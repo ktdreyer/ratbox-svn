@@ -158,7 +158,7 @@ hook_call_event(char *event, void *data)
 
 	for (node = h->hooks.head; node; node = node->next)
 	{
-		fn = (hookfn)node->data;
+		fn = (hookfn)(uintptr_t)node->data;
 		
 		if (fn(data) != 0)
 			return 0;

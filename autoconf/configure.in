@@ -11,8 +11,11 @@ VERSION=7.0
 AC_SUBST(PACKAGE)
 AC_SUBST(VERSION)
 
+OLD_CFLAGS="$CFLAGS"
 dnl Checks for programs.
 AC_PROG_CC
+dnl Make sure autoconf doesnt interfere with cflags -jmallett
+CFLAGS="$OLD_CFLAGS"
 
 AC_MSG_CHECKING(if we are using TenDRA)
 case `$CC -version 2>&1` in
@@ -30,7 +33,10 @@ if test "x$GCC" = "xyes"; then
   IRC_CFLAGS="-O2 -g -ggdb -Wunused -Wall -Wshadow -Wmissing-declarations"
 else
   if test "x$TenDRA" = "xyes"; then
-    IRC_CFLAGS="-I/usr/include -Ylonglong -Yansi"
+    dnl CPPFLAGS here is really IRC_CFLAGS but autoconf does silly
+    dnl things with the wrong variables, so this works. -jmallett
+    IRC_CFLAGS=""
+    CPPFLAGS="$CPPFLAGS -Ylonglong -Yansi -I/usr/include"
   else
     IRC_CFLAGS="-g"
   fi
@@ -124,7 +130,7 @@ AC_CHECK_FUNCS(gettext,, AC_CHECK_LIB(intl, gettext))
 
 dnl Checks for header files.
 AC_HEADER_STDC
-AC_CHECK_HEADERS(sys/param.h unistd.h errno.h string.h strings.h sys/syslog.h stdlib.h stddef.h getopt.h)
+AC_CHECK_HEADERS(sys/resource.h sys/param.h unistd.h errno.h string.h strings.h sys/syslog.h stdlib.h stddef.h getopt.h)
 
 dnl See whether we can include both string.h and strings.h.
 AC_DEFUN(GCC_HEADER_STRING,

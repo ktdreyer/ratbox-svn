@@ -257,9 +257,9 @@ int unload_one_module (char *name, int warn)
   if ((modindex = findmodule_byname (name)) == -1) 
     return -1;
 
-  if( (deinitfunc = (void (*)(void))dlsym (modlist[modindex]->address, 
+  if( (deinitfunc = (void (*)(void))(uintptr_t)dlsym (modlist[modindex]->address, 
 				  "_moddeinit")) 
-		  || (deinitfunc = (void (*)(void))dlsym (modlist[modindex]->address, 
+		  || (deinitfunc = (void (*)(void))(uintptr_t)dlsym (modlist[modindex]->address, 
 				  "__moddeinit")))
   {
     deinitfunc ();
@@ -423,9 +423,9 @@ load_a_module (char *path, int warn, int core)
       return -1;
   }
 
-  initfunc = (void (*)(void))dlsym (tmpptr, "_modinit");
+  initfunc = (void (*)(void))(uintptr_t)dlsym (tmpptr, "_modinit");
   if (initfunc == NULL 
-		  && (initfunc = (void (*)(void))dlsym(tmpptr, "__modinit")) == NULL)
+		  && (initfunc = (void (*)(void))(uintptr_t)dlsym(tmpptr, "__modinit")) == NULL)
   {
     sendto_realops_flags(FLAGS_ALL, L_ALL,
                           "Module %s has no _modinit() function",

@@ -43,6 +43,9 @@
 
 #ifdef RLIMIT_FD_MAX
 #include <sys/time.h>
+#endif
+
+#ifdef HAVE_SYS_RESOURCE_H
 #include <sys/resource.h>
 #endif
 
@@ -209,7 +212,7 @@ print_startup(int pid)
 static void 
 init_sys(void)
 {
-#if defined(RLIMIT_FD_MAX) && !defined(VMS)
+#if defined(RLIMIT_FD_MAX) && !defined(VMS) && defined(HAVE_SYS_RLIMIT_H)
   struct rlimit limit;
 
   if (!getrlimit(RLIMIT_FD_MAX, &limit))
@@ -518,7 +521,7 @@ static void check_pidfile(const char *filename)
  */
 static void setup_corefile(void)
 {
-#ifndef VMS
+#if !defined(VMS) && defined(HAVE_SYS_RESOURCE_H)
   struct rlimit rlim; /* resource limits */
 
   /* Set corefilesize to maximum */
