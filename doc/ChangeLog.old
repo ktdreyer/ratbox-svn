@@ -1,3 +1,7 @@
+*** 20010718_11 by androsyn
+Fixed stupid warnings in ircd_lexer.l one of the fixes is not so nice.
+
+
 *** 20010718_10 by androsyn
 Reflected the fact that the openssl related warnings are fixed.
 
