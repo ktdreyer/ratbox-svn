@@ -1,3 +1,16 @@
+leeh        2002/04/13 07:46:07 EDT	(20020413_1)
+
+  Modified files:
+    modules              m_topic.c 
+  Log:
+  - if a *server* is setting a topic, dont try to send a n!u@h
+  - why is this code even here?  old tburst code?
+  
+  Revision  Changes    Path
+  1.49      +5 -15     ircd-hybrid-7/modules/m_topic.c
+
+
+
 db          2002/04/13 04:36:57 EDT	(20020413_0)
 
   Modified files:
