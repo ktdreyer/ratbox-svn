@@ -1,3 +1,18 @@
+leeh        2005/02/24 15:22:53 EST	(20050224_8)
+
+  Modified files:
+    include              supported.h 
+    modules              m_dline.c 
+  Log:
+  - fix a core in undline on bad masks
+  - remove an unwanted space from beginning of second 005 numeric
+  
+  Revision  Changes    Path
+  7.5       +1 -1      ircd-ratbox/include/supported.h
+  1.49      +8 -1      ircd-ratbox/modules/m_dline.c
+
+
+
 leeh        2005/02/24 15:18:59 EST	(20050224_7)
 
   Modified files:
