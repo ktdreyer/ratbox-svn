@@ -67,7 +67,7 @@ DECLARE_MODULE_AV1(nick, NULL, NULL, nick_clist, NULL, NULL, "$Revision$");
 
 static int change_remote_nick(struct Client *, struct Client *, int, const char **, time_t, const char *);
 
-static int clean_nick(const char *, int local);
+static int clean_nick(const char *, int loc_client);
 static int clean_username(const char *);
 static int clean_host(const char *);
 
@@ -459,7 +459,7 @@ ms_uid(struct Client *client_p, struct Client *source_p, int parc, const char *p
  * side effects - 
  */
 static int
-clean_nick(const char *nick, int local)
+clean_nick(const char *nick, int loc_client)
 {
 	int len = 0;
 
@@ -467,7 +467,7 @@ clean_nick(const char *nick, int local)
 	if(*nick == '-' || *nick == '\0')
 		return 0;
 
-	if(local && IsDigit(*nick))
+	if(loc_client && IsDigit(*nick))
 		return 0;
 
 	for (; *nick; nick++)
