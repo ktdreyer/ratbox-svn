@@ -1,3 +1,7 @@
+*** 20010924_2 by jdc
+- Fixes for Andrew's recent configure additions.
+
+
 *** 20010924_1 by a1kmm
 - Some memset calls added.
 - A few more configure options added:
