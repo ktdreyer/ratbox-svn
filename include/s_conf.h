@@ -365,7 +365,6 @@ extern void get_printable_conf(struct ConfItem *,
                                     char **, char **, char **,
                                     char **, int *,char **);
 extern void report_configured_links(struct Client* client_p, int mask);
-extern void report_specials(struct Client* source_p, int flags, int numeric);
 
 extern void yyerror(char *);
 extern int conf_yy_fatal_error(char *);

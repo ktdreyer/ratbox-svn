@@ -365,48 +365,6 @@ report_configured_links(struct Client* source_p, int mask)
 }
 
 /*
- * report_specials - report special conf entries
- *
- * inputs       - struct Client pointer to client to report to
- *              - int flags type of special struct ConfItem to report
- *              - int numeric for struct ConfItem to report
- * output       - none
- * side effects -
- */
-void 
-report_specials(struct Client* source_p, int flags, int numeric)
-{
-  struct ConfItem* this_conf;
-  struct ConfItem* aconf;
-  char*            name;
-  char*            host;
-  char*            pass;
-  char*            user;
-  char*       classname;
-  int              port;
-
-  if (flags & CONF_XLINE)
-    this_conf = x_conf;
-  else if (flags & CONF_ULINE)
-    this_conf = u_conf;
-  else
-    return;
-
-  for (aconf = this_conf; aconf; aconf = aconf->next)
-    if (aconf->status & flags)
-      {
-        get_printable_conf(aconf, &name, &host, &pass,
-                           &user, &port, &classname);
-
-        sendto_one(source_p, form_str(numeric),
-                   me.name,
-                   source_p->name,
-                   name,
-                   pass);
-      }
-}
-
-/*
  * check_client
  *
  * inputs	- pointer to client

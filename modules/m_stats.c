@@ -693,7 +693,21 @@ static void stats_uptime(struct Client *source_p)
 
 static void stats_shared(struct Client *source_p)
 {
-  report_specials(source_p, CONF_ULINE, RPL_STATSULINE);
+  struct ConfItem *aconf;
+  char *name, *host, *pass, *user, *classname;
+  int port;
+
+  for(aconf = u_conf; aconf != NULL; aconf = aconf->next)
+  {
+    if(aconf->status & CONF_ULINE)
+    {
+      get_printable_conf(aconf, &name, &host, &pass,
+                         &user, &port, &classname);
+
+      sendto_one(source_p, form_str(RPL_STATSULINE), me.name,
+                 source_p->name, name, pass);
+    }
+  }
 }
 
 
@@ -743,7 +757,21 @@ static void stats_servers(struct Client *source_p)
 
 static void stats_gecos(struct Client *source_p)
 {
-  report_specials(source_p, CONF_XLINE, RPL_STATSXLINE);
+  struct ConfItem *aconf;
+  char *name, *host, *pass, *user, *classname;
+  int port;
+
+  for(aconf = x_conf; aconf != NULL; aconf = aconf->next)
+  {
+    if(aconf->status & CONF_XLINE)
+    {
+      get_printable_conf(aconf, &name, &host, &pass,
+                         &user, &port, &classname);
+
+      sendto_one(source_p, form_str(RPL_STATSXLINE), me.name,
+                 source_p->name, name, pass);
+    }
+  }
 }
 
 static void stats_class(struct Client *source_p)
