@@ -365,7 +365,7 @@ const short yydefred[] = {                                      1,
   360,  361,  362,  363,  364,  365,  366,  368,  367,    0,
   353,  349,  313,  372,  371,   26,   27,  182,  169,  168,
   179,  178,  175,  174,  163,  173,  172,  177,  176,  164,
-  180,  181,  171,  170,  167,  166,  165,  162,  132,  133,
+  180,  181,  171,  170,  167,  165,  166,  162,  132,  133,
   129,  131,  130,  134,  222,  229,  228,  232,  227,  226,
   220,  230,  225,  224,  231,  219,  223,  221,  249,  250,
   261,  262,  263,  259,  260,  241,  240,  143,  142,  117,
@@ -961,8 +961,8 @@ const char * const yyrule[] = {
 "auth_user : USER '=' QSTRING ';'",
 "auth_user : IP '=' IP_TYPE ';'",
 "auth_passwd : PASSWORD '=' QSTRING ';'",
-"auth_spoof_notice : SPOOF_NOTICE '=' TYES ';'",
 "auth_spoof_notice : SPOOF_NOTICE '=' TNO ';'",
+"auth_spoof_notice : SPOOF_NOTICE '=' TYES ';'",
 "auth_spoof : SPOOF '=' QSTRING ';'",
 "auth_exceed_limit : EXCEED_LIMIT '=' TYES ';'",
 "auth_exceed_limit : EXCEED_LIMIT '=' TNO ';'",
@@ -1888,19 +1888,19 @@ case 164:
   }
 break;
 case 165:
-#line 766 "ircd_parser.y"
+#line 767 "ircd_parser.y"
 {
     yy_aconf->flags |= CONF_FLAGS_SPOOF_NOTICE;
   }
 break;
 case 166:
-#line 771 "ircd_parser.y"
+#line 772 "ircd_parser.y"
 {
     yy_aconf->flags &= ~CONF_FLAGS_SPOOF_NOTICE;
   }
 break;
 case 167:
-#line 776 "ircd_parser.y"
+#line 777 "ircd_parser.y"
 {
     MyFree(yy_aconf->name);
     DupString(yy_aconf->name, yylval.string);
@@ -1908,79 +1908,79 @@ case 167:
   }
 break;
 case 168:
-#line 783 "ircd_parser.y"
+#line 784 "ircd_parser.y"
 {
     yy_aconf->flags |= CONF_FLAGS_F_LINED;
   }
 break;
 case 169:
-#line 788 "ircd_parser.y"
+#line 789 "ircd_parser.y"
 {
     yy_aconf->flags &= ~CONF_FLAGS_F_LINED;
   }
 break;
 case 170:
-#line 793 "ircd_parser.y"
+#line 794 "ircd_parser.y"
 {
     yy_aconf->flags |= CONF_FLAGS_RESTRICTED;
   }
 break;
 case 171:
-#line 798 "ircd_parser.y"
+#line 799 "ircd_parser.y"
 {
     yy_aconf->flags &= ~CONF_FLAGS_RESTRICTED;
   }
 break;
 case 172:
-#line 803 "ircd_parser.y"
+#line 804 "ircd_parser.y"
 {
     yy_aconf->flags |= CONF_FLAGS_E_LINED;
   }
 break;
 case 173:
-#line 808 "ircd_parser.y"
+#line 809 "ircd_parser.y"
 {
     yy_aconf->flags &= ~CONF_FLAGS_E_LINED;
   }
 break;
 case 174:
-#line 813 "ircd_parser.y"
+#line 814 "ircd_parser.y"
 {
     yy_aconf->flags |= CONF_FLAGS_NEED_IDENTD;
   }
 break;
 case 175:
-#line 818 "ircd_parser.y"
+#line 819 "ircd_parser.y"
 {
     yy_aconf->flags &= ~CONF_FLAGS_NEED_IDENTD;
   }
 break;
 case 176:
-#line 823 "ircd_parser.y"
+#line 824 "ircd_parser.y"
 {
     yy_aconf->flags |= CONF_FLAGS_NO_TILDE;
   }
 break;
 case 177:
-#line 828 "ircd_parser.y"
+#line 829 "ircd_parser.y"
 {
     yy_aconf->flags &= ~CONF_FLAGS_NO_TILDE;
   }
 break;
 case 178:
-#line 833 "ircd_parser.y"
+#line 834 "ircd_parser.y"
 {
     yy_aconf->flags |= CONF_FLAGS_EXEMPTGLINE;
   }
 break;
 case 179:
-#line 838 "ircd_parser.y"
+#line 839 "ircd_parser.y"
 {
     yy_aconf->flags &= ~CONF_FLAGS_EXEMPTGLINE;
   }
 break;
 case 180:
-#line 844 "ircd_parser.y"
+#line 845 "ircd_parser.y"
 {
     yy_aconf->flags |= CONF_FLAGS_REDIR;
     MyFree(yy_aconf->name);
@@ -1988,14 +1988,14 @@ case 180:
   }
 break;
 case 181:
-#line 851 "ircd_parser.y"
+#line 852 "ircd_parser.y"
 {
     yy_aconf->flags |= CONF_FLAGS_REDIR;
     yy_aconf->port = yylval.number;
   }
 break;
 case 182:
-#line 857 "ircd_parser.y"
+#line 858 "ircd_parser.y"
 {
     if (yy_aconf->className == NULL)
       {
@@ -2004,7 +2004,7 @@ case 182:
   }
 break;
 case 183:
-#line 869 "ircd_parser.y"
+#line 870 "ircd_parser.y"
 {
     if(yy_aconf)
       {
@@ -2016,28 +2016,28 @@ case 183:
   }
 break;
 case 184:
-#line 879 "ircd_parser.y"
+#line 880 "ircd_parser.y"
 {
     conf_add_q_conf(yy_aconf);
     yy_aconf = (struct ConfItem *)NULL;
   }
 break;
 case 190:
-#line 890 "ircd_parser.y"
+#line 891 "ircd_parser.y"
 {
     MyFree(yy_aconf->name);
     DupString(yy_aconf->name, yylval.string);
   }
 break;
 case 191:
-#line 896 "ircd_parser.y"
+#line 897 "ircd_parser.y"
 {
     MyFree(yy_aconf->passwd);
     DupString(yy_aconf->passwd, yylval.string);
   }
 break;
 case 192:
-#line 906 "ircd_parser.y"
+#line 907 "ircd_parser.y"
 {
     if(yy_aconf != NULL)
       {
@@ -2052,35 +2052,35 @@ case 192:
   }
 break;
 case 193:
-#line 919 "ircd_parser.y"
+#line 920 "ircd_parser.y"
 {
     conf_add_u_conf(yy_aconf);
     yy_aconf = (struct ConfItem *)NULL;
   }
 break;
 case 200:
-#line 930 "ircd_parser.y"
+#line 931 "ircd_parser.y"
 {
     MyFree(yy_aconf->name);
     DupString(yy_aconf->name, yylval.string);
   }
 break;
 case 201:
-#line 936 "ircd_parser.y"
+#line 937 "ircd_parser.y"
 {
     MyFree(yy_aconf->user);
     DupString(yy_aconf->user, yylval.string);
   }
 break;
 case 202:
-#line 942 "ircd_parser.y"
+#line 943 "ircd_parser.y"
 {
     MyFree(yy_aconf->host);
     DupString(yy_aconf->host, yylval.string);
   }
 break;
 case 203:
-#line 952 "ircd_parser.y"
+#line 953 "ircd_parser.y"
 {
     hub_confs = (struct ConfItem *)NULL;
 
@@ -2108,7 +2108,7 @@ case 203:
   }
 break;
 case 204:
-#line 978 "ircd_parser.y"
+#line 979 "ircd_parser.y"
 {
     if(yy_aconf->host && yy_aconf->passwd
        && yy_aconf->spasswd)
@@ -2177,7 +2177,7 @@ case 204:
   }
 break;
 case 219:
-#line 1055 "ircd_parser.y"
+#line 1056 "ircd_parser.y"
 {
     if(yy_aconf->name != NULL)
       {
@@ -2190,68 +2190,68 @@ case 219:
   }
 break;
 case 220:
-#line 1067 "ircd_parser.y"
+#line 1068 "ircd_parser.y"
 {
     MyFree(yy_aconf->host);
     DupString(yy_aconf->host, yylval.string);
   }
 break;
 case 221:
-#line 1073 "ircd_parser.y"
+#line 1074 "ircd_parser.y"
 {
     MyFree(yy_aconf->spasswd);
     DupString(yy_aconf->spasswd, yylval.string);
   }
 break;
 case 222:
-#line 1079 "ircd_parser.y"
+#line 1080 "ircd_parser.y"
 {
     MyFree(yy_aconf->passwd);
     DupString(yy_aconf->passwd, yylval.string);
   }
 break;
 case 223:
-#line 1084 "ircd_parser.y"
+#line 1085 "ircd_parser.y"
 { yy_aconf->port = yylval.number; }
 break;
 case 224:
-#line 1087 "ircd_parser.y"
+#line 1088 "ircd_parser.y"
 {
     yy_aconf->flags |= CONF_FLAGS_LAZY_LINK;
   }
 break;
 case 225:
-#line 1092 "ircd_parser.y"
+#line 1093 "ircd_parser.y"
 {
     yy_aconf->flags &= ~CONF_FLAGS_LAZY_LINK;
   }
 break;
 case 226:
-#line 1097 "ircd_parser.y"
+#line 1098 "ircd_parser.y"
 {
     yy_aconf->flags |= CONF_FLAGS_ENCRYPTED;
   }
 break;
 case 227:
-#line 1102 "ircd_parser.y"
+#line 1103 "ircd_parser.y"
 {
     yy_aconf->flags &= ~ENCRYPTED;
   }
 break;
 case 228:
-#line 1107 "ircd_parser.y"
+#line 1108 "ircd_parser.y"
 {
     yy_aconf->flags |= CONF_FLAGS_ALLOW_AUTO_CONN;
   }
 break;
 case 229:
-#line 1112 "ircd_parser.y"
+#line 1113 "ircd_parser.y"
 {
     yy_aconf->flags &= ~CONF_FLAGS_ALLOW_AUTO_CONN;
   }
 break;
 case 230:
-#line 1117 "ircd_parser.y"
+#line 1118 "ircd_parser.y"
 {
     if(hub_confs == NULL)
       {
@@ -2272,7 +2272,7 @@ case 230:
   }
 break;
 case 231:
-#line 1137 "ircd_parser.y"
+#line 1138 "ircd_parser.y"
 {
     if(leaf_confs == NULL)
       {
@@ -2293,14 +2293,14 @@ case 231:
   }
 break;
 case 232:
-#line 1157 "ircd_parser.y"
+#line 1158 "ircd_parser.y"
 {
     MyFree(yy_aconf->className);
     DupString(yy_aconf->className, yylval.string);
   }
 break;
 case 233:
-#line 1167 "ircd_parser.y"
+#line 1168 "ircd_parser.y"
 {
     if(yy_aconf)
       {
@@ -2312,7 +2312,7 @@ case 233:
   }
 break;
 case 234:
-#line 1177 "ircd_parser.y"
+#line 1178 "ircd_parser.y"
 {
     if(yy_aconf->user && yy_aconf->passwd && yy_aconf->host)
       {
@@ -2326,7 +2326,7 @@ case 234:
   }
 break;
 case 240:
-#line 1196 "ircd_parser.y"
+#line 1197 "ircd_parser.y"
 {
     char *p;
     char *new_user;
@@ -2352,14 +2352,14 @@ case 240:
   }
 break;
 case 241:
-#line 1221 "ircd_parser.y"
+#line 1222 "ircd_parser.y"
 {
     MyFree(yy_aconf->passwd);
     DupString(yy_aconf->passwd, yylval.string);
   }
 break;
 case 242:
-#line 1231 "ircd_parser.y"
+#line 1232 "ircd_parser.y"
 {
     if(yy_aconf)
       {
@@ -2371,7 +2371,7 @@ case 242:
   }
 break;
 case 243:
-#line 1241 "ircd_parser.y"
+#line 1242 "ircd_parser.y"
 {
     if(yy_aconf->ip)
       {
@@ -2389,7 +2389,7 @@ case 243:
   }
 break;
 case 249:
-#line 1264 "ircd_parser.y"
+#line 1265 "ircd_parser.y"
 {
     char *p;
 
@@ -2402,14 +2402,14 @@ case 249:
   }
 break;
 case 250:
-#line 1276 "ircd_parser.y"
+#line 1277 "ircd_parser.y"
 {
     MyFree(yy_aconf->passwd);
     DupString(yy_aconf->passwd, yylval.string);
   }
 break;
 case 251:
-#line 1286 "ircd_parser.y"
+#line 1287 "ircd_parser.y"
 {
     if(yy_aconf)
       {
@@ -2421,7 +2421,7 @@ case 251:
   }
 break;
 case 252:
-#line 1296 "ircd_parser.y"
+#line 1297 "ircd_parser.y"
 {
     if(yy_aconf->host)
       {
@@ -2439,230 +2439,230 @@ case 252:
   }
 break;
 case 259:
-#line 1319 "ircd_parser.y"
+#line 1320 "ircd_parser.y"
 {
     DupString(yy_aconf->host, yylval.string);
   }
 break;
 case 260:
-#line 1324 "ircd_parser.y"
+#line 1325 "ircd_parser.y"
 {
     MyFree(yy_aconf->passwd);
     DupString(yy_aconf->passwd, yylval.string);
   }
 break;
 case 261:
-#line 1330 "ircd_parser.y"
+#line 1331 "ircd_parser.y"
 {
     yy_aconf->port = 1;
   }
 break;
 case 262:
-#line 1335 "ircd_parser.y"
+#line 1336 "ircd_parser.y"
 {
     yy_aconf->port = 0;
   }
 break;
 case 263:
-#line 1340 "ircd_parser.y"
+#line 1341 "ircd_parser.y"
 {
     yy_aconf->port = 2;
   }
 break;
 case 303:
-#line 1382 "ircd_parser.y"
+#line 1383 "ircd_parser.y"
 {
     ConfigFileEntry.failed_oper_notice = 1;
   }
 break;
 case 304:
-#line 1387 "ircd_parser.y"
+#line 1388 "ircd_parser.y"
 {
     ConfigFileEntry.failed_oper_notice = 0;
   }
 break;
 case 305:
-#line 1392 "ircd_parser.y"
+#line 1393 "ircd_parser.y"
 {
     ConfigFileEntry.show_failed_oper_id = 1;
   }
 break;
 case 306:
-#line 1397 "ircd_parser.y"
+#line 1398 "ircd_parser.y"
 {
     ConfigFileEntry.show_failed_oper_id = 0;
   }
 break;
 case 307:
-#line 1402 "ircd_parser.y"
+#line 1403 "ircd_parser.y"
 {
     ConfigFileEntry.anti_nick_flood = 1;
   }
 break;
 case 308:
-#line 1407 "ircd_parser.y"
+#line 1408 "ircd_parser.y"
 {
     ConfigFileEntry.anti_nick_flood = 0;
   }
 break;
 case 309:
-#line 1412 "ircd_parser.y"
+#line 1413 "ircd_parser.y"
 {
     ConfigFileEntry.max_nick_time = yylval.number;
   }
 break;
 case 310:
-#line 1417 "ircd_parser.y"
+#line 1418 "ircd_parser.y"
 {
     ConfigFileEntry.max_nick_changes = yylval.number;
   }
 break;
 case 311:
-#line 1422 "ircd_parser.y"
+#line 1423 "ircd_parser.y"
 {
     ConfigFileEntry.ts_warn_delta = yylval.number;
   }
 break;
 case 312:
-#line 1427 "ircd_parser.y"
+#line 1428 "ircd_parser.y"
 {
     ConfigFileEntry.ts_max_delta = yylval.number;
   }
 break;
 case 313:
-#line 1432 "ircd_parser.y"
+#line 1433 "ircd_parser.y"
 {
     ConfigFileEntry.links_delay = yylval.number;
   }
 break;
 case 314:
-#line 1436 "ircd_parser.y"
+#line 1437 "ircd_parser.y"
 {
     ConfigFileEntry.kline_with_reason = 1;
   }
 break;
 case 315:
-#line 1441 "ircd_parser.y"
+#line 1442 "ircd_parser.y"
 {
     ConfigFileEntry.kline_with_reason = 0;
   }
 break;
 case 316:
-#line 1446 "ircd_parser.y"
+#line 1447 "ircd_parser.y"
 {
     ConfigFileEntry.client_exit = 1;
   }
 break;
 case 317:
-#line 1451 "ircd_parser.y"
+#line 1452 "ircd_parser.y"
 {
     ConfigFileEntry.client_exit = 0;
   }
 break;
 case 318:
-#line 1456 "ircd_parser.y"
+#line 1457 "ircd_parser.y"
 {
     ConfigFileEntry.kline_with_connection_closed = 1;
   }
 break;
 case 319:
-#line 1461 "ircd_parser.y"
+#line 1462 "ircd_parser.y"
 {
     ConfigFileEntry.kline_with_connection_closed = 0;
   }
 break;
 case 320:
-#line 1466 "ircd_parser.y"
+#line 1467 "ircd_parser.y"
 {
     ConfigFileEntry.quiet_on_ban = 1;
   }
 break;
 case 321:
-#line 1471 "ircd_parser.y"
+#line 1472 "ircd_parser.y"
 {
     ConfigFileEntry.quiet_on_ban = 0;
   }
 break;
 case 322:
-#line 1476 "ircd_parser.y"
+#line 1477 "ircd_parser.y"
 {
     ConfigFileEntry.warn_no_nline = 1;
   }
 break;
 case 323:
-#line 1481 "ircd_parser.y"
+#line 1482 "ircd_parser.y"
 {
     ConfigFileEntry.warn_no_nline = 0;
   }
 break;
 case 324:
-#line 1486 "ircd_parser.y"
+#line 1487 "ircd_parser.y"
 {
     ConfigFileEntry.non_redundant_klines = 1;
   }
 break;
 case 325:
-#line 1491 "ircd_parser.y"
+#line 1492 "ircd_parser.y"
 {
     ConfigFileEntry.non_redundant_klines = 0;
   }
 break;
 case 326:
-#line 1496 "ircd_parser.y"
+#line 1497 "ircd_parser.y"
 {
     ConfigFileEntry.o_lines_oper_only = 1;
   }
 break;
 case 327:
-#line 1501 "ircd_parser.y"
+#line 1502 "ircd_parser.y"
 {
     ConfigFileEntry.o_lines_oper_only = 0;
   }
 break;
 case 328:
-#line 1506 "ircd_parser.y"
+#line 1507 "ircd_parser.y"
 {
     ConfigFileEntry.pace_wait = yylval.number;
   }
 break;
 case 329:
-#line 1511 "ircd_parser.y"
+#line 1512 "ircd_parser.y"
 {
     ConfigFileEntry.whois_wait = yylval.number;
   }
 break;
 case 330:
-#line 1516 "ircd_parser.y"
+#line 1517 "ircd_parser.y"
 {
     ConfigFileEntry.knock_delay = yylval.number;
   }
 break;
 case 331:
-#line 1521 "ircd_parser.y"
+#line 1522 "ircd_parser.y"
 {
     ConfigFileEntry.short_motd = 1;
   }
 break;
 case 332:
-#line 1526 "ircd_parser.y"
+#line 1527 "ircd_parser.y"
 {
     ConfigFileEntry.short_motd = 0;
   }
 break;
 case 333:
-#line 1531 "ircd_parser.y"
+#line 1532 "ircd_parser.y"
 {
     ConfigFileEntry.no_oper_flood = 1;
   }
 break;
 case 334:
-#line 1536 "ircd_parser.y"
+#line 1537 "ircd_parser.y"
 {
     ConfigFileEntry.no_oper_flood = 0;
   }
 break;
 case 335:
-#line 1541 "ircd_parser.y"
+#line 1542 "ircd_parser.y"
 {
 #if 0
     strncpy(iAuth.hostname, yylval.string, HOSTLEN)[HOSTLEN] = 0;
@@ -2670,7 +2670,7 @@ case 335:
 }
 break;
 case 336:
-#line 1548 "ircd_parser.y"
+#line 1549 "ircd_parser.y"
 {
 #if 0
     iAuth.port = yylval.number;
@@ -2678,40 +2678,40 @@ case 336:
 }
 break;
 case 337:
-#line 1555 "ircd_parser.y"
+#line 1556 "ircd_parser.y"
 {
   strncpy_irc(ConfigFileEntry.fname_userlog, yylval.string,
 	      MAXPATHLEN-1)[MAXPATHLEN-1] = 0;
 }
 break;
 case 338:
-#line 1561 "ircd_parser.y"
+#line 1562 "ircd_parser.y"
 {
   strncpy_irc(ConfigFileEntry.fname_foperlog, yylval.string,
 	      MAXPATHLEN-1)[MAXPATHLEN-1] = 0;
 }
 break;
 case 339:
-#line 1567 "ircd_parser.y"
+#line 1568 "ircd_parser.y"
 {
   strncpy_irc(ConfigFileEntry.fname_operlog, yylval.string,
 	      MAXPATHLEN-1)[MAXPATHLEN-1] = 0;
 }
 break;
 case 340:
-#line 1573 "ircd_parser.y"
+#line 1574 "ircd_parser.y"
 {
     ConfigFileEntry.glines = 1;
   }
 break;
 case 341:
-#line 1578 "ircd_parser.y"
+#line 1579 "ircd_parser.y"
 {
     ConfigFileEntry.glines = 0;
   }
 break;
 case 342:
-#line 1583 "ircd_parser.y"
+#line 1584 "ircd_parser.y"
 {
     char langenv[BUFSIZE];
     if (strlen(yylval.string) > BUFSIZE-10)
@@ -2721,163 +2721,163 @@ case 342:
   }
 break;
 case 343:
-#line 1592 "ircd_parser.y"
+#line 1593 "ircd_parser.y"
 {
     ConfigFileEntry.gline_time = yylval.number;
   }
 break;
 case 344:
-#line 1597 "ircd_parser.y"
+#line 1598 "ircd_parser.y"
 {
     ConfigFileEntry.idletime = yylval.number;
   }
 break;
 case 345:
-#line 1602 "ircd_parser.y"
+#line 1603 "ircd_parser.y"
 {
     ConfigFileEntry.dots_in_ident = yylval.number;
   }
 break;
 case 346:
-#line 1607 "ircd_parser.y"
+#line 1608 "ircd_parser.y"
 {
     ConfigFileEntry.maximum_links = yylval.number;
   }
 break;
 case 347:
-#line 1612 "ircd_parser.y"
+#line 1613 "ircd_parser.y"
 {
     ConfigFileEntry.hide_server = 1;
   }
 break;
 case 348:
-#line 1617 "ircd_parser.y"
+#line 1618 "ircd_parser.y"
 {
     ConfigFileEntry.hide_server = 0;
   }
 break;
 case 349:
-#line 1622 "ircd_parser.y"
+#line 1623 "ircd_parser.y"
 {
     ConfigFileEntry.max_targets = yylval.number;
   }
 break;
 case 350:
-#line 1627 "ircd_parser.y"
+#line 1628 "ircd_parser.y"
 {
     ConfigFileEntry.oper_only_umodes = 0;
   }
 break;
 case 354:
-#line 1636 "ircd_parser.y"
+#line 1637 "ircd_parser.y"
 {
     ConfigFileEntry.oper_only_umodes |= FLAGS_BOTS;
   }
 break;
 case 355:
-#line 1640 "ircd_parser.y"
+#line 1641 "ircd_parser.y"
 {
     ConfigFileEntry.oper_only_umodes |= FLAGS_CCONN;
   }
 break;
 case 356:
-#line 1644 "ircd_parser.y"
+#line 1645 "ircd_parser.y"
 {
     ConfigFileEntry.oper_only_umodes |= FLAGS_DEBUG;
   }
 break;
 case 357:
-#line 1648 "ircd_parser.y"
+#line 1649 "ircd_parser.y"
 { 
     ConfigFileEntry.oper_only_umodes |= FLAGS_FULL;
   }
 break;
 case 358:
-#line 1652 "ircd_parser.y"
+#line 1653 "ircd_parser.y"
 {
     ConfigFileEntry.oper_only_umodes |= FLAGS_SKILL;
   }
 break;
 case 359:
-#line 1656 "ircd_parser.y"
+#line 1657 "ircd_parser.y"
 {
     ConfigFileEntry.oper_only_umodes |= FLAGS_NCHANGE;
   }
 break;
 case 360:
-#line 1660 "ircd_parser.y"
+#line 1661 "ircd_parser.y"
 {
     ConfigFileEntry.oper_only_umodes |= FLAGS_REJ;
   }
 break;
 case 361:
-#line 1664 "ircd_parser.y"
+#line 1665 "ircd_parser.y"
 {
     ConfigFileEntry.oper_only_umodes |= FLAGS_UNAUTH;
   }
 break;
 case 362:
-#line 1668 "ircd_parser.y"
+#line 1669 "ircd_parser.y"
 {
     ConfigFileEntry.oper_only_umodes |= FLAGS_SPY;
   }
 break;
 case 363:
-#line 1672 "ircd_parser.y"
+#line 1673 "ircd_parser.y"
 {
     ConfigFileEntry.oper_only_umodes |= FLAGS_EXTERNAL;
   }
 break;
 case 364:
-#line 1676 "ircd_parser.y"
+#line 1677 "ircd_parser.y"
 {
     ConfigFileEntry.oper_only_umodes |= FLAGS_OPERWALL;
   }
 break;
 case 365:
-#line 1680 "ircd_parser.y"
+#line 1681 "ircd_parser.y"
 {
     ConfigFileEntry.oper_only_umodes |= FLAGS_SERVNOTICE;
   }
 break;
 case 366:
-#line 1684 "ircd_parser.y"
+#line 1685 "ircd_parser.y"
 {
     ConfigFileEntry.oper_only_umodes |= FLAGS_INVISIBLE;
   }
 break;
 case 367:
-#line 1688 "ircd_parser.y"
+#line 1689 "ircd_parser.y"
 {
     ConfigFileEntry.oper_only_umodes |= FLAGS_WALLOP;
   }
 break;
 case 368:
-#line 1692 "ircd_parser.y"
+#line 1693 "ircd_parser.y"
 {
     ConfigFileEntry.oper_only_umodes |= FLAGS_CALLERID;
   }
 break;
 case 369:
-#line 1696 "ircd_parser.y"
+#line 1697 "ircd_parser.y"
 {
     ConfigFileEntry.oper_only_umodes |= FLAGS_LOCOPS;
   }
 break;
 case 370:
-#line 1700 "ircd_parser.y"
+#line 1701 "ircd_parser.y"
 {
     ConfigFileEntry.oper_only_umodes |= FLAGS_DRONE;
   }
 break;
 case 371:
-#line 1705 "ircd_parser.y"
+#line 1706 "ircd_parser.y"
 {
     ConfigFileEntry.vchans_oper_only = 1;
   }
 break;
 case 372:
-#line 1710 "ircd_parser.y"
+#line 1711 "ircd_parser.y"
 {
     ConfigFileEntry.vchans_oper_only = 0;
   }

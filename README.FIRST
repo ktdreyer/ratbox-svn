@@ -10,6 +10,31 @@ If you don't read this first, we won't help you.
   * The old config format WILL NOT WORK.  Please see doc/example.conf (!) *
   *************************************************************************
 
+******************************* REQUIREMENTS **********************************
+
+Necessary Requirements:
+
+- A supported platform (look below)
+
+- A working lex/flex and yacc/bison
+
+- A working dynamic load library
+
+- A working resolver library
+
+- A working getopt() function
+
+Feature Specific Requirements:
+
+- For the SSL Challenge controlled OPER feature, a working OpenSSL library
+
+- For dynamic message locale support, a working gettext (intl) library
+
+- For encrypted oper and (optional) server passwords, a working DES and/or
+  MD5 library
+
+*******************************************************************************
+
 - To report bugs in hybrid, use the `send-pr' script that should
   be installed into bin/ along with the rest of ircd.
 

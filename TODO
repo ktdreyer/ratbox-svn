@@ -194,6 +194,9 @@ Little things to be done given enough time and initiative -Hwy
    When e_lines_oper_only=yes; is on line 78. (fixed...)
 .  <Riedel> walter : have you implemented the motd= thing in the auth block ?
 .  <mopi> still haven't made default chan flags configurable, eh? :/
+.  Finish the OpenSSL challenge/rsa_response stuff
+.  Fix topic bursting to LL servers (broke lately for some reason)
+.  Other places that the number formats were replaced with that damn %lu
 
 -- Rodder's list
 .  Add scalable database-based authentication.  Probably part of Iauth.
