@@ -38,13 +38,9 @@
 #define H(x,y,z) ((x)^(y)^(z))
 #define I(x,y,z) ((y)^((x)|(~z)))
 
-/* Length of IDs to generate; at most IDLEN (12) */
-#define ID_GEN_LEN 9
-
 void id_init(void);
 void save_random(void);
 int base64_block(char **out, const char *in, int len);
 int unbase64_block(char **out, const char *data, int len);
-char *id_get(void);
 
 #endif

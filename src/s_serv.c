@@ -384,11 +384,10 @@ hunt_server(struct Client *client_p, struct Client *source_p,
 		if(!match(target_p->name, parv[server]))
 			parv[server] = target_p->name;
 
+/* BROKEN_TS6 */
 		/* This is a little kludgy but should work... */
-		if(IsClient(source_p) &&
-		   ((MyConnect(target_p) && IsCapable(target_p, CAP_UID)) ||
-		    (!MyConnect(target_p) && IsCapable(target_p->from, CAP_UID))))
-			parv[0] = ID(source_p);
+		if(IsTS6(target_p->from))
+			parv[0] = use_id(source_p);
 
 		sendto_one(target_p, command, parv[0],
 			   parv[1], parv[2], parv[3], parv[4], parv[5], parv[6], parv[7], parv[8]);
@@ -704,6 +703,7 @@ burst_users(struct Client *client_p)
 			ubuf[1] = '\0';
 		}
 
+#ifdef BROKEN_TS6
 		if(HasID(target_p) && IsCapable(client_p, CAP_UID))
 			sendto_one(client_p, "CLIENT %s %d %lu %s %s %s %s %s :%s",
 					target_p->name,
@@ -713,6 +713,7 @@ burst_users(struct Client *client_p)
 					target_p->username, target_p->host,
 					target_p->user->server, target_p->user->id, target_p->info);
 		else
+#endif
 			sendto_one(client_p, "NICK %s %d %lu %s %s %s %s :%s",
 					target_p->name,
 					target_p->hopcount + 1,
@@ -723,7 +724,8 @@ burst_users(struct Client *client_p)
 
 		if(ConfigFileEntry.burst_away && !EmptyString(target_p->user->away))
 			sendto_one(client_p, ":%s AWAY :%s",
-					ID_or_name(target_p, client_p), target_p->user->away);
+				   get_id(client_p, target_p),
+				   target_p->user->away);
 	}
 }
 

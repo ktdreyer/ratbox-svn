@@ -285,11 +285,12 @@ struct exit_client_hook
 #define IsTS6(x)	((x)->serv->tsver == 6)
 
 /* use the id if it has one */
-#define use_id(source)	(source->id[0] != '\0' ? source->id : source->name)
+#define has_id(source)	((source)->id[0] != '\0')
+#define use_id(source)	((source)->id[0] != '\0' ? (source)->id : (source)->name)
 
 /* if target is TS6, use id if it has one, else name */
 #define get_id(source, target) ((IsServer(target) && IsTS6(target)) ? \
-				use_id(source) : source->name)
+				use_id(source) : (source)->name)
 
 
 #define IsRegisteredUser(x)     ((x)->status == STAT_CLIENT)

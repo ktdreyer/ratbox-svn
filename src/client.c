@@ -1229,8 +1229,8 @@ exit_generic_client(struct Client *client_p, struct Client *source_p, struct Cli
 	add_history(source_p, 0);
 	off_history(source_p);
 
-	if(HasID(source_p))
-		del_from_id_hash(source_p->user->id, source_p);
+	if(has_id(source_p))
+		del_from_id_hash(source_p->id, source_p);
 
 	del_from_hostname_hash(source_p->host, source_p);
 	del_from_client_hash(source_p->name, source_p);

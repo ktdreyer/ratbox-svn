@@ -101,9 +101,6 @@ static u_int32_t t[64] = {
 ** Should not include any 'flag' characters like @ and %, or special chars
 ** like : * and #, but 8bit accented stuff is quite ok  -orabidoo
 */
-static char printable7[] =
-	"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789[\\]{|}^ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏĞÑÒÓÔÕÖØÙÚÛÜİŞßàáâãäåæçèéêëìíîïğñòóôõöøùúûüı";
-
 static char base64_chars[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
 
 static char base64_values[] = {
@@ -359,18 +356,3 @@ id_reseed(char *in, int len)
 	md5_block(databuf_int, seed, seed);
 }
 
-char *
-id_get()
-{
-	static char id[ID_GEN_LEN + 1];
-	int i;
-
-	md5_block(databuf_int, seed, seed);
-
-	id[0] = '.';
-	for (i = 1; i < ID_GEN_LEN; i++)
-		id[i] = printable7[seed_char[i] & 127];
-
-	id[ID_GEN_LEN] = '\0';
-	return id;
-}

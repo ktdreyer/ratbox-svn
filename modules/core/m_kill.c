@@ -304,7 +304,7 @@ relay_kill(struct Client *one, struct Client *source_p,
 				   source_p->name, reason);
 		else
 			sendto_one(client_p, ":%s KILL %s :%s %s",
-				   source_p->name, get_id(target_p, client_p),
-				   user, inpath, reason);
+				   get_id(target_p, client_p),
+				   get_id(target_p, target_p), inpath, reason);
 	}
 }

@@ -541,6 +541,46 @@ find_id(const char *name)
 	return NULL;
 }
 
+/* hash_find_masked_server()
+ * 
+ * Whats happening in this next loop ? Well, it takes a name like
+ * foo.bar.edu and proceeds to earch for *.edu and then *.bar.edu.
+ * This is for checking full server names against masks although
+ * it isnt often done this way in lieu of using matches().
+ *
+ * Rewrote to do *.bar.edu first, which is the most likely case,
+ * also made const correct
+ * --Bleep
+ */
+static struct Client *
+hash_find_masked_server(const char *name)
+{
+	char buf[HOSTLEN + 1];
+	char *p = buf;
+	char *s;
+	struct Client *server;
+
+	if('*' == *name || '.' == *name)
+		return NULL;
+
+	/* copy it across to give us a buffer to work on */
+	strlcpy(buf, name, sizeof(buf));
+
+	while ((s = strchr(p, '.')) != 0)
+	{
+		*--s = '*';
+		/*
+		 * Dont need to check IsServer() here since nicknames cant
+		 * have *'s in them anyway.
+		 */
+		if((server = find_server(s)))
+			return server;
+		p = s + 2;
+	}
+
+	return NULL;
+}
+
 /* find_any_client()
  *
  * finds a client/server/masked server entry from the hash
@@ -673,47 +713,6 @@ find_hostname(const char *hostname)
 
 	return hostTable[hashv].head;
 }
-
-/* hash_find_masked_server()
- * 
- * Whats happening in this next loop ? Well, it takes a name like
- * foo.bar.edu and proceeds to earch for *.edu and then *.bar.edu.
- * This is for checking full server names against masks although
- * it isnt often done this way in lieu of using matches().
- *
- * Rewrote to do *.bar.edu first, which is the most likely case,
- * also made const correct
- * --Bleep
- */
-static struct Client *
-hash_find_masked_server(const char *name)
-{
-	char buf[HOSTLEN + 1];
-	char *p = buf;
-	char *s;
-	struct Client *server;
-
-	if('*' == *name || '.' == *name)
-		return NULL;
-
-	/* copy it across to give us a buffer to work on */
-	strlcpy(buf, name, sizeof(buf));
-
-	while ((s = strchr(p, '.')) != 0)
-	{
-		*--s = '*';
-		/*
-		 * Dont need to check IsServer() here since nicknames cant
-		 * have *'s in them anyway.
-		 */
-		if((server = find_server(s)))
-			return server;
-		p = s + 2;
-	}
-
-	return NULL;
-}
-
 
 /* find_channel()
  *

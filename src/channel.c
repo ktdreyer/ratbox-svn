@@ -53,7 +53,7 @@ BlockHeap *ban_heap;
 BlockHeap *topic_heap;
 static BlockHeap *member_heap;
 
-static int channel_capabs[] = { CAP_EX, CAP_IE, CAP_UID };
+static int channel_capabs[] = { CAP_EX, CAP_IE, CAP_TS6 };
 #define NCHCAPS         (sizeof(channel_capabs)/sizeof(int))
 #define NCHCAP_COMBOS   (1 << NCHCAPS)
 
@@ -1123,10 +1123,12 @@ send_cap_mode_changes(struct Client *client_p, struct Client *source_p,
 		cap = chcap_combos[j].cap_yes;
 		nocap = chcap_combos[j].cap_no;
 
-		if((cap & CAP_UID) && source_p->user && (source_p->user->id[0] == '.'))
-			mbl = ircsprintf(modebuf, ":%s MODE %s ", source_p->user->id, chptr->chname);
+		if(cap & CAP_TS6)
+			mbl = ircsprintf(modebuf, ":%s MODE %s ",
+					 use_id(source_p), chptr->chname);
 		else
-			mbl = ircsprintf(modebuf, ":%s MODE %s ", source_p->name, chptr->chname);
+			mbl = ircsprintf(modebuf, ":%s MODE %s ",
+					 source_p->name, chptr->chname);
 
 		/* loop the list of - modes we have */
 		for (i = 0; i < mode_count; i++)
@@ -1141,7 +1143,7 @@ send_cap_mode_changes(struct Client *client_p, struct Client *source_p,
 				continue;
 
 			arg = "";
-			if((cap & CAP_UID) && mode_changes[i].id)
+			if((cap & CAP_TS6) && mode_changes[i].id)
 				arg = mode_changes[i].id;
 			if(!*arg)
 				arg = mode_changes[i].arg;
@@ -1162,12 +1164,12 @@ send_cap_mode_changes(struct Client *client_p, struct Client *source_p,
 				nc = 0;
 				mc = 0;
 
-				if((cap & CAP_UID) && source_p->user && (source_p->user->id[0] == '.'))
+				if(cap & CAP_TS6)
 					mbl = ircsprintf(modebuf, ":%s MODE %s ",
-							source_p->user->id, chptr->chname);
+							 use_id(source_p), chptr->chname);
 				else
 					mbl = ircsprintf(modebuf, ":%s MODE %s ",
-							source_p->name, chptr->chname);
+							 source_p->name, chptr->chname);
 
 				pbl = 0;
 				parabuf[0] = 0;

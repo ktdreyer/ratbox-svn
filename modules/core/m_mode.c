@@ -734,7 +734,7 @@ chm_op(struct Client *source_p, struct Channel *chptr,
 		mode_changes[mode_count].caps = 0;
 		mode_changes[mode_count].nocaps = 0;
 		mode_changes[mode_count].mems = ALL_MEMBERS;
-		mode_changes[mode_count].id = targ_p->user->id;
+		mode_changes[mode_count].id = targ_p->id;
 		mode_changes[mode_count].arg = targ_p->name;
 		mode_changes[mode_count++].client = targ_p;
 
@@ -748,7 +748,7 @@ chm_op(struct Client *source_p, struct Channel *chptr,
 		mode_changes[mode_count].caps = 0;
 		mode_changes[mode_count].nocaps = 0;
 		mode_changes[mode_count].mems = ALL_MEMBERS;
-		mode_changes[mode_count].id = targ_p->user->id;
+		mode_changes[mode_count].id = targ_p->id;
 		mode_changes[mode_count].arg = targ_p->name;
 		mode_changes[mode_count++].client = targ_p;
 
@@ -814,7 +814,7 @@ chm_voice(struct Client *source_p, struct Channel *chptr,
 		mode_changes[mode_count].caps = 0;
 		mode_changes[mode_count].nocaps = 0;
 		mode_changes[mode_count].mems = ALL_MEMBERS;
-		mode_changes[mode_count].id = targ_p->user->id;
+		mode_changes[mode_count].id = targ_p->id;
 		mode_changes[mode_count].arg = targ_p->name;
 		mode_changes[mode_count++].client = targ_p;
 
@@ -827,7 +827,7 @@ chm_voice(struct Client *source_p, struct Channel *chptr,
 		mode_changes[mode_count].caps = 0;
 		mode_changes[mode_count].nocaps = 0;
 		mode_changes[mode_count].mems = ALL_MEMBERS;
-		mode_changes[mode_count].id = targ_p->user->id;
+		mode_changes[mode_count].id = targ_p->id;
 		mode_changes[mode_count].arg = targ_p->name;
 		mode_changes[mode_count++].client = targ_p;
 

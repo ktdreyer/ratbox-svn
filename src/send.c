@@ -146,7 +146,7 @@ send_linebuf_remote(struct Client *to, struct Client *from, buf_head_t *linebuf)
 				     from->name, from->username, from->host, to->from->name);
 		kill_client_serv_butone(NULL, to, "%s (%s[%s@%s] Ghosted %s)",
 					me.name, to->name, to->username,
-					to->host, to-.from->name);
+					to->host, to->from->name);
 
 		to->flags |= FLAGS_KILLED;
 
@@ -233,7 +233,7 @@ send_queued_slink_write(int fd, void *data)
 	/* Next, lets try to write some data */
 	if(to->localClient->slinkq)
 	{
-	i	retlen = send(to->localClient->ctrlfd,
+		retlen = send(to->localClient->ctrlfd,
 			      to->localClient->slinkq + to->localClient->slinkq_ofs,
 			      to->localClient->slinkq_len, SEND_FLAGS);
 
@@ -339,7 +339,7 @@ sendto_one_prefix(struct Client *target_p, struct Client *source_p,
 		       command, get_id(target_p, target_p));
 	va_end(args);
 
-	_send_linebuf(to_sendto, &linebuf);
+	_send_linebuf(target_p, &linebuf);
 	linebuf_donebuf(&linebuf);
 }
 
@@ -596,7 +596,9 @@ sendto_match_butone(struct Client *one, struct Client *source_p,
 	buf_head_t linebuf_id;
 
 	linebuf_newbuf(&linebuf_local);
-	linebuf_newbuf(&remote_linebuf);
+	linebuf_newbuf(&linebuf_name);
+	linebuf_newbuf(&linebuf_id);
+
 	va_start(args, pattern);
 
 	if(IsServer(source_p))
@@ -699,7 +701,10 @@ sendto_match_servs(struct Client *source_p, const char *mask, int cap, const cha
 			if(!IsCapable(target_p->from, cap))
 				continue;
 
-			_send_linebuf(target_p->from, &linebuf_ptr);
+			if(IsTS6(target_p->from))
+				_send_linebuf(target_p->from, &linebuf_id);
+			else
+				_send_linebuf(target_p->from, &linebuf_name);
 		}
 	}
 
@@ -751,10 +756,10 @@ sendto_anywhere(struct Client *target_p, struct Client *source_p,
 			       get_id(target_p, target_p));
 	va_end(args);
 
-	if(MyClient(to))
-		_send_linebuf(to, &linebuf);
+	if(MyClient(target_p))
+		_send_linebuf(target_p, &linebuf);
 	else
-		send_linebuf_remote(to, from, &linebuf);
+		send_linebuf_remote(target_p, source_p, &linebuf);
 
 	linebuf_donebuf(&linebuf);
 }
@@ -869,7 +874,7 @@ kill_client(struct Client *target_p, struct Client *diedie, const char *pattern,
 		      get_id(&me, target_p), get_id(diedie, target_p));
 	va_end(args);
 
-	send_linebuf(client_p, &linebuf);
+	send_linebuf(target_p, &linebuf);
 	linebuf_donebuf(&linebuf);
 }
 
@@ -889,7 +894,6 @@ void
 kill_client_serv_butone(struct Client *one, struct Client *target_p, const char *pattern, ...)
 {
 	va_list args;
-	int have_uid = 0;
 	struct Client *client_p;
 	dlink_node *ptr;
 	dlink_node *next_ptr;
@@ -900,9 +904,9 @@ kill_client_serv_butone(struct Client *one, struct Client *target_p, const char 
 	linebuf_newbuf(&linebuf_id);
 	
 	va_start(args, pattern);
-	linebuf_putmsg(&linebuf_name, patter, &args, ":%s KILL %s :",
+	linebuf_putmsg(&linebuf_name, pattern, &args, ":%s KILL %s :",
 		       me.name, target_p->name);
-	linebuf_putmsg(&linebuf_id, patter, &args, ":%s KILL %s :",
+	linebuf_putmsg(&linebuf_id, pattern, &args, ":%s KILL %s :",
 		       use_id(&me), use_id(target_p));
 	va_end(args);
 
@@ -910,7 +914,7 @@ kill_client_serv_butone(struct Client *one, struct Client *target_p, const char 
 	{
 		client_p = ptr->data;
 
-		if(one != NULL) && (client_p == one->from))
+		if((one != NULL) && (client_p == one->from))
 			continue;
 
 		if(IsTS6(client_p))
