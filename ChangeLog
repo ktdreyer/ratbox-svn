@@ -1,3 +1,23 @@
+leeh        2005/02/09 14:02:13 EST	(20050209_1)
+
+  Modified files:
+    include              s_user.h 
+    modules              m_cap.c m_pong.c m_user.c 
+    modules/core         m_nick.c 
+    src                  s_user.c 
+  Log:
+  - remove 'nick' param from register_local_user(), its not needed.
+  
+  Revision  Changes    Path
+  7.35      +1 -1      ircd-ratbox/include/s_user.h
+  1.159     +2 -2      ircd-ratbox/modules/core/m_nick.c
+  1.5       +2 -2      ircd-ratbox/modules/m_cap.c
+  1.59      +2 -3      ircd-ratbox/modules/m_pong.c
+  1.46      +2 -2      ircd-ratbox/modules/m_user.c
+  7.339     +6 -6      ircd-ratbox/src/s_user.c
+
+
+
 leeh        2005/02/09 13:12:53 EST	(20050209_0)
 
   Modified files:
