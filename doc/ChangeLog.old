@@ -1,3 +1,15 @@
+androsyn    2002/06/26 22:14:40 EDT	(20020627_2)
+
+  Modified files:
+    src                  client.c 
+  Log:
+  Got the logic on that assert() backwards..how embarrassing
+  
+  Revision  Changes    Path
+  7.284     +1 -1      ircd-hybrid-7/src/client.c
+
+
+
 androsyn    2002/06/26 20:01:30 EDT	(20020627_1)
 
   Modified files:
