@@ -43,6 +43,7 @@
 #include <string.h>
 #include <time.h>
 
+static void m_trace(struct Client *, struct Client *, int, char **);
 static void ms_trace(struct Client*, struct Client*, int, char**);
 static void mo_trace(struct Client*, struct Client*, int, char**);
 
@@ -50,7 +51,7 @@ static void trace_spy(struct Client *);
 
 struct Message trace_msgtab = {
   "TRACE", 0, 0, 0, MFLG_SLOW, 0,
-  {m_unregistered, m_ignore, ms_trace, mo_trace}
+  {m_unregistered, m_trace, ms_trace, mo_trace}
 };
 
 #ifndef STATIC_MODULES
@@ -71,6 +72,20 @@ char *_version = "20010109";
 #endif
 static int report_this_status(struct Client *source_p, struct Client *target_p,int dow,
                               int link_u_p, int link_u_s);
+
+
+/*
+ * m_trace()
+ *
+ *	parv[0] = sender prefix
+ *	parv[1] = target client/server to trace
+ */
+static void m_trace(struct Client *client_p, struct Client *source_p,
+                    int parc, char *parv[])
+{
+  sendto_one(source_p, form_str(RPL_ENDOFTRACE), me.name,
+             parv[0], parv[1]);
+}
 
 
 /*
