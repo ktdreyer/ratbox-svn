@@ -115,6 +115,20 @@ void read_write_klines(char *filein,char *fileout)
 	  *p = '\0';
 	  p++;
 	  name = p;
+
+/* look for '#' in name field */
+         if((p = strchr(name,'#')))
+         {
+           fprintf(stderr,"oooo # in name too!\n");
+           *p = '_';
+         } 
+/* look for '#' in host field */
+         if((p = strchr(host,'#')))
+         { 
+            fprintf(stderr,"oooo # in host name \n");
+            *p = '_';
+         }
+/* look for '#' in comment field */
           p = strchr(comment,'#');
           while(p)
             {
