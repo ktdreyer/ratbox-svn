@@ -431,7 +431,7 @@ log_operspy(struct Client *source_p, const char *token, const char *arg)
 	{
 		snprintf(linebuf, sizeof(linebuf),
 			 "%s OPERSPY %s %s %s\n",
-			 smalldate(CurrentTime), get_oper_name(source_p),
+			 smalldate(), get_oper_name(source_p),
 			 token, arg ? arg : "");
 		fbputs(linebuf, operspy_fb);
 		fbclose(operspy_fb);

@@ -62,14 +62,22 @@ index:
 
 install:
 	@echo installing help files...
+	-@if test -d $(prefix)/help; then \
+		mv $(prefix)/help $(prefix)/help-old; \
+	fi
+
 	-@if test ! -d $(prefix)/help; then \
-		echo "mkdir $(prefix)/help"; \
 		mkdir $(prefix)/help; \
-		echo "mkdir $(prefix)/help/users"; \
-		mkdir $(prefix)/help/users; \
-		echo "mkdir $(prefix)/help/opers"; \
+	fi
+
+	-@if test ! -d $(prefix)/help/opers; then \
 		mkdir $(prefix)/help/opers; \
 	fi
+
+	-@if test ! -d $(prefix)/help/users; then \
+		mkdir $(prefix)/help/users; \
+	fi
+
 	@for help in opers/*; do \
 	if [ -f $$help ]; then \
 		${INSTALL_DATA} $$help $(ohelpdir); \
