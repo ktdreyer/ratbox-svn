@@ -95,6 +95,7 @@ EOB   - End of Burst - Servers with this enabled cannot issue burst commands
         hacking
 KLN   - Support remote K-lines
 GLN   - Support G-lines
+HOPS  - Support half-ops
 
 K-lines can now be sent to and accepted from other servers.  The shared {}
 block in the conf file is used to specify which servers are trusted.
