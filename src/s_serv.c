@@ -1647,7 +1647,7 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
 	{
 		memcpy(&myipnum, &ServerInfo.ip, sizeof(myipnum));
 		((struct sockaddr_in *)&myipnum)->sin_port = 0;
-		myipnum.ss_family = aconf->my_ipnum.ss_family;
+		myipnum.ss_family = AF_INET;
 	}
 	
 #ifdef IPV6

@@ -234,7 +234,7 @@ conf_set_serverinfo_vhost(void *data)
 		conf_report_error("Invalid netmask for server IPv4 vhost (%s)", (char *) data);
 		return;
 	}
-
+	ServerInfo.ip.sin_family = AF_INET;
 	ServerInfo.specific_ipv4_vhost = 1;
 }
 
@@ -249,6 +249,7 @@ conf_set_serverinfo_vhost6(void *data)
 	}
 
 	ServerInfo.specific_ipv6_vhost = 1;
+	ServerInfo.ip6.sin6_family = AF_INET6;
 #else
 	conf_report_error("Warning -- ignoring serverinfo::vhost6 -- IPv6 support not available.");
 #endif
