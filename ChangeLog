@@ -1,3 +1,21 @@
+androsyn    2003/06/24 20:23:32 UTC	(20030624_3)
+
+  Modified files:
+    include              client.h 
+    modules              m_map.c m_trace.c 
+    src                  client.c s_user.c 
+  Log:
+  Removed usercnt
+  
+  Revision  Changes    Path
+  7.206     +0 -1      ircd-ratbox/include/client.h
+  1.27      +3 -3      ircd-ratbox/modules/m_map.c
+  1.78      +2 -2      ircd-ratbox/modules/m_trace.c
+  7.385     +0 -1      ircd-ratbox/src/client.c
+  7.266     +0 -2      ircd-ratbox/src/s_user.c
+
+
+
 androsyn    2003/06/24 19:56:29 UTC	(20030624_2)
 
   Modified files:
