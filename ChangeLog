@@ -1,3 +1,16 @@
+androsyn    2003/08/29 11:13:37 EDT	(20030829_0)
+
+  Modified files:
+    src                  ircd.c 
+  Log:
+  If we are unable to chdir into our prefix directory, give the user slightly
+  more useful information
+  
+  Revision  Changes    Path
+  7.308     +1 -1      ircd-ratbox/src/ircd.c
+
+
+
 leeh        2003/08/27 19:52:19 EDT	(20030827_3)
 
   Modified files:
