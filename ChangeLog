@@ -1,3 +1,18 @@
+androsyn    2003/01/26 20:17:30 UTC	(20030126_1)
+
+  Modified files:
+    include              s_bsd.h 
+    src                  s_auth.c s_bsd.c 
+  Log:
+  Fix ident checking
+  
+  Revision  Changes    Path
+  7.42      +5 -0      ircd-ratbox/include/s_bsd.h
+  7.124     +10 -1     ircd-ratbox/src/s_auth.c
+  7.195     +28 -18    ircd-ratbox/src/s_bsd.c
+
+
+
 androsyn    2003/01/26 19:47:22 UTC	(20030126_0)
 
   Modified files:
