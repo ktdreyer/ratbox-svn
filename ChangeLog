@@ -1,3 +1,15 @@
+leeh        2005/01/24 17:25:58 EST	(20050124_5)
+
+  Modified files:
+    include              modules.h 
+  Log:
+  - fix the prototype on load_static_modules()
+  
+  Revision  Changes    Path
+  7.61      +1 -1      ircd-ratbox/include/modules.h
+
+
+
 leeh        2005/01/24 16:00:30 EST	(20050124_4)
 
   Modified files:
