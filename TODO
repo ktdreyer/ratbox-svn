@@ -17,7 +17,8 @@ is-'s TODO list
 - PART_REASON
 - dynamically extensible parser for modules
 - modularise channel, network code etc (not just commands)
-
+    we can use override_function() or similar for this
+- username/passwords (iauth ?)
 ------------------------------------------------------------------------------
 
 Adrian's TODO list
