@@ -1,3 +1,8 @@
+*** 20001214_14 by db
+- don't count opers again in /stats L
+
+
+
 *** 20001214_13 by toot
 . moved dots_in_ident to an ircd.conf option
 . removed some d_line remains..
