@@ -1,3 +1,25 @@
+*** 20010924_6 by db
+- removed an unnecessary call in m_stats.c, call fd_dump() directly
+  instead of confusing things. (for stats f)
+
+
+- reworked s_bsd_kqueue.c to use EV_SET() macro. This ensures
+   all kevent struct members are properly initialized at all times.
+
+- removed NOTE_LOWAT kludge, this is not necessary if kevent struct
+  is initialized properly as in above.
+
+- added and remvoved fd_dump_debug() call.
+
+- do not bother closing fd's 0,1,2,3 hey if they are in use, ircd
+  can't use them. 4 ignored fd's aint going to hurt ircd. As it turns
+  out fd 3 is typically used for profiler, which caused CPU to hit 100%
+  as kqueue thought fd 3 was closed (which it was) since profiler thought
+  it was open, but ircd had closed it. ugh. such a lose.
+
+
+
+
 *** 20010924_5 by leeh
 - added ID checks to parse()
 
