@@ -1,3 +1,10 @@
+*** 20010103_11 by db
+- ok, added sanity tests in the parser to not try to DupString NULL strings
+  it won't work properly but at least it won't core.
+- NICK should not send a prefix, to be consistent with previous versions
+
+
+
 *** 20010103_10 by toot
 set the vchan_id in a much more simplistic way
 me so silly :P
