@@ -1,3 +1,19 @@
+androsyn    2003/03/19 08:08:24 UTC	(20030319_1)
+
+  Modified files:
+    include              tools.h 
+    src                  tools.c 
+  Log:
+  Just make the inlines the default, remove the others from tools.c, if the
+  compiler doesn't do inlines, they get a static version of it.  Sucks to be
+  them, but oh well, get a better compiler
+  
+  Revision  Changes    Path
+  1.45      +9 -36     ircd-ratbox/include/tools.h
+  7.38      +0 -233    ircd-ratbox/src/tools.c
+
+
+
 androsyn    2003/03/19 07:20:37 UTC	(20030319_0)
 
   Modified files:
