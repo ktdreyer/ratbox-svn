@@ -255,12 +255,10 @@ linebuf_donebuf(buf_head_t *bufhead)
  * This routine probably isn't as optimal as it could be, but hey .. :)
  *   -- adrian
  *
- * if binary is non-zero assume the data may be compressed,
- * so simply split up (keeping as many [\r\n]*'s in the first buffer)
  */
 static int
 linebuf_copy_line(buf_head_t *bufhead, buf_line_t *bufline,
-  char *data, int len, int binary)
+  char *data, int len)
 {
   int cpylen = 0;	/* how many bytes we've copied */
   char *ch = data;	/* Pointer to where we are in the read data */
@@ -285,16 +283,13 @@ linebuf_copy_line(buf_head_t *bufhead, buf_line_t *bufline,
       /* Are we out of space to PUT this ? */
       if (bufline->len == BUF_DATA_SIZE)
 	{
-	  /*
-	   * ok, we CR/LF/NUL terminate, set overflow, and loop until the
-	   * next CRLF. We then skip that, and return.
-	   */
-          if (!binary)
-          {
-            bufline->overflow = 1;
-            cpylen += linebuf_skip_crlf(ch, len);
-            linebuf_terminate_crlf(bufhead, bufline);
-          }
+	 /*
+	  * ok, we CR/LF/NUL terminate, set overflow, and loop until the
+	  * next CRLF. We then skip that, and return.
+	  */
+          bufline->overflow = 1;
+          cpylen += linebuf_skip_crlf(ch, len);
+          linebuf_terminate_crlf(bufhead, bufline);
 	  /* NOTE: We're finishing, so ignore updating len */
 	  bufline->terminated = 1;
 	  break;
@@ -303,30 +298,12 @@ linebuf_copy_line(buf_head_t *bufhead, buf_line_t *bufline,
       /* Is this a CR or LF? */
       if ((*ch == '\r') || (*ch == '\n'))
 	{
-          if (!binary)
-            {
-              /* Skip */
-              cpylen += linebuf_skip_crlf(ch, len);
-              /* Terminate the line */
-              linebuf_terminate_crlf(bufhead, bufline);
-              /* NOTE: We're finishing, so ignore updating len */
-              bufline->terminated = 1;
-            }
-          else
-            {
-              while ((len > 0) && ((*ch == '\r') || (*ch == '\n')))
-                {
-                  *bufch = *ch;
-                  bufch++;
-                  ch++;
-                  cpylen++;
-                  assert(len > 0);
-                  len--;
-                  bufline->len++;
-                  bufhead->len++;
-                }
-              bufline->terminated =1;
-            }
+          /* Skip */
+          cpylen += linebuf_skip_crlf(ch, len);
+          /* Terminate the line */
+          linebuf_terminate_crlf(bufhead, bufline);
+          /* NOTE: We're finishing, so ignore updating len */
+          bufline->terminated = 1;
           break;
         }
 
@@ -368,7 +345,7 @@ linebuf_copy_line(buf_head_t *bufhead, buf_line_t *bufline,
  *   to dodge copious copies.
  */
 int
-linebuf_parse(buf_head_t *bufhead, char *data, int len, int binary)
+linebuf_parse(buf_head_t *bufhead, char *data, int len)
 {
   buf_line_t *bufline;
   int cpylen;
@@ -381,7 +358,7 @@ linebuf_parse(buf_head_t *bufhead, char *data, int len, int binary)
       bufline = bufhead->list.tail->data;
       assert(!bufline->flushing);
       /* just try, the worst it could do is *reject* us .. */
-      cpylen = linebuf_copy_line(bufhead, bufline, data, len, binary);
+      cpylen = linebuf_copy_line(bufhead, bufline, data, len);
       linecnt++;
       /* If we've copied the same as what we've got, quit now */
       if (cpylen == len)
@@ -400,7 +377,7 @@ linebuf_parse(buf_head_t *bufhead, char *data, int len, int binary)
         bufline = linebuf_new_line(bufhead);
         
         /* And parse */
-        cpylen = linebuf_copy_line(bufhead, bufline, data, len, binary);
+        cpylen = linebuf_copy_line(bufhead, bufline, data, len);
         len -= cpylen;
 	assert(len >= 0);
         data += cpylen;

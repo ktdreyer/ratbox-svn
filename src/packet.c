@@ -326,7 +326,7 @@ read_packet(int fd, void *data)
    * turn comes around.
    */
   lbuf_len = linebuf_parse(&client_p->localClient->buf_recvq,
-      readBuf, length, (IsRegistered(client_p) ? 0 : 1));
+      readBuf, length);
 
   if (lbuf_len < 0)
   {
