@@ -1,3 +1,18 @@
+*** 20010813_11 by leeh
+- updated the accept stuff:
+   - add_accept() is now in m_accept.c
+   - list_accepts() is now in m_accept.c
+   
+   - added five new numerics:
+      281 RPL_ACCEPTLIST - accept list
+      282 RPL_ENDOFACCEPT - end of accept list
+
+      456 ERR_ACCEPTFULL - full accept list
+      457 ERR_ACCEPTEXIST - trying to add a client already on their list
+      458 ERR_ACCEPTNOT - removing a client not on their list
+			  
+
+
 *** 20010813_10 by androsyn
 make_dlink_node now uses the block heap again..
 
