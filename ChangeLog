@@ -1,3 +1,15 @@
+androsyn    2003/01/21 00:14:31 UTC	(20030121_0)
+
+  Modified files:
+    src                  s_bsd.c 
+  Log:
+  Passing a length of 1 to inetntop_sock is pretty silly
+  
+  Revision  Changes    Path
+  7.193     +1 -1      ircd-ratbox/src/s_bsd.c
+
+
+
 androsyn    2003/01/20 23:48:32 UTC	(20030120_10)
 
   Modified files:
