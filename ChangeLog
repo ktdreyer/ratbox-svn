@@ -1,3 +1,30 @@
+leeh        2003/10/19 12:17:59 EDT	(20031019_0)
+
+  Modified files:
+    .                    Makefile.in 
+    doc                  Makefile.in 
+    help                 Makefile.in 
+    modules              Makefile.in 
+    servlink             Makefile.in 
+    src                  Makefile.in 
+    tools                Makefile.in 
+  Log:
+  - cleaned up the Makefiles
+    - cleaned up the output
+    - we no longer build .o files in tools/, rather straight .c -> binary
+    - some other cleanups
+  
+  Revision  Changes    Path
+  7.43      +17 -2     ircd-ratbox/Makefile.in
+  7.22      +9 -13     ircd-ratbox/doc/Makefile.in
+  1.18      +6 -14     ircd-ratbox/help/Makefile.in
+  1.89      +6 -16     ircd-ratbox/modules/Makefile.in
+  1.16      +1 -2      ircd-ratbox/servlink/Makefile.in
+  7.143     +5 -15     ircd-ratbox/src/Makefile.in
+  7.33      +19 -57    ircd-ratbox/tools/Makefile.in
+
+
+
 leeh        2003/10/17 18:14:49 EDT	(20031017_0)
 
   Modified files:
