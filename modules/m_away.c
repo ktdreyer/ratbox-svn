@@ -43,6 +43,8 @@ _modinit(void)
   mod_add_cmd(MSG_AWAY, &away_msgtab);
 }
 
+char *_version = "20001122";
+
 /***********************************************************************
  * m_away() - Added 14 Dec 1988 by jto. 
  *            Not currently really working, I don't like this

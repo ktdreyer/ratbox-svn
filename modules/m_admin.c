@@ -45,6 +45,8 @@ _modinit(void)
   mod_add_cmd(MSG_ADMIN, &admin_msgtab);
 }
 
+char *_version = "20001122";
+
 /*
  * m_admin - ADMIN command handler
  *      parv[0] = sender prefix
