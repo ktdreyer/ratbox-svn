@@ -1,3 +1,7 @@
+*** 20001230_9 by toot
+added a paranoid check in pick_vchan_id
+
+
 *** 20001230_8 by lusky
 - use errno.h instead of sys/errno.h.  freebsd and redhat don't care, but
   solaris does.
