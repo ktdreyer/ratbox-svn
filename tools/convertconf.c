@@ -25,7 +25,6 @@
 #include "../include/config.h"
 #include "../include/setup.h"
 
-#define CONFPATH ETCPATH "/.convertconf-example.conf"
 #define BUFSIZE 512
 
 #define IS_LEAF 0
@@ -57,7 +56,6 @@ static void PrintOutServers(FILE *out);
 static void PairUpServers(struct ConnectPair* );
 static void AddHubOrLeaf(int type,char* name,char* host);
 static void OperPrivsFromString(FILE* , char* );
-static int basic = 0;
 
 int main(int argc,char *argv[])
 {
@@ -71,9 +69,6 @@ int main(int argc,char *argv[])
 
   if(argc > 3)
   {
-    if((argv[1][0] == '-') && argv[1][1] && (argv[1][1] == 'b'))
-      basic = 1;
-
     filein = argv[2];
     fileout = argv[3];
   }
@@ -82,10 +77,6 @@ int main(int argc,char *argv[])
     filein = argv[1];
     fileout = argv[2];
   }
-
-#ifdef EFNET
-  basic = 1;
-#endif
 
   if ((in = fopen(filein, "r")) == NULL)
     {
@@ -101,35 +92,19 @@ int main(int argc,char *argv[])
   
   ConvertConf(in,out);
 
-  if(!basic && ((in = fopen(CONFPATH, "r")) == NULL))
-  {
-    fprintf(stderr, "Can't open %s for reading\n", CONFPATH);
-    puts("You must use the example.conf in the ircd-hybrid-7 source to get the\n"
-	 "general {}; logging {}; channel {}; serverhide {}; modules {}; blocks.\n");
-  }
-  else if(!basic)
-  {
-    while (fgets(line, sizeof(line), in))
-      fprintf(out, line);
-
-    puts("Adding the remaining missing blocks to your config..\n");
-  }
-
   puts("The config file has been converted however you MUST rearrange and check the config:\n"
        "   o class blocks (Y:) must be before anything that uses then\n"
        "   o auth blocks (I:) have NOT been converted, please use convertilines\n"
-       "     to convert them\n");
-  if(!basic)
-    puts("   o the general/channel/serverhide parts will need to be edited\n");
+       "     to convert them\n"
+       "   o you must pull the channel {}; general {}; serverhide {}; and modules {};\n"
+       "     blocks from your example config.\n");
 
   return 0;
 }
 
 static void usage()
 {
-  fprintf(stderr,"convertconf [-b] ircd.conf.old ircd.conf.new\n");
-  fprintf(stderr, "   -b - this will run in 'basic' mode and not add extra blocks\n");
-  fprintf(stderr, "        such as general{}, channel{} etc. (Used for EFNet)\n");
+  fprintf(stderr,"convertconf ircd.conf.old ircd.conf.new\n");
   exit(-1);
 }
 

@@ -19,13 +19,6 @@
    |   The old kline format WILL NOT WORK. Please see point 7!              |
    +------------------------------------------------------------------------+
 
-   ***** EFNET NOTE *****
-   You should run ./configure with the option '--enable-efnet' to tweak
-   some options to be EFNet based.  You must also use the example.efnet.conf
-   instead of example.conf.  Please see note 7 for information about
-   converting old configs to new.
-   **********************
-
      ----------------------------------------------------------------------
 
                                   HOW TO BUILD

@@ -1517,11 +1517,7 @@ set_default_conf(void)
   ConfigFileEntry.default_floodcount = 8;
   ConfigFileEntry.client_flood = CLIENT_FLOOD_DEFAULT;
 
-#ifdef EFNET
   ConfigFileEntry.use_help = 0;
-#else
-  ConfigFileEntry.use_help = 1;
-#endif
 }
 #undef YES
 #undef NO

@@ -78,8 +78,6 @@ install: install-mkdirs build
 		fi; \
 	done
 
-	$(CP) convertconf-example.conf $(sysconfdir)/.convertconf-example.conf
-
 build:
 
 clean:

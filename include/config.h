@@ -176,20 +176,16 @@
  * If this is undefined, opers will be unable to see servers ips and will be
  * shown a masked ip, admins will be shown the real ip.
  *
- * If this is defined, nobody can see a servers ip.  *This is a kludge*, it
- * has the side effect of hiding the ips everywhere, including logfiles.
- *
- * We recommend you leave this undefined, and just take care with who you
- * give admin=yes; to.
+ * If this is defined, nobody can see a servers ip.
  */
-#undef  HIDE_SERVERS_IPS
+#define  HIDE_SERVERS_IPS
 
 /* HIDE_SPOOF_IPS
  *
  * If this is undefined, opers will be allowed to see the real IP of spoofed
  * users in /trace etc.  If this is defined they will be shown a masked IP.
  */
-#undef HIDE_SPOOF_IPS
+#define HIDE_SPOOF_IPS
 
 /* TS5_ONLY
  *
@@ -297,28 +293,15 @@
 */
 #define HYBRID_SOMAXCONN 25
 
-/* CODE DISABLE SECTION
+/* ANONOPS
  *
- * If you have enabled efnet specific code these will be disabled automatically
- * else they are here for anyone else.
+ * Anonops (chanmode +a) provide a method of hiding chanops from users
+ * in a channel who are unopped.  However they can cause mode floods so
+ * are disabled by default.
  */
-#define ANONOPS
+#undef ANONOPS
 
 /* END OF CONFIGURABLE OPTIONS */
-
-/* disable them for efnet */
-#ifdef EFNET
-#undef ANONOPS
-#ifndef HIDE_SERVERS_IPS
-#define HIDE_SERVERS_IPS
-#endif
-#ifndef HIDE_SPOOF_IPS
-#define HIDE_SPOOF_IPS
-#endif
-#ifndef TS5_ONLY
-#define TS5_ONLY
-#endif
-#endif
 
 /* 
  * Default pre-allocations for various things...

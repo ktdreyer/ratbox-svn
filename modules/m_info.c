@@ -756,7 +756,7 @@ static void send_conf_options(struct Client *source_p)
   ** in order for it to show up properly to opers who issue INFO
   */
 
-#ifndef EFNET
+#if 0
   /* jdc -- Only send compile information to admins. */
   if (IsOperAdmin(source_p))
   {

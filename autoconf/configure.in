@@ -661,18 +661,6 @@ if test "$ac_cv_ipv6" = "yes" ; then
 	echo "Using IPv6 support"
 fi
 
-
-dnl efnet
-AC_ARG_ENABLE(efnet,
-[  --enable-efnet               For IRCDs running on efnet. ],
-    [ ac_cv_efnet=$enableval ], [ ac_cv_efnet='no' ])
-
-
-if test "$ac_cv_efnet" = "yes"; then
-    AC_DEFINE(EFNET)
-    echo "Building ircd for use with efnet"
-fi
-
 ac_cv_assert="-DNDEBUG"
 
 dnl assert?
@@ -1010,12 +998,6 @@ if test "X${cf_openssl_ciphers}" != "X"; then
   echo ""
   echo "${cf_openssl_ciphers}"
   echo ""
-fi
-
-if test "$ac_cv_efnet" = "yes"; then
-        echo "This server is configured for EFNet usage.  You should NOT use the"
-        echo "example.conf that will be installed.  Use example.efnet.conf instead."
-        echo ""
 fi
 
 AC_MSG_RESULT("Server is configured with NICKLEN=$ac_cv_nicklen and MAX_CLIENTS=$ac_cv_maxclients")

@@ -76,6 +76,3 @@
 /* topiclen */
 #undef TOPICLEN
 
-/* EFNET */
-#undef EFNET
-
