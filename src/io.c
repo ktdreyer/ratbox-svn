@@ -140,13 +140,25 @@ read_io(void)
 
 		if(server_p != NULL)
 		{
-			/* socket isnt dead, client struct is.. */
+			/* socket isnt dead.. */
 			if((server_p->flags & CONN_DEAD) == 0)
 			{
+				/* client struct is.  im not sure how this
+				 * could happen, but..
+				 */
 				if(server_p->client_p != NULL && 
 				   IsDead(server_p->client_p))
 				{
 					slog("Connection to server %s lost: (Server exited)",
+						server_p->name);
+					(server_p->io_close)(server_p);
+				}
+
+				/* connection timed out.. */
+				else if((server_p->flags & CONN_CONNECTING) &&
+					((server_p->first_time + 30) <= CURRENT_TIME))
+				{
+					slog("Connection to server %s timed out",
 						server_p->name);
 					(server_p->io_close)(server_p);
 				}
@@ -425,7 +437,7 @@ sendto_server(const char *format, ...)
 	char buf[BUFSIZE];
 	va_list args;
 	
-	if(server_p == NULL)
+	if(server_p == NULL || server_p->flags & CONN_DEAD)
 		return;
 
 	va_start(args, format);
