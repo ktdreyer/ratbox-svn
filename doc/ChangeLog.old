@@ -1,3 +1,9 @@
+*** 20010626_2 by jdc
+- modules/m_whois.c
+    * Minor warning fixed up (line 551; if statement vague/ambiguous).
+
+
+
 *** 20010626_1 by jdc
 - doc/cryptlink.txt
     * Fixed up "CAPAB <stuff>" -- should be "CAPAB :<stuff>".
