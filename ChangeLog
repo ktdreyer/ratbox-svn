@@ -1,3 +1,15 @@
+androsyn    2003/02/03 19:09:26 UTC	(20030203_0)
+
+  Added files:
+    .                    README.epoll 
+  Log:
+  Added README.epoll
+  
+  Revision  Changes    Path
+  1.1       +16 -0     ircd-ratbox/README.epoll (new)
+
+
+
 leeh        2003/02/02 00:19:20 UTC	(20030202_0)
 
   Modified files:
