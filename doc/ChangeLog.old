@@ -1,3 +1,9 @@
+*** 20010419_2 by a1kmm
+- Adding habeeb's patch to fix the antispambot code.
+- Added a check on part message similar to that for QUIT to decide if the
+  part reason should be allowed to be shown.
+
+
 *** 20010419_1 by a1kmm
 - Fixed the code to prevent redundant K-lines.
 - Made sure we can always remove K-lines which are placed.
