@@ -1,3 +1,7 @@
+*** 20010103_5 by madmax
+Added a list of known bugs for our beta release.. (and references to the file)
+
+
 *** 20010103_4 by davidt
 - Oops, fixed my last commit message in ChangeLog.
 - Fixed m_join.c so it doesn't reveal who set the topic on +a channels.
