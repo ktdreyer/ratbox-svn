@@ -1,3 +1,18 @@
+leeh        2002/04/19 12:21:08 EDT	(20020419_0)
+
+  Modified files:
+    include              channel.h 
+    modules/core         m_nick.c 
+  Log:
+  - wrapped chanops_voiced list in an #ifdef
+  - mark grace period complete on nickchange
+  
+  Revision  Changes    Path
+  7.107     +3 -1      ircd-hybrid-7/include/channel.h
+  1.87      +4 -1      ircd-hybrid-7/modules/core/m_nick.c
+
+
+
 leeh        2002/04/18 15:11:10 EDT	(20020418_2)
 
   Modified files:
