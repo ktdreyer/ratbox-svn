@@ -1,3 +1,20 @@
+db          2001/12/07 17:53:57 EST	(20011207_1)
+
+  Modified files:
+    include              send.h 
+    modules              m_invite.c m_message.c 
+    src                  send.c 
+  Log:
+  - do not send to origin in sendto_channel_remote()
+  
+  Revision  Changes    Path
+  7.52      +4 -3      ircd-hybrid-7/include/send.h
+  1.34      +3 -2      ircd-hybrid-7/modules/m_invite.c
+  1.79      +2 -2      ircd-hybrid-7/modules/m_message.c
+  7.164     +23 -13    ircd-hybrid-7/src/send.c
+
+
+
 leeh        2001/12/07 05:59:38 EST	(20011207_0)
 
   Modified files:
