@@ -237,9 +237,8 @@ comm_select(unsigned long delay)
    if (hdl)
     hdl(fd, F->write_data);
 
-   poll_update_pollfds(fd, POLLWRNORM, NULL);
-   
   }
+
   if(F->read_handler == NULL)
      poll_update_pollfds(fd, POLLRDNORM, NULL);
   if(F->write_handler == NULL)
