@@ -57,9 +57,6 @@ struct Listener* make_listener(int port, struct irc_inaddr *addr)
 
   listener->name        = me.name;
   listener->fd          = -1;
-/* jdc -- this breaks shit when addr is irc_inaddr but not in listener.h */
-/* copy_s_addr(&IN_ADDR(listener->addr),PIN_ADDR(addr)); */
-
   copy_s_addr(IN_ADDR(listener->addr),PIN_ADDR(addr));
 
   listener->port        = port;
@@ -157,22 +154,14 @@ static void listener_dns_callback(void *ptr, adns_answer *reply)
 
 static int inetport(struct Listener* listener)
 {
-#ifdef IPV6
-  struct sockaddr_in6 lsin6;
-#else
-  struct sockaddr_in lsin;
-#endif
+  struct irc_sockaddr lsin;
   int                fd;
   int                opt = 1;
 
   /*
    * At first, open a new socket
    */
-#ifdef IPV6
-  fd = comm_open(AF_INET6, SOCK_STREAM, 0, "IPv6 Listener socket");
-#else
-  fd = comm_open(AF_INET, SOCK_STREAM, 0, "Listener socket");
-#endif
+  fd = comm_open(DEF_FAM, SOCK_STREAM, 0, "Listener socket");
 
   if (-1 == fd) {
     report_error("opening listener socket %s:%s", 
@@ -200,29 +189,13 @@ static int inetport(struct Listener* listener)
    * Bind a port to listen for new connections if port is non-null,
    * else assume it is already open and try get something from it.
    */
-#ifdef IPV6
-  memset(&lsin6, 0, sizeof(lsin6));
-  lsin6.sin6_family = AF_INET6;
-  memcpy(&lsin6.sin6_addr.s6_addr, &in6addr_any, sizeof(in6addr_any));
-  lsin6.sin6_port = htons(listener->port);
-#else
-  memset(&lsin, 0, sizeof(lsin));
-  lsin.sin_family = AF_INET;
-
-  memcpy(&lsin.sin_addr, &listener->addr, sizeof(struct irc_inaddr));
-
-/* jdc -- this breaks shit when addr == irc_inaddr */
-/* lsin.sin_addr   = listener->addr; */
-
-  lsin.sin_port   = htons(listener->port);
-#endif
+  memset(&lsin, 0, sizeof(struct irc_sockaddr));
+  S_FAM(lsin) = DEF_FAM;
+  copy_s_addr(&S_ADDR(lsin), &IN_ADDR(listener->addr));
+  S_PORT(lsin) = htons(listener->port);
 
 
-#ifdef IPV6
-  if (bind(fd, (struct sockaddr*) &lsin6, sizeof(lsin6))) {
-#else
-  if (bind(fd, (struct sockaddr*) &lsin, sizeof(lsin))) {
-#endif
+  if (bind(fd, (struct sockaddr*) &SOCKADDR(lsin), sizeof(struct irc_sockaddr))) {
     report_error("binding listener socket %s:%s", 
                  get_listener_name(listener), errno);
     fd_close(fd);
