@@ -116,7 +116,7 @@ int ms_version(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
  */
 char* confopts(void)
 {
-  char result[4];
+  static char result[4];
 
   result[0] = '\0';
 
