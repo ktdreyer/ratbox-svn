@@ -1,3 +1,10 @@
+*** 20001205_5 by db
+- cleaned up class.c adding more comment blocks
+- cleaned up s_conf.c to actually use nice defines instead of cryptic #'s
+- fixed typo in linebuf.c
+
+
+
 *** 20001205_4 by toot
 removed zlib from configure, and updated version number
 
