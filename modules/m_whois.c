@@ -203,7 +203,7 @@ int global_whois(struct Client *sptr, char *nick, int wilds)
  */
 int single_whois(struct Client *sptr,struct Client *acptr,int wilds)
 {
-  dlink_node *lp;
+  dlink_node *ptr;
   struct Channel *chptr;
   char *name;
   int invis;
@@ -226,15 +226,13 @@ int single_whois(struct Client *sptr,struct Client *acptr,int wilds)
       return 0;
     }
 
-  /* XXX */
-#if 0
   invis = IsInvisible(acptr);
-  member = (acptr->user->channel) ? 1 : 0;
+  member = (acptr->user->channel.head) ? 1 : 0;
   showperson = (wilds && !invis && !member) || !wilds;
 
-  for (lp = acptr->user->channel->next; lp; lp = lp->next)
+  for (ptr = acptr->user->channel.head; ptr; ptr = ptr->next)
     {
-      chptr = lp->data;
+      chptr = ptr->data;
       member = IsMember(sptr, chptr);
       if (invis && !member)
 	continue;
@@ -249,7 +247,6 @@ int single_whois(struct Client *sptr,struct Client *acptr,int wilds)
 	  break;
 	}
     }
-#endif
 
   if(showperson)
     whois_person(sptr,acptr);
