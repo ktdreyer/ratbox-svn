@@ -1,3 +1,8 @@
+*** 20010204_14 by androsyn
+Added hostname length checking. Report error if hostname is longer than
+HOSTLEN
+
+
 *** 20010204_13 by db
 - changed code to use a patricia trie for the IP I lines
 
