@@ -1,3 +1,11 @@
+*** 20001127_4 by adrian
+
+
+We should only allow a buffer to be obtained via linebuf_get() if it
+is terminated!
+
+
+
 *** 20001127_3 by adrian
 
 
