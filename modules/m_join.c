@@ -269,6 +269,7 @@ m_join(struct Client *client_p, struct Client *source_p, int parc, const char *p
 			free_channel_list(&chptr->banlist);
 			free_channel_list(&chptr->exceptlist);
 			free_channel_list(&chptr->invexlist);
+			chptr->num_mask = 0;
 		}
 		else
 		{

@@ -105,7 +105,9 @@ send_usage(struct Client *source_p)
 #endif
 
 #ifdef VMS
-	sendto_one(source_p, ":%s NOTICE %s :getrusage not supported on this system");
+	sendto_one(source_p, 
+		   ":%s NOTICE %s :getrusage not supported on this system",
+		   me.name, source_p->name);
 	return;
 #else
 	if(getrusage(RUSAGE_SELF, &rus) == -1)
