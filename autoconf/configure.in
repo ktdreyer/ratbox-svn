@@ -710,6 +710,7 @@ AC_OUTPUT(                      \
  modules/Makefile               \
  tools/Makefile                 \
  doc/Makefile                   \
+ help/Makefile                  \
 )
 
 echo "Building dependencies..."

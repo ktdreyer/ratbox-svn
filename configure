@@ -4123,6 +4123,7 @@ trap 'rm -fr `echo "\
  modules/Makefile               \
  tools/Makefile                 \
  doc/Makefile                   \
+ help/Makefile                  \
  include/setup.h servlink/setup.h" | sed "s/:[^ ]*//g"` conftest*; exit 1' 1 2 15
 EOF
 cat >> $CONFIG_STATUS <<EOF
@@ -4240,6 +4241,7 @@ CONFIG_FILES=\${CONFIG_FILES-"\
  modules/Makefile               \
  tools/Makefile                 \
  doc/Makefile                   \
+ help/Makefile                  \
 "}
 EOF
 cat >> $CONFIG_STATUS <<\EOF
