@@ -597,6 +597,9 @@ sendto_common_channels_local(struct Client *user, const char *pattern, ...)
 	  sendto_list_local(&chptr->voiced, sendbuf, len);
 	  sendto_list_local(&chptr->peons, sendbuf, len);
 	}
+
+      if (MyConnect(user) && (user->serial != current_serial))
+	send_message(user, sendbuf, len);
     }
 } /* sendto_common_channels() */
 
@@ -651,6 +654,7 @@ sendto_channel_local(int type,
       sendto_list_local(&chptr->halfops, sendbuf, len);
       break;
     }
+
 
 } /* sendto_channel_local() */
 
