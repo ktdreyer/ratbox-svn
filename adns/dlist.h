@@ -28,7 +28,7 @@
 #ifndef ADNS_DLIST_H_INCLUDED
 #define ADNS_DLIST_H_INCLUDED
 
-#define LIST_INIT(flist) ((flist).head= (flist).tail= 0)
+#define ADNS_LIST_INIT(flist) ((flist).head= (flist).tail= 0)
 #define LINK_INIT(flink) ((flink).next= (flink).back= 0)
 
 #define LIST_UNLINK_PART(flist,node,part) \
