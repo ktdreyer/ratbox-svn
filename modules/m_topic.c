@@ -42,7 +42,7 @@
 
 struct Message topic_msgtab = {
   MSG_TOPIC, 0, 1, 0, MFLG_SLOW, 0,
-  {m_unregistered, m_topic, m_topic, m_topic}
+  {m_unregistered, m_topic, ms_topic, m_topic}
 };
 
 void
@@ -60,10 +60,11 @@ _moddeinit(void)
 char *_version = "20001122";
 
 /*
-** m_topic
-**      parv[0] = sender prefix
-**      parv[1] = topic text
-*/
+ * m_topic
+ *      parv[0] = sender prefix
+ *      parv[1] = channel name
+ *	parv[2] = new topic, if setting topic
+ */
 int     m_topic(struct Client *cptr,
                 struct Client *sptr,
                 int parc,
@@ -71,21 +72,18 @@ int     m_topic(struct Client *cptr,
 {
   struct Channel *chptr = NullChn;
   struct Channel *vchan;
-  char  *topic = NULL;
-  char  *name;
   char  *p = NULL;
   
   if ((p = strchr(parv[1],',')))
     *p = '\0';
-  name = parv[1];
 
-  if (name && IsChannelName(name))
+  if (parv[1] && IsChannelName(parv[1]))
     {
-      chptr = hash_find_channel(name, NullChn);
+      chptr = hash_find_channel(parv[1], NullChn);
       if (!chptr)
         {
           sendto_one(sptr, form_str(ERR_NOSUCHCHANNEL), me.name, parv[0],
-              name);
+              parv[1]);
           return 0;
         }
 
@@ -98,12 +96,11 @@ int     m_topic(struct Client *cptr,
 
       if (parc > 2)
 	{ /* setting topic */
-	  topic = parv[2];
 
 	  if (!IsMember(sptr, chptr))
 	    {
 	      sendto_one(sptr, form_str(ERR_NOTONCHANNEL), me.name, parv[0],
-			 name);
+			 parv[1]);
 	      return 0;
 	    }
 	  if ((chptr->mode.mode & MODE_TOPICLIMIT) == 0 ||
@@ -113,7 +110,7 @@ int     m_topic(struct Client *cptr,
 	      /*
 	       * chptr zeroed
 	       */
-	      strncpy_irc(chptr->topic, topic, TOPICLEN);
+	      strncpy_irc(chptr->topic, parv[2], TOPICLEN);
 	      
               MyFree(chptr->topic_info);
 	      
@@ -127,7 +124,7 @@ int     m_topic(struct Client *cptr,
 	      chptr->topic_time = CurrentTime;
 	      
 	      sendto_channel_remote(chptr, cptr,":%s TOPIC %s :%s",
-				 parv[0], name,
+				 parv[0], parv[1],
 				 chptr->topic);
 	      if(chptr->mode.mode & MODE_HIDEOPS)
 		{
@@ -136,9 +133,14 @@ int     m_topic(struct Client *cptr,
 				       sptr->name,
 				       sptr->username,
 				       sptr->host,
-				       name,
+				       parv[1],
 				       chptr->topic);
-	  /* XXX could send something to NON_CHANOPS suppressing prefix */
+
+		  sendto_channel_local(NON_CHANOPS,
+				       chptr, ":%s TOPIC %s :%s",
+				       me.name,
+				       parv[1],
+				       chptr->topic);
 		}
 	      else
 		{
@@ -147,33 +149,33 @@ int     m_topic(struct Client *cptr,
 				       sptr->name,
 				       sptr->username,
 				       sptr->host,
-				       name, chptr->topic);
+				       parv[1], chptr->topic);
 		}
 	    }
 	  else
             sendto_one(sptr, form_str(ERR_CHANOPRIVSNEEDED),
-                       me.name, parv[0], name);
+                       me.name, parv[0], parv[1]);
 	}
       else  /* only asking  for topic  */
 	{
 	  if (!IsMember(sptr, chptr) && SecretChannel(chptr))
 	    {
 	      sendto_one(sptr, form_str(ERR_NOTONCHANNEL), me.name, parv[0],
-			 name);
+			 parv[1]);
 	      return 0;
 	    }
           if (chptr->topic[0] == '\0')
 	    sendto_one(sptr, form_str(RPL_NOTOPIC),
-		       me.name, parv[0], name);
+		       me.name, parv[0], parv[1]);
           else
 	    {
               sendto_one(sptr, form_str(RPL_TOPIC),
                          me.name, parv[0],
-                         name, chptr->topic);
+                         parv[1], chptr->topic);
               if (!chptr->mode.mode & MODE_HIDEOPS)
                 {
                   sendto_one(sptr, form_str(RPL_TOPICWHOTIME),
-                             me.name, parv[0], name,
+                             me.name, parv[0], parv[1],
                              chptr->topic_info,
                              chptr->topic_time);
                 }
@@ -182,7 +184,7 @@ int     m_topic(struct Client *cptr,
 		  if(is_any_op(chptr,sptr))
 		    {
 		      sendto_one(sptr, form_str(RPL_TOPICWHOTIME),
-				 me.name, parv[0], name,
+				 me.name, parv[0], parv[1],
 				 chptr->topic_info,
 				 chptr->topic_time);
 		    }
@@ -193,8 +195,75 @@ int     m_topic(struct Client *cptr,
   else
     {
       sendto_one(sptr, form_str(ERR_NOSUCHCHANNEL),
-                 me.name, parv[0], name);
+                 me.name, parv[0], parv[1]);
     }
   
+  return 0;
+}
+
+/*
+ * ms_topic
+ *      parv[0] = sender prefix
+ *      parv[1] = channel name
+ *	parv[2] = topic_info
+ *	parv[3] = topic_info time
+ *	parv[4] = new channel topic
+ *
+ * Let servers always set a topic
+ */
+int     ms_topic(struct Client *cptr,
+                struct Client *sptr,
+                int parc,
+                char *parv[])
+{
+  struct Channel *chptr = NullChn;
+  
+  if( parc < 5 )
+    return 0;
+
+  if (parv[1] && IsChannelName(parv[1]))
+    {
+      chptr = hash_find_channel(parv[1], NullChn);
+      if (!chptr)
+        {
+          return 0;
+        }
+
+      strncpy_irc(chptr->topic, parv[4], TOPICLEN);
+	      
+      MyFree(chptr->topic_info);
+	      
+      DupString(chptr->topic_info,parv[2]);
+
+      chptr->topic_time = atoi(parv[3]);
+
+      if(chptr->mode.mode & MODE_HIDEOPS)
+	{
+	  sendto_channel_local(ONLY_CHANOPS,
+			       chptr, ":%s!%s@%s TOPIC %s :%s",
+			       sptr->name,
+			       sptr->username,
+			       sptr->host,
+			       parv[1],
+			       chptr->topic);
+
+	  sendto_channel_local(NON_CHANOPS,
+			       chptr, ":%s TOPIC %s :%s",
+			       me.name,
+			       parv[1],
+			       chptr->topic);
+
+	}
+      else
+	{
+	  sendto_channel_local(ALL_MEMBERS,
+			       chptr, ":%s!%s@%s TOPIC %s :%s",
+			       sptr->name,
+			       sptr->username,
+			       sptr->host,
+			       parv[1], chptr->topic);
+	}
+    }
+
   return 0;
 }

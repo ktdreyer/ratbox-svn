@@ -96,9 +96,6 @@ int     ms_lljoin(struct Client *cptr,
       return 0;
     }
 
-  if( parc < 3 )
-    return 0;
-
   chname = parv[1];
   if(chname == NULL)
     return 0;

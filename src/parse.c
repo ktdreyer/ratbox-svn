@@ -70,56 +70,56 @@ static char buffer[1024];
 static void
 string_to_array(char *string, int mpara, int paramcount, char *end, int *parc, char *parv[MAXPARA])
 {
-	char *ap;
+  char *ap;
 	
-	/*
-	** Must the following loop really be so devious? On
-	** surface it splits the message to parameters from
-	** blank spaces. But, if paramcount has been reached,
-	** the rest of the message goes into this last parameter
-	** (about same effect as ":" has...) --msa
-	**
-	** changed how this works - now paramcount is simply the
-	** required number of arguments for a command.  imo the
-	** previous behavior isn't needed --is
-	** ok, now we do support it, for ISON brokenness among
-	** other things. --is
-	*/
+  /*
+  ** Must the following loop really be so devious? On
+  ** surface it splits the message to parameters from
+  ** blank spaces. But, if paramcount has been reached,
+  ** the rest of the message goes into this last parameter
+  ** (about same effect as ":" has...) --msa
+  **
+  ** changed how this works - now paramcount is simply the
+  ** required number of arguments for a command.  imo the
+  ** previous behavior isn't needed --is
+  ** ok, now we do support it, for ISON brokenness among
+  ** other things. --is
+  */
 	
-	/* Note initially true: s==NULL || *(s-1) == '\0' !! */
+  /* Note initially true: s==NULL || *(s-1) == '\0' !! */
 
-	/* redone by is, aug 2000 */
-	if (paramcount > MAXPARA)
-		paramcount = MAXPARA;
+  /* redone by is, aug 2000 */
+  if (paramcount > MAXPARA)
+    paramcount = MAXPARA;
 	
-	while((ap = strsep(&string, " ")) != NULL) 
-		if(*ap != '\0') 
-		{
-			parv[(*parc)] = ap;
-			
-			if (ap[0] == ':' || (mpara && (*parc >= mpara))) {
-				char *tendp = ap;
-				
-				while (*tendp++)
-					;
-				
-				if ( tendp < end ) /* more tokens to follow */
-					ap [ strlen (ap) ] = ' '; 
-				
-				if (ap[0] == ':')
-					ap++;
-				
-				parv[(*parc)++] = ap;
-				break;
-			}
-			
-			if(*parc < MAXPARA)
-				++(*parc);
-			else
-				break;
-		}
+  while((ap = strsep(&string, " ")) != NULL) 
+    if(*ap != '\0') 
+      {
+	parv[(*parc)] = ap;
 	
-	parv[(*parc)] = NULL;
+	if (ap[0] == ':' || (mpara && (*parc >= mpara))) {
+	  char *tendp = ap;
+				
+	  while (*tendp++)
+	    ;
+	  
+	  if ( tendp < end ) /* more tokens to follow */
+	    ap [ strlen (ap) ] = ' '; 
+	  
+	  if (ap[0] == ':')
+	    ap++;
+				
+	  parv[(*parc)++] = ap;
+	  break;
+	}
+			
+	if(*parc < MAXPARA)
+	  ++(*parc);
+	else
+	  break;
+      }
+	
+  parv[(*parc)] = NULL;
 }
 
 /*
@@ -162,11 +162,11 @@ int parse(struct Client *cptr, char *buffer, char *bufend)
       sender = ch;
 
       if( (s = strchr(ch, ' ')))
-	  {
-		  *s = '\0';
-		  s++;
-		  ch = s;
-	  }
+	{
+	  *s = '\0';
+	  s++;
+	  ch = s;
+	}
 		  
       i = 0;
 
@@ -298,34 +298,35 @@ int parse(struct Client *cptr, char *buffer, char *bufend)
 static int
 handle_command(struct Message *mptr, struct Client *cptr, struct Client *from, int i, char *para[MAXPARA])
 {
-	MessageHandler handler = 0;
+  MessageHandler handler = 0;
 	
-	mptr->count++;
+  mptr->count++;
 	
-	/* New patch to avoid server flooding from unregistered connects
-	   - Pie-Man 07/27/2000 */
+  /* New patch to avoid server flooding from unregistered connects
+     - Pie-Man 07/27/2000 */
 	
-	if (!IsRegistered(cptr))
-	{
-		/* if its from a possible server connection
-		 * ignore it.. more than likely its a header thats sneaked through
-		 */
+  if (!IsRegistered(cptr))
+    {
+      /* if its from a possible server connection
+       * ignore it.. more than likely its a header thats sneaked through
+       */
 		
-		if((IsHandshake(cptr) || IsConnecting(cptr) || IsServer(cptr))
-		   && !(mptr->flags & MFLG_UNREG))
-			return -1;
-	}
+      if((IsHandshake(cptr) || IsConnecting(cptr) || IsServer(cptr))
+	 && !(mptr->flags & MFLG_UNREG))
+	return -1;
+    }
 	
-	handler = mptr->handlers[cptr->handler];
+  handler = mptr->handlers[cptr->handler];
 	
 /* check right amount of params is passed... --is */
 	
-	if (i - 1 < mptr->parameters) {
-		sendto_one(cptr, form_str(ERR_NEEDMOREPARAMS),
-				   me.name, para[0], mptr->cmd);
-		return 0;
-	}
-	return (*handler)(cptr, from, i, para);
+  if (i < mptr->parameters)
+    {
+      sendto_one(cptr, form_str(ERR_NEEDMOREPARAMS),
+		 me.name, para[0], mptr->cmd);
+      return 0;
+    }
+  return (*handler)(cptr, from, i, para);
 }
 
 

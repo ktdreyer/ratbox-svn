@@ -353,7 +353,7 @@ mo_modload (struct Client *cptr, struct Client *sptr, int parc, char **parv)
       return 0;
     }
 
-  m_bn = basename (parv[1]);
+  m_bn = irc_basename (parv[1]);
 
   if (findmodule_byname (m_bn) != -1)
     {
@@ -380,7 +380,7 @@ mo_modunload (struct Client *cptr, struct Client *sptr, int parc, char **parv)
       return 0;
     }
 
-  m_bn = basename (parv[1]);
+  m_bn = irc_basename (parv[1]);
 
   if (findmodule_byname (m_bn) == -1)
     {
