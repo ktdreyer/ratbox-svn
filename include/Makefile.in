@@ -1,0 +1,27 @@
+# makefile for include/
+
+INSTALL=	@INSTALL@
+INSTALL_DATA=	@INSTALL_DATA@
+INSTALL_BIN=	@INSTALL_BIN@
+RM=		@RM@
+
+prefix=		@prefix@
+exec_prefix=	@exec_prefix@
+bindir=		@bindir@
+sysconfdir=	@sysconfdir@
+
+all:
+build:
+clean:
+depend:
+
+install:
+	install -d $(prefix)/include/ircd-hybrid-7
+	@echo installing header files...
+	@for header in *.h; do \
+	echo 	$$header; \
+		install -c $$header $(prefix)/include/ircd-hybrid-7; \
+	done
+
+distclean:
+	${RM} -f Makefile
