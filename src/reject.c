@@ -125,7 +125,12 @@ add_reject(struct Client *client_p)
 	}
 	else
 	{
-		pnode = make_and_lookup_ip(reject_tree, &client_p->localClient->ip, GET_SS_LEN(client_p->localClient->ip));
+		int bitlen = 32;
+#ifdef IPV6
+		if(client_p->localClient->ip.ss_family == AF_INET6)
+			bitlen = 128;
+#endif
+		pnode = make_and_lookup_ip(reject_tree, &client_p->localClient->ip, bitlen);
 		pnode->data = rdata = MyMalloc(sizeof(struct reject_data));
 		dlinkAddTail(pnode, &rdata->rnode, &reject_list);
 		rdata->time = CurrentTime;
