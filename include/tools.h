@@ -122,6 +122,8 @@ void mem_frob(void *data, int len);
 /* forte (and maybe others) dont like these being declared twice,
  * so we dont declare the inlines unless GNUC.
  */
+/* darwin doesnt like these.. */
+#ifndef __APPLE__
 #ifdef __GNUC__
 
 /* 
@@ -321,5 +323,6 @@ dlinkMoveList(dlink_list *from, dlink_list *to)
   from->length = 0;
 }
 #endif /* __GNUC__ */
+#endif /* __APPLE__ */
 
 #endif /* __TOOLS_H__ */

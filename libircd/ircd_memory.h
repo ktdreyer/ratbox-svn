@@ -53,6 +53,9 @@ extern void _DupString(char **x, const char *y);
 /* forte (and maybe others) dont like double declarations, 
  * so we dont declare the inlines unless GNUC
  */
+/* darwin doesnt like these.. */
+#ifndef __APPLE__
+
 #ifdef __GNUC__
 extern inline void * MyMalloc(size_t size)
 {
@@ -85,6 +88,7 @@ extern inline void _DupString(char **x, const char *y)
   strcpy((*x), y); 
 }
 #endif /* __GNUC__ */
+#endif /* __APPLE__ */
 
 #define DupString(x,y) _DupString(&x, y)
 

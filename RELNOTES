@@ -9,6 +9,7 @@
   flooding off
 - fixed a possible whois core
 - fixed &channels to stop propagating
+- ircd-ratbox will now compile again on darwin
 
 -- ircd-ratbox-1.0-rc6
 - changed error message on failed /challenge attempt to say failed 
