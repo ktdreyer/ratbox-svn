@@ -1,3 +1,16 @@
+*** 20001224_7 by db
+- tidied up isomer's parse.c mods... Then noted that someone was
+  sending a numeric to "me" which led to...
+- fixing who sends the MODE message in m_mode, it should be sptr->name
+  not me.name
+- Then noted a conflict in LOGPATH, which I resolved by changing 
+  LOGPATH in ircd_parser.y ircd_lexer.l to T_LOGPATH
+- removed with extreme prejudice all UID/GID CHROOT crap. my goodness
+  efnet servers are dedicated now, and if you really insist, set up a jail
+  or something.
+
+
+
 *** 20001224_6 by wcampbel
 Revised a couple documents
 
