@@ -1,3 +1,15 @@
+leeh        2004/03/18 18:18:41 EST	(20040318_1)
+
+  Modified files:
+    contrib              example_module.c 
+  Log:
+  - rewrite of example_module.c with the new module api, courtesy of koitsu
+  
+  Revision  Changes    Path
+  1.9       +151 -97   ircd-ratbox/contrib/example_module.c
+
+
+
 leeh        2004/03/18 14:02:13 EST	(20040318_0)
 
   Modified files:
