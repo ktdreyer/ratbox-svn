@@ -53,6 +53,67 @@ hash_text(const char* start)
   return(h & (TH_MAX - 1));
 }
 
+/* int hash_ipmask(const char *imask)
+ * Input: The mask.
+ * Output: The hash of the mask, or -1 if it isn't a valid ipmask.
+ * Side-effects: -
+ * XXX - this isn't finished yet...
+ */
+static int
+hash_ipmask(const char *imask, int *bits, struct irc_inaddr *iia)
+{
+ const char *p;
+ unsigned int hash = 0, ipmask, ip_parts[16], i;
+ if ((p = strchr(imask, '@')))
+   p++;
+ else
+   p = imask;
+ for (i=0; i<16; i++)
+   {
+    if (!IsDigit(*p))
+      return -1;
+    ip_parts[i] = strtoul(p, (char **)&p, 10);
+    if (ip_parts[i] > 0xFF)
+      return -1;
+    if (!IsDigit(*p))
+      switch (*p)
+        {
+         case ':':
+         case '.':
+          p++;
+          continue;
+         case 0:
+         case '*':
+          ipmask = (i+1) * 8;
+          break;
+         case '/':
+          ipmask = strtoul(++p, (char **)&p, 10);
+          if (ipmask > (i+1)*8)
+            ipmask = (i+1)*8;
+          break;
+         default:
+          return -1;
+        }
+   }
+#ifdef IPV6
+ if (ipmask > 128)
+   return -1;
+#endif
+ if (i > 4 || ipmask > 32)
+#ifndef IPV6
+   return -1;
+#else
+   for (i=ipmask/16; i; i--)
+     hash ^= ip_parts[i] | ip_parts[i+1]<<8;
+ else
+#endif
+   for (i=ipmask/8; i; i--)
+     hash ^= (i&1) ? ip_parts[i] : ip_parts[i]<<8;
+ *bits = ipmask;
+ /* iia->sin. */
+ return hash & (TH_MAX-1);
+}
+
 /* int get_uhosthash(const char *uhost)
  * Input: A host-name, optionally with wildcards.
  * Output: The hash of the string from the start of the first . or @
@@ -95,6 +156,7 @@ get_uhosthash(const char *uhost)
   return hash_text(lastdot ? lastdot : uhost);
 }
 
+
 /* void add_hostmask(const char *mask, int type, void *data)
  * Input: The mask, the type, a data value applicable to the type.
  * Output: -
@@ -105,22 +167,28 @@ void
 add_hostmask(const char *mask, int type, void *data)
 {
   struct HostMaskEntry *hme;
-  int hash = get_uhosthash(mask);
+  int subtype = HOST_IPCONF;
+  int hash = -1; /*hash_ipmask(mask);*/
+  if (hash < 0)
+    {
+     get_uhosthash(mask);
+     subtype = HOST_NAMECONF;
+    }
   hme = MyMalloc(sizeof(*hme));
 
   hme->data = data;
   /* Just an ugly kludge so first entry in the conf file matches. 
-   * Also so K-lines overrule I lines...
+   * K-lines & D-lines have the special precedence value 0xFFFFFFFF
+   * which means that they will always overrule non-Elining I-lines.
    */
-
   if (type == HOST_CONFITEM &&
       (((struct ConfItem*)data)->status & CONF_KILL))
     hme->precedence = 0xFFFFFFFF;
   else
     hme->precedence = precedence--;
-
   DupString(hme->hostmask, mask);
   hme->type = type;
+  hme->subtype = subtype;
   hme->next = first_mask;
   first_mask = hme;
 
@@ -160,81 +228,58 @@ strcchr(const char *a, const char *b)
 }
 
 /* struct HostMaskEntry *match_hostmask(const char *uhost, int type)
- *
- * Inputs:	a uhost to match
- *		and a type.
- * Output: 	a HostMaskEntry if one found, or NULL.
+ * Input: a uhost to match, a type.
+ * Output: a HostMaskEntry if one found, or NULL.
  * Side-effects: -
  */
 struct HostMaskEntry*
 match_hostmask(const char *uhost, int type)
 {
-  struct HostMaskEntry *misc_hme = NULL;
   struct HostMaskEntry *hme = NULL;
   struct HostMaskEntry *hmk = NULL;
   struct HostMaskEntry *hmc = NULL;
   unsigned long prec = 0;
   unsigned int hash;
   const char *pos;
-
-  /* Look for a match amongst the misc. link list
-   * keep a pointer to the best match if found
-   */
+  /* First check those masks which cannot be hashed... */
   for (hme = first_miscmask; hme; hme = hme->nexthash)
     {
       if (hme->type == type && match(hme->hostmask, uhost) &&
-	  hme->precedence > prec)
-	{
-	  prec = hme->precedence;
-	  misc_hme = hme;
-	}
+          hme->precedence > prec)
+        {
+         if (hme->precedence != 0xFFFFFFFF)
+           prec = hme->precedence;
+         hmc = hme;
+         if ((hme->type == HOST_CONFITEM) &&
+             ((struct ConfItem*)hme->data)->status & CONF_KILL)
+           hmk = hme;
+         else
+           hmc = hme;
+        }
     }
-
-  /* Now try the hash tree... */
-
+  /* Now those in the hash by hostmask... */
   for (pos = uhost; pos; pos = strcchr(pos, "@!."))
     {
       hash = hash_text(pos);
       for (hme = hmhash[hash]; hme; hme=hme->nexthash)
-	if (hme->type == type && match(hme->hostmask, uhost) &&
-	    hme->precedence > prec)
-	  {
-	    if((hme->type == HOST_CONFITEM) &&
-	       ((struct ConfItem*)hme->data)->status & CONF_KILL)
-	      hmk = hme;	
-	    else
-	      hmc = hme;
-	    prec = hme->precedence;
-	  }
+        if (hme->type == type && match(hme->hostmask, uhost) &&
+            hme->precedence > prec)
+          {
+           if (hme->precedence != 0xFFFFFFFF)
+             prec = hme->precedence;
+           if ((hme->type == HOST_CONFITEM) &&
+              ((struct ConfItem*)hme->data)->status & CONF_KILL)
+             hmk = hme;	
+           else
+             hmc = hme;
+          }
     }
-
-  /* If the misc list returns an exemption to kline, return it */
-
-  if (misc_hme && IsConfElined((struct ConfItem *)misc_hme->data))
-    {
-      return(misc_hme);
-    }
-
-  /* if nothing found in the hash tree,
-   * return whatever was found in the misc list
-   */
-
-  if ( (hmk == NULL) && (hmc == NULL) )
-    {
-      return(misc_hme);
-    }
-
-  if (hmc && IsConfElined((struct ConfItem *)hmc->data))
-    {
-      return hmc;
-    }
-
-  if (hmk != NULL)
-    {
-      return hmk;
-    }
-
-  return hmc;
+  /* Now go by IP address... */
+  
+  if (!hmk)
+    return hmc;
+  return (hmc && hme->type==HOST_CONFITEM) &
+          IsConfElined(((struct ConfItem*)hmc->data)) ? hmc : hmk;
 }
 
 /* struct ConfItem *find_matching_conf(const char *host, const char *user,

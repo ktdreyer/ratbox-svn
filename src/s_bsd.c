@@ -454,9 +454,10 @@ void error_exit_client(struct Client* client_p, int error)
     ircsprintf(errmsg, "Read error: %d (%s)", 
                current_error, strerror(current_error));
   }
-
-  SetDead(client_p); /* mark the socket dead so it doesn't get any error msgs */
-  exit_client(client_p, client_p, &me, errmsg);
+  fd_close(client_p->fd);
+  client_p->fd = -1;
+  
+  detach_client(client_p, errmsg);
 }
 
 /*

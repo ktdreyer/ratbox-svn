@@ -95,6 +95,7 @@ static struct flag_item user_modes[] =
   {FLAGS_LOCOPS, 'l'},
   {FLAGS_NCHANGE, 'n'},
   {FLAGS_OPER, 'o'},
+  {FLAGS_PERSISTANT, 'p'},  
   {FLAGS_REJ, 'r'},
   {FLAGS_SERVNOTICE, 's'},
   {FLAGS_UNAUTH, 'u'},
@@ -157,7 +158,7 @@ int user_modes_from_c_to_bitmask[] =
   0,            /* m */
   FLAGS_NCHANGE, /* n */
   FLAGS_OPER,   /* o */
-  0,            /* p */
+  FLAGS_PERSISTANT,/* p */
   0,            /* q */
   FLAGS_REJ,    /* r */
   FLAGS_SERVNOTICE, /* s */
@@ -441,17 +442,19 @@ int register_local_user(struct Client *client_p, struct Client *source_p,
 
   /* end of valid user name check */
   
-  if( (status = check_X_line(client_p,source_p)) < 0 )
-    return(status);
+  if ((status = check_X_line(client_p,source_p)) < 0)
+    return status;
 
   if (source_p->user->id[0] == '\0') 
     {
-      do {
-	id = id_get();
-      } while (hash_find_id(id, NULL));
-      
+      for (id = id_get(); hash_find_id(id, NULL); id = id_get())
+        ;
       strcpy(source_p->user->id, id);
-      add_to_id_hash_table(source_p->user->id, source_p);
+      add_to_id_hash_table(id, source_p);
+      id = id_get();
+      strcpy(user->id_key, id);
+      sendto_one(source_p, ":%s NOTICE %s :Your ID = %s, KEY=%s",
+                 me.name, source_p->name, source_p->user->id, id);
     }
 
   inetntop(source_p->localClient->aftype, &IN_ADDR(source_p->localClient->ip), 
