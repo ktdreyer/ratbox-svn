@@ -1,3 +1,8 @@
+*** 20010605_3 by leeh
+- get_client_name(client_p, HIDE_IP) -> client_p->name
+  showing IPs to opers is bad :P
+
+
 *** 20010605_2 by kreator
 - fixed -L order in IRCDLIBS that was causing this on systems containing
   system libadns:
