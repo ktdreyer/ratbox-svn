@@ -1,3 +1,7 @@
+*** 20010109_5 by wcampbel
+We now show incomplete (unknown) connections in TRACE to opers
+
+
 *** 20010109_4 by wcampbel
 All of the variables are shown in INFO now (except for oper_only_umodes)
 
