@@ -1,3 +1,13 @@
+*** 20010911_3 by db
+- first pass at making events static and recurring instead of one-shot.
+  This saves a malloc each time an event is added and the need to 
+  re-add an event each time. The default is recurring for static events.
+
+- ripped expr out of ircd_parser.y Sorry Edward, but tired of byacc coring
+  all the time and its not really needed.
+
+
+
 *** 20010911_2 by jdc
 - Removed "hide_server" command; use serverhide {} instead.
 
