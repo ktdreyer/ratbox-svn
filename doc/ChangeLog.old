@@ -1,3 +1,10 @@
+*** 19990910_1 by wnder
+IAuth changes:
+ * fully functional and tested: K, I, Q lines (D and G to come)
+ * non-blocking connect to IAuth server
+ * _every_ change i made is under #define USE_IAUTH
+
+
 *** 19990909_26 by tomh
 ewps make sentinel char* instead of void*
 
