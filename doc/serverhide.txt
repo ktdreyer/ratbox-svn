@@ -11,7 +11,7 @@
    can be enabled or disabled at runtime.
 
    This document describes the Hybrid 7 implementation of the server hiding
-   ideas originated (and credited to) numerous people.
+   ideas originated by (and credited to) numerous people.
 
      * 
 
@@ -46,6 +46,8 @@
        | option. See below for more details.                                |
        +--------------------------------------------------------------------+
 
+        
+
      * 
 
        Hidden server option: This option will hide the server from a
@@ -57,7 +59,8 @@
        +--------------------------------------------------------------------+
        | Technically, this code is a hack. With this option enabled, the    |
        | server will prepend '(H) ' to the server info field when           |
-       | connecting to other servers.                                       |
+       | connecting to other servers. Other servers must understand that    |
+       | the (H) means hidden.                                              |
        +--------------------------------------------------------------------+
 
      * 
@@ -87,10 +90,16 @@
 
      * 
 
-       The disable_local_channels will not allow users to join local
+       The disable_local_channels option will not allow users to join local
        &channels. This option is a little extreme, taking away a lot of user
        privilege. It was created to handle the possible hole in server hide
        shown below.
+
+     * 
+
+       All server modes appear to originate from the server you are using.
+       This feature is not tunable; and opers also do not see the real server
+       setting the mode.
 
    Each item is briefly described in the serverhide {} block in ircd.conf.
 
@@ -110,9 +119,9 @@
    WHOIS to determine the server a user is on.
 
    If an abuser knows that a user is on a specific &channel, they could still
-   connect to each server until they find the server. I don't believe there
-   is a way we can avoid this unless local channels are completely disabled
-   with server hiding code enabled.
+   connect to each server until they find the server showing the user in the
+   local channel in a local WHOIS. The disable_local_channels option has been
+   created to handle this risk.
 
      ----------------------------------------------------------------------
 

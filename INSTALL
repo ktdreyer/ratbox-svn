@@ -31,6 +31,9 @@
        this version. Other good reads are doc/whats-new.txt, BUGS,
        doc/example.conf, and README.FIRST.
 
+       An example.conf for EFnet is in doc/ with the values "approved" on 12
+       December 2001.
+
    2. 
 
        Run the configure script. It will create include/setup.h and the
