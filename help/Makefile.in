@@ -34,7 +34,14 @@ index:
 	@for help in $(SYMLINKS); do \
 		echo $$help >> users/index.tmp; \
 	done
-	sed -e 's|^users/||' users/index.tmp | sort -u > users/index
+	echo 'Help topics available to users:' > users/index
+	echo '' >> users/index
+	cat users/index.tmp \
+		| sort -u \
+		| sed -e 's|^users/||' \
+		| tr a-z A-Z \
+		| column -c 65 -x \
+		>> users/index
 	rm -f users/index.tmp
 	rm -f opers/index.tmp
 	@for help in opers/*; do \
@@ -42,7 +49,14 @@ index:
 			echo $$help >> opers/index.tmp; \
 		fi \
 	done
-	sed -e 's|^opers/||' opers/index.tmp | sort -u > opers/index
+	echo 'Help topics available to opers:' > opers/index
+	echo '' >> opers/index
+	cat opers/index.tmp \
+		| sort -u \
+		| sed -e 's|^opers/||' \
+		| tr a-z A-Z \
+		| column -c 65 -x \
+		>> opers/index
 	rm -f opers/index.tmp
 
 install:
