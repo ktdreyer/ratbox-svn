@@ -13,6 +13,16 @@ with the --prefix option to configure, not in config.h.  /usr/local/ircd
 is the default if no prefix is specified.
 	./configure --prefix="/usr/local/ircd"
 
+NOTE:  There are some special optional parameters to the configure script
+       that some admins may wish to use.
+
+--enable-kqueue - Use the superior kqueue(2) system call as opposed to the
+                  default poll(2).  This is currently only available on
+                  FreeBSD 4.1 or higher.
+
+--enable-openssl - Enable the openssl dependent crypto functions.  This will
+                   allow CHALLENGE to work.
+
 2.  Look over the "include/config.h" file.  This allows you to change
 the remaining hard coded options of how the ircd will operate.  Most 
 admins will only have to change a few settings.  "HARD_FDLIMIT_" and
