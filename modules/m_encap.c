@@ -49,16 +49,20 @@
 
 static int ms_encap(struct Client *client_p, struct Client *source_p,
 		     int parc, const char *parv[]);
+static int ms_operspy(struct Client *client_p, struct Client *source_p,
+		      int parc, const char *parv[]);
 
 struct Message encap_msgtab = {
 	"ENCAP", 0, 0, 3, 0, MFLG_SLOW, 0,
 	{m_ignore, m_ignore, ms_encap, m_ignore}
 };
+struct Message operspy_msgtab = {
+	"OPERSPY", 0, 0, 2, 0, MFLG_ENCAP|MFLG_ENCAPONLY, 0,
+	{m_ignore, m_ignore, ms_operspy, m_ignore}
+};
 
-mapi_clist_av1 encap_clist[] = { &encap_msgtab, NULL };
+mapi_clist_av1 encap_clist[] = { &encap_msgtab, &operspy_msgtab, NULL };
 DECLARE_MODULE_AV1(encap, NULL, NULL, encap_clist, NULL, NULL, "$Revision$");
-
-const char *_version = "$Revision$";
 
 /* ms_encap()
  *
@@ -108,6 +112,50 @@ ms_encap(struct Client *client_p, struct Client *source_p, int parc, const char 
 	/* if it matches us, find a matching handler and call it */
 	if(match(parv[1], me.name))
 		handle_encap(client_p, source_p, parv[2], parc - 2, parv + 2);
+
+	return 0;
+}
+
+/* ms_operspy()
+ *
+ * parv[1] - operspy command
+ * parv[2] - optional params
+ */
+static int
+ms_operspy(struct Client *client_p, struct Client *source_p,
+	   int parc, const char *parv[])
+{
+	static char buffer[BUFSIZE];
+	char *ptr;
+	int cur_len = 0;
+	int len, i;
+
+	if(parc < 4)
+	{
+		log_operspy(source_p, parv[1],
+			    parc < 3 ? NULL : parv[2]);
+	}
+	/* buffer all remaining into one param */
+	else
+	{
+		ptr = buffer;
+		cur_len = 0;
+
+		for(i = 2; i < parc; i++)
+		{
+			len = strlen(parv[i]) + 1;
+
+			if((size_t)(cur_len + len) >= sizeof(buffer))
+				return 0;
+
+			snprintf(ptr, sizeof(buffer) - cur_len, "%s ",
+				 parv[i]);
+			ptr += len;
+			cur_len += len;
+		}
+
+		log_operspy(source_p, parv[1], buffer);
+	}
 
 	return 0;
 }

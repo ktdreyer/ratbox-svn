@@ -93,6 +93,7 @@ static struct flag_item user_modes[] = {
 	{UMODE_EXTERNAL,	'x'},
 	{UMODE_SPY,		'y'},
 	{UMODE_OPERWALL,	'z'},
+	{UMODE_OPERSPY,		'Z'},
 	{0, 0}
 };
 

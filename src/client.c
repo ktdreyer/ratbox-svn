@@ -1285,11 +1285,6 @@ exit_unknown_client(struct Client *client_p, struct Client *source_p, struct Cli
 	
 	close_connection(source_p);
 
-	if((source_p->flags & FLAGS_KILLED) == 0)
-	{
-		sendto_server(client_p, NULL, NOCAPS, NOCAPS, ":%s QUIT :%s",
-			      source_p->name, comment);
-	}
 	del_from_hostname_hash(source_p->host, source_p);
 	del_from_client_hash(source_p->name, source_p);
 	remove_client_from_list(source_p);
