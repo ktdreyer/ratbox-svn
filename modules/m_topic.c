@@ -99,6 +99,7 @@ static void m_topic(struct Client *client_p,
         if ( !ServerInfo.hub && uplink &&
            IsCapable(uplink, CAP_LL) )
         {
+#if 0
           /* cache the channel if it exists on uplink
            * If the channel as seen by the uplink, has vchans,
            * the uplink will have to SJOIN all of those.
@@ -106,6 +107,8 @@ static void m_topic(struct Client *client_p,
           sendto_one(uplink, ":%s CBURST %s",
                       me.name, parv[1]);
 
+	  /* Lets not for now -db */
+#endif
           sendto_one(uplink, ":%s TOPIC %s %s",
                      source_p->name, parv[1],
                      ((parc > 2) ? parv[2] : ""));

@@ -120,13 +120,17 @@ static void m_mode(struct Client *client_p, struct Client *source_p,
       if ( MyClient(source_p) && !ServerInfo.hub && uplink &&
 	   IsCapable(uplink, CAP_LL))
 	{
+#if 0
 	  /* cache the channel if it exists on uplink
 	   * If the channel as seen by the uplink, has vchans,
 	   * the uplink will have to SJOIN all of those.
 	   */
+	  /* Lets not for now -db */
+
 	  sendto_one(uplink, ":%s CBURST %s",
                      me.name, parv[1]);
 	  
+#endif
 	  sendto_one(uplink, ":%s MODE %s %s",
 		     source_p->name, parv[1], (parv[2] ? parv[2] : ""));
 	  return;
