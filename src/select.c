@@ -142,7 +142,7 @@ int read_message(time_t delay, unsigned char mask)        /* mika */
       FD_ZERO(read_set);
       FD_ZERO(write_set);
 
-		#ifdef USE_IAUTH
+#ifdef USE_IAUTH
       if (iAuth.socket != NOSOCK)
       {
       	if (IsIAuthConnect(iAuth))
@@ -150,7 +150,7 @@ int read_message(time_t delay, unsigned char mask)        /* mika */
       	else
         	FD_SET(iAuth.socket, read_set);
       }
-    #endif
+#endif
 
       for (auth = AuthPollList; auth; auth = auth->next) {
         assert(-1 < auth->fd);

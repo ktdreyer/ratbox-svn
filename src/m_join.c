@@ -1151,6 +1151,14 @@ int     mo_join(struct Client *cptr,
                      continue;
                    if (key && key[0] == '!')
                      {
+                       /* user joined with key "!".  force listing.
+                          (this prevents join-invited-chan voodoo) */
+                       if (!key[1])
+                         {
+                           show_vchans(cptr, sptr, chptr);
+                           return 0;
+                         }
+
                        /* found a matching vchan? let them join it */
                        if ((vchan_chptr = find_vchan(chptr, key)))
                          {
@@ -1176,11 +1184,21 @@ int     mo_join(struct Client *cptr,
                            chptr = chptr->next_vchan;
                            joining_vchan = 1;
                          }
-                       /* otherwise, they get a list of inhabited channels */
                        else
                         {
-                          show_vchans(cptr, sptr, chptr);
-                          return 0;
+                          /* voodoo to auto-join channel invited to */
+                          if ((vchan_chptr=vchan_invites(chptr, sptr)))
+                            {
+                              root_chptr = chptr;
+                              chptr = vchan_chptr;
+                              joining_vchan = 1;
+                            }
+                          /* otherwise, they get a list of channels */
+                          else
+                            {
+                              show_vchans(cptr, sptr, chptr);
+                              return 0;
+                            }
                         }
                      }   
                  }

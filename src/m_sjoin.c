@@ -67,8 +67,6 @@ int     ms_sjoin(struct Client *cptr,
   struct SLink  *l;
   int   args = 0, keep_our_modes = 1, keep_new_modes = 1;
   int   doesop = 0, what = 0, pargs = 0, fl, people = 0, isnew;
-  /* loop unrolled this is now redundant */
-  /*  int ip; */
   register      char *s, *s0;
   static        char numeric[16], sjbuf[BUFSIZE];
   char    modebuf[MODEBUFLEN];
@@ -193,15 +191,6 @@ int     ms_sjoin(struct Client *cptr,
 
   doesop = (parv[4+args][0] == '@' || parv[4+args][1] == '@');
 
-#if 0
-  for (l = chptr->members; l && l->value.cptr; l = l->next)
-    if (l->flags & MODE_CHANOP)
-      {
-        haveops++;
-        break;
-      }
-#endif
-
   oldmode = &chptr->mode;
 
   if (isnew)
@@ -239,19 +228,6 @@ int     ms_sjoin(struct Client *cptr,
       if (doesop && !chptr->opcount)
         {
           chptr->channelts = tstosend = newts;
-#if 0
-          /* Only warn of Hacked ops if the channel already
-           * existed on this side.
-           * This should drop the number of warnings down dramatically
-           */
-
-          if (MyConnect(sptr) && !isnew)
-            {
-              sendto_realops("Hacked ops from %s on opless channel: %s",
-                             sptr->name,
-                             chptr->chname);
-            }
-#endif
         }
       else
         tstosend = oldts;

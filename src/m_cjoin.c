@@ -214,7 +214,7 @@ int     m_cjoin(struct Client *cptr,
       return 0;
     }
 
-  ircsprintf( vchan_name, "#%s_%lu", name+1, CurrentTime );
+  ircsprintf( vchan_name, "##%s_%lu", name+1, CurrentTime );
   vchan_chptr = get_channel(sptr, vchan_name, CREATE);
 
   if( vchan_chptr == NULL )
