@@ -69,8 +69,6 @@
 #define INADDR_NONE ((unsigned int) 0xffffffff)
 #endif
 
-extern struct sockaddr_in vserv;               /* defined in s_conf.c */
-
 const char* const NONB_ERROR_MSG   = "set_non_blocking failed for %s:%s"; 
 const char* const OPT_ERROR_MSG    = "disable_sock_options failed for %s:%s";
 const char* const SETBUF_ERROR_MSG = "set_sock_buffers failed for server %s:%s";

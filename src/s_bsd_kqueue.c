@@ -71,8 +71,6 @@
 
 #define KE_LENGTH	16
 
-extern struct sockaddr_in vserv;               /* defined in s_conf.c */
-
 static void kq_update_events(int, short, PF *);
 static int kq;
 static struct timespec zero_timespec;

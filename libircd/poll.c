@@ -88,7 +88,6 @@
 #define INADDR_NONE ((unsigned int) 0xffffffff)
 #endif
 
-extern struct sockaddr_in vserv;               /* defined in s_conf.c */
 
 struct _pollfd_list {
     struct pollfd pollfds[MAXCONNECTIONS];

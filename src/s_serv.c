@@ -61,6 +61,8 @@
 #define INADDR_NONE ((unsigned int) 0xffffffff)
 #endif
 
+extern struct sockaddr_in vserv;               /* defined in s_conf.c */
+
 int MaxConnectionCount = 1;
 int MaxClientCount     = 1;
 
@@ -1385,8 +1387,17 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
     add_client_to_list(cptr);
 
     /* Now, initiate the connection */
-    comm_connect_tcp(cptr->fd, aconf->host, aconf->port, NULL, 0, 
-        serv_connect_callback, cptr);
+    if(specific_virtual_host)
+      {
+	comm_connect_tcp(cptr->fd, aconf->host, aconf->port,
+			 (struct sockaddr *)&vserv, sizeof(vserv), 
+			 serv_connect_callback, cptr);
+      }
+    else
+      {
+	comm_connect_tcp(cptr->fd, aconf->host, aconf->port, NULL, 0, 
+			 serv_connect_callback, cptr);
+      }
 
     return 1;
 }

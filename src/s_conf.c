@@ -243,6 +243,14 @@ static struct LinkReport {
   { 0, 0, '\0' }
 };
 
+/*
+ * report_configured_links
+ *
+ * inputs	- pointer to client to report to
+ *		- type of line to report
+ * output	- NONE
+ * side effects	-
+ */
 void report_configured_links(struct Client* sptr, int mask)
 {
   struct ConfItem*   tmp;
@@ -447,6 +455,7 @@ int check_client(struct Client *cptr, struct Client *sptr, char *username)
 
 /*
  * attach_Iline
+ *
  * inputs	-
  * output	-
  * side effect	- find the first (best) I line to attach.
@@ -3019,7 +3028,6 @@ struct ConfItem *conf_add_o_line(struct ConfItem *aconf)
  * output       - NONE
  * side effects - Add the M line
  */
-
 void conf_add_me(struct ConfItem *aconf)
 {
   /*

@@ -25,6 +25,7 @@
  *
  *  $Id$
  */
+#include "tools.h"
 #include "s_bsd.h"
 #include "class.h"
 #include "client.h"
@@ -74,11 +75,6 @@
 #define INADDR_NONE ((unsigned int) 0xffffffff)
 #endif
 
-extern struct sockaddr_in vserv;               /* defined in s_conf.c */
-
-struct Client* local[MAXCONNECTIONS];
-
-
 /*
  * Stuff for select()
  */
@@ -89,10 +85,12 @@ static fd_set writeSet;
 fd_set*  read_set  = &readSet;
 fd_set*  write_set = &writeSet;
 
+static void add_fds_from_list(dlink_list *list, unsigned char mask);
+static void check_fds_from_list(dlink_list *list, unsigned char mask,
+				int nfds);
 
 void init_netio(void)
 {
-
   if( MAXCONNECTIONS > FD_SETSIZE )
     {
       fprintf(stderr, "FD_SETSIZE = %d MAXCONNECTIONS = %d\n",
@@ -166,29 +164,11 @@ int read_message(time_t delay, unsigned char mask)        /* mika */
         assert(-1 < listener->fd);
         FD_SET(listener->fd, read_set);
       }
-      for (i = 0; i <= highest_fd; i++)
-        {
-          if (!(fd_table[i].mask & mask) || !(cptr = local[i]))
-            continue;
 
-          /*
-           * anything that IsMe should NEVER be in the local client array
-           */
-          assert(!IsMe(cptr));
+      add_fds_from_list(&lclient_list, mask);
+      add_fds_from_list(&serv_list, mask);
+      add_fds_from_list(&unknown_list, mask);
 
-          if (DBufLength(&cptr->recvQ) && delay2 > 2)
-            delay2 = 1;
-          if (DBufLength(&cptr->recvQ) < 4088)        
-            {
-               FD_SET(i, read_set);
-            }
-
-          if (DBufLength(&cptr->sendQ) || IsConnecting(cptr))
-            {
-               FD_SET(i, write_set);
-            }
-        }
-      
       if (ResolverFileDescriptor >= 0)
         {
           FD_SET(ResolverFileDescriptor, read_set);
@@ -282,57 +262,131 @@ int read_message(time_t delay, unsigned char mask)        /* mika */
   }
 #endif
 
-  for (i = 0; i <= highest_fd; i++) {
-    if (!(fd_table[i].mask & mask) || !(cptr = local[i]))
-      continue;
+  check_fds_from_list(&lclient_list, mask, nfds);
+  check_fds_from_list(&serv_list, mask, nfds);
+  check_fds_from_list(&unknown_list, mask, nfds);
 
-    /*
-     * See if we can write...
-     */
-    if (FD_ISSET(i, write_set)) {
-      --nfds;
-      if (IsConnecting(cptr)) {
-        if (!completed_connection(cptr)) {
-          exit_client(cptr, cptr, &me, "Lost C/N Line");
-          continue;
-        }
-        send_queued(cptr);
-          if (!IsDead(cptr))
-            continue;
-      }
-      else {
-        /*
-         * ...room for writing, empty some queue then...
-         */
-        send_queued(cptr);
-        if (!IsDead(cptr))
-          continue;
-      }
-      exit_client(cptr, cptr, &me, 
-                 (cptr->flags & FLAGS_SENDQEX) ? 
-                 "SendQ Exceeded" : strerror(get_sockerr(cptr->fd)));
-      continue;
-    }
-    length = 1;     /* for fall through case */
-
-    if (FD_ISSET(i, read_set)) {
-      --nfds;
-      length = read_packet(cptr);
-    }
-    else if (PARSE_AS_CLIENT(cptr) && !NoNewLine(cptr))
-      length = parse_client_queued(cptr);
-
-    if (length > 0 || length == CLIENT_EXITED)
-      continue;
-    if (IsDead(cptr)) {
-       exit_client(cptr, cptr, &me,
-                    strerror(get_sockerr(cptr->fd)));
-       continue;
-    }
-    error_exit_client(cptr, length);
-    errno = 0;
-  }
   return 0;
 }
-  
+
+/*
+ * add_fds_from_list
+ *
+ * inputs	- pointer to a dlink_list
+ *		- mask
+ * output	- NONE
+ * side effects	- adds fd's from clients on given list to fd_set's
+ */
+static void
+add_fds_from_list(dlink_list *list, unsigned char mask)
+{
+  dlink_node *ptr;
+  struct Client *cptr;
+  int i;
+
+  for(ptr = list->head; ptr; ptr=ptr->next)
+    {
+      cptr = ptr->data;
+
+      i = cptr->fd;	/* ugh */
+
+      /* XXX */
+#if 0
+      if (!(fd_table[i].mask & mask))
+	continue;
+#endif
+#if 0
+      if (DBufLength(&cptr->localClient->buf_recvq) && delay2 > 2)
+	delay2 = 1;
+#endif
+
+      if (DBufLength(&cptr->localClient->buf_recvq) < 4088)        
+	{
+	  FD_SET(i, read_set);
+	}
+
+      /* XXX */
+      if (DBufLength(&cptr->localClient->buf_sendq || IsConnecting(cptr))
+	{
+	  FD_SET(i, write_set);
+	}
+    }
+}  
+
+/*
+ * check_fds_from_list
+ *
+ * inputs	- pointer to a dlink_list
+ * output	- NONE
+ * side effects	- checks fd's from each clients on given list
+ *		  does I/O if necessary
+ */
+static void
+check_fds_from_list(dlink_list *list, unsigned char mask, int nfds)
+{
+  dlink_node *ptr;
+  struct Client *cptr;
+  int i;
+  int length;
+
+  for (ptr = list->head; ptr; ptr = ptr->next)
+    {
+      cptr = ptr->data;
+      i = cptr->fd;
+
+      if (nfds == 0)
+	return;
+
+#if 0
+      if (!(fd_table[i].mask & mask))
+	continue;
+#endif
+
+      /*
+       * See if we can write...
+       */
+      if (FD_ISSET(i, write_set)) {
+	--nfds;
+	if (IsConnecting(cptr)) {
+	  if (!completed_connection(cptr)) {
+	    exit_client(cptr, cptr, &me, "Lost C/N Line");
+	    continue;
+	  }
+	  send_queued(cptr);
+          if (!IsDead(cptr))
+            continue;
+	}
+	else {
+	  /*
+	   * ...room for writing, empty some queue then...
+	   */
+	  send_queued(cptr);
+	  if (!IsDead(cptr))
+	    continue;
+	}
+	exit_client(cptr, cptr, &me, 
+		    (cptr->flags & FLAGS_SENDQEX) ? 
+		    "SendQ Exceeded" : strerror(get_sockerr(cptr->fd)));
+	continue;
+      }
+      length = 1;     /* for fall through case */
+
+      if (FD_ISSET(i, read_set)) {
+	--nfds;
+	length = read_packet(cptr);
+      }
+      else if (PARSE_AS_CLIENT(cptr) && !NoNewLine(cptr))
+	length = parse_client_queued(cptr);
+
+      if (length > 0 || length == CLIENT_EXITED)
+	continue;
+      if (IsDead(cptr)) {
+	exit_client(cptr, cptr, &me,
+                    strerror(get_sockerr(cptr->fd)));
+	continue;
+      }
+      error_exit_client(cptr, length);
+      errno = 0;
+    }
+}
 
