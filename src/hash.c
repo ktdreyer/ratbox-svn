@@ -387,15 +387,10 @@ hash_find_id(const char *name, struct Client *cptr)
 	hashv = hash_id(name);
 	tmp = (struct Client *)idTable[hashv].list;
 
-	sendto_realops_flags(FLAGS_ALL, "looking up client %d from ID hash table", hashv);
-	
 	/*
 	 * Got the bucket, now search the chain.
 	 */
 	for (; tmp; tmp = tmp->idhnext) {
-		
-		sendto_realops_flags(FLAGS_ALL, "checking client %s ID %s", tmp->name, tmp->user->id);
-	
 		if (tmp->user && strcmp(name, tmp->user->id) == 0)
 		{
 			return(tmp);
