@@ -15,6 +15,23 @@
 #include "tools.h"
 #include "memdebug.h"
 
+
+/*
+ * frob some memory. debugging time.
+ * -- adrian
+ */
+void
+mem_frob(void *data, int len)
+{
+    unsigned char b[4] = { 0xde, 0xad, 0xbe, 0xef };
+    int i;
+    char *cdata = data;
+    for (i = 0; i < len; i++) {
+        *cdata = b[i % 4];
+        cdata++;
+    }
+}
+
 /* 
  * dlink_ routines are stolen from squid, except for dlinkAddBefore,
  * which is mine.

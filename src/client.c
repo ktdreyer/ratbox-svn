@@ -205,11 +205,15 @@ void _free_client(struct Client* cptr)
       if (cptr->localClient->dns_reply)
 	--cptr->localClient->dns_reply->ref_count;
 
+      mem_frob(cptr->localClient, sizeof(struct LocalUser));
+      mem_frob(cptr, sizeof(struct Client));
       result = BlockHeapFree(localUserFreeList, cptr->localClient);
       result = BlockHeapFree(ClientFreeList, cptr);
     }
-  else
+  else {
+    mem_frob(cptr, sizeof(struct Client));
     result = BlockHeapFree(ClientFreeList, cptr);
+  }
 
   assert(0 == result);
   if (result)
