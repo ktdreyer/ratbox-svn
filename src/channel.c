@@ -2360,7 +2360,7 @@ chm_key(struct Client *client_p, struct Client *source_p,
     mode_changes_minus[mode_count_minus].nocaps = 0;
     mode_changes_minus[mode_count_minus].mems = ALL_MEMBERS;
     mode_changes_minus[mode_count_minus].id = NULL;
-    mode_changes_minus[mode_count_minus++].arg = NULL;
+    mode_changes_minus[mode_count_minus++].arg = "*";
   }
 }
 

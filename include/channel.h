@@ -33,7 +33,7 @@
 #endif
 
 /* XXX until debugged and verified thoroughly */
-#undef USE_TABLE_MODE
+#define USE_TABLE_MODE
 
 struct Client;
 
