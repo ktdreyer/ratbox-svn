@@ -1,3 +1,16 @@
+androsyn    2002/11/24 10:09:52 UTC	(20021124_11)
+
+  Modified files:
+    src                  s_serv.c s_user.c 
+  Log:
+  Put burst_away in the wrong spot..oops
+  
+  Revision  Changes    Path
+  7.298     +23 -0     ircd-ratbox/src/s_serv.c
+  7.236     +0 -22     ircd-ratbox/src/s_user.c
+
+
+
 androsyn    2002/11/24 10:03:30 UTC	(20021124_10)
 
   Modified files:
