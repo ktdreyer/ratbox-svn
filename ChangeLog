@@ -1,3 +1,21 @@
+androsyn    2003/02/12 19:26:02 UTC	(20030212_0)
+
+  Modified files:
+    include              client.h 
+    src                  client.c s_auth.c s_serv.c 
+  Log:
+  Remove add_client_to_list as it was just simply calling dlinkAddTail.  Also
+  make remove_client_from_list static as it isn't called from outside of
+  client.c
+  
+  Revision  Changes    Path
+  7.198     +0 -6      ircd-ratbox/include/client.h
+  7.367     +3 -3      ircd-ratbox/src/client.c
+  7.131     +1 -1      ircd-ratbox/src/s_auth.c
+  7.324     +1 -1      ircd-ratbox/src/s_serv.c
+
+
+
 androsyn    2003/02/11 19:33:22 UTC	(20030211_3)
 
   Modified files:
