@@ -15,7 +15,9 @@
 #include "rserv.h"
 #include "c_init.h"
 #include "log.h"
+#include "s_chanserv.h"
 #include "s_userserv.h"
+#include "ucommand.h"
 #include "balloc.h"
 #include "conf.h"
 #include "io.h"
@@ -25,21 +27,31 @@ static BlockHeap *user_reg_heap;
 
 dlink_list user_reg_table[MAX_USER_REG_HASH];
 
+static void u_userserv_udrop(struct connection_entry *, char *parv[], int parc);
+
+static int s_userserv_udrop(struct client *, char *parv[], int parc);
 static int s_userserv_register(struct client *, char *parv[], int parc);
 static int s_userserv_login(struct client *, char *parv[], int parc);
 static int s_userserv_logout(struct client *, char *parv[], int parc);
 
 static struct service_command userserv_command[] =
 {
+	{ "UDROP",	&s_userserv_udrop,	2, NULL, 1, 0L, 0, 0, CONF_OPER_US_ADMIN },
 	{ "REGISTER",	&s_userserv_register,	2, NULL, 1, 0L, 0, 0, 0 },
 	{ "LOGIN",	&s_userserv_login,	2, NULL, 1, 0L, 0, 0, 0 },
 	{ "LOGOUT",	&s_userserv_logout,	0, NULL, 1, 0L, 1, 0, 0 },
 	{ "\0",		NULL,			0, NULL, 0, 0L, 0, 0, 0 }
 };
 
+static struct ucommand_handler userserv_ucommand[] =
+{
+	{ "udrop",	u_userserv_udrop,	CONF_OPER_US_ADMIN,	2, NULL },
+	{ "\0",		NULL,			0,			0, NULL }
+};
+
 static struct service_handler userserv_service = {
 	"USERSERV", "USERSERV", "userserv", "services.userserv", "User Auth Services", 0,
-	30, 50, userserv_command, NULL, NULL
+	30, 50, userserv_command, userserv_ucommand, NULL
 };
 
 static int user_db_callback(void *db, int argc, char **argv, char **colnames);
@@ -61,6 +73,15 @@ add_user_reg(struct user_reg *reg_p)
 	dlink_add(reg_p, &reg_p->node, &user_reg_table[hashv]);
 }
 
+static void
+free_user_reg(struct user_reg *ureg_p)
+{
+	unsigned int hashv = hash_name(ureg_p->name);
+	dlink_delete(&ureg_p->node, &user_reg_table[hashv]);
+
+	my_free(ureg_p->password);
+	BlockHeapFree(user_reg_heap, ureg_p);
+}
 
 static int
 user_db_callback(void *db, int argc, char **argv, char **colnames)
@@ -128,6 +149,81 @@ find_user_reg_nick(struct client *client_p, const char *name)
 	}
 	else
 		return find_user_reg(client_p, name);
+}
+
+static void
+u_userserv_udrop(struct connection_entry *conn_p, char *parv[], int parc)
+{
+	struct user_reg *ureg_p;
+	struct member_reg *mreg_p;
+	dlink_node *ptr, *next_ptr;
+
+	if((ureg_p = find_user_reg(NULL, parv[1])) == NULL)
+	{
+		if(*parv[1] == '=')
+			sendto_one(conn_p, "Nickname %s is not logged in",
+					parv[1]);
+		else
+			sendto_one(conn_p, "Username %s is not registered",
+					parv[1]);
+		return;
+	}
+
+	loc_sqlite_exec(NULL, "DELETE FROM members WHERE username = %Q",
+			ureg_p->name);
+
+	DLINK_FOREACH_SAFE(ptr, next_ptr, ureg_p->channels.head)
+	{
+		mreg_p = ptr->data;
+
+		/* only member of this channel, so drop the channel too */
+		if(dlink_list_length(&mreg_p->channel_reg->users) == 1)
+			free_channel_reg(mreg_p->channel_reg);
+		else
+			free_member_reg(mreg_p);
+	}
+
+	loc_sqlite_exec(NULL, "DELETE FROM users WHERE username = %Q",
+			ureg_p->name);
+
+	sendto_one(conn_p, "Username %s registration dropped",
+			ureg_p->name);
+
+	free_user_reg(ureg_p);
+}
+
+static int
+s_userserv_udrop(struct client *client_p, char *parv[], int parc)
+{
+	struct user_reg *ureg_p;
+	struct member_reg *mreg_p;
+	dlink_node *ptr, *next_ptr;
+
+	if((ureg_p = find_user_reg(client_p, parv[0])) == NULL)
+		return 1;
+
+	loc_sqlite_exec(NULL, "DELETE FROM members WHERE username = %Q",
+			ureg_p->name);
+
+	DLINK_FOREACH_SAFE(ptr, next_ptr, ureg_p->channels.head)
+	{
+		mreg_p = ptr->data;
+
+		/* only member of this channel, so drop the channel too */
+		if(dlink_list_length(&mreg_p->channel_reg->users) == 1)
+			free_channel_reg(mreg_p->channel_reg);
+		else
+			free_member_reg(mreg_p);
+	}
+
+	loc_sqlite_exec(NULL, "DELETE FROM users WHERE username = %Q",
+			ureg_p->name);
+
+	service_error(userserv_p, client_p, "Username %s registration dropped",
+			ureg_p->name);
+
+	free_user_reg(ureg_p);
+	return 1;
 }
 
 static int

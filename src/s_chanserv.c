@@ -115,11 +115,9 @@ init_s_chanserv(void)
 	load_channel_db();
 }
 
-static void
+void
 free_channel_reg(struct chan_reg *reg_p)
 {
-	struct member_reg *mreg_p;
-	struct ban_reg *banreg_p;
 	dlink_node *ptr, *next_ptr;
 	unsigned int hashv = hash_channel(reg_p->name);
 
@@ -130,12 +128,7 @@ free_channel_reg(struct chan_reg *reg_p)
 
 	DLINK_FOREACH_SAFE(ptr, next_ptr, reg_p->users.head)
 	{
-		mreg_p = ptr->data;
-
-		my_free(mreg_p->lastmod);
-		dlink_delete(&mreg_p->usernode, &mreg_p->user_reg->channels);
-		dlink_delete(&mreg_p->channode, &mreg_p->channel_reg->users);
-		BlockHeapFree(member_reg_heap, mreg_p);
+		free_member_reg(ptr->data);
 	}
 
 	loc_sqlite_exec(NULL, "DELETE FROM bans WHERE chname = %Q",
@@ -143,14 +136,11 @@ free_channel_reg(struct chan_reg *reg_p)
 
 	DLINK_FOREACH_SAFE(ptr, next_ptr, reg_p->bans.head)
 	{
-		banreg_p = ptr->data;
-
-		free_ban_reg(reg_p, banreg_p);
+		free_ban_reg(reg_p, ptr->data);
 	}
 
 	loc_sqlite_exec(NULL, "DELETE FROM channels WHERE chname = %Q",
 			reg_p->name);
-
 
 	my_free(reg_p->name);
 	my_free(reg_p->topic);
@@ -202,6 +192,15 @@ make_member_reg(struct user_reg *ureg_p, struct chan_reg *chreg_p,
 	dlink_add(mreg_p, &mreg_p->channode, &chreg_p->users);
 
 	return mreg_p;
+}
+
+void
+free_member_reg(struct member_reg *mreg_p)
+{
+	dlink_delete(&mreg_p->usernode, &mreg_p->user_reg->channels);
+	dlink_delete(&mreg_p->channode, &mreg_p->channel_reg->users);
+	my_free(mreg_p->lastmod);
+	BlockHeapFree(member_reg_heap, mreg_p);
 }
 
 static struct member_reg *
@@ -622,6 +621,7 @@ s_chanserv_adduser(struct client *client_p, char *parv[], int parc)
 static int
 s_chanserv_deluser(struct client *client_p, char *parv[], int parc)
 {
+	struct chan_reg *chreg_p;
 	struct user_reg *ureg_p;
 	struct member_reg *mreg_p;
 	struct member_reg *mreg_tp;
@@ -632,10 +632,12 @@ s_chanserv_deluser(struct client *client_p, char *parv[], int parc)
 	if((ureg_p = find_user_reg_nick(client_p, parv[1])) == NULL)
 		return 1;
 
-	if((mreg_tp = find_member_reg(ureg_p, mreg_p->channel_reg)) == NULL)
+	chreg_p = mreg_p->channel_reg;
+
+	if((mreg_tp = find_member_reg(ureg_p, chreg_p)) == NULL)
 	{
 		service_error(chanserv_p, client_p, "User %s on %s does not have access",
-				ureg_p->name, mreg_p->channel_reg->name);
+				ureg_p->name, chreg_p->name);
 		return 1;
 	}
 
@@ -643,34 +645,30 @@ s_chanserv_deluser(struct client *client_p, char *parv[], int parc)
 	if(mreg_p->level <= mreg_tp->level && mreg_p != mreg_tp)
 	{
 		service_error(chanserv_p, client_p, "User %s on %s access level equal or higher",
-				ureg_p->name, mreg_p->channel_reg->name);
+				ureg_p->name, chreg_p->name);
 		return 1;
 	}
 
 	service_error(chanserv_p, client_p, "User %s on %s removed",
-			mreg_tp->user_reg->name, mreg_tp->channel_reg->name);
+			mreg_tp->user_reg->name, chreg_p->name);
 
 	delete_member_db_entry(mreg_tp);
 
-	/* must be done before we possibly free the channel */
-	my_free(mreg_tp->lastmod);
-	dlink_delete(&mreg_tp->usernode, &mreg_tp->user_reg->channels);
-	dlink_delete(&mreg_tp->channode, &mreg_tp->channel_reg->users);
+	/* must be done before we possibly free the channel - mreg_p is
+	 * possibly free()'d after this so should not be used
+	 */
+	free_member_reg(mreg_tp);
 
 	/* handle a user deleting themselves, when theyre the only member on
 	 * the channel
 	 */
-	if(mreg_p == mreg_tp && 
-	   dlink_list_length(&mreg_p->channel_reg->users) == 0)
+	if(dlink_list_length(&chreg_p->users) == 0)
 	{
 		service_error(chanserv_p, client_p, "Channel %s registration dropped",
-				mreg_p->channel_reg->name);
+				chreg_p->name);
 
-		free_channel_reg(mreg_p->channel_reg);
+		free_channel_reg(chreg_p);
 	}
-
-		
-	BlockHeapFree(member_reg_heap, mreg_tp);
 
 	return 1;
 }

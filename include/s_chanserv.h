@@ -9,7 +9,9 @@ struct chan_reg
 {
 	char *name;
 	char *topic;
+#if 0
 	struct chmode mode;
+#endif
 	int flags;
 
 	time_t reg_time;
@@ -46,7 +48,7 @@ struct ban_reg
 	dlink_node channode;
 };
 
-extern void load_chan_db(void);
-extern void save_chan_db(void);
+void free_channel_reg(struct chan_reg *);
+void free_member_reg(struct member_reg *);
 
 #endif
