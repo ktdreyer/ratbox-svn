@@ -326,6 +326,7 @@ load_all_modules (int warn)
   (void)closedir (system_module_dir);
 }
 
+#ifndef STATIC_MODULES
 /* load_core_modules()
  *
  * input        -

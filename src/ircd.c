@@ -655,7 +655,9 @@ int main(int argc, char *argv[])
   init_stats();
   init_hooks();
   load_all_modules(1);
+#ifndef STATIC_MODULES
   load_core_modules(1);
+#endif
   initServerMask();
   init_auth();                  /* Initialise the auth code */
   init_resolver();      /* Needs to be setup before the io loop */
