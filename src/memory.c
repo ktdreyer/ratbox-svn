@@ -44,7 +44,7 @@ typedef struct _MemEntry
  struct _MemEntry *next, *last;
  /* Data follows... */
 } MemoryEntry;
-MemoryEntry *first_mem_entry;
+MemoryEntry *first_mem_entry = NULL;
 
 void*
 _MyMalloc(size_t length, char *file, int line)
@@ -58,7 +58,7 @@ _MyMalloc(size_t length, char *file, int line)
  mem_entry->size = length;
  mem_entry->ts = CurrentTime;
  if (line > 0)
-   strncpy_irc(mem_entry->file, file, 50);
+   strncpy_irc(mem_entry->file, file, 50)[49] = 0;
  else
    *mem_entry->file = 0;
  mem_entry->line = line;
@@ -90,7 +90,12 @@ _MyRealloc(void *what, size_t size, char *file, int line)
 {
  MemoryEntry *mme;
  if (!what)
-   return NULL;
+   return _MyMalloc(size, file, line);
+ if (!size)
+   {
+    _MyFree(what, file, line);
+    return NULL;
+   }
  mme = (MemoryEntry*)(what - sizeof(MemoryEntry));
  mme = realloc(mme, size+sizeof(MemoryEntry));
  mme->size = size;
@@ -105,7 +110,7 @@ _DupString(char **x, const char *y, char *file, int line)
 }
 
 void ReportAllocated(struct Client*);
-
+void ReportBlockHeap(struct Client*);
 
 void
 ReportAllocated(struct Client *cptr)
@@ -120,8 +125,8 @@ ReportAllocated(struct Client *cptr)
      mme->line);
  sendto_one(cptr, ":%s NOTICE %s :*** -- End Memory Allocation Report",
    me.name, cptr->name);
+ ReportBlockHeap(cptr);
 }
-
 #else /* MEMDEBUG */
 /*
  * MyMalloc - allocate memory, call outofmemory on failure

@@ -8,8 +8,9 @@
  */
 #include <stdio.h>
 #include <unistd.h>
-#include "blalloc.h"
 #include "ircd_defs.h"      /* DEBUG_BLOCK_ALLOCATOR */
+#include "ircd.h"
+#include "blalloc.h"
 #include "irc_string.h"     /* MyMalloc */
 #include "tools.h"
 #include "s_log.h"
@@ -24,6 +25,19 @@
 
 const char* BH_CurrentFile = 0;   /* GLOBAL used for BlockHeap debugging */
 int         BH_CurrentLine = 0;   /* GLOBAL used for BlockHeap debugging */
+#endif
+
+#ifdef MEMDEBUG
+typedef struct _MemEntry
+{
+ size_t size;
+ time_t ts;
+ char file[50];
+ int line;
+ struct _MemEntry *next, *last;
+ /* Data follows... */
+} MemoryEntry;
+MemoryEntry *first_block_mem_entry = NULL;
 #endif
 
 static int newblock(BlockHeap *bh);
@@ -104,12 +118,14 @@ BlockHeap * BlockHeapCreate (size_t elemsize,
                      int elemsperblock)
 {
    BlockHeap *bh;
-
    /* Catch idiotic requests up front */
    if ((elemsize <= 0) || (elemsperblock <= 0))
      {
        outofmemory();   /* die.. out of memory */
      }
+#ifdef MEMDEBUG
+   elemsize += sizeof(MemoryEntry);
+#endif
 
    /* Allocate our new BlockHeap */
    bh = (BlockHeap *) MyMalloc( sizeof (BlockHeap));
@@ -155,7 +171,11 @@ BlockHeap * BlockHeapCreate (size_t elemsize,
 /*    Pointer to a structure (void *), or NULL if unsuccessful.             */
 /* ************************************************************************ */
 
+#ifdef MEMDEBUG
+void * _BlockHeapAlloc (BlockHeap *bh, char *file, int line)
+#else
 void * _BlockHeapAlloc (BlockHeap *bh)
+#endif
 {
    Block *walker;
    int unit;
@@ -180,10 +200,23 @@ void * _BlockHeapAlloc (BlockHeap *bh)
            if(bh->base->elems == NULL)
              return((void *)NULL);
          }
-#ifdef DEBUGMEM
-       DbgMemAlloc(file, line, bh->elemSize, DBGMEM_BLALLOC, (bh->base)->elems);
-#endif
+#ifdef MEMDEBUG
+       {
+         MemoryEntry *mme = (MemoryEntry*)(bh->base->elems);
+         mme->next = first_block_mem_entry;
+         if (first_block_mem_entry)
+           first_block_mem_entry->last = mme;
+         first_block_mem_entry = mme;
+         mme->ts = CurrentTime;
+         mme->size = bh->elemSize;
+         if (line > 0)
+           strncpy_irc(mme->file, file, 50)[49] = 0;
+         mme->line = line;
+         return (void*)(((char *)mme)+sizeof(MemoryEntry));
+       }
+#else
        return ((bh->base)->elems);      /* ...and take the first elem. */
+#endif
      }
 
    for (walker = bh->base; walker != NULL; walker = walker->next)
@@ -221,9 +254,21 @@ void * _BlockHeapAlloc (BlockHeap *bh)
                               * (unsigned long )bh->elemSize))
                             );
 #ifdef DEBUGMEM
-		   DbgMemAlloc(file, line, bh->elemSize, DBGMEM_BLALLOC, ret);
+           {
+            MemoryEntry *mme = (MemoryEntry*)ret;
+            mme->next = first_block_mem_entry;
+            if (first_block_mem_entry)
+              first_block_mem_entry->last = mme;
+            first_block_mem_entry = mme;
+            mme->ts = CurrentTime;
+            mme->size = bh->elemSize;
+            if (line > 0)
+              strncpy_irc(mme->file, file, 50)[49] = 0;
+            mme->line = line;
+            mme->size = bh->size;
+            ret += sizeof(MemoryEntry)
+           }
 #endif
-
 		   return ret;
                  }
                /* Step up to the next unit */
@@ -254,19 +299,12 @@ void * _BlockHeapAlloc (BlockHeap *bh)
 /* Returns:                                                                 */
 /*    0 if successful, 1 if element not contained within BlockHeap.         */
 /* ************************************************************************ */
-#ifdef DEBUGMEM
-int _BlockHeapFree(BlockHeap *bh, void *ptr, char * file, int line)
-#else
 int _BlockHeapFree(BlockHeap *bh, void *ptr)
-#endif
 {
    Block *walker;
    unsigned long ctr;
    unsigned long bitmask;
 
-#ifdef DEBUGMEM
-   DbgMemFree(file, line, DBGMEM_BLALLOC, ptr);
-#endif
    if (bh == NULL)
      {
 #if defined(SYSLOG_BLOCK_ALLOCATOR)
@@ -274,7 +312,17 @@ int _BlockHeapFree(BlockHeap *bh, void *ptr)
 #endif
        return 1;
      }
-
+#ifdef MEMDEBUG
+   {
+    MemoryEntry *mme = (MemoryEntry*)(((char*)bh)-sizeof(MemoryEntry));
+    if (mme->last)
+      mme->last->next = mme->next;
+    else
+      first_block_mem_entry = mme;
+    if (mme->next)
+      mme->next->last = mme->last;
+   }
+#endif
    for (walker = bh->base; walker != NULL; walker = walker->next)
      {
       if ((ptr >= walker->elems) && (ptr <= walker->endElem))
@@ -314,6 +362,23 @@ int _BlockHeapFree(BlockHeap *bh, void *ptr)
      }
    return 1;
 }
+
+#ifdef MEMDEBUG
+void ReportBlockHeap(struct Client *);
+void ReportBlockHeap(struct Client *cptr)
+{
+ MemoryEntry *mme;
+ sendto_one(cptr, ":%s NOTICE %s :*** -- Block memory Allocation Report",
+   me.name, cptr->name);
+ for (mme = first_block_mem_entry; mme; mme=mme->next)
+   sendto_one(cptr,
+     ":%s NOTICE %s :*** -- %u bytes allocated for %lus at %s:%d",
+     me.name, cptr->name, mme->size, CurrentTime-mme->ts, mme->file,
+     mme->line);
+ sendto_one(cptr, ":%s NOTICE %s :*** -- End Block memory Allocation Report",
+   me.name, cptr->name);
+}
+#endif
 
 /* ************************************************************************ */
 /* FUNCTION DOCUMENTATION:                                                  */

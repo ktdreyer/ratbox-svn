@@ -1129,7 +1129,6 @@ res_readreply(int fd, void *data)
 }
 
 
-#if 0
 /*
  * dup_hostent - Duplicate a hostent struct, allocate only enough memory for
  * the data we're putting in it.
@@ -1198,10 +1197,7 @@ static void dup_hostent(aHostent* new_hp, struct hostent* hp)
     }
   *ap = 0;
 }
-#endif
 
-#if 0
-/* We don't actually keep a cache atm, this was just leaking... -A1kmm.*/
 static struct cache* make_cache(ResRQ* request)
 {
   struct cache* cp;
@@ -1223,7 +1219,6 @@ static struct cache* make_cache(ResRQ* request)
 
   return(cp);
 }
-#endif
 
 unsigned long cres_mem(struct Client *sptr)
 {
