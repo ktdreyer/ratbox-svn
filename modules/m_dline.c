@@ -236,6 +236,9 @@ mo_dline(struct Client *client_p, struct Client *source_p, int parc, const char 
 	{
 		*oper_reason = '\0';
 		oper_reason++;
+
+		if(!EmptyString(oper_reason))
+			DupString(aconf->spasswd, oper_reason);
 	}
 
 	aconf->status = CONF_DLINE;

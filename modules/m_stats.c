@@ -380,7 +380,7 @@ stats_tdeny (struct Client *source_p)
 				get_printable_kline(source_p, aconf, &host, &pass, &user, &oper_reason);
 
 				sendto_one(source_p, form_str (RPL_STATSDLINE), me.name,
-					   source_p->name, 'D', host, pass,
+					   source_p->name, 'd', host, pass,
 					   oper_reason ? "|" : "",
 					   oper_reason ? oper_reason : "");
 			}
@@ -416,7 +416,7 @@ stats_deny (struct Client *source_p)
 				get_printable_kline(source_p, aconf, &host, &pass, &user, &oper_reason);
 
 				sendto_one(source_p, form_str (RPL_STATSDLINE), me.name,
-					   source_p->name, 'd', host, pass,
+					   source_p->name, 'D', host, pass,
 					   oper_reason ? "|" : "",
 					   oper_reason ? oper_reason : "");
 			}
