@@ -44,12 +44,12 @@
 #include <string.h>
 #include <assert.h>
 
-static int nick_from_server(struct Client *, struct Client *, int, char **,
+int nick_from_server(struct Client *, struct Client *, int, char **,
                             time_t, char *);
-static int set_initial_nick(struct Client *cptr, struct Client *sptr,char *nick);
-static int change_nick(struct Client *cptr, struct Client *sptr, char *nick);
-static int nick_equal_server(struct Client *cptr, struct Client *sptr, char *nick);
-static int clean_nick_name(char* nick);
+int set_initial_nick(struct Client *cptr, struct Client *sptr,char *nick);
+int change_nick(struct Client *cptr, struct Client *sptr, char *nick);
+int nick_equal_server(struct Client *cptr, struct Client *sptr, char *nick);
+int clean_nick_name(char* nick);
 
 
 struct Message nick_msgtab = {
@@ -75,15 +75,7 @@ char *_version = "20001122";
 ** mr_nick
 **      parv[0] = sender prefix
 **      parv[1] = nickname
-**      parv[2] = optional hopcount when new user; TS when nick change
-**      parv[3] = optional TS
-**      parv[4] = optional umode
-**      parv[5] = optional username
-**      parv[6] = optional hostname
-**      parv[7] = optional server
-**      parv[8] = optional ircname
 */
-
 int mr_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 {
   struct   Client* acptr;
@@ -100,10 +92,6 @@ int mr_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   /*
    * parc == 2 on a normal client sign on (local) and a normal
    *      client nick change
-   * parc == 4 on a normal server-to-server client nick change
-   *      notice
-   * parc == 9 on a normal TS style server-to-server NICK
-   *      introduction
    */
 
   /*
@@ -142,22 +130,7 @@ int mr_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       return 0;
     }
 
-  /*
-  ** Check against nick name collisions.
-  **
-  ** Put this 'if' here so that the nesting goes nicely on the screen :)
-  ** We check against server name list before determining if the nickname
-  ** is present in the nicklist (due to the way the below for loop is
-  ** constructed). -avalon
-  */
-  if ((acptr = find_server(nick)))
-    {
-      sendto_one(sptr, form_str(ERR_NICKNAMEINUSE), me.name,
-		 BadPtr(parv[0]) ? "*" : parv[0], nick);
-      return 0; /* NICK message ignored */
-    }
-
-  if (!(acptr = find_client(nick, NULL)))
+  if ( (acptr = find_client(nick, NULL)) == NULL )
     return(set_initial_nick(cptr, sptr, nick));
   else
     sendto_one(sptr, form_str(ERR_NICKNAMEINUSE), me.name,
@@ -193,10 +166,6 @@ int m_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   /*
    * parc == 2 on a normal client sign on (local) and a normal
    *      client nick change
-   * parc == 4 on a normal server-to-server client nick change
-   *      notice
-   * parc == 9 on a normal TS style server-to-server NICK
-   *      introduction
    */
 
   /*
@@ -226,13 +195,6 @@ int m_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       sendto_one(sptr, form_str(ERR_ERRONEUSNICKNAME),
 		 me.name, parv[0], parv[1]);
       return 0;
-    }
-
-  if ((acptr = find_server(nick)))
-    {
-      sendto_one(sptr, form_str(ERR_NICKNAMEINUSE), me.name,
-		 BadPtr(parv[0]) ? "*" : parv[0], nick);
-      return 0; /* NICK message ignored */
     }
 
   if ((acptr = find_client(nick, NULL)))
@@ -326,37 +288,13 @@ int ms_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
     newts = atol(parv[3]);
 
   /*
-   * parc == 2 on a normal client sign on (local) and a normal
-   *      client nick change
    * parc == 4 on a normal server-to-server client nick change
    *      notice
    * parc == 9 on a normal TS style server-to-server NICK
    *      introduction
    */
-  if (IsServer(sptr) && (parc < 9))
-    {
-      /*
-       * We got the wrong number of params. Someone is trying
-       * to trick us. Kill it. -ThemBones
-       */
-      ts_warn("BAD NICK: %s[%s@%s] on %s (from %s)", parv[1],
-                     (parc >= 6) ? parv[5] : "-",
-                     (parc >= 7) ? parv[6] : "-",
-                     (parc >= 8) ? parv[7] : "-", parv[0]);
-      return 0;
-     }
-
-  if ((parc >= 7) && (!strchr(parv[6], '.')))
-    {
-      /*
-       * Ok, we got the right number of params, but there
-       * isn't a single dot in the hostname, which is suspicious.
-       * Don't fret about it just kill it. - ThemBones
-       */
-      ts_warn("BAD HOSTNAME: %s[%s@%s] on %s (from %s)",
-                     parv[0], parv[5], parv[6], parv[7], parv[0]);
-      return 0;
-    }
+  if( (parc != 4) || (parc != 9) )
+    return 0;
 
   fromTS = (parc > 6);
 
@@ -404,12 +342,7 @@ int ms_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       return 0;
     }
 
-  /*
-   * Check against nick name collisions.
-   * a nick can never be the same as a server name - Dianora
-   */
-
-  if ( nick_equal_server(cptr, sptr, nick) )
+  if (strchr(nick,'.') != NULL)
     {
       sptr->flags |= FLAGS_KILLED;      
       return exit_client(cptr, sptr, &me, "Nick/Server collision");
@@ -691,7 +624,7 @@ int ms_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
  * side effects -
  */
 
-static int
+int
 nick_from_server(struct Client *cptr, struct Client *sptr, int parc,
                  char *parv[], time_t newts,char *nick)
 {
@@ -780,8 +713,7 @@ nick_from_server(struct Client *cptr, struct Client *sptr, int parc,
  * This function is only called to set up an initially registering
  * client. 
  */
-
-static int
+int
 set_initial_nick(struct Client *cptr, struct Client *sptr,
                  char *nick)
 {
@@ -847,7 +779,7 @@ set_initial_nick(struct Client *cptr, struct Client *sptr,
  *
  */
 
-static int change_nick(struct Client *cptr, struct Client *sptr,
+int change_nick(struct Client *cptr, struct Client *sptr,
                        char *nick)
 {
   /*
@@ -931,7 +863,7 @@ static int change_nick(struct Client *cptr, struct Client *sptr,
  *      a change should be global, some confusion would
  *      result if only few servers allowed it...
  */
-static int clean_nick_name(char* nick)
+int clean_nick_name(char* nick)
 {
   char* ch   = nick;
   char* endp = ch + NICKLEN;
@@ -948,43 +880,3 @@ static int clean_nick_name(char* nick)
 
   return (ch - nick);
 }
-
-/*
- * nick_equal_server
- *
- * inputs	- cptr
- * 		- sptr
- *		- nick to check
- * output	- 1 if equal 0 if not
- * side effects	-
- */
-static int
-nick_equal_server(struct Client *cptr, struct Client *sptr, char *nick )
-{
-  struct Client *acptr;
-
-  if ((acptr = find_server(nick)))
-    {
-      /*
-      ** We have a nickname trying to use the same name as
-      ** a server. Send out a nick collision KILL to remove
-      ** the nickname. As long as only a KILL is sent out,
-      ** there is no danger of the server being disconnected.
-      ** Ultimate way to jupiter a nick ? >;-). -avalon
-      */
-      sendto_realops("Nick collision on %s(%s <- %s)",
-		     sptr->name, acptr->from->name,
-		     get_client_name(cptr, HIDE_IP));
-      ServerStats->is_kill++;
-      sendto_one(cptr, ":%s KILL %s :%s (%s <- %s)",
-                 me.name, sptr->name, me.name, acptr->from->name,
-                 /* NOTE: Cannot use get_client_name
-                 ** twice here, it returns static
-                 ** string pointer--the other info
-                 ** would be lost
-                 */
-                 get_client_name(cptr, HIDE_IP));
-      return 1;
-    }
-  return 0;
-}  
