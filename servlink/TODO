@@ -3,7 +3,7 @@ Servlink todo list
 
 Deal with avail_out = 0, then reduce the size of the buffer.
 	We won't usually hit 6x compression, but I just went over that..
-	We should deal gracefully withr running out of output space...
+	We should deal gracefully with running out of output space...
 
 Implement read handler for control fd in hybrid.
 	This would allow commands like CMD_ZIPLINK_STATS to check
