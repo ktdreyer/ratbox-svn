@@ -1,3 +1,15 @@
+androsyn    2002/12/14 22:33:57 UTC	(20021214_1)
+
+  Modified files:
+    include              irc_string.h 
+  Log:
+  Remove the BadPtr() macro from irc_string.h
+  
+  Revision  Changes    Path
+  7.44      +0 -4      ircd-ratbox/include/irc_string.h
+
+
+
 androsyn    2002/12/14 22:32:18 UTC	(20021214_0)
 
   Modified files:
