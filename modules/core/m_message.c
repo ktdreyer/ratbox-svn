@@ -176,17 +176,11 @@ m_message(int p_or_n,
 {
   int i;
 
-#if 0  /* Allow servers to send notices to individual people */
-  if (!IsPerson(source_p))
-    return;
-#endif
-
-  /* It is stupid to disallow servers to send privmsgs but not notices.
+  /* servers have no reason to send privmsgs, yet sometimes there is cause
+   * for a notice.. (for example remote kline replies) --fl_
    */
-#if 0
   if (!IsPerson(source_p) && p_or_n != NOTICE)
     return;
-#endif
 
   if (parc < 2 || *parv[1] == '\0')
   {
