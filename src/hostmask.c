@@ -569,7 +569,7 @@ delete_one_address_conf(const char *address, struct ConfItem *aconf)
         arecl->next = arec->next;
       else
         atable[hv] = arec->next;
-      aconf->flags |= CONF_ILLEGAL;
+      aconf->status |= CONF_ILLEGAL;
       if (!aconf->clients)
         free_conf(aconf);
       MyFree(arec);
@@ -608,7 +608,7 @@ clear_out_address_conf(void)
       }
       else
       {
-        arec->aconf->flags |= CONF_ILLEGAL;
+        arec->aconf->status |= CONF_ILLEGAL;
         if (!arec->aconf->clients)
           free_conf(arec->aconf);
         MyFree(arec);

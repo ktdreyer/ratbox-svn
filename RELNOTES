@@ -13,6 +13,7 @@
   stats g will now show pending glines
   stats G will now show triggered glines
 - fixed a problem with double RPL_TOPICWHO being sent
+- fixed another null nick issue
 - the conf has been updated:
 
   - instead of class { name="users"; ... }; use
