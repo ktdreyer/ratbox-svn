@@ -1,3 +1,9 @@
+*** 20010214_2 by toot
+. added some CVS Id tags where they were lacking
+. removed 'd' from MYINFO.. no more denys
+. made some formatting more consistent :P
+
+
 *** 20010214_1 by a1kmm
 - Re-reverted something I accidently reverted - always close all files in your text-editor after cvs
   update!
