@@ -245,9 +245,9 @@ daemon(int a, int b)
     exit(EXIT_SUCCESS);
 
   setsid();
-  fclose(stdin);
+  /*  fclose(stdin);
   fclose(stdout);
-  fclose(stderr);
+  fclose(stderr); */
 #endif
 }
 #endif

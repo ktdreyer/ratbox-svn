@@ -55,6 +55,9 @@
 /* u_int32_t */
 #undef u_int32_t
 
+/* Define if you have the daemon function.  */
+#undef HAVE_DAEMON
+
 /* Define if you have the gettext function.  */
 #undef HAVE_GETTEXT
 
