@@ -868,7 +868,7 @@ static void	conf_set_class_cidr_bitlen(void *data)
 	unsigned int maxsize = 32;
 #endif
 	if(*(unsigned int *)data > maxsize)
-		conf_report_error("class::cidr_bitlen argument exceeds maxsize (%d > %d) - ignoring."
+		conf_report_error("class::cidr_bitlen argument exceeds maxsize (%d > %d) - ignoring.",
 				   *(unsigned int *)data, maxsize);
 	else		                                
 		yy_class->cidr_bitlen = *(unsigned int *)data;
