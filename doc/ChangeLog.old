@@ -1,3 +1,7 @@
+*** 20001228_25 by spookey
+ - Adds string lookup capability to modlist (QUOTE MODLIST [STRING])
+
+
 *** 20001228_24 by bill
 
 - fixed mode bug (thank you, Diane)
