@@ -232,7 +232,8 @@ static void mo_gline(struct Client *client_p,
 			   user,
 			   host,
 			   reason);
-	  
+
+      /* 5 param version for hyb-7 servers */
       sendto_cap_serv_butone(CAP_GLN,
 			     NULL, ":%s GLINE %s %s %s :%s",
 			     me.name,
@@ -240,6 +241,12 @@ static void mo_gline(struct Client *client_p,
 			     user,
 			     host,
 			     reason);
+
+      /* 8 param for hyb-6 */
+      sendto_nocap_serv_butone(CAP_GLN,
+                               NULL, ":%s GLINE %s %s %s %s %s %s :%s",
+                               me.name, source_p->name, source_p->username, source_p->host,
+                               source_p->user->server, user, host, reason);
 
       sendto_realops_flags(FLAGS_ALL,
 			"%s!%s@%s on %s is requesting gline for [%s@%s] [%s]",
@@ -287,39 +294,55 @@ static void ms_gline(struct Client *client_p,
   char *host = NULL;             /* user and host of GLINE "victim" */
   const char *reason = NULL;           /* reason for "victims" demise */
 
-
+#if 0
+  /* it's an ms_ function, so no need for this! */
   if(!IsServer(source_p))
     return;
+#endif
 
-  /* Hyb7 sends 5 parcs.. hyb6 sends 8 and will gline the wrong host,
-   * so check the param count -- fl_ */
-  if(parc != 5)
-    return;
-
-  oper_nick = parv[1];
-  user = parv[2];
-  host = parv[3];
-  reason = parv[4];
-
-  if ((rclient_p = hash_find_client(oper_nick,(struct Client *)NULL)))
+  /* new hyb-7 gline. */ 
+  if(parc == 5)
     {
-      if(!IsPerson(rclient_p))
-	return;
+      oper_nick = parv[1];
+      user = parv[2];
+      host = parv[3];
+      reason = parv[4];
+
+      if ((rclient_p = hash_find_client(oper_nick,(struct Client *)NULL)))
+        {
+          if(!IsPerson(rclient_p))
+            return;
+        }
+      else
+        return;
+
+      if ((oper_user = (const char *)rclient_p->username) == NULL)
+        return;
+
+      if ((oper_host = rclient_p->host) == NULL)
+        return;
+
+      if (rclient_p->user && rclient_p->user->server)
+        oper_server = rclient_p->user->server;
+      else
+       return;
     }
+  /* or it's a hyb-6 style */
+  else if(parc == 8)
+    {
+      oper_nick = parv[1];
+      oper_user = parv[2];
+      oper_host = parv[3];
+      oper_server = parv[4];
+      user = parv[5];
+      host = parv[6];
+      reason = parv[7];      
+    }
+  /* none of the above */
   else
     return;
 
-  if ((oper_user = (const char *)rclient_p->username) == NULL)
-    return;
-
-  if ((oper_host = rclient_p->host) == NULL)
-    return;
-
-  if (rclient_p->user && rclient_p->user->server)
-    oper_server = rclient_p->user->server;
-  else
-    return;
-
+  /* send in hyb-7 to compatable servers */
   sendto_cap_serv_butone(CAP_GLN,
                          source_p, ":%s GLINE %s %s %s :%s",
 		         source_p->name,
@@ -327,6 +350,12 @@ static void ms_gline(struct Client *client_p,
 		         user,
 		         host,
 		         reason);
+  /* hyb-6 version to the rest */
+  sendto_nocap_serv_butone(CAP_GLN,
+                           source_p, ":%s GLINE %s %s %s %s %s %s :%s",
+                           source_p->name, oper_nick, oper_user, oper_host,
+                           oper_server, user, host, reason);
+
 
   if (ConfigFileEntry.glines)
     {
