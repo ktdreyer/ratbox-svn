@@ -1,3 +1,25 @@
+leeh        2005/02/21 12:09:34 EST	(20050221_0)
+
+  Modified files:
+    .                    configure configure.ac 
+    doc                  whats-new-2.1.txt 
+    tools                README.mkpasswd 
+  Removed files:
+    src                  crypt.c 
+  Log:
+  - update whats-new-2.1.txt some more
+  - we dont have vms mkpasswd anymore
+  - remove the unused crypt.c
+  
+  Revision  Changes    Path
+  7.243     +3 -6      ircd-ratbox/configure
+  7.57      +2 -4      ircd-ratbox/configure.ac
+  7.2       +2 -0      ircd-ratbox/doc/whats-new-2.1.txt
+  7.13      +0 -504    ircd-ratbox/src/crypt.c (dead)
+  1.9       +0 -3      ircd-ratbox/tools/README.mkpasswd
+
+
+
 leeh        2005/02/19 12:38:09 EST	(20050219_3)
 
   Modified files:
