@@ -64,12 +64,13 @@ struct ConfItem *match_ip_Kline(unsigned long ip, const char *name)
 	patricia_node_t *node;
 	unsigned long nip = ntohl(ip);
 	node = match_string(kline, inetntoa((char *)&nip));
-	log(L_NOTICE, "ip_Kline node = %d\n", node);
+	log(L_DEBUG, "ip_Kline node = %d\n", node);
 	if(node != NULL)
 	{
 		if(match(node->data->user, name))
 		{
-			log(L_NOTICE, "ip_Kline: %s %s\n", node->data->user, name);
+			log(L_DEBUG, "ip_Kline: %s %s\n", node->data->user,
+                            name);
 			return(node->data);
 		}
 	}
@@ -128,4 +129,3 @@ void report_dlines(struct Client *sptr)
 		sendto_one(sptr, form_str(RPL_STATSDLINE), me.name, sptr->name, conftype, host, pass);	
 	} PATRICIA_WALK_END;
 }
-
