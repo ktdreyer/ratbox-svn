@@ -208,6 +208,10 @@ int     m_cjoin(struct Client *cptr,
    * - Dianora
    */
 
+	if (strlen(name+1) > CHANNELLEN-14) {
+		sendto_one(sptr, form_str(ERR_BADCHANNAME),me.name, parv[0], (unsigned char*) name);
+		return 0;
+	}
   ircsprintf( vchan_name, "#%s_%lu", name+1, CurrentTime );
   vchan_chptr = get_channel(sptr, vchan_name, CREATE);
 

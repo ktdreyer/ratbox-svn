@@ -50,7 +50,7 @@ int     m_list(struct Client *cptr,
   struct Channel *root_chptr;
   struct Channel *tmpchptr;
   char  *name, *p = NULL;
-  char  vname[CHANNELLEN+NICKLEN+3];
+  char  vname[CHANNELLEN+NICKLEN+4];
   static time_t last_used=0L;
   int i,j;
 
