@@ -187,9 +187,9 @@ void adns__querysend_tcp(adns_query qu, struct timeval now) {
   if (ads->tcpsend.used) {
     wr= 0;
   } else {
-    iov[0].iov_base= length;
+    iov[0].iov_base= (char *)length;
     iov[0].iov_len= 2;
-    iov[1].iov_base= qu->query_dgram;
+    iov[1].iov_base= (char *)qu->query_dgram;
     iov[1].iov_len= qu->query_dglen;
     wr= writev(qu->ads->tcpsocket,iov,2);
     if (wr < 0) {

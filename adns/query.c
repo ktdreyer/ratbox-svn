@@ -286,7 +286,7 @@ int adns_submit_reverse_ip6(adns_state ads,
   char shortbuf[100];
   char *buf, *buf_free;
   const unsigned char *cp;
-  unsigned char *qp;
+  char *qp;
   int n, c, lreq, r;
 		
   if(addr->sa_family != AF_INET6) return ENOSYS;
