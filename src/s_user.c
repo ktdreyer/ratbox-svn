@@ -215,6 +215,13 @@ int show_lusers(struct Client *source_p)
       sendto_one(source_p, form_str(RPL_LOCALUSERS), me.name, source_p->name,
                  Count.local, Count.max_loc);
     }
+  else
+    {
+      sendto_one(source_p, form_str(RPL_LUSERME),
+                 me.name, source_p->name, Count.total, 0);
+      sendto_one(source_p, form_str(RPL_LOCALUSERS), 
+                 me.name, source_p->name, Count.total, Count.max_tot);
+    }
 
   sendto_one(source_p, form_str(RPL_GLOBALUSERS), me.name, source_p->name,
              Count.total, Count.max_tot);
