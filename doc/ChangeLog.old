@@ -1,3 +1,17 @@
+androsyn    2002/02/16 22:11:30 EST	(20020217_5)
+
+  Modified files:
+    src                  s_serv.c send.c 
+  Log:
+  Remove some extra SetDead() calls.  We are going straight into exit_client()
+  anyways.
+  
+  Revision  Changes    Path
+  7.241     +0 -1      ircd-hybrid-7/src/s_serv.c
+  7.174     +0 -2      ircd-hybrid-7/src/send.c
+
+
+
 androsyn    2002/02/16 21:55:25 EST	(20020217_4)
 
   Modified files:
