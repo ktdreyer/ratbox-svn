@@ -1,3 +1,17 @@
+db          2002/07/22 01:08:04 EDT	(20020722_1)
+
+  Modified files:
+    src                  ircd_lexer.l s_conf.c 
+  Log:
+  - This fixes the \" case in QSTRING. (an admin wanted this one)
+    This allows you to set email as "db@db.net" for example.
+  
+  Revision  Changes    Path
+  1.142     +42 -5     ircd-hybrid-7/src/ircd_lexer.l
+  7.315     +41 -43    ircd-hybrid-7/src/s_conf.c
+
+
+
 leeh        2002/07/21 20:40:43 EDT	(20020722_0)
 
   Modified files:
