@@ -173,7 +173,7 @@ struct cache {
 };
 
 
-int    ResolverFileDescriptor = -1;   /* GLOBAL - used in s_bsd.c */
+static int    ResolverFileDescriptor = -1;
 
 static time_t nextDNSCheck    = 0;
 

@@ -24,8 +24,6 @@ struct DNSQuery {
   void (*callback)(void* vptr, struct DNSReply* reply); /* callback to call */
 };
 
-extern int ResolverFileDescriptor;  /* GLOBAL - file descriptor (s_bsd.c) */
-
 extern void get_res(void);
 extern struct DNSReply* gethost_byname(const char* name, 
                                        const struct DNSQuery* req);
