@@ -1,3 +1,8 @@
+*** 20001225_19 by ejb
+- fix knock paramcount
+- make knock use +p to stop it, not +s
+
+
 *** 20001225_18 by wcampbel
 1. Noted that auth blocks with redirection MUST have a class
 2. is- says anonops is hideops
