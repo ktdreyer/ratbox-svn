@@ -163,7 +163,8 @@ void flush_reject(void)
 	DLINK_FOREACH_SAFE(ptr, next, reject_list.head)
 	{
 		pnode = ptr->data;
-		rdata = pnode->data;		
+		rdata = pnode->data;
+		dlinkDelete(ptr, &reject_list);
 		MyFree(rdata);
 		patricia_remove(reject_tree, pnode);
 	}
