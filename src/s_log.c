@@ -38,7 +38,8 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
-#ifdef HAVE_SYSLOG_H
+#ifdef USE_SYSLOG
+/* XXX #ifdef HAVE_SYSLOG_H */
 #include <syslog.h>
 #endif
 #include <unistd.h>
