@@ -180,13 +180,11 @@ void
 fd_note(int fd, const char *format, ...)
 {
   va_list args;
-  int len;
   
   if (format)
     {
       va_start(args, format);
-      len = vsprintf_irc(fd_table[fd].desc, format, args);
-      assert(len < FD_DESC_SZ); /* + '\0' */
+      vsnprintf(fd_table[fd].desc, FD_DESC_SZ, format, args);
       va_end(args);
     }
   else
