@@ -688,7 +688,6 @@ void remove_a_mode( int hide_or_not,
   struct Client *acptr;
   char buf[BUFSIZE];
   char modebuf[MODEBUFLEN];
-  char parabuf[MODEBUFLEN];
   char *para[MAXMODEPARAMS];
   char *chname;
   int count = 0;

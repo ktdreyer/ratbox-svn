@@ -1634,7 +1634,6 @@ int accept_message(struct Client *source, struct Client *target)
 int add_to_accept(struct Client *source, struct Client *target)
 {
   dlink_node *m;
-  struct Client *acptr;
   int len;
 
   /* XXX MAX_ALLOW should be in config file not hard coded */

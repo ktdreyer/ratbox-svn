@@ -848,7 +848,6 @@ void iphash_stats(struct Client *cptr, struct Client *sptr,
 int detach_conf(struct Client* cptr,struct ConfItem* aconf)
 {
   dlink_node *ptr;
-  struct ConfItem *found_conf;
 
   if(aconf == NULL)
     return -1;
@@ -2022,7 +2021,6 @@ show_temp_klines(struct Client *sptr, struct ConfItem *tklist)
   char *host;
   char *user;
   char *reason;
-  char *p;
 
   kill_list_ptr = last_list_ptr = tklist;
 

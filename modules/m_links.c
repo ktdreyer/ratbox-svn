@@ -69,8 +69,6 @@ int m_links(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   struct Client* acptr;
   char           clean_mask[2 * HOSTLEN + 4];
   char*          p;
-  char*          s;
-  int            bogus_server = 0;
 
   if (parc > 2)
     {
@@ -108,8 +106,7 @@ int m_links(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
         {
           if(acptr->info[0])
             {
-              p = strchr(acptr->info,']');
-              if(p)
+              if( (p = strchr(acptr->info,']')) )
                 p += 2; /* skip the nasty [IP] part */
               else
                 p = acptr->info;

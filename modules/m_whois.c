@@ -270,7 +270,6 @@ void whois_person(struct Client *sptr,struct Client *acptr)
   struct Client *a2cptr;
   struct Channel *chptr;
   struct Channel *bchan;
-  int user_flags;
   int cur_len = 0;
   int mlen;
   char *t;

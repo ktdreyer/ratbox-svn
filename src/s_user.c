@@ -980,9 +980,6 @@ void send_umode_out(struct Client *cptr,
  */
 static void user_welcome(struct Client *sptr)
 {
-  dlink_node *ptr;
-  struct ConfItem *aconf;
-
   sendto_one(sptr, form_str(RPL_WELCOME), me.name, sptr->name, sptr->name );
   /* This is a duplicate of the NOTICE but see below...*/
   sendto_one(sptr, form_str(RPL_YOURHOST), me.name, sptr->name,

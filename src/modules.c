@@ -180,7 +180,7 @@ int
 load_one_module (char *path)
 {
   void *tmpptr;
-  char *mod_basename, *s;
+  char *mod_basename;
   void (*initfunc)(void) = NULL;
   char **verp;
   char *ver;

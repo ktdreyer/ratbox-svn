@@ -72,14 +72,11 @@ char *_version = "20001122";
  */
 int mr_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 {
-  int              i;
   char             info[REALLEN + 1];
   char*            host;
   struct Client*   acptr;
   struct Client*   bcptr;
-  struct ConfItem* aconf;
   int              hop;
-  dlink_node       *ptr;
 
   if ( (host = parse_server_args(parv, parc, info, &hop)) == NULL )
     {
@@ -206,7 +203,6 @@ int mr_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
  */
 int ms_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 {
-  int              i;
   char             info[REALLEN + 1];
   char*            host;
   struct Client*   acptr;

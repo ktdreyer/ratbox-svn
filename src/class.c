@@ -81,7 +81,6 @@ static  int     get_conf_ping(struct ConfItem *aconf)
 const char*     get_client_class(struct Client *acptr)
 {
   dlink_node    *ptr;
-  struct Class  *cl;
   struct ConfItem *aconf;
   const char*   retc = (const char *)NULL;
 

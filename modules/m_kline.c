@@ -119,7 +119,6 @@ int mo_kline(struct Client *cptr,
                 int parc,
                 char *parv[])
 {
-  char *p;
   char *reason = NULL;
   const char* current_date;
   int  ip_kline = NO;

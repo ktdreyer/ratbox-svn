@@ -2405,7 +2405,6 @@ void cleanup_channels(void *unused)
 
 static void destroy_channel(struct Channel *chptr)
 {
-  struct Client *sptr;
   dlink_node *ptr;
   struct Channel *root_chptr;
   dlink_node *m;
@@ -2702,8 +2701,6 @@ void del_invite(struct Channel *chptr, struct Client *who)
  */
 char *channel_chanop_or_voice(struct Channel *chptr, struct Client *acptr)
 {
-  dlink_node *ptr;
-
   if(find_user_link(&chptr->chanops,acptr))
     return("@");
   else if(find_user_link(&chptr->voiced,acptr))

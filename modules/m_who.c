@@ -280,7 +280,6 @@ void who_global(struct Client *sptr,char *mask, int oper)
   int   member;
   int   isinvis;
   int   maxmatches = 500;
-  char  *op_flags;
 
   for (acptr = GlobalClientList; acptr; acptr = acptr->next)
     {

@@ -101,7 +101,6 @@ flood_recalc(int fd, void *data)
 {
     struct Client *cptr = data;
     struct LocalUser *lcptr = cptr->localClient;
-    int new_allow_parsed;
 
     assert(cptr != NULL);
     assert(lcptr != NULL);
@@ -158,7 +157,6 @@ read_packet(int fd, void *data)
   struct Client *cptr = data;
   struct LocalUser *lcptr = cptr->localClient;
   int length = 0;
-  int done;
 
   assert(lcptr != NULL);
   assert(lcptr->allow_read <= MAX_FLOOD_PER_SEC);

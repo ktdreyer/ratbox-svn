@@ -1,23 +1,81 @@
 
 send.c re-work
 
+PREFIXES
+========
+
+  Server prefixes are the ":%s" strings at the beginning of messages.
+They are used to route the message properly and by local clients to
+update their idea of who is whom. Typical prefix for a local client to
+a channel:
+
+":Dianora!db@irc.db.net"
+
+for a prefix to a remote server:
+":Dianora"
+
+e.g. as seen locally on a channel:
+
+":Dianora!db@irc.db.net PRIVMSG #us-opers :ON TOP OF ...\r\n"
+
+e.g. as seen sent to a remote server:
+":Dianora PRIVMSG #us-opers :ON TOP OF ...\r\n"
+
+  It has been argued that full prefixes sent locally are a waste of bandwidth
+(Isomer from undernet has argued this). i.e. instead of sending:
+":nick!user@host" for a local prefix, one could just send ":nick"..
+Unfortunately, this breaks many clients badly. Personally I feel that
+until clients are updated to understand that a full prefix isn't always
+going to be sent, that this should be held off on.
+
+  As much as possible, prefix generation is now moved "upstairs" as
+much as possible. i.e. if its known its a local client only, then the
+onus of the prefix generation, is the users, not hidden in send.c
+This allows somewhat faster code to be written, as the prefix doesn't
+have to be regenerated over and over again.
+
+
+FUNCTIONS
+=========
+
 sendto_one()    - Should be used for _local_ clients only
                   it expects the prefix to be pre-built by user.
 		  
                   usage - sendto_one(struct Client *to, char *pattern, ...);
 
                   typical use:
-                  sendto_one(acptr,"%s NOTICE %s :I'm tired", me.name);
+
+                  sendto_one(acptr,":%s NOTICE %s :I'm tired", me.name);
+                  Note: This was from a server "me" hence only one
+                  name in prefix.
+
+                  This would be an example of a client sptr, noticing
+                  acptr IF acptr is known to be a local client:
+
+                  sendto_one(acptr,":%s!%s@%s NOTICE %s :You there?",
+                             sptr->name,
+                             sptr->username,
+                             sptr->host,
+                             acptr->name);
 
 sendto_channel_butone()
                 - This function sends a var args message to a channel globally
                   except to the client specified as "one", the prefix
-                  is already pre-built by user.
+                  is built by this function on the fly as it has to
+                  be sent both to local clients on this server and to
+                  remote servers. 
 
                   usage - sendto_channel_butone(struct Client *one,
                                                 struct Client *from,
                                                 struct Channel *chptr,
                                                 const char *pattern, ... );
+
+                  sendto_channel_butone(cptr, sptr, chptr
+                                        "PRIVMSG %s :HI!",
+                                        chptr->chname);
+
+                  e.g. if channel message is coming from "cptr"
+                  it must not be sent back to cptr.
 
 sendto_serv_butone()
                 - This function sends specified var args message
@@ -25,8 +83,6 @@ sendto_serv_butone()
 	
                   usage - sendto_serv_butone(struct Client *one,
                                            const char *pattern, ... );  
-
-
 
 sendto_cap_serv_butone()
                 - This function sends specified var args message
@@ -44,6 +100,8 @@ sendto_common_channels_local()
                 - This function is used only by m_nick and exit_one_client
                   its used to propogate nick changes to all channels user
                   is in, and QUIT messages to all channels user is in.
+                  As it only sends to local clients, prefix generation
+                  is left to the user.
 
                   usage - sendto_common_channels_local(struct Client *user,
                                                        const char *pattern,

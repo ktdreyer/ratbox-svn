@@ -531,8 +531,6 @@ GreetUser(struct Client *client)
 
 {
   static char ubuf[12];
-  struct ConfItem *found_aconf;
-  dlink_node *ptr;
   dlink_node *m;
 
   sendto_realops_flags(FLAGS_CCONN,

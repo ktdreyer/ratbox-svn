@@ -161,7 +161,6 @@ int     m_notice(struct Client *cptr,
  *		- pointer to sptr
  *		- pointer to channel
  */
-
 int     m_message(int p_or_n,
 		  char *command,
 		  struct Client *cptr,
@@ -381,7 +380,6 @@ int build_target_list(int p_or_n,
  *		  note, this does the canonize using pointers
  * side effects	- NONE
  */
-
 int duplicate_ptr( void *ptr, struct entity target_table[], int n)
 {
   int i;
@@ -412,10 +410,10 @@ void msg_channel( int p_or_n, char *command,
 		  char *text)
 {
   struct Channel *vchan;
-  char *channel_name=NULL;
+  char *chname=NULL;
   int result;
 
-  channel_name = chptr->chname;
+  chname = chptr->chname;
 
   if ( (HasVchans(chptr)) && (vchan = map_vchan(chptr,sptr)) )
     {
@@ -434,28 +432,22 @@ void msg_channel( int p_or_n, char *command,
       if (result == CAN_SEND_OPV)
 	{
 	  sendto_channel_butone(cptr, sptr, chptr,
-				":%s!%s@%s %s %s :%s",
-				sptr->name,
-				sptr->username,
-				sptr->host,
-				command, channel_name, text);
+				"%s %s :%s",
+				command, chname, text);
 	}
       else
 	{
-	  if(!flood_attack_channel(sptr, chptr,channel_name))
+	  if(!flood_attack_channel(sptr, chptr, chname))
 	    sendto_channel_butone(cptr, sptr, chptr,
-				  ":%s!%s@%s %s %s :%s",
-				  sptr->name,
-				  sptr->username,
-				  sptr->host,
-				  command, channel_name, text);
+				  "%s %s :%s",
+				  command, chname, text);
 	}
     }
   else
     {
       if (p_or_n != NOTICE)
         sendto_one(sptr, form_str(ERR_CANNOTSENDTOCHAN),
-                   me.name, sptr->name, channel_name);
+                   me.name, sptr->name, chname);
     }
 }
 
@@ -485,13 +477,9 @@ void msg_channel_flags( int p_or_n, char *command,
 
   chname = chptr->chname;
 
-  if (HasVchans(chptr))
+  if (HasVchans(chptr) && (vchan = map_vchan(chptr,sptr)))
     {
-      if( (vchan = map_vchan(chptr,sptr)) )
-	{
-	  chname = chptr->chname;
-	  chptr = vchan;
-	}
+      chptr = vchan;
     }
 
   if(MyClient(sptr))
@@ -730,13 +718,6 @@ void handle_opers(int p_or_n,
   char *s;
   int count;
 
-  /* Everything below here should be reserved for opers 
-   * as pointed out by Mortiis, user%host.name@server.name 
-   * syntax could be used to flood without FLUD protection
-   * its also a delightful way for non-opers to find users who
-   * have changed nicks
-   */
-
   /*
   ** the following two cases allow masks in NOTICEs
   ** (for OPERs only)
@@ -817,9 +798,3 @@ void handle_opers(int p_or_n,
 	}
     }
 }
-
-
-
-
-
-

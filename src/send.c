@@ -46,10 +46,9 @@
 #include <assert.h>
 #include <sys/errno.h>
 
-#define NEWLINE "\r\n"
 #define LOG_BUFSIZE 2048
 
-static  char    sendbuf[2048];
+static  char    sendbuf[IRCD_BUFSIZE*4];
 
 static  int
 send_message (struct Client *, char *, int);
@@ -68,7 +67,9 @@ sendto_list_local(dlink_list *list, const char *sendbuf, int len);
 void
 send_channel_members(struct Client *one, struct Client *from,
 		     dlink_list *list,
-		     const char *sendbuf, int len);
+		     const char *local_sendbuf, int local_len,
+		     const char *remote_sendbuf, int remote_len
+		     );
 
 static int
 send_format(char *sendbuf, const char *pattern, va_list args);
@@ -369,9 +370,13 @@ sendto_one(struct Client *to, const char *pattern, ...)
 /*
  * sendto_channel_butone
  *
- * inputs	-
+ * inputs	- pointer to client(server) to NOT send message to
+ *		- pointer to cient that is sending this message
+ *		- pointer to channel being sent to
+ *		- vargs message
  * output	- NONE
  * side effects	-
+ * BUGS		- This function is now too long.
  */
 void
 sendto_channel_butone(struct Client *one, struct Client *from,
@@ -379,31 +384,84 @@ sendto_channel_butone(struct Client *one, struct Client *from,
                       const char *pattern, ...)
 {
   va_list    args;
-  dlink_node *lp;
-  struct Client *acptr;
-  int len;
+  char buf[IRCD_BUFSIZE*2];
+  char local_prefix[NICKLEN+HOSTLEN+USERLEN+5];
+  char local_sendbuf[IRCD_BUFSIZE*2];
+  char remote_prefix[NICKLEN+HOSTLEN+USERLEN+5];
+  char remote_sendbuf[IRCD_BUFSIZE*2];
+  int local_len;
+  int remote_len;
 
   va_start(args, pattern);
-  len = send_format(sendbuf,pattern,args);
+  (void)send_format(buf,pattern,args);
   va_end(args);
+
+  if(IsServer(from))
+    {
+      ircsprintf(local_prefix,":%s ",
+		 from->name);
+    }
+  else
+    {
+      ircsprintf(local_prefix,":%s!%s@%s ",
+		 from->name,
+		 from->username,
+		 from->host);
+    }
+
+  ircsprintf(remote_prefix,":%s ", from->name);
+
+  ircsprintf(remote_sendbuf, "%s%s",remote_prefix,buf);
+  remote_len = strlen(remote_sendbuf);
+
+  if(remote_len > 510)
+    {
+      remote_sendbuf[IRCD_BUFSIZE-2] = '\r';
+      remote_sendbuf[IRCD_BUFSIZE-1] = '\n';
+      remote_sendbuf[IRCD_BUFSIZE] = '\0';
+      remote_len = IRCD_BUFSIZE;
+    }
+
+  ircsprintf(local_sendbuf, "%s%s",local_prefix,buf);
+  local_len = strlen(local_sendbuf);
+
+  if(local_len > 510)
+    {
+      local_sendbuf[IRCD_BUFSIZE-2] = '\r';
+      local_sendbuf[IRCD_BUFSIZE-1] = '\n';
+      local_sendbuf[IRCD_BUFSIZE] = '\0';
+      local_len = IRCD_BUFSIZE;
+    }
 
   ++current_serial;
   
-  send_channel_members(one, from, &chptr->chanops, sendbuf, len);
-  send_channel_members(one, from, &chptr->voiced,  sendbuf, len);
-  send_channel_members(one, from, &chptr->halfops, sendbuf, len);
-  send_channel_members(one, from, &chptr->peons,   sendbuf, len);
+  send_channel_members(one, from, &chptr->chanops,
+		       (const char *)local_sendbuf, local_len,
+		       (const char *)remote_sendbuf, remote_len);
+
+  send_channel_members(one, from, &chptr->voiced,
+		       (const char *)local_sendbuf, local_len,
+		       (const char *)remote_sendbuf, remote_len);
+
+  send_channel_members(one, from, &chptr->halfops,
+		       (const char *)local_sendbuf, local_len,
+		       (const char *)remote_sendbuf, remote_len);
+
+  send_channel_members(one, from, &chptr->peons,
+		       (const char *)local_sendbuf, local_len,
+		       (const char *)remote_sendbuf, remote_len);
 
 } /* sendto_channel_butone() */
 
 void
 send_channel_members(struct Client *one, struct Client *from,
 		     dlink_list *list,
-		     const char *sendbuf, int len)
+		     const char *local_sendbuf, int local_len,
+		     const char *remote_sendbuf, int remote_len
+		     )
 {
   dlink_node *ptr;
   struct Client *acptr;
-  int index;
 
   for (ptr = list->head; ptr; ptr = ptr->next)
     {
@@ -416,7 +474,7 @@ send_channel_members(struct Client *one, struct Client *from,
         {
           if(acptr->serial != current_serial)
 	    {
-	      send_message(acptr, (char *)sendbuf, len);
+	      send_message(acptr, (char *)local_sendbuf, local_len);
 	      acptr->serial = current_serial;
 	    }
         }
@@ -428,7 +486,8 @@ send_channel_members(struct Client *one, struct Client *from,
            */
           if(acptr->from->serial != current_serial)
             {
-	      send_message_remote(acptr, from, (char *)sendbuf, len);
+	      send_message_remote(acptr, from, 
+				  (char *)remote_sendbuf, remote_len);
               acptr->from->serial = current_serial;
             }
         }
@@ -869,7 +928,7 @@ sendto_anywhere(struct Client *to, struct Client *from,
   int len;
   va_list args;
   char prefix[NICKLEN+HOSTLEN+USERLEN+5];	/* same as USERHOST_REPLYLEN */
-  char buf[1024];
+  char buf[IRCD_BUFSIZE*2];
 
   va_start(args, pattern);
   len = send_format(buf, pattern, args);
@@ -923,7 +982,7 @@ sendto_realops_flags(int flags, const char *pattern, ...)
 {
   int len;
   struct Client *cptr;
-  char nbuf[1024];
+  char nbuf[IRCD_BUFSIZE*2];
   dlink_node *ptr;
   va_list args;
 

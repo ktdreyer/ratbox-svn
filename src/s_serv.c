@@ -831,7 +831,6 @@ int server_estab(struct Client *cptr)
 static void server_burst(struct Client *cptr)
 {
   struct Client*    acptr;
-  dlink_node *l;
   struct Channel*   chptr;
   struct Channel*   vchan; 
   dlink_node *ptr;
