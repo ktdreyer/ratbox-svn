@@ -53,10 +53,10 @@ static FBFILE* logFile;
 #endif
 static int logLevel = INIT_LOG_LEVEL;
 
-static FBFILE *user_log_fb=NULL;
 
 #ifndef SYSLOG_USERS
 static EVH user_log_resync;
+static FBFILE *user_log_fb=NULL;
 #endif
 
 
