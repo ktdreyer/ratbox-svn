@@ -150,7 +150,7 @@ send_message(struct Client *to, char *msg, int len)
      * later.
      *     -- adrian
      */
-    comm_setselect(to->fd, FDLIST_BUSYCLIENT, COMM_SELECT_WRITE,
+    comm_setselect(to->fd, FDLIST_IDLECLIENT, COMM_SELECT_WRITE,
       send_queued_write, to, 0);
     return 0;
 } /* send_message() */
@@ -210,7 +210,7 @@ send_queued_write(int fd, void *data)
 
   /* Finally, if we have any more data, reschedule a write */
   if (linebuf_len(&to->buf_sendq))
-      comm_setselect(fd, FDLIST_BUSYCLIENT, COMM_SELECT_WRITE,
+      comm_setselect(fd, FDLIST_IDLECLIENT, COMM_SELECT_WRITE,
         send_queued_write, to, 0);
 } /* send_queued_write() */
 

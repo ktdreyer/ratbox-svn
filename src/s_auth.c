@@ -180,7 +180,7 @@ static void release_auth_client(struct Client* client)
    * us. This is what read_packet() does.
    *     -- adrian
    */
-  comm_setselect(client->fd, FDLIST_BUSYCLIENT, COMM_SELECT_READ, read_packet,
+  comm_setselect(client->fd, FDLIST_IDLECLIENT, COMM_SELECT_READ, read_packet,
     client, 0);
   add_client_to_list(client);
 }
