@@ -1,3 +1,17 @@
+leeh        2004/10/27 14:05:41 EDT	(20041027_2)
+
+  Modified files:
+    include              modebuild.h 
+    src                  modebuild.c 
+  Log:
+  - added a kick builder
+  
+  Revision  Changes    Path
+  1.2       +5 -0      rserv/include/modebuild.h
+  1.2       +35 -0     rserv/src/modebuild.c
+
+
+
 leeh        2004/10/27 13:21:34 EDT	(20041027_1)
 
   Modified files:
