@@ -1,3 +1,25 @@
+androsyn    2005/03/28 00:41:08 UTC	(20050328_1)
+
+  Modified files:
+    .                    Makefile.in configure configure.ac 
+    adns                 Makefile.in 
+    modules              Makefile.in 
+    src                  Makefile.in 
+    tools                Makefile.in 
+  Log:
+  Regenerate autoconf foo
+  
+  Revision  Changes    Path
+  7.61      +0 -0      ircd-ratbox/Makefile.in
+  1.23      +1 -1      ircd-ratbox/adns/Makefile.in
+  7.259     +4 -4      ircd-ratbox/configure
+  7.70      +4 -4      ircd-ratbox/configure.ac
+  1.131     +0 -0      ircd-ratbox/modules/Makefile.in
+  7.167     +1 -1      ircd-ratbox/src/Makefile.in
+  7.49      +0 -0      ircd-ratbox/tools/Makefile.in
+
+
+
 androsyn    2005/03/28 00:36:16 UTC	(20050328_0)
 
   Modified files:
