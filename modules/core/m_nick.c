@@ -311,23 +311,31 @@ static void ms_nick(struct Client *client_p, struct Client *source_p,
   strncpy_irc(nick, parv[1], NICKLEN);
   nick[NICKLEN] = '\0';
 
-  if(check_clean_nick(client_p, source_p, nick, parv[1]) ||
-     check_clean_user(client_p, source_p, nick, parv[5]) ||
-     check_clean_host(client_p, source_p, nick, parv[6]))
+  if(check_clean_nick(client_p, source_p, nick, parv[1]))
     return;
 
-  /* check the length of the clients gecos */
-  if(parc > 8 && strlen(parv[8]) > REALLEN)
-  {
-    sendto_realops_flags(FLAGS_ALL, L_ALL, "Long realname from server %s for %s",
-                         parv[0], parv[1]);
-    parv[8][REALLEN] = '\0';			 
-  }
+  if (parc == 9)
+    {
+      if (check_clean_user(client_p, source_p, nick, parv[5]) ||
+          check_clean_host(client_p, source_p, nick, parv[6]))
+        return;
 
-  if(!IsServer(source_p) && (parc == 3))
-    newts = atol(parv[2]);
-  else if(IsServer(source_p) && (parc == 9))
-    newts = atol(parv[3]);
+      /* check the length of the clients gecos */
+      if(strlen(parv[8]) > REALLEN)
+        {
+          sendto_realops_flags(FLAGS_ALL, L_ALL, "Long realname from server %s for %s",
+                         parv[0], parv[1]);
+          parv[8][REALLEN] = '\0';
+        }
+
+      if (IsServer(source_p))
+        newts = atol(parv[3]);
+    }
+  else
+    {
+      if (!IsServer(source_p))
+        newts = atol(parv[2]);
+    }
 
   /* if the nick doesnt exist, allow it and process like normal */
   if (!(target_p = find_client(nick, NULL)))
