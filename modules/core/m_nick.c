@@ -47,7 +47,7 @@
 int nick_from_server(struct Client *, struct Client *, int, char **,
                             time_t, char *);
 int set_initial_nick(struct Client *cptr, struct Client *sptr,char *nick);
-int change_nick(struct Client *cptr, struct Client *sptr, char *nick);
+int change_local_nick(struct Client *cptr, struct Client *sptr, char *nick);
 int nick_equal_server(struct Client *cptr, struct Client *sptr, char *nick);
 int clean_nick_name(char* nick);
 
@@ -108,10 +108,7 @@ int mr_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   nick[NICKLEN] = '\0';
 
   /*
-   * if clean_nick_name() returns a null name OR if the server sent a nick
-   * name and clean_nick_name() changed it in some way (due to rules of nick
-   * creation) then reject it. If from a server and we reject it,
-   * and KILL it. -avalon 4/4/92
+   * if clean_nick_name() returns a null name its bad
    */
   if (clean_nick_name(nick) == 0)
     {
@@ -142,13 +139,6 @@ int mr_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 ** m_nick
 **      parv[0] = sender prefix
 **      parv[1] = nickname
-**      parv[2] = optional hopcount when new user; TS when nick change
-**      parv[3] = optional TS
-**      parv[4] = optional umode
-**      parv[5] = optional username
-**      parv[6] = optional hostname
-**      parv[7] = optional server
-**      parv[8] = optional ircname
 */
 
 int m_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
@@ -168,6 +158,9 @@ int m_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
    *      client nick change
    */
 
+  if (parc != 2)
+    return 0;
+
   /*
    * nick is an auto, need to terminate the string
    */
@@ -175,10 +168,7 @@ int m_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   nick[NICKLEN] = '\0';
 
   /*
-   * if clean_nick_name() returns a null name OR if the server sent a nick
-   * name and clean_nick_name() changed it in some way (due to rules of nick
-   * creation) then reject it. If from a server and we reject it,
-   * and KILL it. -avalon 4/4/92
+   * if clean_nick_name() its bad.
    */
   if (clean_nick_name(nick) == 0)
     {
@@ -209,9 +199,10 @@ int m_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 	{
 	  if (strcmp(acptr->name, nick) != 0)
 	    /*
-	    ** Allows change of case in his/her nick
-	    */
-	    return(change_nick(cptr,sptr,nick)); /* -- go and process change */
+	     * Allows change of case in his/her nick
+	     * -- go and process change
+	     */
+	    return(change_local_nick(cptr,sptr,nick));
 	  else
 	    {
 	      /*
@@ -236,7 +227,7 @@ int m_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 	  if (MyConnect(acptr))
 	    {
 	      exit_client(NULL, acptr, &me, "Overridden");
-	      return(change_nick(cptr,sptr,nick));
+	      return(change_local_nick(cptr,sptr,nick));
 	    }
 	  else
 	    {
@@ -249,7 +240,7 @@ int m_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
     }
   else
     {
-      return(change_nick(cptr,sptr,nick)); /* -- go and process change */ 
+      return(change_local_nick(cptr,sptr,nick));
     }
 
   return 1;
@@ -282,11 +273,6 @@ int ms_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       return 0;
     }
 
-  if (!IsServer(sptr) && parc > 2)
-    newts = atol(parv[2]);
-  else if (IsServer(sptr) && parc > 3)
-    newts = atol(parv[3]);
-
   /*
    * parc == 4 on a normal server-to-server client nick change
    *      notice
@@ -295,8 +281,6 @@ int ms_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
    */
   if( (parc != 4) || (parc != 9) )
     return 0;
-
-  fromTS = (parc > 6);
 
   /*
    * nick is an auto, need to terminate the string
@@ -310,8 +294,7 @@ int ms_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
    * creation) then reject it. If from a server and we reject it,
    * and KILL it. -avalon 4/4/92
    */
-  if (clean_nick_name(nick) == 0 ||
-      (IsServer(cptr) && strcmp(nick, parv[1])))
+  if (clean_nick_name(nick) == 0 || strcmp(nick, parv[1]) )
     {
       sendto_one(sptr, form_str(ERR_ERRONEUSNICKNAME),
                  me.name, BadPtr(parv[0]) ? "*" : parv[0], parv[1]);
@@ -366,6 +349,14 @@ int ms_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
         return 0; /* NICK Message ignored */
       }
    }
+
+  if (!IsServer(sptr) && parc > 2)
+    newts = atol(parv[2]);
+  else if (IsServer(sptr) && parc > 3)
+    newts = atol(parv[3]);
+
+  fromTS = (parc > 6);
+
   /*
   ** Note: From this point forward it can be assumed that
   ** acptr != sptr (point to different client structures).
@@ -623,7 +614,6 @@ int ms_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
  * output       -
  * side effects -
  */
-
 int
 nick_from_server(struct Client *cptr, struct Client *sptr, int parc,
                  char *parv[], time_t newts,char *nick)
@@ -771,15 +761,14 @@ set_initial_nick(struct Client *cptr, struct Client *sptr,
 }
 
 /*
- * change_nick
+ * change_local_nick
  * inputs	- pointer to server
  *
  * output	- 
- * side effects	-
+ * side effects	- changes nick of a LOCAL user
  *
  */
-
-int change_nick(struct Client *cptr, struct Client *sptr,
+int change_local_nick(struct Client *cptr, struct Client *sptr,
                        char *nick)
 {
   /*
