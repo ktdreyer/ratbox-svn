@@ -207,7 +207,9 @@ send_linebuf_remote(struct Client *to, struct Client *from,
   }
 
   /* Optimize by checking if (from && to) before everything */
-  if (!MyClient(from) && IsPerson(to) && (to->from == from->from))
+  /* we set to->from up there.. */
+
+  if (!MyClient(from) && IsPerson(to) && (to == from->from))
   {
     if (IsServer(from))
     {
@@ -238,7 +240,7 @@ send_linebuf_remote(struct Client *to, struct Client *from,
     exit_client(NULL, to, &me, "Ghosted client");
 
     return;
-  } /* if (!MyClient(from) && IsPerson(to) && (to->from == from->from)) */
+  } 
 
   _send_linebuf(to, linebuf);
   return;
