@@ -1,3 +1,15 @@
+leeh        2002/07/11 07:04:38 EDT	(20020711_3)
+
+  Modified files:
+    src                  client.c 
+  Log:
+  - fixed an error with a Debug(), found by sofit <sofit@mail.bg>
+  
+  Revision  Changes    Path
+  7.288     +1 -1      ircd-hybrid-7/src/client.c
+
+
+
 androsyn    2002/07/11 05:23:21 EDT	(20020711_2)
 
   Modified files:
