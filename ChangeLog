@@ -1,3 +1,18 @@
+leeh        2002/11/12 22:06:38 UTC	(20021112_0)
+
+  Modified files:
+    .                    RELNOTES 
+    include              memory.h tools.h 
+  Log:
+  - the define for darwin is __APPLE__, wrap the inlines in it.
+  
+  Revision  Changes    Path
+  1.65      +1 -0      ircd-ratbox/RELNOTES
+  7.37      +4 -0      ircd-ratbox/include/memory.h
+  1.38      +3 -0      ircd-ratbox/include/tools.h
+
+
+
 leeh        2002/11/11 23:26:19 UTC	(20021111_5)
 
   Modified files:
