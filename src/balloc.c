@@ -75,6 +75,13 @@ static int newblock(BlockHeap * bh);
 #ifdef HAVE_MMAP /* We've got mmap() that is good */
 #include <sys/mman.h>
 
+/* HP-UX sucks */
+#ifdef MAP_ANONYMOUS
+#ifndef MAP_ANON
+#define MAP_ANONYMOUS MAP_ANON
+#endif
+#endif
+
 /*
  * static inline void free_block(void *ptr, size_t size)
  *
