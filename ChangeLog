@@ -1,3 +1,15 @@
+androsyn    2003/06/24 21:39:55 UTC	(20030624_5)
+
+  Modified files:
+    src                  hash.c 
+  Log:
+  For some reason allocating the hash tables out of bss really bothered me.
+  
+  Revision  Changes    Path
+  7.77      +14 -14    ircd-ratbox/src/hash.c
+
+
+
 androsyn    2003/06/24 20:50:18 UTC	(20030624_4)
 
   Modified files:
