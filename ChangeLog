@@ -1,3 +1,21 @@
+androsyn    2003/09/09 15:46:44 EDT	(20030909_4)
+
+  Modified files:
+    include              channel.h 
+    modules/core         m_mode.c m_sjoin.c 
+    src                  channel.c hash.c 
+  Log:
+  Keep other objects from twiddling with channel related heaps directly
+  
+  Revision  Changes    Path
+  7.150     +9 -0      ircd-ratbox/include/channel.h
+  1.93      +3 -7      ircd-ratbox/modules/core/m_mode.c
+  1.187     +2 -3      ircd-ratbox/modules/core/m_sjoin.c
+  7.396     +39 -5     ircd-ratbox/src/channel.c
+  7.86      +1 -7      ircd-ratbox/src/hash.c
+
+
+
 androsyn    2003/09/09 15:25:22 EDT	(20030909_3)
 
   Modified files:
