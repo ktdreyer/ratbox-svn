@@ -1,3 +1,15 @@
+androsyn    2004/03/23 11:38:31 EST	(20040323_1)
+
+  Modified files:
+    servlink             servlink.c 
+  Log:
+  Move the max_fd check up..
+  
+  Revision  Changes    Path
+  1.35      +1 -5      ircd-ratbox/servlink/servlink.c
+
+
+
 leeh        2004/03/22 19:00:52 EST	(20040323_0)
 
   Removed files:
