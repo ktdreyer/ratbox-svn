@@ -76,7 +76,7 @@ Commit approved by db on IRC.
 
 
 *** 20010929_1 by wcampbel
-Fix for STATS r showing long values in a %d, found by jv, aproved by Diane
+Fix for STATS r showing long values in a %d, found by jv, approved by Diane
 
 
 *** 20010928_1 by davidt
@@ -87,7 +87,7 @@ Fix for STATS r showing long values in a %d, found by jv, aproved by Diane
 *** 20010927_2 by wcampbel
 Updated BUGS, INSTALL, and Riedel's operguide.txt.
 Updated numerics.txt slightly.
-Aproval from Diane on IRC.
+Approval from Diane on IRC.
 
 
 *** 20010927_1 by wcampbel
