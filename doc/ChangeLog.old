@@ -1,3 +1,10 @@
+*** 20001025_1 by db
+- removed NO_JOIN_ON_SPLIT
+- cleaned up m_join.c a bit
+- removed a pile of uneeded #ifdef's
+
+
+
 *** 20001024_4 by adrian
 
 
