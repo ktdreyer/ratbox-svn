@@ -1,3 +1,9 @@
+*** 20010101_2 by wcampbel
+make depend needs to have the CFLAGS in addition to -MM.
+This is for making sure that the error messages associated with gcc
+not being able to find /usr/local/include/libintl.h don't crop up.
+
+
 *** 20010101_1 by wcampbel
 Updated my part of the TODO list
 
