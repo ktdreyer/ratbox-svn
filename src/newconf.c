@@ -2352,17 +2352,17 @@ void	conf_set_general_no_oper_flood(void *data)
 
 void	conf_set_general_fname_userlog(void *data)
 {
-	strlcpy(ConfigFileEntry.fname_userlog, data, MAXPATHLEN);
+	strlcpy(ConfigFileEntry.fname_userlog, data, sizeof(ConfigFileEntry.fname_userlog));
 }
 
 void	conf_set_general_fname_foperlog(void *data)
 {
-	strlcpy(ConfigFileEntry.fname_foperlog, data, MAXPATHLEN);
+	strlcpy(ConfigFileEntry.fname_foperlog, data, sizeof(ConfigFileEntry.fname_foperlog));
 }
 
 void	conf_set_general_fname_operlog(void *data)
 {
-	strlcpy(ConfigFileEntry.fname_operlog, data, MAXPATHLEN);
+	strlcpy(ConfigFileEntry.fname_operlog, data, sizeof(ConfigFileEntry.fname_operlog));
 }
 
 void	conf_set_general_glines(void *data)
