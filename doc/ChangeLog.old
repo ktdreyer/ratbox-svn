@@ -1,3 +1,7 @@
+*** 20011130_2 by a1kmm
+- Removed extraneous argument in a kill_client.
+
+
 *** 20011130_1 by a1kmm
 - Ran m_message.c and send.c through indent - they were unreadable
   before because of tabs.
