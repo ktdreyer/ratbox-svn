@@ -1,3 +1,6 @@
+*** 20010101_24 by davidt
+Oops.  cjoin should also work on non-lazylinks now :)
+
 *** 20010101_23 by db
 - ignore capab sent from remote server
 
