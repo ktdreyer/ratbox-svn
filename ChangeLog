@@ -1,3 +1,21 @@
+leeh        2004/01/23 13:55:50 EST	(20040123_0)
+
+  Modified files:
+    doc                  example.conf 
+    include              conf.h io.h 
+    src                  newconf.c ucommand.c 
+  Log:
+  - added basic flags, to restrict .die etc
+  
+  Revision  Changes    Path
+  1.9       +9 -0      rserv/doc/example.conf
+  1.11      +8 -0      rserv/include/conf.h
+  1.14      +1 -1      rserv/include/io.h
+  1.9       +24 -11    rserv/src/newconf.c
+  1.13      +20 -12    rserv/src/ucommand.c
+
+
+
 leeh        2004/01/22 08:42:36 EST	(20040122_1)
 
   Modified files:
