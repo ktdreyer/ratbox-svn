@@ -1,3 +1,7 @@
+*** 20010306_2 by toot
+cast eob message to (int), for prettyness :P
+
+
 *** 20010306_1 by toot
 . ugly %lu in /stats v and  temp tkline removed
 . acptr had been renamed to aclient_p, when we wanted target_p.
