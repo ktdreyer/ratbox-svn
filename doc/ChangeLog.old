@@ -1,3 +1,10 @@
+*** 20001217_2 by db
+- removed the two pass exit procedure in check_klines check_pings
+  it was =only= done in the first place to get around the local[] 
+  re-arrangement nonsense in the original code. This is long gone..
+
+
+
 *** 20001217_1 by db
 - moved gline expiration to be an event started from ircd.c at startup
   right now its run every half hour. That should be sufficient.
