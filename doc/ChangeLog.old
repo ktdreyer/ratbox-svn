@@ -1,3 +1,20 @@
+leeh        2002/01/30 10:00:02 EST	(20020130_1)
+
+  Modified files:
+    include              channel.h 
+    modules              m_set.c 
+    src                  client.c 
+  Log:
+  - commited patch to fix check_splitmode() wrt events from
+    Giorgos Keramidas <keramida@ceid.upatras.gr>
+  
+  Revision  Changes    Path
+  7.102     +1 -1      ircd-hybrid-7/include/channel.h
+  1.42      +4 -4      ircd-hybrid-7/modules/m_set.c
+  7.223     +1 -1      ircd-hybrid-7/src/client.c
+
+
+
 androsyn    2002/01/30 01:48:17 EST	(20020130_0)
 
   Modified files:
