@@ -1,3 +1,17 @@
+leeh        2004/07/31 20:05:22 EDT	(20040801_0)
+
+  Modified files:
+    modules              m_stats.c 
+    src                  s_stats.c 
+  Log:
+  - merge tstats() into m_stats.c
+  
+  Revision  Changes    Path
+  1.223     +95 -2     ircd-ratbox/modules/m_stats.c
+  7.38      +0 -94     ircd-ratbox/src/s_stats.c
+
+
+
 leeh        2004/07/31 19:39:51 EDT	(20040731_5)
 
   Modified files:
