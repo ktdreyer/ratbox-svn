@@ -1,3 +1,17 @@
+androsyn    2002/08/24 17:10:09 EDT	(20020824_5)
+
+  Modified files:
+    include              client.h 
+    src                  client.c 
+  Log:
+  Add the stupid abort_list back..blah..
+  
+  Revision  Changes    Path
+  7.175     +0 -1      ircd-ratbox/include/client.h
+  7.322     +41 -15    ircd-ratbox/src/client.c
+
+
+
 androsyn    2002/08/24 16:19:01 EDT	(20020824_4)
 
   Modified files:
