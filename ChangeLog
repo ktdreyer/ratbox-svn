@@ -1,3 +1,52 @@
+androsyn    2005/03/28 00:36:16 UTC	(20050328_0)
+
+  Modified files:
+    .                    Makefile.in configure configure.ac 
+    adns                 Makefile.am Makefile.in adns.h event.c 
+                         resolver.c setup.c 
+    include              commio.h parse.h res.h s_auth.h 
+                         s_newconf.h 
+    modules              Makefile.in 
+    src                  Makefile.am Makefile.in commio.c 
+                         ircd_signal.c parse.c s_auth.c 
+                         s_newconf.c 
+    tools                Makefile.in 
+  Added files:
+    src                  dns.c 
+  Removed files:
+    src                  adns.c 
+  Log:
+  the rest of the resolver
+  
+  Revision  Changes    Path
+  7.60      +1 -1      ircd-ratbox/Makefile.in
+  1.3       +5 -0      ircd-ratbox/adns/Makefile.am
+  1.22      +66 -20    ircd-ratbox/adns/Makefile.in
+  1.22      +12 -11    ircd-ratbox/adns/adns.h
+  1.32      +4 -5      ircd-ratbox/adns/event.c
+  1.5       +40 -114   ircd-ratbox/adns/resolver.c
+  1.45      +4 -6      ircd-ratbox/adns/setup.c
+  7.258     +2 -0      ircd-ratbox/configure
+  7.69      +4 -2      ircd-ratbox/configure.ac
+  1.20      +1 -1      ircd-ratbox/include/commio.h
+  7.27      +1 -0      ircd-ratbox/include/parse.h
+  7.40      +9 -16     ircd-ratbox/include/res.h
+  7.30      +1 -1      ircd-ratbox/include/s_auth.h
+  7.52      +1 -1      ircd-ratbox/include/s_newconf.h
+  1.130     +0 -0      ircd-ratbox/modules/Makefile.in
+  7.4       +5 -5      ircd-ratbox/src/Makefile.am
+  7.166     +11 -11    ircd-ratbox/src/Makefile.in
+  7.83      +0 -288    ircd-ratbox/src/adns.c (dead)
+  1.35      +12 -42    ircd-ratbox/src/commio.c
+  7.1       +304 -0    ircd-ratbox/src/dns.c (new)
+  7.32      +1 -0      ircd-ratbox/src/ircd_signal.c
+  7.197     +1 -1      ircd-ratbox/src/parse.c
+  7.201     +20 -56    ircd-ratbox/src/s_auth.c
+  7.75      +8 -15     ircd-ratbox/src/s_newconf.c
+  7.48      +0 -0      ircd-ratbox/tools/Makefile.in
+
+
+
 leeh        2005/03/27 02:19:49 UTC	(20050327_3)
 
   Added files:
