@@ -87,19 +87,21 @@
  *
  */
 
-#define DPATH   "/usr/local/ircd/"
-#define MODPATH "/usr/local/ircd/modules/autoload/"
-#define MSGPATH "/usr/local/ircd/messages/"
-#define SPATH   "/usr/local/ircd/ircd"
-#define CPATH   "ircd.conf"
-#define KPATH   "kline.conf"
-#define DLPATH  "kline.conf"
-#define RPATH   "ircd.rsa"
-#define MPATH   "ircd.motd"
-#define LPATH   "ircd.log"
-#define PPATH   "ircd.pid"
-#define HPATH   "opers.txt"
-#define OPATH   "opers.motd"
+#define DPATH   IRCD_PREFIX
+#define MODPATH IRCD_PREFIX "/modules/autoload/"
+#define MSGPATH IRCD_PREFIX "/messages/"
+#define SPATH   IRCD_PREFIX "/bin/ircd"
+/* i really don't like the below, but I'll figure the rest out! -- adrian */
+#define ETCPATH	IRCD_PREFIX "/etc"
+#define CPATH   ETCPATH "/ircd.conf"
+#define KPATH   ETCPATH "/kline.conf"
+#define DLPATH  ETCPATH "/kline.conf"
+#define RPATH   ETCPATH "/ircd.rsa"
+#define MPATH   ETCPATH "/ircd.motd"
+#define LPATH   ETCPATH "/ircd.log"
+#define PPATH   ETCPATH "/ircd.pid"
+#define HPATH   ETCPATH "/opers.txt"
+#define OPATH   ETCPATH "/opers.motd"
 
 /* TS_MAX_DELTA_DEFAULT and TS_WARN_DELTA_DEFAULT -
  * allowed delta for TS when another server connects.
@@ -128,8 +130,8 @@
  *
  * These need to be defined if you want to use SYSLOG logging, too.
  */
-#define FNAME_USERLOG "/usr/local/ircd/users" /* */
-#define FNAME_OPERLOG "/usr/local/ircd/opers" /* */
+#define FNAME_USERLOG ETCPATH "/users"
+#define FNAME_OPERLOG ETCPATH "/opers"
 
 /* NETWORK_NAME_DEFAULT and NETWORK_DESC_DEFAULT - these are used
  * instead of a servers name/description if you enable server hiding.
@@ -527,13 +529,6 @@ error CLIENT_FLOOD undefined.
 #undef USE_GETTEXT
 #define _(a)       (a)
 #endif
-
-
-/* tuck this here for now, it will go away eventually...
- * but meanwhile, at least it will compile a server that works -db
- */
-
-#define LLVER1
 
 #define CONFIG_H_LEVEL_7
 

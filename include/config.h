@@ -130,8 +130,8 @@
  *
  * These need to be defined if you want to use SYSLOG logging, too.
  */
-#define FNAME_USERLOG "/usr/local/ircd/users" /* */
-#define FNAME_OPERLOG "/usr/local/ircd/opers" /* */
+#define FNAME_USERLOG ETCPATH "/users"
+#define FNAME_OPERLOG ETCPATH "/opers"
 
 /* NETWORK_NAME_DEFAULT and NETWORK_DESC_DEFAULT - these are used
  * instead of a servers name/description if you enable server hiding.

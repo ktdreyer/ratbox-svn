@@ -504,19 +504,10 @@ int main(int argc, char *argv[])
   euid = geteuid();
 
   ConfigFileEntry.dpath = DPATH;
-
   ConfigFileEntry.configfile = CPATH;   /* Server configuration file */
+  ConfigFileEntry.klinefile = KPATH;    /* Server kline file */
+  ConfigFileEntry.dlinefile = DLPATH;   /* dline file */
 
-#ifdef KPATH
-  ConfigFileEntry.klinefile = KPATH;         /* Server kline file */
-#else
-  ConfigFileEntry.klinefile = CPATH;
-#endif /* KPATH */
-
-#ifdef DLPATH
-  ConfigFileEntry.dlinefile = DLPATH;
-#else
-  ConfigFileEntry.dlinefile = CPATH;
 #endif /* DLPATH */
 
 #ifdef  CHROOTDIR
