@@ -1,3 +1,10 @@
+*** 19990909_1 by wnder
+Ok, sorry for the broken compile - I put all the iauth code
+in the ircd tree under #ifdef USE_IAUTH so hopefully nothing
+else will be affected until it's good and ready - i'll do a
+checkout after this to make sure everything's fine.
+
+
 *** 19990908_2 by lusky
 fixes to userhost, changed to -5 style
 
