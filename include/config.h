@@ -257,6 +257,12 @@
 
 /* You shouldn't change anything below this line, unless absolutely needed. */
 
+/* OPER_ONLY_UMODES - umodes that only opers can set */
+#define OPER_ONLY_UMODES (FLAGS_ADMIN|FLAGS_BOTS|FLAGS_CCONN|FLAGS_DEBUG| \
+						  FLAGS_FULL|FLAGS_SKILL|FLAGS_NCHANGE|FLAGS_OPER| \
+						  FLAGS_REJ|FLAGS_UNAUTH|FLAGS_SPY|FLAGS_EXTERNAL| \
+						  FLAGS_OPERWALL)
+
 /* INITIAL_DBUFS - how many dbufs to preallocate
  */
 #define INITIAL_DBUFS 1000 /* preallocate 4 megs of dbufs */ 

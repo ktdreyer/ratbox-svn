@@ -799,7 +799,7 @@ int user_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
           what = MODE_DEL;
           break;        
 
-        case 'O': case 'o' :
+        case 'o' :
           if(what == MODE_ADD)
             {
               if(IsServer(cptr) && !IsOper(sptr))
@@ -818,7 +818,8 @@ int user_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
                 break;
 
               sptr->umodes &= ~(FLAGS_OPER|FLAGS_ADMIN);
-
+			  sptr->umodes &= ~OPER_ONLY_UMODES;
+			  
               Count.oper--;
 
               if (MyConnect(sptr))
@@ -867,19 +868,23 @@ int user_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
         case '\r' :
         case '\t' :
           break;
-	case 'a':
-	  if (MyConnect(sptr)) {
-	    badflag = 1;
-	    break;
-	  }
+			case 'a':
+				if (MyConnect(sptr)) {
+					badflag = 1;
+					break;
+				}
         default :
           if( (flag = user_modes_from_c_to_bitmask[(unsigned char)*m]))
             {
-              if (what == MODE_ADD)
-                sptr->umodes |= flag;
-              else
-		sptr->umodes &= ~flag;  
-            }
+				if (MyConnect(sptr) && !IsOper(sptr) && (OPER_ONLY_UMODES & flag)) {
+					badflag = YES;
+				} else {
+					if (what == MODE_ADD)
+						sptr->umodes |= flag;
+					else
+						sptr->umodes &= ~flag;  
+				}
+			}
           else
             {
               if (MyConnect(sptr))
