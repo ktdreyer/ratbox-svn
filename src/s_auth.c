@@ -185,7 +185,6 @@ static void auth_dns_callback(void* vptr, adns_answer* reply)
   struct AuthRequest* auth = (struct AuthRequest*) vptr;
   char *str = auth->client->host;
   ClearDNSPending(auth);
-  *auth->client->host = '\0';
   if(reply && (reply->status == adns_s_ok))
     {
       if(strlen(*reply->rrs.str) <= HOSTLEN)
@@ -202,8 +201,8 @@ static void auth_dns_callback(void* vptr, adns_answer* reply)
         struct Client *client = auth->client;
         auth->ip6_int = 1;
 	MyFree(reply);
-	SetDNSPending(auth);
         adns_getaddr(&client->localClient->ip, client->localClient->aftype, client->localClient->dns_query, 1);
+	SetDNSPending(auth);
         return;
       } else {
         sendheader(auth->client, REPORT_FAIL_DNS);
