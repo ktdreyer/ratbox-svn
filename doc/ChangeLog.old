@@ -1,3 +1,7 @@
+*** 20010305_3 by androsyn
+Changes sptr cptr and acptr to source_p client_p and target_p respectively
+
+
 *** 20010305_2 by androsyn
 That should have been source_p not server_p
 
