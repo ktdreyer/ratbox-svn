@@ -24,25 +24,34 @@
 
 struct Client;
 
-/* ircdauth.c prototypes */
+#define NOSOCK        (-1)
+#define MAXPARAMS     15
+
+#define IA_CONNECT    (1 >> 0)
+
+#define IsIAuthConnect(x)    ((x).flags &  IA_CONNECT)
+#define SetIAuthConnect(x)   ((x).flags |= IA_CONNECT)
+#define ClearIAuthConnect(x) ((x).flags &= ~IA_CONNECT)
+
+struct IrcdAuthentication
+{
+	char hostname[HOSTLEN + 1]; /* hostname of IAuth server */
+	int port;                   /* port for connection */
+	int socket;                 /* socket fd for IAuth connection */
+	unsigned int flags;         /* IA_* */
+};
+
+/*
+ * Prototypes
+ */
 
 int ConnectToIAuth();
 void IAuthQuery(struct Client *client);
 int ParseIAuth();
 
-typedef struct IrcdAuthentication IrcdAuth;
-
-#define  NOSOCK        (-1)
-#define  MAXPARAMS     15
-
-struct IrcdAuthentication
-{
-	char hostname[HOSTLEN + 1]; /* hostname of IAuth server */
-	int port; /* port for connection */
-	int socket; /* socket descriptor for IAuth connection */
-};
-
-/* external declarations */
+/*
+ * External declarations
+ */
 
 extern struct IrcdAuthentication iAuth;
 
