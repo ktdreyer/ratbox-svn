@@ -166,7 +166,7 @@ comm_setselect(int fd, fdlist_t list, unsigned int type, PF * handler,
 
   if(epoll_ctl(ep, op, fd, F->pflags) != 0)
   {
-    perror("comm_setselect(): epoll_ctl()");
+    ilog(L_ERROR, "comm_setselect(): epoll_ctl failed: %s", strerror(errno));
   }
   
 

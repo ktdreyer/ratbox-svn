@@ -130,7 +130,7 @@ kq_update_events(int fd, short filter, PF * handler)
 	  /* jdc -- someone needs to do error checking... */
 	  if (ret == -1)
 	    {
-	      perror("kq_update_events(): kevent()");
+	      ilog(L_ERROR, "kq_update_events(): kevent(): %s", strerror(errno));
 	      return;
 	    }
 	  kqoff = 0;
