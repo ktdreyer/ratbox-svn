@@ -1,3 +1,7 @@
+*** 20010108_2 by madmax
+added FLAGS_DRONE to OPER_UMODES for +e
+
+
 *** 20010108_1 by toot
 fixed a memleak dianora found, when reading modules from the config
 
