@@ -1,3 +1,9 @@
+*** 19990826_1 by lusky
+turned on ANTI_DRONE_FLOOD by default
+sync'd config.h.dist
+include class.h in m_message.c
+
+
 *** 19990825_3 by lusky
 cleaned up tools/Makefile.in
 added CVS Id tags to a many files
