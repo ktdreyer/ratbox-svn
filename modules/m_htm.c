@@ -44,6 +44,8 @@ _modinit(void)
   mod_add_cmd(MSG_HTM, &htm_msgtab);
 }
 
+char *_version = "20001122";
+
 #define LOADCFREQ 5
 /*
  * mo_htm - HTM command handler

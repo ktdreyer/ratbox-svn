@@ -42,6 +42,8 @@ _modinit(void)
   mod_add_cmd(MSG_CAPAB, &capab_msgtab);
 }
 
+char *_version = "20001122";
+
 /*
  * ms_capab - CAPAB message handler
  *      parv[0] = sender prefix

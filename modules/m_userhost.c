@@ -53,8 +53,6 @@ char *_version = "20001122";
  * the need for complicated requests like WHOIS. It returns user/host
  * information only (no spurious AWAY labels or channels).
  */
-/* rewritten Diane Bruce 1999 */
-
 int     m_userhost(struct Client *cptr,
                    struct Client *sptr,
                    int parc,

@@ -45,6 +45,8 @@ _modinit(void)
 
 static char buf[BUFSIZE];
 
+char *_version = "20001122";
+
 /*
  * m_ison added by Darren Reed 13/8/91 to act as an efficent user indicator
  * with respect to cpu/bandwidth used. Implemented for NOTIFY feature in
@@ -54,13 +56,6 @@ static char buf[BUFSIZE];
  * format:
  * ISON :nicklist
  */
-/*
- * Take care of potential nasty buffer overflow problem 
- * -Dianora
- *
- */
-
-
 int m_ison(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 {
   struct Client *acptr;

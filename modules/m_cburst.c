@@ -48,6 +48,8 @@ _modinit(void)
   mod_add_cmd(MSG_CBURST, &cburst_msgtab);
 }
 
+char *_version = "20001122";
+
 /*
 ** m_cburst
 **      parv[0] = sender prefix

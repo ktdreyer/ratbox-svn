@@ -47,6 +47,7 @@ _modinit(void)
   mod_add_cmd(MSG_INVITE, &invite_msgtab);
 }
 
+char *_version = "20001122";
 
 /*
 ** m_invite

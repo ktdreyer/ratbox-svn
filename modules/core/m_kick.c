@@ -45,6 +45,8 @@ _modinit(void)
   mod_add_cmd(MSG_KICK, &kick_msgtab);
 }
 
+char *_version = "20001122";
+
 /*
 ** m_kick
 **      parv[0] = sender prefix
@@ -52,21 +54,6 @@ _modinit(void)
 **      parv[2] = client to kick
 **      parv[3] = kick comment
 */
-/*
- * I've removed the multi channel kick, and the multi user kick
- * though, there are still remnants left ie..
- * "name = strtoken(&p, parv[1], ",");" in a normal kick
- * it will just be "KICK #channel nick"
- * A strchr() is going to be faster than a strtoken(), so rewritten
- * to use a strchr()
- *
- * It appears the original code was supposed to support 
- * "kick #channel1,#channel2 nick1,nick2,nick3." For example, look at
- * the original code for m_topic(), where 
- * "topic #channel1,#channel2,#channel3... topic" was supported.
- *
- * -Dianora
- */
 int     m_kick(struct Client *cptr,
                struct Client *sptr,
                int parc,
@@ -116,12 +103,6 @@ int     m_kick(struct Client *cptr,
 	}
     }
 
-  /* You either have chan op privs, or you don't -Dianora */
-  /* orabidoo and I discussed this one for a while...
-   * I hope he approves of this code, (he did) users can get quite confused...
-   *    -Dianora
-   */
-
   if (!IsServer(sptr) && !is_chan_op(chptr, sptr) ) 
     { 
       /* was a user, not a server, and user isn't seen as a chanop here */
@@ -163,20 +144,6 @@ int     m_kick(struct Client *cptr,
        *     But I will warn it as a possible desync.
        *
        *     -Dianora
-       */
-
-      /*          sendto_one(sptr, form_str(ERR_DESYNC),
-       *           me.name, parv[0], chptr->chname);
-       */
-
-      /*
-       * After more discussion with orabidoo...
-       *
-       * The code was sound, however, what happens if we have +h (TS4)
-       * and some servers don't understand it yet? 
-       * we will be seeing servers with users who appear to have
-       * no chanops at all, merrily kicking users....
-       * -Dianora
        */
     }
 
