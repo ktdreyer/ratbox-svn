@@ -1,3 +1,20 @@
+leeh        2004/03/06 15:50:45 EST	(20040306_6)
+
+  Modified files:
+    doc                  whats-new.txt 
+    modules              m_info.c 
+    src                  client.c 
+  Log:
+  - fixed the user exit log
+  - fix /info to list all logfiles
+  
+  Revision  Changes    Path
+  7.44      +2 -1      ircd-ratbox/doc/whats-new.txt
+  1.105     +43 -6     ircd-ratbox/modules/m_info.c
+  7.437     +11 -6     ircd-ratbox/src/client.c
+
+
+
 leeh        2004/03/06 15:03:31 EST	(20040306_5)
 
   Modified files:
