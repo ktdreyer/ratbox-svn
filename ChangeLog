@@ -1,3 +1,19 @@
+leeh        2003/06/20 15:25:43 UTC	(20030620_5)
+
+  Modified files:
+    modules              m_names.c m_who.c 
+    src                  channel_mode.c send.c 
+  Log:
+  - fix a few bugs
+  
+  Revision  Changes    Path
+  1.69      +5 -2      ircd-ratbox/modules/m_names.c
+  1.91      +11 -10    ircd-ratbox/modules/m_who.c
+  7.105     +2 -2      ircd-ratbox/src/channel_mode.c
+  7.245     +3 -1      ircd-ratbox/src/send.c
+
+
+
 leeh        2003/06/20 14:26:06 UTC	(20030620_4)
 
   Modified files:
