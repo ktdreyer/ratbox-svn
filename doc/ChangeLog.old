@@ -1,3 +1,15 @@
+*** 20001218_7 by db
+- modifed lazylinks partially, to not send a full nick burst..
+  still some work to do on this..
+- added client_burst_if_needed() ... it checks to see if the given
+  server pointer is a server, is a lazylink, and if it does not
+  know about that given client, it bursts the nick.
+- A nick that is not known on a leaf, will be nick collided ! if it
+  changes nick. Thats next folks.. removing the sending of nick
+  changes to leafs that don't know about that nick.
+  
+
+
 *** 20001218_6 by ejb
 - remove whois_notice stupidity
 - +a umode is now set automatically for admin=yes; opers, and cannot be changed.
