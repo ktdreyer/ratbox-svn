@@ -379,7 +379,7 @@ io_loop(void)
 			eventRun();
 
 
-		comm_select(250);
+		comm_select(500);
 		if(ConfigFileEntry.htm_messages)
 			check_htm();
 
