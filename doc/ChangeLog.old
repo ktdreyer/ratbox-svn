@@ -1,3 +1,7 @@
+*** 20010501_3 by ejb
+- typo.
+
+
 *** 20010501_2 by ejb
 - fixed STRING types in getopt.c.
 
