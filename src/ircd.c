@@ -727,14 +727,16 @@ int main(int argc, char *argv[])
   eventAdd("comm_checktimeouts", comm_checktimeouts, NULL, 1);
 
   eventAdd("cleanup_zombies", cleanup_zombies, NULL, 30); 
+  
 #ifdef PACE_CONNECT
  if (ConfigFileEntry.throttle_time > 0)
-  eventAdd("flush_expired_ips", flush_expired_ips, NULL, ConfigFileEntry.throttle_time);
+   eventAdd("flush_expired_ips", flush_expired_ips, NULL, ConfigFileEntry.throttle_time);
  else
-  eventAdd("flush_expired_ips", flush_expired_ips, NULL, 300);
+   eventAdd("flush_expired_ips", flush_expired_ips, NULL, 300);
 #endif
 
-  eventAdd("write_links_file", write_links_file, NULL, ConfigServerHide.links_delay);
+  if(ConfigFileEntry.links_delay > 0)
+    eventAdd("write_links_file", write_links_file, NULL, ConfigServerHide.links_delay);
 
   ServerRunning = 1;
   io_loop();
