@@ -107,16 +107,18 @@ get_listener_name(const struct Listener *listener)
 {
 	static char buf[HOSTLEN + HOSTLEN + PORTNAMELEN + 4];
 	int port = 0;
+
+	assert(NULL != listener);
+	if(listener == NULL)
+		return NULL;
+
 #ifdef IPV6
 	if(listener->addr.ss_family == AF_INET6)
 		port = ntohs(((struct sockaddr_in6 *)&listener->addr)->sin6_port);
 	else
-#else
+#endif
 		port = ntohs(((struct sockaddr_in *)&listener->addr)->sin_port);	
-#endif	
-	assert(NULL != listener);
-	if(listener == NULL)
-		return NULL;
+
 	ircsprintf(buf, "%s[%s/%u]", me.name, listener->name, port);
 	return buf;
 }
@@ -368,7 +370,6 @@ add_listener(int port, const char *vhost_ip, int family)
 		default:
 			break;
 	}
-
 	if((listener = find_listener(&vaddr)))
 	{
 		if(listener->fd > -1)
