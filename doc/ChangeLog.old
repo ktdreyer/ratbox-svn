@@ -1,3 +1,15 @@
+leeh        2002/04/25 05:38:40 EDT	(20020425_1)
+
+  Modified files:
+    src                  client.c 
+  Log:
+  - ints need a return number..
+  
+  Revision  Changes    Path
+  7.252     +1 -1      ircd-hybrid-7/src/client.c
+
+
+
 leeh        2002/04/25 04:54:50 EDT	(20020425_0)
 
   Modified files:
