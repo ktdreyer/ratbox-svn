@@ -1,3 +1,22 @@
+leeh        2004/02/26 11:58:34 EST	(20040226_2)
+
+  Modified files:
+    help/opers           xline 
+    modules              m_resv.c m_stats.c m_xline.c 
+    src                  messages.tab s_newconf.c 
+  Log:
+  - temp xlines..
+  
+  Revision  Changes    Path
+  1.4       +22 -3     ircd-ratbox/help/opers/xline
+  1.50      +2 -2      ircd-ratbox/modules/m_resv.c
+  1.197     +2 -1      ircd-ratbox/modules/m_stats.c
+  1.41      +120 -48   ircd-ratbox/modules/m_xline.c
+  7.108     +1 -1      ircd-ratbox/src/messages.tab
+  7.23      +6 -1      ircd-ratbox/src/s_newconf.c
+
+
+
 leeh        2004/02/26 11:12:21 EST	(20040226_1)
 
   Modified files:
