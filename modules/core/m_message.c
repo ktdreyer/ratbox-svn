@@ -175,12 +175,6 @@ int     m_message(int p_or_n,
   if (!IsPerson(sptr))
     return 0;
 
-#ifndef ANTI_SPAMBOT_WARN_ONLY
-  /* if its a spambot, just ignore it */
-  if(sptr->join_leave_count >= MAX_JOIN_LEAVE_COUNT)
-    return 0;
-#endif
-
   /* privmsg gives different errors, so this still needs to be checked */
   if (parc < 2 || *parv[1] == '\0')
     {
@@ -222,10 +216,6 @@ int     m_message(int p_or_n,
 	  break;
 	}
     }
-
-  if(ntargets == 0)
-    sendto_one(sptr, form_str(ERR_NOSUCHNICK), me.name,
-	       parv[0], parv[1]);
 
   return 1;
 }
@@ -271,15 +261,26 @@ int build_target_list(int p_or_n,
       ** plain old channel msg ?
       */
 
-      if( IsChanPrefix(*nick) && (chptr = hash_find_channel(nick, NullChn))
-	  && !duplicate_ptr(chptr, target_table, i) )
+      if( IsChanPrefix(*nick) )
 	{
-	  target_table[i].ptr = (void *)chptr;
-	  target_table[i++].type = ENTITY_CHANNEL;
+	  if( (chptr = hash_find_channel(nick, NullChn)) )
+	    {
+	      if( !duplicate_ptr(chptr, target_table, i) )
+		{
+		  target_table[i].ptr = (void *)chptr;
+		  target_table[i++].type = ENTITY_CHANNEL;
 	  
-	  if( i >= MAX_MULTI_MESSAGES)
-	    return(i);
-	  continue;
+		  if( i >= MAX_MULTI_MESSAGES)
+		    return(i);
+		  continue;
+		}
+	    }
+	  else
+	    {
+	      sendto_one(sptr, form_str(ERR_NOSUCHNICK), me.name,
+			 sptr->name, nick );
+	      continue;
+	    }
 	}
 
       /* @#channel or +#channel message ? */
@@ -313,15 +314,23 @@ int build_target_list(int p_or_n,
 	   * if the channel is found, fine, if not report an error
 	   */
 
-	  if ( (chptr = hash_find_channel(nick+1, NullChn)) &&
-	       !duplicate_ptr(chptr, target_table,i) )
+	  if ( (chptr = hash_find_channel(nick+1, NullChn)) )
 	    {
-	      target_table[i].ptr = (void *)chptr;
-	      target_table[i].type = ENTITY_CHANOPS_ON_CHANNEL;
-	      target_table[i++].flags = type;
+	      if( !duplicate_ptr(chptr, target_table,i))
+		{
+		  target_table[i].ptr = (void *)chptr;
+		  target_table[i].type = ENTITY_CHANOPS_ON_CHANNEL;
+		  target_table[i++].flags = type;
 
-	      if( i >= MAX_MULTI_MESSAGES)
-		return(i);
+		  if( i >= MAX_MULTI_MESSAGES)
+		    return(i);
+		  continue;
+		}
+	    }
+	  else
+	    {
+	      sendto_one(sptr, form_str(ERR_NOSUCHNICK), me.name,
+			 sptr->name, nick );
 	      continue;
 	    }
 	}
@@ -334,16 +343,24 @@ int build_target_list(int p_or_n,
 
       /* At this point, its likely its another client */
 
-      if ( (acptr = find_person(nick, NULL)) &&
-	   !duplicate_ptr(acptr, target_table, i) &&
-	   !drone_attack(sptr, acptr) )
+      if ( (acptr = find_person(nick, NULL)) )
 	{
-	  target_table[i].ptr = (void *)acptr;
-	  target_table[i].type = ENTITY_CLIENT;
-	  target_table[i++].flags = 0;
+	  if( !duplicate_ptr(acptr, target_table, i) &&
+	      !drone_attack(sptr, acptr) )
+	    {
+	      target_table[i].ptr = (void *)acptr;
+	      target_table[i].type = ENTITY_CLIENT;
+	      target_table[i++].flags = 0;
 	      
-	  if( i >= MAX_MULTI_MESSAGES)
-	    return(i);
+	      if( i >= MAX_MULTI_MESSAGES)
+		return(i);
+	      continue;
+	    }
+	}
+      else
+	{
+	  sendto_one(sptr, form_str(ERR_NOSUCHNICK), me.name,
+		     sptr->name, nick );
 	  continue;
 	}
 
