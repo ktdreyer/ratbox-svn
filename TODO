@@ -190,6 +190,11 @@ Little things to be done given enough time and initiative
 .  Re-add the ability to set usermodes from the conf (oldconf field after the
    O: line class)
 .  What does the name field in the listen block do?  (oldconf P:name:ip::port)
+.  Get rid of the %lu format in m_eob.c, go back to a damn %d
+.  Fix the format of TIME, we used to use %t in date()...that seems to be
+   gone now.... Saturday January 20 2001 -- 15:49: 3 - 5: 0
+   That looks like shit...fix it
+.  Randomize the order of WHO #channel and NAMES #channel in +a mode.
 
 -- Rodder's list
 .  Add scaleable database-based authentication.  Probably part of Iauth.
