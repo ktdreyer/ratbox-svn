@@ -125,7 +125,6 @@ int   class_redirport_var;
 %token  PORT
 %token  QSTRING
 %token  QUARANTINE
-%token  QUARANTINE
 %token  REASON
 %token  REDIRSERV
 %token  REDIRPORT
@@ -199,9 +198,11 @@ int   class_redirport_var;
 %token  MAX_TARGETS
 %token  LINKS_NOTICE
 %token  LINKS_DELAY
+
 %type   <ip_entry> IP_TYPE
 %type   <string>   QSTRING
 %type   <number>   NUMBER
+
 %%
 conf:   
         | conf conf_item
