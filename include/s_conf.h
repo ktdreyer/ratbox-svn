@@ -202,6 +202,7 @@ typedef struct config_file_entry
   int         links_delay;
   int         vchans_oper_only;
   int         quiet_on_ban;
+  int         caller_id_wait;
 } ConfigFileEntryType;
 
 struct server_info

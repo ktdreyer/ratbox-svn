@@ -1438,6 +1438,9 @@ static void read_conf(FBFILE* file)
 
   if (!ConfigFileEntry.knock_delay)
     ConfigFileEntry.knock_delay = 300;
+
+  if (!ConfigFileEntry.caller_id_wait)
+    ConfigFileEntry.caller_id_wait = 60;
   
   GlobalSetOptions.idletime = (ConfigFileEntry.idletime * 60);
 

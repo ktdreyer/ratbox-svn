@@ -471,6 +471,11 @@ static void send_conf_options(struct Client *sptr)
               "Minimum Delay between uses of certain commands");
   sendto_one(sptr,
               ":%s %d %s :%-30s %-5d [%-30s]",
+              me.name, RPL_INFO, sptr->name, "caller_id_wait",
+              ConfigFileEntry.caller_id_wait,
+              "Minimum Delay between notifying +g users of messages");
+  sendto_one(sptr,
+              ":%s %d %s :%-30s %-5d [%-30s]",
               me.name, RPL_INFO, sptr->name, "whois_wait",
               ConfigFileEntry.whois_wait,
               "Delay between Remote uses of WHOIS");

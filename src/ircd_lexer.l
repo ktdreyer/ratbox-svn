@@ -87,6 +87,7 @@ admin		{ return ADMIN; }
 administrator	{ return ADMIN; }
 auth		{ return AUTH; }
 autoconn	{ return AUTOCONN; }
+caller_id_wait	{ return CALLER_ID_WAIT; }
 class		{ return CLASS; }
 client_exit     { return CLIENT_EXIT; }
 connect		{ return CONNECT; }
