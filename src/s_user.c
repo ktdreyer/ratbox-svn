@@ -249,9 +249,14 @@ void show_isupport(struct Client *source_p)
 {
   char isupportbuffer[512];
 
-  ircsprintf(isupportbuffer,FEATURES,FEATURESVALUES);
+  ircsprintf(isupportbuffer, FEATURES, FEATURESVALUES);
   sendto_one(source_p, form_str(RPL_ISUPPORT), me.name, source_p->name, 
   	     isupportbuffer);
+	     
+  ircsprintf(isupportbuffer, FEATURES2, FEATURES2VALUES);
+  sendto_one(source_p, form_str(RPL_ISUPPORT), me.name, source_p->name,
+             isupportbuffer);
+
   return;
 }
 

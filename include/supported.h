@@ -37,10 +37,7 @@
                 " MAXTARGETS=%i" \
                 " NICKLEN=%i" \
                 " TOPICLEN=%i" \
-                " KICKLEN=%i" \
-                " CHANTYPES=%s" \
-                " PREFIX=%s" \
-                " CHANMODES=%s"
+                " KICKLEN=%i"
 
 #define FEATURESVALUES ConfigChannel.use_knock ? " KNOCK" : "", \
         ConfigChannel.use_vchans ? " VCHANS" : "", \
@@ -48,10 +45,17 @@
         ConfigChannel.use_invex ? " INVEX" : "", \
         MAXMODEPARAMS,ConfigChannel.max_chans_per_user, \
         ConfigChannel.max_bans, \
-        ConfigFileEntry.max_targets,NICKLEN,TOPICLEN,TOPICLEN, \
-	ConfigServerHide.disable_local_channels ? "#" : "#&","(ohv)@%+", \
-        "beI,k,l,imnpsta"
+        ConfigFileEntry.max_targets,NICKLEN,TOPICLEN,TOPICLEN
 
+#define FEATURES2 "CHANTYPES=%s" \
+                  " PREFIX=%s" \
+		  " CHANMODES=%s" \
+		  " NETWORK=%s"
+
+#define FEATURES2VALUES ConfigServerHide.disable_local_channels ? "#" : "#&", \
+                        "(ohv)@%+", "beI,k,l,imnpsta", \
+			ServerInfo.network_name
+                          
 /*
  * - from mirc's versions.txt
  *
