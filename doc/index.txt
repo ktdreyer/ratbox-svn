@@ -12,6 +12,7 @@ Tao-of-IRC.940110
 blalloc.txt		- Outline of the block memory allocator
 challenge.txt           - Overview of the challenge/response system for
                           obtaining operator status
+cookies.txt             - ircd Cookie proposal
 event.txt		- Outline of the event system
 example.conf            - An example ircd.conf file describing most of the
                           user settable options

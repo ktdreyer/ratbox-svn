@@ -155,11 +155,6 @@ Little things to be done given enough time and initiative -Hwy
    user="wcampbel@144.26.0.0/16"; # Does not work
 .  The 3 logging path settings are NOOP in the conf (logpath, oper_log, 
    gline_log)
-.  $$*.server.mask and $#*.user.mask do not currently work...
-   Notice -- Unknown prefix (:Hwy-7!wcampbel@bee-90-245.bee.net PRIVMSG 
-   $hyb-devel.monkie.org :test) from 
-   hyb-devel.monkie.org[wcampbel@cats.meow.st], Squitting 
-   Hwy-7!wcampbel@bee-90-245.bee.net (DONE -- except for LL bugs)
 .  Have a few more things /quote SET'table
 .  More documentation on the gettext stuff, enough for a layman to use
 .  Extra \r\n sent to the log file by ts_warn needs to go (Done?)
@@ -190,6 +185,13 @@ Little things to be done given enough time and initiative -Hwy
 .  JOIN #channel,0 joins #channel0, #2,000 joins #20... STRANGE
 .  Unconfirmed reports of DNS lookups failing on the first connection to
    a server, while working fine on subsequent connections.
+.  Somehow fix the bug that causes cores when an in-use message file is
+   updated.
+.  A FAQ
+.  Major cleanup of example.conf, it's a disgrace
+.  chkconf
+.  Clean up the manpage (ircd.8)
+.  More translations!
 
 
 -- Rodder's list
