@@ -52,4 +52,10 @@ extern void  show_opers(struct Client* client);
 extern int do_user(char* nick, struct Client* cptr, struct Client* sptr,
                    char* username, char *host, char *server, char *realname);
 
-#endif
+extern int clean_nick_name(char* nick);
+extern int nickkilldone(struct Client *cptr, struct Client *sptr, int parc,
+                        char *parv[], time_t newts,char *nick);
+
+#endif /* INCLUDED_s_user_h */
+
+

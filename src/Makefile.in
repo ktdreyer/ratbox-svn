@@ -60,6 +60,7 @@ SRCS = \
 	m_message.c \
 	m_mode.c \
 	m_names.c \
+	m_nick.c \
 	m_oper.c \
 	m_operwall.c \
 	m_part.c \
@@ -155,6 +156,7 @@ SRCS = \
 #	m_lusers.o \
 #	m_mode.o \
 #	m_names.o \
+#	m_nick.o \
 #	m_oper.o \
 #	m_operwall.o \
 #	m_part.o \

@@ -66,6 +66,7 @@ extern const char* myctime(time_t);
 extern char*       strtoken(char** save, char* str, char* fs);
 extern void*       MyMalloc(size_t size);
 extern void*       MyRealloc(void* p, size_t size);
+
 /* MyFree is defined as a macro in ircd_defs.h */
 /* extern void MyFree(void* p); */
 

@@ -65,7 +65,7 @@
 /* 
  * Macros everyone uses :/ moved here from sys.h
  */
-#define MyFree(x)      do { if ((x)) { free((x)); (x) = 0; } } while(0)
+#define MyFree(x)      do { free((x)); (x) = 0; } while(0)
 
 #define DEBUG_BLOCK_ALLOCATOR
 #ifdef DEBUG_BLOCK_ALLOCATOR
