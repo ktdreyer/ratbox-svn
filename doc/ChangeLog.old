@@ -1,3 +1,7 @@
+*** 20010420_3 by androsyn
+Fixed signedness warnings with Sun's cc
+
+
 *** 20010420_2 by androsyn
 Added TODO for static modules
 
