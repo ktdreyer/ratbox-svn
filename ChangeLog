@@ -1,3 +1,16 @@
+androsyn    2004/10/13 14:20:48 EDT	(20041013_1)
+
+  Modified files:
+    adns                 event.c setup.c 
+  Log:
+  replace a few close() calls with comm_close()
+  
+  Revision  Changes    Path
+  1.28      +2 -2      ircd-ratbox/adns/event.c
+  1.41      +3 -3      ircd-ratbox/adns/setup.c
+
+
+
 androsyn    2004/10/13 12:48:12 EDT	(20041013_0)
 
   Modified files:
