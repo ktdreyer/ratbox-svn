@@ -153,9 +153,6 @@
 /* Define to 1 if you have the <wait.h> header file. */
 #undef HAVE_WAIT_H
 
-/* Define to 1 if you have the `writev' function. */
-#undef HAVE_WRITEV
-
 /* Define if IPv6 support is present and available. */
 #undef IPV6
 
