@@ -249,7 +249,7 @@ read_ctrl_packet(int fd, void *data)
 
 	for (replydef = slinkrpltab; replydef->handler; replydef++)
 	{
-		if(replydef->replyid == reply->command)
+		if((int)replydef->replyid == reply->command)
 			break;
 	}
 

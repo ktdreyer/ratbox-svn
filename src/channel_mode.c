@@ -426,7 +426,7 @@ pretty_mask(char *mask)
 
 	nick = user = host = splat;
 
-	if(BUFSIZE - mask_pos < strlen(mask) + 5)
+	if((size_t)BUFSIZE - mask_pos < strlen(mask) + 5)
 		return NULL;
 
 	old_mask_pos = mask_pos;

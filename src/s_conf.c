@@ -272,7 +272,7 @@ report_configured_links(struct Client *source_p, int mask)
 		if(tmp->status & mask)
 		{
 			for (p = &report_array[0]; p->conf_type; p++)
-				if(p->conf_type == tmp->status)
+				if(p->conf_type == (int)tmp->status)
 					break;
 
 			if(p->conf_type == 0)
@@ -591,7 +591,7 @@ add_ip_limit(struct Client *client_p, struct ConfItem *aconf)
 
 	if(pnode != NULL)
 	{
-		if(((unsigned long) pnode->data) >= ConfCidrAmount(aconf)
+		if(((long) pnode->data) >= ConfCidrAmount(aconf)
 		   && !IsConfExemptLimits(aconf))
 		{
 			/* This should only happen if the limits are set to 0 */
@@ -903,7 +903,7 @@ find_conf_by_name(const char *name, int status)
 
 	for (conf = ConfigItemList; conf; conf = conf->next)
 	{
-		if(conf->status == status && conf->name && match(name, conf->name))
+		if((int)conf->status == status && conf->name && match(name, conf->name))
 			return (conf);
 	}
 	return (NULL);
@@ -928,7 +928,7 @@ find_conf_by_host(const char *host, int status)
 		return (NULL);
 	for (conf = ConfigItemList; conf; conf = conf->next)
 	{
-		if(conf->status == status && conf->host && match(host, conf->host))
+		if((int)conf->status == status && conf->host && match(host, conf->host))
 			return (conf);
 	}
 	return (NULL);

@@ -146,13 +146,14 @@ dns_do_callbacks(void)
 {
 	adns_query q, r;
 	adns_answer *answer;
+	void *xr = &r;
 	struct DNSQuery *query;
-
+	void *xq = &query;
 	adns_forallqueries_begin(dns_state);
 
-	while ((q = adns_forallqueries_next(dns_state, (void **) &r)) != NULL)
+	while ((q = adns_forallqueries_next(dns_state, xr)) != NULL)
 	{
-		switch (adns_check(dns_state, &q, &answer, (void **) &query))
+		switch (adns_check(dns_state, &q, &answer, xq))
 		{
 		case 0:
 			/* Looks like we got a winner */

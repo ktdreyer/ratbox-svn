@@ -431,13 +431,14 @@ parse_cryptserv_args(struct Client *client_p, const char *parv[], int parc, char
 {
 	char *name = LOCAL_COPY(parv[2]);
 	unsigned char *tmp, *out;
+	char **tmpx = (void *)&tmp;
 	int len;
 	int decoded_len;
 
 	info[0] = '\0';
 
 	/* parv[2] contains encrypted auth data */
-	if(!(decoded_len = unbase64_block((char **) &tmp, parv[3], strlen(parv[3]))))
+	if(!(decoded_len = unbase64_block(tmpx, parv[3], strlen(parv[3]))))
 	{
 		cryptlink_error(client_p, "SERV", "Couldn't base64 decode data", NULL);
 		return (NULL);

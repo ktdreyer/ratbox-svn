@@ -311,7 +311,8 @@ int adns_submit_reverse_any(adns_state ads,
   const unsigned char *iaddr;
   char *buf, *buf_free;
   char shortbuf[100];
-  int r, lreq;
+  int r;
+  size_t lreq;
 
   flags &= ~adns_qf_search;
 

@@ -367,7 +367,7 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char 
 
 		/* copy the nick to the two buffers */
 		nhops += ircsprintf(nhops, "%s ", s);
-		assert((nhops - sjbuf) < sizeof(sjbuf));
+		assert((size_t)(nhops - sjbuf) < sizeof(sjbuf));
 
 		if(!keep_new_modes)
 		{

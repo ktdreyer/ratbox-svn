@@ -173,7 +173,7 @@ static void ccf_sortlist(adns_state ads, const char *fn, int lno, const char *bu
   const char *word;
   char tbuf[200], *slash, *ep;
   struct in_addr base, mask;
-  int l;
+  size_t l;
   unsigned long initial, baselocal;
 
   if (!buf) return;
@@ -375,7 +375,7 @@ static int gl_text(adns_state ads, getline_ctx *src_io, const char *filename,
 }
 
 static void readconfiggeneric(adns_state ads, const char *filename,
-			      int (*getline)(adns_state ads, getline_ctx*,
+			      int (*xgetline)(adns_state ads, getline_ctx*,
 					     const char *filename, int lno,
 					     char *buf, int buflen),
 			      /* Returns >=0 for success, -1 for EOF or error
@@ -389,7 +389,7 @@ static void readconfiggeneric(adns_state ads, const char *filename,
   const struct configcommandinfo *ccip;
 
   for (lno=1;
-       (l= getline(ads,&gl_ctx, filename,lno, linebuf,sizeof(linebuf))) != -1;
+       (l= xgetline(ads,&gl_ctx, filename,lno, linebuf,sizeof(linebuf))) != -1;
        lno++) {
     if (l == -2) continue;
     while (l>0 && ctype_whitespace(linebuf[l-1])) l--;
@@ -401,7 +401,7 @@ static void readconfiggeneric(adns_state ads, const char *filename,
     while (*q && !ctype_whitespace(*q)) q++;
     dirl= q-p;
     for (ccip=configcommandinfos;
-	 ccip->name && !(strlen(ccip->name)==dirl && !memcmp(ccip->name,p,q-p));
+	 ccip->name && !(strlen(ccip->name)==(size_t)dirl && !memcmp(ccip->name,p,q-p));
 	 ccip++);
     if (!ccip->name) {
       adns__diag(ads,-1,0,"%s:%d: unknown configuration directive `%.*s'",

@@ -127,7 +127,7 @@ dohelp(struct Client *source_p, const char *hpath, const char *topic, const char
 	char path[MAXPATHLEN + 1];
 	char ntopic[25];
 	struct stat sb;
-	int i;
+	unsigned int i;
 
 	if(topic != NULL)
 	{
