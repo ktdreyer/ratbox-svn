@@ -1,3 +1,61 @@
+leeh        2002/08/12 11:53:29 EDT	(20020812_0)
+
+  Modified files:
+    contrib              m_clearchan.c m_force.c m_ojoin.c 
+                         m_opme.c 
+    doc                  convertconf-example.conf example.conf 
+                         example.efnet.conf modes.txt 
+    include              channel.h channel_mode.h config.h 
+                         config.h.dist newconf.h s_conf.h s_serv.h 
+                         send.h supported.h 
+    modules              m_info.c m_invite.c m_join.c m_knock.c 
+                         m_topic.c m_who.c m_whois.c 
+    modules/core         m_kick.c m_message.c m_part.c m_sjoin.c 
+    src                  channel.c channel_mode.c ircd.c newconf.c 
+                         s_conf.c s_debug.c s_serv.c send.c 
+  Log:
+  - removed halfops.
+  
+  Revision  Changes    Path
+  1.32      +1 -10     ircd-ratbox/contrib/m_clearchan.c
+  1.15      +1 -9      ircd-ratbox/contrib/m_force.c
+  1.13      +1 -18     ircd-ratbox/contrib/m_ojoin.c
+  1.32      +1 -9      ircd-ratbox/contrib/m_opme.c
+  7.6       +0 -6      ircd-ratbox/doc/convertconf-example.conf
+  7.172     +0 -6      ircd-ratbox/doc/example.conf
+  7.7       +0 -8      ircd-ratbox/doc/example.efnet.conf
+  7.9       +1 -3      ircd-ratbox/doc/modes.txt
+  7.121     +3 -13     ircd-ratbox/include/channel.h
+  7.12      +1 -26     ircd-ratbox/include/channel_mode.h
+  7.144     +0 -2      ircd-ratbox/include/config.h
+  7.61      +0 -2      ircd-ratbox/include/config.h.dist
+  7.5       +0 -1      ircd-ratbox/include/newconf.h
+  7.189     +0 -1      ircd-ratbox/include/s_conf.h
+  7.70      +1 -2      ircd-ratbox/include/s_serv.h
+  7.59      +3 -4      ircd-ratbox/include/send.h
+  1.25      +1 -2      ircd-ratbox/include/supported.h
+  1.48      +3 -16     ircd-ratbox/modules/core/m_kick.c
+  1.105     +4 -11     ircd-ratbox/modules/core/m_message.c
+  1.58      +2 -2      ircd-ratbox/modules/core/m_part.c
+  1.146     +8 -70     ircd-ratbox/modules/core/m_sjoin.c
+  1.60      +1 -7      ircd-ratbox/modules/m_info.c
+  1.50      +3 -3      ircd-ratbox/modules/m_invite.c
+  1.95      +7 -11     ircd-ratbox/modules/m_join.c
+  1.58      +2 -2      ircd-ratbox/modules/m_knock.c
+  1.57      +4 -4      ircd-ratbox/modules/m_topic.c
+  1.66      +1 -41     ircd-ratbox/modules/m_who.c
+  1.85      +2 -2      ircd-ratbox/modules/m_whois.c
+  7.333     +12 -107   ircd-ratbox/src/channel.c
+  7.59      +60 -462   ircd-ratbox/src/channel_mode.c
+  7.246     +0 -6      ircd-ratbox/src/ircd.c
+  7.15      +0 -13     ircd-ratbox/src/newconf.c
+  7.329     +0 -9      ircd-ratbox/src/s_conf.c
+  7.72      +0 -3      ircd-ratbox/src/s_debug.c
+  7.280     +0 -4      ircd-ratbox/src/s_serv.c
+  7.211     +2 -18     ircd-ratbox/src/send.c
+
+
+
 androsyn    2002/08/11 11:14:43 EDT	(20020811_9)
 
   Modified files:
