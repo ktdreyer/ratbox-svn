@@ -279,9 +279,11 @@ single_whois(struct Client *source_p, struct Client *target_p)
 				   target_p->name, 
 				   CurrentTime - target_p->user->last, 
 				   target_p->firsttime);
-	} else {
-		if(ConfigFileEntry.use_whois_actually && show_ip(source_p, target_p))
-		if(DoesTS6(target_p->servptr) && (target_p->sockhost[0] != '\0') && (target_p->sockhost[0] != '0'))
+	}
+	else
+	{
+		if(ConfigFileEntry.use_whois_actually && show_ip(source_p, target_p) &&
+		   !EmptyString(target_p->sockhost) && strcmp(target_p->sockhost, "0"))
 		{
 			sendto_one_numeric(source_p, RPL_WHOISACTUALLY,
 					   form_str(RPL_WHOISACTUALLY),

@@ -86,8 +86,6 @@ mr_pass(struct Client *client_p, struct Client *source_p, int parc, const char *
 			   IsIdChar(parv[4][2]) && parv[4][3] == '\0')
 			{
 				client_p->localClient->caps |= CAP_TS6;
-				client_p->tsinfo |= TS_DOESTS6;
-
 				strcpy(client_p->id, parv[4]);
 			}
 		}

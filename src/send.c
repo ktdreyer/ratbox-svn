@@ -545,7 +545,7 @@ sendto_channel_flags(struct Client *one, int type, struct Client *source_p,
 
 			if(target_p->from->serial != current_serial)
 			{
-				if(DoesTS6(target_p->from))
+				if(has_id(target_p->from))
 					send_linebuf_remote(target_p, source_p, &linebuf_id);
 				else
 					send_linebuf_remote(target_p, source_p, &linebuf_name);
@@ -723,7 +723,7 @@ sendto_match_butone(struct Client *one, struct Client *source_p,
 		if(target_p == one)
 			continue;
 
-		if(DoesTS6(target_p))
+		if(has_id(target_p))
 			send_linebuf_remote(target_p, source_p, &linebuf_id);
 		else
 			send_linebuf_remote(target_p, source_p, &linebuf_name);
@@ -787,7 +787,7 @@ sendto_match_servs(struct Client *source_p, const char *mask, int cap,
 			if(nocap && !NotCapable(target_p->from, nocap))
 				continue;
 
-			if(DoesTS6(target_p->from))
+			if(has_id(target_p->from))
 				_send_linebuf(target_p->from, &linebuf_id);
 			else
 				_send_linebuf(target_p->from, &linebuf_name);
@@ -990,7 +990,7 @@ kill_client_serv_butone(struct Client *one, struct Client *target_p, const char 
 		if((one != NULL) && (client_p == one->from))
 			continue;
 
-		if(DoesTS6(client_p))
+		if(has_id(client_p))
 			_send_linebuf(client_p, &linebuf_id);
 		else
 			_send_linebuf(client_p, &linebuf_name);

@@ -321,15 +321,13 @@ struct exit_client_hook
 #endif
 
 #define TS_DOESTS       0x10000000
-#define TS_DOESTS6	0x20000000
-#define DoesTS(x)       ((x)->tsinfo & (TS_DOESTS|TS_DOESTS6))
-#define DoesTS6(x)	((x)->tsinfo & TS_DOESTS6)
+#define DoesTS(x)       ((x)->tsinfo & TS_DOESTS)
 
 #define has_id(source)	((source)->id[0] != '\0')
 #define use_id(source)	((source)->id[0] != '\0' ? (source)->id : (source)->name)
 
 /* if target is TS6, use id if it has one, else name */
-#define get_id(source, target) ((IsServer(target->from) && DoesTS6(target->from)) ? \
+#define get_id(source, target) ((IsServer(target->from) && has_id(target->from)) ? \
 				use_id(source) : (source)->name)
 
 /* housekeeping flags */

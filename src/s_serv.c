@@ -1152,7 +1152,7 @@ server_estab(struct Client *client_p)
 		if(target_p == client_p)
 			continue;
 
-		if(DoesTS6(target_p) && has_id(client_p))
+		if(has_id(target_p) && has_id(client_p))
 		{
 			sendto_one(target_p, ":%s SID %s 2 %s :%s%s",
 				   me.id, client_p->name, client_p->id,
@@ -1201,31 +1201,24 @@ server_estab(struct Client *client_p)
 			continue;
 
 		/* presumption, if target has an id, so does its uplink */
-		if(DoesTS6(client_p) && has_id(target_p))
-		{
+		if(has_id(client_p) && has_id(target_p))
 			sendto_one(client_p, ":%s SID %s %d %s :%s%s",
 				   target_p->serv->upid, target_p->name,
 				   target_p->hopcount + 1, target_p->id,
 				   IsHidden(target_p) ? "(H) " : "", target_p->info);
-
-			if(target_p->serv->caps && IsCapable(client_p, CAP_ENCAP))
-				sendto_one(client_p, ":%s ENCAP * GCAP :%s",
-						target_p->id, show_capabilities(target_p));
-		}
 		else
-		{
 			sendto_one(client_p, ":%s SERVER %s %d :%s%s",
 				   target_p->serv->up,
 				   target_p->name, target_p->hopcount + 1,
 				   IsHidden(target_p) ? "(H) " : "", target_p->info);
 
-			if(target_p->serv->caps && IsCapable(client_p, CAP_ENCAP))
-				sendto_one(client_p, ":%s ENCAP * GCAP :%s",
-						target_p->name, show_capabilities(target_p));
-		}
+		if(target_p->serv->caps && IsCapable(client_p, CAP_ENCAP))
+			sendto_one(client_p, ":%s ENCAP * GCAP :%s",
+					get_id(target_p, client_p),
+					show_capabilities(target_p));
 	}
 
-	if(DoesTS6(client_p))
+	if(has_id(client_p))
 		burst_TS6(client_p);
 	else
 		burst_TS5(client_p);
