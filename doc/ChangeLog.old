@@ -1,3 +1,7 @@
+*** 20010727_4 by leeh
+- coding when tired is bad..
+
+
 *** 20010727_3 by leeh
 - sendto_one() doesnt care about LL, so we need to check manually..
 
