@@ -1145,7 +1145,6 @@ get_printable_kline(struct Client *source_p, struct ConfItem *aconf,
 void
 read_conf_files(int cold)
 {
-	FILE *file;
 	const char *filename;
 
 	conf_fbfile_in = NULL;

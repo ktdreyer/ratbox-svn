@@ -1308,21 +1308,6 @@ conf_cleanup_cluster(struct TopConf *tc)
 	return 0;
 }
 
-static int
-conf_end_cluster(struct TopConf *tc)
-{
-	if(EmptyString(yy_shared->server))
-	{
-		conf_report_error("Ignoring cluster -- invalid cluster::server");
-		free_remote_conf(yy_shared);
-	}
-	else
-		dlinkAddTail(yy_shared, &yy_shared->node, &cluster_conf_list);
-
-	yy_shared = NULL;
-	return 0;
-}
-
 static void
 conf_set_cluster_name(void *data)
 {

@@ -161,7 +161,6 @@ do_etrace(struct Client *source_p, int ipv4, int ipv6)
 static void
 do_etrace_full(struct Client *source_p)
 {
-	struct Client *target_p;
 	dlink_node *ptr;
 
 	DLINK_FOREACH(ptr, lclient_list.head)

@@ -79,7 +79,6 @@ void
 clear_s_newconf(void)
 {
 	struct server_conf *server_p;
-	struct ConfItem *aconf;
 	dlink_node *ptr;
 	dlink_node *next_ptr;
 
