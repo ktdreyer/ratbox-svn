@@ -388,15 +388,17 @@ sendto_one(struct Client *to, const char *pattern, ...)
 } /* sendto_one() */
 
 /*
- * sendto_one
+ * sendto_one_prefix
  *
  * inputs	- pointer to destination client
+ *		- pointer to client to form prefix from
  *		- var args message
  * output	- NONE
  * side effects	- send message to single client
  */
 void
-sendto_one_prefix(struct Client *to, struct Client *prefix, const char *pattern, ...)
+sendto_one_prefix(struct Client *to, struct Client *prefix,
+		  const char *pattern, ...)
 
 {
   int ilen, llen;
@@ -409,13 +411,14 @@ sendto_one_prefix(struct Client *to, struct Client *prefix, const char *pattern,
   if (to->from)
     sendto = to->from;
   else
-	  sendto = to;
+    sendto = to;
   
   if (to->fd < 0)
     {
       Debug((DEBUG_ERROR,
              "Local socket %s with negative fd... AARGH!",
              to->name));
+      return;
     }
   else if (IsMe(to))
     {
@@ -432,9 +435,9 @@ sendto_one_prefix(struct Client *to, struct Client *prefix, const char *pattern,
   llen = ircsprintf(lbuf, ":%s %s", prefix->name, sendbuf);
   
   if (IsServer(sendto) && IsCapable(to->from, CAP_UID))
-	  send_message(sendto, ibuf, ilen);
+    send_message(sendto, ibuf, ilen);
   else
-	  send_message(sendto, lbuf, llen);
+    send_message(sendto, lbuf, llen);
   
   Debug((DEBUG_SEND,"Sending [%s] to %s",sendbuf,to->name));
 } /* sendto_one() */

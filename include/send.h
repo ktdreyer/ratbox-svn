@@ -29,6 +29,8 @@ extern void send_queued_write(int fd, void *data);
 extern  void sendto_all_local_opers(struct Client *, char *message_type,
 				    const char *pattern,...);
 extern  void sendto_one(struct Client *, const char *, ...);
+extern  void sendto_one_prefix(struct Client *, struct Client *,
+			       const char *, ...);
 extern  void sendto_channel_butone(struct Client *, struct Client *, 
                                    struct Channel *, const char *, ...);
 extern  void sendto_serv_butone(struct Client *, const char *, ...);
@@ -46,6 +48,10 @@ extern  void sendto_all_local_opers(struct Client *, char *message_type,
 	    __attribute__((format (printf, 3, 4)));
 extern  void sendto_one(struct Client *, const char *, ...)
 	    __attribute__((format (printf, 2, 3)));
+
+extern  void sendto_one_prefix(struct Client *, struct Client *,
+			       const char *, ...)
+	    __attribute__((format (printf, 3, 4)));
 
 extern  void sendto_channel_butone(struct Client *, struct Client *, 
                                    struct Channel *, const char *, ...)
