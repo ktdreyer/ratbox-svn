@@ -1,3 +1,8 @@
+*** 20010105_21 by wcampbel
+Document the usermode 'drone' '+e' and add support in oper_only_umodes
+for it.
+
+
 *** 20010105_20 by wcampbel
 Removed references to HASH in opers.txt, and added README.HASH containing
 the old HASH documentation
