@@ -22,7 +22,7 @@
 
 #include <sys/types.h>
 #include <sys/socket.h>
-
+#include <sys/poll.h>
 #include <assert.h>
 #include <errno.h>
 #include <string.h>
@@ -77,27 +77,28 @@ static unsigned int ctrl_ofs = 0;
 void
 io_loop(int nfds)
 {
-	fd_set rfds;
-	fd_set wfds;
+	struct pollfd pfd[6];
 	int i, ret;
 
 	/* loop forever */
 	for (;;)
 	{
-		FD_ZERO(&rfds);
-		FD_ZERO(&wfds);
+		memset(&pfd,0, sizeof(pfd));
 
 		for (i = 0; i < 5; i++)
 		{
-			if(fds[i].read_cb)
-				FD_SET(fds[i].fd, &rfds);
-			if(fds[i].write_cb)
-				FD_SET(fds[i].fd, &wfds);
+			if(fds[i].read_cb) {
+				pfd[i].fd = fds[i].fd;
+				pfd[i].events |= POLLIN;
+			}
+
+			if(fds[i].write_cb) {
+				pfd[i].fd = fds[i].fd;
+				pfd[i].events |= POLLOUT;
+			}
 		}
 
-		/* we have <6 fds ever, so I don't think select is too painful */
-		ret = select(nfds, &rfds, &wfds, NULL, NULL);
-
+		ret = poll(pfd, 6, -1);
 		if(ret < 0)
 		{
 			check_error(ret, IO_SELECT, -1);	/* exit on fatal errors */
@@ -107,9 +108,9 @@ io_loop(int nfds)
 			/* call any callbacks */
 			for (i = 0; i < 5; i++)
 			{
-				if(FD_ISSET(fds[i].fd, &rfds) && fds[i].read_cb)
+				if(fds[i].read_cb && pfd[i].revents & (POLLIN|POLLERR|POLLHUP)) 
 					(*fds[i].read_cb) ();
-				if(FD_ISSET(fds[i].fd, &wfds) && fds[i].write_cb)
+				if(fds[i].write_cb && pfd[i].revents & (POLLOUT|POLLERR|POLLHUP))
 					(*fds[i].write_cb) ();
 			}
 		}
