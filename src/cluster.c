@@ -35,7 +35,10 @@
 #include "ircd_defs.h"
 #include "cluster.h"
 #include "tools.h"
+#include "client.h"
 #include "memory.h"
+#include "s_serv.h"
+#include "send.h"
 
 dlink_list cluster_list;
 
@@ -59,5 +62,70 @@ free_cluster(struct cluster *clptr)
 
   MyFree(clptr->name);
   MyFree((char *) clptr);
+}
+
+void
+clear_clusters(void)
+{
+  dlink_node *ptr;
+  dlink_node *next_ptr;
+
+  DLINK_FOREACH_SAFE(ptr, next_ptr, cluster_list.head)
+  {
+    free_cluster(ptr->data);
+    dlinkDestroy(ptr, &cluster_list);
+  }
+}
+
+int
+find_cluster(const char *name, int type)
+{
+  struct cluster *clptr;
+  dlink_node *ptr;
+
+  DLINK_FOREACH(ptr, cluster_list.head)
+  {
+    clptr = ptr->data;
+
+    if(match(clptr->name, name) && clptr->type & type)
+      return 1;
+  }
+
+  return 0;
+}
+
+void
+cluster_kline(struct Client *source_p, int tkline_time, const char *user, 
+              const char *host, const char *reason)
+{
+  struct cluster *clptr;
+  dlink_node *ptr;
+
+  DLINK_FOREACH(ptr, cluster_list.head)
+  {
+    clptr = ptr->data;
+
+    if(clptr->type & CLUSTER_KLINE)
+      sendto_match_servs(source_p, clptr->name, CAP_KLN,
+                         "KLINE %s %d %s %s :%s",
+                         clptr->name, tkline_time, user, host, reason);
+  }
+}
+
+void
+cluster_unkline(struct Client *source_p, const char *user, const char *host)
+{
+  struct cluster *clptr;
+  dlink_node *ptr;
+
+  DLINK_FOREACH(ptr, cluster_list.head)
+  {
+    clptr = ptr->data;
+
+    if(clptr->type & CLUSTER_UNKLINE)
+      sendto_match_servs(source_p, clptr->name, CAP_UNKLN,
+                         "UNKLINE %s %s %s",
+                         clptr->name, user, host);
+  }
 }
 

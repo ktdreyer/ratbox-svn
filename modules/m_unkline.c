@@ -44,7 +44,7 @@
 #include "parse.h"
 #include "modules.h"
 #include "s_serv.h"
-
+#include "cluster.h"
 
 static void mo_unkline(struct Client*, struct Client*, int, char**);
 static void ms_unkline(struct Client*, struct Client*, int, char**);
@@ -79,7 +79,7 @@ _moddeinit(void)
 const char *_version = "$Revision$";
 #endif
 
-static void remove_permkline_match(struct Client *, char *, char *);
+static void remove_permkline_match(struct Client *, char *, char *, int);
 static int flush_write(struct Client *, FBFILE* , char *, char *);
 
 static int remove_temp_kline(char *, char *);
@@ -137,17 +137,18 @@ static void mo_unkline (struct Client *client_p,struct Client *source_p,
     }
 
   /* possible remote kline.. */
-  if(parc > 3)
+  if((parc > 3) && (irccmp(parv[2], "ON") == 0))
   {
-    if(irccmp(parv[2], "ON") == 0)
-    {
-      sendto_match_servs(source_p, parv[3], CAP_UNKLN,
-                         "UNKLINE %s %s %s",
-                         parv[3], user, host);
+    sendto_match_servs(source_p, parv[3], CAP_UNKLN,
+                       "UNKLINE %s %s %s",
+                       parv[3], user, host);
       
-      if(match(parv[3], me.name) == 0)
-        return;
-    }
+    if(match(parv[3], me.name) == 0)
+      return;
+  }
+  else if(dlink_list_length(&cluster_list) > 0)
+  {
+    cluster_unkline(source_p, user, host);
   }
 
   if(remove_temp_kline(user, host))
@@ -163,7 +164,7 @@ static void mo_unkline (struct Client *client_p,struct Client *source_p,
       return;
     }
 
-  remove_permkline_match(source_p, host, user);
+  remove_permkline_match(source_p, host, user, 0);
 }
 
 /* ms_unkline()
@@ -199,7 +200,21 @@ static void ms_unkline(struct Client *client_p, struct Client *source_p,
   if(!IsPerson(source_p))
     return;
 
-  if(find_shared(source_p->username, source_p->host, 
+  if(find_cluster(source_p->user->server, CLUSTER_UNKLINE))
+  {
+    if(remove_temp_kline(kuser, khost))
+    {
+      sendto_realops_flags(UMODE_ALL, L_ALL,
+                           "%s has removed the temporary K-Line for: [%s@%s]",
+                           get_oper_name(source_p), kuser, khost);
+      ilog(L_NOTICE, "%s removed temporary K-Line for [%s@%s]",
+           source_p->name, kuser, khost);
+      return;
+    }
+
+    remove_permkline_match(source_p, khost, kuser, 1);
+  }
+  else if(find_shared(source_p->username, source_p->host, 
                  source_p->user->server, OPER_UNKLINE))
   {
     if(remove_temp_kline(kuser, khost))
@@ -221,7 +236,7 @@ static void ms_unkline(struct Client *client_p, struct Client *source_p,
       return;
     }
 
-    remove_permkline_match(source_p, khost, kuser);    
+    remove_permkline_match(source_p, khost, kuser, 0);    
   }
 }
 
@@ -230,7 +245,7 @@ static void ms_unkline(struct Client *client_p, struct Client *source_p,
  * hunts for a permanent kline, and removes it.
  */
 static void remove_permkline_match(struct Client *source_p,
-	                           char *host, char *user)
+	                           char *host, char *user, int cluster)
 {
   FBFILE *in, *out;
   int pairme = 0;
@@ -324,20 +339,24 @@ static void remove_permkline_match(struct Client *source_p,
       return;
     }
 
-  if(!pairme)
+  if(!pairme && !cluster)
     {
       sendto_one(source_p, ":%s NOTICE %s :No K-Line for %s@%s",
                  me.name, source_p->name,user,host);
       return;
     }
 
-  if(!MyClient(source_p))
-    sendto_realops_flags(UMODE_ALL, L_ALL,
-       	                 "*** Received Un-kline for [%s@%s], from %s",
-	                 user, host, get_oper_name(source_p));
+  if(!cluster)
+  {
+    if(!MyClient(source_p))
+      sendto_realops_flags(UMODE_ALL, L_ALL,
+                           "*** Received Un-kline for [%s@%s], from %s",
+                           user, host, get_oper_name(source_p));
 
-  sendto_one(source_p, ":%s NOTICE %s :K-Line for [%s@%s] is removed", 
-             me.name, source_p->name, user,host);
+    sendto_one(source_p, ":%s NOTICE %s :K-Line for [%s@%s] is removed", 
+               me.name, source_p->name, user,host);
+  }
+
   sendto_realops_flags(UMODE_ALL, L_ALL,
 		       "%s has removed the K-Line for: [%s@%s]",
 		       get_oper_name(source_p), user, host);

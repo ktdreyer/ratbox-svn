@@ -46,6 +46,7 @@
 #include "msg.h"
 #include "parse.h"
 #include "modules.h"
+#include "cluster.h"
 
 static void mo_kline(struct Client *,struct Client *,int,char **);
 static void ms_kline(struct Client *,struct Client *,int,char **);
@@ -82,14 +83,14 @@ const char *_version = "$Revision$";
 /* Local function prototypes */
 
 static time_t  valid_tkline(struct Client *source_p, char *string);
-static char *cluster(char *);
+static char *format_kline(char *);
 static int find_user_host(struct Client *source_p,
                           char *user_host_or_nick, char *user, char *host);
 
-/* needed to remove unused definition warning */
-static int valid_comment(struct Client *source_p, const char *comment);
-static int valid_user_host(struct Client *source_p, const char *user, const char *host);
+static int valid_comment(const char *comment);
+static int valid_user_host(const char *user, const char *host);
 static int valid_wild_card(const char *user, const char *host);
+
 static int already_placed_kline(struct Client*, const char*, const char*, int);
 
 static void apply_kline(struct Client *source_p, struct ConfItem *aconf,
@@ -179,33 +180,46 @@ mo_kline(struct Client *client_p, struct Client *source_p,
   if(parc != 0)
     reason = *parv;
 
-  if (valid_user_host(source_p, user,host))
-     return;
-
-  if (valid_wild_card(user,host))
-    {
-       sendto_one(source_p, 
-          ":%s NOTICE %s :Please include at least %d non-wildcard characters with the user@host",
-           me.name,
-           source_p->name,
-           ConfigFileEntry.min_nonwildcard);
-       return;
-    }
-
-  if (!valid_comment(source_p, reason))
+  if (!valid_user_host(user, host))
+  {
+    sendto_one(source_p,
+               ":%s NOTICE %s :Invalid character in comment",
+               me.name, source_p->name);
     return;
+  }
+
+  if (!valid_wild_card(user, host))
+  {
+    sendto_one(source_p, 
+          ":%s NOTICE %s :Please include at least %d non-wildcard characters with the user@host",
+           me.name, source_p->name, ConfigFileEntry.min_nonwildcard);
+    return;
+  }
+
+  if (!valid_comment(reason))
+  {
+    sendto_one(source_p,
+               ":%s NOTICE %s :Invalid character '\"' in comment",
+               me.name, source_p->name);
+    return;
+  }
 
   if (target_server != NULL)
-    {
-      sendto_match_servs(source_p, target_server, CAP_KLN,
-                         "KLINE %s %lu %s %s :%s",
-                         target_server, (unsigned long) tkline_time,
-                         user, host, reason);
+  {
+    sendto_match_servs(source_p, target_server, CAP_KLN,
+                       "KLINE %s %lu %s %s :%s",
+                       target_server, (unsigned long) tkline_time,
+                       user, host, reason);
 
-      /* If we are sending it somewhere that doesnt include us, stop */
-      if(!match(target_server, me.name))
-        return;
-    }
+    /* If we are sending it somewhere that doesnt include us, stop */
+    if(!match(target_server, me.name))
+      return;
+  }
+  /* if we have cluster servers, send it to them.. */
+  else if(dlink_list_length(&cluster_list) > 0)
+  {
+    cluster_kline(source_p, tkline_time, user, host, reason);
+  }
 
   if (already_placed_kline(source_p, user, host, tkline_time))
     return;
@@ -281,10 +295,42 @@ ms_kline(struct Client *client_p, struct Client *source_p,
   khost = parv[4];
   kreason = parv[5];
 
-  if (find_shared(source_p->username, source_p->host,
+  if(find_cluster(source_p->user->server, CLUSTER_KLINE))
+  {
+    if(!valid_user_host(kuser, khost) || !valid_wild_card(kuser, khost) ||
+       !valid_comment(kreason))
+      return;
+
+    tkline_time = atoi(parv[2]);
+
+    aconf = make_conf();
+
+    aconf->status = CONF_KILL;
+    DupString(aconf->user, kuser);
+    DupString(aconf->host, khost);
+
+    /* Look for an oper reason */
+    if ((oper_reason = strchr(kreason, '|')) != NULL)
+    {
+      *oper_reason = '\0';
+      oper_reason++;
+    }
+
+    DupString(aconf->passwd, kreason);
+    current_date = smalldate();
+
+    if (tkline_time)
+      apply_tkline(source_p, aconf, kreason, oper_reason,
+                   current_date, tkline_time);
+    else
+      apply_kline(source_p, aconf, aconf->passwd, oper_reason, current_date);
+
+    check_klines();
+  }
+  else if (find_shared(source_p->username, source_p->host,
                   source_p->user->server, OPER_K))
   {
-    if (valid_user_host(source_p, kuser, khost))
+    if (!valid_user_host(kuser, khost))
     {
       sendto_realops_flags(UMODE_ALL, L_ALL,
              "*** %s!%s@%s on %s is requesting an Invalid K-Line for [%s@%s] [%s]",
@@ -293,7 +339,7 @@ ms_kline(struct Client *client_p, struct Client *source_p,
       return;
     }
 
-    if (valid_wild_card(kuser, khost))
+    if (!valid_wild_card(kuser, khost))
     {
        sendto_realops_flags(UMODE_ALL, L_ALL, 
              "*** %s!%s@%s on %s is requesting a K-Line without %d wildcard chars for [%s@%s] [%s]",
@@ -302,7 +348,7 @@ ms_kline(struct Client *client_p, struct Client *source_p,
        return;
     }
 
-    if(!valid_comment(source_p, kreason))
+    if(!valid_comment(kreason))
       return;
 
     tkline_time = atoi(parv[2]);
@@ -449,7 +495,7 @@ valid_tkline(struct Client *source_p, char *p)
 }
 
 /*
- * cluster()
+ * format_kline()
  *
  * inputs       - pointer to a hostname
  * output       - pointer to a static of the hostname masked
@@ -458,7 +504,7 @@ valid_tkline(struct Client *source_p, char *p)
  *
  */
 static char *
-cluster(char *hostname)
+format_kline(char *hostname)
 {
   static char result[HOSTLEN + 1];      /* result to return */
   char        temphost[HOSTLEN + 1];    /* work place */
@@ -692,7 +738,7 @@ mo_dline(struct Client *client_p, struct Client *source_p,
 
   if (parc >= loc+1) /* host :reason */
     {
-      if (valid_comment(source_p,parv[loc]) == 0)
+      if (!valid_comment(parv[loc]))
 	return;
 
       if(*parv[loc])
@@ -884,7 +930,7 @@ find_user_host(struct Client *source_p,
       if (*target_p->username == '~')
         luser[0] = '*';
 
-      strlcpy(lhost,cluster(target_p->host),HOSTLEN+1);
+      strlcpy(lhost,format_kline(target_p->host),HOSTLEN+1);
     }
 
   return 1;
@@ -899,28 +945,13 @@ find_user_host(struct Client *source_p,
  * side effects -
  */
 static int
-valid_user_host(struct Client *source_p, const char *luser, const char *lhost)
+valid_user_host(const char *luser, const char *lhost)
 {
-  /*
-   * Check for # in user@host
-   */
+  /* # is invalid, as is '!' (n!u@h kline) */
+  if(strchr(lhost, '#') || strchr(luser, '#') || strchr(luser, '!'))
+    return 0;
 
-  if(strchr(lhost, '#') || strchr(luser, '#'))
-  {
-    sendto_one(source_p, ":%s NOTICE %s :Invalid character '#' in kline",
-               me.name, source_p->name);		    
-    return 1;
-  }
-
-  /* Dont let people kline *!ident@host, as the ! is invalid.. */
-  if(strchr(luser, '!'))
-  {
-    sendto_one(source_p, ":%s NOTICE %s :Invalid character '!' in kline",
-               me.name, source_p->name);
-    return 1;
-  }
-
-  return 0;
+  return 1;
 }
 
 /*
@@ -981,9 +1012,9 @@ valid_wild_card(const char *luser, const char *lhost)
   }
 
   if (nonwild < ConfigFileEntry.min_nonwildcard)
-    return 1;
-  else
     return 0;
+
+  return 1;
 }
 
 /*
@@ -994,15 +1025,10 @@ valid_wild_card(const char *luser, const char *lhost)
  * side effects - NONE
  */
 static int
-valid_comment(struct Client *source_p, const char *comment)
+valid_comment(const char *comment)
 {
   if(strchr(comment, '"'))
-    {
-      sendto_one(source_p,
-		   ":%s NOTICE %s :Invalid character '\"' in comment",
-		   me.name, source_p->name);
-      return 0;
-    }
+    return 0;
 
   return 1;
 }

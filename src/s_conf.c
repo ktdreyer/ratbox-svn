@@ -53,6 +53,7 @@
 #include "fileio.h"
 #include "memory.h"
 #include "balloc.h"
+#include "cluster.h"
 
 struct config_server_hide ConfigServerHide;
 
@@ -1929,6 +1930,7 @@ void clear_out_old_conf(void)
   clear_out_address_conf();
   clear_xlines();
   clear_shared();
+  clear_clusters();
 
   /* clean out module paths */
 #ifndef STATIC_MODULES

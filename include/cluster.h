@@ -36,6 +36,8 @@
 
 #include "tools.h"
 
+struct Client;
+
 extern dlink_list cluster_list;
 
 struct cluster
@@ -50,5 +52,15 @@ struct cluster
 
 extern struct cluster *make_cluster(void);
 extern void free_cluster(struct cluster *clptr);
+extern void clear_clusters(void);
+
+extern int find_cluster(const char *name, int type);
+
+extern void cluster_kline(struct Client *source_p, int tkline_time,
+                          const char *user, const char *host,
+                          const char *reason);
+extern void cluster_unkline(struct Client *source_p,
+                            const char *user, const char *host);
 
 #endif
+
