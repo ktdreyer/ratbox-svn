@@ -1119,7 +1119,7 @@ else
 	tmpresult=no
 fi
 
-echo "OpenSSL (Cryptlinks)..... $tmpresult"
+echo "OpenSSL ................. $tmpresult"
 
 if test "$shared_modules" = yes; then
 	tmpresult=shared
