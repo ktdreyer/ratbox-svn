@@ -1,3 +1,17 @@
+leeh        2005/02/15 19:42:48 EST	(20050216_1)
+
+  Modified files:
+    src                  s_chanserv.c 
+  Log:
+  - make CS::LISTUSERS use dump_info_accesslist()
+  - tidy up dump_info_accesslist() to only show suspend level when its set,
+    and to show aop/avoice
+  
+  Revision  Changes    Path
+  1.66      +8 -16     rserv/src/s_chanserv.c
+
+
+
 leeh        2005/02/15 19:26:49 EST	(20050216_0)
 
   Modified files:
