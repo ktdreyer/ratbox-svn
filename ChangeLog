@@ -1,3 +1,15 @@
+leeh        2004/05/25 12:53:52 EDT	(20040525_3)
+
+  Modified files:
+    modules              m_resv.c 
+  Log:
+  - me_unresv had the wrong parc count
+  
+  Revision  Changes    Path
+  1.60      +2 -2      ircd-ratbox/modules/m_resv.c
+
+
+
 leeh        2004/05/25 12:42:43 EDT	(20040525_2)
 
   Modified files:
