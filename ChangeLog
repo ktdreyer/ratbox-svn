@@ -1,3 +1,16 @@
+androsyn    2003/03/19 22:17:53 UTC	(20030319_3)
+
+  Modified files:
+    src                  listener.c 
+  Log:
+  We want to return the port for ipv4 sockets when compiled for ipv6 don't we
+  :)
+  
+  Revision  Changes    Path
+  7.90      +7 -6      ircd-ratbox/src/listener.c
+
+
+
 androsyn    2003/03/19 08:35:19 UTC	(20030319_2)
 
   Modified files:
