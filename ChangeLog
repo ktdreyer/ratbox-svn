@@ -1,3 +1,16 @@
+androsyn    2002/10/13 18:21:31 UTC	(20021013_0)
+
+  Modified files:
+    src                  s_auth.c 
+  Log:
+  Fixed buglet when compiled for ipv6 the server would return the dns failure
+  message twice..oops
+  
+  Revision  Changes    Path
+  7.111     +4 -2      ircd-ratbox/src/s_auth.c
+
+
+
 androsyn    2002/10/12 19:15:00 UTC	(20021012_1)
 
   Modified files:
