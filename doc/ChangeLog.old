@@ -1,3 +1,9 @@
+*** 20010725_1 by leeh
+- an unregged client should never get a remote ping.. therefore
+  it should never need to be routed
+- changed an irccmp() to a !match()
+
+
 *** 20010724_1 by leeh
 - added a catcher for those who dont bother reading the config files,
   will exit() the ircd unless its removed (its off if the lines not there)
