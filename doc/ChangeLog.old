@@ -1,3 +1,15 @@
+androsyn    2001/12/10 02:26:01 EST	(20011210_11)
+
+  Modified files:
+    src                  s_bsd_sigio.c 
+  Log:
+  Removed unnecessary variable..
+  
+  Revision  Changes    Path
+  7.5       +2 -4      ircd-hybrid-7/src/s_bsd_sigio.c
+
+
+
 androsyn    2001/12/10 02:24:11 EST	(20011210_10)
 
   Modified files:
