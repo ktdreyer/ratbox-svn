@@ -1,3 +1,15 @@
+*** 20001101_1 by adrian
+
+
+more comm_connect() code. This again hasn't been tested.
+
+* finished comm_connect_tryconnect() to do what it should
+* deal with the DNS return
+* add more COMM_ERRs, so that the code trying to connect can do better
+  debugging
+
+
+
 *** 20001031_9 by db
 - If you are going to change macros to look "prettier" finish the job
   *glares at bleep* We had macros that duplicated functionality
