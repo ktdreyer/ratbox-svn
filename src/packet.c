@@ -150,6 +150,9 @@ parse_client_queued (struct Client *client_p)
 			else if(lclient_p->sent_parsed >= (4 * lclient_p->allow_read))
 				break;
 
+			if(!MyConnect(client_p))
+				return;
+				
 				dolen = linebuf_get (&client_p->localClient->
 					     buf_recvq, readBuf, READBUF_SIZE,
 					     LINEBUF_COMPLETE, LINEBUF_PARSED);

@@ -484,7 +484,6 @@ stats_hubleaf (struct Client *source_p)
 static void
 stats_auth (struct Client *source_p)
 {
-#warning "fix stats_auth()"
 	/* Oper only, if unopered, return ERR_NOPRIVS */
 	if((ConfigFileEntry.stats_i_oper_only == 2) && !IsOper (source_p))
 		sendto_one (source_p, form_str (ERR_NOPRIVILEGES), me.name, source_p->name);
@@ -518,7 +517,7 @@ stats_auth (struct Client *source_p)
 	/* Theyre opered, or allowed to see all auth blocks */
 	else {
 		report_ipIlines(source_p);
-		// report_auth (source_p);
+		report_ilines(source_p);
 	}
 }
 
@@ -630,6 +629,7 @@ stats_klines (struct Client *source_p)
 	/* Theyre opered, or allowed to see all klines */
 	else {
 		report_ipKlines(source_p);	
+		report_klines(source_p);
 	}
 }
 
