@@ -1,3 +1,11 @@
+*** 20011011_2 by jdc
+* Make use_halfops adjust sending HOPS capability.
+* Added default_server_capabs to ircd.c; this contains the default
+  startup capabilities (CAP_MASK), with certain ones AND+NOT'd out
+  based on server configuration (i.e. use_halfops = no).
+* s_serv.c had CAP_MASK replaced with default_server_capabs.
+
+
 *** 20011011_1 by jdc
 * Support for channel {} block command "use_halfops".  Default is yes.
   The code which uses the use_halfops variable hasn't been written yet,
