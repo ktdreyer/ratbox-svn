@@ -1,3 +1,15 @@
+androsyn    2001/12/16 05:07:34 EST	(20011216_9)
+
+  Modified files:
+    src                  irc_string.c 
+  Log:
+  Fixed an ipv6 compile error..
+  
+  Revision  Changes    Path
+  7.45      +4 -0      ircd-hybrid-7/src/irc_string.c
+
+
+
 androsyn    2001/12/16 04:58:33 EST	(20011216_8)
 
   Modified files:
