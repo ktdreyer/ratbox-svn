@@ -79,22 +79,26 @@ char *_version = "20001122";
 ** m_names
 **      parv[0] = sender prefix
 **      parv[1] = channel
-**      parv[2] = root name
+**      parv[2] = vkey
 */
-static void m_names( struct Client *client_p,
+static void m_names(struct Client *client_p,
                     struct Client *source_p,
                     int parc,
                     char *parv[])
 { 
-  struct Channel *vchan;
+  struct Channel *vchan = NULL;
   struct Channel *ch2ptr = NULL;
-  char  *s;
+  char *s;
   char *para = parc > 1 ? parv[1] : NULL;
+  char *vkey = NULL;
 
   if (!BadPtr(para))
     {
       if( (s = strchr(para, ',')) )
         *s = '\0';
+
+      if (parc > 2)
+        vkey = parv[2];
 
       if (!check_channel_name(para))
         { 
@@ -104,21 +108,31 @@ static void m_names( struct Client *client_p,
         }
 
       if( (ch2ptr = hash_find_channel(para, NULL)) )
-	{
-	  if (HasVchans(ch2ptr))
-	    {
-	      vchan = map_vchan(ch2ptr,source_p);
-	      if(vchan == 0)
-		channel_member_names( source_p, ch2ptr, ch2ptr->chname );
-	      else
-		channel_member_names( source_p, vchan, ch2ptr->chname );
-	    }
-	  else
-	    {
-	      channel_member_names( source_p, ch2ptr, ch2ptr->chname );
-	    }
-	  return;
-	}
+        {
+          if (HasVchans(ch2ptr))
+            {
+
+              vchan = map_vchan(ch2ptr, source_p);
+
+              if ((vkey && !vkey[1]) || (!vchan && !vkey))
+                {
+                  show_vchans(client_p, source_p, ch2ptr, "names");
+                  return;
+                }
+              else if (vkey && vkey[1])
+                {
+                  vchan = find_vchan(ch2ptr, vkey);
+                  if(!vchan)
+                    return;
+                }
+              channel_member_names(source_p, vchan, ch2ptr->chname);
+
+            }
+          else
+            {
+              channel_member_names(source_p, ch2ptr, ch2ptr->chname);
+            }
+        }
     }
   else
     {
