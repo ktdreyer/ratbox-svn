@@ -465,9 +465,11 @@ static void setup_corefile(void)
   struct rlimit rlim; /* resource limits */
 
   /* Set corefilesize to maximum */
-  getrlimit(RLIMIT_CORE, &rlim);
-  rlim.rlim_cur = rlim.rlim_max;
-  setrlimit(RLIMIT_CORE, &rlim);
+  if (!getrlimit(RLIMIT_CORE, &rlim))
+  {
+    rlim.rlim_cur = rlim.rlim_max;
+    setrlimit(RLIMIT_CORE, &rlim);
+  }
 }
 
 int main(int argc, char *argv[])
