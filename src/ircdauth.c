@@ -681,10 +681,10 @@ GreetUser(struct Client *client)
    */
 
 	if (LocalClientList)
-		LocalClientList->prev_local = client;
+		LocalClientList->previous_local_client = client;
 
-	client->prev_local = NULL;
-	client->next_local = LocalClientList;
+	client->previous_local_client = NULL;
+	client->next_local_client = LocalClientList;
 	LocalClientList = client;
 
 	sendto_serv_butone(client,
