@@ -1,3 +1,16 @@
+leeh        2002/07/16 06:35:23 EDT	(20020716_0)
+
+  Modified files:
+    .                    INSTALL 
+  Log:
+  - added an efnut warning to INSTALL and noted the fact convertconf wont
+    touch I:, you need convertilines for it.
+  
+  Revision  Changes    Path
+  7.30      +11 -0     ircd-hybrid-7/INSTALL
+
+
+
 db          2002/07/15 04:14:34 EDT	(20020715_3)
 
   Modified files:
