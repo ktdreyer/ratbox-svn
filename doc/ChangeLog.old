@@ -1,3 +1,16 @@
+*** 20010717_1 by leeh
+- fixed a logic error in ircd_parser
+- updated example.conf slightly
+- (from jv)
+  make the password field in stats c show the link type:
+  	A - autoconnect
+	C - cryptlinks
+	L - lazylink
+	M - masked (eg: *.fi)
+	Z - ziplink
+	* - none of above
+
+
 *** 20010716_7 by leeh
 - /connect new.server 0 hub.server
 
