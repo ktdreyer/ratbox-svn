@@ -302,10 +302,27 @@ sendto_realops("Creating top_chptr for %s", (parv[2] + 1));
     {
       fl = 0;
 
-      if (*s == '@' || s[1] == '@')
-        fl |= MODE_CHANOP;
-      if (*s == '+' || s[1] == '+')
-        fl |= MODE_VOICE;
+      if (*s == '@')
+	{
+	  fl |= MODE_CHANOP;
+	  s++;
+	}
+      else if (*s == '+')
+	{
+	  fl |= MODE_VOICE;
+	  s++;
+	}
+
+      if (*s == '+')
+	{
+	  fl |= MODE_VOICE;
+	  s++;
+	}
+      else if (*s == '@')
+	{
+	  fl |= MODE_CHANOP;
+	  s++;
+	}
 
       if (!keep_new_modes)
        {
@@ -318,8 +335,7 @@ sendto_realops("Creating top_chptr for %s", (parv[2] + 1));
             fl = 0;
           }
        }
-      while (*s == '@' || *s == '+')
-        s++;
+
       if (!(acptr = find_chasing(sptr, s, NULL)))
         continue;
       if (acptr->from != cptr)

@@ -312,8 +312,8 @@ void who_global(struct Client *sptr,char *mask, int oper)
 
 	  do_who_list(sptr, chptr, &chptr->chanops, chname, "@");
 	  do_who_list(sptr, chptr, &chptr->halfops, chname, "%");
-	  do_who_list(sptr, chptr, &chptr->chanops, chname, "+");
-	  do_who_list(sptr, chptr, &chptr->chanops, chname, "");
+	  do_who_list(sptr, chptr, &chptr->voiced,  chname, "+");
+	  do_who_list(sptr, chptr, &chptr->peons,   chname, "");
 	}
       chname = chptr->chname;
 
@@ -346,8 +346,8 @@ void do_who_on_channel(struct Client *sptr,
 {
   do_who_list(sptr, chptr, &chptr->chanops, chname, "@");
   do_who_list(sptr, chptr, &chptr->halfops, chname, "%");
-  do_who_list(sptr, chptr, &chptr->chanops, chname, "+");
-  do_who_list(sptr, chptr, &chptr->chanops, chname, "");
+  do_who_list(sptr, chptr, &chptr->voiced,  chname, "+");
+  do_who_list(sptr, chptr, &chptr->peons,   chname, "");
 }
 
 void do_who_list(struct Client *sptr, struct Channel *chptr,
