@@ -1,3 +1,15 @@
+leeh        2004/04/14 12:29:25 EDT	(20040414_3)
+
+  Modified files:
+    modules/core         m_kick.c 
+  Log:
+  - swap an IsServer() for a !MyClient()
+  
+  Revision  Changes    Path
+  1.78      +2 -2      ircd-ratbox/modules/core/m_kick.c
+
+
+
 androsyn    2004/04/14 12:17:01 EDT	(20040414_2)
 
   Modified files:
