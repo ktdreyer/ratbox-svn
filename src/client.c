@@ -878,49 +878,6 @@ find_chasing(struct Client *source_p, char *user, int *chasing)
   return who;
 }
 
-
-
-/*
- * check_registered_user - is used to cancel message, if the
- * originator is a server or not registered yet. In other
- * words, passing this test, *MUST* guarantee that the
- * source_p->user exists (not checked after this--let there
- * be coredumps to catch bugs... this is intentional --msa ;)
- *
- * There is this nagging feeling... should this NOT_REGISTERED
- * error really be sent to remote users? This happening means
- * that remote servers have this user registered, although this
- * one has it not... Not really users fault... Perhaps this
- * error message should be restricted to local clients and some
- * other thing generated for remotes...
- */
-static int
-check_registered_user(struct Client* client)
-{
-  if (!IsRegisteredUser(client))
-    {
-      sendto_one(client, form_str(ERR_NOTREGISTERED), me.name, "*");
-      return -1;
-    }
-  return 0;
-}
-
-/*
- * check_registered user cancels message, if 'x' is not
- * registered (e.g. we don't know yet whether a server
- * or user)
- */
-static int
-check_registered(struct Client* client)
-{
-  if (!IsRegistered(client))
-    {
-      sendto_one(client, form_str(ERR_NOTREGISTERED), me.name, "*");
-      return -1;
-    }
-  return 0;
-}
-
 /*
  * get_client_name -  Return the name of the client
  *    for various tracking and

@@ -47,7 +47,6 @@ extern PF  read_ctrl_packet;
 extern PF  read_packet;
 extern PF  flood_recalc;
 
-extern void client_dopacket(struct Client *, char *, size_t);
 
 #endif /* INCLUDED_packet_h */
 
