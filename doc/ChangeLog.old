@@ -1,3 +1,7 @@
+*** 20010606_10 by kreator
+- added missing #include <stdlib.h> for exit() calls in configure
+
+
 *** 20010606_9 by jdc
 * Yup.  Here we go again.  Changes for OpenSSL to work properly during
   make; servlink/Makefile.in was also majorly wrong, including the SSL
