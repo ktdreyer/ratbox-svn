@@ -656,10 +656,6 @@ static int     do_numeric(
 {
   struct Client *acptr;
   struct Channel *chptr;
-  char  *nick, *p;
-  int   i;
-  char  *t;	/* current position inside buffer */
-  int   tl;	/* current length of presently being built string in t */
 
   if (parc < 1 || !IsServer(sptr))
     return 0;
@@ -675,9 +671,11 @@ static int     do_numeric(
   ** assumptions--bets are off, if these are changed --msa)
   ** Note: if buffer is non-empty, it will begin with SPACE.
   */
-  t = buffer;
   if (parc > 1)
     {
+      char *t = buffer; /* Current position within the buffer */
+      int i;
+      int   tl;	/* current length of presently being built string in t */
       for (i = 2; i < (parc - 1); i++)
         {
           tl = ircsprintf(t," %s", parv[i]);
@@ -685,43 +683,38 @@ static int     do_numeric(
         }
       ircsprintf(t," :%s", parv[parc-1]);
     }
-  for (; (nick = strtoken(&p, parv[1], ",")); parv[1] = NULL)
+  if ((acptr = find_client(parv[1], (struct Client *)NULL)))
     {
-      if ((acptr = find_client(nick, (struct Client *)NULL)))
+      /*
+      ** Drop to bit bucket if for me...
+      ** ...one might consider sendto_op 
+      ** here... --msa
+      ** And so it was done. -avalon
+      ** And regretted. Dont do it that way. Make sure
+      ** it goes only to non-servers. -avalon
+      ** Check added to make sure servers don't try to loop
+      ** with numerics which can happen with nick collisions.
+      ** - Avalon
+      */
+      if (IsMe(acptr)) 
         {
-          /*
-          ** Drop to bit bucket if for me...
-          ** ...one might consider sendto_ops
-          ** here... --msa
-          ** And so it was done. -avalon
-          ** And regretted. Dont do it that way. Make sure
-          ** it goes only to non-servers. -avalon
-          ** Check added to make sure servers don't try to loop
-          ** with numerics which can happen with nick collisions.
-          ** - Avalon
-          */
-          if (!IsMe(acptr) && IsPerson(acptr))
-	    {
-	      sendto_anywhere(acptr, sptr,"%s %s%s",
-			      numeric, nick, buffer);
-	    }
-          else if (IsServer(acptr) && acptr->from != cptr)
-	    {
-	      sendto_anywhere(acptr, sptr,"%s %s%s",
-			      numeric, nick, buffer);
-	    }
+          /* sendto_realops(...); ? */
+          return 0;
         }
-      else if ((acptr = find_server(nick)))
+      else if (acptr->from == cptr) 
         {
-          if (!IsMe(acptr) && acptr->from != cptr)
-		sendto_anywhere(acptr, sptr,"%s %s%s",
-				numeric, nick, buffer);
+          /* This message changed direction (nick collision?)
+           * ignore it.
+           */
+          return 0;
         }
-      else if ((chptr = hash_find_channel(nick, (struct Channel *)NULL)))
+        sendto_anywhere(acptr, sptr, ":%s %s%s", numeric, parv[1], buffer);
+        return 0;
+      }
+      else if ((chptr = hash_find_channel(parv[1], (struct Channel *)NULL)))
         sendto_channel_butone(cptr,sptr,chptr,":%s %s %s%s",
                               sptr->name,
                               numeric, chptr->chname, buffer);
-    }
   return 0;
 }
 
