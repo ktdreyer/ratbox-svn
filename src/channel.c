@@ -74,7 +74,7 @@ void channel_member_list(struct Client *sptr,
 			 int *cur_len,
 			 int *reply_to_send);
 
-static void delete_members(dlink_list *list);
+static void delete_members(struct Channel *chptr, dlink_list *list);
 
 static int check_banned(struct Channel *chptr, struct Client *who, 
 			char *s, char *s2);
@@ -460,6 +460,7 @@ void add_user_to_channel(struct Channel *chptr, struct Client *who, int flags)
 void remove_user_from_channel(struct Channel *chptr,struct Client *who)
 {
   dlink_node *ptr;
+  dlink_node *next_ptr;
 
   /* last user in the channel.. set a vchan_id incase we need it */
   if (chptr->users == 1)
@@ -482,8 +483,10 @@ void remove_user_from_channel(struct Channel *chptr,struct Client *who)
   chptr->users_last = CurrentTime;
   free_dlink_node(ptr);
 
-  for (ptr = who->user->channel.head; ptr; ptr = ptr->next)
+  for (ptr = who->user->channel.head; ptr; ptr = next_ptr)
     {
+      next_ptr = ptr->next;
+
       if (ptr->data == chptr)
       {
 	dlinkDelete(ptr,&who->user->channel);
@@ -2811,10 +2814,10 @@ static void destroy_channel(struct Channel *chptr)
    * be empty, it only has to be empty of local users.
    */
 
-  delete_members(&chptr->chanops);
-  delete_members(&chptr->voiced);
-  delete_members(&chptr->peons);
-  delete_members(&chptr->halfops);
+  delete_members(chptr, &chptr->chanops);
+  delete_members(chptr, &chptr->voiced);
+  delete_members(chptr, &chptr->peons);
+  delete_members(chptr, &chptr->halfops);
 
   while ((ptr = chptr->invites.head))
     del_invite(chptr, ptr->data);
@@ -2853,14 +2856,39 @@ static void destroy_channel(struct Channel *chptr)
  * output	- none
  * side effects	- delete members of this list
  */
-static void delete_members(dlink_list *list)
+static void delete_members(struct Channel * chptr, dlink_list *list)
 {
   dlink_node *ptr;
   dlink_node *next_ptr;
+  dlink_node *ptr_ch;
+  dlink_node *next_ptr_ch;
+  
+  struct Client *who;
 
   for(ptr = list->head; ptr; ptr = next_ptr)
     {
       next_ptr = ptr->next;
+      who = (struct Client *)ptr->data;
+
+      /* remove reference to chptr from who */
+      for (ptr_ch = who->user->channel.head; ptr_ch; ptr_ch = next_ptr_ch)
+        {
+          next_ptr_ch = ptr_ch->next;
+
+          if (ptr_ch->data == chptr)
+            {
+              dlinkDelete(ptr_ch,&who->user->channel);
+              free_dlink_node(ptr_ch);
+              break;
+            }
+        }
+
+      who->user->joined--;
+
+      if (IsVchan(chptr))
+        del_vchan_from_client_cache(who, chptr);
+
+      /* remove reference to who from chptr */
       dlinkDelete(ptr,list);
       free_dlink_node(ptr);
     }
