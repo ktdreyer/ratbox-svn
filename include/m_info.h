@@ -46,8 +46,6 @@ Info MyInformation[] = {
   { "ANTI_SPAM_EXIT_MESSAGE_TIME", "NONE", 0, "Delay before Allowing Spam Bot Exit Messages" },
 #endif /* ANTI_SPAM_EXIT_MESSAGE_TIME */
 
-  { "BUFFERPOOL", "", BUFFERPOOL, "Maximum size of all SendQs" },
-
 #ifdef CHROOTDIR
   { "CHROOTDIR", "ON", 0, "chroot() before reading Configuration File" },
 #else

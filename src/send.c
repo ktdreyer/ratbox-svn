@@ -110,7 +110,7 @@ dead_link(struct Client *to, char *notice)
   to->flags |= FLAGS_DEADSOCKET;
 
   /*
-   * If because of BUFFERPOOL problem then clean dbuf's now so that
+   * If because of buffer problem then clean linebuf's now so that
    * notices don't hurt operators below.
    */
   linebuf_donebuf(&to->localClient->buf_recvq);

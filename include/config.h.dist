@@ -249,11 +249,6 @@
  */
 #define MAXSENDQLENGTH 7050000    /* Recommended value: 7050000 for efnet */
 
-/*  BUFFERPOOL - the maximum size of the total of all sendq's.
- *  Recommended value is 4 times MAXSENDQLENGTH.
- */
-#define BUFFERPOOL (MAXSENDQLENGTH * 4)
-
 /* IRC_UID IRC_GID - user and group id ircd should switch to if run as root
  * If you start the server as root but wish to have it run as another user,
  * define IRC_UID to that UID.  This should only be defined if you are running
