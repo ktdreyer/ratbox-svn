@@ -328,9 +328,9 @@ static void oldParseOneLine(FILE *out,char* line)
       break;
 
     case 'D': /* Deny lines (immediate refusal) */
-      fprintf(out,"\tacl {\n");
-      if(user_field)
-	fprintf(out,"\t\tip=\"%s\";\n", user_field);
+      fprintf(out,"\tdeny {\n");
+      if(host_field)
+	fprintf(out,"\t\tip=\"%s\";\n", host_field);
       if(passwd_field)
 	fprintf(out,"\t\treason=\"%s\";\n", passwd_field);
       fprintf(out,"\t}\n\n");
