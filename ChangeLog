@@ -1,3 +1,16 @@
+androsyn    2003/02/14 06:16:13 UTC	(20030214_7)
+
+  Modified files:
+    src                  s_auth.c 
+  Log:
+  If we are going to check and see if the auth request is NULL..we better set
+  it NULL after we free it.
+  
+  Revision  Changes    Path
+  7.135     +1 -1      ircd-ratbox/src/s_auth.c
+
+
+
 androsyn    2003/02/14 06:09:21 UTC	(20030214_6)
 
   Modified files:
