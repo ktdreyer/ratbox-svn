@@ -1,3 +1,17 @@
+leeh        2002/01/02 16:43:32 EST	(20020102_5)
+
+  Modified files:
+    include              modules.h 
+    src                  modules.c 
+  Log:
+  - added headers to most of the modules functions
+  
+  Revision  Changes    Path
+  7.25      +1 -0      ircd-hybrid-7/include/modules.h
+  7.81      +57 -4     ircd-hybrid-7/src/modules.c
+
+
+
 leeh        2002/01/02 12:45:42 EST	(20020102_4)
 
   Modified files:
