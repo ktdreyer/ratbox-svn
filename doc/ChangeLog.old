@@ -1,3 +1,7 @@
+*** 20001226_10 by wcampbel
+Document MD5 oper password support
+
+
 *** 20001226_9 by db
 - if test on name not className caused spoofs to lose their classes
 
