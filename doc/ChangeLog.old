@@ -1,3 +1,12 @@
+*** 20001022_1 by db
+- ok, sub1_from_channel went through all the work to figure out if the
+  root channel could be removed if a sub channel was removed, only it uh
+  forgot to make sure it was empty first. (oh oh) This meant that
+  the root channel also got removed from the hash when a client left
+  the sub chan. oops
+
+
+
 *** 20001021_7 by db
 - applied bysin's two patches 
 
