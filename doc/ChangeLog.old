@@ -1,3 +1,10 @@
+*** 20010223_2 by androsyn
+Untested module loader for HP-UX using shl_*().  This should get integrated
+into the current modules.c, but I didn't feel like messing with autoconf
+this morning. If you're gonna use this make sure you hack your Makefile 
+to use -lld instead of -ldl
+
+
 *** 20010223_1 by db
 - This appears to be stable under seans little "toy" test cloner.
   I have moved the exit_client code outside of send.c and into parse.c
