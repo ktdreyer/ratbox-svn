@@ -997,7 +997,8 @@ int	conf_end_oper(struct TopConf* tc)
 		if (yy_achead->passwd)
 			DupString(yy_tmp->passwd, yy_achead->passwd);
 		yy_tmp->port = yy_achead->port;
-
+		yy_tmp->flags = yy_achead->flags;
+		
 #ifdef HAVE_LIBCRYPTO
 		if(yy_achead->rsa_public_key_file)
 			DupString(yy_tmp->rsa_public_key_file, yy_achead->rsa_public_key_file);
