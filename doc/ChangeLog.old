@@ -1,3 +1,12 @@
+*** 20001025_8 by adrian
+
+
+Convert the auth timeout checking to be once a second. I can't see this
+sucking too badly because timeout_auth_queries_event() doesn't walk
+the entire fd array - instead it walks AuthPollList.
+
+
+
 *** 20001025_7 by db
 - added evenAdd for cleanup_channels
 
