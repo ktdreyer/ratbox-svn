@@ -1,3 +1,15 @@
+androsyn    2001/12/16 05:08:29 EST	(20011216_10)
+
+  Modified files:
+    src                  irc_string.c 
+  Log:
+  forgot the #ifdef IPV6
+  
+  Revision  Changes    Path
+  7.46      +2 -0      ircd-hybrid-7/src/irc_string.c
+
+
+
 androsyn    2001/12/16 05:07:34 EST	(20011216_9)
 
   Modified files:
