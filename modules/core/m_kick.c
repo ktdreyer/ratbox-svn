@@ -174,9 +174,6 @@ static void m_kick(struct Client *client_p,
       /* half ops cannot kick full chanops */
       if (is_half_op(chptr,source_p) && is_chan_op(chptr,who))
 	{
-	  sendto_one(who, ":%s NOTICE %s :half-op %s tried to kick you",
-		     me.name, who->name, source_p->name);
-
           sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED),
                      me.name, parv[0], name);
 	  return;
