@@ -1,3 +1,13 @@
+*** 20010703_6 by leeh
+- wheeeeeeeeeeeee :)
+ 
+  added support for wildcard nick resv's
+  this means two seperate structs.. channels are in the hash for speed
+  reasons.. but we have to search through a linked list of nicks, due
+  to us having to call match() and not irccmp()
+
+
+
 *** 20010703_5 by leeh
 - removed traces of q_conf, I think its gone forever now :)
 
