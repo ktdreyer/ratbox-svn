@@ -1,3 +1,15 @@
+leeh        2004/04/12 22:52:59 EDT	(20040413_0)
+
+  Modified files:
+    src                  s_serv.c 
+  Log:
+  - restore strerror(errno) for serv connect errors other than timeout
+  
+  Revision  Changes    Path
+  7.401     +21 -10    ircd-ratbox/src/s_serv.c
+
+
+
 leeh        2004/04/12 19:36:46 EDT	(20040412_10)
 
   Modified files:
