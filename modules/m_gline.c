@@ -143,8 +143,6 @@ static void mo_gline(struct Client *client_p,
   char *user = NULL;
   char *host = NULL;	              /* user and host of GLINE "victim" */
   const char *reason = NULL;          /* reason for "victims" demise */
-  char *p;
-  char tmpch;
   char tempuser[USERLEN + 2];
   char temphost[HOSTLEN + 1];
 

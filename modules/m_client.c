@@ -54,9 +54,10 @@ int clean_nick_name(char* nick);
 void read_packet(int fd, void *data);
 void user_welcome(struct Client *source_p);
 static void ms_client(struct Client*, struct Client*, int, char**);
-static void m_client(struct Client*, struct Client*, int, char**);
 
 #ifdef PERSISTANT_CLIENTS
+static void m_client(struct Client*, struct Client*, int, char**);
+
 struct Message client_msgtab = {
   "CLIENT", 0, 3, 0, MFLG_SLOW, 0,
   {m_client, m_ignore, ms_client, m_ignore}
