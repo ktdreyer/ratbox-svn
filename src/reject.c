@@ -122,7 +122,6 @@ add_reject(struct Client *client_p)
 		rdata = pnode->data;
 		rdata->time = CurrentTime;
 		rdata->count++;
-		dlinkMoveTail(&rdata->rnode, &reject_list);
 	}
 	else
 	{
