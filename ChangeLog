@@ -1,3 +1,16 @@
+leeh        2004/04/11 21:52:27 EDT	(20040412_1)
+
+  Modified files:
+    modules/core         m_join.c 
+  Log:
+  - fix a problem when propagating TS6 JOIN, we werent sending the key
+    properly..
+  
+  Revision  Changes    Path
+  1.153     +2 -2      ircd-ratbox/modules/core/m_join.c
+
+
+
 leeh        2004/04/11 20:05:19 EDT	(20040412_0)
 
   Modified files:
