@@ -1,3 +1,7 @@
+*** 19990802_5 by tomh
+changed 2 headed function calls, removed unused data member in client struct
+
+
 *** 19990802_4 by db
 - goofed the 216 reply
 
