@@ -1,3 +1,17 @@
+*** 20010626_11 by leeh
+- fixed a header in m_post.c
+- added RESV - h7's channel jupes
+
+  /RESV - locally "jupe" a channel, to prevent anyone joining that
+          channel.  It will return the ERR_UNAVAILRESOURCE numeric
+	  (juped).
+  /UNRESV - remove a RESV thats been placed
+
+  I shall extend it to nicks shortly.. as for permanence, I dont think
+  it should be an issue.. if they want it permanent, they can add it to
+  ircd.conf ;p
+
+
 *** 20010626_10 by androsyn
 Next time profile a function first before you go and replace it :P
 
