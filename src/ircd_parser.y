@@ -1339,14 +1339,14 @@ general_kline_with_reason: KLINE_WITH_REASON '=' TYES ';'
   } ;
 
 general_client_exit: CLIENT_EXIT '=' TYES ';'
-{
-	ConfigFileEntry.client_exit = 1;
-}
-| CLIENT_EXIT '-' TNO ';'
-{
-	ConfigFileEntry.client_exit = 0;
-	
-};
+  {
+    ConfigFileEntry.client_exit = 1;
+  }
+    |
+    CLIENT_EXIT '-' TNO ';'
+  {
+    ConfigFileEntry.client_exit = 0;
+  };
 
 general_kline_with_connection_closed: KLINE_WITH_CONNECTION_CLOSED '=' TYES ';'
   {
@@ -1444,13 +1444,14 @@ general_short_motd: SHORT_MOTD '=' TYES ';'
   } ;
   
 general_no_oper_flood: NO_OPER_FLOOD '=' TYES ';'
-{
-	ConfigFileEntry.no_oper_flood = 1;
-}
-| NO_OPER_FLOOD '=' TNO ';'
-{
-	ConfigFileEntry.no_oper_flood = 0;
-};
+  {
+    ConfigFileEntry.no_oper_flood = 1;
+  }
+    | 
+    NO_OPER_FLOOD '=' TNO ';'
+  {
+    ConfigFileEntry.no_oper_flood = 0;
+  };
 
 general_iauth_server: IAUTH_SERVER '=' QSTRING ';'
 {
@@ -1478,20 +1479,24 @@ general_fname_operlog: FNAME_OPERLOG '=' QSTRING ';'
 };
 
 general_stats_p_notice: STATS_P_NOTICE '=' TYES ';'
-{
-	ConfigFileEntry.stats_p_notice = 1;
-} | STATS_P_NOTICE '=' TNO ';'
-{
-	ConfigFileEntry.stats_p_notice = 0;
-} ;
+  {
+    ConfigFileEntry.stats_p_notice = 1;
+  } 
+    | 
+    STATS_P_NOTICE '=' TNO ';'
+  {
+    ConfigFileEntry.stats_p_notice = 0;
+  } ;
 
 general_glines: GLINES '=' TYES ';'
-{
-	ConfigFileEntry.glines = 1;
-} | GLINES '=' TNO ';'
-{
-	ConfigFileEntry.glines = 0;
-} ;
+  {
+    ConfigFileEntry.glines = 1;
+  } 
+    |
+    GLINES '=' TNO ';'
+  {
+    ConfigFileEntry.glines = 0;
+  } ;
 
 general_message_locale: MESSAGE_LOCALE '=' QSTRING ';'
 {
@@ -1519,12 +1524,14 @@ general_maximum_links: MAXIMUM_LINKS '=' NUMBER ';'
 } ;
 
 general_hide_server: HIDESERVER '=' TYES ';'
-{
-        ConfigFileEntry.hide_server = 1;
-} | HIDESERVER '=' TNO ';'
-{
-        ConfigFileEntry.hide_server = 0;
-} ;
+  {
+    ConfigFileEntry.hide_server = 1;
+  }
+    |
+    HIDESERVER '=' TNO ';'
+  {
+    ConfigFileEntry.hide_server = 0;
+  } ;
 
 general_max_targets: MAX_TARGETS '=' NUMBER ';'
 {
@@ -1602,10 +1609,11 @@ umode_item:	T_BOTS
 } ;
 
 general_links_notice: LINKS_NOTICE '=' TYES ';'
-{
-	ConfigFileEntry.links_notice = 1;
-}
-| LINKS_NOTICE '=' TNO ';'
-{
-	ConfigFileEntry.links_notice = 0;
-};
+  {
+    ConfigFileEntry.links_notice = 1;
+  }
+    |
+    LINKS_NOTICE '=' TNO ';'
+  {
+    ConfigFileEntry.links_notice = 0;
+  };
