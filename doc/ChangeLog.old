@@ -1,3 +1,9 @@
+*** 20010120_11 by db
+- fixed memory leak in new listen {} code
+- added max_clients = in serverinfo block
+
+
+
 *** 20010120_10 by davidt
 Fix silly warning
 
