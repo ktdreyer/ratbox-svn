@@ -169,8 +169,9 @@ init_netio(void)
 	dpfd = open("/dev/poll", O_RDWR);
 	if(dpfd < 0)
 	{
-		ilog(L_MAIN,
-		     "init_netio: Couldn't open /dev/poll - %d: %s\n", errno, strerror(errno));
+		fprintf(stderr,
+		     "init_netio: Couldn't open /dev/poll - %d: %s\n",
+		     errno, strerror(errno));
 		exit(115);	/* Whee! */
 	}
 }

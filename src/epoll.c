@@ -83,7 +83,7 @@ init_netio(void)
 	pfd = MyMalloc(sizeof(struct epoll_event) * pfd_size);
 	if(ep < 0)
 	{
-		ilog(L_MAIN, "init_netio: Couldn't open epoll fd!\n");
+		fprintf(stderr, "init_netio: Couldn't open epoll fd!\n");
 		exit(115);	/* Whee! */
 	}
 	fd_note(ep, "epoll file descriptor");
