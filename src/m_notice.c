@@ -34,6 +34,7 @@
 #include "channel.h"
 #include "vchannel.h"
 #include "irc_string.h"
+#include "m_privmsg.h"
 #include "hash.h"
 #include "class.h"
 
@@ -96,6 +97,19 @@
  *                      non-NULL pointers.
  */
 
+struct entity target_table[MAX_MULTI_MESSAGES];
+
+static void notice_channel( struct Client *cptr,
+			    struct Client *sptr,
+			    struct Channel *chptr,
+			    char *text);
+
+static void notice_channel_flags( struct Client *cptr,
+				   struct Client *sptr,
+				   struct Channel *chptr,
+				   int flags,
+				   char *text);
+
 /*
 ** m_notice
 **
@@ -108,16 +122,26 @@
 **
 */
 
+static void notice_client(struct Client *sptr, struct Client *acptr,
+			  char *text);
+
+
 int     m_notice(struct Client *cptr,
                           struct Client *sptr,
                           int parc,
                           char *parv[])
 {
-  struct Client *acptr;
-  char *nick, *server, *host;
-  struct Channel *chptr;
-  struct Channel *vchan;
-  int type=0;
+  int i;
+  int ntargets;
+
+  if (!IsPerson(sptr))
+    return 0;
+
+#ifndef ANTI_SPAMBOT_WARN_ONLY
+  /* if its a spambot, just ignore it */
+  if(sptr->join_leave_count >= MAX_JOIN_LEAVE_COUNT)
+    return 0;
+#endif
 
   /* notice gives different errors, so still check this */
   if (parc < 2 || *parv[1] == '\0')
@@ -133,315 +157,166 @@ int     m_notice(struct Client *cptr,
       return -1;
     }
 
-  if (MyConnect(sptr))
+  ntargets = build_target_list(sptr,parv[1],target_table);
+
+  for(i = 0; i < ntargets ; i++)
     {
-#ifndef ANTI_SPAMBOT_WARN_ONLY
-      /* if its a spambot, just ignore it */
-      if(sptr->join_leave_count >= MAX_JOIN_LEAVE_COUNT)
-        return 0;
-#endif
-      /* As Mortiis points out, if there is only one target,
-       * the call to canonize is silly
-       */
-    }
-  /* 
-   * If the target contains a , it will barf tough.
-   */
-
-  nick = parv[1];
-  if((strchr(nick,',')))
-    {
-      sendto_one(sptr, form_str(ERR_TOOMANYTARGETS),
-                     me.name, parv[0], "NOTICE");
-      return -1;
-    }
-
-  /*
-  ** channels are privmsg'd a lot more than other clients, moved up here
-  ** plain old channel msg ?
-  */
-  if( IsChanPrefix(*nick)
-      && (IsPerson(sptr) && (chptr = hash_find_channel(nick, NullChn))))
-    {
-      /* reset idle time for message only if target exists */
-      if(MyClient(sptr) && sptr->user)
-        sptr->user->last = CurrentTime;
-
-      if(check_for_ctcp(parv[2]))
-	check_for_flud(sptr, NULL, chptr, 1);
-
-      if (HasVchans(chptr))
+      switch (target_table[i].type)
 	{
-	  if( (vchan = map_vchan(chptr,sptr)) )
-	    {
-	      if (can_send(vchan, sptr) == 0)
-		sendto_channel_butone(cptr, sptr, vchan,
-				      ":%s %s %s :%s",
-				      parv[0], "NOTICE", nick,
-				      parv[2]);
-	      else
-		sendto_one(sptr, form_str(ERR_CANNOTSENDTOCHAN),
-			   me.name, parv[0], nick);
-	      return 0;
-	    }
+	case ENTITY_CHANNEL:
+	  notice_channel(cptr,sptr,
+			 (struct Channel *)target_table[i].ptr,
+			 parv[2]);
+	  break;
+
+	case ENTITY_CHANOPS_ON_CHANNEL:
+	  notice_channel_flags(cptr,sptr,
+			       (struct Channel *)target_table[i].ptr,
+			       target_table[i].flags,parv[2]);
+	  break;
+
+	case ENTITY_CLIENT:
+	  notice_client(sptr,(struct Client *)target_table[i].ptr,parv[2]);
+	  break;
 	}
-
-      if (can_send(chptr, sptr) == 0)
-	sendto_channel_butone(cptr, sptr, chptr,
-			      ":%s %s %s :%s",
-			      parv[0], "NOTICE", nick,
-			      parv[2]);
-      else
-	sendto_one(sptr, form_str(ERR_CANNOTSENDTOCHAN),
-		   me.name, parv[0], nick);
-
-      return 0;
     }
-      
-  /*
-  ** @# type of channel msg?
-  */
 
-  if(*nick == '@')
-    type = MODE_CHANOP;
-  else if(*nick == '+')
-    type = MODE_CHANOP|MODE_VOICE;
+  if(ntargets == 0)
+    sendto_one(sptr, form_str(ERR_NOSUCHNICK), me.name,
+	       parv[0], parv[1]);
+  return 1;
+}
 
-  if(type)
+/*
+ * notice_channel
+ *
+ * inputs	- pointer to cptr
+ *		- pointer to sptr
+ *		- pointer to channel
+ * output	- YES if duplicate pointer in table, NO if not.
+ *		  note, this is canonilization
+ * side effects	- message given channel
+ */
+static void notice_channel( struct Client *cptr,
+			     struct Client *sptr,
+			     struct Channel *chptr,
+			     char *text)
+{
+  struct Channel *vchan;
+  char *channel_name=NULL;
+
+  if (HasVchans(chptr))
     {
-      /* Strip if using DALnet chanop/voice prefix. */
-      if (*(nick+1) == '@' || *(nick+1) == '+')
-        {
-          nick++;
-          *nick = '@';
-          type = MODE_CHANOP|MODE_VOICE;
-        }
-
-      /* suggested by Mortiis */
-      if(!*nick)        /* if its a '\0' dump it, there is no recipient */
-        {
-          sendto_one(sptr, form_str(ERR_NORECIPIENT),
-                     me.name, parv[0], "NOTICE");
-          return -1;
-        }
-
-      if (!IsPerson(sptr))      /* This means, servers can't send messages */
-        return -1;
-
-      /* At this point, nick+1 should be a channel name i.e. #foo or &foo
-       * if the channel is found, fine, if not report an error
-       */
-
-      if ( (chptr = hash_find_channel(nick+1, NullChn)) )
-        {
-          /* reset idle time for message only if target exists */
-          if(MyClient(sptr) && sptr->user)
-            sptr->user->last = CurrentTime;
-
-          if (!is_chan_op(chptr,sptr))
-            {
-              return -1;
-            }
-          else
-            {
-              sendto_channel_type(cptr,
-                                  sptr,
-                                  chptr,
-                                  type,
-                                  nick+1,
-                                  "NOTICE",
-                                  parv[2]);
-            }
-        }
-      else
-        {
-          sendto_one(sptr, form_str(ERR_NOSUCHNICK),
-                     me.name, parv[0], nick);
-          return -1;
-        }
-      return 0;
+      if( (vchan = map_vchan(chptr,sptr)) )
+	{
+	  channel_name = chptr->chname;
+	  chptr = vchan;
+	}
     }
+  else
+    channel_name = chptr->chname;
 
-  /*
-  ** nickname addressed?
-  */
+  if(MyClient(sptr) && sptr->user)
+    sptr->user->last = CurrentTime;
 
-  /* LazyLinks */
-#ifndef LLVER1
+  if(check_for_ctcp(text))
+    check_for_flud(sptr, NULL, chptr, 1);
 
-  if(!ConfigFileEntry.hub && serv_cptr_list &&
-     IsCapable(serv_cptr_list,CAP_LL))
+  if (can_send(chptr, sptr) == 0)
+    sendto_channel_butone(cptr, sptr, chptr,
+			  ":%s %s %s :%s",
+			  sptr->name, "NOTICE", channel_name, text);
+  else
+    sendto_one(sptr, form_str(ERR_CANNOTSENDTOCHAN),
+	       me.name, sptr->name, channel_name);
+}
+
+/*
+ * notice_channel_flags
+ *
+ * inputs	- pointer to cptr
+ *		- pointer to sptr
+ *		- pointer to channel
+ *		- pointer to text to send
+ * output	- NONE
+ * side effects	- message given channel either chanop or voice
+ */
+static void notice_channel_flags( struct Client *cptr,
+				   struct Client *sptr,
+				   struct Channel *chptr,
+				   int flags,
+				   char *text)
+{
+  struct Channel *vchan;
+  char *channel_name=NULL;
+
+  if (HasVchans(chptr))
     {
-
+      if( (vchan = map_vchan(chptr,sptr)) )
+	{
+	  channel_name = chptr->chname;
+	  chptr = vchan;
+	}
     }
-#endif
+  else
+    channel_name = chptr->chname;
 
-  if ((acptr = find_person(nick, NULL)))
+  if(MyClient(sptr) && sptr->user)
+    sptr->user->last = CurrentTime;
+
+  if(check_for_ctcp(text))
+    check_for_flud(sptr, NULL, chptr, 1);
+
+  if (can_send(chptr, sptr) == 0)
+    sendto_channel_type(cptr,
+			sptr,
+			chptr,
+			flags,
+			channel_name,
+			"NOTICE",
+			text);
+  else
+    sendto_one(sptr, form_str(ERR_CANNOTSENDTOCHAN),
+	       me.name, sptr->name, channel_name);
+}
+
+/*
+ * notice_client
+ *
+ * inputs	- pointer to sptr
+ *		- pointer to acptr (struct Client *)
+ *		- pointer to text
+ * output	- NONE
+ * side effects	- message given channel either chanop or voice
+ */
+static void notice_client(struct Client *sptr, struct Client *acptr,
+			  char *text)
+{
+  /* reset idle time for message only if its not to self */
+  if (sptr != acptr)
     {
-      /* reset idle time for message only if target exists */
-      if(MyClient(sptr) && sptr->user)
-        sptr->user->last = CurrentTime;
-
-      if(MyConnect(acptr) && IsClient(sptr) &&
-	 GlobalSetOptions.dronetime)
-        {
-          if((acptr->first_received_message_time+GlobalSetOptions.dronetime)
-	     < CurrentTime)
-            {
-              acptr->received_number_of_privmsgs=1;
-              acptr->first_received_message_time = CurrentTime;
-              acptr->drone_noticed = 0;
-            }
-          else
-            {
-              if(acptr->received_number_of_privmsgs > 
-		 GlobalSetOptions.dronecount)
-                {
-                  if(acptr->drone_noticed == 0) /* tiny FSM */
-                    {
-                      sendto_ops_flags(FLAGS_BOTS,
-                             "Possible Drone Flooder %s [%s@%s] on %s target: %s",
-                                     sptr->name, sptr->username,
-                                     sptr->host,
-                                     sptr->user->server, acptr->name);
-                      acptr->drone_noticed = 1;
-                    }
-                  /* heuristic here, if target has been getting a lot
-                   * of privmsgs from clients, and sendq is above halfway up
-                   * its allowed sendq, then throw away the privmsg, otherwise
-                   * let it through. This adds some protection, yet doesn't
-                   * DOS the client.
-                   * -Dianora
-                   */
-                  if(DBufLength(&acptr->sendQ) > (get_sendq(acptr)/2L))
-                    {
-                      if(acptr->drone_noticed == 1) /* tiny FSM */
-                        {
-                          sendto_ops_flags(FLAGS_BOTS,
-                         "anti_drone_flood SendQ protection activated for %s",
-                                         acptr->name);
-
-                          sendto_one(acptr,     
- ":%s NOTICE %s :*** Notice -- Server drone flood protection activated for %s",
-                                     me.name, acptr->name, acptr->name);
-                          acptr->drone_noticed = 2;
-                        }
-                    }
-
-                  if(DBufLength(&acptr->sendQ) <= (get_sendq(acptr)/4L))
-                    {
-                      if(acptr->drone_noticed == 2)
-                        {
-                          sendto_one(acptr,     
-                                     ":%s NOTICE %s :*** Notice -- Server drone flood protection de-activated for %s",
-                                     me.name, acptr->name, acptr->name);
-                          acptr->drone_noticed = 1;
-                        }
-                    }
-                  if(acptr->drone_noticed > 1)
-                    return 0;
-                }
-              else
-                acptr->received_number_of_privmsgs++;
-            }
-        }
-
-      sendto_prefix_one(acptr, sptr, ":%s %s %s :%s",
-                        parv[0], "NOTICE", nick, parv[2]);
-
-      /* reset idle time for message only if its not to self */
-      if (sptr != acptr)
-        {
-          if(sptr->user)
-            sptr->user->last = CurrentTime;
-        }
-      return 0;
+      if(sptr->user)
+	sptr->user->last = CurrentTime;
     }
 
-  /* Everything below here should be reserved for opers 
-   * as pointed out by Mortiis, user%host.name@server.name 
-   * syntax could be used to flood without FLUD protection
-   * its also a delightful way for non-opers to find users who
-   * have changed nicks -Dianora
-   *
-   * Grrr it was pointed out to me that x@service is valid
-   * for non-opers too, and wouldn't allow for flooding/stalking
-   * -Dianora
-   */
+  /* reset idle time for message only if target exists */
+  if(MyClient(sptr) && sptr->user)
+    sptr->user->last = CurrentTime;
+
+  if(check_for_ctcp(text))
+    check_for_flud(sptr, acptr, NULL, 1);
+
+  if (MyConnect(sptr) &&
+      acptr->user && acptr->user->away)
+    sendto_one(sptr, form_str(RPL_AWAY), me.name,
+	       sptr->name, acptr->name,
+	       acptr->user->away);
+
+  sendto_prefix_one(acptr, sptr, ":%s %s %s :%s",
+		    sptr->name, "NOTICE", acptr->name, text);
 
 
-  /*
-  ** the following two cases allow masks in NOTICEs
-  ** (for OPERs only)
-  **
-  ** Armin, 8Jun90 (gruner@informatik.tu-muenchen.de)
-  */
-  if ((*nick == '$' || *nick == '#'))
-    {
-               sendto_one(sptr, form_str(ERR_NOSUCHNICK),
-                                  me.name, parv[0], nick);
-               return -1;
-    }
-        
-  /*
-  ** user[%host]@server addressed?
-  */
-  if ((server = (char *)strchr(nick, '@')) &&
-      (acptr = find_server(server + 1)))
-    {
-      int count = 0;
-
-      /* Disable the user%host@server form for non-opers
-       * -Dianora
-       */
-
-      if( (char *)strchr(nick,'%'))
-        {
-          sendto_one(sptr, form_str(ERR_NOSUCHNICK),
-                     me.name, parv[0], nick);
-          return -1;
-        }
-        
-      /*
-      ** Not destined for a user on me :-(
-      */
-      if (!IsMe(acptr))
-        {
-          sendto_one(acptr,":%s %s %s :%s", parv[0],
-                     "NOTICE", nick, parv[2]);
-          return 0;
-        }
-
-      *server = '\0';
-
-      if ((host = (char *)strchr(nick, '%')))
-        *host++ = '\0';
-
-      /*
-      ** Look for users which match the destination host
-      ** (no host == wildcard) and if one and one only is
-      ** found connected to me, deliver message!
-      */
-      acptr = find_userhost(nick, host, NULL, &count);
-      if (server)
-        *server = '@';
-      if (host)
-        *--host = '%';
-      if (acptr)
-        {
-          if (count == 1)
-            sendto_prefix_one(acptr, sptr,
-                              ":%s %s %s :%s",
-                              parv[0], "NOTICE",
-                              nick, parv[2]);
-        }
-      if (acptr)
-          return 0;
-    }
-  sendto_one(sptr, form_str(ERR_NOSUCHNICK), me.name,
-             parv[0], nick);
-
-  return 0;
+  return;
 }
 
 int     mo_notice(struct Client *cptr,
@@ -449,11 +324,6 @@ int     mo_notice(struct Client *cptr,
                           int parc,
                           char *parv[])
 {
-  struct Client *acptr;
-  char *s, *nick, *server, *host;
-  struct Channel *chptr;
-  int type=0;
-
   if (parc < 2 || *parv[1] == '\0')
     {
       sendto_one(sptr, form_str(ERR_NORECIPIENT),
@@ -467,241 +337,7 @@ int     mo_notice(struct Client *cptr,
       return -1;
     }
 
-  if (MyConnect(sptr))
-    {
-#ifndef ANTI_SPAMBOT_WARN_ONLY
-      /* if its a spambot, just ignore it */
-      if(sptr->join_leave_count >= MAX_JOIN_LEAVE_COUNT)
-        return 0;
-#endif
-      /* As Mortiis points out, if there is only one target,
-       * the call to canonize is silly
-       */
-    }
-  /* 
-   * If the target contains a , it will barf tough.
-   */
-
-  nick = parv[1];
-  if((strchr(nick,',')))
-    {
-      sendto_one(sptr, form_str(ERR_TOOMANYTARGETS),
-                     me.name, parv[0], "NOTICE");
-      return -1;
-    }
-
-  /*
-  ** channels are privmsg'd a lot more than other clients, moved up here
-  ** plain old channel msg ?
-  */
-  if( IsChanPrefix(*nick)
-      && (IsPerson(sptr) && (chptr = hash_find_channel(nick, NullChn))))
-    {
-      /* reset idle time for message only if target exists */
-      if(MyClient(sptr) && sptr->user)
-        sptr->user->last = CurrentTime;
-
-      if (can_send(chptr, sptr) == 0)
-        sendto_channel_butone(cptr, sptr, chptr,
-                              ":%s %s %s :%s",
-                              parv[0], "NOTICE", nick,
-                              parv[2]);
-      return 0;
-    }
-      
-  /*
-  ** @# type of channel msg?
-  */
-
-  if(*nick == '@')
-    type = MODE_CHANOP;
-  else if(*nick == '+')
-    type = MODE_CHANOP|MODE_VOICE;
-
-  if(type)
-    {
-      /* Strip if using DALnet chanop/voice prefix. */
-      if (*(nick+1) == '@' || *(nick+1) == '+')
-        {
-          nick++;
-          *nick = '@';
-          type = MODE_CHANOP|MODE_VOICE;
-        }
-
-      /* suggested by Mortiis */
-      if(!*nick)        /* if its a '\0' dump it, there is no recipient */
-        {
-          sendto_one(sptr, form_str(ERR_NORECIPIENT),
-                     me.name, parv[0], "NOTICE");
-          return -1;
-        }
-
-      if (!IsPerson(sptr))      /* This means, servers can't send messages */
-        return -1;
-
-      /* At this point, nick+1 should be a channel name i.e. #foo or &foo
-       * if the channel is found, fine, if not report an error
-       */
-
-      if ( (chptr = hash_find_channel(nick+1, NullChn)) )
-        {
-          /* reset idle time for message only if target exists */
-          if(MyClient(sptr) && sptr->user)
-            sptr->user->last = CurrentTime;
-
-          if (!is_chan_op(chptr,sptr))
-            {
-              return -1;
-            }
-          else
-            {
-              sendto_channel_type(cptr,
-                                  sptr,
-                                  chptr,
-                                  type,
-                                  nick+1,
-                                  "NOTICE",
-                                  parv[2]);
-            }
-        }
-      else
-        {
-          sendto_one(sptr, form_str(ERR_NOSUCHNICK),
-                     me.name, parv[0], nick);
-          return -1;
-        }
-      return 0;
-    }
-
-  /*
-  ** nickname addressed?
-  */
-
-  /* LazyLinks */
-#ifndef LLVER1
-
-  if(!ConfigFileEntry.hub && serv_cptr_list &&
-     IsCapable(serv_cptr_list,CAP_LL))
-    {
-
-    }
-#endif
-
-  if ((acptr = find_person(nick, NULL)))
-    {
-      /* reset idle time for message only if target exists */
-      if(MyClient(sptr) && sptr->user)
-        sptr->user->last = CurrentTime;
-
-      sendto_prefix_one(acptr, sptr, ":%s %s %s :%s",
-                        parv[0], "NOTICE", nick, parv[2]);
-
-      /* reset idle time for message only if its not to self */
-      if (sptr != acptr)
-        {
-          if(sptr->user)
-            sptr->user->last = CurrentTime;
-        }
-      return 0;
-    }
-
-  /* Everything below here should be reserved for opers 
-   * as pointed out by Mortiis, user%host.name@server.name 
-   * syntax could be used to flood without FLUD protection
-   * its also a delightful way for non-opers to find users who
-   * have changed nicks -Dianora
-   *
-   * Grrr it was pointed out to me that x@service is valid
-   * for non-opers too, and wouldn't allow for flooding/stalking
-   * -Dianora
-   */
-
-        
-  /*
-  ** the following two cases allow masks in NOTICEs
-  ** (for OPERs only)
-  **
-  ** Armin, 8Jun90 (gruner@informatik.tu-muenchen.de)
-  */
-  if ((*nick == '$' || *nick == '#'))
-    {
-      if (!(s = (char *)strrchr(nick, '.')))
-        {
-          sendto_one(sptr, form_str(ERR_NOTOPLEVEL),
-                     me.name, parv[0], nick);
-          return 0;
-        }
-      while (*++s)
-        if (*s == '.' || *s == '*' || *s == '?')
-          break;
-      if (*s == '*' || *s == '?')
-        {
-          sendto_one(sptr, form_str(ERR_WILDTOPLEVEL),
-                     me.name, parv[0], nick);
-          return 0;
-        }
-      sendto_match_butone(IsServer(cptr) ? cptr : NULL, 
-                          sptr, nick + 1,
-                          (*nick == '#') ? MATCH_HOST :
-                          MATCH_SERVER,
-                          ":%s %s %s :%s", parv[0],
-                          "NOTICE", nick, parv[2]);
-      return 0;
-    }
-        
-  /*
-  ** user[%host]@server addressed?
-  */
-  if ((server = (char *)strchr(nick, '@')) &&
-      (acptr = find_server(server + 1)))
-    {
-      int count = 0;
-
-      /*
-      ** Not destined for a user on me :-(
-      */
-      if (!IsMe(acptr))
-        {
-          sendto_one(acptr,":%s %s %s :%s", parv[0],
-                     "NOTICE", nick, parv[2]);
-          return 0;
-        }
-
-      *server = '\0';
-
-      /* special case opers@server */
-      if(!irccmp(nick,"opers"))
-        {
-          sendto_realops("To opers: From %s: %s",sptr->name,parv[2]);
-          return 0;
-        }
-        
-      if ((host = (char *)strchr(nick, '%')))
-        *host++ = '\0';
-
-      /*
-      ** Look for users which match the destination host
-      ** (no host == wildcard) and if one and one only is
-      ** found connected to me, deliver message!
-      */
-      acptr = find_userhost(nick, host, NULL, &count);
-      if (server)
-        *server = '@';
-      if (host)
-        *--host = '%';
-      if (acptr)
-        {
-          if (count == 1)
-            sendto_prefix_one(acptr, sptr,
-                              ":%s %s %s :%s",
-                              parv[0], "NOTICE",
-                              nick, parv[2]);
-        }
-      if (acptr)
-          return 0;
-    }
-  sendto_one(sptr, form_str(ERR_NOSUCHNICK), me.name,
-             parv[0], nick);
+  m_notice(cptr,sptr,parc,parv);
 
   return 0;
 }
@@ -711,11 +347,6 @@ int     ms_notice(struct Client *cptr,
                           int parc,
                           char *parv[])
 {
-  struct Client *acptr;
-  char *s, *nick, *server, *host;
-  struct Channel *chptr;
-  int type=0;
-
   if (parc < 2 || *parv[1] == '\0')
     {
       sendto_one(sptr, form_str(ERR_NORECIPIENT),
@@ -729,325 +360,7 @@ int     ms_notice(struct Client *cptr,
       return -1;
     }
 
-  if (MyConnect(sptr))
-    {
-#ifndef ANTI_SPAMBOT_WARN_ONLY
-      /* if its a spambot, just ignore it */
-      if(sptr->join_leave_count >= MAX_JOIN_LEAVE_COUNT)
-        return 0;
-#endif
-      /* As Mortiis points out, if there is only one target,
-       * the call to canonize is silly
-       */
-    }
-  /* 
-   * If the target contains a , it will barf tough.
-   */
-
-  nick = parv[1];
-  if((strchr(nick,',')))
-    {
-      sendto_one(sptr, form_str(ERR_TOOMANYTARGETS),
-                     me.name, parv[0], "NOTICE");
-      return -1;
-    }
-
-  /*
-  ** channels are privmsg'd a lot more than other clients, moved up here
-  ** plain old channel msg ?
-  */
-  if( IsChanPrefix(*nick)
-      && (IsPerson(sptr) && (chptr = hash_find_channel(nick, NullChn))))
-    {
-      /* reset idle time for message only if target exists */
-      if(MyClient(sptr) && sptr->user)
-        sptr->user->last = CurrentTime;
-
-      if (can_send(chptr, sptr) == 0)
-        sendto_channel_butone(cptr, sptr, chptr,
-                              ":%s %s %s :%s",
-                              parv[0], "NOTICE", nick,
-                              parv[2]);
-      return 0;
-    }
-      
-  /*
-  ** @# type of channel msg?
-  */
-
-  if(*nick == '@')
-    type = MODE_CHANOP;
-  else if(*nick == '+')
-    type = MODE_CHANOP|MODE_VOICE;
-
-  if(type)
-    {
-      /* Strip if using DALnet chanop/voice prefix. */
-      if (*(nick+1) == '@' || *(nick+1) == '+')
-        {
-          nick++;
-          *nick = '@';
-          type = MODE_CHANOP|MODE_VOICE;
-        }
-
-      /* suggested by Mortiis */
-      if(!*nick)        /* if its a '\0' dump it, there is no recipient */
-        {
-          sendto_one(sptr, form_str(ERR_NORECIPIENT),
-                     me.name, parv[0], "NOTICE");
-          return -1;
-        }
-
-      if (!IsPerson(sptr))      /* This means, servers can't send messages */
-        return -1;
-
-      /* At this point, nick+1 should be a channel name i.e. #foo or &foo
-       * if the channel is found, fine, if not report an error
-       */
-
-      if ( (chptr = hash_find_channel(nick+1, NullChn)) )
-        {
-          /* reset idle time for message only if target exists */
-          if(MyClient(sptr) && sptr->user)
-            sptr->user->last = CurrentTime;
-
-          if (!is_chan_op(chptr,sptr))
-            {
-              return -1;
-            }
-          else
-            {
-              sendto_channel_type(cptr,
-                                  sptr,
-                                  chptr,
-                                  type,
-                                  nick+1,
-                                  "NOTICE",
-                                  parv[2]);
-            }
-        }
-      else
-        {
-          sendto_one(sptr, form_str(ERR_NOSUCHNICK),
-                     me.name, parv[0], nick);
-          return -1;
-        }
-      return 0;
-    }
-
-  /*
-  ** nickname addressed?
-  */
-
-  /* LazyLinks */
-#ifndef LLVER1
-
-  if(!ConfigFileEntry.hub && serv_cptr_list &&
-     IsCapable(serv_cptr_list,CAP_LL))
-    {
-
-    }
-#endif
-
-  if ((acptr = find_person(nick, NULL)))
-    {
-      /* reset idle time for message only if target exists */
-      if(MyClient(sptr) && sptr->user)
-        sptr->user->last = CurrentTime;
-
-      if(MyConnect(acptr) && IsClient(sptr) && !IsAnyOper(sptr) &&
-	 GlobalSetOptions.dronetime)
-        {
-          if((acptr->first_received_message_time+GlobalSetOptions.dronetime)
-	     < CurrentTime)
-            {
-              acptr->received_number_of_privmsgs=1;
-              acptr->first_received_message_time = CurrentTime;
-              acptr->drone_noticed = 0;
-            }
-          else
-            {
-              if(acptr->received_number_of_privmsgs > 
-		 GlobalSetOptions.dronecount)
-                {
-                  if(acptr->drone_noticed == 0) /* tiny FSM */
-                    {
-                      sendto_ops_flags(FLAGS_BOTS,
-                             "Possible Drone Flooder %s [%s@%s] on %s target: %s",
-                                     sptr->name, sptr->username,
-                                     sptr->host,
-                                     sptr->user->server, acptr->name);
-                      acptr->drone_noticed = 1;
-                    }
-                  /* heuristic here, if target has been getting a lot
-                   * of privmsgs from clients, and sendq is above halfway up
-                   * its allowed sendq, then throw away the privmsg, otherwise
-                   * let it through. This adds some protection, yet doesn't
-                   * DOS the client.
-                   * -Dianora
-                   */
-                  if(DBufLength(&acptr->sendQ) > (get_sendq(acptr)/2L))
-                    {
-                      if(acptr->drone_noticed == 1) /* tiny FSM */
-                        {
-                          sendto_ops_flags(FLAGS_BOTS,
-                         "ANTI_DRONE_FLOOD SendQ protection activated for %s",
-                                         acptr->name);
-
-                          sendto_one(acptr,     
- ":%s NOTICE %s :*** Notice -- Server drone flood protection activated for %s",
-                                     me.name, acptr->name, acptr->name);
-                          acptr->drone_noticed = 2;
-                        }
-                    }
-
-                  if(DBufLength(&acptr->sendQ) <= (get_sendq(acptr)/4L))
-                    {
-                      if(acptr->drone_noticed == 2)
-                        {
-                          sendto_one(acptr,     
-                                     ":%s NOTICE %s :*** Notice -- Server drone flood protection de-activated for %s",
-                                     me.name, acptr->name, acptr->name);
-                          acptr->drone_noticed = 1;
-                        }
-                    }
-                  if(acptr->drone_noticed > 1)
-                    return 0;
-                }
-              else
-                acptr->received_number_of_privmsgs++;
-            }
-        }
-
-      sendto_prefix_one(acptr, sptr, ":%s %s %s :%s",
-                        parv[0], "NOTICE", nick, parv[2]);
-
-      /* reset idle time for message only if its not to self */
-      if (sptr != acptr)
-        {
-          if(sptr->user)
-            sptr->user->last = CurrentTime;
-        }
-
-      return 0;
-    }
-
-  /* Everything below here should be reserved for opers 
-   * as pointed out by Mortiis, user%host.name@server.name 
-   * syntax could be used to flood without FLUD protection
-   * its also a delightful way for non-opers to find users who
-   * have changed nicks -Dianora
-   *
-   * Grrr it was pointed out to me that x@service is valid
-   * for non-opers too, and wouldn't allow for flooding/stalking
-   * -Dianora
-   */
-
-        
-  /*
-  ** the following two cases allow masks in NOTICEs
-  ** (for OPERs only)
-  **
-  ** Armin, 8Jun90 (gruner@informatik.tu-muenchen.de)
-  */
-  if ((*nick == '$' || *nick == '#'))
-    {
-
-      if(!IsAnyOper(sptr))
-        {
-          sendto_one(sptr, form_str(ERR_NOSUCHNICK),
-                     me.name, parv[0], nick);
-          return -1;
-        }
-
-      if (!(s = (char *)strrchr(nick, '.')))
-        {
-          sendto_one(sptr, form_str(ERR_NOTOPLEVEL),
-                     me.name, parv[0], nick);
-          return 0;
-        }
-      while (*++s)
-        if (*s == '.' || *s == '*' || *s == '?')
-          break;
-      if (*s == '*' || *s == '?')
-        {
-          sendto_one(sptr, form_str(ERR_WILDTOPLEVEL),
-                     me.name, parv[0], nick);
-          return 0;
-        }
-      sendto_match_butone(IsServer(cptr) ? cptr : NULL, 
-                          sptr, nick + 1,
-                          (*nick == '#') ? MATCH_HOST :
-                          MATCH_SERVER,
-                          ":%s %s %s :%s", parv[0],
-                          "NOTICE", nick, parv[2]);
-      return 0;
-    }
-        
-  /*
-  ** user[%host]@server addressed?
-  */
-  if ((server = (char *)strchr(nick, '@')) &&
-      (acptr = find_server(server + 1)))
-    {
-      int count = 0;
-
-      /* Disable the user%host@server form for non-opers
-       * -Dianora
-       */
-
-      if( (char *)strchr(nick,'%') && !IsAnyOper(sptr))
-        {
-          sendto_one(sptr, form_str(ERR_NOSUCHNICK),
-                     me.name, parv[0], nick);
-          return -1;
-        }
-        
-      /*
-      ** Not destined for a user on me :-(
-      */
-      if (!IsMe(acptr))
-        {
-          sendto_one(acptr,":%s %s %s :%s", parv[0],
-                     "NOTICE", nick, parv[2]);
-          return 0;
-        }
-
-      *server = '\0';
-
-      /* special case opers@server */
-      if(!irccmp(nick,"opers") && IsAnyOper(sptr))
-        {
-          sendto_realops("To opers: From %s: %s",sptr->name,parv[2]);
-          return 0;
-        }
-        
-      if ((host = (char *)strchr(nick, '%')))
-        *host++ = '\0';
-
-      /*
-      ** Look for users which match the destination host
-      ** (no host == wildcard) and if one and one only is
-      ** found connected to me, deliver message!
-      */
-      acptr = find_userhost(nick, host, NULL, &count);
-      if (server)
-        *server = '@';
-      if (host)
-        *--host = '%';
-      if (acptr)
-        {
-          if (count == 1)
-            sendto_prefix_one(acptr, sptr,
-                              ":%s %s %s :%s",
-                              parv[0], "NOTICE",
-                              nick, parv[2]);
-        }
-      if (acptr)
-          return 0;
-    }
-  sendto_one(sptr, form_str(ERR_NOSUCHNICK), me.name,
-             parv[0], nick);
+  m_notice(cptr,sptr,parc,parv);
 
   return 0;
 }
