@@ -1,3 +1,8 @@
+*** 20010124_8 by db
+- don't allow /accept server. Redundant check in client.c
+
+
+
 *** 20010124_7 by davidt
 IPv6 patch, v2
 
