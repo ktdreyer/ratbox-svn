@@ -533,6 +533,7 @@ GreetUser(struct Client *client)
   static char ubuf[12];
   struct ConfItem *found_aconf;
   dlink_node *ptr;
+  dlink_node *m;
 
   sendto_realops_flags(FLAGS_CCONN,
 		       "Client connecting: %s (%s@%s) [%s] {%d}",
@@ -659,12 +660,8 @@ GreetUser(struct Client *client)
       ubuf[1] = '\0';
     }
   
-  if (LocalClientList)
-    LocalClientList->previous_local_client = client;
-
-  client->previous_local_client = NULL;
-  client->next_local_client = LocalClientList;
-  LocalClientList = client;
+  m = make_dlink_node();
+  dlinkAdd(client, m, &lclient_list);
 
   sendto_serv_butone(client,
 		     "NICK %s %d %lu %s %s %s %s :%s",

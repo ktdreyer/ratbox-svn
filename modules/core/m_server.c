@@ -1,4 +1,4 @@
-/************************************************************************
+/***********************************************************************
  *   IRC - Internet Relay Chat, src/m_server.c
  *   Copyright (C) 1990 Jarkko Oikarinen and
  *                      University of Oulu, Computing Center
@@ -76,6 +76,7 @@ int mr_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   struct Client*   bcptr;
   struct ConfItem* aconf;
   int              hop;
+  dlink_node       *ptr;
 
   info[0] = '\0';
   /*  inpath = get_client_name(cptr,FALSE); */
@@ -317,8 +318,9 @@ int mr_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
        * need to send different names to different servers
        * (domain name matching)
        */
-      for (bcptr = serv_cptr_list; bcptr; bcptr = bcptr->next_server_client)
+      for (ptr = serv_list.head; ptr; ptr = ptr->next)
         {
+	  bcptr = ptr->data;
           if (bcptr == cptr)
             continue;
           if (!(aconf = bcptr->serv->nline))
@@ -391,6 +393,7 @@ int ms_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   struct Client*   bcptr;
   struct ConfItem* aconf;
   int              hop;
+  dlink_node	   *ptr;
 
   info[0] = '\0';
   /*  inpath = get_client_name(cptr,FALSE); */
@@ -634,8 +637,10 @@ int ms_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
        * need to send different names to different servers
        * (domain name matching)
        */
-      for (bcptr = serv_cptr_list; bcptr; bcptr = bcptr->next_server_client)
+      for (ptr = serv_list.head; ptr; ptr = ptr->next)
         {
+	  bcptr = ptr->data;
+
           if (bcptr == cptr)
             continue;
           if (!(aconf = bcptr->serv->nline))

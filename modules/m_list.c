@@ -71,15 +71,20 @@ int     m_list(struct Client *cptr,
                char *parv[])
 {
   static time_t last_used=0L;
+  /* XXX global uplink */
+  dlink_node *ptr;
+  struct Client *uplink=NULL;
+  if( ptr = serv_list.head )
+    uplink = ptr->data;
 
   /* If its a LazyLinks connection, let uplink handle the list */
 
-  if( serv_cptr_list && IsCapable( serv_cptr_list, CAP_LL) )
+  if( uplink && IsCapable(uplink,CAP_LL) )
     {
       if(parc < 2)
-	sendto_one( serv_cptr_list, ":%s LIST", sptr->name );
+	sendto_one( uplink, ":%s LIST", sptr->name );
       else
-	sendto_one( serv_cptr_list, ":%s LIST %s", sptr->name, parv[1] );
+	sendto_one( uplink, ":%s LIST %s", sptr->name, parv[1] );
       return 0;
     }
 
@@ -117,18 +122,24 @@ int     mo_list(struct Client *cptr,
                int parc,
                char *parv[])
 {
-  /* Opers don't get paced */
+  /* XXX global uplink */
+  dlink_node *ptr;
+  struct Client *uplink=NULL;
+  if( ptr = serv_list.head )
+    uplink = ptr->data;
+  
+/* Opers don't get paced */
 
   /* If its a LazyLinks connection, let uplink handle the list
    * even for opers!
    */
 
-  if( serv_cptr_list && IsCapable( serv_cptr_list, CAP_LL) )
+  if( uplink && IsCapable( uplink, CAP_LL) )
     {
       if(parc < 2)
-	sendto_one( serv_cptr_list, ":%s LIST", sptr->name );
+	sendto_one( uplink, ":%s LIST", sptr->name );
       else
-	sendto_one( serv_cptr_list, ":%s LIST %s", sptr->name, parv[1] );
+	sendto_one( uplink, ":%s LIST %s", sptr->name, parv[1] );
       return 0;
     }
 

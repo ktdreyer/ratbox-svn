@@ -10,7 +10,7 @@
 #ifndef __TOOLS_H__
 #define __TOOLS_H__
 
-#define DEBUG_DLINK
+#undef DEBUG_DLINK
 
 /*
  * double-linked-list stuff
@@ -51,4 +51,7 @@ dlinkMoveList(dlink_list *from, dlink_list *to);
 
 int
 dlink_list_length(dlink_list *m);
+
+dlink_node *
+dlinkFind(dlink_list *m, void *data);
 #endif

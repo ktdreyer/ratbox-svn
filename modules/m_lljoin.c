@@ -76,6 +76,11 @@ int     ms_lljoin(struct Client *cptr,
   int  flags;
   struct Client *acptr;
   struct Channel *chptr;
+  /* XXX global uplink */
+  dlink_node *ptr;
+  struct Client *uplink=NULL;
+  if( ptr = serv_list.head )
+    uplink = ptr->data;
 
   if( parc < 4 )
     return 0;
@@ -110,7 +115,7 @@ int     ms_lljoin(struct Client *cptr,
       chptr = get_channel( acptr, name, CREATE );
     }
 
-  if(serv_cptr_list && IsCapable(serv_cptr_list,CAP_LL))
+  if(uplink && IsCapable(uplink,CAP_LL))
     {
       switch(can_join_flag)
         {
@@ -126,15 +131,15 @@ int     ms_lljoin(struct Client *cptr,
 
           if(flags == CHFL_CHANOP)
             {
-              sendto_one(serv_cptr_list,
-                                 ":%s SJOIN %lu %s + :@%s", me.name,
-                                 chptr->channelts, name, nick);
+              sendto_one(uplink,
+			 ":%s SJOIN %lu %s + :@%s", me.name,
+			 chptr->channelts, name, nick);
             }
           else
             {
-              sendto_one(serv_cptr_list,
-                                 ":%s SJOIN %lu %s + :%s", me.name,
-                                 chptr->channelts, name, nick);
+              sendto_one(uplink,
+			 ":%s SJOIN %lu %s + :%s", me.name,
+			 chptr->channelts, name, nick);
             }
 
           add_user_to_channel(chptr, acptr, flags);
@@ -160,9 +165,9 @@ int     ms_lljoin(struct Client *cptr,
 					 me.name, chptr->chname);
 		}
 
-              sendto_one(serv_cptr_list, 
-                                 ":%s MODE %s +nt",
-                                 me.name, chptr->chname);
+              sendto_one(uplink, 
+			 ":%s MODE %s +nt",
+			 me.name, chptr->chname);
             }
         break;
 

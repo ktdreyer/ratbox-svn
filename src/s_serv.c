@@ -568,6 +568,8 @@ int server_estab(struct Client *cptr)
   char*             host;
   char*             encr;
   int               split;
+  dlink_node        *m;
+  dlink_node        *ptr;
 
   assert(0 != cptr);
   ClearAccess(cptr);
@@ -629,7 +631,7 @@ int server_estab(struct Client *cptr)
       /* Its easy now, if there is a server in my link list
        * and I'm not a HUB, I can't grow the linklist more than 1
        */
-      if (serv_cptr_list)   
+      if (serv_list.head)   
         {
           ServerStats->is_ref++;
           sendto_one(cptr, "ERROR :I'm a leaf not a hub");
@@ -696,8 +698,8 @@ int server_estab(struct Client *cptr)
     report_error(SETBUF_ERROR_MSG, get_client_name(cptr, TRUE), errno);
 
   /* LINKLIST */
-  cptr->next_server_client = serv_cptr_list;
-  serv_cptr_list = cptr;
+  m = make_dlink_node();
+  dlinkAdd(cptr, m, &serv_list);
   
   /* ircd-hybrid-6 can do TS links, and  zipped links*/
   sendto_realops("Link with %s established: (%s) link",
@@ -720,8 +722,10 @@ int server_estab(struct Client *cptr)
   ** need to send different names to different servers
   ** (domain name matching) Send new server to other servers.
   */
-  for(acptr=serv_cptr_list;acptr;acptr=acptr->next_server_client)
+  for(ptr=serv_list.head;ptr;ptr=ptr->next)
     {
+      acptr = ptr->data;
+
       if (acptr == cptr)
         continue;
 
@@ -986,11 +990,14 @@ void set_autoconn(struct Client *sptr,char *parv0,char *name,int newval)
  */
 void show_servers(struct Client *cptr)
 {
-  register struct Client *cptr2;
-  register int j=0;                /* used to count servers */
+  struct Client *cptr2;
+  int j=0;                /* used to count servers */
+  dlink_node *ptr;
 
-  for(cptr2 = serv_cptr_list; cptr2; cptr2 = cptr2->next_server_client)
+  for(ptr = serv_list.head; ptr; ptr = ptr->next)
     {
+      cptr2 = ptr->data;
+
       ++j;
       sendto_one(cptr, ":%s %d %s :%s (%s!%s@%s) Idle: %d",
                  me.name, RPL_STATSDEBUG, cptr->name, cptr2->name,

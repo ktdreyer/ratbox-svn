@@ -32,7 +32,12 @@
 #define INCLUDED_sys_types_h
 #endif
 
+#ifndef __TOOLS_H__
+#include "tools.h"
+#endif
+
 struct Client;
+struct dlink_list;
 
 struct SetOptions
 {
@@ -91,9 +96,9 @@ extern time_t         LCF;
 extern time_t         nextconnect;
 
 
-extern struct Client* LocalClientList;
-extern struct Client* oper_cptr_list;
-extern struct Client* serv_cptr_list;
+extern dlink_list lclient_list;
+extern dlink_list oper_list;
+extern dlink_list serv_list;
 
 #ifdef REJECT_HOLD
 extern int reject_held_fds;

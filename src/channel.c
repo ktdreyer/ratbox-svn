@@ -471,35 +471,8 @@ void    remove_user_from_channel(struct Channel *chptr,struct Client *who)
  */
 dlink_node *find_user_link(dlink_list *list, struct Client *who)
 {
-  dlink_node *ptr;
-
   if (who)
-    {
-      for (ptr = list->head; ptr; ptr = ptr->next)
-	{
-	  if (ptr->data == who)
-	    return (ptr);
-	}
-    }
-  return (NULL);
-}
-
-/*
- * find_channel_link
- * inputs	- list to search 
- *		- channel pointer to find
- * output	- pointer to link or NULL if not found
- * side effects	- Look for ptr in the linked listed pointed to by link.
- */
-dlink_node *find_channel_link(dlink_list *list, struct Channel *chptr)
-{
-  dlink_node *ptr;
-
-  for (ptr = list->head; ptr; ptr = ptr->next)
-    {
-      if (ptr->data == chptr)
-	return (ptr);
-    }
+    return(dlinkFind(list,who));
   return (NULL);
 }
 
@@ -523,7 +496,7 @@ static int change_channel_membership(struct Channel *chptr,
     {
       if (to_list != &chptr->peons)
 	{
-	  dlinkDelete( ptr, &chptr->peons);
+	  dlinkDelete(ptr, &chptr->peons);
 	  dlinkAdd(who, ptr, to_list);
 	  return(1);
 	}
@@ -533,7 +506,7 @@ static int change_channel_membership(struct Channel *chptr,
     {
       if (to_list != &chptr->voiced)
 	{
-	  dlinkDelete( ptr, &chptr->voiced);
+	  dlinkDelete(ptr, &chptr->voiced);
 	  dlinkAdd(who, ptr, to_list);
 	  return(1);
 	}
@@ -543,7 +516,7 @@ static int change_channel_membership(struct Channel *chptr,
     {
       if (to_list != &chptr->halfops)
 	{
-	  dlinkDelete( ptr, &chptr->halfops);
+	  dlinkDelete(ptr, &chptr->halfops);
 	  dlinkAdd(who, ptr, to_list);
 	  return(1);
 	}
@@ -553,7 +526,7 @@ static int change_channel_membership(struct Channel *chptr,
     {
       if (to_list != &chptr->chanops)
 	{
-	  dlinkDelete( ptr, &chptr->chanops);
+	  dlinkDelete(ptr, &chptr->chanops);
 	  dlinkAdd(who, ptr, to_list);
 	  return(1);
 	}
@@ -2187,7 +2160,18 @@ void cleanup_channels(void *unused)
 {
    struct Channel *chptr;
    struct Channel *next_chptr;
- 
+   dlink_node *ptr;
+   struct Client *uplink;
+
+   /* XXX errg for leafs, really need a global uplink struct */
+   if(!ConfigFileEntry.hub && serv_list.head)
+     {
+       ptr = serv_list.head;
+       uplink = ptr->data;
+     }
+   else
+     uplink = NULL;
+
    if(!ConfigFileEntry.hub)
      eventAdd("cleanup_channels", cleanup_channels, NULL,
 	      CLEANUP_CHANNELS_TIME, 0 );
@@ -2208,13 +2192,11 @@ void cleanup_channels(void *unused)
 		 {
 		   if(chptr->users == 0)
 		     {
-		       if (!ConfigFileEntry.hub
+		       if (uplink
 			   &&
-			   serv_cptr_list
-			   &&
-			   IsCapable(serv_cptr_list, CAP_LL))
+			   IsCapable(uplink, CAP_LL))
 			 {
-			   sendto_one(serv_cptr_list,":%s DROP %s",
+			   sendto_one(uplink,":%s DROP %s",
 				      me.name, chptr->chname);
 			 }
 		       destroy_channel(chptr);
@@ -2232,15 +2214,13 @@ void cleanup_channels(void *unused)
 		 {
 		   destroy_channel(chptr);
 		 }
-	       else if( ! ConfigFileEntry.hub
+	       else if( uplink
 			&&
-			serv_cptr_list
-			&&
-			IsCapable(serv_cptr_list,CAP_LL)
+			IsCapable(uplink,CAP_LL)
 			&&
 			(chptr->locusers == 0) )
 		 {
-		   sendto_one(serv_cptr_list,":%s DROP %s",
+		   sendto_one(uplink,":%s DROP %s",
 			      me.name, chptr->chname);
 		   destroy_channel(chptr);
 		 }

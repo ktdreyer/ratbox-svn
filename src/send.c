@@ -463,11 +463,14 @@ sendto_serv_butone(struct Client *one, const char *pattern, ...)
 {
   va_list args;
   register struct Client *cptr;
+  dlink_node *ptr;
 
   va_start(args, pattern);
   
-  for(cptr = serv_cptr_list; cptr; cptr = cptr->next_server_client)
+  for(ptr = serv_list.head; ptr; ptr = ptr->next)
     {
+      cptr = ptr->data;
+
       if (one && (cptr == one->from))
         continue;
       
@@ -627,7 +630,8 @@ sendto_match_servs(struct Channel *chptr, struct Client *from, const char *patte
 {
   va_list args;
   register struct Client *cptr;
-  
+  dlink_node *ptr;
+
   va_start(args, pattern);
 
   if (chptr)
@@ -638,8 +642,10 @@ sendto_match_servs(struct Channel *chptr, struct Client *from, const char *patte
   else
     return; /* an ooopsies */
 
-  for(cptr = serv_cptr_list; cptr; cptr = cptr->next_server_client)
+  for(ptr = serv_list.head; ptr; ptr = ptr->next)
     {
+      cptr = ptr->data;
+
       if (cptr == from)
         continue;
 
@@ -669,6 +675,7 @@ sendto_match_cap_servs(struct Channel *chptr, struct Client *from, int cap,
 {
   va_list args;
   register struct Client *cptr;
+  dlink_node *ptr;
 
   va_start(args, pattern);
 
@@ -678,8 +685,10 @@ sendto_match_cap_servs(struct Channel *chptr, struct Client *from, int cap,
         return;
     }
 
-  for(cptr = serv_cptr_list; cptr; cptr = cptr->next_server_client)
+  for(ptr = serv_list.head; ptr; ptr = ptr->next)
     {
+      cptr = ptr->data;
+
       if (cptr == from)
         continue;
       
@@ -706,12 +715,15 @@ sendto_match_butone(struct Client *one, struct Client *from, char *mask,
 {
   va_list args;
   register struct Client *cptr;
+  dlink_node *ptr;
 
   va_start(args, pattern);
 
   /* scan the local clients */
-  for(cptr = LocalClientList; cptr; cptr = cptr->next_local_client)
+  for(ptr = lclient_list.head; ptr; ptr = ptr->next)
     {
+      cptr = ptr->data;
+
       if (cptr == one)  /* must skip the origin !! */
         continue;
       
@@ -720,8 +732,10 @@ sendto_match_butone(struct Client *one, struct Client *from, char *mask,
     }
 
   /* Now scan servers */
-  for (cptr = serv_cptr_list; cptr; cptr = cptr->next_server_client)
+  for (ptr = serv_list.head; ptr; ptr = ptr->next)
     {
+      cptr = ptr->data;
+
       if (cptr == one) /* must skip the origin !! */
         continue;
 
@@ -751,7 +765,7 @@ sendto_match_butone(struct Client *one, struct Client *from, char *mask,
        */
 
       vsendto_prefix_one(cptr, from, pattern, args);
-    } /* for (cptr = serv_cptr_list; cptr; cptr = cptr->next_server_client) */
+    }
 
   va_end(args);
 } /* sendto_match_butone() */
@@ -771,7 +785,8 @@ send_operwall(struct Client *from, char *type_message, ...)
   va_list va;
   struct Client *acptr;
   struct User *user;
-  
+  dlink_node *ptr;
+
   va_start(va, type_message);
   format = va_arg(va, char *);
   vsnprintf(message, sizeof(message)-2, format, va);
@@ -793,8 +808,10 @@ send_operwall(struct Client *from, char *type_message, ...)
 
   if(type_message != NULL)
     {
-      for (acptr = oper_cptr_list; acptr; acptr = acptr->next_oper_client)
+      for (ptr = oper_list.head; ptr; ptr = ptr->next)
 	{
+	  acptr = ptr->data;
+
 	  if (!SendOperwall(acptr))
 	    continue; /* has to be oper if in this linklist */
 	  sendto_one(acptr, ":%s WALLOPS :%s %s", sender,
@@ -803,8 +820,9 @@ send_operwall(struct Client *from, char *type_message, ...)
     }
   else
     {
-      for (acptr = oper_cptr_list; acptr; acptr = acptr->next_oper_client)
+      for (ptr = oper_list.head; ptr; ptr = ptr->next)
 	{
+	  acptr = ptr->data;
 	  if (!SendOperwall(acptr))
 	    continue; /* has to be oper if in this linklist */
 
@@ -974,9 +992,12 @@ vsendto_realops(const char *pattern, va_list args)
 {
   register struct Client *cptr;
   char nbuf[1024];
-  
-  for (cptr = oper_cptr_list; cptr; cptr = cptr->next_oper_client)
+  dlink_node *ptr;
+
+  for (ptr = oper_list.head; ptr; ptr = ptr->next)
     {
+      cptr = ptr->data;
+
       if (SendServNotice(cptr))
         {
           (void)ircsprintf(nbuf, ":%s NOTICE %s :*** Notice -- ",
@@ -1001,11 +1022,14 @@ sendto_realops_flags(int flags, const char *pattern, ...)
   va_list args;
   register struct Client *cptr;
   char nbuf[1024];
+  dlink_node *ptr;
 
   va_start(args, pattern);
 
-  for (cptr = oper_cptr_list; cptr; cptr = cptr->next_oper_client)
+  for (ptr = oper_list.head; ptr; ptr = ptr->next)
     {
+      cptr = ptr->data;
+
       if(cptr->umodes & flags)
         {
           (void)ircsprintf(nbuf, ":%s NOTICE %s :*** Notice -- ",
@@ -1014,7 +1038,7 @@ sendto_realops_flags(int flags, const char *pattern, ...)
           
           vsendto_one(cptr, nbuf, args);
         }
-    } /* for (cptr = oper_cptr_list; cptr; cptr = cptr->next_oper_client) */
+    } 
 
   va_end(args);
 } /* sendto_realops_flags() */
@@ -1072,9 +1096,12 @@ sendto_slaves(struct Client *one, char *message, char *nick, int parc, char *par
 {
   struct Client *acptr;
   struct ConfItem *aconf;
+  dlink_node *ptr;
 
-  for(acptr = serv_cptr_list; acptr; acptr = acptr->next_server_client)
+  for(ptr = serv_list.head; ptr; ptr = ptr->next)
     {
+      acptr = ptr->data;
+
       if (one == acptr)
         continue;
       
@@ -1105,7 +1132,7 @@ sendto_slaves(struct Client *one, char *message, char *nick, int parc, char *par
                            parv[1]);
             } /* if (match(acptr->name,aconf->name)) */
         } /* for (aconf = u_conf; aconf; aconf = aconf->next) */
-    } /* for(acptr = serv_cptr_list; acptr; acptr = acptr->next_server_client) */
+    } 
 
   return 0;
 } /* sendto_slaves() */

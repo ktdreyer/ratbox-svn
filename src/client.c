@@ -1414,6 +1414,8 @@ const char* comment         /* Reason for the exit */
   struct Client        *acptr;
   struct Client        *next;
   char comment1[HOSTLEN + HOSTLEN + 2];
+  dlink_node *m;
+
   if (MyConnect(sptr))
     {
 #ifdef LIMIT_UH
@@ -1429,26 +1431,12 @@ const char* comment         /* Reason for the exit */
 #endif
       if (IsAnyOper(sptr))
         {
-          /* LINKLIST */
-          {
-            struct Client *prev_cptr=(struct Client *)NULL;
-            struct Client *cur_cptr = oper_cptr_list;
-            while(cur_cptr) 
-              {
-                if(sptr == cur_cptr)
-                  {
-                    if(prev_cptr)
-                      prev_cptr->next_oper_client = cur_cptr->next_oper_client;
-                    else
-                      oper_cptr_list = cur_cptr->next_oper_client;
-                    cur_cptr->next_oper_client = (struct Client *)NULL;
-                    break;
-                  }
-                else
-                  prev_cptr = cur_cptr;
-                cur_cptr = cur_cptr->next_oper_client;
-              }
-          }
+	  m = dlinkFind(&oper_list,sptr);
+	  if( m != NULL )
+	    {
+	      dlinkDelete(m, &oper_list);
+	      free_dlink_node(m);
+	    }
         }
       if (IsClient(sptr))
         {
@@ -1457,23 +1445,12 @@ const char* comment         /* Reason for the exit */
           /* LINKLIST */
           if(IsPerson(sptr))        /* a little extra paranoia */
             {
-              if(sptr->previous_local_client)
-                sptr->previous_local_client->next_local_client =
-                  sptr->next_local_client;
-              else
-                {
-                  if(LocalClientList == sptr)
-                    {
-                      LocalClientList = sptr->next_local_client;
-                    }
-                }
-
-              if(sptr->next_local_client)
-                sptr->next_local_client->previous_local_client =
-                  sptr->previous_local_client;
-
-              sptr->previous_local_client = sptr->next_local_client = 
-                (struct Client *)NULL;
+	      m = dlinkFind(&lclient_list,sptr);
+	      if( m != NULL )
+		{
+		  dlinkDelete(m,&lclient_list);
+		  free_dlink_node(m);
+		}
             }
         }
       if (IsServer(sptr))
@@ -1483,24 +1460,9 @@ const char* comment         /* Reason for the exit */
 	  if(ConfigFileEntry.hub)
 	    restoreUnusedServerMask(sptr->localClient->serverMask);
           {
-            struct Client *prev_cptr = NULL;
-            struct Client *cur_cptr = serv_cptr_list;
-            while(cur_cptr)
-              {
-                if(sptr == cur_cptr)
-                  {
-                    if(prev_cptr)
-                      prev_cptr->next_server_client =
-                        cur_cptr->next_server_client;
-                    else
-                      serv_cptr_list = cur_cptr->next_server_client;
-                    cur_cptr->next_server_client = NULL;
-                    break;
-                  }
-                else
-                  prev_cptr = cur_cptr;
-                cur_cptr = cur_cptr->next_server_client;
-              }
+	    m = dlinkFind(&serv_list,sptr);
+	    dlinkDelete(m,&serv_list);
+	    free_dlink_node(m);
           }
         }
       sptr->flags |= FLAGS_CLOSING;

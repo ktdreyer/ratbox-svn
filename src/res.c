@@ -1075,10 +1075,10 @@ res_readreply(int fd, void *data)
 	  /*
 	   * got a name and address response, client resolved
 	   *
-	   * XXX - Bug found here by Dianora -
-	   * make_cache() occasionally returns a NULL pointer when a
-	   * PTR returned a CNAME, cp was not checked before so the
-	   * callback was being called with a value of 0x2C != NULL
+           * XXX - Bug found here by Dianora -
+           * make_cache() occasionally returns a NULL pointer when a
+           * PTR returned a CNAME, cp was not checked before so the
+           * callback was being called with a value of 0x2C != NULL
 	   *
 	   */
 	  cp = make_cache(request);

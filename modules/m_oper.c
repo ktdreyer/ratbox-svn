@@ -241,6 +241,7 @@ int oper_up( struct Client *sptr, struct ConfItem *aconf )
   char *operprivs;
   dlink_node *ptr;
   struct ConfItem *found_aconf;
+  dlink_node *m;
 
   if (aconf->status == CONF_LOCOP)
     {
@@ -279,9 +280,8 @@ int oper_up( struct Client *sptr, struct ConfItem *aconf )
   SetElined(sptr);
       
   /* LINKLIST */  
-  /* add to oper link list -Dianora */
-  sptr->next_oper_client = oper_cptr_list;
-  oper_cptr_list = sptr;
+  m = make_dlink_node();
+  dlinkAdd(sptr,m,&oper_list);
 
   if(sptr->localClient->confs.head)
     {

@@ -24,7 +24,7 @@ void
 dlinkAdd(void *data, dlink_node * m, dlink_list * list)
 {
 #ifdef DEBUG_DLINK
-assert(m->ref_count == 0);
+assert(m->ref_count < 2);
 m->ref_count++;
 #endif
     m->data = data;
@@ -41,7 +41,7 @@ void
 dlinkAddBefore(dlink_node *b, void *data, dlink_node *m, dlink_list *list)
 {
 #ifdef DEBUG_DLINK
-assert(m->ref_count == 0);
+assert(m->ref_count < 2);
 m->ref_count++;
 #endif
     /* Shortcut - if its the first one, call dlinkAdd only */
@@ -60,7 +60,7 @@ void
 dlinkAddTail(void *data, dlink_node *m, dlink_list *list)
 {
 #ifdef DEBUG_DLINK
-assert(m->ref_count == 0);
+assert(m->ref_count < 2);
 m->ref_count++;
 #endif
     m->data = data;
@@ -77,7 +77,7 @@ void
 dlinkDelete(dlink_node *m, dlink_list *list)
 {
 #ifdef DEBUG_DLINK
-assert(m->ref_count == 1);
+assert(m->ref_count > 0);
 m->ref_count++;
 #endif
     if (m->next)
@@ -91,6 +91,11 @@ m->ref_count++;
         list->tail = m->prev;
         
     m->next = m->prev = NULL;
+
+#ifdef DEBUG_DLINK
+if(m->ref_count > 0)
+    m->ref_count--;
+#endif
 }
 
 
@@ -108,6 +113,25 @@ extern int dlink_list_length(dlink_list *list)
   for (ptr = list->head; ptr; ptr = ptr->next)
     count++;
   return count;
+}
+
+/*
+ * dlinkFind
+ * inputs	- list to search 
+ *		- data
+ * output	- pointer to link or NULL if not found
+ * side effects	- Look for ptr in the linked listed pointed to by link.
+ */
+dlink_node *dlinkFind(dlink_list *list, void * data )
+{
+  dlink_node *ptr;
+
+  for (ptr = list->head; ptr; ptr = ptr->next)
+    {
+      if (ptr->data == data)
+	return (ptr);
+    }
+  return (NULL);
 }
 
 void

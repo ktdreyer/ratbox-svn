@@ -147,8 +147,6 @@ that the buffer isn't being overflowed. I'd rather be comfortable at
 #define MAXMODEPARAMS   3
 
 extern dlink_node *find_user_link (dlink_list *, struct Client *);
-extern dlink_node *find_channel_link(dlink_list *lp,
-				     struct Channel *chptr); 
 extern void    add_user_to_channel(struct Channel *chptr,
 				   struct Client *who, int flags);
 extern void    remove_user_from_channel(struct Channel *chptr,
@@ -251,7 +249,7 @@ extern void list_one_channel(struct Client *sptr,struct Channel *chptr);
                                  (MODE_PRIVATE | MODE_SECRET)) == 0)
 
 #define IsMember(blah,chan) ((blah && blah->user && \
-                find_channel_link(&blah->user->channel, chan)) ? 1 : 0)
+                dlinkFind(&blah->user->channel, chan)) ? 1 : 0)
 
 #define IsChannelName(name) ((name) && (*(name) == '#' || *(name) == '&'))
 

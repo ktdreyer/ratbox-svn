@@ -184,11 +184,15 @@ void show_opers(struct Client *cptr)
   struct Client        *cptr2;
   int j=0;
   struct ConfItem *aconf;
+  dlink_node *oper_ptr;
   dlink_node *ptr;
 
-  for(cptr2 = oper_cptr_list; cptr2; cptr2 = cptr2->next_oper_client)
+  for(oper_ptr = oper_list.head; oper_ptr; oper_ptr = oper_ptr->next)
     {
       ++j;
+
+      cptr2 = oper_ptr->data;
+
       if (MyClient(cptr) && IsAnyOper(cptr))
         {
 	  ptr = cptr2->localClient->confs.head;
@@ -286,6 +290,7 @@ int register_user(struct Client *cptr, struct Client *sptr,
   char        tmpstr2[IRCD_BUFSIZE];
   int  status;
   dlink_node *ptr;
+  dlink_node *m;
 
   assert(0 != sptr);
   assert(sptr->username != username);
@@ -481,11 +486,8 @@ int register_user(struct Client *cptr, struct Client *sptr,
 
   if (MyConnect(sptr))
     {
-      if(LocalClientList)
-        LocalClientList->previous_local_client = sptr;
-      sptr->previous_local_client = (struct Client *)NULL;
-      sptr->next_local_client = LocalClientList;
-      LocalClientList = sptr;
+      m = make_dlink_node();
+      dlinkAdd(sptr, m, &lclient_list);
     }
   
   sendto_serv_butone(cptr, "NICK %s %d %lu %s %s %s %s :%s",
@@ -799,7 +801,7 @@ int user_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
               if (MyConnect(sptr))
                 {
                   struct Client *prev_cptr = (struct Client *)NULL;
-                  struct Client *cur_cptr = oper_cptr_list;
+                  dlink_node *m;
 
 		  ptr = sptr->localClient->confs.head;
 		  aconf = ptr->data;
@@ -812,21 +814,13 @@ int user_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
                                     FLAGS2_OPER_N|
                                     FLAGS2_OPER_K|
                                     FLAGS2_OPER_ADMIN);
-                  while(cur_cptr)
-                    {
-                      if(sptr == cur_cptr) 
-                        {
-                          if(prev_cptr)
-                            prev_cptr->next_oper_client = cur_cptr->next_oper_client;
-                          else
-                            oper_cptr_list = cur_cptr->next_oper_client;
-                          cur_cptr->next_oper_client = (struct Client *)NULL;
-                          break;
-                        }
-                      else
-                        prev_cptr = cur_cptr;
-                      cur_cptr = cur_cptr->next_oper_client;
-                    }
+
+		  m = dlinkFind(&oper_list,sptr);
+		  if(m != NULL)
+		    {
+		      dlinkDelete(m,&oper_list);
+		      free_dlink_node(m);
+		    }
                 }
             }
           break;
@@ -953,11 +947,14 @@ void send_umode_out(struct Client *cptr,
 {
   struct Client *acptr;
   char buf[BUFSIZE];
+  dlink_node *ptr;
 
   send_umode(NULL, sptr, old, SEND_UMODES, buf);
 
-  for(acptr = serv_cptr_list; acptr; acptr = acptr->next_server_client)
+  for(ptr = serv_list.head; ptr; ptr = ptr->next)
     {
+      acptr = ptr->data;
+
       if((acptr != cptr) && (acptr != sptr) && (*buf))
         {
           sendto_one(acptr, ":%s MODE %s :%s",

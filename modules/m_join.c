@@ -212,11 +212,17 @@ int     m_join(struct Client *cptr,
 	  flags = CHFL_CHANOP;
 	  if(!ConfigFileEntry.hub)
 	    {
+	      /* XXX global uplink */
+	      dlink_node *ptr;
+	      struct Client *uplink=NULL;
+	      if( ptr = serv_list.head )
+		uplink = ptr->data;
+
 	      /* LazyLinks */
-	      if( (*name != '&') && serv_cptr_list
-		  && IsCapable(serv_cptr_list, CAP_LL) )
+	      if( (*name != '&') && uplink
+		  && IsCapable(uplink, CAP_LL) )
 		{
-		  sendto_one(serv_cptr_list,":%s CBURST %s %s %s",
+		  sendto_one(uplink,":%s CBURST %s %s %s",
 			     me.name,name,sptr->name, key ? key: "" );
 		  /* And wait for LLJOIN */
 		  return 0;
