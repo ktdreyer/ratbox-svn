@@ -747,8 +747,7 @@ main(int argc, char *argv[])
 		ilog(L_CRIT, "No server name specified in serverinfo block.");
 		exit(EXIT_FAILURE);
 	}
-	/* Can't use strncpy_irc here because we didn't malloc enough... -A1kmm */
-	strncpy(me.name, ServerInfo.name, HOSTLEN);
+	strlcpy(me.name, ServerInfo.name, sizeof(me.name));
 
 	/* serverinfo{} description must exist.  If not, error out. */
 	if(ServerInfo.description == NULL)
@@ -757,7 +756,7 @@ main(int argc, char *argv[])
 		ilog(L_CRIT, "ERROR: No server description specified in serverinfo block.");
 		exit(EXIT_FAILURE);
 	}
-	strncpy(me.info, ServerInfo.description, REALLEN);
+	strlcpy(me.info, ServerInfo.description, sizeof(me.info));
 
 	me.from = &me;
 	me.servptr = &me;
