@@ -1,3 +1,7 @@
+*** 20010104_16 by a1kmm
+- Fixed CRYPT_LINK_PASSWORD to work again in check_server
+
+
 *** 20010104_15 by a1kmm
 - Use GNU format checking features if __GNUC__ is defined - helps us find bugs in printf like send functions.
 
