@@ -1,3 +1,8 @@
+*** 19990802_3 by db
+- bug in mtrie_conf.c causing ~ klines not to work
+
+
+
 *** 19990802_2 by db
 - major bug in s_conf.c to do with reading of kline.conf
 
