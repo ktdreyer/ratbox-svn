@@ -1,3 +1,15 @@
+leeh        2002/10/18 13:38:30 UTC	(20021018_0)
+
+  Modified files:
+    contrib              m_clearchan.c 
+  Log:
+  - fix a compile warning
+  
+  Revision  Changes    Path
+  1.40      +1 -28     ircd-ratbox/contrib/m_clearchan.c
+
+
+
 leeh        2002/10/17 17:36:49 UTC	(20021017_0)
 
   Modified files:
