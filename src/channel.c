@@ -55,7 +55,6 @@ BlockHeap *channel_heap;
 BlockHeap *ban_heap;
 BlockHeap *topic_heap;
 
-static int  sub1_from_channel(struct Channel *);
 static void destroy_channel(struct Channel *);
 
 static void delete_members(struct Channel *chptr, dlink_list * list);
@@ -171,6 +170,7 @@ add_user_to_channel(struct Channel *chptr, struct Client *who, int flags)
   who->user->joined++;
 }
 
+
 /*
  * remove_user_from_channel
  * 
@@ -179,41 +179,42 @@ add_user_to_channel(struct Channel *chptr, struct Client *who, int flags)
  * output       - did the channel get destroyed
  * side effects - deletes an user from a channel by removing a link in the
  *                channels member chain.
- *                sets a vchan_id if the last user is just leaving
  */
 int
 remove_user_from_channel(struct Channel *chptr, struct Client *who)
 {
   int x;
-  dlink_list *loclists[] = {
-        &chptr->locpeons,   
-        &chptr->locvoiced,  
-        &chptr->locchanops, 
-        &chptr->locchanops_voiced,
-        NULL
+
+  dlink_list *chan_loclists[] =
+  {
+    &chptr->locpeons,   
+    &chptr->locvoiced,  
+    &chptr->locchanops, 
+    &chptr->locchanops_voiced,
+    NULL
   };
 
-  dlink_list *lists[] = {
-        &chptr->peons,   
-        &chptr->voiced,  
-        &chptr->chanops,
-        &chptr->chanops_voiced,
-        NULL
+  dlink_list *chan_lists[] =
+  {
+    &chptr->peons,
+    &chptr->voiced,
+    &chptr->chanops,
+    &chptr->chanops_voiced,
+    NULL
   };
-  
-  
+
   if(MyClient(who))
   {
-    for(x = 0; loclists[x] != NULL; x++)
+    for(x = 0; chan_loclists[x] != NULL; x++)
     {
-       if(dlinkFindDestroy(loclists[x], who))
+       if(dlinkFindDestroy(chan_loclists[x], who))
          break;
     }
   }
 
-  for(x = 0; lists[x] != NULL; x++)
+  for(x = 0; chan_lists[x] != NULL; x++)
   {
-     if(dlinkFindDestroy(lists[x], who))
+     if(dlinkFindDestroy(chan_lists[x], who))
        break;
   }
 
@@ -228,7 +229,90 @@ remove_user_from_channel(struct Channel *chptr, struct Client *who)
     if (chptr->locusers > 0)
       chptr->locusers--;
   }
-  return(sub1_from_channel(chptr));
+
+  if (--chptr->users <= 0)
+  {
+    assert(chptr->users >= 0);
+    chptr->users = 0;           /* if chptr->users < 0, make sure it sticks at 0
+                                 * It should never happen but...
+                                 */
+    destroy_channel(chptr);
+    return 1;
+  }
+
+  return 0;
+}
+
+/* qs_user_from_channel()
+ *
+ * inputs       - channel to remove from, user to remove
+ * outputs      -
+ * side effects - user is removed from channel, made persisting if last
+ *                user to leave.
+ */
+int
+qs_user_from_channel(struct Channel *chptr, struct Client *who)
+{
+  int x;
+
+  dlink_list *chan_loclists[] =
+  {
+    &chptr->locpeons,   
+    &chptr->locvoiced,  
+    &chptr->locchanops, 
+    &chptr->locchanops_voiced,
+    NULL
+  };
+
+  dlink_list *chan_lists[] =
+  {
+    &chptr->peons,
+    &chptr->voiced,
+    &chptr->chanops,
+    &chptr->chanops_voiced,
+    NULL
+  };
+
+  if(MyClient(who))
+  {
+    for(x = 0; chan_loclists[x] != NULL; x++)
+    {
+      if(dlinkFindDestroy(chan_loclists[x], who))
+        break;
+    }
+
+    if (chptr->locusers > 0)
+      chptr->locusers--;
+  }
+
+  for(x = 0; chan_lists[x] != NULL; x++)
+  {
+    if(dlinkFindDestroy(chan_lists[x], who))
+      break;
+  }
+
+  dlinkFindDestroy(&chptr->deopped, who);
+  dlinkFindDestroy(&who->user->channel, chptr);
+
+  chptr->users_last = CurrentTime;
+  who->user->joined--;
+
+  assert(chptr->users > 0);
+
+  if (--chptr->users <= 0)
+  {
+    chptr->users = 0;
+
+    /* persistent channel - must be 12h old */
+    if (!ConfigChannel.persist_time ||
+       ((chptr->channelts + (60*60*12)) > CurrentTime))
+    {
+      destroy_channel(chptr);
+      return 1;
+    }
+  }
+
+  return 0;
 }
 
 /*
@@ -395,30 +479,6 @@ check_channel_name(const char *name)
   }
 
   return 1;
-}
-
-/*
-**  Subtract one user from channel (and free channel
-**  block, if channel became empty).
-*/
-static int
-sub1_from_channel(struct Channel *chptr)
-{
-  if (--chptr->users <= 0)
-  {
-    assert(chptr->users >= 0);
-    chptr->users = 0;           /* if chptr->users < 0, make sure it sticks at 0
-                                 * It should never happen but...
-                                 */
-    /* persistent channel - must be 12h old */
-    if (!ConfigChannel.persist_time ||
-        ((chptr->channelts + (60*60*12)) > CurrentTime))
-    {
-      destroy_channel(chptr);
-      return 1;
-    }
-  }
-  return 0;
 }
 
 /*

@@ -62,6 +62,9 @@ static void check_pings_list(dlink_list *list);
 static void check_unknowns_list(dlink_list *list);
 static void free_exited_clients(void *unused);
 static void exit_aborted_clients(void *unused);
+
+static void qs_client(struct Client *, const char *);
+
 static EVH check_pings;
 
 static int remote_client_count=0;
@@ -1225,8 +1228,10 @@ static void recurse_remove_clients(struct Client* source_p, const char* comment)
   DLINK_FOREACH_SAFE(ptr, ptr_next, source_p->serv->users.head)
     {
       target_p = (struct Client *)ptr->data;
+
+      /* XXX - this next line can probably go now --fl */
       target_p->flags |= FLAGS_KILLED;
-      exit_one_client(NULL, target_p, &me, comment);
+      qs_client(target_p, comment);
     }
 
   DLINK_FOREACH_SAFE(ptr, ptr_next, source_p->serv->servers.head)
@@ -1236,6 +1241,68 @@ static void recurse_remove_clients(struct Client* source_p, const char* comment)
       target_p->flags |= FLAGS_KILLED;
       exit_one_client(NULL, target_p, &me, me.name);
     }
+}
+
+/* qs_client()
+ *
+ * inputs       - client to remove, reason
+ * outputs      -
+ * side effects - client is 'quitstormed' off the network
+ */
+static void
+qs_client(struct Client *source_p, const char *comment)
+{
+  struct Client* target_p;
+  dlink_node *ptr;
+  dlink_node *next_ptr;
+
+  if(source_p->servptr && source_p->servptr->serv)
+  {
+    dlinkDelete(&source_p->lnode, &source_p->servptr->serv->users);
+    source_p->servptr->serv->usercnt--;
+  }
+
+  sendto_common_channels_local(source_p, ":%s!%s@%s QUIT :%s",
+                               source_p->name, source_p->username, 
+                               source_p->host, comment);
+
+  DLINK_FOREACH_SAFE(ptr, next_ptr, source_p->user->channel.head)
+  {
+    qs_user_from_channel(ptr->data, source_p);
+  }
+
+  /* shouldnt be in any channels */
+  assert(source_p->user->channel.head == NULL);
+
+  /* clean up various lists */
+  DLINK_FOREACH_SAFE(ptr, next_ptr, source_p->user->invited.head)
+  {
+    del_invite(ptr->data, source_p);
+  }
+
+  del_all_accepts(source_p);
+  
+  /* add to whowas */
+  add_history(source_p, 0);
+  off_history(source_p);
+
+  if (HasID(source_p))
+    del_from_id_hash_table(source_p->user->id, source_p);
+
+  if(ConfigFileEntry.use_global_limits)
+    del_from_hostname_hash_table(source_p->host, source_p);
+
+  del_from_client_hash_table(source_p->name, source_p);
+
+  /* remove from global client list */
+  remove_client_from_list(source_p);
+
+  /* Check to see if the client isn't already on the dead list */
+  assert(dlinkFind(&dead_list, source_p) == NULL);
+
+  /* this stops them being sent things like channel messages */
+  SetDead(source_p);
+  dlinkAddAlloc(source_p, &dead_list);
 }
 
 /*

@@ -71,7 +71,8 @@ struct Message whois_msgtab = {
 void
 _modinit(void)
 {
-  hook_add_event("doing_whois");
+  hook_add_event("doing_whois_local");
+  hook_add_event("doing_whois_global");
   mod_add_cmd(&whois_msgtab);
   add_conf_item("operator", "oper_spy", CF_YESNO, conf_set_oper_spy);
 }
@@ -80,6 +81,7 @@ void
 _moddeinit(void)
 {
   hook_del_event("doing_whois");
+  hook_del_event("doing_whois_global");
   mod_del_cmd(&whois_msgtab);
   remove_conf_item("operator", "oper_spy");
 }
@@ -383,7 +385,9 @@ static void whois_person(struct Client *source_p,struct Client *target_p, int gl
 /* although we should fill in parc and parv, we don't ..
 	 be careful of this when writing whois hooks */
   if(MyClient(source_p)) 
-    hook_call_event("doing_whois", &hd);
+    hook_call_event("doing_whois_local", &hd);
+  else
+    hook_call_event("doing_whois_global", &hd);
   
   return;
 }

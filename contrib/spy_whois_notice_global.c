@@ -34,13 +34,13 @@ show_notice(struct hook_mfunc_data *);
 void
 _modinit(void)
 {
-  hook_add_hook("doing_whois_local", (hookfn *)show_notice);
+  hook_add_hook("doing_whois_global", (hookfn *)show_notice);
 }
 
 void
 _moddeinit(void)
 {
-  hook_del_hook("doing_whois_local", (hookfn *)show_notice);
+  hook_del_hook("doing_whois_global", (hookfn *)show_notice);
 }
 
 const char *_version = "$Revision$";
@@ -50,7 +50,7 @@ const char *_version = "$Revision$";
 int
 show_notice(struct hook_mfunc_data *data)
 {
-  if (MyConnect(data->source_p) && MyConnect(data->client_p) &&
+  if (MyConnect(data->client_p) &&
       IsOper(data->client_p) && (data->client_p != data->source_p) 
       && data->client_p->umodes & UMODE_SPY) 
     {
