@@ -1,3 +1,22 @@
+leeh        2002/10/25 15:21:48 UTC	(20021025_1)
+
+  Modified files:
+    .                    README.FIRST RELNOTES 
+    modules/core         m_message.c 
+    src                  channel.c 
+  Log:
+  - added notes about the fbsd ipv4-in-ipv6 thing
+  - give ERR_NOSUCHSERVER to privmsg user@server when server doesnt exist
+  - if no persist_time, destroy channel.
+  
+  Revision  Changes    Path
+  7.37      +4 -0      ircd-ratbox/README.FIRST
+  1.60      +8 -0      ircd-ratbox/RELNOTES
+  1.111     +11 -4     ircd-ratbox/modules/core/m_message.c
+  7.356     +2 -1      ircd-ratbox/src/channel.c
+
+
+
 leeh        2002/10/25 14:39:39 UTC	(20021025_0)
 
   Modified files:
