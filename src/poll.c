@@ -67,11 +67,9 @@
 #ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>    /* NOFILE */
 #endif
+
 #include <arpa/inet.h>
-
-#define __USE_XOPEN    /* XXXX had to add this define to make it compile -toby */
 #include <sys/poll.h>
-
 
 /* I hate linux -- adrian */
 #ifndef POLLRDNORM
