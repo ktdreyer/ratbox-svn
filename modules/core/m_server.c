@@ -98,9 +98,9 @@ int mr_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   if (!DoesTS(cptr))
     {
       sendto_realops_flags(FLAGS_ADMIN,"Link %s dropped, non-TS server",
-			   get_client_name(cptr, TRUE));
-      sendto_realops_flags(FLAGS_ALL,"Link %s dropped, non-TS server",
 			   get_client_name(cptr, FALSE));
+      sendto_realops_flags(FLAGS_ALL,"Link %s dropped, non-TS server",
+			   get_client_name(cptr, MASK_IP));
       return exit_client(cptr, cptr, cptr, "Non-TS server");
     }
 
@@ -116,22 +116,22 @@ int mr_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
         {
          sendto_realops_flags(FLAGS_ADMIN,
            "Unauthorized server connection attempt from %s: No entry for "
-           "servername %s.", get_client_name(cptr, TRUE), name);
+           "servername %s", get_client_name(cptr, FALSE), name);
 
          sendto_realops_flags(FLAGS_ALL,
            "Unauthorized server connection attempt from %s: No entry for "
-           "servername %s.", get_client_name(cptr, FALSE), name);
+           "servername %s", get_client_name(cptr, MASK_IP), name);
         }
       return exit_client(cptr, cptr, cptr,
                 "Invalid servername.");
      case -2:
       sendto_realops_flags(FLAGS_ADMIN,
         "Unauthorized server connection attempt from %s: Bad password "
-        "for server %s.", get_client_name(cptr, TRUE), name);
+        "for server %s", get_client_name(cptr, FALSE), name);
 
       sendto_realops_flags(FLAGS_ALL,
         "Unauthorized server connection attempt from %s: Bad password "
-        "for server %s.", get_client_name(cptr, FALSE), name);
+        "for server %s", get_client_name(cptr, MASK_IP), name);
 
       return exit_client(cptr, cptr, cptr,
                  "Invalid password.");
@@ -139,11 +139,11 @@ int mr_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
      case -3:
       sendto_realops_flags(FLAGS_ADMIN,
         "Unauthorized server connection attempt from %s: Invalid host "
-        "for server %s.", get_client_name(cptr, TRUE), name);
+        "for server %s", get_client_name(cptr, FALSE), name);
 
       sendto_realops_flags(FLAGS_ALL,
         "Unauthorized server connection attempt from %s: Invalid host "
-        "for server %s.", get_client_name(cptr, FALSE), name);
+        "for server %s", get_client_name(cptr, MASK_IP), name);
 
       return exit_client(cptr, cptr, cptr,
                  "Invalid host.");
@@ -164,11 +164,11 @@ int mr_server(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
        */
       sendto_realops_flags(FLAGS_ADMIN,
          "Attempt to re-introduce server %s from %s", name,
-         get_client_name(cptr, TRUE));
+         get_client_name(cptr, FALSE));
 
       sendto_realops_flags(FLAGS_ALL,
          "Attempt to re-introduce server %s from %s", name,
-         get_client_name(cptr, FALSE));
+         get_client_name(cptr, MASK_IP));
 
       sendto_one(cptr, "ERROR :Server already exists.");
       return exit_client(cptr, cptr, cptr, "Server Exists");
