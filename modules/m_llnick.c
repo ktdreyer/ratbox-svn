@@ -81,7 +81,7 @@ static void ms_llnick(struct Client *client_p,
   int new = 0;
   dlink_node *ptr;
   
-  if(!IsCapable(client_p,CAP_LL))
+  if(!IsCapable(client_p,CAP_LL) || !IsCapable(client_p, CAP_HUB))
     {
       sendto_realops_flags(FLAGS_ALL, L_ALL,
 			   "*** LLNICK requested from non LL server %s",
