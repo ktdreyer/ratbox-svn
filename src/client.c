@@ -1423,7 +1423,8 @@ int exit_client(
 	  strcat(comment1, source_p->name);
 	}
 
-      remove_dependents(client_p, source_p, from, comment, comment1);
+      if(source_p->serv != NULL) /* XXX Why does this happen */
+        remove_dependents(client_p, source_p, from, comment, comment1);
 
       if (source_p->servptr == &me)
         {
