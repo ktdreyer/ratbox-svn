@@ -84,7 +84,7 @@ struct Capability
                          CAP_IE  | CAP_EOB  | CAP_KLN  | \
                          CAP_GLN | CAP_HOPS | CAP_AOPS | \
                          CAP_UID | CAP_ZIP  | CAP_ENC | \
-                         CAP_KNOCK | CAP_TBURST | CAP_PARA)
+                         CAP_KNOCK  | CAP_PARA)
 
 #ifdef HAVE_LIBZ
 #define CAP_ZIP_SUPPORTED       CAP_ZIP
