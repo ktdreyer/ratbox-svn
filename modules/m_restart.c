@@ -32,6 +32,8 @@
 #include "s_log.h"
 #include "send.h"
 #include "msg.h"
+#include "parse.h"
+#include "modules.h"
 
 struct Message restart_msgtab = {
   MSG_RESTART, 0, 0, MFLG_SLOW, 0,
@@ -41,13 +43,13 @@ struct Message restart_msgtab = {
 void
 _modinit(void)
 {
-  mod_add_cmd(MSG_RESTART, &restart_msgtab);
+  mod_add_cmd(&restart_msgtab);
 }
 
 void
 _moddeinit(void)
 {
-  mod_del_cmd(MSG_RESTART);
+  mod_del_cmd(&restart_msgtab);
 }
 
 char *_version = "20001122";

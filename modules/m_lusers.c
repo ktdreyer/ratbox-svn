@@ -31,6 +31,8 @@
 #include "send.h"
 #include "s_conf.h"
 #include "msg.h"
+#include "parse.h"
+#include "modules.h"
 
 struct Message lusers_msgtab = {
   MSG_LUSERS, 0, 0, MFLG_SLOW, 0,
@@ -40,13 +42,13 @@ struct Message lusers_msgtab = {
 void
 _modinit(void)
 {
-  mod_add_cmd(MSG_LUSERS, &lusers_msgtab);
+  mod_add_cmd(&lusers_msgtab);
 }
 
 void
 _moddeinit(void)
 {
-  mod_del_cmd(MSG_LUSERS);
+  mod_del_cmd(&lusers_msgtab);
 }
 
 char *_version = "20001122";

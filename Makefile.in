@@ -24,6 +24,8 @@ RM=@RM@
 # Default CFLAGS
 # CFLAGS = -g -O2 -DNDEBUG
 CFLAGS		= @CFLAGS@
+# Developers CFLAGS
+#CFLAGS= -g -O2 -Wunused -Wall -ggdb -pedantic -Wshadow -Wmissing-declarations
 
 # Default make flags - you may want to uncomment this on a multicpu machine
 #MFLAGS = -j 4

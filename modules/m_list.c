@@ -33,6 +33,8 @@
 #include "vchannel.h"
 #include "list.h"
 #include "msg.h"
+#include "parse.h"
+#include "modules.h"
 
 #include <assert.h>
 #include <string.h>
@@ -46,13 +48,13 @@ struct Message list_msgtab = {
 void
 _modinit(void)
 {
-  mod_add_cmd(MSG_LIST, &list_msgtab);
+  mod_add_cmd(&list_msgtab);
 }
 
 void
 _moddeinit(void)
 {
-  mod_del_cmd(MSG_LIST);
+  mod_del_cmd(&list_msgtab);
 }
 
 int list_all_channels(struct Client *sptr);

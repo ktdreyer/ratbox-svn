@@ -29,6 +29,8 @@
 #include "numeric.h"
 #include "send.h"
 #include "msg.h"
+#include "parse.h"
+#include "modules.h"
 
 #include <string.h>
 
@@ -40,13 +42,13 @@ struct Message ison_msgtab = {
 void
 _modinit(void)
 {
-  mod_add_cmd(MSG_ISON, &ison_msgtab);
+  mod_add_cmd(&ison_msgtab);
 }
 
 void
 _moddeinit(void)
 {
-  mod_del_cmd(MSG_ISON);
+  mod_del_cmd(&ison_msgtab);
 }
 
 static char buf[BUFSIZE];

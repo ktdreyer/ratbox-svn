@@ -31,6 +31,8 @@
 #include "send.h"
 #include "irc_string.h"
 #include "msg.h"
+#include "parse.h"
+#include "modules.h"
 #include <string.h>
 
 static char buf[BUFSIZE];
@@ -43,13 +45,13 @@ struct Message userhost_msgtab = {
 void
 _modinit(void)
 {
-  mod_add_cmd(MSG_USERHOST, &userhost_msgtab);
+  mod_add_cmd(&userhost_msgtab);
 }
 
 void
 _moddeinit(void)
 {
-  mod_del_cmd(MSG_USERHOST);
+  mod_del_cmd(&userhost_msgtab);
 }
 
 char *_version = "20001122";

@@ -28,6 +28,8 @@
 #include "s_serv.h"
 #include "s_conf.h"
 #include "msg.h"
+#include "parse.h"
+#include "modules.h"
 
 #include <assert.h>
 
@@ -39,13 +41,13 @@ struct Message capab_msgtab = {
 void
 _modinit(void)
 {
-  mod_add_cmd(MSG_CAPAB, &capab_msgtab);
+  mod_add_cmd(&capab_msgtab);
 }
 
 void
 _moddeinit(void)
 {
-  mod_del_cmd(MSG_CAPAB);
+  mod_del_cmd(&capab_msgtab);
 }
 
 char *_version = "20001122";

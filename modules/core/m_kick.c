@@ -32,6 +32,8 @@
 #include "numeric.h"
 #include "send.h"
 #include "msg.h"
+#include "modules.h"
+#include "parse.h"
 
 #include <string.h>
 
@@ -43,13 +45,13 @@ struct Message kick_msgtab = {
 void
 _modinit(void)
 {
-  mod_add_cmd(MSG_KICK, &kick_msgtab);
+  mod_add_cmd(&kick_msgtab);
 }
 
 void
 _moddeinit(void)
 {
-  mod_del_cmd(MSG_KICK);
+  mod_del_cmd(&kick_msgtab);
 }
 
 char *_version = "20001122";

@@ -21,6 +21,7 @@
  */
 #include "tools.h"
 #include "channel.h"
+#include "vchannel.h"
 #include "client.h"
 #include "common.h"
 #include "hash.h"
@@ -61,13 +62,13 @@ static void send_members(struct Client *cptr,
 			 dlink_list *list,
 			 char *op_flag );
 
-static void channel_member_list(struct Client *sptr,
-				dlink_list *list,
-				char *show_flag,
-				char *buf,
-				int mlen,
-				int *cur_len,
-				int *reply_to_send);
+void channel_member_list(struct Client *sptr,
+			 dlink_list *list,
+			 char *show_flag,
+			 char *buf,
+			 int mlen,
+			 int *cur_len,
+			 int *reply_to_send);
 
 static void delete_members(dlink_list *list);
 
@@ -1050,7 +1051,7 @@ void set_channel_mode(struct Client *cptr,
   int   type;
 
   dlink_node *ptr;
-  dlink_list *to_list;
+  dlink_list *to_list=NULL;
   struct Ban *banptr;
 
   chan_op = is_chan_op(chptr,sptr);
@@ -2261,7 +2262,7 @@ static void clear_channel_list(int type, struct Channel *chptr,
   char  *chname;
   struct Channel *root_chptr;
 
-  if(root_chptr = find_bchan(chptr))
+  if( (root_chptr = find_bchan(chptr)) != NULL )
     chname = root_chptr->chname;
   else
     chname = chptr->chname;
@@ -2371,7 +2372,6 @@ void cleanup_channels(void *unused)
 {
    struct Channel *chptr;
    struct Channel *next_chptr;
-   dlink_node *ptr;
 
    eventAdd("cleanup_channels", cleanup_channels, NULL,
 	    CLEANUP_CHANNELS_TIME, 0 );
@@ -2603,7 +2603,7 @@ void channel_member_names( struct Client *sptr,
  * output	- none
  * side effects	- lists all names on given list of channel
  */
-static void
+void
 channel_member_list(struct Client *sptr,
 			 dlink_list *list,
 			 char *show_flag,

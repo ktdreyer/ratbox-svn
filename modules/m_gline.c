@@ -45,6 +45,8 @@
 #include "fileio.h"
 #include "s_serv.h"
 #include "hash.h"
+#include "parse.h"
+#include "modules.h"
 
 #include <assert.h>
 #include <string.h>
@@ -102,13 +104,13 @@ struct Message gline_msgtab = {
 void
 _modinit(void)
 {
-    mod_add_cmd(MSG_GLINE, &gline_msgtab);
+    mod_add_cmd(&gline_msgtab);
 }
 
 void
 _moddeinit(void)
 {
-  mod_del_cmd(MSG_GLINE);
+  mod_del_cmd(&gline_msgtab);
 }
 
 char *_version = "20001122";

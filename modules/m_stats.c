@@ -48,7 +48,8 @@
 #include "s_user.h"      /* show_opers */
 #include "event.h"	 /* events */
 #include "linebuf.h"
-
+#include "parse.h"
+#include "modules.h"
 #include <string.h>
 
 struct Message stats_msgtab = {
@@ -59,13 +60,13 @@ struct Message stats_msgtab = {
 void
 _modinit(void)
 {
-  mod_add_cmd(MSG_STATS, &stats_msgtab);
+  mod_add_cmd(&stats_msgtab);
 }
 
 void
 _moddeinit(void)
 {
-  mod_del_cmd(MSG_STATS);
+  mod_del_cmd(&stats_msgtab);
 }
 
 char *_version = "20001122";

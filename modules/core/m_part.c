@@ -36,6 +36,8 @@
 #include "send.h"
 #include "s_serv.h"
 #include "msg.h"
+#include "parse.h"
+#include "modules.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -49,13 +51,13 @@ struct Message part_msgtab = {
 void
 _modinit(void)
 {
-  mod_add_cmd(MSG_PART, &part_msgtab);
+  mod_add_cmd(&part_msgtab);
 }
 
 void
 _moddeinit(void)
 {
-  mod_del_cmd(MSG_PART);
+  mod_del_cmd(&part_msgtab);
 }
 
 static void part_one_client(struct Client *cptr,

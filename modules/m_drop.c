@@ -33,6 +33,8 @@
 #include "send.h"
 #include "handlers.h"
 #include "msg.h"
+#include "parse.h"
+#include "modules.h"
 
 #include <assert.h>
 #include <string.h>
@@ -46,13 +48,13 @@ struct Message drop_msgtab = {
 void
 _modinit(void)
 {
-  mod_add_cmd(MSG_DROP, &drop_msgtab);
+  mod_add_cmd(&drop_msgtab);
 }
 
 void
 _moddeinit(void)
 {
-  mod_del_cmd(MSG_DROP);
+  mod_del_cmd(&drop_msgtab);
 }
 
 char *_version = "20001122";

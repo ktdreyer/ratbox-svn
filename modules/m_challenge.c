@@ -56,13 +56,13 @@ struct Message challenge_msgtab = {
 void
 _modinit(void)
 {
-  mod_add_cmd(MSG_CHALLENGE, &challenge_msgtab);
+  mod_add_cmd(&challenge_msgtab);
 }
 
 void
 _moddeinit(void)
 {
-  mod_del_cmd(MSG_CHALLENGE);
+  mod_del_cmd(&challenge_msgtab);
 }
 
 /* isn't this cute? :) */

@@ -29,6 +29,8 @@
 #include "numeric.h"
 #include "send.h"
 #include "msg.h"
+#include "parse.h"
+#include "modules.h"
 
 #include <stdlib.h>
 
@@ -40,13 +42,13 @@ struct Message away_msgtab = {
 void
 _modinit(void)
 {
-  mod_add_cmd(MSG_AWAY, &away_msgtab);
+  mod_add_cmd(&away_msgtab);
 }
 
 void
 _moddeinit(void)
 {
-  mod_del_cmd(MSG_AWAY);
+  mod_del_cmd(&away_msgtab);
 }
 
 char *_version = "20001122";

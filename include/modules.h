@@ -32,12 +32,12 @@ struct module {
 };
 
 /* load a module */
-void load_module(char *path);
+extern void load_module(char *path);
 
 /* load all modules */
-void load_all_module(void);
+extern void load_all_module(void);
 
-/* add a command */
-void mod_add_cmd(char *cmd, struct Message *msg);
+extern void _modinit(void);
+extern void _moddeinit(void);
 
 #endif

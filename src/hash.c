@@ -45,6 +45,9 @@
  * Contributed by James L. Davis
  */
 
+static unsigned int hash_nick_name(const char* name);
+static unsigned int hash_channel_name(const char* name);
+
 #ifdef  DEBUGMODE
 static struct HashEntry* clientTable = NULL;
 static struct HashEntry* channelTable = NULL;
@@ -105,7 +108,8 @@ size_t hash_get_client_table_size(void)
  * The order shown above is just one instant of the server. 
  */
 
-unsigned int hash_nick_name(const char* name)
+static unsigned
+int hash_nick_name(const char* name)
 {
   unsigned int h = 0;
 
@@ -125,7 +129,8 @@ unsigned int hash_nick_name(const char* name)
  * is little or no point hashing on a full channel name which maybe 255 chars
  * long.
  */
-unsigned int hash_channel_name(const char* name)
+static unsigned
+int hash_channel_name(const char* name)
 {
   register int i = 30;
   unsigned int h = 0;
@@ -431,7 +436,7 @@ struct Channel* hash_find_channel(const char* name, struct Channel* chptr)
  * XXX - spaghetti still, sigh
  */
 
-int m_hash(struct Client *cptr, struct Client *sptr,int parc,char *parv[])
+int mo_hash(struct Client *cptr, struct Client *sptr,int parc,char *parv[])
 {
   register int l;
   register int i;
@@ -455,11 +460,7 @@ int m_hash(struct Client *cptr, struct Client *sptr,int parc,char *parv[])
   char  hash_log_file[256];
   char  timebuffer[MAX_DATE_STRING];
 
-  if (!MyClient(sptr) || !IsGlobalOper(sptr))
-    {
-      sendto_one(sptr, form_str(ERR_NOPRIVILEGES), me.name, parv[0]);
-      return 0;
-    }
+
   if(parc > 1)
     {
       if(!irccmp(parv[1],"iphash"))

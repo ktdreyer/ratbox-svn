@@ -33,6 +33,8 @@
 #include "s_log.h"
 #include "send.h"
 #include "msg.h"
+#include "parse.h"
+#include "modules.h"
 
 struct Message die_msgtab = {
   MSG_DIE, 0, 1, MFLG_SLOW, 0,
@@ -42,13 +44,13 @@ struct Message die_msgtab = {
 void
 _modinit(void)
 {
-  mod_add_cmd(MSG_DIE, &die_msgtab);
+  mod_add_cmd(&die_msgtab);
 }
 
 void
 _moddeinit(void)
 {
-  mod_del_cmd(MSG_DIE);
+  mod_del_cmd(&die_msgtab);
 }
 
 char *_version = "20001122";

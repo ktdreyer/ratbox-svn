@@ -31,6 +31,8 @@
 #include "irc_string.h"
 #include "s_debug.h"
 #include "msg.h"
+#include "parse.h"
+#include "modules.h"
 
 struct Message pong_msgtab = {
   MSG_PONG, 0, 1, MFLG_SLOW | MFLG_UNREG, 0,
@@ -40,13 +42,13 @@ struct Message pong_msgtab = {
 void
 _modinit(void)
 {
-  mod_add_cmd(MSG_PONG, &pong_msgtab);
+  mod_add_cmd(&pong_msgtab);
 }
 
 void
 _moddeinit(void)
 {
-  mod_del_cmd(MSG_PONG);
+  mod_del_cmd(&pong_msgtab);
 }
 
 char *_version = "20001122";

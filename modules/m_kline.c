@@ -43,6 +43,8 @@
 #include "handlers.h"
 #include "s_serv.h"
 #include "msg.h"
+#include "parse.h"
+#include "modules.h"
 
 #include <stdlib.h>
 #include <unistd.h>
@@ -64,15 +66,15 @@ struct Message dline_msgtab = {
 void
 _modinit(void)
 {
-  mod_add_cmd(MSG_KLINE, &kline_msgtab);
-  mod_add_cmd(MSG_DLINE, &dline_msgtab);
+  mod_add_cmd(&kline_msgtab);
+  mod_add_cmd(&dline_msgtab);
 }
 
 void
 _moddeinit(void)
 {
-  mod_del_cmd(MSG_KLINE);
-  mod_del_cmd(MSG_DLINE);
+  mod_del_cmd(&kline_msgtab);
+  mod_del_cmd(&dline_msgtab);
 }
 
 extern ConfigFileEntryType ConfigFileEntry; /* defined in ircd.c */

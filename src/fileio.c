@@ -23,6 +23,7 @@
 #include "fileio.h"
 #include "irc_string.h"
 #include "client.h"	/* for FLAGS_ALL */
+#include "send.h"	/* sendto_realops_flags */
 
 /* The following are to get the fd manipulation routines. eww. */
 #include "fdlist.h"

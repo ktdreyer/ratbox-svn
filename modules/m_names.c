@@ -37,6 +37,8 @@
 #include "s_serv.h"
 #include "s_conf.h"
 #include "msg.h"
+#include "parse.h"
+#include "modules.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -53,13 +55,13 @@ struct Message names_msgtab = {
 void
 _modinit(void)
 {
-  mod_add_cmd(MSG_NAMES, &names_msgtab);
+  mod_add_cmd(&names_msgtab);
 }
 
 void
 _moddeinit(void)
 {
-  mod_del_cmd(MSG_NAMES);
+  mod_del_cmd(&names_msgtab);
 }
 
 char *_version = "20001122";
@@ -184,21 +186,21 @@ void names_all_visible_channels(struct Client *sptr)
 	  cur_len = mlen;
 
 	  channel_member_list(sptr,
-			      &chptr->chanops, chptr, chname,
+			      &chptr->chanops,
 			      show_ops_flag,
 			      buf, mlen, &cur_len, &reply_to_send);
 
 	  channel_member_list(sptr,
-			      &chptr->voiced, chptr, chname,
+			      &chptr->voiced,
 			      show_voiced_flag,
 			      buf, mlen, &cur_len, &reply_to_send);
 
 	  channel_member_list(sptr,
-			      &chptr->halfops, chptr, chname,
+			      &chptr->halfops,
 			      show_voiced_flag,
 			      buf, mlen, &cur_len, &reply_to_send);
 
-	  channel_member_list(sptr, &chptr->peons, chptr, chname,
+	  channel_member_list(sptr, &chptr->peons,
 			      "",
 			      buf, mlen, &cur_len, &reply_to_send);
 

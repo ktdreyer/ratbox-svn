@@ -34,6 +34,8 @@
 #include "s_conf.h"
 #include "vchannel.h"
 #include "msg.h"
+#include "parse.h"
+#include "modules.h"
 
 #include <string.h>
 
@@ -51,13 +53,13 @@ struct Message knock_msgtab = {
 void
 _modinit(void)
 {
-  mod_add_cmd(MSG_KNOCK, &knock_msgtab);
+  mod_add_cmd(&knock_msgtab);
 }
 
 void
 _moddeinit(void)
 {
-  mod_del_cmd(MSG_KNOCK);
+  mod_del_cmd(&knock_msgtab);
 }
 
 char *_version = "20001122";

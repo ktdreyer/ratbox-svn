@@ -29,8 +29,9 @@
 #include "s_conf.h"
 #include "s_serv.h"
 #include "send.h"
-
 #include "msg.h"
+#include "parse.h"
+#include "modules.h"
 
 struct Message accept_msgtab = {
   MSG_ACCEPT, 0, 2, MFLG_SLOW | MFLG_UNREG, 0, 
@@ -40,13 +41,13 @@ struct Message accept_msgtab = {
 void
 _modinit(void)
 {
-  mod_add_cmd(MSG_ACCEPT, &accept_msgtab);
+  mod_add_cmd(&accept_msgtab);
 }
 
 void
 _moddeinit(void)
 {
-  mod_del_cmd(MSG_ACCEPT);
+  mod_del_cmd(&accept_msgtab);
 }
 
 char *_version = "20001122";

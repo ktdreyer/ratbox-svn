@@ -45,6 +45,7 @@
 #include "s_serv.h"
 #include "s_gline.h"
 #include "hash.h"
+#include "event.h"
 
 #include <assert.h>
 #include <string.h>
@@ -54,7 +55,7 @@
 #include <fcntl.h>
 
 static struct ConfItem *glines=NULL;
-static struct gline_pending *pending_glines=NULL;
+struct gline_pending *pending_glines=NULL;
 
 static void expire_glines(void);
 static void expire_pending_glines(void);

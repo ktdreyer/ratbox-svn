@@ -31,6 +31,8 @@
 #include "send.h"
 #include "s_conf.h"
 #include "msg.h"
+#include "parse.h"
+#include "modules.h"
 
 #include <assert.h>
 #include <time.h>
@@ -44,13 +46,13 @@ struct Message svinfo_msgtab = {
 void
 _modinit(void)
 {
-  mod_add_cmd(MSG_SVINFO, &svinfo_msgtab);
+  mod_add_cmd(&svinfo_msgtab);
 }
 
 void
 _moddeinit(void)
 {
-  mod_del_cmd(MSG_SVINFO);
+  mod_del_cmd(&svinfo_msgtab);
 }
 
 char *_version = "20001122";

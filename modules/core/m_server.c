@@ -37,6 +37,8 @@
 #include "scache.h"      /* find_or_add */
 #include "send.h"        /* sendto_one */
 #include "msg.h"
+#include "parse.h"
+#include "modules.h"
 
 #include <string.h>
 #include <stdlib.h>
@@ -49,13 +51,13 @@ struct Message server_msgtab = {
 void 
 _modinit(void)
 {
-  mod_add_cmd(MSG_SERVER, &server_msgtab);
+  mod_add_cmd(&server_msgtab);
 }
 
 void
 _moddeinit(void)
 {
-  mod_del_cmd(MSG_SERVER);
+  mod_del_cmd(&server_msgtab);
 }
 
 char *parse_server_args(char *parv[], int parc, char *info, int *hop);

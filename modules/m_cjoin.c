@@ -37,6 +37,8 @@
 #include "s_serv.h"
 #include "s_conf.h"
 #include "msg.h"
+#include "parse.h"
+#include "modules.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -50,13 +52,13 @@ struct Message cjoin_msgtab = {
 void
 _modinit(void)
 {
-  mod_add_cmd(MSG_CJOIN, &cjoin_msgtab);
+  mod_add_cmd(&cjoin_msgtab);
 }
 
 void
 _moddeinit(void)
 {
-  mod_del_cmd(MSG_CJOIN);
+  mod_del_cmd(&cjoin_msgtab);
 }
 
 char *_version = "20001122";

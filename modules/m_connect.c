@@ -35,6 +35,8 @@
 #include "s_serv.h"
 #include "send.h"
 #include "msg.h"
+#include "parse.h"
+#include "modules.h"
 
 #include <assert.h>
 #include <stdlib.h>     /* atoi */
@@ -47,13 +49,13 @@ struct Message connect_msgtab = {
 void
 _modinit(void)
 {
-  mod_add_cmd(MSG_CONNECT, &connect_msgtab);
+  mod_add_cmd(&connect_msgtab);
 }
 
 void
 _moddeinit(void)
 {
-  mod_del_cmd(MSG_CONNECT);
+  mod_del_cmd(&connect_msgtab);
 }
 
 char *_version = "20001122";

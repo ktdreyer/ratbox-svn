@@ -35,8 +35,9 @@
 #include "send.h"
 #include "s_conf.h"
 #include "handlers.h"
-
 #include "msg.h"
+#include "parse.h"
+#include "modules.h"
 
 #include <time.h>
 #include <string.h>
@@ -49,13 +50,13 @@ struct Message info_msgtab = {
 void
 _modinit(void)
 {
-  mod_add_cmd(MSG_INFO, &info_msgtab);
+  mod_add_cmd(&info_msgtab);
 }
 
 void
 _moddeinit(void)
 {
-  mod_del_cmd(MSG_INFO);
+  mod_del_cmd(&info_msgtab);
 }
 
 void send_info_text(struct Client *sptr);

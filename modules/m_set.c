@@ -36,6 +36,8 @@
 #include "channel.h"  /* for server_was_split */
 #include "s_log.h"
 #include "msg.h"
+#include "parse.h"
+#include "modules.h"
 
 #include <stdlib.h>  /* atoi */
 
@@ -47,13 +49,13 @@ struct Message set_msgtab = {
 void
 _modinit(void)
 {
-  mod_add_cmd(MSG_SET, &set_msgtab);
+  mod_add_cmd(&set_msgtab);
 }
 
 void
 _moddeinit(void)
 {
-  mod_del_cmd(MSG_SET);
+  mod_del_cmd(&set_msgtab);
 }
 
 char *_version = "20001122";
@@ -393,7 +395,7 @@ int mo_set(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 {
   int newval;
   int i;
-  char *arg;
+  char *arg=NULL;
   char *intarg;
 
   if (parc > 1)

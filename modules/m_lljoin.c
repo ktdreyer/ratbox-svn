@@ -33,6 +33,8 @@
 #include "send.h"
 #include "handlers.h"
 #include "msg.h"
+#include "parse.h"
+#include "modules.h"
 
 #include <assert.h>
 #include <string.h>
@@ -46,13 +48,13 @@ struct Message lljoin_msgtab = {
 void
 _modinit(void)
 {
-  mod_add_cmd(MSG_LLJOIN, &lljoin_msgtab);
+  mod_add_cmd(&lljoin_msgtab);
 }
 
 void
 _moddeinit(void)
 {
-  mod_del_cmd(MSG_LLJOIN);
+  mod_del_cmd(&lljoin_msgtab);
 }
 
 char *_version = "20001122";

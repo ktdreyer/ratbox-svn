@@ -359,20 +359,20 @@ void clear_hash_parse()
  *		  modules address space. Might not want to do that...
  */
 void
-mod_add_cmd(char *cmd, struct Message *msg)
+mod_add_cmd(struct Message *msg)
 {
   struct MessageHash *ptr;
   struct MessageHash *last_ptr = NULL;
   struct MessageHash *new_ptr;
   int    index;
 
-  index = hash(cmd);
-
   assert(msg != NULL);
+
+  index = hash(msg->cmd);
 
   for(ptr = msg_hash_table[index]; ptr; ptr = ptr->next )
     {
-      if (strcasecmp(cmd,ptr->cmd) == 0)
+      if (strcasecmp(msg->cmd,ptr->cmd) == 0)
 	return;				/* Its already added */
       last_ptr = ptr;
     }
@@ -380,7 +380,7 @@ mod_add_cmd(char *cmd, struct Message *msg)
   new_ptr = (struct MessageHash *)MyMalloc(sizeof(struct MessageHash));
 
   new_ptr->next = NULL;
-  DupString(new_ptr->cmd,cmd);
+  DupString(new_ptr->cmd,msg->cmd);
   new_ptr->msg = msg;
 
   msg->count = 0;
@@ -398,17 +398,19 @@ mod_add_cmd(char *cmd, struct Message *msg)
  * output	- none
  * side effects - unload this one command name
  */
-int mod_del_cmd(char *cmd)
+int mod_del_cmd(struct Message *msg)
 {
   struct MessageHash *ptr;
   struct MessageHash *last_ptr = NULL;
   int    index;
 
-  index = hash(cmd);
+  assert(msg != NULL);
+
+  index = hash(msg->cmd);
 
   for(ptr = msg_hash_table[index]; ptr; ptr = ptr->next )
     {
-      if(strcasecmp(cmd,ptr->cmd) == 0)
+      if(strcasecmp(msg->cmd,ptr->cmd) == 0)
 	{
 	  MyFree(ptr->cmd);
 	  if(last_ptr != NULL)

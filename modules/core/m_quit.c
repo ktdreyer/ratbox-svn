@@ -29,6 +29,8 @@
 #include "s_serv.h"
 #include "send.h"
 #include "msg.h"
+#include "parse.h"
+#include "modules.h"
 
 struct Message quit_msgtab = {
   MSG_QUIT, 0, 0, MFLG_SLOW | MFLG_UNREG, 0,
@@ -38,13 +40,13 @@ struct Message quit_msgtab = {
 void
 _modinit(void)
 {
-  mod_add_cmd(MSG_QUIT, &quit_msgtab);
+  mod_add_cmd(&quit_msgtab);
 }
 
 void
 _moddeinit(void)
 {
-  mod_del_cmd(MSG_QUIT);
+  mod_del_cmd(&quit_msgtab);
 }
 
 char *_version = "20001122";

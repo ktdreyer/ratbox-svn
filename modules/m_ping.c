@@ -29,6 +29,8 @@
 #include "send.h"
 #include "irc_string.h"
 #include "msg.h"
+#include "parse.h"
+#include "modules.h"
 
 struct Message ping_msgtab = {
   MSG_PING, 0, 1, MFLG_SLOW, 0,
@@ -38,13 +40,13 @@ struct Message ping_msgtab = {
 void
 _modinit(void)
 {
-  mod_add_cmd(MSG_PING, &ping_msgtab);
+  mod_add_cmd(&ping_msgtab);
 }
 
 void
 _moddeinit(void)
 {
-  mod_del_cmd(MSG_PING);
+  mod_del_cmd(&ping_msgtab);
 }
 
 char *_version = "20001122";

@@ -31,6 +31,8 @@
 #include "s_serv.h"
 #include "send.h"
 #include "msg.h"
+#include "parse.h"
+#include "modules.h"
 
 #include "channel.h"
 #include "vchannel.h"
@@ -103,15 +105,15 @@ struct Message notice_msgtab = {
 void
 _modinit(void)
 {
-  mod_add_cmd(MSG_PRIVMSG, &privmsg_msgtab);
-  mod_add_cmd(MSG_NOTICE, &notice_msgtab);
+  mod_add_cmd(&privmsg_msgtab);
+  mod_add_cmd(&notice_msgtab);
 }
 
 void
 _moddeinit(void)
 {
-  mod_del_cmd(MSG_PRIVMSG);
-  mod_del_cmd(MSG_NOTICE);
+  mod_del_cmd(&privmsg_msgtab);
+  mod_del_cmd(&notice_msgtab);
 }
 
 char *_version = "20001122";

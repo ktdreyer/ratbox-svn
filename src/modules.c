@@ -32,6 +32,7 @@
 #include "config.h"
 #include "ircd.h"
 #include "client.h"
+#include "send.h"
 #include "handlers.h"
 #include "numeric.h"
 #include "ircd_defs.h"
@@ -124,6 +125,11 @@ struct Message modlist_msgtab = {
   {m_unregistered, m_ignore, m_ignore, mo_modlist}
 };
 
+struct Message hash_msgtab = {
+  MSG_HASH, 0, 2, MFLG_SLOW, 0,
+  {m_unregistered, m_ignore, m_ignore, mo_hash}
+};
+
 /* load all modules from MPATH */
 void
 load_all_modules (void)
@@ -138,9 +144,10 @@ load_all_modules (void)
 					     (MODS_INCREMENT));
   max_mods = MODS_INCREMENT;
 
-  mod_add_cmd(MSG_MODLOAD,&modload_msgtab);
-  mod_add_cmd(MSG_MODUNLOAD,&modunload_msgtab);
-  mod_add_cmd(MSG_MODLIST,&modlist_msgtab);
+  mod_add_cmd(&modload_msgtab);
+  mod_add_cmd(&modunload_msgtab);
+  mod_add_cmd(&modlist_msgtab);
+  mod_add_cmd(&hash_msgtab);
 
   if (chdir (system_module_dir_name) == -1)
     {
@@ -321,6 +328,7 @@ mo_modunload (struct Client *cptr, struct Client *sptr, int parc, char **parv)
 		  me.name, sptr->name, m_bn);
     }
   free (m_bn);
+  return 0;
 }
 
 /* list modules .. */
@@ -344,6 +352,7 @@ mo_modlist (struct Client *cptr, struct Client *sptr, int parc, char **parv)
 		 modlist[i]->address,
 		 modlist[i]->version);
     }
+  return 0;
 }
 
 

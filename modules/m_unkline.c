@@ -39,6 +39,9 @@
 #include "s_misc.h"
 #include "send.h"
 #include "msg.h"
+#include "s_gline.h"
+#include "parse.h"
+#include "modules.h"
 
 #include <stdio.h>
 #include <time.h>
@@ -57,17 +60,17 @@ struct Message msgtabs[] = {
 void
 _modinit(void)
 {
-  mod_add_cmd(MSG_UNKLINE, &msgtabs[0]);
-  mod_add_cmd(MSG_UNDLINE, &msgtabs[1]);
-  mod_add_cmd(MSG_UNGLINE, &msgtabs[2]);
+  mod_add_cmd(&msgtabs[0]);
+  mod_add_cmd(&msgtabs[1]);
+  mod_add_cmd(&msgtabs[2]);
 }
 
 void
 _moddeinit(void)
 {
-  mod_del_cmd(MSG_UNKLINE);
-  mod_del_cmd(MSG_UNDLINE);
-  mod_del_cmd(MSG_UNGLINE);
+  mod_del_cmd(&msgtabs[0]);
+  mod_del_cmd(&msgtabs[1]);
+  mod_del_cmd(&msgtabs[2]);
 }
 
 extern ConfigFileEntryType ConfigFileEntry; /* defined in ircd.c */

@@ -31,6 +31,8 @@
 #include "send.h"
 #include "s_conf.h"
 #include "msg.h"
+#include "parse.h"
+#include "modules.h"
 
 #include <assert.h>
 #include <string.h>
@@ -43,13 +45,13 @@ struct Message links_msgtab = {
 void
 _modinit(void)
 {
-  mod_add_cmd(MSG_LINKS, &links_msgtab);
+  mod_add_cmd(&links_msgtab);
 }
 
 void
 _moddeinit(void)
 {
-  mod_del_cmd(MSG_LINKS);
+  mod_del_cmd(&links_msgtab);
 }
 
 char *_version = "20001122";

@@ -37,6 +37,8 @@
 #include "s_serv.h"
 #include "s_conf.h"
 #include "msg.h"
+#include "parse.h"
+#include "modules.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -50,13 +52,13 @@ struct Message join_msgtab = {
 void
 _modinit(void)
 {
-  mod_add_cmd(MSG_JOIN, &join_msgtab);
+  mod_add_cmd(&join_msgtab);
 }
 
 void
 _moddeinit(void)
 {
-  mod_del_cmd(MSG_JOIN);
+  mod_del_cmd(&join_msgtab);
 }
 
 void build_list_of_channels( struct Client *sptr,

@@ -31,6 +31,8 @@
 #include "s_serv.h"
 #include "send.h"
 #include "msg.h"
+#include "parse.h"
+#include "modules.h"
 
 struct Message time_msgtab = {
   MSG_TIME, 0, 0, MFLG_SLOW, 0,
@@ -40,13 +42,13 @@ struct Message time_msgtab = {
 void
 _modinit(void)
 {
-  mod_add_cmd(MSG_TIME, &time_msgtab);
+  mod_add_cmd(&time_msgtab);
 }
 
 void
 _moddeinit(void)
 {
-  mod_del_cmd(MSG_TIME);
+  mod_del_cmd(&time_msgtab);
 }
 
 char *_version = "20001202";

@@ -34,6 +34,8 @@
 #include "msg.h"
 #include "mtrie_conf.h"
 #include "numeric.h"
+#include "parse.h"
+#include "modules.h"
 
 struct Message testline_msgtab = {
   MSG_TESTLINE, 0, 0, MFLG_SLOW, 0,
@@ -43,13 +45,13 @@ struct Message testline_msgtab = {
 void
 _modinit(void)
 {
-  mod_add_cmd(MSG_TESTLINE, &testline_msgtab);
+  mod_add_cmd(&testline_msgtab);
 }
 
 void
 _moddeinit(void)
 {
-  mod_del_cmd(MSG_TESTLINE);
+  mod_del_cmd(&testline_msgtab);
 }
  
 char *_version = "20001124";

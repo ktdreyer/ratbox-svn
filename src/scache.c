@@ -10,6 +10,7 @@
 #include "ircd.h"
 #include "numeric.h"
 #include "send.h"
+#include "scache.h"
 
 #include <assert.h>
 #include <string.h>

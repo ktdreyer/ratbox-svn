@@ -32,6 +32,8 @@
 #include "whowas.h"
 #include "irc_string.h"
 #include "msg.h"
+#include "parse.h"
+#include "modules.h"
 
 #include <string.h>
 
@@ -45,13 +47,13 @@ struct Message kill_msgtab = {
 void
 _modinit(void)
 {
-  mod_add_cmd(MSG_KILL, &kill_msgtab);
+  mod_add_cmd(&kill_msgtab);
 }
 
 void
 _moddeinit(void)
 {
-  mod_del_cmd(MSG_KILL);
+  mod_del_cmd(&kill_msgtab);
 }
 
 char *_version = "20001122";

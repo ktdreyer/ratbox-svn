@@ -29,6 +29,8 @@
 #include "s_serv.h"
 #include "send.h"
 #include "msg.h"
+#include "parse.h"
+#include "modules.h"
 
 struct Message users_msgtab = {
   MSG_USERS, 0, 0, MFLG_SLOW, 0,
@@ -38,13 +40,13 @@ struct Message users_msgtab = {
 void
 _modinit(void)
 {
-  mod_add_cmd(MSG_USERS, &users_msgtab);
+  mod_add_cmd(&users_msgtab);
 }
 
 void
 _moddeinit(void)
 {
-  mod_del_cmd(MSG_USERS);
+  mod_del_cmd(&users_msgtab);
 }
 
 char *_version = "20001122";

@@ -30,6 +30,8 @@
 #include "send.h"
 #include "s_debug.h"
 #include "msg.h"
+#include "parse.h"
+#include "modules.h"
 
 struct Message error_msgtab = {
   MSG_ERROR, 0, 0, MFLG_SLOW | MFLG_UNREG, 0,
@@ -39,13 +41,13 @@ struct Message error_msgtab = {
 void
 _modinit(void)
 {
-  mod_add_cmd(MSG_ERROR, &error_msgtab);
+  mod_add_cmd(&error_msgtab);
 }
 
 void
 _moddeinit(void)
 {
-  mod_del_cmd(MSG_ERROR);
+  mod_del_cmd(&error_msgtab);
 }
 
 char *_version = "20001122";

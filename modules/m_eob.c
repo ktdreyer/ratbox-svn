@@ -29,8 +29,9 @@
 #include "s_conf.h"
 #include "s_serv.h"
 #include "send.h"
-
 #include "msg.h"
+#include "parse.h"
+#include "modules.h"
 
 void do_eob( struct Client *sptr );
 
@@ -42,13 +43,13 @@ struct Message eob_msgtab = {
 void
 _modinit(void)
 {
-  mod_add_cmd(MSG_EOB, &eob_msgtab);
+  mod_add_cmd(&eob_msgtab);
 }
 
 void
 _moddeinit(void)
 {
-  mod_del_cmd(MSG_EOB);
+  mod_del_cmd(&eob_msgtab);
 }
 
 char *_version = "20001202";
@@ -68,4 +69,5 @@ int ms_eob(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 			 sptr->name);
 
   SetEob(cptr);
+  return 0;
 }

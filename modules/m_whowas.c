@@ -32,6 +32,8 @@
 #include "send.h"
 #include "s_conf.h"
 #include "msg.h"
+#include "parse.h"
+#include "modules.h"
 
 #include <assert.h>
 #include <string.h>
@@ -45,13 +47,13 @@ struct Message whowas_msgtab = {
 void
 _modinit(void)
 {
-  mod_add_cmd(MSG_WHOWAS, &whowas_msgtab);
+  mod_add_cmd(&whowas_msgtab);
 }
 
 void
 _moddeinit(void)
 {
-  mod_del_cmd(MSG_WHOWAS);
+  mod_del_cmd(&whowas_msgtab);
 }
 
 int whowas_do(struct Client *cptr, struct Client *sptr,

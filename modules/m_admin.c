@@ -29,8 +29,9 @@
 #include "s_conf.h"
 #include "s_serv.h"
 #include "send.h"
-
 #include "msg.h"
+#include "parse.h"
+#include "modules.h"
 
 void do_admin( struct Client *sptr );
 
@@ -42,13 +43,13 @@ struct Message admin_msgtab = {
 void
 _modinit(void)
 {
-  mod_add_cmd(MSG_ADMIN, &admin_msgtab);
+  mod_add_cmd(&admin_msgtab);
 }
 
 void
 _moddeinit(void)
 {
-  mod_del_cmd(MSG_ADMIN);
+  mod_del_cmd(&admin_msgtab);
 }
 
 char *_version = "20001202";

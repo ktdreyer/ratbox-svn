@@ -38,6 +38,8 @@
 #include "send.h"
 #include "list.h"
 #include "msg.h"
+#include "parse.h"
+#include "modules.h"
 #include <fcntl.h>
 #include <unistd.h>
 
@@ -57,13 +59,13 @@ struct Message oper_msgtab = {
 void
 _modinit(void)
 {
-  mod_add_cmd(MSG_OPER, &oper_msgtab);
+  mod_add_cmd(&oper_msgtab);
 }
 
 void
 _moddeinit(void)
 {
-  mod_del_cmd(MSG_OPER);
+  mod_del_cmd(&oper_msgtab);
 }
 
 char *_version = "20001122";
@@ -258,7 +260,7 @@ int match_oper_password(char *password, struct ConfItem *aconf)
 int oper_up( struct Client *sptr, struct ConfItem *aconf )
 {
   int old = (sptr->umodes & ALL_UMODES);
-  char *operprivs;
+  char *operprivs=NULL;
   dlink_node *ptr;
   struct ConfItem *found_aconf;
   dlink_node *m;
@@ -325,7 +327,7 @@ int oper_up( struct Client *sptr, struct ConfItem *aconf )
 
   sendto_one(sptr, form_str(RPL_YOUREOPER), me.name, sptr->name);
   sendto_one(sptr, ":%s NOTICE %s :*** Oper privs are %s",me.name,
-	     sptr->name,
+	     sptr->name,	
 	     operprivs);
   SendMessageFile(sptr, &ConfigFileEntry.opermotd);
 

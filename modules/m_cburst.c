@@ -33,6 +33,8 @@
 #include "send.h"
 #include "msg.h"
 #include "handlers.h"
+#include "parse.h"
+#include "modules.h"
 
 #include <assert.h>
 #include <string.h>
@@ -46,13 +48,13 @@ struct Message cburst_msgtab = {
 void
 _modinit(void)
 {
-  mod_add_cmd(MSG_CBURST, &cburst_msgtab);
+  mod_add_cmd(&cburst_msgtab);
 }
 
 void
 _moddeinit(void)
 {
-  mod_del_cmd(MSG_CBURST);
+  mod_del_cmd(&cburst_msgtab);
 }
 
 char *_version = "20001122";
@@ -81,7 +83,6 @@ int     ms_cburst(struct Client *cptr,
   char *name;
   char *nick;
   char *key;
-  struct Client *acptr;
   struct Channel *chptr;
 
   if( parc < 2 || *parv[1] == '\0' )

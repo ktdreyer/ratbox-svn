@@ -30,6 +30,8 @@
 #include "send.h"
 #include "s_user.h"
 #include "msg.h"
+#include "parse.h"
+#include "modules.h"
 
 struct Message operwall_msgtab = {
   MSG_OPERWALL, 0, 1, MFLG_SLOW, 0,
@@ -39,13 +41,13 @@ struct Message operwall_msgtab = {
 void
 _modinit(void)
 {
-  mod_add_cmd(MSG_OPERWALL, &operwall_msgtab);
+  mod_add_cmd(&operwall_msgtab);
 }
 
 void
 _moddeinit(void)
 {
-  mod_del_cmd(MSG_OPERWALL);
+  mod_del_cmd(&operwall_msgtab);
 }
 
 char *_version = "20001122";

@@ -62,11 +62,11 @@ struct Channel
   time_t          users_last;		/* when last user was in channel */
   time_t          last_knock;           /* don't allow knock to flood */
   struct Channel  *root_chptr;
-  dlink_list	  vchan_list;	/* vchan sublist */
+  dlink_list	  vchan_list;	        /* vchan sublist */
   dlink_list      chanops;
   dlink_list      halfops;
   dlink_list      voiced;
-  dlink_list      peons;	/* non ops, just members */
+  dlink_list      peons;                /* non ops, just members */
 
   dlink_list      invites;
   dlink_list      banlist;
@@ -78,7 +78,9 @@ struct Channel
   int             received_number_of_privmsgs;
   int             flood_noticed;
 
-  int             num_bed;          /* number of bans+exceptions+denies */
+  unsigned long   serverMask;           /* Only used for Lazy Links */
+
+  int             num_bed;              /* number of bans+exceptions+denies */
   time_t          channelts;
   char            chname[1];
 };
@@ -123,16 +125,23 @@ extern void    set_channel_mode(struct Client *, struct Client *,
 extern struct  Channel* get_channel(struct Client *,char*,int );
 extern void    clear_bans_exceptions_denies(struct Client *,struct Channel *);
 
-extern void channel_member_names( struct Client *sptr, struct Channel *chptr,
-				  char *name_of_channel);
-extern char *channel_pub_or_secret(struct Channel *chptr);
-extern char *channel_chanop_or_voice(struct Channel *, struct Client *);
+extern void    channel_member_names( struct Client *sptr,
+				     struct Channel *chptr,
+				     char *name_of_channel);
+extern char    *channel_pub_or_secret(struct Channel *chptr);
+extern char    *channel_chanop_or_voice(struct Channel *, struct Client *);
 
-extern void add_invite(struct Channel *chptr, struct Client *who);
-extern void del_invite(struct Channel *chptr, struct Client *who);
+extern void    add_invite(struct Channel *chptr, struct Client *who);
+extern void    del_invite(struct Channel *chptr, struct Client *who);
 
-extern int list_continue(struct Client *sptr);
-extern void list_one_channel(struct Client *sptr,struct Channel *chptr);
+extern void    list_one_channel(struct Client *sptr,struct Channel *chptr);
+extern void    channel_member_list(struct Client *sptr,
+				   dlink_list *list,
+				   char *show_flag,
+				   char *buf,
+				   int mlen,
+				   int *cur_len,
+				   int *reply_to_send);
 
 
 /*

@@ -36,6 +36,8 @@
 #include "send.h"
 #include "s_conf.h"
 #include "msg.h"
+#include "parse.h"
+#include "modules.h"
 
 struct Message invite_msgtab = {
   MSG_INVITE, 0, 2, MFLG_SLOW, 0,
@@ -45,13 +47,13 @@ struct Message invite_msgtab = {
 void
 _modinit(void)
 {
-  mod_add_cmd(MSG_INVITE, &invite_msgtab);
+  mod_add_cmd(&invite_msgtab);
 }
 
 void
 _moddeinit(void)
 {
-  mod_del_cmd(MSG_INVITE);
+  mod_del_cmd(&invite_msgtab);
 }
 
 char *_version = "20001122";
