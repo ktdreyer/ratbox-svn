@@ -1,3 +1,8 @@
+*** 20010519_4 by a1kmm
+*sigh* yet another commit, we do check in sendnick_TS after all. Hopefully
+the last commit for this bug...
+
+
 *** 20010519_3 by a1kmm
 - Made client_burst_if_needed check the target actually is a client :)
 
