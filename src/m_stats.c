@@ -289,14 +289,53 @@ static void do_normal_stats(struct Client *sptr,
                    me.name, sptr->name);
       break;
 
+    case 'M' : case 'm' :
+      for (mptr = msgtab; mptr->cmd; mptr++)
+          sendto_one(sptr, form_str(RPL_STATSCOMMANDS),
+                     me.name, sptr->name, mptr->cmd,
+                     mptr->count, mptr->bytes);
+      stats_spy(sptr,stat);
+      break;
+
+    case 'u' :
+      {
+        time_t now;
+        
+        now = CurrentTime - me.since;
+        sendto_one(sptr, form_str(RPL_STATSUPTIME), me.name, sptr->name,
+                   now/86400, (now/3600)%24, (now/60)%60, now%60);
+        sendto_one(sptr, form_str(RPL_STATSCONN), me.name, sptr->name,
+                   MaxConnectionCount, MaxClientCount);
+	stats_spy(sptr,stat);
+        break;
+      }
+    default :
+      break;
+    }
+}
+
+static void do_non_priv_stats(struct Client *sptr, char *name, char *target,
+			      char stat, int doall, int wilds)
+{
+  switch (stat)
+    {
+    case 'E' : case 'e' :
+    case 'F' : case 'f' :
+      sendto_one(sptr,":%s NOTICE %s :Use stats I instead", me.name, sptr->name);
+      stats_spy(sptr,stat);
+      break;
+
+/* ZZZ opers only flag */
     case 'H' : case 'h' :
       report_configured_links(sptr, CONF_HUB|CONF_LEAF);
       stats_spy(sptr,stat);
       break;
 
-    case 'I' : case 'i' :
 /* ZZZ  should be in run time config */
-#ifndef I_LINES_OPER_ONLY
+    case 'I' : case 'i' :
+#ifdef I_LINES_OPER_ONLY
+      sendto_one(sptr, form_str(ERR_NOPRIVILEGES), me.name, sptr->name);
+#else
       report_mtrie_conf_links(sptr, CONF_CLIENT);
 #endif
       stats_spy(sptr,stat);
@@ -310,11 +349,97 @@ static void do_normal_stats(struct Client *sptr,
       stats_spy(sptr,stat);
       break;
 
-    case 'M' : case 'm' :
-      for (mptr = msgtab; mptr->cmd; mptr++)
-          sendto_one(sptr, form_str(RPL_STATSCOMMANDS),
-                     me.name, sptr->name, mptr->cmd,
-                     mptr->count, mptr->bytes);
+/* ZZZ opers only flag */
+    case 'o' : case 'O' :
+      report_configured_links(sptr, CONF_OPS);
+      stats_spy(sptr,stat);
+      break;
+
+/* ZZZ opers only flag */
+    case 'P' :
+      show_ports(sptr);
+      stats_spy(sptr,stat);
+      break;
+
+    case 'p' :
+      if (ConfigFileEntry.stats_p_notice)
+	{
+	  stats_p_spy(sptr);
+	}
+      else
+	{
+	  show_opers(sptr);
+	  stats_spy(sptr,stat);
+	}
+      break;
+
+    case 'v' : case 'V' :
+      show_servers(sptr);
+      stats_spy(sptr,stat);
+      break;
+
+    case '?':
+      serv_info(sptr, sptr->name);
+      stats_spy(sptr,stat);
+      break;
+
+
+    case 'D' : case 'd' :
+    case 'S' : case 's' :
+    case 'T' : case 't' :
+    case 'Z' : case 'z' :
+      sendto_one(sptr, form_str(ERR_NOPRIVILEGES), me.name, sptr->name);
+      stats_spy(sptr,stat);
+      break;
+    }
+}
+
+static void do_priv_stats(struct Client *sptr, char *name, char *target,
+			    char stat, int doall, int wilds)
+{
+  switch (stat)
+    {
+    case 'D': case 'd':
+      report_dlines(sptr);
+      stats_spy(sptr,stat);
+      break;
+
+    case 'E' : case 'e' :
+      show_events(sptr);
+      stats_spy(sptr,stat);
+      break;
+
+    case 'G': case 'g' :
+      if (ConfigFileEntry.glines)
+	{
+	  report_glines(sptr);
+	  stats_spy(sptr,stat);
+	}
+      else
+        sendto_one(sptr,":%s NOTICE %s :This server does not support G lines",
+                   me.name, sptr->name);
+      break;
+
+    case 'H' : case 'h' :
+      report_configured_links(sptr, CONF_HUB|CONF_LEAF);
+      stats_spy(sptr,stat);
+      break;
+
+    case 'I' : case 'i' :
+      report_mtrie_conf_links(sptr, CONF_CLIENT);
+      stats_spy(sptr,stat);
+      break;
+
+    case 'K' :
+      if(target != (char *)NULL)
+        report_matching_host_klines(sptr,target);
+      else
+	report_matching_host_klines(sptr,sptr->host);
+      stats_spy(sptr,stat);
+      break;
+
+    case 'k' :
+      report_temp_klines(sptr);
       stats_spy(sptr,stat);
       break;
 
@@ -330,150 +455,6 @@ static void do_normal_stats(struct Client *sptr,
 
     case 'p' :
       show_opers(sptr);
-      stats_p_spy(sptr);
-      break;
-
-    case 'u' :
-      {
-        time_t now;
-        
-        now = CurrentTime - me.since;
-        sendto_one(sptr, form_str(RPL_STATSUPTIME), me.name, sptr->name,
-                   now/86400, (now/3600)%24, (now/60)%60, now%60);
-        sendto_one(sptr, form_str(RPL_STATSCONN), me.name, sptr->name,
-                   MaxConnectionCount, MaxClientCount);
-	stats_spy(sptr,stat);
-        break;
-      }
-
-    case 'v' : case 'V' :
-      show_servers(sptr);
-      stats_spy(sptr,stat);
-      break;
-
-    case '?':
-      serv_info(sptr, sptr->name);
-      stats_spy(sptr,stat);
-      break;
-
-    default :
-      stat = '*';
-      break;
-    }
-}
-
-static void do_non_priv_stats(struct Client *sptr, char *name, char *target,
-			      char stat, int doall, int wilds)
-{
-  switch (stat)
-    {
-    case 'D': case 'd':
-      sendto_one(sptr, form_str(ERR_NOPRIVILEGES), me.name, sptr->name);
-      stats_spy(sptr,stat);
-      break;
-
-    case 'E' : case 'e' :
-      sendto_one(sptr,":%s NOTICE %s :Use stats I instead", me.name, sptr->name);
-      stats_spy(sptr,stat);
-      break;
-
-    case 'F' : case 'f' :
-      sendto_one(sptr,":%s NOTICE %s :Use stats I instead", me.name, sptr->name);
-      stats_spy(sptr,stat);
-      break;
-
-    case 'G': case 'g' :
-      if (ConfigFileEntry.glines)
-	{
-	  report_glines(sptr);
-	  stats_spy(sptr,stat);
-	}
-      else
-        sendto_one(sptr,":%s NOTICE %s :This server does not support G lines",
-                   me.name, sptr->name);
-      break;
-
-    case 'H' : case 'h' :
-      report_configured_links(sptr, CONF_HUB|CONF_LEAF);
-      stats_spy(sptr,stat);
-      break;
-
-    case 'I' : case 'i' :
-/* ZZZ  should be in run time config */
-#ifndef I_LINES_OPER_ONLY
-      report_mtrie_conf_links(sptr, CONF_CLIENT);
-#endif
-      stats_spy(sptr,stat);
-      break;
-
-    case 'k' :
-      report_temp_klines(sptr);
-      stats_spy(sptr,stat);
-      break;
-
-    case 'K' :
-/* sendto_one(sptr, form_str(ERR_NOPRIVILEGES), me.name, sptr->name); */
-      if(target != (char *)NULL)
-        report_matching_host_klines(sptr,target);
-      else
-	report_matching_host_klines(sptr,sptr->host);
-      stats_spy(sptr,stat);
-      break;
-
-    case 'S' : case 's':
-      sendto_one(sptr, form_str(ERR_NOPRIVILEGES), me.name, sptr->name);
-      stats_spy(sptr,stat);
-      break;
-
-    case 'T' : case 't' :
-      sendto_one(sptr, form_str(ERR_NOPRIVILEGES), me.name, sptr->name);
-      stats_spy(sptr,stat);
-      break;
-
-    case 'Z' : case 'z' :
-      sendto_one(sptr, form_str(ERR_NOPRIVILEGES), me.name, sptr->name);
-      stats_spy(sptr,stat);
-      break;
-    }
-}
-
-static void do_priv_stats(struct Client *sptr, char *name, char *target,
-			    char stat, int doall, int wilds)
-{
-  switch (stat)
-    {
-    case 'B' : case 'b' :
-      sendto_one(sptr,":%s NOTICE %s :Use stats I instead", me.name, sptr->name);
-      break;
-
-    case 'D': case 'd':
-      report_dlines(sptr);
-      stats_spy(sptr,stat);
-      break;
-
-    case 'E' : case 'e' :
-      show_events(sptr);
-      stats_spy(sptr,stat);
-      break;
-
-    case 'F' : case 'f' :
-      sendto_one(sptr,":%s NOTICE %s :Use stats I instead", me.name, sptr->name);
-      stats_spy(sptr,stat);
-      break;
-
-    case 'G': case 'g' :
-      if (ConfigFileEntry.glines)
-	{
-	  report_glines(sptr);
-	  stats_spy(sptr,stat);
-	}
-      else
-        sendto_one(sptr,":%s NOTICE %s :This server does not support G lines",
-                   me.name, sptr->name);
-      break;
-
-    case 'k' :
-      report_temp_klines(sptr);
       stats_spy(sptr,stat);
       break;
 
@@ -502,6 +483,11 @@ static void do_priv_stats(struct Client *sptr, char *name, char *target,
       stats_spy(sptr,stat);
       break;
 
+    case 'v' : case 'V' :
+      show_servers(sptr);
+      stats_spy(sptr,stat);
+      break;
+
     case 'X' :
       report_specials(sptr,CONF_XLINE,RPL_STATSXLINE);
       stats_spy(sptr,stat);
@@ -516,6 +502,12 @@ static void do_priv_stats(struct Client *sptr, char *name, char *target,
       count_memory(sptr, sptr->name);
       stats_spy(sptr,stat);
       break;
+
+    case '?':
+      serv_info(sptr, sptr->name);
+      stats_spy(sptr,stat);
+      break;
+
     }
 }
 
@@ -655,11 +647,10 @@ static void stats_L_spy(struct Client *sptr, char stat, char *name)
 
 static void stats_p_spy(struct Client *sptr)
 {
-  if (ConfigFileEntry.stats_p_notice && !ConfigFileEntry.stats_notice )
-    sendto_realops_flags(FLAGS_SPY,
-			 "STATS p requested by %s (%s@%s) [%s]",
-			 sptr->name, sptr->username, sptr->host,
-			 sptr->user->server);
+  sendto_realops_flags(FLAGS_SPY,
+		       "STATS p requested by %s (%s@%s) [%s]",
+		       sptr->name, sptr->username, sptr->host,
+		       sptr->user->server);
 }
 
 /*

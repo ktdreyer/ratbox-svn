@@ -104,7 +104,6 @@ static int bot_check(char *host);
 */
 int m_user(struct Client* cptr, struct Client* sptr, int parc, char *parv[])
 {
-#define UFLAGS  (FLAGS_INVISIBLE|FLAGS_WALLOP|FLAGS_SERVNOTICE)
   char* username;
   char* host;
   char* server;
