@@ -1,3 +1,15 @@
+jdc         2001/12/09 22:55:31 EST	(20011210_3)
+
+  Modified files:
+    src                  channel.c 
+  Log:
+  - Follow-up fix for s_iphost.
+  
+  Revision  Changes    Path
+  7.284     +1 -1      ircd-hybrid-7/src/channel.c
+
+
+
 jdc         2001/12/09 22:52:05 EST	(20011210_2)
 
   Modified files:
