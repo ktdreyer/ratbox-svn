@@ -57,7 +57,7 @@ mapi_hlist_av1 admin_hlist[] = {
 	{ NULL }
 };
 
-DECLARE_MODULE_AV1(admin, NULL, NULL, admin_clist, admin_hlist, NULL, NULL, "$Revision$");
+DECLARE_MODULE_AV1(admin, NULL, NULL, admin_clist, admin_hlist, NULL, "$Revision$");
 
 /*
  * mr_admin - ADMIN command handler

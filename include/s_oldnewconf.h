@@ -50,8 +50,6 @@
 #define IsResvChannel(x)	((x)->flags & RESV_CHANNEL)
 #define IsResvNick(x)		((x)->flags & RESV_NICK)
 
-#define ENCAP_PERM	0x001
-
 struct rxconf
 {
 	char *name;
@@ -65,13 +63,6 @@ struct shared
 	char *username;
 	char *host;
 	char *servername;
-	int flags;
-};
-
-struct encap
-{
-	const char *name;
-	MessageHandler handler;
 	int flags;
 };
 
@@ -102,11 +93,6 @@ extern void free_shared(struct shared *);
 extern void clear_shared(void);
 extern int find_shared(const char *username, const char *host, 
 			const char *servername, int type);
-
-extern dlink_list encap_list;
-extern int add_encap(struct encap *enptr);
-extern int del_encap(struct encap *enptr);
-extern struct encap *find_encap(const char *name);
 
 #endif
 

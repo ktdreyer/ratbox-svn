@@ -63,7 +63,7 @@
 
 #ifndef HAVE_LIBCRYPTO
 
-DECLARE_MODULE_AV1(cryptlink, NULL, NULL, NULL, NULL, NULL, NULL, "$Revision$");
+DECLARE_MODULE_AV1(cryptlink, NULL, NULL, NULL, NULL, NULL, "$Revision$");
 #else
 
 static int bogus_host(char *host);
@@ -94,7 +94,7 @@ static struct CryptLinkStruct cryptlink_cmd_table[] = {
 };
 
 mapi_clist_av1 cryptlink_clist[] = { &cryptlink_msgtab, NULL };
-DECLARE_MODULE_AV1(cryptlink, NULL, NULL, cryptlink_clist, NULL, NULL, NULL, "$Revision$");
+DECLARE_MODULE_AV1(cryptlink, NULL, NULL, cryptlink_clist, NULL, NULL, "$Revision$");
 
 
 /* mr_cryptlink - CRYPTLINK message handler

@@ -61,7 +61,7 @@ struct Message undline_msgtab = {
 };
 
 mapi_clist_av1 dline_clist[] = { &dline_msgtab, &undline_msgtab, NULL };
-DECLARE_MODULE_AV1(dline, NULL, NULL, dline_clist, NULL, NULL, NULL, "$Revision$");
+DECLARE_MODULE_AV1(dline, NULL, NULL, dline_clist, NULL, NULL, "$Revision$");
 
 static time_t valid_tkline(struct Client *source_p, const char *string);
 static int valid_comment(char *comment);

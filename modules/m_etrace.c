@@ -60,7 +60,7 @@ struct Message etrace_msgtab = {
 };
 
 mapi_clist_av1 etrace_clist[] =  { &etrace_msgtab, NULL };
-DECLARE_MODULE_AV1(etrace, NULL, NULL, etrace_clist, NULL, NULL, NULL, "$Revision$");
+DECLARE_MODULE_AV1(etrace, NULL, NULL, etrace_clist, NULL, NULL, "$Revision$");
 
 /*
  * m_etrace

@@ -103,7 +103,7 @@ struct Message notice_msgtab = {
 mapi_clist_av1 message_clist[] = {
 	&privmsg_msgtab, &notice_msgtab, NULL
 };
-DECLARE_MODULE_AV1(message, NULL, NULL, message_clist, NULL, NULL, NULL, "$Revision$");
+DECLARE_MODULE_AV1(message, NULL, NULL, message_clist, NULL, NULL, "$Revision$");
 
 /*
 ** m_privmsg
@@ -465,7 +465,7 @@ msg_channel_flags(int p_or_n, const char *command, struct Client *client_p,
 
 	if(flags & CHFL_VOICE)
 	{
-		type = ONLY_CHANOPS_VOICED;
+		type = ONLY_CHANOPSVOICED;
 		c = '+';
 	}
 	else

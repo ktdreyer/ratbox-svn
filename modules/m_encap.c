@@ -56,7 +56,7 @@ struct Message encap_msgtab = {
 };
 
 mapi_clist_av1 encap_clist[] = { &encap_msgtab, NULL };
-DECLARE_MODULE_AV1(encap, NULL, NULL, encap_clist, NULL, NULL, NULL, "$Revision$");
+DECLARE_MODULE_AV1(encap, NULL, NULL, encap_clist, NULL, NULL, "$Revision$");
 
 const char *_version = "$Revision$";
 
@@ -107,18 +107,7 @@ ms_encap(struct Client *client_p, struct Client *source_p, int parc, const char 
 
 	/* if it matches us, find a matching handler and call it */
 	if(match(parv[1], me.name))
-	{
-		MessageHandler handler = 0;
-		struct encap *enptr;
-
-		enptr = find_encap(parv[2]);
-
-		if(enptr != NULL)
-		{
-			handler = enptr->handler;
-			(*handler) (client_p, source_p, parc, parv);
-		}
-	}
+		handle_encap(client_p, source_p, parv[2], parc - 2, parv + 2);
 
 	return 0;
 }

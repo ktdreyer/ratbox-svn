@@ -46,7 +46,7 @@ struct Message wallops_msgtab = {
 };
 
 mapi_clist_av1 wallops_clist[] = { &wallops_msgtab, NULL };
-DECLARE_MODULE_AV1(wallops, NULL, NULL, wallops_clist, NULL, NULL, NULL, "$Revision$");
+DECLARE_MODULE_AV1(wallops, NULL, NULL, wallops_clist, NULL, NULL, "$Revision$");
 
 /*
  * mo_wallops (write to *all* opers currently online)

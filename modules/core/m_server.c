@@ -55,7 +55,7 @@ struct Message server_msgtab = {
 };
 
 mapi_clist_av1 server_clist[] = { &server_msgtab, NULL };
-DECLARE_MODULE_AV1(server, NULL, NULL, server_clist, NULL, NULL, NULL, "$Revision$");
+DECLARE_MODULE_AV1(server, NULL, NULL, server_clist, NULL, NULL, "$Revision$");
 
 int bogus_host(const char *host);
 struct Client *server_exists(const char *);

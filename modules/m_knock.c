@@ -49,7 +49,7 @@ struct Message knock_msgtab = {
 };
 
 mapi_clist_av1 knock_clist[] = { &knock_msgtab, NULL };
-DECLARE_MODULE_AV1(knock, NULL, NULL, knock_clist, NULL, NULL, NULL, "$Revision$");
+DECLARE_MODULE_AV1(knock, NULL, NULL, knock_clist, NULL, NULL, "$Revision$");
 
 static void parse_knock(struct Client *, struct Client *, const char *);
 

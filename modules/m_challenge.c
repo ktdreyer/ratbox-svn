@@ -57,7 +57,7 @@ static int	challenge_load(void)
 #endif
 }
 
-DECLARE_MODULE_AV1(challenge, challenge_load, NULL, NULL, NULL, NULL, NULL, "$Revision$");
+DECLARE_MODULE_AV1(challenge, challenge_load, NULL, NULL, NULL, NULL, "$Revision$");
 #else
 
 static int m_challenge(struct Client *, struct Client *, int, const char **);
@@ -70,7 +70,7 @@ struct Message challenge_msgtab = {
 };
 
 mapi_clist_av1 challenge_clist[] = { &challenge_msgtab, NULL };
-DECLARE_MODULE_AV1(challenge, NULL, NULL, challenge_clist, NULL, NULL, NULL, "$Revision$");
+DECLARE_MODULE_AV1(challenge, NULL, NULL, challenge_clist, NULL, NULL, "$Revision$");
 
 /*
  * m_challenge - generate RSA challenge for wouldbe oper

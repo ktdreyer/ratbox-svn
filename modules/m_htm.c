@@ -46,7 +46,7 @@ struct Message htm_msgtab = {
 	{m_unregistered, m_ignore, m_ignore, m_htm}
 };
 mapi_clist_av1 htm_clist[] = { &htm_msgtab, NULL };
-DECLARE_MODULE_AV1(htm, NULL, NULL, htm_clist, NULL, NULL, NULL, "$Revision$");
+DECLARE_MODULE_AV1(htm, NULL, NULL, htm_clist, NULL, NULL, "$Revision$");
 
 /*
 ** m_htm

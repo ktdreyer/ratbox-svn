@@ -49,7 +49,7 @@ struct Message testline_msgtab = {
 };
 
 mapi_clist_av1 testline_clist[] = { &testline_msgtab, NULL };
-DECLARE_MODULE_AV1(testline, NULL, NULL, testline_clist, NULL, NULL, NULL, "$Revision$");
+DECLARE_MODULE_AV1(testline, NULL, NULL, testline_clist, NULL, NULL, "$Revision$");
 
 /*
  * mo_testline

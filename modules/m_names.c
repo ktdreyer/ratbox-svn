@@ -53,7 +53,7 @@ struct Message names_msgtab = {
 };
 
 mapi_clist_av1 names_clist[] = { &names_msgtab, NULL };
-DECLARE_MODULE_AV1(names, NULL, NULL, names_clist, NULL, NULL, NULL, "$Revision$");
+DECLARE_MODULE_AV1(names, NULL, NULL, names_clist, NULL, NULL, "$Revision$");
 
 /************************************************************************
  * m_names() - Added by Jto 27 Apr 1989

@@ -52,7 +52,7 @@ struct Message mode_msgtab = {
 };
 
 mapi_clist_av1 mode_clist[] = { &mode_msgtab, NULL };
-DECLARE_MODULE_AV1(mode, NULL, NULL, mode_clist, NULL, NULL, NULL, "$Revision$");
+DECLARE_MODULE_AV1(mode, NULL, NULL, mode_clist, NULL, NULL, "$Revision$");
 
 /* bitmasks for error returns, so we send once per call */
 #define SM_ERR_NOTS             0x00000001	/* No TS on channel */
@@ -1048,7 +1048,7 @@ set_channel_mode(struct Client *client_p, struct Client *source_p,
 	int i, j, flags;
 	int dir = MODE_ADD;
 	int parn = 1;
-	int alevel, errors = 0;
+	int errors = 0;
 	const char *ml = parv[0];
 	char c;
 	int table_position;

@@ -59,7 +59,7 @@ static const char *weekdays[] = {
 };
 
 mapi_clist_av1 time_clist[] = { &time_msgtab, NULL };
-DECLARE_MODULE_AV1(time, NULL, NULL, time_clist, NULL, NULL, NULL, "$Revision$");
+DECLARE_MODULE_AV1(time, NULL, NULL, time_clist, NULL, NULL, "$Revision$");
 
 /*
  * m_time

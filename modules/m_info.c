@@ -65,7 +65,7 @@ mapi_hlist_av1 info_hlist[] = {
 	{ NULL }
 };
 
-DECLARE_MODULE_AV1(info, NULL, NULL, info_clist, NULL, NULL, NULL, "$Revision$");
+DECLARE_MODULE_AV1(info, NULL, NULL, info_clist, NULL, NULL, "$Revision$");
 
 /*
  * jdc -- Structure for our configuration value table

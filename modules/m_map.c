@@ -42,7 +42,7 @@ struct Message map_msgtab = {
 };
 
 mapi_clist_av1 map_clist[] = { &map_msgtab, NULL };
-DECLARE_MODULE_AV1(map, NULL, NULL, map_clist, NULL, NULL, NULL, "$Revision$");
+DECLARE_MODULE_AV1(map, NULL, NULL, map_clist, NULL, NULL, "$Revision$");
 
 static char buf[BUFSIZE];
 

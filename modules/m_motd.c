@@ -58,7 +58,7 @@ mapi_hlist_av1 motd_hlist[] = {
 	{ NULL }
 };
 
-DECLARE_MODULE_AV1(motd, NULL, NULL, motd_clist, NULL, NULL, NULL, "$Revision$");
+DECLARE_MODULE_AV1(motd, NULL, NULL, motd_clist, NULL, NULL, "$Revision$");
 
 /* mr_motd()
  *

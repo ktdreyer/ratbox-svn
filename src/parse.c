@@ -58,7 +58,7 @@ static void do_numeric(char[], struct Client *, struct Client *, int, char **);
 static int handle_command(struct Message *, struct Client *, struct Client *, int, const char**);
 
 static int hash(const char *p);
-static struct Message *hash_parse(char *);
+static struct Message *hash_parse(const char *);
 
 struct MessageHash *msg_hash_table[MAX_MSG_HASH];
 
@@ -246,7 +246,8 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
 
 		mptr = hash_parse(ch);
 
-		if(!mptr || !mptr->cmd)
+		/* no command or its encap only, error */
+		if(!mptr || !mptr->cmd || mptr->flags & MFLG_ENCAPONLY)
 		{
 			/*
 			 * Note: Give error message *only* to recognized
@@ -394,6 +395,28 @@ handle_command(struct Message *mptr, struct Client *client_p,
 	return (1);
 }
 
+void
+handle_encap(struct Client *client_p, struct Client *source_p,
+	     const char *command, int parc, const char *parv[])
+{
+	struct Message *mptr;
+	MessageHandler handler = 0;
+
+	parv[0] = source_p->name;
+
+	mptr = hash_parse(command);
+
+	if(mptr == NULL || mptr->cmd == NULL ||
+	   (mptr->flags & MFLG_ENCAP) == 0)
+		return;
+
+	handler = mptr->handlers[client_p->handler];
+
+	if(parc < (int) mptr->parameters)
+		return;
+
+	(*handler) (client_p, source_p, parc, parv);
+}
 
 /*
  * clear_hash_parse()
@@ -498,7 +521,7 @@ mod_del_cmd(struct Message *msg)
  * side effects - 
  */
 static struct Message *
-hash_parse(char *cmd)
+hash_parse(const char *cmd)
 {
 	struct MessageHash *ptr;
 	int msgindex;
