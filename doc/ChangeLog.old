@@ -1,3 +1,8 @@
+*** 20001213_2 by db
+- urgh stupid typo sorry ! sorry sorry sorry!
+
+
+
 *** 20001213_1 by db
 - msg_tree_root has to be zero'ed in clear_msg_tree() or it causes
   odd problems esp. on redhat linux for some reason. NO idea why
