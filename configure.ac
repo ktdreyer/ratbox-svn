@@ -651,11 +651,11 @@ AC_HELP_STRING([--with-confdir=DIR],
 	       [Directory to install config files.]),
 	       [ confdir=`echo $withval | sed 's/\/$//'`
 		 AC_MSG_RESULT(yes)
-		 AC_DEFINE_DIR(ETC_DIR, "$confdir", [Prefix where config files are installed.])
+		 AC_DEFINE_DIR(ETC_DIR, confdir, [Prefix where config files are installed.])
 		 AC_SUBST_DIR([confdir]) ],
 	       [ confdir='${prefix}/etc'
 		 AC_MSG_RESULT(no)
-	         AC_DEFINE_DIR(ETC_DIR, "$confdir", [Prefix where config files are installed.])
+	         AC_DEFINE_DIR(ETC_DIR, confdir, [Prefix where config files are installed.])
 	  	 AC_SUBST_DIR([confdir])]
 )
 
@@ -669,11 +669,11 @@ AC_HELP_STRING([--with-logdir=DIR],
 	       [Directory where to write logfiles.]),
 	       [ logdir=`echo $withval | sed 's/\/$//'`
 		 AC_MSG_RESULT(yes)
-		 AC_DEFINE_DIR(LOG_DIR, "$logdir", [Prefix where to write logfiles.])
+		 AC_DEFINE_DIR(LOG_DIR, logdir, [Prefix where to write logfiles.])
 		 AC_SUBST_DIR([logdir]) ],
 	       [ logdir='${prefix}/logs'
 		 AC_MSG_RESULT(no)
-	         AC_DEFINE_DIR(LOG_DIR, "$logdir", [Prefix where to write logfiles.])
+	         AC_DEFINE_DIR(LOG_DIR, logdir, [Prefix where to write logfiles.])
 	  	 AC_SUBST_DIR([logdir])]
 )
 
@@ -687,11 +687,11 @@ AC_HELP_STRING([--with-helpdir=DIR],
 	       [Directory to install help files.]),
 	       [ helpdir=`echo $withval | sed 's/\/$//'`
 		 AC_MSG_RESULT(yes)
-		 AC_DEFINE_DIR(HELP_DIR, "$helpdir", [Prefix where help files are installed.])
+		 AC_DEFINE_DIR(HELP_DIR, helpdir, [Prefix where help files are installed.])
 		 AC_SUBST_DIR([helpdir]) ],
 	       [ helpdir='${prefix}/help'
 		 AC_MSG_RESULT(no)
-	         AC_DEFINE_DIR(HELP_DIR, "$helpdir", [Prefix where help file are installed.])
+	         AC_DEFINE_DIR(HELP_DIR, helpdir, [Prefix where help file are installed.])
 	  	 AC_SUBST_DIR([helpdir])]
 )
 
@@ -705,11 +705,11 @@ AC_HELP_STRING([--with-moduledir=DIR],
 	       [Directory to install modules.]),
 	       [ moduledir=`echo $withval | sed 's/\/$//'`
 		 AC_MSG_RESULT(yes)
-		 AC_DEFINE_DIR(MODULE_DIR, "$moduledir", [Prefix where modules are installed.])
+		 AC_DEFINE_DIR(MODULE_DIR, moduledir, [Prefix where modules are installed.])
 		 AC_SUBST_DIR([moduledir]) ],
 	       [ moduledir='${prefix}/modules'
 		 AC_MSG_RESULT(no)
-	         AC_DEFINE_DIR(MODULE_DIR, "$moduledir", [Prefix where modules are installed.])
+	         AC_DEFINE_DIR(MODULE_DIR, moduledir, [Prefix where modules are installed.])
 	  	 AC_SUBST_DIR([moduledir])]
 )
 

@@ -7504,7 +7504,7 @@ echo "${ECHO_T}yes" >&6
 
   test "x$prefix" = xNONE && prefix="$ac_default_prefix"
   test "x$exec_prefix" = xNONE && exec_prefix='${prefix}'
-  ac_define_dir=`eval echo $"$confdir"`
+  ac_define_dir=`eval echo $confdir`
   ac_define_dir=`eval echo $ac_define_dir`
   ETC_DIR="$ac_define_dir"
 
@@ -7530,7 +7530,7 @@ echo "${ECHO_T}no" >&6
 
   test "x$prefix" = xNONE && prefix="$ac_default_prefix"
   test "x$exec_prefix" = xNONE && exec_prefix='${prefix}'
-  ac_define_dir=`eval echo $"$confdir"`
+  ac_define_dir=`eval echo $confdir`
   ac_define_dir=`eval echo $ac_define_dir`
   ETC_DIR="$ac_define_dir"
 
@@ -7565,7 +7565,7 @@ echo "${ECHO_T}yes" >&6
 
   test "x$prefix" = xNONE && prefix="$ac_default_prefix"
   test "x$exec_prefix" = xNONE && exec_prefix='${prefix}'
-  ac_define_dir=`eval echo $"$logdir"`
+  ac_define_dir=`eval echo $logdir`
   ac_define_dir=`eval echo $ac_define_dir`
   LOG_DIR="$ac_define_dir"
 
@@ -7591,7 +7591,7 @@ echo "${ECHO_T}no" >&6
 
   test "x$prefix" = xNONE && prefix="$ac_default_prefix"
   test "x$exec_prefix" = xNONE && exec_prefix='${prefix}'
-  ac_define_dir=`eval echo $"$logdir"`
+  ac_define_dir=`eval echo $logdir`
   ac_define_dir=`eval echo $ac_define_dir`
   LOG_DIR="$ac_define_dir"
 
@@ -7626,7 +7626,7 @@ echo "${ECHO_T}yes" >&6
 
   test "x$prefix" = xNONE && prefix="$ac_default_prefix"
   test "x$exec_prefix" = xNONE && exec_prefix='${prefix}'
-  ac_define_dir=`eval echo $"$helpdir"`
+  ac_define_dir=`eval echo $helpdir`
   ac_define_dir=`eval echo $ac_define_dir`
   HELP_DIR="$ac_define_dir"
 
@@ -7652,7 +7652,7 @@ echo "${ECHO_T}no" >&6
 
   test "x$prefix" = xNONE && prefix="$ac_default_prefix"
   test "x$exec_prefix" = xNONE && exec_prefix='${prefix}'
-  ac_define_dir=`eval echo $"$helpdir"`
+  ac_define_dir=`eval echo $helpdir`
   ac_define_dir=`eval echo $ac_define_dir`
   HELP_DIR="$ac_define_dir"
 
@@ -7687,7 +7687,7 @@ echo "${ECHO_T}yes" >&6
 
   test "x$prefix" = xNONE && prefix="$ac_default_prefix"
   test "x$exec_prefix" = xNONE && exec_prefix='${prefix}'
-  ac_define_dir=`eval echo $"$moduledir"`
+  ac_define_dir=`eval echo $moduledir`
   ac_define_dir=`eval echo $ac_define_dir`
   MODULE_DIR="$ac_define_dir"
 
@@ -7713,7 +7713,7 @@ echo "${ECHO_T}no" >&6
 
   test "x$prefix" = xNONE && prefix="$ac_default_prefix"
   test "x$exec_prefix" = xNONE && exec_prefix='${prefix}'
-  ac_define_dir=`eval echo $"$moduledir"`
+  ac_define_dir=`eval echo $moduledir`
   ac_define_dir=`eval echo $ac_define_dir`
   MODULE_DIR="$ac_define_dir"
 
