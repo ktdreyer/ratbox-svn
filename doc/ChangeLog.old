@@ -1,3 +1,6 @@
+*** 20010202_7 by davidt
+-I flags should be in CPPFLAGS, not CFLAGS, updated configure to stop warning from make depend
+
 *** 20010202_6 by jdc
 - Blah.  Okay, *finally* fixed passwords.  I shouldn't have changed
   the strcmp()s like I did earlier.  The *REAL* bug was that one of
