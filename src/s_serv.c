@@ -2226,18 +2226,18 @@ void cryptlink_init(struct Client *client_p,
   if (!ServerInfo.rsa_private_key ||
       !RSA_check_key(ServerInfo.rsa_private_key) ||
       !aconf->rsa_public_key)
-    {
-      cryptlink_error(client_p,
-                      "%s[%s]: CRYPTLINK failed - invalid RSA key(s)");
-      return;
-    }
+  {
+    cryptlink_error(client_p,
+                    "%s[%s]: CRYPTLINK failed - invalid RSA key(s)");
+    return;
+  }
 
   if (get_randomness(randkey, CIPHERKEYLEN) != 1)
-    {
-      cryptlink_error(client_p,
-                      "%s[%s]: CRYPTLINK failed - couldn't generate secret");
-      return;
-    }
+  {
+    cryptlink_error(client_p,
+                    "%s[%s]: CRYPTLINK failed - couldn't generate secret");
+    return;
+  }
 
   encrypted = MyMalloc(RSA_size(ServerInfo.rsa_private_key));
 
@@ -2250,20 +2250,21 @@ void cryptlink_init(struct Client *client_p,
   memcpy(client_p->localClient->in_key, randkey, CIPHERKEYLEN);
 
   if (enc_len <= 0)
-    {
-      MyFree(encrypted);
-      cryptlink_error(client_p,
-                      "%s[%s]: CRYPTLINK failed - couldn't encrypt data");
-      return;
-    }
+  {
+    report_crypto_errors();
+    MyFree(encrypted);
+    cryptlink_error(client_p,
+                    "%s[%s]: CRYPTLINK failed - couldn't encrypt data");
+    return;
+  }
 
   if (!(base64_block(&key_to_send, encrypted, enc_len)))
-    {
-      MyFree(encrypted);
-      cryptlink_error(client_p,
-                      "%s[%s]: CRYPTLINK failed - couldn't base64 key");
-      return;
-    }
+  {
+    MyFree(encrypted);
+    cryptlink_error(client_p,
+                    "%s[%s]: CRYPTLINK failed - couldn't base64 key");
+    return;
+  }
 
 
   send_capabilities(client_p, aconf, CAP_MASK
@@ -2286,16 +2287,18 @@ void cryptlink_init(struct Client *client_p,
    * here now and save everyone the trouble of us ever existing.
    */
   if (IsDead(client_p))
-   {
-     cryptlink_error(client_p,
-                     "%s[%s] went dead during handshake");
-     return;
-   }
+  {
+    cryptlink_error(client_p,
+                    "%s[%s] went dead during handshake");
+    return;
+  }
 
   /* If we get here, we're ok, so lets start reading some data */
   if (fd > -1)
+  {
     comm_setselect(fd, FDLIST_SERVER, COMM_SELECT_READ, read_packet,
                    client_p, 0);
+  }
 }
 
 void cryptlink_error(struct Client *client_p, char *reason)

@@ -164,12 +164,14 @@ static void mr_cryptauth(struct Client *client_p, struct Client *source_p,
 
   key = MyMalloc(RSA_size(ServerInfo.rsa_private_key));
 
+  verify_private_key();
   len = RSA_private_decrypt( enc_len, enc, key,
                              ServerInfo.rsa_private_key,
                              RSA_PKCS1_PADDING );
 
   if ( len < client_p->localClient->in_cipher->keylen )
   {
+    report_crypto_errors();
     sendto_realops_flags(FLAGS_SERVADMIN,
           "Unauthorized server connection attempt from %s: %s",
           get_client_name(client_p, HIDE_IP),
@@ -212,15 +214,15 @@ static void mr_cryptauth(struct Client *client_p, struct Client *source_p,
 
   if (!(client_p->localClient->out_cipher ||
       (client_p->localClient->out_cipher = select_cipher(client_p, aconf))))
-    {
-      cryptlink_error(client_p,
-                "%s[%s]: CRYPTLINK failed - couldn't find compatable cipher");
-      return;
-    }
+  {
+    cryptlink_error(client_p,
+              "%s[%s]: CRYPTLINK failed - couldn't find compatable cipher");
+    return;
+  }
 
   /* set hopcount */
   client_p->hopcount = 1;
-  
+
   SetCryptIn(client_p);
   ClearWaitAuth(client_p);
   server_estab(client_p);
@@ -236,25 +238,25 @@ static void mr_cryptserv(struct Client *client_p, struct Client *source_p,
                          int parc, char *parv[])
 {
   char             info[REALLEN + 1];
-  char             *name;
-  struct Client    *target_p;
-  char             *key = client_p->localClient->out_key;
+  char            *name;
+  struct Client   *target_p;
+  char            *key = client_p->localClient->out_key;
   char            *b64_key;
-  struct ConfItem  *aconf;
+  struct ConfItem *aconf;
   char            *encrypted;
   int              enc_len;
 
   /*
   if (client_p->name[0] != 0)
-   return;
-   */
+  return;
+  */
 
   if ( (name = parse_cryptserv_args(client_p, parv, parc, info, key)) == NULL )
-    {
-      sendto_one(client_p,"ERROR :Invalid parameters");
-      exit_client(client_p, client_p, &me, "Invalid CRYPTSERV command");
-      return;
-    }
+  {
+    sendto_one(client_p,"ERROR :Invalid parameters");
+    exit_client(client_p, client_p, &me, "Invalid CRYPTSERV command");
+    return;
+  }
 
   /* CRYPTSERV support => TS support */
   client_p->tsinfo = TS_DOESTS;
@@ -268,21 +270,21 @@ static void mr_cryptserv(struct Client *client_p, struct Client *source_p,
   /* Now we just have to call check_server and everything should be
    * checked for us... -A1kmm. */
   switch (check_server(name, client_p, CHECK_SERVER_CRYPTLINK))
-    {
-     case -1:
+  {
+    case -1:
       if (ConfigFileEntry.warn_no_nline)
-        {
-         sendto_realops_flags(FLAGS_SERVADMIN,
-           "Unauthorized server connection attempt from %s: No entry for "
-           "servername %s", get_client_name(client_p, HIDE_IP), name);
-         sendto_realops_flags(FLAGS_SERVOPER,
-           "Unauthorized server connection attempt from %s: No entry for "
-           "servername %s", get_client_name(client_p, MASK_IP), name);
-        }
+      {
+        sendto_realops_flags(FLAGS_SERVADMIN,
+          "Unauthorized server connection attempt from %s: No entry for "
+          "servername %s", get_client_name(client_p, HIDE_IP), name);
+        sendto_realops_flags(FLAGS_SERVOPER,
+          "Unauthorized server connection attempt from %s: No entry for "
+          "servername %s", get_client_name(client_p, MASK_IP), name);
+      }
       exit_client(client_p, client_p, client_p, "Invalid servername.");
       return;
       break;
-     case -2:
+    case -2:
       sendto_realops_flags(FLAGS_SERVADMIN,
         "Unauthorized server connection attempt from %s: CRYPTLINK not "
         "enabled for server %s", get_client_name(client_p, HIDE_IP), name);
@@ -292,81 +294,80 @@ static void mr_cryptserv(struct Client *client_p, struct Client *source_p,
       exit_client(client_p, client_p, &me, "CRYPTLINK not enabled.");
       return;
       break;
-     case -3:
+    case -3:
       sendto_realops_flags(FLAGS_SERVADMIN,
         "Unauthorized server connection attempt from %s: Invalid host "
         "for server %s", get_client_name(client_p, HIDE_IP), name);
       sendto_realops_flags(FLAGS_SERVOPER,
         "Unauthorized server connection attempt from %s: Invalid host "
         "for server %s", get_client_name(client_p, MASK_IP), name);
-
       exit_client(client_p, client_p, client_p, "Invalid host.");
       return;
       break;
-    }
+  }
 
   if ((target_p = find_server(name)))
-    {
-      /*
-       * This link is trying feed me a server that I already have
-       * access through another path -- multiple paths not accepted
-       * currently, kill this link immediately!!
-       *
-       * Rather than KILL the link which introduced it, KILL the
-       * youngest of the two links. -avalon
-       *
-       * Definitely don't do that here. This is from an unregistered
-       * connect - A1kmm.
-       */
-      sendto_realops_flags(FLAGS_SERVADMIN,
-         "Attempt to re-introduce server %s from %s", name,
-         get_client_name(client_p, HIDE_IP));
-      sendto_realops_flags(FLAGS_SERVOPER,
-         "Attempt to re-introduce server %s from %s", name,
-         get_client_name(client_p, MASK_IP));
+  {
+    /*
+     * This link is trying feed me a server that I already have
+     * access through another path -- multiple paths not accepted
+     * currently, kill this link immediately!!
+     *
+     * Rather than KILL the link which introduced it, KILL the
+     * youngest of the two links. -avalon
+     *
+     * Definitely don't do that here. This is from an unregistered
+     * connect - A1kmm.
+     */
+    sendto_realops_flags(FLAGS_SERVADMIN,
+      "Attempt to re-introduce server %s from %s", name,
+      get_client_name(client_p, HIDE_IP));
+    sendto_realops_flags(FLAGS_SERVOPER,
+      "Attempt to re-introduce server %s from %s", name,
+      get_client_name(client_p, MASK_IP));
 
-      sendto_one(client_p, "ERROR :Server already exists.");
-      exit_client(client_p, client_p, client_p, "Server Exists");
-      return;
-    }
+    sendto_one(client_p, "ERROR :Server already exists.");
+    exit_client(client_p, client_p, client_p, "Server Exists");
+    return;
+  }
 
-  if(ServerInfo.hub && IsCapable(client_p, CAP_LL))
-    {
+  if (ServerInfo.hub && IsCapable(client_p, CAP_LL))
+  {
       if(IsCapable(client_p, CAP_HUB))
-        {
+      {
           ClearCap(client_p,CAP_LL);
           sendto_realops_flags(FLAGS_ALL,
                "*** LazyLinks to a hub from a hub, thats a no-no.");
-        }
+      }
       else
-        {
+      {
           client_p->localClient->serverMask = nextFreeMask();
 
           if(!client_p->localClient->serverMask)
-            {
+          {
               sendto_realops_flags(FLAGS_ALL,
                                    "serverMask is full!");
               /* try and negotiate a non LL connect */
               ClearCap(client_p,CAP_LL);
-            }
-        }
-    }
+          }
+      }
+  }
   else if (IsCapable(client_p, CAP_LL))
-    {
-      if(!IsCapable(client_p, CAP_HUB))
-        {
-          ClearCap(client_p,CAP_LL);
-          sendto_realops_flags(FLAGS_ALL,
-               "*** LazyLinks to a leaf from a leaf, thats a no-no.");
-        }
-    }
+  {
+      if (!IsCapable(client_p, CAP_HUB))
+      {
+        ClearCap(client_p,CAP_LL);
+        sendto_realops_flags(FLAGS_ALL,
+          "*** LazyLinks to a leaf from a leaf, thats a no-no.");
+      }
+  }
 
   aconf = find_conf_name(&client_p->localClient->confs,
                          name, CONF_SERVER);
   if (!aconf)
   {
     sendto_realops_flags(FLAGS_ALL,
-                 "Lost C-Line for %s", get_client_name(client_p, HIDE_IP));
+      "Lost C-Line for %s", get_client_name(client_p, HIDE_IP));
     exit_client(client_p, client_p, &me, "Lost C-line");
     return;
   }
@@ -381,11 +382,11 @@ static void mr_cryptserv(struct Client *client_p, struct Client *source_p,
 
   if (!(client_p->localClient->out_cipher ||
       (client_p->localClient->out_cipher = select_cipher(client_p, aconf))))
-    {
-      cryptlink_error(client_p,
-                "%s[%s]: CRYPTLINK failed - couldn't find compatable cipher");
-      return;
-    }
+  {
+    cryptlink_error(client_p,
+              "%s[%s]: CRYPTLINK failed - couldn't find compatable cipher");
+    return;
+  }
 
   encrypted = MyMalloc(RSA_size(ServerInfo.rsa_private_key));
 
@@ -396,19 +397,22 @@ static void mr_cryptserv(struct Client *client_p, struct Client *source_p,
                                RSA_PKCS1_PADDING);
 
   if (enc_len <= 0)
-    {
-      MyFree(encrypted);
-      cryptlink_error(client_p,
-                      "%s[%s]: CRYPTLINK failed - couldn't encrypt data");
-      return;
-    }
- 
+  {
+    report_crypto_errors();
+    MyFree(encrypted);
+    cryptlink_error(client_p,
+                    "%s[%s]: CRYPTLINK failed - couldn't encrypt data");
+    return;
+  }
+
   base64_block(&b64_key, encrypted, enc_len);
 
   MyFree(encrypted);
-  
+
   if (!IsWaitAuth(client_p))
+  {
     cryptlink_init(client_p, aconf, -1);
+  }
 
   sendto_one(client_p, "CRYPTAUTH %s %s",
              client_p->localClient->out_cipher->name,
@@ -422,7 +426,7 @@ static void mr_cryptserv(struct Client *client_p, struct Client *source_p,
  * parse_cryptserv_args
  *
  * inputs	- parv parameters
- * 		- parc count
+ *		- parc count
  *		- info string (to be filled in by this routine)
  *		- key (to be filled in by this routine)
  * output	- NULL if invalid params, server name otherwise
@@ -436,10 +440,10 @@ static char *parse_cryptserv_args(struct Client *client_p,
   unsigned char *tmp, *out;
   int len;
   int decoded_len;
-  
+
   info[0] = '\0';
 
-  if (parc < 4 || *parv[3] == '\0')
+  if ( (parc < 4) || (*parv[3] == '\0') )
     return NULL;
 
   name = parv[1];
@@ -456,14 +460,16 @@ static char *parse_cryptserv_args(struct Client *client_p,
 
   out = MyMalloc(RSA_size(ServerInfo.rsa_private_key));
 
+  verify_private_key();
   len = RSA_private_decrypt( decoded_len, tmp, out,
                              ServerInfo.rsa_private_key,
                              RSA_PKCS1_PADDING );
- 
+
   MyFree(tmp);
 
   if ( len < CIPHERKEYLEN )
   {
+    report_crypto_errors();
     sendto_realops_flags(FLAGS_ALL,
           "Invalid CRYPTSERV command from %s: %s",
           get_client_name(client_p, MASK_IP),
@@ -479,7 +485,9 @@ static char *parse_cryptserv_args(struct Client *client_p,
   info[REALLEN] = '\0';
 
   if (strlen(name) > HOSTLEN)
+  {
     name[HOSTLEN] = '\0';
+  }
 
   return(name);
 }
@@ -494,21 +502,23 @@ static char *parse_cryptserv_args(struct Client *client_p,
 static int bogus_host(char *host)
 {
   int bogus_server = 0;
-  char *s;
   int dots = 0;
+  char *s;
 
-  for( s = host; *s; s++ )
+  for (s = host; *s; s++ )
+  {
+    if (!IsServChar(*s))
     {
-      if (!IsServChar(*s))
-	{
-	  bogus_server = 1;
-	  break;
-	}
-      if ('.' == *s)
-	++dots;
+      bogus_server = 1;
+      break;
     }
+    if ('.' == *s)
+    {
+      ++dots;
+    }
+  }
 
-  if (!dots || bogus_server )
+  if ( (!dots) || (bogus_server) )
     return 1;
 
   return 0;

@@ -67,21 +67,22 @@ struct ConfItem
   struct irc_inaddr ipnum;
   unsigned int     ip;       /* only used for I D lines etc. */
   unsigned int     ip_mask;
-  char*            name;     /* IRC name, nick, server name, or original u@h */
-  char*            host;     /* host part of user@host */
-  char*            passwd;
-  char*            spasswd;  /* Password to send. */
-  char*            user;     /* user part of user@host */
+  char *           name;     /* IRC name, nick, server name, or original u@h */
+  char *           host;     /* host part of user@host */
+  char *           passwd;
+  char *           spasswd;  /* Password to send. */
+  char *           user;     /* user part of user@host */
   int              port;
-  char*		   fakename;   /* Mask name */
+  char *           fakename;   /* Mask name */
   time_t           hold;     /* Hold action until this time (calendar time) */
-  char*		   className;   /* Name of class */
-  struct Class*    c_class;     /* Class of connection */
-  struct DNSQuery  *dns_query;
-  int		   aftype;
+  char *           className;   /* Name of class */
+  struct Class *   c_class;     /* Class of connection */
+  struct DNSQuery* dns_query;
+  int              aftype;
   int              dns_pending; /* 1 if dns query pending, 0 otherwise */
 #ifdef HAVE_LIBCRYPTO
-  RSA*             rsa_public_key;
+  RSA *            rsa_public_key;
+  char *           rsa_private_key_filename;
   struct EncPreference *cipher_preference;
 #endif
 };

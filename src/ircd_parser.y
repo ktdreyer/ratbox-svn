@@ -487,6 +487,13 @@ serverinfo_rsa_private_key: RSA_PRIVATE_KEY '=' QSTRING ';'
     ServerInfo.rsa_private_key = NULL;
   }
 
+  if (ServerInfo.rsa_private_key_filename)
+  {
+    free(ServerInfo.rsa_private_key_filename);
+  }
+
+  ServerInfo.rsa_private_key_filename = strdup(yylval.string);
+
   file = BIO_new_file( yylval.string, "r" );
 
   if (!file)

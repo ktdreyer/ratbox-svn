@@ -28,6 +28,7 @@
 #include "memory.h"
 #include "rsa.h"
 #include "s_conf.h"
+#include "s_log.h"
 #include "client.h" /* CIPHERKEYLEN .. eww */
 
 #ifdef HAVE_LIBCRYPTO
@@ -38,9 +39,97 @@
 #include <openssl/bn.h>
 #include <openssl/evp.h>
 
+static void report_crypto_errors(void);
+static void verify_private_key(void);
 static void binary_to_hex( unsigned char * bin, char * hex, int length );
 static int absorb( char ** str, char lowest, char highest );
 static RSA * str_to_RSApublic( char * key );
+
+/*
+ * report_crypto_errors - Dump crypto error list to log
+ */
+static void report_crypto_errors(void)
+{
+  unsigned long e = 0;
+  unsigned long cnt = 0;
+
+  ERR_load_crypto_strings();
+  while ( (cnt < 100) && (e = ERR_get_error()) )
+  {
+    ilog(L_CRIT, "SSL error: %s", ERR_error_string(e, 0));
+    cnt++;
+  }
+};
+
+/*
+ * verify_private_key - reread private key and verify against inmem key
+ */
+static void verify_private_key(void)
+{
+  BIO * file;
+  RSA * key = 0, *mkey = 0;
+
+  if (!ServerInfo.rsa_private_key)
+  {
+    return;
+  }
+
+  if (!ServerInfo.rsa_private_key_filename)
+  {
+    ilog(L_NOTICE, "Don't know private key filename - can't validate it");
+    return;
+  }
+
+  file = BIO_new_file(ServerInfo.rsa_private_key_filename, "r");
+
+  if (!file)
+  {
+    ilog(L_NOTICE, "Failed to open private key file - can't validate it");
+    return;
+  }
+
+  PEM_read_bio_RSAPrivateKey( file, &key, NULL, NULL );
+
+  BIO_set_close(file, BIO_CLOSE);
+  BIO_free(file);
+
+  if (!key)
+  {
+    ilog(L_NOTICE, "Failed to read private key file - can't validate it");
+    report_crypto_errors();
+    return;
+  }
+
+  mkey = ServerInfo.rsa_private_key;
+
+  if (mkey->pad != key->pad)
+    ilog(L_CRIT, "Private key corrupted: pad %i != pad %i",
+                 mkey->pad, key->pad);
+
+  if (mkey->version != key->version)
+    ilog(L_CRIT, "Private key corrupted: version %i != version %i",
+                  mkey->version, key->version);
+
+  if (BN_cmp(mkey->n, key->n))
+    ilog(L_CRIT, "Private key corrupted: n differs");
+  if (BN_cmp(mkey->e, key->e))
+    ilog(L_CRIT, "Private key corrupted: e differs");
+  if (BN_cmp(mkey->d, key->d))
+    ilog(L_CRIT, "Private key corrupted: d differs");
+  if (BN_cmp(mkey->p, key->p))
+    ilog(L_CRIT, "Private key corrupted: p differs");
+  if (BN_cmp(mkey->q, key->q))
+    ilog(L_CRIT, "Private key corrupted: q differs");
+  if (BN_cmp(mkey->dmp1, key->dmp1))
+    ilog(L_CRIT, "Private key corrupted: dmp1 differs");
+  if (BN_cmp(mkey->dmq1, key->dmq1))
+    ilog(L_CRIT, "Private key corrupted: dmq1 differs");
+  if (BN_cmp(mkey->iqmp, key->iqmp))
+    ilog(L_CRIT, "Private key corrupted: iqmp differs");
+
+  RSA_free(key);
+}
+
 
 static void binary_to_hex( unsigned char * bin, char * hex, int length )
 {
@@ -127,25 +216,33 @@ int generate_challenge( char ** r_challenge, char ** r_response, char * key )
   RSA *rsa;
   DupString(nkey, key);
   if (!(rsa = str_to_RSApublic(nkey)))
-    {
-     *r_challenge = NULL;
-     *r_response = NULL;
-     MyFree(nkey);
-     return -1;
-    }
+  {
+    *r_challenge = NULL;
+    *r_response = NULL;
+    MyFree(nkey);
+    return -1;
+  }
   MyFree(nkey);
+
   get_randomness(secret, 32);
   *r_response = MyMalloc(65);
   binary_to_hex(secret, *r_response, 32);
+
   length = RSA_size(rsa);
   tmp = MyMalloc(length);
-  ret = RSA_public_encrypt(32, secret, tmp, rsa,
-                           RSA_PKCS1_PADDING);
+  ret = RSA_public_encrypt(32, secret, tmp, rsa, RSA_PKCS1_PADDING);
+
   *r_challenge = MyMalloc( (length << 1) + 1 );
   binary_to_hex( tmp, *r_challenge, length );
   (*r_challenge)[length<<1] = 0;
   MyFree(tmp);
-  return (ret<0)?-1:0;
+
+  if (ret < 0)
+  {
+    report_crypto_errors();
+    return(-1);
+  }
+  return(0);
 }
 
 #endif /* HAVE_LIBCRYPTO */
