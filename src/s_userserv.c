@@ -225,6 +225,8 @@ logout_user_reg(struct user_reg *ureg_p)
 	{
 		target_p = ptr->data;
 
+		sendto_server(":%s ENCAP * SU %s", MYNAME, target_p->name);
+
 		target_p->user->user_reg = NULL;
 		dlink_destroy(ptr, &ureg_p->users);
 	}
@@ -241,9 +243,12 @@ h_user_burst_login(void *v_client_p, void *v_username)
 	if(IsEOB(client_p->uplink))
 		return 0;
 
-	/* XXX - log them out? */
+	/* nickname that isnt actually registered.. log them out */
 	if((ureg_p = find_user_reg(NULL, username)) == NULL)
+	{
+		sendto_server(":%s ENCAP * SU %s", MYNAME, client_p->name);
 		return 0;
+	}
 
 	/* already logged in.. hmm, this shouldnt really happen */
 	if(client_p->user->user_reg)
@@ -698,6 +703,9 @@ s_user_register(struct client *client_p, char *parv[], int parc)
 			EmptyString(reg_p->email) ? "" : reg_p->email, 
 			reg_p->reg_time, reg_p->last_time, reg_p->flags);
 
+	sendto_server(":%s ENCAP * SU %s %s", 
+			MYNAME, client_p->name, reg_p->name);
+
 	service_error(userserv_p, client_p, "Username %s registered", parv[0]);
 
 	return 5;
@@ -745,9 +753,8 @@ s_user_login(struct client *client_p, char *parv[], int parc)
 				client_p->user->mask, reg_p->name);
 	}
 
-	if(ConnCapService(server_p))
-		sendto_server(":%s ENCAP * SU %s %s",
-				MYNAME, client_p->name, reg_p->name);
+	sendto_server(":%s ENCAP * SU %s %s",
+			MYNAME, client_p->name, reg_p->name);
 
 	client_p->user->user_reg = reg_p;
 	reg_p->last_time = CURRENT_TIME;
@@ -764,8 +771,7 @@ s_user_logout(struct client *client_p, char *parv[], int parc)
 	client_p->user->user_reg = NULL;
 	service_error(userserv_p, client_p, "Logout successful");
 
-	if(ConnCapService(server_p))
-		sendto_server(":%s ENCAP * SU %s", MYNAME, client_p->name);
+	sendto_server(":%s ENCAP * SU %s", MYNAME, client_p->name);
 
 	return 1;
 }
