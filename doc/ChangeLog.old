@@ -1,3 +1,8 @@
+*** 20000105_14 by db
+- removed more pesky #ifdef HUB hidden in .h files
+
+
+
 *** 20000105_13 by db
 - always initialize serverMask
 
