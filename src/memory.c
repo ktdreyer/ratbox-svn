@@ -171,11 +171,9 @@ log_memory(void)
 void*
 _MyMalloc(size_t size)
 {
-  void* ret = malloc(size);
+  void *ret = calloc(1, size);
   if (ret == NULL)
     outofmemory();
-  else
-    memset(ret, 0, size);
   return ret;
 }
 
