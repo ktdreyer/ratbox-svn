@@ -1,3 +1,15 @@
+androsyn    2003/01/20 20:28:19 UTC	(20030120_5)
+
+  Modified files:
+    src                  ircd.c 
+  Log:
+  remove iplines.h
+  
+  Revision  Changes    Path
+  7.275     +0 -1      ircd-ratbox/src/ircd.c
+
+
+
 androsyn    2003/01/20 19:41:45 UTC	(20030120_4)
 
   Modified files:
