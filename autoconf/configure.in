@@ -11,6 +11,10 @@ VERSION=7.0
 AC_SUBST(PACKAGE)
 AC_SUBST(VERSION)
 
+if test "x$CFLAGS" = "x"; then
+	CFLAGS="-g -O2 -Wunused -Wall -ggdb -pedantic -Wshadow -Wmissing-declarations"
+fi
+
 dnl Checks for programs.
 AC_PROG_CC
 AC_ISC_POSIX
