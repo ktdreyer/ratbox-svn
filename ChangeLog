@@ -1,3 +1,16 @@
+androsyn    2003/12/19 10:20:57 EST	(20031219_0)
+
+  Modified files:
+    src                  s_user.c 
+  Log:
+  When passing UID commands, if a user has an IP address of ::1, we need to
+  prefix a 0 to it, otherwise it'll break things
+  
+  Revision  Changes    Path
+  7.298     +10 -1     ircd-ratbox/src/s_user.c
+
+
+
 leeh        2003/12/01 17:48:50 EST	(20031201_0)
 
   Modified files:
