@@ -30,8 +30,6 @@
 #include "s_conf.h"
 #include "y.tab.h"
 
-/* int yylineno=1; */
-
 #undef YY_INPUT
 #define YY_FATAL_ERROR(msg) conf_yy_fatal_error( msg )
 #define YY_INPUT(buf,result,max_size) \
@@ -74,7 +72,7 @@ description	{ return DESCRIPTION; }
 administrator	{ return ADMIN; }
 admin		{ return ADMIN; }
 class		{ return CLASS; }
-client		{ return CLIENT; }
+auth		{ return AUTH; }
 operator	{ return OPERATOR; }
 global		{ return GLOBAL; }
 oper		{ return OPERATOR; }
@@ -115,7 +113,6 @@ password	{ return PASSWORD; }
 passwd		{ return PASSWORD; }
 kline_exempt	{ return KLINE_EXEMPT; }
 allow_bots	{ return ALLOW_BOTS; }
-allow		{ return ALLOW; }
 no_tilde	{ return NO_TILDE; }
 have_ident	{ return HAVE_IDENT; }
 reason		{ return REASON; }

@@ -54,6 +54,7 @@
 
 
 extern ConfigFileEntryType ConfigFileEntry; /* defined in ircd.c */
+extern int yylineno;
 
 #ifndef INADDR_NONE
 #define INADDR_NONE ((unsigned int) 0xffffffff)
@@ -81,6 +82,7 @@ FBFILE* conf_fbfile_in;
 char    conf_line_in[256];
 struct ConfItem* yy_aconf;
 extern char yytext[];
+int yylineno;
 
 /* address of class 0 conf */
 static struct   Class* class0;
@@ -1754,7 +1756,7 @@ static void initconf(FBFILE* file)
 
   ccount = ncount = 0;
 
-  class0 = find_class("0");       /* which one is class 0 ? */
+  class0 = find_class("default");       /* which one is the default class ? */
   aconf = NULL;
 
   while (fbgets(line, sizeof(line), file))
@@ -1839,6 +1841,7 @@ static void initconf(FBFILE* file)
 static void initnewconf(FBFILE* file)
 {
   yy_aconf = NULL;
+  yylineno = 0;
   yyparse(); /* wheee! */
   fbclose(file);
 }
@@ -1863,7 +1866,7 @@ void conf_add_conf(struct ConfItem *aconf)
 	 aconf->port,
 	 aconf->c_class ? ConfClassType(aconf): 0 ));
   aconf->next = ConfigItemList;
-  ConfigItemList = aconf;
+   ConfigItemList = aconf;
 }
 
 /*
@@ -2688,7 +2691,7 @@ void get_printable_conf(struct ConfItem *aconf, char **name, char **host,
                            char **pass, char **user,int *port,char **classname)
 {
   static  char        null[] = "<NULL>";
-  static  char        zero[] = "0";
+  static  char        zero[] = "default";
 
   *name = BadPtr(aconf->name) ? null : aconf->name;
   *host = BadPtr(aconf->host) ? null : aconf->host;
@@ -3121,7 +3124,7 @@ void conf_add_class_to_conf(struct ConfItem *aconf)
   if(!aconf->className)
     {
       sendto_realops("Warning *** Missing class field");
-      DupString(aconf->className,"0");
+      DupString(aconf->className,"default");
       ClassPtr(aconf) = class0;
       return;
     }
@@ -3130,10 +3133,10 @@ void conf_add_class_to_conf(struct ConfItem *aconf)
 
   if(ClassPtr(aconf) == class0)
     {
-      sendto_realops("Warning *** Defaulting to class 0 for missing class \"%s\"",
+      sendto_realops("Warning *** Defaulting to default class for missing class \"%s\"",
 	     aconf->className);
       MyFree(aconf->className);
-      DupString(aconf->className,"0");
+      DupString(aconf->className,"default");
       return;
     }
 
@@ -3141,23 +3144,21 @@ void conf_add_class_to_conf(struct ConfItem *aconf)
     {
       ClassPtr(aconf) = find_class(0);
       MyFree(aconf->className);
-      DupString(aconf->className,"0");
+      DupString(aconf->className,"default");
       return;
     }
 }
 
 /*
- * conf_add_i_line
+ * conf_delist_old_conf
  * inputs       - pointer to config item
  * output       - NONE
- * side effects - Add an I line
+ * side effects - delist old conf (if present)
  */
 
-void conf_add_i_line(struct ConfItem *aconf)
+void conf_delist_old_conf(struct ConfItem *aconf)
 {
   struct ConfItem *bconf;
-
-  conf_add_class_to_conf(aconf);
 
   if ((bconf = find_conf_entry(aconf, aconf->status)))
     {
@@ -3180,6 +3181,19 @@ void conf_add_i_line(struct ConfItem *aconf)
       free_conf(aconf);
       aconf = bconf;
     }
+}
+
+/*
+ * conf_add_i_line
+ * inputs       - pointer to config item
+ * output       - NONE
+ * side effects - Add an I line
+ */
+
+void conf_add_i_line(struct ConfItem *aconf)
+{
+  conf_add_class_to_conf(aconf);
+  conf_delist_old_conf(aconf);
 
   if (aconf->host)
     {
@@ -3539,7 +3553,7 @@ void conf_add_fields(struct ConfItem *aconf,
 
 void yyerror(char *msg)
 {
-  sendto_realops("Parser error %s %s", msg, yytext);
+  sendto_realops("Parser error %s %s line %d", msg, yytext, yylineno);
 }
 
 int conf_fbgets(char *buf,int max_size, FBFILE *fb)

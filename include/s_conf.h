@@ -24,6 +24,10 @@
  * $Id$
  *
  * $Log$
+ * Revision 7.12  2000/01/23 04:53:36  db
+ * - more cleanup on new conf file parser..
+ *   using "auth" instead of "client" as per Kev's document..
+ *
  * Revision 7.11  2000/01/21 04:21:32  db
  * - CONNECT in new parser works, needs full testing
  *
@@ -492,6 +496,7 @@ extern struct ConfItem* conf_add_server(struct ConfItem *,int ,int );
 extern struct ConfItem* conf_add_o_line(struct ConfItem *);
 extern void conf_add_port(struct ConfItem *);
 extern void conf_add_class_to_conf(struct ConfItem *);
+extern void conf_delist_old_conf(struct ConfItem *);
 extern void conf_add_i_line(struct ConfItem *);
 extern void conf_add_me(struct ConfItem *);
 extern void conf_add_hub_or_leaf(struct ConfItem *);

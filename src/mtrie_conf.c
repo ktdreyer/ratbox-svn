@@ -1350,7 +1350,8 @@ void report_mtrie_conf_links(struct Client *sptr, int flags)
              IsConfDoSpoofIp(found_conf))
             continue;
 
-          get_printable_conf(found_conf, &name, &host, &pass, &user, &port, &classname );
+          get_printable_conf(found_conf, &name, &host, &pass, &user, &port,
+			     &classname );
 
           c = 'I';
 #ifdef LITTLE_I_LINES

@@ -208,7 +208,7 @@ void    initclass()
   ClassList = (struct Class *)make_class();
 
   ClassType(ClassList) = 0;
-  DupString(ClassName(ClassList),"0");
+  DupString(ClassName(ClassList),"default");
   ConFreq(ClassList) = CONNECTFREQUENCY;
   PingFreq(ClassList) = PINGFREQUENCY;
   MaxLinks(ClassList) = MAXIMUM_LINKS;
