@@ -102,10 +102,9 @@ static void mo_forcejoin(struct Client *client_p, struct Client *source_p,
     
     if((chptr = hash_find_channel(parv[2])))
     {
-      sendto_one(target_p, ":%s!%s@%s JOIN :%s",
-                 target_p->name, target_p->username, target_p->host,
-	         chptr->chname);
-      
+      if(IsMember(target_p, chptr))
+	return;
+
       add_user_to_channel(chptr, target_p, type);
       sendto_server(target_p, target_p, chptr, NOCAPS, NOCAPS, LL_ICLIENT,
 	            ":%s SJOIN %lu %s + :%c%s",
@@ -142,11 +141,8 @@ static void mo_forcepart(struct Client *client_p, struct Client *source_p,
 
   if((target_p = find_client(parv[1])) && MyClient(target_p))
   {
-    if((chptr = hash_find_channel(parv[2])))
+    if((chptr = hash_find_channel(parv[2])) && IsMember(target_p, chptr))
     {
-      sendto_one(target_p, ":%s!%s@%s PART %s",
-                 target_p->name, target_p->username, target_p->host,
-   	         chptr->chname);
       sendto_server(target_p, target_p, chptr, NOCAPS, NOCAPS, LL_ICLIENT,
 		    ":%s PART %s :%s",
 		    target_p->name, chptr->chname,
