@@ -178,7 +178,7 @@ u_login(struct connection_entry *conn_p, char *parv[], int parc)
         if(ConfOperEncrypted(oper_p))
                 crpass = crypt(parv[2], oper_p->pass);
         else
-                crpass = oper_p->pass;
+                crpass = parv[2];
 
         if(strcmp(oper_p->pass, crpass))
         {
@@ -265,7 +265,7 @@ u_die(struct connection_entry *conn_p, char *parv[], int parc)
 
         sendto_all(0, "Services terminated by %s", conn_p->name);
         slog("ratbox-services terminated by %s", conn_p->name);
-        exit(0);
+        die("Services terminated");
 }
 
 static void

@@ -52,6 +52,7 @@ struct user
 	time_t tsinfo;
 
 	struct user_reg *user_reg;
+	struct conf_oper *oper;
 
 	dlink_list channels;
 

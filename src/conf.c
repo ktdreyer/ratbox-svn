@@ -193,7 +193,7 @@ find_conf_oper(const char *username, const char *host, const char *server)
 
                 if(match(oper_p->username, username) &&
                    match(oper_p->host, host) &&
-		   match(oper_p->server, server))
+		   (EmptyString(oper_p->server) || match(oper_p->server, server)))
                         return oper_p;
         }
 

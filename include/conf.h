@@ -80,7 +80,9 @@ struct conf_oper
 #define CONF_OPER_SADMIN	0x0200
 
 #define OperAdmin(x)	((x)->privs & CONF_OPER_ADMIN)
+#define CliOperAdmin(x)	((x)->user->oper && (x)->user->oper->flags & CONF_OPER_ADMIN)
 #define OperSAdminx(x)	((x)->privs & CONF_OPER_SADMIN)
+
 
 #define CONF_SERVER_AUTOCONN	0x0001
 

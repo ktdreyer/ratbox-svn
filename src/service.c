@@ -17,6 +17,7 @@
 #include "ucommand.h"
 #include "cache.h"
 #include "channel.h"
+#include "crypt.h"
 
 dlink_list service_list;
 
@@ -258,9 +259,8 @@ handle_service(struct client *service_p, struct client *client_p, char *text)
 
         if(service_p->service->flood > service_p->service->flood_max)
         {
-                sendto_server(":%s NOTICE %s :Temporarily unable to answer "
-                              "query. Please try again shortly.",
-                              MYNAME, client_p->name);
+		service_error(service_p, client_p, 
+			"Temporarily unable to answer query. Please try again shortly.");
                 service_p->service->flood++;
                 service_p->service->paced_count++;
                 return;
@@ -269,11 +269,13 @@ handle_service(struct client *service_p, struct client *client_p, char *text)
         if((p = strchr(text, ' ')) != NULL)
                 *p++ = '\0';
 
+        parc = string_to_array(p, parv);
+
         if(!strcasecmp(text, "HELP"))
         {
                 service_p->service->flood++;
 
-                if(EmptyString(p))
+                if(parc < 1 || EmptyString(parv[0]))
                 {
                         char buf[BUFSIZE];
 
@@ -290,16 +292,13 @@ handle_service(struct client *service_p, struct client *client_p, char *text)
 
 			if(buf[0] != '\0')
 			{
-	                        sendto_server(":%s NOTICE %s :%s Help Index.  Use "
-        	                              "HELP <command> for more information.",
-                	                      MYNAME, client_p->name,
-                        	              service_p->name);
-	                        sendto_server(":%s NOTICE %s :Topics: %s",
-        	                              MYNAME, client_p->name, buf);
+				service_error(service_p, client_p, "%s Help Index. "
+						"Use HELP <command> for more information",
+						service_p->name);
+				service_error(service_p, client_p, "Topics: %s", buf);
 			}
 			else
-				sendto_server(":%s NOTICE %s :No help is available for this service.",
-						MYNAME, client_p->name);
+				service_error(service_p, client_p, "No help is available for this service.");
 
                         service_p->service->help_count++;
                         return;
@@ -307,7 +306,7 @@ handle_service(struct client *service_p, struct client *client_p, char *text)
 
                 for(i = 0; cmd_table[i].cmd[0] != '\0'; i++)
                 {
-                        if(!strcasecmp(p, cmd_table[i].cmd))
+                        if(!strcasecmp(parv[0], cmd_table[i].cmd))
                         {
                                 struct cachefile *fileptr;
                                 struct cacheline *lineptr;
@@ -344,8 +343,69 @@ handle_service(struct client *service_p, struct client *client_p, char *text)
                               MYNAME, client_p->name, p);
                 return;
         }
+	else if(!strcasecmp(text, "LOGIN"))
+	{
+		struct conf_oper *oper_p;
+		char *crpass;
 
-        parc = string_to_array(p, parv);
+		if(client_p->user->oper)
+		{
+			service_error(service_p, client_p, "You are already logged in");
+			return;
+		}
+
+		if(parc < 2)
+		{
+			service_error(service_p, client_p, "Insufficient parameters to %s::LOGIN",
+					service_p->name);
+			service_p->service->flood++;
+			return;
+		}
+
+		if((oper_p = find_conf_oper(client_p->user->username, client_p->user->host,
+						client_p->user->servername)) == NULL)
+		{
+			service_error(service_p, client_p, "No access to %s::LOGIN",
+					service_p->name);
+			service_p->service->flood++;
+			return;
+		}
+
+		if(ConfOperEncrypted(oper_p))
+			crpass = crypt(parv[1], oper_p->pass);
+		else
+			crpass = parv[1];
+
+		if(strcmp(crpass, oper_p->pass))
+		{
+			service_error(service_p, client_p, "Invalid password");
+			return;
+		}
+
+		sendto_all(UMODE_AUTH, "%s (%s) has logged in [IRC]",
+				client_p->name, oper_p->name);
+		service_error(service_p, client_p, "Login successful");
+
+		client_p->user->oper = oper_p;
+		oper_p->refcount++;
+		return;
+	}
+	else if(!strcasecmp(text, "LOGOUT"))
+	{
+		if(client_p->user->oper == NULL)
+		{
+			service_error(service_p, client_p, "You are not logged in");
+			service_p->service->flood++;
+			return;
+		}
+
+		deallocate_conf_oper(client_p->user->oper);
+		client_p->user->oper = NULL;
+
+		service_error(service_p, client_p, "Logout successful");
+		return;
+	}
+
 
         for(i = 0; cmd_table[i].cmd[0] != '\0'; i++)
         {
