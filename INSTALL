@@ -2,7 +2,7 @@
 
    $Id$
 
-   Copyright (c) 2001-2002 by ircd-hybrid team
+   Copyright (c) 2001 by ircd-hybrid team
 
      ----------------------------------------------------------------------
 
@@ -92,31 +92,34 @@
             should be used on all production servers for maximum speed and to
             prevent cores from things that shouldn't normally happen.
 
-          *
-            --enable-small-net - Tunes the server for smaller networks. 
-            Reduces startup memory footprint.  This should really only
-            be used for *small* networks, as this tends to be a performance
-            hit on larger networks.
+          * 
+
+            --enable-small-net - Tunes the server for smaller networks by
+            reducing the startup memory footprint. This should really only be
+            used for *small* networks, as this tends to be a performance hit
+            on larger networks.
 
           * 
-            --with-nicklen - Sets the maximum NICK length.  Note that this
-            should be consistant across your entire network.
 
-          *
-            --with-maxclients - Sets the maximum number of clients support
-            by the server. Note that this also twiddles the HARD_FDLIMIT_
+            --with-nicklen - Sets the maximum NICK length. Note that this
+            must be consistant across your entire network.
+
+          * 
+
+            --with-maxclients - Sets the maximum number of clients support by
+            the server. Note that this also twiddles the HARD_FDLIMIT_ define
             so it is no longer necessary to modify include/config.h for this.
             If HARD_FDLIMIT_ ends up being larger that FD_SETSIZE when using
-            select() for your I/O loop, s_bsd_select.c will refuse to 
-            compile(and tell you to use poll instead).  Take this errors
-            advice and use --enable-poll or something a bit more efficient.
-            You'll be happier at the end of the day for it.
+            select() for your I/O loop, s_bsd_select.c will refuse to compile
+            (and tell you to use poll instead). Take this error's advice and
+            use --enable-poll or something a bit more efficient. You'll be
+            happier at the end of the day for it.
 
    3. 
 
        Look over the "include/config.h" file. This allows you to change the
        few remaining hard coded options of how the ircd will operate. Most
-       admins will only have to change a few settings. USE_SYSLOG is the 
+       admins will only have to change a few settings. USE_SYSLOG is the only
        one that most admins will need to edit.
 
          Note: Note that you must have permission by the sysadmin to send
