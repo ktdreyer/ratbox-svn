@@ -138,9 +138,6 @@ struct Client
   struct Client*    lnext;      /* Used for Server->servers/users */
   struct Client*    lprev;      /* Used for Server->servers/users */
 
-  struct Client*    servnext;   /* GlobalServerList */
-  struct Client*    servprev;   /* GlobalServerList */
-
   struct User*      user;       /* ...defined, if this is a User */
   struct Server*    serv;       /* ...defined, if this is a server */
   struct Client*    servptr;    /* Points to server this Client is on */
