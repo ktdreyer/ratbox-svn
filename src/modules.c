@@ -182,6 +182,7 @@ load_one_module (char *path)
   void *tmpptr;
   char *mod_basename, *s;
   void (*initfunc)(void) = NULL;
+  char **verp;
   char *ver;
 
   mod_basename = basename(path);
@@ -209,8 +210,10 @@ load_one_module (char *path)
       return -1;
     }
 
-  if (!(ver = (char *)dlsym (tmpptr, "_version")))
+  if (!(verp = (char **)dlsym (tmpptr, "_version")))
     ver = unknown_ver;
+  else
+    ver = *verp;
 
   increase_modlist();
 
