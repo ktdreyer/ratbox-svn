@@ -17,8 +17,6 @@ fi
 
 generation=`expr $generation + 1`
 
-uname=`uname -a`
-
 creation=`date | \
 awk '{if (NF == 6) \
          { print $1 " "  $2 " " $3 " "  $6 " at " $4 " " $5 } \
@@ -54,7 +52,6 @@ $spitshell >version.c <<!SUB!THIS!
 
 const char *generation = "$generation";
 const char *creation = "$creation";
-const char *platform = "$uname";
 const char *ircd_version = PATCHLEVEL;
 const char *serno = SERIALNUM;
 
