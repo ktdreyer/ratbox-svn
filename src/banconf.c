@@ -54,11 +54,13 @@ getfields(char *line)
 	char *p = line;
 	int i;
 
-	for(i = 0; i < MAX_CONF_FIELDS && p; i++)
+	for(i = 0; i < MAX_CONF_FIELDS && !EmptyString(line); i++)
 	{
 		s = line;
 
-		/* we need to loop until we find a non-escaped ',' */
+		/* we need to loop until we find a non-escaped ',' or if the
+		 * field is quoted, one that has a quote to the left of it
+		 */
 		while(1)
 		{
 			if((p = strchr(s, ',')))
@@ -71,6 +73,12 @@ getfields(char *line)
 
 				if(*line == '"')
 				{
+					if(*(p - 1) != '"')
+					{
+						s = p + 1;
+						continue;
+					}
+
 					line++;
 
 					if(*(p - 1) == '"')
