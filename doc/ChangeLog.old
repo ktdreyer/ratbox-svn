@@ -1,3 +1,8 @@
+*** 20010105_12 by db
+- removed obsolete Qline struct
+
+
+
 *** 20010105_11 by db
 - fixed m_jupe.c so it will work without coring.
 
