@@ -1,3 +1,6 @@
+*** 20001228_31 by davidt
+.collapse the signs for chanop-only modes..
+
 *** 20001228_30 by wcampbel
 Added o_lines_oper_only option to the configuration file
 
