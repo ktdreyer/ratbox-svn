@@ -1,3 +1,9 @@
+*** 20001015_4 by db
+- the m_mode changes needed
+  this allows you to mode +o etc. on sub chans. wheeeeeee
+
+
+
 *** 20001015_3 by db
 - m_names now recognizes vchan names
 
