@@ -198,10 +198,11 @@ int     m_cjoin(struct Client *cptr,
       return 0;
     }
 
-  vchan_chptr->vchan_flag = YES;
-
-  vchan_chptr->next_vchan = chptr->next_vchan;
-  chptr->next_vchan->prev_vchan = vchan_chptr;
+  if (chptr->next_vchan)
+    {
+      vchan_chptr->next_vchan = chptr->next_vchan;
+      chptr->next_vchan->prev_vchan = vchan_chptr;
+    }
 
   chptr->next_vchan = vchan_chptr;
   vchan_chptr->prev_vchan = chptr;
@@ -214,9 +215,11 @@ int     m_cjoin(struct Client *cptr,
   
   /*
   **  Set timestamp
+  **  XXXXX and chan_id..
   */
   
   vchan_chptr->channelts = CurrentTime;
+  strncpy_irc(vchan_chptr->chan_id, parv[0], NICKLEN);
   sendto_match_servs(vchan_chptr, cptr,
 		     ":%s SJOIN %lu %s + :@%s", me.name,
 		     vchan_chptr->channelts, vchan_chptr->chname, parv[0]);

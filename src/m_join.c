@@ -97,6 +97,8 @@
  *                      non-NULL pointers.
  */
 
+static void show_vchans(struct Client *, struct Client *, struct Channel *);
+static struct Channel* find_vchan(struct Channel *, char *);
 
 /*
 ** m_join
@@ -112,6 +114,7 @@ int     m_join(struct Client *cptr,
   static char   jbuf[BUFSIZE];
   struct SLink  *lp;
   struct Channel *chptr = NULL;
+  struct Channel *vchan_chptr = NULL;
   char  *name, *key = NULL;
   int   i, flags = 0;
 #ifdef NO_CHANOPS_WHEN_SPLIT
@@ -290,7 +293,30 @@ int     m_join(struct Client *cptr,
           /* To save a redundant hash table lookup later on */
            
            if((chptr = hash_find_channel(name, NullChn)))
-             flags = 0;
+             {
+               /* there's subchans so check those */
+               if (chptr->next_vchan)
+                 {
+                   if (key && key[0] == '!')
+                     {
+                       /* found a matching vchan? let them join it */
+                       if ((vchan_chptr = find_vchan(chptr, key)))
+                         chptr = vchan_chptr;
+                       else
+                         {
+                           sendto_one(sptr, form_str(ERR_NOSUCHCHANNEL),
+                                      me.name, parv[0], name);
+                           return 0;
+                         }
+                     }
+                   else
+                     {
+                       show_vchans(cptr, sptr, chptr);
+                       return 0;
+                     }
+                 }
+               flags = 0;
+             }
            else
              {
                flags = CHFL_CHANOP;
@@ -408,7 +434,8 @@ int     m_join(struct Client *cptr,
         }
       else
         {
-          sendto_one(sptr, me.name, parv[0], name);     
+          sendto_one(sptr, form_str(ERR_UNAVAILRESOURCE),
+                     me.name, parv[0], name);
 #ifdef ANTI_SPAMBOT
           if(successful_join_count > 0)
             successful_join_count--;
@@ -451,10 +478,12 @@ int     m_join(struct Client *cptr,
 #endif
       /*
       **  Set timestamp if appropriate, and propagate
+      **  XXX and set the chan_id to the nick getting ops
       */
       if (MyClient(sptr) && (flags & CHFL_CHANOP) )
         {
           chptr->channelts = CurrentTime;
+          strncpy_irc(chptr->chan_id, parv[0], NICKLEN);
 #ifdef NO_CHANOPS_WHEN_SPLIT
           if(allow_op)
             {
@@ -875,10 +904,12 @@ int     ms_join(struct Client *cptr,
 #endif
       /*
       **  Set timestamp if appropriate, and propagate
+      **  XXX and set chan_id to nickname getting ops for now
       */
       if (MyClient(sptr) && (flags & CHFL_CHANOP) )
         {
           chptr->channelts = CurrentTime;
+          strncpy_irc(chptr->chan_id, parv[0], NICKLEN);
 #ifdef NO_CHANOPS_WHEN_SPLIT
           if(allow_op)
             {
@@ -961,6 +992,7 @@ int     mo_join(struct Client *cptr,
   static char   jbuf[BUFSIZE];
   struct SLink  *lp;
   struct Channel *chptr = NULL;
+  struct Channel *vchan_chptr = NULL;
   char  *name, *key = NULL;
   int   i, flags = 0;
   char  *p = NULL, *p2 = NULL;
@@ -1052,7 +1084,30 @@ int     mo_join(struct Client *cptr,
           /* To save a redundant hash table lookup later on */
            
            if((chptr = hash_find_channel(name, NullChn)))
-             flags = 0;
+             {
+               /* there's subchans so check those */
+               if (chptr->next_vchan)
+                 {
+                   if (key && key[0] == '!')
+                     {
+                       /* found a matching vchan? let them join it */
+                       if ((vchan_chptr = find_vchan(chptr, key)))
+                         chptr = vchan_chptr;
+                       else
+                         {
+                           sendto_one(sptr, form_str(ERR_NOSUCHCHANNEL),
+                                      me.name, parv[0], name);
+                           return 0;
+                         }
+                     }
+                   else
+                     {
+                       show_vchans(cptr, sptr, chptr);
+                       return 0;
+                     }
+                 }
+               flags = 0;
+             }
            else
              {
                flags = CHFL_CHANOP;
@@ -1123,10 +1178,12 @@ int     mo_join(struct Client *cptr,
       add_user_to_channel(chptr, sptr, flags);
       /*
       **  Set timestamp if appropriate, and propagate
+      **  XXX and set chan_id to nickname getting ops for now
       */
       if (MyClient(sptr) && (flags & CHFL_CHANOP) )
         {
           chptr->channelts = CurrentTime;
+          strncpy_irc(chptr->chan_id, parv[0], NICKLEN);
           sendto_match_servs(chptr, cptr,
                              ":%s SJOIN %lu %s + :@%s", me.name,
                              chptr->channelts, name, parv[0]);
@@ -1180,6 +1237,45 @@ int     mo_join(struct Client *cptr,
         }
     }
   return 0;
+}
+
+/* show info on vchans, XXXX this needs to be improved! */
+
+static void show_vchans(struct Client *cptr,
+                        struct Client *sptr,
+                        struct Channel *chptr)
+{
+   int no_of_vchans = 0;
+   struct Channel *chtmp1, *chtmp2;
+
+   for (chtmp1 = chptr; chtmp1; chtmp1 = chtmp1->next_vchan)
+     no_of_vchans++;
+
+   sendto_one(sptr,
+              ":%s NOTICE %s *** %d channels are available for %s",
+              me.name, sptr->name, no_of_vchans, chptr->chname);
+   sendto_one(sptr,
+              ":%s NOTICE %s *** Type /join %s <key> to join the one you wish to join",
+               me.name, sptr->name, chptr->chname);
+
+   for (chtmp2 = chptr; chtmp2; chtmp2 = chtmp2->next_vchan)
+      sendto_one(sptr,
+                 ":%s NOTICE %s *** !%s",
+                  me.name, sptr->name, chtmp2->chan_id);
+}
+
+/* return matching vchan, or NULL if there isn't one */
+static struct Channel* find_vchan(struct Channel *chptr, char *key)
+{
+  struct Channel *chtmp;
+  
+  key++; /* go past the '!' */
+
+  for (chtmp = chptr; chtmp; chtmp = chtmp->next_vchan)
+    if (!irccmp(chtmp->chan_id, key))
+      return chtmp;
+  
+  return NullChn;
 }
 
 #ifdef DBOP

@@ -2452,22 +2452,32 @@ static  void    sub1_from_channel(struct Channel *chptr)
 	  /* free all bans/exceptions/denies */
 	  free_bans_exceptions_denies( chptr );
 
-          if (chptr->prevch)
-            chptr->prevch->nextch = chptr->nextch;
-          else
-            GlobalChannelList = chptr->nextch;
-          if (chptr->nextch)
-            chptr->nextch->prevch = chptr->prevch;
-
 #ifdef FLUD
           free_fluders(NULL, chptr);
 #endif
+
           /* If channel has subchannels don't delete this channel */
-          if ( chptr->vchan_flag == NULL )	  
+          if ( chptr->next_vchan == NULL )	  
             {
+	      if (chptr->prevch)
+		chptr->prevch->nextch = chptr->nextch;
+	      else
+		GlobalChannelList = chptr->nextch;
+	      if (chptr->nextch)
+		chptr->nextch->prevch = chptr->prevch;
               del_from_channel_hash_table(chptr->chname, chptr);
               MyFree((char*) chptr);
               Count.chan--;
+	    }
+
+          /* if this is a subchan take it out the linked list */
+          if (chptr->prev_vchan)
+            {
+              chptr->prev_vchan->next_vchan = chptr->next_vchan;
+              if (chptr->next_vchan)
+                chptr->next_vchan->prev_vchan = chptr->prev_vchan;
+              MyFree((char*) chptr);
+              Count.chan--; /* is this line needed for subchans? */
             }
         }
     }
