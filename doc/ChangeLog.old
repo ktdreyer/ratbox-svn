@@ -1,3 +1,18 @@
+androsyn    2002/06/26 18:01:36 EDT	(20020626_7)
+
+  Modified files:
+    include              config.h 
+    src                  client.c 
+  Log:
+  Minor little changes regarding the value that we should use for pending
+  remote exits
+  
+  Revision  Changes    Path
+  7.138     +6 -0      ircd-hybrid-7/include/config.h
+  7.282     +1 -6      ircd-hybrid-7/src/client.c
+
+
+
 leeh        2002/06/26 17:35:29 EDT	(20020626_6)
 
   Modified files:
