@@ -1,3 +1,8 @@
+*** 20000103_7 by db
+- mods to try to flush connections if dbufs are used up
+
+
+
 *** 20000103_6 by db
 - it all works now (LL). channel cleanup etc. 
 
