@@ -8,6 +8,9 @@ If you don't read this first, we won't help you.
   * configure is run.                                                     *
   * - You now need to ./configure --prefix="/path/to/install/it"          *
   * The old config format WILL NOT WORK.  Please see doc/example.conf (!) *
+  *									  *
+  * The old kline format WILL NOT WORK.  Please use convertklines which   *
+  * will be installed with your ircd!					  *
   *************************************************************************
 
 ******************************* REQUIREMENTS **********************************
