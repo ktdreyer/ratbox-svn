@@ -160,7 +160,7 @@ mo_dline(struct Client *client_p, struct Client *source_p, int parc, char *parv[
 		}
 
 
-		inetntop(DEF_FAM, &target_p->localClient->ip, cidr_form_host,
+		inetntop(target_p->localClient->aftype, &target_p->localClient->ip, cidr_form_host,
 			 sizeof(cidr_form_host));
 #ifdef IPV6
 		if(!(IN6_IS_ADDR_V4MAPPED(&IN_ADDR2(target_p->localClient->ip))) ||

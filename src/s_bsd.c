@@ -399,10 +399,8 @@ add_connection(struct Listener *listener, int fd)
 		new_client->localClient->aftype = AF_INET6;
 	else
 	{
-#if 0				/* This isn't really necessary */
 		memmove(&new_client->localClient->ip.sins.sin.s_addr,
 			&IN_ADDR(new_client->localClient->ip)[12], sizeof(struct in_addr));
-#endif
 		new_client->localClient->aftype = AF_INET;
 	}
 #else
