@@ -388,7 +388,7 @@ add_connection(struct Listener *listener, int fd)
 	 * so we have something valid to put into error messages...
 	 */
 	inetntop_sock(&new_client->localClient->ip, new_client->localClient->sockhost, 
-		sizeof(*new_client->localClient->sockhost));
+		sizeof(new_client->localClient->sockhost));
 
 	*new_client->host = '\0';
 #ifdef IPV6
