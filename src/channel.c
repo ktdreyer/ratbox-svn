@@ -1394,6 +1394,17 @@ void set_channel_mode(struct Client *cptr,
                                  chptr->mode.key);
             }
 #endif
+          if (whatt == MODE_DEL)
+            {
+              if( (arg[0] == '*') && (arg[1] == '\0'))
+                arg = chptr->mode.key;
+              else
+                {
+                  if(strcmp(arg,chptr->mode.key))
+                    break;
+		}
+	    }
+
           *mbufw++ = plus;
           *mbufw++ = 'k';
           strcpy(pbufw, arg);
