@@ -170,7 +170,6 @@ clear_temps(dlink_list *tlist)
 
   DLINK_FOREACH_SAFE(ptr, next_ptr, tlist->head)
   {
-    next_ptr = ptr->next;
     aconf = ptr->data;
 
     delete_one_address_conf(aconf->host, aconf);

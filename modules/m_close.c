@@ -69,11 +69,9 @@ static void mo_close(struct Client *client_p, struct Client *source_p,
   int            closed = 0;
 
 
-
-  for (ptr = unknown_list.head; ptr; ptr = ptr_next)
+  DLINK_FOREACH_SAFE(ptr, ptr_next, unknown_list.head)
     {
       target_p = ptr->data;
-      ptr_next = ptr->next;
 
   /* Which list would connecting servers be found in? serv_list ? */
 #if 0
