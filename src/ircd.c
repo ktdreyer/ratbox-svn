@@ -264,7 +264,6 @@ struct lgetopt myopts[] = {
 void
 set_time(void)
 {
-	static char to_send[200];
 	struct timeval newtime;
 	newtime.tv_sec = 0;
 	newtime.tv_usec = 0;
@@ -282,13 +281,8 @@ set_time(void)
 	
 #endif
 	if(newtime.tv_sec < CurrentTime)
-	{
-		ircsnprintf(to_send, sizeof(to_send), 
-			   "System clock is running backwards - (%ld < %ld)",
-			   newtime.tv_sec, CurrentTime);
-		report_error(to_send, me.name, me.name, 0);
 		set_back_events(CurrentTime - newtime.tv_sec);
-	}
+
 	SystemTime.tv_sec = newtime.tv_sec;
 	SystemTime.tv_usec = newtime.tv_usec;
 }
