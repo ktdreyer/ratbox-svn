@@ -1430,8 +1430,8 @@ const char* comment         /* Reason for the exit */
       if (sptr->servptr == &me)
         {
           sendto_realops_flags(FLAGS_ALL,
-		       "%s was connected for %lu seconds.  %d/%d sendK/recvK.",
-			       sptr->name,CurrentTime - sptr->firsttime,
+		       "%s was connected for %d seconds.  %d/%d sendK/recvK.",
+			       sptr->name, (int)(CurrentTime - sptr->firsttime),
 			       sptr->localClient->sendK,
 			       sptr->localClient->receiveK);
           log(L_NOTICE, "%s was connected for %d seconds.  %d/%d sendK/recvK.",

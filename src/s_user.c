@@ -197,22 +197,22 @@ void show_opers(struct Client *cptr)
 	  ptr = cptr2->localClient->confs.head;
 	  aconf = ptr->data;
 
-          sendto_one(cptr, ":%s %d %s :[%c][%s] %s (%s@%s) Idle: %lu",
+          sendto_one(cptr, ":%s %d %s :[%c][%s] %s (%s@%s) Idle: %d",
                      me.name, RPL_STATSDEBUG, cptr->name,
                      IsOper(cptr2) ? 'O' : 'o',
 		     oper_privs_as_string(cptr2, aconf->port),
                      cptr2->name,
                      cptr2->username, cptr2->host,
-                     CurrentTime - cptr2->user->last);
+                     (int)(CurrentTime - cptr2->user->last));
         }
       else
         {
-          sendto_one(cptr, ":%s %d %s :[%c] %s (%s@%s) Idle: %lu",
+          sendto_one(cptr, ":%s %d %s :[%c] %s (%s@%s) Idle: %d",
                      me.name, RPL_STATSDEBUG, cptr->name,
                      IsOper(cptr2) ? 'O' : 'o',
                      cptr2->name,
                      cptr2->username, cptr2->host,
-                     CurrentTime - cptr2->user->last);
+                     (int)(CurrentTime - cptr2->user->last));
         }
     }
 

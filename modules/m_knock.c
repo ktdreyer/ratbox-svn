@@ -109,12 +109,11 @@ static int m_knock(struct Client *cptr,
    * -davidt
    */
 
-  if((chptr->last_knock + 30) > CurrentTime)
+  if((chptr->last_knock + ConfigFileEntry.knock_delay) > CurrentTime)
     {
-      sendto_one(sptr, ":%s NOTICE %s :*** Notice -- Wait %lu seconds before another knock to %s",
+      sendto_one(sptr, ":%s NOTICE %s :*** Notice -- Wait %d seconds before another knock to %s",
                  me.name, sptr->name,
-                 30 - (CurrentTime -
-                       chptr->last_knock),
+                 (int)(ConfigFileEntry.knock_delay - CurrentTime - chptr->last_knock),
                  parv[1]);
       return 0;
     }

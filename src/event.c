@@ -259,9 +259,9 @@ show_events(struct Client *sptr)
   while (e != NULL)
     {
       sendto_one(sptr,
-                 ":%s NOTICE %s :*** %-20s %lu seconds     %d",
+                 ":%s NOTICE %s :*** %-20s %-3d seconds     %d",
                  me.name,sptr->name,
-                 e->name, e->when - CurrentTime, e->weight);
+                 e->name, (int)(e->when - CurrentTime), e->weight);
       e = e->next;
     }
   sendto_one(sptr,":%s NOTICE %s :*** Finished",me.name,sptr->name);
