@@ -334,8 +334,6 @@ io_loop(void)
       if (delay <= CurrentTime)
 	eventRun();
   
-      /* Check on the last activity, sleep for up to 1/2s if we are idle... */
-      fprintf(stderr, "Empty cycles: %d callbacks_called: %d\n", empty_cycles, callbacks_called);
 
       if (callbacks_called > 0)
 	empty_cycles = 0;
