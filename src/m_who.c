@@ -23,6 +23,7 @@
  *   $Id$
  */
 
+#include "common.h"   /* bleah */
 #include "handlers.h"
 #include "client.h"
 #include "channel.h"
@@ -92,9 +93,6 @@
  *                      non-NULL pointers.
  */
 
-#define YES 1
-#define NO  0
-
 static void do_who_on_channel(struct Client *sptr,
 			      struct Channel *chptr, char *real_name,
 			      int oper, int member);
@@ -125,14 +123,6 @@ int     m_who(struct Client *cptr,
   struct Channel *mychannel = NULL;
   int   oper = parc > 2 ? (*parv[2] == 'o' ): 0; /* Show OPERS only */
   int   member;
-
-
-  /* Allow use of m_who without registering */
-  /* Not anymore...- Comstud */
-  /* taken care of in parse.c now - Dianora */
-     /*  if (check_registered_user(sptr))
-    return 0;
-    */
 
   /*
   **  Following code is some ugly hacking to preserve the
@@ -265,6 +255,16 @@ int     m_who(struct Client *cptr,
   return 0;
 }
 
+/*
+ * who_global
+ *
+ * inputs	- pointer to client requesting who
+ *		- char * mask to match
+ *		- int if oper or not
+ * output	- NONE
+ * side effects - do a global scan of all clients looking for match
+ *		  this is slightly expensive on EFnet ...
+ */
 
 static void who_global(struct Client *sptr,char *mask, int oper)
 {
@@ -329,6 +329,18 @@ static void who_global(struct Client *sptr,char *mask, int oper)
     }
 }
 
+/*
+ * do_who_on_channel
+ *
+ * inputs	- pointer to client requesting who
+ *		- pointer to channel to do who on
+ *		- The "real name" of this channel
+ *		- int if sptr is oper or not
+ *		- int if client is member or not
+ * output	- NONE
+ * side effects - do a who on given channel
+ */
+
 static void do_who_on_channel(struct Client *sptr,
 			      struct Channel *chptr,
 			      char *real_name,
@@ -346,14 +358,26 @@ static void do_who_on_channel(struct Client *sptr,
     }
 }
 
+/*
+ * do_who
+ *
+ * inputs	- pointer to client requesting who
+ *		- pointer to client to do who on
+ *		- The reported name
+ *		- 
+ * output	- NONE
+ * side effects - do a who on given person
+ */
+
 static  void    do_who(struct Client *sptr,
 			     struct Client *acptr,
 			     char *repname,
 			     struct SLink *lp)
 {
   char  status[5];
-  /* Using a pointer will compile faster than an index */
   char *p = status;
+  /* Using a pointer will compile faster than an index */
+  /* Not always, with modern compilers ... -db */
 
   if (acptr->user->away)
     *p++ = 'G';

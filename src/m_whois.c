@@ -23,6 +23,7 @@
  *   $Id$
  */
 
+#include "common.h"   /* bleah */
 #include "handlers.h"
 #include "client.h"
 #include "channel.h"
@@ -37,8 +38,6 @@
 #include "s_conf.h"
 
 #include <string.h>
-
-static char buf[BUFSIZE];
 
 /*
  * m_functions execute protocol messages on this server:
@@ -97,7 +96,8 @@ static char buf[BUFSIZE];
  *                      non-NULL pointers.
  */
 
-static int single_whois(struct Client *sptr,struct Client *acptr,int wilds);
+static int single_whois(struct Client *sptr, struct Client *acptr, int wilds);
+static int global_whois(struct Client *sptr, char *nick, int wilds);
 
 /*
 ** m_whois
@@ -113,7 +113,7 @@ int     m_whois(struct Client *cptr,
   struct Client *acptr;
   char  *nick;
   char  *p = NULL;
-  int   found=0;
+  int   found=NO;
   int   wilds;
 
   if (parc < 2)
@@ -175,28 +175,44 @@ int     m_whois(struct Client *cptr,
 
   if(!wilds)
     {
-      acptr = hash_find_client(nick,(struct Client *)NULL);
-      if(!acptr)
+      if( (acptr = hash_find_client(nick,(struct Client *)NULL)) )
 	{
-	  sendto_one(sptr, form_str(ERR_NOSUCHNICK),
-		     me.name, parv[0], nick);
-	  return 0;
+	  if(IsPerson(acptr))
+	    {
+	      (void)single_whois(sptr,acptr,wilds);
+	      found = YES;
+	    }
 	}
-      if(!IsPerson(acptr))
-	{
-	  sendto_one(sptr, form_str(RPL_ENDOFWHOIS),
-		     me.name, parv[0], parv[1]);
-	  return 0;
-	}
-      (void)single_whois(sptr,acptr,wilds);
-      sendto_one(sptr, form_str(RPL_ENDOFWHOIS),
-		 me.name, parv[0], parv[1]);
-
-      /* All done. */
-      return 0;
+    }
+  else
+    {
+      /* Oh-oh wilds is true so have to do it the hard expensive way */
+      found = global_whois(sptr, nick, wilds);
     }
 
-  /* Oh-oh wilds is true so have to do it the hard expensive way */
+  if(found)
+    sendto_one(sptr, form_str(RPL_ENDOFWHOIS), me.name, parv[0], parv[1]);
+  else
+    sendto_one(sptr, form_str(ERR_NOSUCHNICK), me.name, parv[0], nick);
+
+  return 0;
+}
+
+/*
+ * global_whois()
+ *
+ * Inputs	- sptr client to report to
+ *		- acptr client to report on
+ *		- wilds whether wildchar char or not
+ * Output	- if found return 1
+ * Side Effects	- do a single whois on given client
+ * 		  writing results to sptr
+ */
+
+static int global_whois(struct Client *sptr, char *nick, int wilds)
+{
+  struct Client *acptr;
+  int found = NO;
 
   for (acptr = GlobalClientList; (acptr = next_client(acptr, nick));
        acptr = acptr->next)
@@ -228,13 +244,7 @@ int     m_whois(struct Client *cptr,
 	found = 1;
     }
 
-  if (!found)
-    sendto_one(sptr, form_str(ERR_NOSUCHNICK),
-	       me.name, parv[0], nick);
-
-  sendto_one(sptr, form_str(RPL_ENDOFWHOIS), me.name, parv[0], parv[1]);
-  
-  return 0;
+  return (found);
 }
 
 /*
@@ -250,6 +260,7 @@ int     m_whois(struct Client *cptr,
 
 static int single_whois(struct Client *sptr,struct Client *acptr,int wilds)
 {
+  char buf[BUFSIZE];
   static struct User UnknownUser =
   {
     NULL,       /* next */
@@ -374,4 +385,3 @@ static int single_whois(struct Client *sptr,struct Client *acptr,int wilds)
   
   return 1;
 }
-

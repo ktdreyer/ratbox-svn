@@ -34,6 +34,8 @@
 #include "list.h"
 #include "numeric.h"
 #include "send.h"
+#include "s_serv.h"
+#include "s_conf.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -405,6 +407,12 @@ int ms_names( struct Client *cptr,
 	      int parc,
 	      char *parv[])
 { 
+  if( ConfigFileEntry.hub )
+    {
+      if(!IsCapable(cptr->from,CAP_LL))
+	return 0;
+    }
   return(1);
 }
+
 
