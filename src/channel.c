@@ -860,12 +860,13 @@ set_channel_topic(struct Channel *chptr, const char *topic,
  * side effects - user gets list of "simple" modes based on channel access.
  *                NOTE: m_join.c depends on trailing spaces in pbuf
  */
-void
-channel_modes(struct Channel *chptr, struct Client *client_p, char *mbuf, char *pbuf)
+const char *
+channel_modes(struct Channel *chptr, struct Client *client_p)
 {
-	int len;
+	static char buf[BUFSIZE];
+	char *mbuf = buf;
+
 	*mbuf++ = '+';
-	*pbuf = '\0';
 
 	if(chptr->mode.mode & MODE_SECRET)
 		*mbuf++ = 's';
@@ -883,25 +884,31 @@ channel_modes(struct Channel *chptr, struct Client *client_p, char *mbuf, char *
 	if(chptr->mode.mode & MODE_REGONLY)
 		*mbuf++ = 'r';
 #endif
-
-	if(chptr->mode.limit)
+	if(chptr->mode.limit && *chptr->mode.key)
 	{
-		*mbuf++ = 'l';
-		if(!MyClient(client_p) || IsMember(client_p, chptr))
-		{
-			len = ircsprintf(pbuf, "%d ", chptr->mode.limit);
-			pbuf += len;
-		}
+		if(IsMe(client_p) || !MyClient(client_p) || IsMember(client_p, chptr))
+			ircsprintf(mbuf, "lk %d %s", chptr->mode.limit, chptr->mode.key);
+		else
+			ircsprintf(mbuf, "lk");
 	}
-	if(*chptr->mode.key)
+	else if(chptr->mode.limit)
 	{
-		*mbuf++ = 'k';
-		if(!MyClient(client_p) || IsMember(client_p, chptr))
-			ircsprintf(pbuf, "%s ", chptr->mode.key);
+		if(IsMe(client_p) || !MyClient(client_p) || IsMember(client_p, chptr))
+			ircsprintf(mbuf, "l %d", chptr->mode.limit);
+		else
+			ircsprintf(mbuf, "l");
 	}
+	else if(*chptr->mode.key)
+	{
+		if(IsMe(client_p) || !MyClient(client_p) || IsMember(client_p, chptr))
+			ircsprintf(mbuf, "k %s", chptr->mode.key);
+		else
+			ircsprintf(mbuf, "k");
+	}
+	else
+		*mbuf = '\0';
 
-	*mbuf++ = '\0';
-	return;
+	return buf;
 }
 
 /* Now lets do some stuff to keep track of what combinations of

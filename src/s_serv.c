@@ -688,8 +688,6 @@ burst_modes_TS6(struct Client *client_p, struct Channel *chptr,
 static void
 burst_TS5(struct Client *client_p)
 {
-	static char modebuf[MODEBUFLEN];
-	static char parabuf[MODEBUFLEN];
 	static char ubuf[12];
 	struct Client *target_p;
 	struct Channel *chptr;
@@ -743,11 +741,9 @@ burst_TS5(struct Client *client_p)
 		if(*chptr->chname != '#')
 			continue;
 
-		*modebuf = *parabuf = '\0';
-		channel_modes(chptr, client_p, modebuf, parabuf);
-
-		cur_len = mlen = ircsprintf(buf, ":%s SJOIN %ld %s %s %s:", me.name,
-				(long) chptr->channelts, chptr->chname, modebuf, parabuf);
+		cur_len = mlen = ircsprintf(buf, ":%s SJOIN %ld %s %s :", me.name,
+				(long) chptr->channelts, chptr->chname, 
+				channel_modes(chptr, client_p));
 
 		t = buf + mlen;
 
@@ -816,8 +812,6 @@ burst_TS5(struct Client *client_p)
 static void
 burst_TS6(struct Client *client_p)
 {
-	static char modebuf[MODEBUFLEN];
-	static char parabuf[MODEBUFLEN];
 	static char ubuf[12];
 	struct Client *target_p;
 	struct Channel *chptr;
@@ -883,11 +877,9 @@ burst_TS6(struct Client *client_p)
 		if(*chptr->chname != '#')
 			continue;
 
-		*modebuf = *parabuf = '\0';
-		channel_modes(chptr, client_p, modebuf, parabuf);
-
-		cur_len = mlen = ircsprintf(buf, ":%s SJOIN %ld %s %s %s:", me.name,
-				(long) chptr->channelts, chptr->chname, modebuf, parabuf);
+		cur_len = mlen = ircsprintf(buf, ":%s SJOIN %ld %s %s :", me.name,
+				(long) chptr->channelts, chptr->chname,
+				channel_modes(chptr, client_p));
 
 		t = buf + mlen;
 

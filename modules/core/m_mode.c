@@ -89,46 +89,6 @@ static int mode_count;
 static int mode_limit;
 static int mask_pos;
 
-static void
-loc_channel_modes(struct Channel *chptr, struct Client *client_p, char *mbuf, char *pbuf)
-{
-	int len;
-	*mbuf++ = '+';
-	*pbuf = '\0';
-
-	if(chptr->mode.mode & MODE_SECRET)
-		*mbuf++ = 's';
-	if(chptr->mode.mode & MODE_PRIVATE)
-		*mbuf++ = 'p';
-	if(chptr->mode.mode & MODE_MODERATED)
-		*mbuf++ = 'm';
-	if(chptr->mode.mode & MODE_TOPICLIMIT)
-		*mbuf++ = 't';
-	if(chptr->mode.mode & MODE_INVITEONLY)
-		*mbuf++ = 'i';
-	if(chptr->mode.mode & MODE_NOPRIVMSGS)
-		*mbuf++ = 'n';
-#ifdef ENABLE_SERVICES
-	if(chptr->mode.mode & MODE_REGONLY)
-		*mbuf++ = 'r';
-#endif
-
-	if(chptr->mode.limit)
-	{
-		*mbuf++ = 'l';
-		len = ircsprintf(pbuf, "%d ", chptr->mode.limit);
-		pbuf += len;
-	}
-	if(*chptr->mode.key)
-	{
-		*mbuf++ = 'k';
-		ircsprintf(pbuf, "%s ", chptr->mode.key);
-	}
-
-	*mbuf++ = '\0';
-	return;
-}
-
 /*
  * m_mode - MODE command handler
  * parv[0] - sender
@@ -188,15 +148,12 @@ m_mode(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	if(parc < n + 1)
 	{
 		if(operspy)
-		{
 			report_operspy(source_p, "MODE", chptr->chname);
-			loc_channel_modes(chptr, source_p, modebuf, parabuf);
-		}
-		else
-			channel_modes(chptr, source_p, modebuf, parabuf);
 
 		sendto_one(source_p, form_str(RPL_CHANNELMODEIS),
-			   me.name, source_p->name, parv[1], modebuf, parabuf);
+			   me.name, source_p->name, parv[1],
+			   operspy ? channel_modes(chptr, &me) :
+			    channel_modes(chptr, source_p));
 
 		sendto_one(source_p, form_str(RPL_CREATIONTIME),
 			   me.name, source_p->name, parv[1], chptr->channelts);

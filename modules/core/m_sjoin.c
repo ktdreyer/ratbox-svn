@@ -81,11 +81,13 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char 
 {
 	static char buf_nick[BUFSIZE];
 	static char buf_uid[BUFSIZE];
+	static const char empty_modes[] = "0";
 	struct Channel *chptr;
 	struct Client *target_p;
 	time_t newts;
 	time_t oldts;
 	static struct Mode mode, *oldmode;
+	const char *modes;
 	int args = 0;
 	int keep_our_modes = 1;
 	int keep_new_modes = 1;
@@ -249,26 +251,21 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char 
 	*modebuf = *parabuf = '\0';
 
 	if(parv[3][0] != '0' && keep_new_modes)
-	{
-		channel_modes(chptr, source_p, modebuf, parabuf);
-	}
+		modes = channel_modes(chptr, source_p);
 	else
-	{
-		modebuf[0] = '0';
-		modebuf[1] = '\0';
-	}
+		modes = empty_modes;
 
-	mlen = ircsprintf(buf_nick, ":%s SJOIN %ld %s %s %s:",
+	mlen = ircsprintf(buf_nick, ":%s SJOIN %ld %s %s :",
 			  source_p->name, (long) chptr->channelts,
-			  parv[2], modebuf, parabuf);
+			  parv[2], modes);
 	ptr_nick = buf_nick + mlen;
 
 	/* working on the presumption eventually itll be more efficient to
 	 * build a TS6 buffer without checking its needed..
 	 */
-	mlen = ircsprintf(buf_uid, ":%s SJOIN %ld %s %s %s:",
+	mlen = ircsprintf(buf_uid, ":%s SJOIN %ld %s %s :",
 			  use_id(source_p), (long) chptr->channelts,
-			  parv[2], modebuf, parabuf);
+			  parv[2], modes);
 	ptr_uid = buf_uid + mlen;
 
 	mbuf = modebuf;
