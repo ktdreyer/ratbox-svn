@@ -935,7 +935,7 @@ s_user_info(struct client *client_p, char *parv[], int parc)
 
 	if(ureg_p == client_p->user->user_reg || CliOperUSAdmin(client_p))
 	{
-		struct Client *target_p;
+		struct client *target_p;
 		dlink_node *ptr;
 
 		service_error(userserv_p, client_p,
