@@ -1,3 +1,7 @@
+*** 20010129_1 by lusky
+revved patchlevel to beta1
+
+
 *** 20010128_11 by wcampbel
 Applied the OpenBSD a.out fix
 Someone test this to make sure it still runs right on BSD/Linux/Solaris...
