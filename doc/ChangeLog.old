@@ -1,3 +1,8 @@
+*** 20001016_6 by db
+- semi fixed whois
+
+
+
 *** 20001016_5 by toot
 . don't allow JOIN to a 'real' subchan name
 . some extra brackets in privmsg/notice to kill a compile warning
