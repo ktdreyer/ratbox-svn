@@ -39,8 +39,16 @@
  */
 #define CH_MAX 16384
 
+/*
+ * RESV hash table size
+ *
+ * used in hash.c
+ */
+#define R_MAX 1024
+
 struct Client;
 struct Channel;
+struct Resv;
 
 struct HashEntry {
   int    hits;
@@ -51,8 +59,11 @@ struct HashEntry {
 struct Client *hash_find_id(const char *name, struct Client *client_p);
 extern int add_to_id_hash_table(char *, struct Client *);
 extern struct HashEntry hash_get_channel_block(int i);
+
 extern size_t hash_get_client_table_size(void);
 extern size_t hash_get_channel_table_size(void);
+extern size_t hash_get_resv_table_size(void);
+
 extern void   init_hash(void);
 extern void   add_to_client_hash_table(const char* name, 
                                        struct Client* client);
@@ -69,6 +80,13 @@ extern struct Channel* hash_find_channel(const char* name,
 extern struct Client* hash_find_client(const char* name, 
                                        struct Client* client);
 extern struct Client* hash_find_server(const char* name);
+
+extern void add_to_resv_hash_table(const char *name,
+                                   struct Resv *resv_p);
+extern void del_from_resv_hash_table(const char *name,
+                                     struct Resv *resv_p, int type);
+extern struct Resv *hash_find_resv(const char *name,
+                                   struct Resv *resv_p, int type);
 
 #endif  /* INCLUDED_hash_h */
 

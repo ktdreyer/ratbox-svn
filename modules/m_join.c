@@ -28,6 +28,7 @@
 #include "vchannel.h"
 #include "client.h"
 #include "common.h"   /* bleah */
+#include "resv.h"
 #include "hash.h"
 #include "irc_string.h"
 #include "ircd.h"
@@ -144,13 +145,14 @@ static void m_join(struct Client *client_p,
 	  do_join_0(&me,source_p);
 	  continue;
 	}
-
-      if(is_resv(name))
+	
+      if(find_resv(name, RESV_CHANNEL))
       {
         sendto_one(source_p, form_str(ERR_UNAVAILRESOURCE),
 	           me.name, source_p->name, name);
         continue;
       }
+
 
       if( (chptr = hash_find_channel(name, NullChn)) != NULL )
 	{

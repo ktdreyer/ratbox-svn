@@ -32,6 +32,7 @@
 #include "parse.h"
 #include "modules.h"
 #include "s_conf.h"
+#include "resv.h"
 
 static void mo_resv(struct Client *, struct Client *, int, char **);
 static void mo_unresv(struct Client *, struct Client *, int, char **);
@@ -73,63 +74,56 @@ char *_version = "20010626";
 static void mo_resv(struct Client *client_p, struct Client *source_p,
                     int parc, char *parv[])
 {
-  struct JupedChannel *jptr;
-  int len;
+  struct Resv *resv_p;
+  char ctype[BUFSIZE];
+  int type;
 
   if(parc > 1)
   {
     if(BadPtr(parv[1]))
       return;
-
-    if((parv[1][0] != '#') && (parv[1][0] != '&'))
+      
+    if(IsChannelName(parv[1]))
+    {
+      type = RESV_CHANNEL;
+      ircsprintf(ctype, "channel");
+    }
+    else if(clean_nick_name != 0)
+    {
+      type = RESV_NICK;
+      ircsprintf(ctype, "nick");
+    }
+    else
       return;
     
-    len = strlen(parv[1]);
- 
-    if(len > CHANNELLEN)
-    {
-      len = CHANNELLEN;
-      *(parv[1] + CHANNELLEN) = '\0';
-    }
-
-    if(jptr = find_resv(parv[1]))
+    resv_p = create_resv(parv[1], type, 0);
+    if(!(resv_p))
     {
       sendto_one(source_p,
-                 ":%s NOTICE %s :A RESV has already been placed on channel: %s",
-		 me.name, source_p->name, jptr->chname);
+                 ":%s NOTICE %s :A RESV has already been placed on %s: %s",
+		 me.name, source_p->name, ctype, parv[1]);
       return;
     }
     
-    jptr = (struct JupedChannel *)MyMalloc(sizeof(struct JupedChannel) + len + 1);
-    strcpy(jptr->chname, parv[1]);
-    
-    if(JupedChannelList)
-      JupedChannelList->prev = jptr;
-    
-    jptr->next = JupedChannelList;
-    jptr->prev = NULL;
-
-    JupedChannelList = jptr;
-
     sendto_one(source_p,
-               ":%s NOTICE %s :A local RESV has been placed on channel: %s",
-	       me.name, source_p->name, jptr->chname);
+               ":%s NOTICE %s :A local RESV has been placed on %s: %s",
+	       me.name, source_p->name, ctype, resv_p->name);
 
     sendto_realops_flags(FLAGS_ALL,
-                         "%s has placed a local RESV on channel: %s",
-			 get_oper_name(source_p), jptr->chname);
+                         "%s has placed a local RESV on %s: %s",
+			 get_oper_name(source_p), ctype, resv_p->name);
              
     
   }
   else
   {
-    if(!JupedChannelList)
+    if(!ResvList)
       sendto_realops_flags(FLAGS_ALL, "no resv channels");
     else
     {
-      for(jptr = JupedChannelList; jptr; jptr = jptr->next)
+      for(resv_p = ResvList; resv_p; resv_p=resv_p->next)
       {
-        sendto_realops_flags(FLAGS_ALL, "RESV: %s", jptr->chname);
+        sendto_realops_flags(FLAGS_ALL, "RESV: %s", resv_p->name);
       }
     }
   }
@@ -146,38 +140,47 @@ static void mo_resv(struct Client *client_p, struct Client *source_p,
 static void mo_unresv(struct Client *client_p, struct Client *source_p,
                       int parc, char *parv[])
 {
-  struct JupedChannel *jptr;
+  struct Resv *resv_p;
+  char ctype[BUFSIZE];
+  int type;
 
-  if(!JupedChannelList || !(jptr = find_resv(parv[1])))
-#if 0
-return;
-
-  if(!(jptr = find_resv(parv[1])))
-#endif  
+  if(IsChannelName(parv[1]))
+  {
+    type = RESV_CHANNEL;
+    ircsprintf(ctype, "channel");
+  }
+  else if(clean_nick_name != 0)
+  {
+    type = RESV_NICK;
+    ircsprintf(ctype, "nick");
+  }
+  else
+    return;
+							    
+  if(!ResvList || !(resv_p = hash_find_resv(parv[1], (struct Resv *)NULL, type)))
   {
     sendto_one(source_p, 
-               ":%s NOTICE %s :A RESV does not exist for channel %s",
-	       me.name, source_p->name, parv[1]);
+               ":%s NOTICE %s :A RESV does not exist for %s: %s",
+	       me.name, source_p->name, ctype, parv[1]);
     return;
+  }
+  else if(resv_p->conf)
+  {
+    sendto_one(source_p,
+       ":%s NOTICE %s :The RESV for %s: %s is in the config file and must be removed by hand.",
+               me.name, source_p->name, ctype, parv[1]);
+    return;	       
   }
   else
   {
-    if(jptr->prev)
-      jptr->prev->next = jptr->next;
-    else
-      JupedChannelList = jptr->next;
-
-    if(jptr->next)
-      jptr->next->prev = jptr->prev;
-
-    MyFree((char *)jptr);
+    delete_resv(resv_p);
 
     sendto_one(source_p,
-               ":%s NOTICE %s :The local RESV has been removed on channel: %s",
-	       me.name, source_p->name, parv[1]);
+               ":%s NOTICE %s :The local RESV has been removed on %s: %s",
+	       me.name, source_p->name, ctype, parv[1]);
     sendto_realops_flags(FLAGS_ALL,
-                         "%s has removed the local RESV for channel: %s",
-			 get_oper_name(source_p), parv[1]);
+                         "%s has removed the local RESV for %s: %s",
+			 get_oper_name(source_p), ctype, parv[1]);
 	      
   }
 }

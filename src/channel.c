@@ -102,46 +102,6 @@ void check_spambot_warning(struct Client *source_p, const char *name);
 
 
 /*
- * find_resv()
- */
-struct JupedChannel *find_resv(char *resv)
-{
-  struct JupedChannel *jptr;
-  
-  if(JupedChannelList)
-  {
-
-    for(jptr = JupedChannelList; jptr; jptr = jptr->next)
-    {
-      if(!irccmp(resv, jptr->chname))
-        return jptr;
-    }
-  }
-
-  return NULL;
-}
-
-/*
- * IsResv()
- */
-
-int is_resv(char *resv)
-{
-  struct JupedChannel *jptr;
-
-  if(JupedChannelList)
-  {
-    for(jptr = JupedChannelList; jptr; jptr = jptr->next)
-    {
-      if(!irccmp(resv, jptr->chname))
-        return 1;
-    }
-  }
-  
-  return 0;
-}
-
-/*
  * check_string
  *
  * inputs       - string to check

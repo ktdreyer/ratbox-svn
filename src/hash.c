@@ -37,6 +37,7 @@
 #include "client.h"
 #include "common.h"
 #include "hash.h"
+#include "resv.h"
 #include "irc_string.h"
 #include "ircd.h"
 #include "numeric.h"
@@ -58,15 +59,19 @@ static unsigned int hash_channel_name(const char* name);
 static struct HashEntry* clientTable = NULL;
 static struct HashEntry* channelTable = NULL;
 static struct HashEntry* idTable = NULL;
+static struct HashEntry* resvTable = NULL;
 static int clhits;
 static int clmiss;
 static int chhits;
 static int chmiss;
+static int rhits;
+static int rmiss;
 #else
 
 static struct HashEntry clientTable[U_MAX];
 static struct HashEntry channelTable[CH_MAX];
 static struct HashEntry idTable[U_MAX];
+static struct HashEntry resvTable[R_MAX];
 
 #endif
 
@@ -83,6 +88,11 @@ size_t hash_get_channel_table_size(void)
 size_t hash_get_client_table_size(void)
 {
   return sizeof(struct HashEntry) * U_MAX;
+}
+
+size_t hash_get_resv_table_size(void)
+{
+  return sizeof(struct HashEntry) * R_MAX;
 }
 
 /*
@@ -169,6 +179,44 @@ int hash_channel_name(const char* name)
 }
 
 /*
+ * hash_resv_nick()
+ *
+ * calculate a hash value of a nickname
+ */
+static unsigned
+int hash_resv_nick(const char *name)
+{
+  unsigned int h = 0;
+
+  while (*name)
+  {
+    h = (h << 4) - (h + (unsigned char)ToLower(*name++));
+  }
+
+  return (h & (R_MAX - 1));
+}
+
+/*
+ * hash_resv_channel()
+ *
+ * calculate a hash value on at most the first 30 characters and add
+ * it to the resv hash
+ */
+static unsigned
+int hash_resv_channel(const char *name)
+{
+  register int i = 30;
+  unsigned int h = 0;
+
+  while (*name && --i)
+  {
+    h = (h << 4) - (h + (unsigned char)ToLower(*name++));
+  }
+
+  return (h & (R_MAX -1));
+}
+
+/*
  * clear_client_hash_table
  *
  * Nullify the hashtable and its contents so it is completely empty.
@@ -185,7 +233,7 @@ static void clear_client_hash_table()
 }
 
 /*
- * clear_client_hash_table
+ * clear_id_hash_table
  *
  * Nullify the hashtable and its contents so it is completely empty.
  */
@@ -215,11 +263,24 @@ static void clear_channel_hash_table()
   memset(channelTable, 0, sizeof(struct HashEntry) * CH_MAX);
 }
 
+static void clear_resv_hash_table()
+{
+#ifdef DEBUGMODE
+  rmiss = 0;
+  rhits = 0;
+  if(!resvTable)
+    resvTable = (struct HashEntry*) MyMalloc(R_MAX *
+                                             sizeof(struct HashEntry));
+#endif
+  memset(resvTable, 0, sizeof(struct HashEntry) * R_MAX);
+}
+
 void init_hash(void)
 {
   clear_client_hash_table();
   clear_channel_hash_table();
   clear_id_hash_table();
+  clear_resv_hash_table();
 }
 
 /*
@@ -268,6 +329,27 @@ void add_to_channel_hash_table(const char* name, struct Channel* chptr)
   ++channelTable[hashv].links;
   ++channelTable[hashv].hits;
 }
+
+/*
+ * add_to_resv_hash_table
+ */
+void add_to_resv_hash_table(const char *name, struct Resv *rptr)
+{
+  unsigned int hashv;
+  assert(0 != name);
+  assert(0 != rptr);
+
+  if(rptr->type == RESV_CHANNEL)
+    hashv = hash_resv_channel(name);
+  else if(rptr->type == RESV_NICK)
+    hashv = hash_resv_nick(name);
+
+  rptr->hnext = (struct Resv*) resvTable[hashv].list;
+  resvTable[hashv].list = (void*)rptr;
+  ++resvTable[hashv].links;
+  ++resvTable[hashv].hits;
+}
+
 
 /*
  * del_from_client_hash_table - remove a client/server from the client
@@ -379,6 +461,47 @@ void del_from_channel_hash_table(const char* name, struct Channel* chptr)
     }
 }
 
+/*
+ * del_from_resv_hash_table()
+ */
+void del_from_resv_hash_table(const char *name, struct Resv *rptr, int type)
+{
+  struct Resv *tmp;
+  struct Resv *prev=NULL;
+  unsigned int hashv;
+
+  assert(name != 0);
+  assert(rptr != 0);
+
+  if(type == RESV_NICK)
+    hashv = hash_resv_nick(name);
+  else if(type == RESV_CHANNEL)
+    hashv = hash_resv_channel(name);
+  else
+    return;
+
+  tmp = (struct Resv*) resvTable[hashv].list;
+
+  for( ; tmp; tmp = tmp->hnext)
+  {
+    if(tmp == rptr)
+    {
+      if(prev)
+        prev->hnext = tmp->hnext;
+      else
+        resvTable[hashv].list = (void*)tmp->hnext;
+
+      tmp->hnext=NULL;
+
+      assert(resvTable[hashv].links > 0);
+      --resvTable[hashv].links;
+
+      return;
+    }
+  }
+  
+}  
+ 
 /*
  * hash_find_id
  */
@@ -543,6 +666,7 @@ struct Channel* hash_find_channel(const char* name, struct Channel* chptr)
   tmp = (struct Channel*) channelTable[hashv].list;
 
   for ( ; tmp; tmp = tmp->hnextch)
+  
     if (irccmp(name, tmp->chname) == 0)
       {
 #ifdef        DEBUGMODE
@@ -555,3 +679,37 @@ struct Channel* hash_find_channel(const char* name, struct Channel* chptr)
 #endif
   return chptr;
 }
+
+/*
+ * hash_find_resv()
+ */
+struct Resv *hash_find_resv(const char *name, struct Resv *rptr, int type)
+{
+  struct Resv *tmp;
+  unsigned int hashv;
+
+  assert(name != 0);
+  
+  if(type == RESV_CHANNEL)
+    hashv = hash_resv_channel(name);
+  else if(type == RESV_NICK)
+    hashv = hash_resv_nick(name);
+
+  tmp= (struct Resv*) resvTable[hashv].list;
+
+  for( ; tmp; tmp = tmp->hnext)
+  {
+    if(!irccmp(name, tmp->name) && (tmp->type == type))
+    {
+#ifdef DEBUGMODE
+      ++rhits;
+#endif      
+      return tmp;
+    }
+  }
+#ifdef DEBUGMODE
+  ++rmiss;
+#endif
+  
+  return rptr;
+}  

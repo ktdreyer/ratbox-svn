@@ -38,6 +38,7 @@
 #include "list.h"
 #include "channel.h"
 #include "s_log.h"
+#include "resv.h"
 #include "msg.h"
 #include "parse.h"
 #include "modules.h"
@@ -122,6 +123,13 @@ static void mr_nick(struct Client *client_p, struct Client *source_p, int parc,
                  me.name, BadPtr(parv[0]) ? "*" : parv[0], parv[1]);
       return;
     }
+
+  if(find_resv(nick, RESV_NICK))
+  {
+    sendto_one(source_p, form_str(ERR_UNAVAILRESOURCE),
+               me.name, BadPtr(parv[0]) ? "*" : parv[0], nick);
+    return;
+  }
 
   if(find_q_conf(nick, source_p->username, source_p->host)) 
     {
@@ -218,6 +226,13 @@ static void m_nick(struct Client *client_p, struct Client *source_p,
       return;
     }
 
+  if(find_resv(nick, RESV_NICK))
+  {
+    sendto_one(source_p, form_str(ERR_UNAVAILRESOURCE),
+               me.name, parv[0], nick);
+    return;
+  }
+  
   if (!IsOper(source_p) && find_q_conf(nick, source_p->username, source_p->host))
     {
       sendto_realops_flags(FLAGS_REJ,
