@@ -1309,7 +1309,7 @@ const char* comment         /* Reason for the exit */
       if (IsServer(source_p))
         {
           Count.myserver--;
-
+          unset_chcap_usage_counts(source_p);
 	  if(ServerInfo.hub)
 	    remove_lazylink_flags(source_p->localClient->serverMask);
 	  else

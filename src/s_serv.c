@@ -71,6 +71,7 @@
 #include "client.h"
 #include "s_debug.h"
 #include "memory.h"
+#include "channel.h" /* chcap_usage_counts stuff...*/
 
 extern char *crypt();
 
@@ -1115,6 +1116,8 @@ int server_estab(struct Client *client_p)
   */
   SetServer(client_p);
   client_p->servptr = &me;
+  /* Update the capability combination usage counts. -A1kmm */
+  set_chcap_usage_counts(client_p);
 
   /* Some day, all these lists will be consolidated *sigh* */
   add_client_to_llist(&(me.serv->servers), client_p);
