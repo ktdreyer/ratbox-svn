@@ -1091,19 +1091,21 @@ stats_uptime (struct Client *source_p)
 struct shared_flags
 {
 	int flag;
-	char has;
-	char hasnt;
+	char letter;
 };
 static struct shared_flags shared_flagtable[] =
 {
-	{ SHARED_KLINE,		'K', 'k' },
-	{ SHARED_UNKLINE,	'U', 'u' },
-	{ SHARED_XLINE,		'X', 'x' },
-	{ SHARED_UNXLINE,	'Y', 'y' },
-	{ SHARED_RESV,		'Q', 'q' },
-	{ SHARED_UNRESV,	'R', 'r' },
-	{ SHARED_LOCOPS,	'L', 'l' },
-	{ 0,			'\0', '\0' }
+	{ SHARED_PKLINE,	'K' },
+	{ SHARED_TKLINE,	'k' },
+	{ SHARED_UNKLINE,	'U' },
+	{ SHARED_PXLINE,	'X' },
+	{ SHARED_TXLINE,	'x' },
+	{ SHARED_UNXLINE,	'Y' },
+	{ SHARED_PRESV,		'Q' },
+	{ SHARED_TRESV,		'q' },
+	{ SHARED_UNRESV,	'R' },
+	{ SHARED_LOCOPS,	'L' },
+	{ 0,			'\0'}
 };
 
 
@@ -1112,7 +1114,7 @@ stats_shared (struct Client *source_p)
 {
 	struct remote_conf *shared_p;
 	dlink_node *ptr;
-	char buf[9];
+	char buf[15];
 	char *p;
 	int i;
 
@@ -1127,9 +1129,7 @@ stats_shared (struct Client *source_p)
 		for(i = 0; shared_flagtable[i].flag != 0; i++)
 		{
 			if(shared_p->flags & shared_flagtable[i].flag)
-				*p++ = shared_flagtable[i].has;
-			else
-				*p++ = shared_flagtable[i].hasnt;
+				*p++ = shared_flagtable[i].letter;
 		}
 
 		*p = '\0';
@@ -1151,9 +1151,7 @@ stats_shared (struct Client *source_p)
 		for(i = 0; shared_flagtable[i].flag != 0; i++)
 		{
 			if(shared_p->flags & shared_flagtable[i].flag)
-				*p++ = shared_flagtable[i].has;
-			else
-				*p++ = shared_flagtable[i].hasnt;
+				*p++ = shared_flagtable[i].letter;
 		}
 
 		*p = '\0';

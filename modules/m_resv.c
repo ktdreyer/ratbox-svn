@@ -147,12 +147,7 @@ ms_resv(struct Client *client_p, struct Client *source_p,
 	if(!IsPerson(source_p))
 		return 0;
 
-	if(find_shared_conf(source_p->username, source_p->host,
-				source_p->user->server, SHARED_RESV))
-	{
-		parse_resv(source_p, parv[2], parv[3], 0);
-	}
-
+	parse_resv(source_p, parv[2], parv[3], 0);
 	return 0;
 }
 
@@ -164,12 +159,7 @@ me_resv(struct Client *client_p, struct Client *source_p,
 	if(!IsPerson(source_p))
 		return 0;
 
-	if(find_shared_conf(source_p->username, source_p->host,
-			source_p->user->server, SHARED_RESV))
-	{
-		parse_resv(source_p, parv[2], parv[4], atoi(parv[1]));
-	}
-
+	parse_resv(source_p, parv[2], parv[4], atoi(parv[1]));
 	return 0;
 }
 
@@ -186,6 +176,12 @@ parse_resv(struct Client *source_p, const char *name,
 	   const char *reason, int temp_time)
 {
 	struct ConfItem *aconf;
+
+	if(!MyClient(source_p) && 
+	   !find_shared_conf(source_p->username, source_p->host,
+			source_p->user->server, 
+			(temp_time > 0) ? SHARED_TRESV : SHARED_PRESV))
+		return;
 
 	if(IsChannelName(name))
 	{
@@ -317,24 +313,24 @@ cluster_resv(struct Client *source_p, int temp_time, const char *name,
 	{
 		shared_p = ptr->data;
 
-		if(!(shared_p->flags & SHARED_RESV))
-			continue;
-
 		/* old protocol cant handle temps, and we dont really want
 		 * to convert them to perm.. --fl
 		 */
 		if(!temp_time)
 		{
+			if(!(shared_p->flags & SHARED_PRESV))
+				continue;
+
 			sendto_match_servs(source_p, shared_p->server,
 					CAP_CLUSTER, NOCAPS,
 					"RESV %s %s :%s",
 					shared_p->server, name, reason);
 			sendto_match_servs(source_p, shared_p->server,
 					CAP_ENCAP, CAP_CLUSTER,
-					"ENCAP %s RESV %d %s 0 :%s",
-					shared_p->server, temp_time, name, reason);
+					"ENCAP %s RESV 0 %s 0 :%s",
+					shared_p->server, name, reason);
 		}
-		else
+		else if(shared_p->flags & SHARED_TRESV)
 			sendto_match_servs(source_p, shared_p->server,
 					CAP_ENCAP, NOCAPS,
 					"ENCAP %s RESV %d %s 0 :%s",

@@ -205,7 +205,8 @@ handle_remote_xline(struct Client *source_p, int temp_time,
 	struct ConfItem *aconf;
 
 	if(!find_shared_conf(source_p->username, source_p->host,
-				source_p->user->server, SHARED_XLINE))
+				source_p->user->server,
+				(temp_time > 0) ? SHARED_TXLINE : SHARED_PXLINE))
 		return;
 
 	if(!valid_xline(source_p, name, reason))
@@ -374,22 +375,22 @@ cluster_xline(struct Client *source_p, int temp_time, const char *name,
 	{
 		shared_p = ptr->data;
 
-		if(!(shared_p->flags & SHARED_XLINE))
-			continue;
-
 		/* old protocol cant handle temps, and we dont really want
 		 * to convert them to perm.. --fl
 		 */
 		if(!temp_time)
 		{
+			if(!(shared_p->flags & SHARED_PXLINE))
+				continue;
+
 			sendto_match_servs(source_p, shared_p->server, CAP_CLUSTER, NOCAPS,
 					"XLINE %s %s 2 :%s",
 					shared_p->server, name, reason);
 			sendto_match_servs(source_p, shared_p->server, CAP_ENCAP, CAP_CLUSTER,
-					"ENCAP %s XLINE %d %s 2 :%s",
-					shared_p->server, temp_time, name, reason);
+					"ENCAP %s XLINE 0 %s 2 :%s",
+					shared_p->server, name, reason);
 		}
-		else
+		else if(shared_p->flags & SHARED_TXLINE)
 			sendto_match_servs(source_p, shared_p->server, CAP_ENCAP, NOCAPS,
 					"ENCAP %s XLINE %d %s 2 :%s",
 					shared_p->server, temp_time, name, reason);

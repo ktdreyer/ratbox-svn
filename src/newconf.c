@@ -354,24 +354,30 @@ static struct mode_table connect_table[] = {
 };
 
 static struct mode_table cluster_table[] = {
-	{ "kline",	SHARED_KLINE	},
-	{ "unkline",	SHARED_UNKLINE	},
-	{ "locops",	SHARED_LOCOPS	},
-	{ "xline",	SHARED_XLINE	},
-	{ "unxline",	SHARED_UNXLINE	},
-	{ "resv",	SHARED_RESV	},
-	{ "unresv",	SHARED_UNRESV	},
-	{ "all",	CLUSTER_ALL	},
+	{ "kline",	SHARED_PKLINE|SHARED_TKLINE	},
+	{ "tkline",	SHARED_TKLINE			},
+	{ "unkline",	SHARED_UNKLINE			},
+	{ "locops",	SHARED_LOCOPS			},
+	{ "xline",	SHARED_PXLINE|SHARED_TXLINE	},
+	{ "txline",	SHARED_TXLINE			},
+	{ "unxline",	SHARED_UNXLINE			},
+	{ "resv",	SHARED_PRESV|SHARED_TRESV	},
+	{ "tresv",	SHARED_TRESV			},
+	{ "unresv",	SHARED_UNRESV			},
+	{ "all",	CLUSTER_ALL			},
 	{NULL, 0}
 };
 
 static struct mode_table shared_table[] =
 {
-	{ "kline",	SHARED_KLINE	},
+	{ "kline",	SHARED_PKLINE|SHARED_TKLINE	},
+	{ "xline",	SHARED_PXLINE|SHARED_TXLINE	},
+	{ "resv",	SHARED_PRESV|SHARED_TRESV	},
+	{ "tkline",	SHARED_TKLINE	},
 	{ "unkline",	SHARED_UNKLINE	},
-	{ "xline",	SHARED_XLINE	},
+	{ "txline",	SHARED_TXLINE	},
 	{ "unxline",	SHARED_UNXLINE	},
-	{ "resv",	SHARED_RESV	},
+	{ "tresv",	SHARED_TRESV	},
 	{ "unresv",	SHARED_UNRESV	},
 	{ "all",	SHARED_ALL	},
 	{NULL, 0}

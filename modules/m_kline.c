@@ -156,7 +156,8 @@ mo_kline(struct Client *client_p, struct Client *source_p,
 	}
 	/* if we have cluster servers, send it to them.. */
 	else if(dlink_list_length(&cluster_conf_list) > 0)
-		cluster_generic(source_p, "KLINE", SHARED_KLINE, CAP_KLN,
+		cluster_generic(source_p, "KLINE", 
+				(tkline_time > 0) ? SHARED_TKLINE : SHARED_PKLINE, CAP_KLN,
 				"%lu %s %s :%s",
 				tkline_time, user, host, reason);
 
@@ -262,9 +263,10 @@ handle_remote_kline(struct Client *source_p, int tkline_time,
 	char *reason = LOCAL_COPY(kreason);
 	struct ConfItem *aconf = NULL;
 	char *oper_reason;
-	
+
 	if(!find_shared_conf(source_p->username, source_p->host,
-				source_p->user->server, SHARED_KLINE))
+				source_p->user->server, 
+				(tkline_time > 0) ? SHARED_TKLINE : SHARED_PKLINE))
 		return;
 
 	if(!valid_user_host(source_p, user, host) ||
