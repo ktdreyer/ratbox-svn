@@ -32,6 +32,8 @@
 #include "ircd_defs.h"        /* buffer sizes */
 #endif
 
+#define USE_TABLE_MODE
+
 struct Client;
 
 /* mode structure for channels */
@@ -248,5 +250,19 @@ typedef struct Ban      /* also used for exceptions -orabidoo */
 #define MAX_VCHAN_TIME (60*60)
 /* Number of chanops, peon, voiced, halfops sublists */
 #define MAX_SUBLISTS 4
-#endif  /* INCLUDED_channel_h */
 
+#ifdef USE_TABLE_MODE
+struct ChModeChange
+{
+ char letter;
+ char *arg;
+ int caps, nocaps, mems;
+};
+
+#define CHACCESS_CHANOP 3
+#define CHACCESS_HALFOP 2
+#define CHACCESS_VOICED 1
+#define CHACCESS_PEON   0
+
+#endif
+#endif  /* INCLUDED_channel_h */
