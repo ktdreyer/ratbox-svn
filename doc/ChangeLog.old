@@ -1,3 +1,10 @@
+*** 20000102_6 by db
+- fixed a bug in m_join.c
+- cleaned up LL channel key handling
+- don't assign serverMask's to non LL servers
+
+
+
 *** 20000102_5 by db
 - added LazyLinks.txt document outlining original Lazy Links protocol
   its been modified for -7
