@@ -1,3 +1,6 @@
+*** 20010120_10 by davidt
+Fix silly warning
+
 *** 20010120_9 by fl_
 - the sjoin part to the vchan bug.. altho its still possible to make
   fake vchans if youre timing is right :/
