@@ -1,3 +1,15 @@
+leeh        2004/07/29 13:00:37 EDT	(20040729_3)
+
+  Modified files:
+    include              config.h 
+  Log:
+  - piddpath had been moved to the log dir when it should be in etc/
+  
+  Revision  Changes    Path
+  7.176     +1 -1      ircd-ratbox/include/config.h
+
+
+
 leeh        2004/07/29 12:59:33 EDT	(20040729_2)
 
   Modified files:
