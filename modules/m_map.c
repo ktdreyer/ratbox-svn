@@ -52,7 +52,8 @@ static char buf[BUFSIZE];
 static int
 m_map(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
-	if(ConfigFileEntry.map_oper_only || ConfigServerHide.flatten_links)
+	if((!IsExemptShide(source_p) && ConfigServerHide.flatten_links) ||
+	   ConfigFileEntry.map_oper_only)
 	{
 		m_not_oper(client_p, source_p, parc, parv);
 		return 0;

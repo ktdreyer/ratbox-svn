@@ -129,14 +129,15 @@ struct ConfItem
 #define CONF_FLAGS_RESTRICTED           0x00002000
 #define CONF_FLAGS_EXEMPTFLOOD          0x00004000
 #define CONF_FLAGS_EXEMPTSPAMBOT	0x00008000
+#define CONF_FLAGS_EXEMPTSHIDE		0x00010000
 /* server flags */
-#define CONF_FLAGS_ALLOW_AUTO_CONN      0x00010000
-#define CONF_FLAGS_LAZY_LINK            0x00020000
-#define CONF_FLAGS_ENCRYPTED            0x00040000
-#define CONF_FLAGS_COMPRESSED           0x00080000
-#define CONF_FLAGS_TEMPORARY            0x00100000
-#define CONF_FLAGS_CRYPTLINK            0x00200000
-#define CONF_FLAGS_VHOSTED		0x00400000
+#define CONF_FLAGS_ALLOW_AUTO_CONN      0x00040000
+#define CONF_FLAGS_LAZY_LINK            0x00080000
+#define CONF_FLAGS_ENCRYPTED            0x00100000
+#define CONF_FLAGS_COMPRESSED           0x00200000
+#define CONF_FLAGS_TEMPORARY            0x00400000
+#define CONF_FLAGS_CRYPTLINK            0x00800000
+#define CONF_FLAGS_VHOSTED		0x01000000
 
 
 /* Macros for struct ConfItem */
@@ -150,6 +151,7 @@ struct ConfItem
 #define IsConfExemptGline(x)    ((x)->flags & CONF_FLAGS_EXEMPTGLINE)
 #define IsConfExemptFlood(x)    ((x)->flags & CONF_FLAGS_EXEMPTFLOOD)
 #define IsConfExemptSpambot(x)	((x)->flags & CONF_FLAGS_EXEMPTSPAMBOT)
+#define IsConfExemptShide(x)	((x)->flags & CONF_FLAGS_EXEMPTSHIDE)
 #define IsConfIdlelined(x)      ((x)->flags & CONF_FLAGS_IDLE_LINED)
 #define IsConfDoIdentd(x)       ((x)->flags & CONF_FLAGS_DO_IDENTD)
 #define IsConfDoSpoofIp(x)      ((x)->flags & CONF_FLAGS_SPOOF_IP)

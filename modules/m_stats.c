@@ -340,7 +340,8 @@ stats_adns_servers (struct Client *source_p)
 static void
 stats_connect (struct Client *source_p)
 {
-	if((ConfigFileEntry.stats_c_oper_only || ConfigServerHide.flatten_links) &&
+	if((ConfigFileEntry.stats_c_oper_only || 
+	    (ConfigServerHide.flatten_links && !IsExemptShide(source_p))) &&
 	    !IsOper(source_p))
 		sendto_one_numeric(source_p, ERR_NOPRIVILEGES,
 				   form_str (ERR_NOPRIVILEGES));
@@ -547,8 +548,9 @@ stats_glines (struct Client *source_p)
 static void
 stats_hubleaf (struct Client *source_p)
 {
-	if((ConfigFileEntry.stats_h_oper_only || ConfigServerHide.flatten_links) &&
-	   !IsOper(source_p))
+	if((ConfigFileEntry.stats_h_oper_only || 
+	    (ConfigServerHide.flatten_links && !IsExemptShide(source_p))) &&
+	    !IsOper(source_p))
 		sendto_one_numeric(source_p, ERR_NOPRIVILEGES,
 				   form_str (ERR_NOPRIVILEGES));
 	else
@@ -954,7 +956,8 @@ stats_servers (struct Client *source_p)
 	int days, hours, minutes;
 	int j = 0;
 
-	if(ConfigServerHide.flatten_links && !IsOper(source_p))
+	if(ConfigServerHide.flatten_links && !IsOper(source_p) &&
+	   !IsExemptShide(source_p))
 	{
 		sendto_one_numeric(source_p, ERR_NOPRIVILEGES,
 				   form_str (ERR_NOPRIVILEGES));
@@ -1074,7 +1077,8 @@ stats_servlinks (struct Client *source_p)
 	dlink_node *ptr;
 	int j = 0;
 
-	if(ConfigServerHide.flatten_links && !IsOper (source_p))
+	if(ConfigServerHide.flatten_links && !IsOper (source_p) &&
+	   !IsExemptShide(source_p))
 	{
 		sendto_one_numeric(source_p, ERR_NOPRIVILEGES,
 				   form_str (ERR_NOPRIVILEGES));

@@ -72,7 +72,7 @@ static void send_links_cache(struct Client *source_p);
 static int
 m_links(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
-	if(ConfigServerHide.flatten_links)
+	if(ConfigServerHide.flatten_links && !IsExemptShide(source_p))
 		send_links_cache(source_p);
 	else
 		mo_links(client_p, source_p, parc, parv);
