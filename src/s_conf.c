@@ -91,7 +91,6 @@ static void     expire_tklines(dlink_list *);
 static int 	is_attached(struct Client *client_p, struct ConfItem *aconf);
 
 FBFILE* conf_fbfile_in;
-char    conf_line_in[256];
 struct ConfItem* yy_aconf;
 extern char yytext[];
 
@@ -2276,32 +2275,6 @@ get_conf_name(KlineType type)
     }
 
   return(ConfigFileEntry.dlinefile);
-}
-
-/*
- * conf_add_class
- * inputs       - pointer to config item
- * output       - NONE
- * side effects - Add a class
- *
- */
-
-void 
-conf_add_class(struct ConfItem *aconf,int sendq)
-{
-  /*
-  ** If conf line is a class definition, create a class entry
-  */
-    /*
-    ** associate each conf line with a class by using a pointer
-    ** to the correct class record. -avalon
-    */
-  if (aconf->host)
-    {
-      add_class(aconf->host, atoi(aconf->passwd),
-		atoi(aconf->user), aconf->port,
-		sendq);
-    }
 }
 
 /*
