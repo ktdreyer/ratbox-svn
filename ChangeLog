@@ -1,3 +1,15 @@
+androsyn    2002/11/25 03:56:50 UTC	(20021125_6)
+
+  Modified files:
+    modules              m_htm.c 
+  Log:
+  Fix HTM to actually work for opers
+  
+  Revision  Changes    Path
+  1.5       +2 -2      ircd-ratbox/modules/m_htm.c
+
+
+
 androsyn    2002/11/25 03:40:23 UTC	(20021125_5)
 
   Modified files:
