@@ -1,3 +1,9 @@
+*** 20010210_9 by a1kmm
+- Fixed DLINES - an irc_inaddr is not the same as a sockaddr
+- We cannot return from accept_connection without re-selecting the listener or the listener won't work
+  properly!
+
+
 *** 20010210_8 by db
 - /rehash should check_klines() !
 
