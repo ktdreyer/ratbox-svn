@@ -1,3 +1,9 @@
+*** 20010106_24 by wcampbel
+Removed whois_notice and topic_uh from the ConfigFileEntry struct, one no
+longer exists, the other is always enabled, neither variable is used 
+ANYWHERE in the source, more bloat...
+
+
 *** 20010106_23 by wcampbel
 Numerous documentation cleanups
 
