@@ -1,3 +1,8 @@
+*** 20010225_13 by androsyn
+These are really that last ones for libresolv. Now I just need to figure out how to 
+make autoconf not look for libresolv and libnsl
+
+
 *** 20010225_12 by androsyn
 Fixed yet another dependancy on libresolv
 
