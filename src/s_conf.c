@@ -1833,10 +1833,7 @@ static void initconf(FBFILE* file)
 
 static void initnewconf(FBFILE* file)
 {
-#if 0
-  class0 = find_class(0);       /* which one is class 0 ? */
-#endif
-
+  yy_aconf = NULL;
   yyparse(); /* wheee! */
   fbclose(file);
 }

@@ -169,10 +169,9 @@ oper_entry:	OPERATOR
     yy_aconf->status = CONF_LOCOP;
   };
  '{' oper_items '}' ';' {
-
   if(yy_aconf->name && yy_aconf->passwd && yy_aconf->host)
     {
-      conf_add_class_to_conf(yy_aconf,NULL);
+      conf_add_class_to_conf(yy_aconf);
       conf_add_conf(yy_aconf);
     }
   yy_aconf = NULL;
@@ -188,7 +187,7 @@ oper_item:	oper_name  | oper_user | oper_host | oper_password |
 
 oper_name:	NAME '=' QSTRING ';' {
   DupString(yy_aconf->name,yylval.string);
- };
+};
 
 oper_user:	USER '=' QSTRING ';' {
   DupString(yy_aconf->user,yylval.string);
@@ -203,8 +202,8 @@ oper_password:	PASSWORD '=' QSTRING ';' {
 };
 
 oper_class:	CLASS '=' QSTRING ';' {
-  DupString(yy_aconf->class_name,yylval.string);
- };
+  DupString(yy_aconf->className,yylval.string);
+};
 
 oper_global:	GLOBAL '=' YES ';' {yy_aconf->status = CONF_OPERATOR;} |
 		GLOBAL '=' NO ';' {yy_aconf->status = CONF_LOCOP;} ;
@@ -279,16 +278,39 @@ class_sendq:	SENDQ '=' NUMBER ';' { sendto_realops("sendq [%d]",yylval.number); 
  *  section listen
  ***************************************************************************/
 
-listen_entry:	LISTEN '{' listen_items '}' ';'
+listen_entry:	LISTEN 
+  {
+    if(yy_aconf)
+      {
+	free_conf(yy_aconf);
+	yy_aconf = NULL;
+      }
+    yy_aconf=make_conf();
+    yy_aconf->status = CONF_LISTEN_PORT;
+    DupString(yy_aconf->passwd,"*");
+  };
+ '{' listen_items '}' ';' {
+  conf_add_port(yy_aconf);
+  conf_add_conf(yy_aconf);
+  yy_aconf = NULL;
+ };
 
 listen_items:	listen_items listen_item |
 		listen_item
 
-listen_item:	listen_name | listen_port 
+listen_item:	listen_name | listen_port | listen_address
 
-listen_name:	NAME '=' QSTRING ';'  { sendto_realops("listen.name [%s]",yylval.string); };
+listen_name:	NAME '=' QSTRING ';'  {
+    DupString(yy_aconf->host,yylval.string) ; 
+  };
 
-listen_port:	PORT '=' NUMBER ';'  { sendto_realops("listen.port [%d]",yylval.number); };
+listen_port:	PORT '=' NUMBER ';'  {
+    yy_aconf->port = yylval.number;
+  };
+
+listen_address:	IP '=' QSTRING ';' {
+  DupString(yy_aconf->passwd,yylval.string);
+  };
 
 /***************************************************************************
  *  section client

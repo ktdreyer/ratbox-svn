@@ -156,8 +156,9 @@ void    add_class(char *classname,
   Debug((DEBUG_DEBUG,
          "Add Class %s: p %x t %x - cf: %d pf: %d ml: %d sq: %l",
          classname, p, t, confreq, ping, maxli, sendq));
-  if(classname)
-    DupString(ClassName(p),classname);
+
+  /* classname already known to be non NULL */
+  DupString(ClassName(p),classname);
   ConFreq(p) = confreq;
   PingFreq(p) = ping;
   MaxLinks(p) = maxli;
