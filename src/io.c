@@ -46,6 +46,9 @@ static void read_client(struct connection_entry *conn_p);
 static int write_sendq(struct connection_entry *conn_p);
 static void parse_server(char *buf, int len);
 static void parse_client(struct connection_entry *conn_p, char *buf, int len);
+#ifdef HAVE_GETADDRINFO
+static struct addrinfo *gethostinfo(char const *host, int port);
+#endif
 
 /* stolen from squid */
 static int
@@ -486,7 +489,7 @@ connect_from_client(struct client *client_p, const char *servicenick)
 	int port;
 	int res;
 
-	client_fd = sock_create();
+	client_fd = sock_create(AF_INET);
 
 	if(config_file.dcc_vhost == NULL ||
 	   (local_addr = gethostbyname(config_file.dcc_vhost)) == NULL)
@@ -1126,13 +1129,13 @@ sendq_add(struct connection_entry *conn_p, const char *buf, int len, int offset)
 }
 
 int
-sock_create(void)
+sock_create(int domain)
 {
 	int fd = -1;
 	int optval = 1;
 	int flags;
 
-	if((fd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
+	if((fd = socket(domain, SOCK_STREAM, 0)) < 0)
 		return -1;
 
 	setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval));
@@ -1145,7 +1148,111 @@ sock_create(void)
 
 	return fd;
 }
-	
+
+#ifdef HAVE_GETADDRINFO
+/* sock_open()
+ *   attempts to open a connection
+ *
+ * inputs	- host/port to connect to, vhost to use
+ * outputs	- fd of socket, -1 on error
+ */
+int
+sock_open(const char *host, int port, const char *vhost, int type)
+{
+	struct addrinfo *hostres;
+	int fd = -1;
+
+	/* no specific vhost, try default */
+	if(vhost == NULL)
+		vhost = config_file.vhost;
+
+	if(vhost != NULL)
+	{
+		struct addrinfo *bindres;
+
+		if((bindres = gethostinfo(vhost, 0)) != NULL)
+		{
+			fd = sock_create(bindres->ai_family);
+			if(fd < 0)
+			{
+				slog("Connection to %s/%d failed: (socket()/fcntl(): %s)",
+				     host, port, strerror(errno));
+				sendto_all(UMODE_SERVER,
+					   "Connection to %s/%d failed: (socket()/fcntl(): %s)",
+					   host, port, strerror(errno));
+				return -1;
+			}
+
+			if((bind(fd, bindres->ai_addr, bindres->ai_addrlen)) < 0)
+			{
+				slog("Connection to %s/%d failed: "
+                                     "(unable to bind to %s: %s)",
+				     host, port, vhost, strerror(errno));
+				sendto_all(UMODE_SERVER,
+                                           "Connection to %s/%d failed: "
+                                           "(unable to bind to %s: %s)",
+				           host, port, vhost, strerror(errno));
+				return -1;
+			}
+		}
+		freeaddrinfo(bindres);
+	}
+
+	if(type == IO_HOST)
+	{
+		if((hostres = gethostinfo(host, port)) == NULL)
+		{
+			slog("Connection to %s/%d failed: "
+                             "(unable to resolve: %s)",
+			     host, port, host);
+			sendto_all(UMODE_SERVER,
+                                   "Connection to %s/%d failed: "
+                                   "(unable to resolve: %s)",
+				   host, port, host);
+			return -1;
+		}
+		if(fd < 0)
+			fd = sock_create(hostres->ai_family);
+		if(fd < 0)
+		{
+			slog("Connection to %s/%d failed: (socket()/fcntl(): %s)",
+			     host, port, strerror(errno));
+			sendto_all(UMODE_SERVER,
+				   "Connection to %s/%d failed: (socket()/fcntl(): %s)",
+				   host, port, strerror(errno));
+			return -1;
+		}
+		connect(fd, hostres->ai_addr, hostres->ai_addrlen);
+		freeaddrinfo(hostres);
+		return fd;
+	}
+	else
+	{
+		struct sockaddr_in raddr;
+		unsigned long hl;
+
+		if(fd < 0)
+			fd = sock_create(AF_INET);
+		if(fd < 0)
+		{
+			slog("Connection to %s/%d failed: (socket()/fcntl(): %s)",
+			     host, port, strerror(errno));
+			sendto_all(UMODE_SERVER,
+				   "Connection to %s/%d failed: (socket()/fcntl(): %s)",
+				   host, port, strerror(errno));
+			return -1;
+		}
+		memset(&raddr, 0, sizeof(struct sockaddr_in));
+		raddr.sin_family = AF_INET;
+		raddr.sin_port = htons(port);
+		hl = strtoul(host, NULL, 10);
+		raddr.sin_addr.s_addr = htonl(hl);
+
+		connect(fd, (struct sockaddr *) &raddr, sizeof(struct sockaddr_in));
+		return fd;
+	}
+}
+#else
 /* sock_open()
  *   attempts to open a connection
  *
@@ -1230,6 +1337,7 @@ sock_open(const char *host, int port, const char *vhost, int type)
 	connect(fd, (struct sockaddr *) &raddr, sizeof(struct sockaddr_in));
 	return fd;
 }
+#endif
 
 /* sock_write()
  *   Writes a buffer to a given user, flushing sendq first.
@@ -1298,4 +1406,27 @@ sock_close(struct connection_entry *conn_p)
 
 	SetConnDead(conn_p);
 }
+
+#ifdef HAVE_GETADDRINFO
+/* Stolen from FreeBSD's whois client, modified for rserv by W. Campbell */
+static struct addrinfo *gethostinfo(char const *host, int port)
+{
+	struct addrinfo hints, *res;
+	int error;
+	char portbuf[6];
+
+	memset(&hints, 0, sizeof(hints));
+	hints.ai_flags = 0;
+	hints.ai_family = AF_UNSPEC;
+	hints.ai_socktype = SOCK_STREAM;
+	snprintf(portbuf, 6, "%d", port);
+	error = getaddrinfo(host, portbuf, &hints, &res);
+	if (error)
+	{
+		slog("gethostinfo error: %s: %s", host, gai_strerror(error));
+		return (NULL);
+	}
+	return (res);
+}
+#endif
 

@@ -26,7 +26,7 @@ AC_CHECK_HEADERS(sys/time.h stdlib.h stdarg.h string.h strings.h unistd.h errno.
 
 AC_TYPE_SIGNAL
 AC_FUNC_STRFTIME
-AC_CHECK_FUNCS(select strlcpy strlcat gethostbyname mmap)
+AC_CHECK_FUNCS(select strlcpy strlcat gethostbyname mmap getaddrinfo)
 
 AC_OUTPUT(			\
 	Makefile		\

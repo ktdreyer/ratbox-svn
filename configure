@@ -1696,7 +1696,7 @@ fi
 
 fi
 
-for ac_func in select strlcpy strlcat gethostbyname mmap
+for ac_func in select strlcpy strlcat gethostbyname mmap getaddrinfo
 do
 echo $ac_n "checking for $ac_func""... $ac_c" 1>&6
 echo "configure:1703: checking for $ac_func" >&5

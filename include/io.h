@@ -91,7 +91,7 @@ extern void sendto_all(int umode, const char *format, ...);
 extern void sendto_all_butone(struct connection_entry *, int umode, 
                               const char *format, ...);
 
-extern int sock_create(void);
+extern int sock_create(int);
 extern int sock_open(const char *host, int port, const char *vhost, int type);
 extern void sock_close(struct connection_entry *conn_p);
 extern int sock_write(struct connection_entry *conn_p, const char *buf, int len);

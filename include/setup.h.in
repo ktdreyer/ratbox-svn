@@ -9,6 +9,9 @@
 /* Define if you have the ANSI C header files.  */
 #undef STDC_HEADERS
 
+/* Define if you have the getaddrinfo function.  */
+#undef HAVE_GETADDRINFO
+
 /* Define if you have the gethostbyname function.  */
 #undef HAVE_GETHOSTBYNAME
 
