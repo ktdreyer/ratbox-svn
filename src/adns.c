@@ -18,6 +18,19 @@
 adns_state dns_state;
 
 
+void delete_adns_queries(struct DNSQuery *q)
+{
+	if(q != NULL)
+	{
+		if(q->query != NULL)
+		{
+			q->query->ads = dns_state;
+			adns_cancel(q->query);
+		}
+	}
+	q->query = 0xf00dbeef;
+}              	        
+
 void restart_resolver(void)
 {
 	int err;
@@ -61,6 +74,7 @@ void dns_do_callbacks(void)
 	adns_forallqueries_begin(dns_state);
 	while((q = adns_forallqueries_next(dns_state, (void **)&q)) != NULL)
 	{
+		q->ads = dns_state;
 		switch(adns_check(dns_state, &q, &answer, (void **)&query))
 		{
 			case 0:
