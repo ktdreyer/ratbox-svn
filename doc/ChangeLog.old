@@ -1,3 +1,17 @@
+db          2001/12/29 18:29:32 EST	(20011229_5)
+
+  Modified files:
+    include              channel.h 
+    src                  channel_mode.c 
+  Log:
+  - start in at the +vo crapola
+  
+  Revision  Changes    Path
+  7.97      +2 -0      ircd-hybrid-7/include/channel.h
+  7.12      +3 -8      ircd-hybrid-7/src/channel_mode.c
+
+
+
 wcampbel    2001/12/29 17:52:13 EST	(20011229_4)
 
   Modified files:
