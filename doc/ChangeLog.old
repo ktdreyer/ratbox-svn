@@ -1,3 +1,7 @@
+*** 20010224_2 by a1kmm
+- Make sure we get the right version of config.h
+
+
 *** 20010224_1 by a1kmm
 - Disable memory debugging for the beta release.
 
