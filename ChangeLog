@@ -1,3 +1,24 @@
+leeh        2002/09/01 13:35:50 EDT	(20020901_0)
+
+  Modified files:
+    include              ircd.h resv.h 
+    modules              m_resv.c 
+    modules/core         m_nick.c 
+    src                  ircd.c resv.c 
+  Log:
+  - moved resv's over to dlink_lists, in preparation for what im about to
+    do next..
+  
+  Revision  Changes    Path
+  7.54      +0 -1      ircd-ratbox/include/ircd.h
+  1.9       +5 -9      ircd-ratbox/include/resv.h
+  1.102     +3 -3      ircd-ratbox/modules/core/m_nick.c
+  1.18      +5 -5      ircd-ratbox/modules/m_resv.c
+  7.255     +1 -0      ircd-ratbox/src/ircd.c
+  7.18      +54 -62    ircd-ratbox/src/resv.c
+
+
+
 leeh        2002/08/31 11:54:06 EDT	(20020831_5)
 
   Modified files:
