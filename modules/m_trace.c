@@ -64,7 +64,7 @@ _moddeinit(void)
 static int report_this_status(struct Client *sptr, struct Client *acptr,int dow,
                               int link_u_p, int link_u_s);
 
-char *_version = "20001122";
+char *_version = "20010109";
 
 /*
 ** mo_trace
@@ -221,6 +221,24 @@ static int mo_trace(struct Client *cptr, struct Client *sptr,
 
       cnt = report_this_status(sptr,acptr,dow,link_u[i],link_s[i]);
     }
+
+  /* This section is to report the unknowns */
+  for ( i = 0, ptr = unknown_list.head; ptr; ptr = ptr->next)
+    {
+      acptr = ptr->data;
+
+      if (IsInvisible(acptr) && dow &&
+          !(MyConnect(sptr) && IsOper(sptr)) &&
+          !IsOper(acptr) && (acptr != sptr))
+        continue;
+      if (!doall && wilds && !match(tname, acptr->name))
+        continue;
+      if (!dow && irccmp(tname, acptr->name))
+        continue;
+
+      cnt = report_this_status(sptr,acptr,dow,link_u[i],link_s[i]);
+    }
+
   /*
    * Add these lines to summarize the above which can get rather long
    * and messy when done remotely - Avalon
