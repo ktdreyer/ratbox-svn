@@ -1,3 +1,21 @@
+*** 20001226_4 by db
+- lljoin was checking for arg count, when thats no longer necessary
+  given the new parser
+
+- parser got the parc count off by one when checking for vality, off by one
+  error.. also cleaned up formatting
+
+- modules.c two functions were referring to basename() which had been 
+  changed to irc_basename()
+
+- s_serv.c was sending topic to servers that didn't see that server on
+  channel, changed interface so s_serv.c bursts topic info to lazyleaf
+  as well as setting topic
+
+- changed m_topic.c to allow servers to set topic and topic info
+
+
+
 *** 20001226_3 by db
 - don't burst the TOPIC in s_serv.c until there is a ms_topic() handler
   the server isn't on channel so the leaf will send back an not on channel
