@@ -1008,6 +1008,7 @@ server_estab(struct Client *client_p)
 	{
 		memset(client_p->localClient->passwd, 0, strlen(client_p->localClient->passwd));
 		MyFree(client_p->localClient->passwd);
+		client_p->localClient->passwd = NULL;
 	}
 
 	/* Its got identd , since its a server */
