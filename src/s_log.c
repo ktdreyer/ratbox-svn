@@ -51,7 +51,7 @@ static int sysLogLevel[] = {
   LOG_INFO
 };
 
-static const char *sysLogLevelToString[] =
+static const char *logLevelToString[] =
 { "L_CRIT",
   "L_ERROR",
   "L_WARN",
@@ -142,5 +142,5 @@ const char *get_log_level_as_string(int level)
   else if(level < L_ERROR)
     level = L_ERROR;
 
-  return(sysLogLevelToString[level]);
+  return(logLevelToString[level]);
 }
