@@ -1,3 +1,8 @@
+*** 20001228_27 by db
+- local array shoud be static. bad Diane bad bad bad
+
+
+
 *** 20001228_26 by db
 - ummm unitialized pointers should not be strcatted... bad bad bad
   bad coder...
