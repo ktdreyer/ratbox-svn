@@ -509,24 +509,10 @@ mo_modlist (struct Client *client_p, struct Client *source_p, int parc, char **p
     return;
   }
 
-  if (parc>1)
-  {
-    sendto_one(source_p,
-               ":%s NOTICE %s :Listing modules matching string '%s'...",
-               me.name, parv[0], parv[1]);
-  }
-  else {
-    sendto_one(source_p, ":%s NOTICE %s :Listing all modules...",
-               me.name, parv[0]);
-  }
-
   for(i = 0; i < num_mods; i++ )
   {
     if(parc>1)
     {
-#if 0
-      if(strstr(modlist[i]->name,parv[1]))  /* why was this non-wildcard matching? */
-#endif
       if(match(parv[1],modlist[i]->name))
       {
         sendto_one(source_p, form_str(RPL_MODLIST), me.name, parv[0],
@@ -534,13 +520,15 @@ mo_modlist (struct Client *client_p, struct Client *source_p, int parc, char **p
                    modlist[i]->version);
       }
     }
-    else {
+    else
+    {
       sendto_one(source_p, form_str(RPL_MODLIST), me.name, parv[0],
                  modlist[i]->name, modlist[i]->address,
                  modlist[i]->version);
     }
   }
-  sendto_one(source_p, ":%s NOTICE %s :Done.", me.name, parv[0]);
+  
+  sendto_one(source_p, form_str(RPL_ENDOFMODLIST), me.name, parv[0]);
 }
 
 /* unload and reload all modules */
