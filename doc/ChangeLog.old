@@ -1,3 +1,20 @@
+jmallett    2002/01/07 15:32:50 EST	(20020107_4)
+
+  Modified files:
+    .                    configure 
+    autoconf             configure.in 
+  Log:
+  Fix OS/compiler logic in configure to be slightly more generic than
+  checking for using gcc in the SunOS case, in case we decide to
+  include support for generic portable compilers like TenDRA or
+  OpenWatcom or such, and they have different options for PIC code.
+  
+  Revision  Changes    Path
+  7.108     +14 -15    ircd-hybrid-7/autoconf/configure.in
+  7.111     +30 -31    ircd-hybrid-7/configure
+
+
+
 jmallett    2002/01/07 12:48:30 EST	(20020107_3)
 
   Modified files:
