@@ -123,7 +123,7 @@ static void m_okick(struct Client *client_p,
   if (IsMember(who, chptr))
     {
       sendto_channel_local(ALL_MEMBERS, chptr, ":%s KICK %s %s :%s",
-          me.name, me.name, who->name, comment);
+          me.name, chptr->chname, who->name, comment);
       sendto_server(&me, chptr, NOCAPS, NOCAPS,
                     ":%s KICK %s %s :%s",
                     me.name, chptr->chname,
