@@ -178,9 +178,11 @@ static void ms_kill(struct Client *client_p, struct Client *source_p,
   struct Client*    target_p;
   const char* inpath = client_p->name;
   char*       user;
-  char*       path;
   char*       reason;
   int         chasing = 0;
+#if 0
+  char*       path;
+#endif
 
   if (*parv[1] == '\0')
     {
@@ -362,7 +364,7 @@ static void relay_kill(struct Client *one, struct Client *source_p,
       }
     else
       {
-        sendto_one(client_p, ":%s KILL %s :%s %s",
+        sendto_one(client_p, ":%s KILL %s :%s %s (%s)",
                    source_p->name, user, me.name,
                    inpath, reason);
       }
