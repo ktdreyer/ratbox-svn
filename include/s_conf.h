@@ -211,6 +211,8 @@ typedef struct config_file_entry
   int         quiet_on_ban;
   int         caller_id_wait;
   int         persist_expire;
+  int         min_nonwildcard;
+  int         default_floodcount;
 } ConfigFileEntryType;
 
 struct server_info

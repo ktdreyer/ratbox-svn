@@ -37,13 +37,4 @@ struct PKDlines
 
 typedef struct PKDlines aPendingLine;
 
-/*
- * This number represents the number of non-wildcard characters
- * that must be in the kline string in order for it to be
- * considered valid. "* ? ! @ ." are considered wildcard
- * characters for the kline routine.
- */
-
-#define NONWILDCHARS 4
-
 #endif /* INCLUDED_m_kline_h */

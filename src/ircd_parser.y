@@ -88,6 +88,7 @@ int   class_redirport_var;
 %token  COMPRESSED
 %token  CONNECT
 %token  CONNECTFREQ
+%token  DEFAULT_FLOODCOUNT
 %token  DENY
 %token  DESCRIPTION
 %token  DIE
@@ -229,6 +230,7 @@ int   class_redirport_var;
 %token  LINKS_NOTICE
 %token  LINKS_DELAY
 %token  VCHANS_OPER_ONLY
+%token  MIN_NONWILDCARD
 
 %type   <ip_value> IP_TYPE
 %type   <string>   QSTRING
@@ -1454,8 +1456,8 @@ general_item:       general_failed_oper_notice | general_show_failed_oper_id |
                     general_max_targets |
                     general_links_delay |
                     general_vchans_oper_only |
-                    general_caller_id_wait |
-                    general_persistant_expire_time |
+                    general_caller_id_wait | general_default_floodcount |
+                    general_persistant_expire_time | general_min_nonwildcard |
                     error
 
 general_failed_oper_notice:   FAILED_OPER_NOTICE '=' TYES ';'
@@ -1799,3 +1801,12 @@ general_persistant_expire_time:  PERSISTANT_EXPIRE_TIME '=' NUMBER ';'
   {
     ConfigFileEntry.persist_expire = yylval.number;  
   };
+general_min_nonwildcard:    MIN_NONWILDCARD '=' NUMBER ';'
+  {
+    ConfigFileEntry.min_nonwildcard = yylval.number;
+  };
+general_default_floodcount:    DEFAULT_FLOODCOUNT '=' NUMBER ';'
+  {
+    ConfigFileEntry.default_floodcount = yylval.number;
+  };
+

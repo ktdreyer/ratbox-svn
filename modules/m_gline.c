@@ -145,7 +145,6 @@ static void mo_gline(struct Client *client_p,
   const char *reason = NULL;          /* reason for "victims" demise */
   char *p;
   char tmpch;
-  int nonwild;
   char tempuser[USERLEN + 2];
   char temphost[HOSTLEN + 1];
 
@@ -209,6 +208,7 @@ static void mo_gline(struct Client *client_p,
        * be disallowed.
        * -wnder
        */
+      /* A config file options is better, I think :) -- fl */
 
       /* Not enough non-wild characters were found, assume they are trying to gline *@*. */
       if (check_wild_gline(user, host))
@@ -216,7 +216,7 @@ static void mo_gline(struct Client *client_p,
 	  if (MyClient(source_p))
 	    sendto_one(source_p,
 		       ":%s NOTICE %s :Please include at least %d non-wildcard characters with the user@host",
-		       me.name, parv[0], NONWILDCHARS);
+		       me.name, parv[0], ConfigFileEntry.min_nonwildcard);
 	  return;
 	}
 			
@@ -328,11 +328,13 @@ static void ms_gline(struct Client *client_p,
 
   if (ConfigFileEntry.glines)
     {
+     /* I dont like the idea of checking for x non-wildcard chars in a gline.. it could lead to
+      * a desync... but we have to stop people glining *@*..   -- fl */
      if (check_wild_gline(user, host))
         {
           sendto_realops_flags(FLAGS_ALL, 
                        "%s!%s@%s on %s is requesting a gline without %d non-wildcard characters for [%s@%s] [%s]",
-                       oper_nick, oper_user, oper_host, oper_server, NONWILDCHARS,
+                       oper_nick, oper_user, oper_host, oper_server, ConfigFileEntry.min_nonwildcard,
                        user, host, reason);
           return;
         }
@@ -388,12 +390,12 @@ check_wild_gline(char *user, char *host)
              * If we find enough non-wild characters, we can
              * break - no point in searching further.
              */
-            if (++nonwild >= NONWILDCHARS)
+            if (++nonwild >= ConfigFileEntry.min_nonwildcard)
               break;
          }
     }
 
-   if (nonwild < NONWILDCHARS)
+   if (nonwild < ConfigFileEntry.min_nonwildcard)
     {
        /*
         * The user portion did not contain enough non-wild
@@ -403,12 +405,12 @@ check_wild_gline(char *user, char *host)
        while ((tmpch = *p++))
          {
            if (!IsKWildChar(tmpch))
-             if (++nonwild >= NONWILDCHARS)
+             if (++nonwild >= ConfigFileEntry.min_nonwildcard)
                break;
          }
      }
 
-    if (nonwild < NONWILDCHARS)
+    if (nonwild < ConfigFileEntry.min_nonwildcard)
        return 1;
     else
        return 0;

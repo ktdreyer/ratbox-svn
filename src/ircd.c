@@ -395,7 +395,10 @@ static void initialize_global_set_options(void)
   GlobalSetOptions.spam_time = MIN_JOIN_LEAVE_TIME;
   GlobalSetOptions.spam_num = MAX_JOIN_LEAVE_COUNT;
 
-  GlobalSetOptions.floodcount = DEFAULT_FLOOD_COUNT;
+  if(ConfigFileEntry.default_floodcount)
+    GlobalSetOptions.floodcount = ConfigFileEntry.default_floodcount;
+  else
+    GlobalSetOptions.floodcount = 10;
 
  /* End of global set options */
 
@@ -491,8 +494,6 @@ int main(int argc, char *argv[])
 
   memset((void *)&AdminInfo, 0, sizeof(AdminInfo));
 
-  initialize_global_set_options();
-
   ConfigFileEntry.dpath = DPATH;
   ConfigFileEntry.configfile = CPATH;   /* Server configuration file */
   ConfigFileEntry.klinefile = KPATH;    /* Server kline file */
@@ -550,6 +551,8 @@ int main(int argc, char *argv[])
   init_auth();			/* Initialise the auth code */
 
   read_conf_files(YES);         /* cold start init conf files */
+
+  initialize_global_set_options();
 
   if (ServerInfo.name == NULL)
     {

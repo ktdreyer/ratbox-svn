@@ -208,7 +208,7 @@ static void mo_kline(struct Client *client_p,
           ":%s NOTICE %s :Please include at least %d non-wildcard characters with the user@host",
            me.name,
            source_p->name,
-           NONWILDCHARS);
+           ConfigFileEntry.min_nonwildcard);
        return;
     }
 
@@ -929,12 +929,12 @@ static int valid_wild_card(char *luser, char *lhost)
        * If we find enough non-wild characters, we can
        * break - no point in searching further.
        */
-      if (++nonwild >= NONWILDCHARS)
+      if (++nonwild >= ConfigFileEntry.min_nonwildcard)
         break;
     }
   }
 
-  if (nonwild < NONWILDCHARS)
+  if (nonwild < ConfigFileEntry.min_nonwildcard)
   {
     /*
      * The user portion did not contain enough non-wild
@@ -944,12 +944,12 @@ static int valid_wild_card(char *luser, char *lhost)
     while ((tmpch = *p++))
     {
       if (!IsKWildChar(tmpch))
-        if (++nonwild >= NONWILDCHARS)
+        if (++nonwild >= ConfigFileEntry.min_nonwildcard)
           break;
     }
   }
 
-  if (nonwild < NONWILDCHARS)
+  if (nonwild < ConfigFileEntry.min_nonwildcard)
     return 1;
   else
     return 0;
