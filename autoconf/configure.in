@@ -19,7 +19,6 @@ if test "x$GCC" = "xyes"; then
 else
   IRC_CFLAGS="-g"
 fi
-
 AC_SUBST(IRC_CFLAGS)
 AC_ISC_POSIX
 AC_PROG_MAKE_SET
@@ -33,6 +32,7 @@ AC_PROG_YACC
 AC_PROG_INSTALL
 AC_PROG_LEX
 AC_PROG_RANLIB
+AC_C_INLINE
 
 dnl use directory structure of cached as default (hack)
 if test "$libexecdir" = '${exec_prefix}/libexec' &&
