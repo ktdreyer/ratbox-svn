@@ -1,3 +1,49 @@
+androsyn    2003/09/10 11:14:50 EDT	(20030910_1)
+
+  Modified files:
+    adns                 adns.h check.c event.c general.c parse.c 
+                         query.c reply.c setup.c transmit.c 
+                         types.c 
+    include              fdlist.h res.h s_conf.h 
+    modules              .depend 
+    src                  .depend Makefile.in adns.c fdlist.c 
+                         hash.c ircd_lexer.l s_conf.c s_gline.c 
+                         s_log.c 
+  Removed files:
+    include              fileio.h 
+    src                  fileio.c 
+  Log:
+  Merge fileio.c into fdlist.c
+  
+  Revision  Changes    Path
+  1.10      +1 -0      ircd-ratbox/adns/adns.h
+  1.7       +1 -1      ircd-ratbox/adns/check.c
+  1.21      +1 -1      ircd-ratbox/adns/event.c
+  1.14      +1 -1      ircd-ratbox/adns/general.c
+  1.8       +1 -1      ircd-ratbox/adns/parse.c
+  1.19      +1 -1      ircd-ratbox/adns/query.c
+  1.10      +1 -1      ircd-ratbox/adns/reply.c
+  1.32      +1 -1      ircd-ratbox/adns/setup.c
+  1.12      +1 -1      ircd-ratbox/adns/transmit.c
+  1.13      +1 -1      ircd-ratbox/adns/types.c
+  7.33      +34 -1     ircd-ratbox/include/fdlist.h
+  7.17      +0 -95     ircd-ratbox/include/fileio.h (dead)
+  7.28      +0 -1      ircd-ratbox/include/res.h
+  7.258     +1 -2      ircd-ratbox/include/s_conf.h
+  1.34      +666 -9    ircd-ratbox/modules/.depend
+  7.36      +178 -205  ircd-ratbox/src/.depend
+  7.140     +0 -1      ircd-ratbox/src/Makefile.in
+  7.63      +0 -1      ircd-ratbox/src/adns.c
+  7.44      +272 -0    ircd-ratbox/src/fdlist.c
+  7.31      +0 -308    ircd-ratbox/src/fileio.c (dead)
+  7.87      +0 -1      ircd-ratbox/src/hash.c
+  1.156     +1 -1      ircd-ratbox/src/ircd_lexer.l
+  7.436     +0 -1      ircd-ratbox/src/s_conf.c
+  1.39      +1 -1      ircd-ratbox/src/s_gline.c
+  7.61      +1 -1      ircd-ratbox/src/s_log.c
+
+
+
 androsyn    2003/09/10 10:53:11 EDT	(20030910_0)
 
   Modified files:
