@@ -11,6 +11,7 @@ struct user_reg
 {
 	char name[USERREGNAME_LEN+1];
 	char *password;
+	char *email;
 
 	time_t reg_time;
 	time_t last_time;

@@ -43,6 +43,7 @@ set_default_conf(void)
 	config_file.disable_uregister = 0;
 	config_file.uregister_time = 60;
 	config_file.uregister_amount = 10;
+	config_file.uregister_email = 1;
 
 	config_file.disable_cregister = 0;
 	config_file.cregister_time = 60;

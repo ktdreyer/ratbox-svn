@@ -88,7 +88,7 @@ user_db_callback(void *db, int argc, char **argv, char **colnames)
 {
 	struct user_reg *reg_p;
 
-	if(argc < 5)
+	if(argc < 6)
 		return 0;
 
 	if(EmptyString(argv[0]))
@@ -98,9 +98,12 @@ user_db_callback(void *db, int argc, char **argv, char **colnames)
 	strlcpy(reg_p->name, argv[0], sizeof(reg_p->name));
 	reg_p->password = my_strdup(argv[1]);
 
-	reg_p->reg_time = atol(argv[2]);
-	reg_p->last_time = atol(argv[3]);
-	reg_p->flags = atoi(argv[4]);
+	if(!EmptyString(argv[2]))
+		reg_p->email = my_strdup(argv[2]);
+
+	reg_p->reg_time = atol(argv[3]);
+	reg_p->last_time = atol(argv[4]);
+	reg_p->flags = atoi(argv[5]);
 
 	add_user_reg(reg_p);
 
@@ -256,6 +259,13 @@ s_userserv_register(struct client *client_p, char *parv[], int parc)
 		return 1;
 	}
 
+	if(config_file.uregister_email && (parc < 3 || EmptyString(parv[2])))
+	{
+		service_error(userserv_p, client_p, "Insufficient parameters to %s::REGISTER",
+				userserv_p->name);
+		return 1;
+	}
+
 	/* apply timed registration limits */
 	if(config_file.uregister_time && config_file.uregister_amount)
 	{
@@ -285,14 +295,18 @@ s_userserv_register(struct client *client_p, char *parv[], int parc)
 	password = get_crypt(parv[1], NULL);
 	reg_p->password = my_strdup(password);
 
+	if(!EmptyString(parv[2]))
+		reg_p->email = my_strdup(parv[2]);
+
 	reg_p->reg_time = reg_p->last_time = CURRENT_TIME;
 
 	client_p->user->user_reg = reg_p;
 	add_user_reg(reg_p);
 
-	loc_sqlite_exec(NULL, "INSERT INTO users VALUES(%Q, %Q, %lu, %lu, %u)",
-			reg_p->name, reg_p->password, reg_p->reg_time, reg_p->last_time,
-			reg_p->flags);
+	loc_sqlite_exec(NULL, "INSERT INTO users VALUES(%Q, %Q, %Q, %lu, %lu, %u)",
+			reg_p->name, reg_p->password, 
+			EmptyString(reg_p->email) ? "" : reg_p->email, 
+			reg_p->reg_time, reg_p->last_time, reg_p->flags);
 
 	service_error(userserv_p, client_p, "Registration successful");
 

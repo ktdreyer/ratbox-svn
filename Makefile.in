@@ -30,6 +30,7 @@ install: build
 	$(INSTALL) -m 750 -d $(PREFIX)/logs
 	$(INSTALL) -m 750 src/$(BIN) $(PREFIX)
 	$(INSTALL) -m 640 doc/example.conf $(PREFIX)
+	$(INSTALL) -m 640 doc/schema.txt $(PREFIX)
 	@for i in $(SUBDIRS); do \
 		echo "install -> $$i"; \
 		cd $$i; \

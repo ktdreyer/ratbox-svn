@@ -31,6 +31,7 @@ struct _config_file
 	int disable_uregister;
 	int uregister_time;
 	int uregister_amount;
+	int uregister_email;
 
 	/* chanserv */
 	int disable_cregister;

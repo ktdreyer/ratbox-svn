@@ -1,4 +1,4 @@
 Makefile
 y.tab.*
 lex.yy.c
-rserv
+ratbox-services
