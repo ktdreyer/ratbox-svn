@@ -36,12 +36,12 @@ extern dlink_list *ndTable;
 #define FNV1_32_INIT 0x811c9dc5UL
 
 /* Client hash table size, used in hash.c/s_debug.c */
-#define U_MAX_BITS (32-16)
-#define U_MAX 65536 /* 2^16 */
+#define U_MAX_BITS (32-17)
+#define U_MAX 131072 /* 2^17 */
 
 /* Channel hash table size, hash.c/s_debug.c */
-#define CH_MAX_BITS (32-15)
-#define CH_MAX 32768 /* 2^15 */
+#define CH_MAX_BITS (32-16)
+#define CH_MAX 65536 /* 2^16 */
 
 /* hostname hash table size */
 #define HOST_MAX_BITS (32-17)
