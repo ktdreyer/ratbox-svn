@@ -1,3 +1,18 @@
+androsyn    2003/09/24 16:39:29 EDT	(20030924_0)
+
+  Modified files:
+    src                  epoll.c linebuf.c send.c 
+  Log:
+  Add support for doing scatter/gather writes.  poll() works okay so far, not
+  rtsigio seems broken still, as does epoll. Not sure about kqueue though
+  
+  Revision  Changes    Path
+  1.17      +49 -4     ircd-ratbox/src/epoll.c
+  7.117     +59 -30    ircd-ratbox/src/linebuf.c
+  7.262     +6 -1      ircd-ratbox/src/send.c
+
+
+
 androsyn    2003/09/23 09:54:12 EDT	(20030923_7)
 
   Modified files:
