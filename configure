@@ -4452,9 +4452,9 @@ fi
 
 
 if test "$ac_cv_type_struct_sockaddr_storage" = no; then
-	echo "$as_me:$LINENO: checking for struct sockaddr_in.sin_len" >&5
-echo $ECHO_N "checking for struct sockaddr_in.sin_len... $ECHO_C" >&6
-if test "${ac_cv_member_struct_sockaddr_in_sin_len+set}" = set; then
+	echo "$as_me:$LINENO: checking for struct sockaddr.sa_len" >&5
+echo $ECHO_N "checking for struct sockaddr.sa_len... $ECHO_C" >&6
+if test "${ac_cv_member_struct_sockaddr_sa_len+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   cat >conftest.$ac_ext <<_ACEOF
@@ -4467,8 +4467,8 @@ $ac_includes_default
 int
 main ()
 {
-static struct sockaddr_in ac_aggr;
-if (ac_aggr.sin_len)
+static struct sockaddr ac_aggr;
+if (ac_aggr.sa_len)
 return 0;
   ;
   return 0;
@@ -4495,7 +4495,7 @@ if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   ac_status=$?
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
   (exit $ac_status); }; }; then
-  ac_cv_member_struct_sockaddr_in_sin_len=yes
+  ac_cv_member_struct_sockaddr_sa_len=yes
 else
   echo "$as_me: failed program was:" >&5
 sed 's/^/| /' conftest.$ac_ext >&5
@@ -4510,8 +4510,8 @@ $ac_includes_default
 int
 main ()
 {
-static struct sockaddr_in ac_aggr;
-if (sizeof ac_aggr.sin_len)
+static struct sockaddr ac_aggr;
+if (sizeof ac_aggr.sa_len)
 return 0;
   ;
   return 0;
@@ -4538,20 +4538,20 @@ if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   ac_status=$?
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
   (exit $ac_status); }; }; then
-  ac_cv_member_struct_sockaddr_in_sin_len=yes
+  ac_cv_member_struct_sockaddr_sa_len=yes
 else
   echo "$as_me: failed program was:" >&5
 sed 's/^/| /' conftest.$ac_ext >&5
 
-ac_cv_member_struct_sockaddr_in_sin_len=no
+ac_cv_member_struct_sockaddr_sa_len=no
 fi
 rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
 fi
 rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
 fi
-echo "$as_me:$LINENO: result: $ac_cv_member_struct_sockaddr_in_sin_len" >&5
-echo "${ECHO_T}$ac_cv_member_struct_sockaddr_in_sin_len" >&6
-if test $ac_cv_member_struct_sockaddr_in_sin_len = yes; then
+echo "$as_me:$LINENO: result: $ac_cv_member_struct_sockaddr_sa_len" >&5
+echo "${ECHO_T}$ac_cv_member_struct_sockaddr_sa_len" >&6
+if test $ac_cv_member_struct_sockaddr_sa_len = yes; then
 
 cat >>confdefs.h <<\_ACEOF
 #define SOCKADDR_IN_HAS_LEN 1
@@ -4689,6 +4689,8 @@ fi
 rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
 
 fi
+
+
 
 # Check whether --enable-ipv6 or --disable-ipv6 was given.
 if test "${enable_ipv6+set}" = set; then

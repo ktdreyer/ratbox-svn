@@ -240,8 +240,8 @@ AC_CHECK_TYPES([struct sockaddr_storage], , ,
 ]])
 
 if test "$ac_cv_type_struct_sockaddr_storage" = no; then
-	AC_CHECK_MEMBER([struct sockaddr_in.sin_len],
-	[AC_DEFINE(SOCKADDR_IN_HAS_LEN, 1, [Define to 1 if sockaddr_in has a 'sin_len' member.])])
+	AC_CHECK_MEMBER([struct sockaddr.sa_len],
+	[AC_DEFINE(SOCKADDR_IN_HAS_LEN, 1, [Define to 1 if sockaddr has a 'sa_len' member.])])
 fi
 
 AC_CHECK_TYPE(socklen_t, ,
@@ -266,6 +266,16 @@ AC_COMPILE_IFELSE(
 [AC_MSG_RESULT(no)])
 
 fi
+
+AC_DEFUN(AC_STRUCT_SA_LEN,
+[AC_CACHE_CHECK([for sa_len in struct sockaddr], ac_cv_struct_sa_len,
+[AC_TRY_COMPILE([#include <sys/types.h>
+#include <sys/socket.h>], [struct sockaddr s; s.sa_len;],
+ac_cv_struct_sa_len=yes, ac_cv_struct_sa_len=no)])
+if test $ac_cv_struct_sa_len = yes; then
+  AC_DEFINE(HAVE_SA_LEN)
+fi
+])
 
 AC_ARG_ENABLE(ipv6,
 AC_HELP_STRING([--enable-ipv6],[Enable IPv6 support]),

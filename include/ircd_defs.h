@@ -127,17 +127,33 @@
 
 
 #ifndef HAVE_STRUCT_SOCKADDR_STORAGE
-# define	_SS_MAXSIZE	128	/* Implementation specific max size */
-# define	_SS_PADSIZE	(_SS_MAXSIZE - sizeof (struct sockaddr))
-
+#ifdef SOCKADDR_IN_HAS_LEN /* BSD style sockaddr_storage for BSD style
+                              sockaddr_in */   
 struct sockaddr_storage {
-	struct  sockaddr ss_sa;
-	char		__ss_pad2[_SS_PADSIZE];
+	unsigned char ss_len;
+        sa_family_t ss_family;
+        char __ss_pad1[((sizeof(int64_t)) - sizeof(unsigned char) -   
+                        sizeof(sa_family_t) )];
+        int64_t __ss_align;
+        char __ss_pad2[(128 - sizeof(unsigned char) - sizeof(sa_family_t) -
+                        ((sizeof(int64_t)) - sizeof(unsigned char) -
+                         sizeof(sa_family_t)) - (sizeof(int64_t)))];
 };
-# define ss_family ss_sa.sa_family
-#endif /* !HAVE_STRUCT_SOCKADDR_STORAGE */
+#undef HAVE_SA_LEN
+#define HAVE_SA_LEN 1
+#else /* Linux style for everything else (for now) */
+struct sockaddr_storage
+{
+  	sa_family_t ss_family;
+  	u_int32_t __ss_align;
+        char __ss_padding[(128 - (2 * sizeof (u_int32_t)))];
+};
+#endif /* SOCKADDR_IN_HAS_LEN */
+#endif /* HAVE_STRUCT_SOCKADDR_STORAGE */
 
-#ifdef SOCKADDR_IN_HAS_LEN
+
+
+#ifdef HAVE_SA_LEN
 #define SET_SS_LEN(x, y) x.sa_len = y
 #define GET_SS_LEN(x) x.sa_len
 #else
