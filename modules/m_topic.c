@@ -170,13 +170,22 @@ int     m_topic(struct Client *cptr,
               sendto_one(sptr, form_str(RPL_TOPIC),
                          me.name, parv[0],
                          name, chptr->topic);
-	      if ((!GlobalSetOptions.hide_chanops) ||
-		  (GlobalSetOptions.hide_chanops && is_any_op(chptr,sptr)))
+              if (!GlobalSetOptions.hide_chanops)
+                {
+                  sendto_one(sptr, form_str(RPL_TOPICWHOTIME),
+                             me.name, parv[0], name,
+                             chptr->topic_info,
+                             chptr->topic_time);
+                }
+	      else 
 		{
-		  sendto_one(sptr, form_str(RPL_TOPICWHOTIME),
-			     me.name, parv[0], name,
-			     chptr->topic_info,
-			     chptr->topic_time);
+		  if(is_any_op(chptr,sptr))
+		    {
+		      sendto_one(sptr, form_str(RPL_TOPICWHOTIME),
+				 me.name, parv[0], name,
+				 chptr->topic_info,
+				 chptr->topic_time);
+		    }
 		}
 	    }
 	}
