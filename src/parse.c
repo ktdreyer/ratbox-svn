@@ -67,7 +67,7 @@ struct MessageHash *msg_hash_table[MAX_MSG_HASH];
 
 static char buffer[1024];
 
-/* turn a string into a parc/parv pair
+/* turn a string into a parc/parv pair */
 
 
 static inline int
@@ -75,7 +75,8 @@ string_to_array(char *string, char *parv[MAXPARA])
 {
 	char *p, *buf = string;
 	register int x = 1;
-	buf += strspn(buf, " ");
+	while(*buf == ' ') 
+		buf++;
 	if(*buf == '\0')
 		return x;
 	do 
@@ -101,7 +102,8 @@ string_to_array(char *string, char *parv[MAXPARA])
 	                parv[x] = NULL;
 			return x;
 	        }       
-	        buf += strspn(buf, " ");
+	        while(*buf == ' ')
+	        	buf++;
 	        x++;
 	} while(x < MAXPARA - 1);
 	parv[x++] = p;
@@ -190,8 +192,8 @@ void parse(struct Client *client_p, char *pbuffer, char *bufend)
               return;
             }
         }
-      while (*ch == ' ')
-        ch++;
+      while(*ch == ' ')
+      	ch++;
     }
 
   if (*ch == '\0')
