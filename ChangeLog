@@ -1,3 +1,23 @@
+leeh        2004/03/19 20:31:16 EST	(20040320_1)
+
+  Modified files:
+    modules              m_invite.c m_ping.c m_pong.c m_whois.c 
+    modules/core         m_kill.c m_message.c 
+    src                  s_serv.c 
+  Log:
+  - fix ERR_NOSUCHNICK and ERR_NOSUCHSERVER to not give out UIDs.
+  
+  Revision  Changes    Path
+  1.101     +3 -2      ircd-ratbox/modules/core/m_kill.c
+  1.147     +8 -3      ircd-ratbox/modules/core/m_message.c
+  1.81      +3 -2      ircd-ratbox/modules/m_invite.c
+  1.55      +3 -7      ircd-ratbox/modules/m_ping.c
+  1.54      +4 -3      ircd-ratbox/modules/m_pong.c
+  1.139     +5 -3      ircd-ratbox/modules/m_whois.c
+  7.391     +7 -5      ircd-ratbox/src/s_serv.c
+
+
+
 leeh        2004/03/19 19:34:34 EST	(20040320_0)
 
   Modified files:
