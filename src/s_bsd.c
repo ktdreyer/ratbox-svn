@@ -890,10 +890,8 @@ static int read_packet(struct Client *cptr)
    * worrying about the time of day or anything :)
    */
   if (PARSE_AS_SERVER(cptr)) {
-    if (length > 0) {
-      if ((done = dopacket(cptr, readBuf, length)))
-        return done;
-    }
+    if ((done = dopacket(cptr, readBuf, length)))
+      return done;
   }
   else {
     /*
