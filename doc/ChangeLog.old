@@ -1,3 +1,10 @@
+*** 20001106_2 by db
+- removed prototype that no longer existed
+- fixed comment in hash.c
+- reworked yet another inconsistent function
+
+
+
 *** 20001106_1 by db
 - made some functions consistent in use... i.e. always start with chptr
 - removed some dead functions
