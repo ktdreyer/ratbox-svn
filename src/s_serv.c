@@ -573,9 +573,9 @@ serv_connect(struct server_conf *server_p, struct Client *by)
 
 	/* Create a local client */
 	client_p = make_client(NULL);
+	client_p->name = find_or_add(server_p->name);
 
 	/* Copy in the server, hostname, fd */
-	strlcpy(client_p->name, server_p->name, sizeof(client_p->name));
 	strlcpy(client_p->host, server_p->host, sizeof(client_p->host));
 	strlcpy(client_p->sockhost, buf, sizeof(client_p->sockhost));
 	client_p->localClient->fd = fd;
