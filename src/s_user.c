@@ -245,7 +245,7 @@ int show_lusers(struct Client *sptr)
     sendto_one(sptr, form_str(RPL_LUSERCHANNELS),
                me.name, sptr->name, Count.chan);
 
-  if(!GlobalSetOptions.hide_server && !IsOper(sptr))
+  if(!(GlobalSetOptions.hide_server && !IsOper(sptr)))
     sendto_one(sptr, form_str(RPL_LUSERME),
                me.name, sptr->name, Count.local, Count.myserver);
 
@@ -1016,14 +1016,6 @@ void send_umode_out(struct Client *cptr,
 
       if((acptr != cptr) && (acptr != sptr) && (*buf))
         {
-          log(L_DEBUG, "About to send umode to %s\n", acptr->name);
-          log(L_DEBUG, "hub: %d, LL: %d, SM: %d, CEM: %d, MATCH: %d",
-              ConfigFileEntry.hub, IsCapable(acptr, CAP_LL),
-              acptr->localClient->serverMask,
-              sptr->lazyLinkClientExists,
-              (acptr->localClient->serverMask &
-               sptr->lazyLinkClientExists));
-            
           if((!(ConfigFileEntry.hub && IsCapable(acptr, CAP_LL)))
              || (acptr->localClient->serverMask &
                  sptr->lazyLinkClientExists))
