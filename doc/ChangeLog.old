@@ -1,3 +1,8 @@
+*** 20001210_12 by db
+- This fixes prefix on a nick change sent to local server.
+
+
+
 *** 20001210_11 by db
 - fixed length error in sendto_realops_flags
 
