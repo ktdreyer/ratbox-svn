@@ -1,3 +1,8 @@
+*** 20001219_3 by db
+- show the name of the server sending a CBURST if its not LL
+
+
+
 *** 20001219_2 by db
 - nick LL are almost there...
   Now, nick changes for nicks that the hub does not know about on a leaf
