@@ -1,3 +1,6 @@
+*** 20010101_30 by davidt
+Eliminate race condition from s_serv.c, where we could add a server to serv_list (for SJOINS, etc) without first bursting it)
+
 *** 20010101_29 by fl_
 - dont show how many local users we have if shide is on
   instead make the local user reply the same as the global one
