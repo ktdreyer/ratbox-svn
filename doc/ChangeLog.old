@@ -1,3 +1,7 @@
+*** 20010311_3 by a1kmm
+- Added a flag "persistant=yes" to CONF_CLIENT(auth{} blocks). Without this flag, you cannot become +p.
+
+
 *** 20010311_2 by a1kmm
 - We now expire timed out persistant connections.
 
