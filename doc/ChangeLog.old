@@ -1,3 +1,10 @@
+*** 19990910_2 by wnder
+IAuth changes:
+ * the listen port is now dynamically configurable (iauth.conf)
+   - I'll have to do something similar to ircd.conf
+ * k/i/q lines (read at run-time from iauth.conf)
+
+
 *** 19990910_1 by wnder
 IAuth changes:
  * fully functional and tested: K, I, Q lines (D and G to come)
