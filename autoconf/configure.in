@@ -11,12 +11,6 @@ VERSION=7.0
 AC_SUBST(PACKAGE)
 AC_SUBST(VERSION)
 
-if test -z "$MAKE"; then
-	MAKE=make
-	echo WARNING: No make command specified, assuming `which $MAKE`
-	echo WARNING: To specify a different make, use MAKE="<command>" $0
-fi
-
 dnl Checks for programs.
 AC_PROG_CC
 
@@ -241,26 +235,6 @@ esac
 
 dnl Checks for library functions.
 AC_PROG_GCC_TRADITIONAL
-
-AC_MSG_CHECKING(for how to include files in Makefile)
-cat >conftest <<__EOF__
-mytest:
-	@touch conftest.t
-.include "/dev/null"
-__EOF__
-
-rm -f conftest.t
-
-$MAKE -f conftest mytest >/dev/null >/dev/null
-if test -f conftest.t; then
-	AC_MSG_RESULT(.include)
-	INCDEP=".include \".depend\""
-else
-	AC_MSG_RESULT(include)
-	INCDEP="include .depend"
-fi
-
-rm -f conftest.t conftest
 
 AC_CHECK_TYPE(u_int32_t, unsigned long)
 

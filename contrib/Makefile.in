@@ -51,9 +51,14 @@ install: all
 
 .PHONY: depend clean distclean
 depend:
-	${MKDEP} ${CPPFLAGS} ${SRCS} > .depend.tmp
-	${SED} s/\\\.o/\\\.so/ < .depend.tmp > .depend
-	${RM} -f .depend.tmp
+	@${MKDEP} ${CPPFLAGS} ${SRCS} > .depend
+	@sed s/\\\.o/\\\.so/ < .depend > .depend.tmp
+	@sed -e '/^# DO NOT DELETE THIS LINE/,$$d' <Makefile >Makefile.depend
+	@echo '# DO NOT DELETE THIS LINE!!!' >>Makefile.depend
+	@echo '# make depend needs it.' >>Makefile.depend
+	@cat .depend.tmp >>Makefile.depend
+	@mv Makefile.depend Makefile
+	@rm -f .depend.tmp .depend
 
 clean:
 	${RM} -f *.so *~ 
@@ -61,4 +66,3 @@ clean:
 distclean: clean
 	${RM} -f Makefile
 
-@INCDEP@

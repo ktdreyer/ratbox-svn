@@ -131,13 +131,15 @@ install_shared_modules:
 .PHONY: depend clean distclean
 depend:
 	@${MKDEP} ${CPPFLAGS} ${SRCS} > .depend.tmp
-	@${SED} s/\\\.o/\\\.so/ < .depend.tmp > .depend
-	@${RM} -f .depend.tmp
+	@sed -e '/^# DO NOT DELETE THIS LINE/,$$d' <Makefile >Makefile.depend
+	@echo '# DO NOT DELETE THIS LINE!!!' >>Makefile.depend
+	@echo '# make depend needs it.' >>Makefile.depend
+	@cat .depend.tmp >>Makefile.depend
+	@mv Makefile.depend Makefile
+	@rm -f .depend.tmp
 
 clean:
 	${RM} -f *.so *~ *.o *.a
 
 distclean: clean
 	${RM} -f Makefile
-
-@INCDEP@
