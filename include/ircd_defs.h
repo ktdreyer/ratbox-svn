@@ -143,6 +143,7 @@ do { \
 #define IN_ADDR(x) x.sins.sin6.s6_addr
 #define IPV4_MAPPED(x) ((uint32_t *)x.sins.sin6.s6_addr)[3]
 #define PIN_ADDR(x) x->sins.sin6.s6_addr /* For Pointers */
+#define IN_ADDR2(x) x.sins.sin6
 
 #define DEF_FAM AF_INET6
 

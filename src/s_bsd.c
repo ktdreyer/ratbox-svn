@@ -358,7 +358,7 @@ void add_connection(struct Listener* listener, int fd)
   copy_s_addr(IN_ADDR(new_client->localClient->ip),  S_ADDR(irn));
   inetntop(DEF_FAM, &IN_ADDR(new_client->localClient->ip), new_client->localClient->sockhost, HOSTIPLEN);
 #ifdef IPV6
-  if(!IN6_IS_ADDR_V4MAPPED(&IN_ADDR(new_client->localClient->ip)))
+  if(!IN6_IS_ADDR_V4MAPPED(&IN_ADDR2(new_client->localClient->ip)))
   	new_client->localClient->aftype = AF_INET6;
   else
   {
