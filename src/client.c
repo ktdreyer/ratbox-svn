@@ -624,7 +624,8 @@ void
 remove_client_from_list(struct Client* client_p)
 {
   assert(NULL != client_p);
-  
+  if(client_p == NULL)
+    return;
   /* A client made with make_client()
    * is on the unknown_list until removed.
    * If it =does= happen to exit before its removed from that list
@@ -874,7 +875,9 @@ get_client_name(struct Client* client, int showip)
   static char nbuf[HOSTLEN * 2 + USERLEN + 5];
 
   assert(NULL != client);
-
+  if(client == NULL)
+    return NULL;
+    
   if (MyConnect(client))
     {
       if (!irccmp(client->name, client->host))
