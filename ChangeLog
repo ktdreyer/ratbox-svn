@@ -1,3 +1,20 @@
+leeh        2004/11/21 12:08:14 EST	(20041121_0)
+
+  Modified files:
+    doc                  schema.txt 
+    include              s_chanserv.h 
+    src                  s_chanserv.c 
+  Log:
+  - track which oper suspends a channel, and output the fact its suspended
+    in CHANSERV::INFO
+  
+  Revision  Changes    Path
+  1.10      +1 -0      rserv/doc/schema.txt
+  1.14      +1 -0      rserv/include/s_chanserv.h
+  1.20      +25 -7     rserv/src/s_chanserv.c
+
+
+
 leeh        2004/11/20 11:49:50 EST	(20041120_1)
 
   Modified files:
