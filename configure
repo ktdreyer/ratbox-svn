@@ -2377,6 +2377,7 @@ _ACEOF
 		echo "$as_me:$LINENO: result: AIX - Sorry you poor bastard..really we are" >&5
 echo "${ECHO_T}AIX - Sorry you poor bastard..really we are" >&6
 		IRC_CFLAGS="$IRC_CFLAGS -Wl,-brtl"
+	;;
 	*)
 		echo "$as_me:$LINENO: result: no" >&5
 echo "${ECHO_T}no" >&6

@@ -105,6 +105,7 @@ case "$OSNAME" in
 	AIX*)
 		AC_MSG_RESULT(AIX - Sorry you poor bastard..really we are)
 		IRC_CFLAGS="$IRC_CFLAGS -Wl,-brtl"
+	;;
 	*)
 		AC_MSG_RESULT(no)
 	;;
