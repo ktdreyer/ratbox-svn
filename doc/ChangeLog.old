@@ -1,3 +1,16 @@
+jmallett    2002/02/13 13:39:15 EST	(20020213_1)
+
+  Modified files:
+    .                    README.FIRST 
+  Log:
+  Add a big screaming note about the need to make clean or make distclean when
+  upgrading.  This probably won't really apply after a release, but still.
+  
+  Revision  Changes    Path
+  7.29      +4 -0      ircd-hybrid-7/README.FIRST
+
+
+
 androsyn    2002/02/13 13:16:48 EST	(20020213_0)
 
   Modified files:
