@@ -1,3 +1,19 @@
+db          2001/12/30 17:11:44 EST	(20011230_6)
+
+  Modified files:
+    include              config.h config.h.dist 
+    modules              m_sjoin.c 
+  Log:
+  - "up" ported IGNORE_BOGUS_TS define from 6. This is a module, so easy
+    to re-enable later.
+  
+  Revision  Changes    Path
+  7.125     +8 -1      ircd-hybrid-7/include/config.h
+  7.52      +12 -3     ircd-hybrid-7/include/config.h.dist
+  1.125     +3 -1      ircd-hybrid-7/modules/m_sjoin.c
+
+
+
 a1kmm       2001/12/30 04:11:30 EST	(20011230_5)
 
   Modified files:
