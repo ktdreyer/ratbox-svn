@@ -1,3 +1,7 @@
+*** 20010225_12 by androsyn
+Fixed yet another dependancy on libresolv
+
+
 *** 20010225_11 by androsyn
 Fixed another dependancy of libresolv on solaris
 
