@@ -3,6 +3,12 @@ If you don't read this first, we won't help you.
 
 ******************************* IMPORTANT *************************************
 
+- *********** Note for those who dont bother reading docs *****************
+  * Reading INSTALL is now a must, as the old DPATH is now specified when *
+  * configure is run.                                                     *
+  * - You now need to ./configure --prefix="/path/to/install/it"          *
+  *************************************************************************
+
 - To report bugs in hybrid, use the `send-pr' script that should
   be installed into bin/ along with the rest of ircd.
 
@@ -11,10 +17,6 @@ If you don't read this first, we won't help you.
 
 - See the INSTALL document for info on configuring and compiling
   ircd-hybrid.
-
-- Reading INSTALL is now a must, as the old DPATH is now specified when
-  configure is run.
-  (ie Dont forget to ./configure --prefix="/path/you/want")
 
 - Please read doc/index.txt to get an overview of the current documentation.
 
