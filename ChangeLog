@@ -1,3 +1,15 @@
+leeh        2003/06/23 12:41:02 UTC	(20030623_1)
+
+  Modified files:
+    src                  channel_mode.c 
+  Log:
+  - fix various uses of LOCAL_COPY, where we needed the data for later on.
+  
+  Revision  Changes    Path
+  7.106     +22 -17    ircd-ratbox/src/channel_mode.c
+
+
+
 leeh        2003/06/23 09:12:59 UTC	(20030623_0)
 
   Modified files:
