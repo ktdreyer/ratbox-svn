@@ -82,6 +82,7 @@ struct Server
 	char by[NICKLEN];
 	dlink_list servers;
 	dlink_list users;
+	int caps;		/* capabilities bit-field */
 };
 
 struct SlinkRpl

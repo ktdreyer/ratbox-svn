@@ -83,14 +83,11 @@ struct Capability
 #define CAP_ZIP_SUPPORTED       0
 #endif
 
-#define DoesCAP(x)      ((x)->caps)
-
 /*
  * Capability macros.
  */
 #define IsCapable(x, cap)       (((x)->localClient->caps & (cap)) == cap)
 #define NotCapable(x, cap)	(((x)->localClient->caps & (cap)) == 0)
-#define SetCapable(x, cap)      ((x)->localClient->caps |=  (cap))
 #define ClearCap(x, cap)        ((x)->localClient->caps &= ~(cap))
 
 #define SLINKCMD_SET_ZIP_OUT_LEVEL           1	/* data */

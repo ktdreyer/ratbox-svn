@@ -948,7 +948,7 @@ show_capabilities(struct Client *target_p)
 	tl = ircsprintf(msgbuf, "TS ");
 	t += tl;
 
-	if(!target_p->localClient->caps)	/* short circuit if no caps */
+	if(!IsServer(target_p) || !target_p->serv->caps)	/* short circuit if no caps */
 	{
 		msgbuf[2] = '\0';
 		return msgbuf;
@@ -956,7 +956,7 @@ show_capabilities(struct Client *target_p)
 
 	for (cap = captab; cap->cap; ++cap)
 	{
-		if(cap->cap & target_p->localClient->caps)
+		if(cap->cap & target_p->serv->caps)
 		{
 			tl = ircsprintf(t, "%s ", cap->name);
 			t += tl;
@@ -1109,6 +1109,8 @@ server_estab(struct Client *client_p)
 	make_server(client_p);
 	client_p->serv->up = me.name;
 	client_p->serv->upid = me.id;
+	client_p->serv->caps = client_p->localClient->caps;
+
 	/* add it to scache */
 	find_or_add(client_p->name);
 	client_p->firsttime = CurrentTime;
@@ -1151,13 +1153,25 @@ server_estab(struct Client *client_p)
 			continue;
 
 		if(DoesTS6(target_p) && has_id(client_p))
+		{
 			sendto_one(target_p, ":%s SID %s 2 %s :%s%s",
 				   me.id, client_p->name, client_p->id,
 				   IsHidden(client_p) ? "(H) " : "", client_p->info);
+
+			if(IsCapable(target_p, CAP_ENCAP))
+				sendto_one(target_p, ":%s ENCAP * GCAP :%s",
+					client_p->id, show_capabilities(client_p));
+		}
 		else
+		{
 			sendto_one(target_p, ":%s SERVER %s 2 :%s%s",
 				   me.name, client_p->name,
 				   IsHidden(client_p) ? "(H) " : "", client_p->info);
+
+			if(IsCapable(target_p, CAP_ENCAP))
+				sendto_one(target_p, ":%s ENCAP * GCAP :%s",
+					client_p->name, show_capabilities(client_p));
+		}
 	}
 
 	/*
@@ -1188,15 +1202,27 @@ server_estab(struct Client *client_p)
 
 		/* presumption, if target has an id, so does its uplink */
 		if(DoesTS6(client_p) && has_id(target_p))
+		{
 			sendto_one(client_p, ":%s SID %s %d %s :%s%s",
 				   target_p->serv->upid, target_p->name,
 				   target_p->hopcount + 1, target_p->id,
 				   IsHidden(target_p) ? "(H) " : "", target_p->info);
+
+			if(target_p->serv->caps && IsCapable(client_p, CAP_ENCAP))
+				sendto_one(client_p, ":%s ENCAP * GCAP :%s",
+						target_p->id, show_capabilities(target_p));
+		}
 		else
+		{
 			sendto_one(client_p, ":%s SERVER %s %d :%s%s",
 				   target_p->serv->up,
 				   target_p->name, target_p->hopcount + 1,
 				   IsHidden(target_p) ? "(H) " : "", target_p->info);
+
+			if(target_p->serv->caps && IsCapable(client_p, CAP_ENCAP))
+				sendto_one(client_p, ":%s ENCAP * GCAP :%s",
+						target_p->name, show_capabilities(target_p));
+		}
 	}
 
 	if(DoesTS6(client_p))

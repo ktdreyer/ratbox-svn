@@ -34,13 +34,18 @@
 #include "modules.h"
 
 static int mr_capab(struct Client *, struct Client *, int, const char **);
+static int me_gcap(struct Client *, struct Client *, int, const char **);
 
 struct Message capab_msgtab = {
 	"CAPAB", 0, 0, 0, MFLG_SLOW | MFLG_UNREG,
 	{{mr_capab, 0}, mg_ignore, mg_ignore, mg_ignore, mg_ignore}
 };
+struct Message gcap_msgtab = {
+	"GCAP", 0, 0, 0, MFLG_ENCAP | MFLG_ENCAPONLY,
+	{mg_ignore, mg_ignore, mg_ignore, {me_gcap, 2}, mg_ignore}
+};
 
-mapi_clist_av1 capab_clist[] = { &capab_msgtab, NULL };
+mapi_clist_av1 capab_clist[] = { &capab_msgtab, &gcap_msgtab, NULL };
 DECLARE_MODULE_AV1(capab, NULL, NULL, capab_clist, NULL, NULL, "$Revision$");
 
 /*
@@ -82,6 +87,30 @@ mr_capab(struct Client *client_p, struct Client *source_p, int parc, const char 
 					client_p->localClient->caps |= cap->cap;
 					break;
 				}
+			}
+		}
+	}
+
+	return 0;
+}
+
+static int
+me_gcap(struct Client *client_p, struct Client *source_p,
+		int parc, const char *parv[])
+{
+	struct Capability *cap;
+	char *t = LOCAL_COPY(parv[1]);
+	char *s;
+	char *p;
+
+	for (s = strtoken(&p, t, " "); s; s = strtoken(&p, NULL, " "))
+	{
+		for (cap = captab; cap->name; cap++)
+		{
+			if(!irccmp(cap->name, s))
+			{
+				client_p->serv->caps |= cap->cap;
+				break;
 			}
 		}
 	}
