@@ -562,7 +562,7 @@ if test "$SELECT_TYPE" != "kqueue" ; then
                 SELECT_TYPE="select"
                 AC_DEFINE(USE_SELECT)
         else
-                echo "Eep!  Can't find kqueue, devpoll, poll _or_ select!"
+                echo "Eep!  Can't find kqueue, devpoll, poll, rtsigio _or_ select!"
                 echo "I'll try select and hope for the best."
                 SELECT_TYPE="select"
                 AC_DEFINE(USE_SELECT)
