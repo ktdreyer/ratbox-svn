@@ -258,7 +258,7 @@ char* pick_vchan_id(struct Channel *chptr)
 {
   dlink_node *lp;
   struct Client *acptr;
-  static char vchan_id[NICKLEN+USERLEN+HOSTLEN+10];
+  static char vchan_id[NICKLEN*2];
 
   for (lp = chptr->chanops.head; lp; lp = lp->next)
     if (!lp->next)

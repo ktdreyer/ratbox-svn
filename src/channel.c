@@ -433,10 +433,28 @@ void add_user_to_channel(struct Channel *chptr, struct Client *who, int flags)
  * output	- none
  * side effects - deletes an user from a channel by removing a link in the
  *		  channels member chain.
+ *                sets a vchan_id if the last user is just leaving
  */
 void remove_user_from_channel(struct Channel *chptr,struct Client *who)
 {
   dlink_node *ptr;
+  struct Client *lastuser = NULL;
+
+  /* last user in the channel.. set a vchan_id incase we need it */
+  if (chptr->users == 1)
+    {
+      if (chptr->chanops.head)
+        lastuser = chptr->chanops.head->data;
+      else if (chptr->halfops.head)
+        lastuser = chptr->halfops.head->data;
+      else if (chptr->voiced.head)
+        lastuser = chptr->voiced.head->data;
+      else if (chptr->peons.head)
+        lastuser = chptr->peons.head->data;
+
+      if (lastuser != NULL) /* just incase.. */
+        ircsprintf(chptr->vchan_id, "!%s", lastuser->name);
+    }
 
   if( (ptr = find_user_link(&chptr->peons,who)) )
     dlinkDelete(ptr,&chptr->peons);
@@ -2500,24 +2518,6 @@ struct Channel* get_channel(struct Client *cptr, char *chname, int flag)
 */
 static  void    sub1_from_channel(struct Channel *chptr)
 {
-  struct Client *lastuser = NULL;
-
-  /* last user in the channel.. set a vchan_id incase we need it */
-  if (chptr->users == 1)
-    {
-      if (chptr->chanops.head)
-        lastuser = chptr->chanops.head->data;
-      else if (chptr->halfops.head)
-        lastuser = chptr->halfops.head->data;
-      else if (chptr->voiced.head)
-        lastuser = chptr->voiced.head->data;
-      else if (chptr->peons.head)
-        lastuser = chptr->peons.head->data;
-
-      if (lastuser != NULL) /* just incase.. */
-        ircsprintf(chptr->vchan_id, "!%s", lastuser->name);
-    }
-
   if (--chptr->users <= 0)
     {
       chptr->users = 0; /* if chptr->users < 0, make sure it sticks at 0

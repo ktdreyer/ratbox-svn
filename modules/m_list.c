@@ -263,7 +263,7 @@ int list_named_channel(struct Client *sptr,char *name)
 void list_one_channel(struct Client *sptr,struct Channel *chptr)
 {
   struct Channel *root_chptr;
-  char  vname[CHANNELLEN+NICKLEN+4];
+  char  vname[CHANNELLEN+NICKLEN+5]; /* <!!>, and null */
 
   if( (IsVchan(chptr) || HasVchans(chptr)) )
     {
