@@ -1639,15 +1639,22 @@ void del_from_accept(struct Client *source, struct Client *target)
  *
  * inputs	- pointer to exiting client
  * output	- NONE
- * side effects - Walk through given clients on_allow_list remove all
- *                references to this client from the clients in each of their
- *                on_allow_list
+ * side effects - Walk through given clients allow_list and on_allow_list
+ *                remove all references to this client
  */
 void del_all_accepts(struct Client *cptr)
 {
   dlink_node *ptr;
   dlink_node *next_ptr;
   struct Client *acptr;
+
+  for (ptr = cptr->allow_list.head; ptr; ptr = next_ptr)
+    {
+      next_ptr = ptr->next;
+      acptr = ptr->data;
+      if(acptr != NULL)
+        del_from_accept(acptr,cptr);
+    }
 
   for (ptr = cptr->on_allow_list.head; ptr; ptr = next_ptr)
     {
