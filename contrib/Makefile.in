@@ -9,6 +9,7 @@ SED             = @SED@
 LEX		= @LEX@
 LEXLIB		= @LEXLIB@
 CFLAGS		= @IRC_CFLAGS@ -DIRCD_PREFIX=\"@prefix@\"
+PICFLAGS	= @PICFLAGS@
 MKDEP		= ${CC} -MM
 INSTALL		= @INSTALL@
 INSTALL_PROGRAM	= @INSTALL_PROGRAM@
@@ -28,7 +29,6 @@ CPPFLAGS	= ${INCLUDES} @CPPFLAGS@
 SRCS =                          \
   m_clearchan.c			\
   m_jupe.c			\
-  m_hash.c			\
   m_nickinfo.c                  \
   m_opme.c                      \
   m_map.c			\
@@ -57,7 +57,7 @@ install: all
 .SUFFIXES: .so
 
 .c.so:
-	${CC} -DPIC -fPIC -shared ${CPPFLAGS} ${CFLAGS} $< -o $@
+	${CC} ${PICFLAGS}  ${CPPFLAGS} ${CFLAGS} $< -o $@
 
 .PHONY: depend clean distclean
 depend:
