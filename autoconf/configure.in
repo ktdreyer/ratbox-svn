@@ -20,6 +20,26 @@ else
   IRC_CFLAGS="-g"
 fi
 
+AC_MSG_CHECKING(Checking how to generate dependancy info)
+
+if test "x$GCC" = "xyes"; then
+  MKDEP="$GCC -MM"
+else
+   case `uname -s` in
+    SunOS*)
+	AC_MSG_RESULT(SunOS - Assuming $CC -xM to make dependancies)
+	MKDEP="$CC -xM"
+    ;;
+    *)
+	AC_MSG_RESULT(Assuming your compiler can take $CC -MM to make dependancies)
+        MKDEP="$CC -MM"	
+    ;;
+   esac
+   
+fi
+
+AC_SUBST(MKDEP)
+
 dnl jdc -- If CFLAGS is defined, best use it everywhere...
 dnl NOTE: jv says it must be added to the *END*, because things like
 dnl "gcc -O9 -O2" will result in -O2 getting preference.  How stupid.
