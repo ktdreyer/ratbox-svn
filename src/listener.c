@@ -320,7 +320,7 @@ void accept_connection(struct Listener* listener)
 {
   static time_t      last_oper_notice = 0;
   struct sockaddr_in addr;
-  int                addrlen = sizeof(struct sockaddr_in);
+  size_t             addrlen = sizeof(struct sockaddr_in);
   int                fd;
 
   assert(0 != listener);
