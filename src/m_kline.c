@@ -740,6 +740,7 @@ mo_kline(struct Client *cptr,
         user,
         host,
         reason ? reason : "No reason");
+      check_klines();
       return 0;
     }
   else
@@ -806,6 +807,7 @@ mo_kline(struct Client *cptr,
       user,
       host);
 
+    check_klines();
     return 0;
   }
   else if (PendingLines)
@@ -1728,6 +1730,7 @@ mo_dline(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
                         sptr->name,
                         host);
 
+		check_klines();
                 return 0;
         }
         else if (PendingLines)
@@ -1748,14 +1751,6 @@ mo_dline(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
                 host,
                 reason,
                 current_date);
-
-	/*
-	** I moved the following 2 lines up here
-	** because we still want the server to
-	** hunt for 'targetted' clients even if
-	** there are problems adding the D-line
-	** to the appropriate file. -ThemBones
-	*/
 
   check_klines();
   return 0;
