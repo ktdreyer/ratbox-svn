@@ -453,11 +453,12 @@ int mo_set(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
                        (set_cmd_table[i].wants_char ? "string, " : ""),
                        (set_cmd_table[i].wants_char ? "int" : "")
                       );
-          else
-          {
-            arg = NULL;
-            intarg = NULL;
-          }
+        }
+
+        if(parc <= 2)
+        {
+          arg = NULL;
+          intarg = NULL;
         }
 
         if(set_cmd_table[i].wants_int && (parc > 2))

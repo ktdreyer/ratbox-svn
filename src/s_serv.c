@@ -1291,11 +1291,17 @@ void set_autoconn(struct Client *sptr,char *parv0,char *name,int newval)
                  ":%s NOTICE %s :AUTOCONN for %s is now set to %i",
                  me.name, parv0, name, newval);
     }
-  else
+  else if (name)
     {
       sendto_one(sptr,
                  ":%s NOTICE %s :Can't find %s",
                  me.name, parv0, name);
+    }
+  else
+    {
+      sendto_one(sptr,
+                 ":%s NOTICE %s :Please specify a server name!",
+                 me.name, parv0);
     }
 }
 
