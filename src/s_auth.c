@@ -215,7 +215,7 @@ static void auth_dns_callback(void* vptr, adns_answer* reply)
 	{
 		if(strlen(*reply->rrs.str) < HOSTLEN)
 		{
-			strncpy_irc(auth->client->host, *reply->rrs.str, HOSTLEN);
+			strcpy(auth->client->host, *reply->rrs.str);
 			sendheader(auth->client, REPORT_FIN_DNS);
 		} else {
 			strcpy(auth->client->host, auth->client->localClient->sockhost);
