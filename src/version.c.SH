@@ -71,6 +71,7 @@ char *infotext[] =
   "",
   "The core Hybrid Team as of this major release:",
   "",
+  "adrian              Adrian Chadd        adrian@creative.net.au",
   "cosine              Patrick Alken       wnder@uwns.underworld.net",
   "Dianora             Diane Bruce         db@db.net",
   "is-                 Edward Brocklesby   ejb@leguin.org.uk",
