@@ -98,7 +98,7 @@ main(int argc, char *argv[])
 		{
 			for(x = 0; x < 255; x++)
 			{
-				if(x != fds[0].fd && x != fds[1].fd && x != fds[2].fd && x != fds[3].fd && x != fds[4].fd)
+				if(x != fds[0].fd && x != fds[1].fd && x != fds[2].fd)
 				{
 					if(dup2(fds[i].fd, x) < 0)
 						exit(1);
