@@ -1447,19 +1447,19 @@ general_item:       general_failed_oper_notice | general_show_failed_oper_id |
                     general_non_redundant_klines | general_dots_in_ident |
                     general_e_lines_oper_only | general_f_lines_oper_only |
                     general_o_lines_oper_only |
-                    general_stats_notice | general_pace_wait |
+                    general_pace_wait |
                     general_whois_wait | 
                     general_knock_delay | general_quiet_on_ban |
                     general_short_motd | general_no_oper_flood |
                     general_iauth_server |
-                    general_iauth_port | general_stats_p_notice |
+                    general_iauth_port |
                     general_glines | general_gline_time |
                     general_idletime |
                     general_hide_server | general_maximum_links |
                     general_message_locale | general_client_exit |
                     general_fname_userlog | general_fname_operlog |
                     general_fname_foperlog | general_oper_only_umodes |
-                    general_max_targets | general_links_notice |
+                    general_max_targets |
                     general_links_delay |
                     general_vchans_oper_only |
                     error
@@ -1608,16 +1608,6 @@ general_o_lines_oper_only: O_LINES_OPER_ONLY '=' TYES ';'
     ConfigFileEntry.o_lines_oper_only = 0;
   } ;
 
-general_stats_notice: STATS_NOTICE '=' TYES ';'
-  {
-    ConfigFileEntry.stats_notice = 1;
-  }
-    |
-    STATS_NOTICE '=' TNO ';'
-  {
-    ConfigFileEntry.stats_notice = 0;
-  } ;
-
 general_pace_wait: PACE_WAIT '=' NUMBER ';'
   {
     ConfigFileEntry.pace_wait = yylval.number;
@@ -1684,16 +1674,6 @@ general_fname_operlog: FNAME_OPERLOG '=' QSTRING ';'
 	strncpy_irc(ConfigFileEntry.fname_operlog, yylval.string,
 	            MAXPATHLEN-1)[MAXPATHLEN-1] = 0;
 };
-
-general_stats_p_notice: STATS_P_NOTICE '=' TYES ';'
-  {
-    ConfigFileEntry.stats_p_notice = 1;
-  } 
-    | 
-    STATS_P_NOTICE '=' TNO ';'
-  {
-    ConfigFileEntry.stats_p_notice = 0;
-  } ;
 
 general_glines: GLINES '=' TYES ';'
   {
@@ -1826,16 +1806,6 @@ umode_item:	T_BOTS
   {
     ConfigFileEntry.oper_only_umodes |= FLAGS_DRONE;
   } ;
-
-general_links_notice: LINKS_NOTICE '=' TYES ';'
-  {
-    ConfigFileEntry.links_notice = 1;
-  }
-    |
-    LINKS_NOTICE '=' TNO ';'
-  {
-    ConfigFileEntry.links_notice = 0;
-  };
 
 general_vchans_oper_only: VCHANS_OPER_ONLY '=' TYES ';'
   {

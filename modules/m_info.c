@@ -421,21 +421,6 @@ static void send_conf_options(struct Client *sptr)
               "Only Allow Operators to see STATS o");
   sendto_one(sptr,
               ":%s %d %s :%-30s %-5s [%-30s]",
-              me.name, RPL_INFO, sptr->name, "stats_notice",
-              ConfigFileEntry.stats_notice ? "YES" : "NO",
-              "Show Operators when a Client uses STATS");
-  sendto_one(sptr,
-              ":%s %d %s :%-30s %-5s [%-30s]",
-              me.name, RPL_INFO, sptr->name, "stats_p_notice",
-              ConfigFileEntry.stats_p_notice ? "YES" : "NO",
-              "Show Operators when a Client uses STATS p");
-  sendto_one(sptr,
-              ":%s %d %s :%-30s %-5s [%-30s]",
-              me.name, RPL_INFO, sptr->name, "links_notice",
-              ConfigFileEntry.links_notice ? "YES" : "NO",
-              "Show Operators when a Client uses LINKS");
-  sendto_one(sptr,
-              ":%s %d %s :%-30s %-5s [%-30s]",
               me.name, RPL_INFO, sptr->name, "glines",
               ConfigFileEntry.glines ? "YES" : "NO",
               "Network wide K-lines");
