@@ -83,7 +83,7 @@ static void conf_add_d_line(struct ConfItem *);
 static void conf_add_x_line(struct ConfItem *);
 static void conf_add_u_line(struct ConfItem *);
 static void conf_add_q_line(struct ConfItem *);
-static void add_host_user_port_fields(struct ConfItem*, char*, char*, char *);
+static void conf_add_fields(struct ConfItem*, char*, char *, char*, char *);
 
 static FBFILE*  openconf(const char* filename);
 static void     initconf(FBFILE*);
@@ -1978,6 +1978,7 @@ static struct ConfItem* oldParseOneLine(char* line,struct ConfItem* aconf,
   char conf_letter;
   char* tmp;
   char* user_field=(char *)NULL;
+  char* pass_field=(char *)NULL;
   char* host_field=(char *)NULL;
   char* port_field=(char *)NULL;
   char* class_field=(char *)NULL;
@@ -1996,9 +1997,8 @@ static struct ConfItem* oldParseOneLine(char* line,struct ConfItem* aconf,
 	break;
       
       /* pass field */
-      if ((tmp = getfield(NULL)) == NULL)
+      if ((pass_field = getfield(NULL)) == NULL)
 	break;
-      DupString(aconf->passwd, tmp);
 
       /* user field */
       if ((user_field = getfield(NULL)) == NULL)
@@ -2022,7 +2022,7 @@ static struct ConfItem* oldParseOneLine(char* line,struct ConfItem* aconf,
     {
     case 'A':case 'a': /* Name, e-mail address of administrator */
       aconf->status = CONF_ADMIN;
-      add_host_user_port_fields(aconf,host_field,user_field,port_field);
+      conf_add_fields(aconf,host_field,pass_field,user_field,port_field);
       break;
 
     case 'c':
@@ -2033,21 +2033,21 @@ static struct ConfItem* oldParseOneLine(char* line,struct ConfItem* aconf,
       aconf->status = CONF_CONNECT_SERVER;
       ++*pccount;
       aconf->flags |= CONF_FLAGS_ALLOW_AUTO_CONN;
-      add_host_user_port_fields(aconf,host_field,user_field,port_field);
+      conf_add_fields(aconf,host_field,pass_field,user_field,port_field);
       aconf = conf_add_server(aconf,class_field,*pncount,*pccount);
       break;
 
     case 'd':
       aconf->status = CONF_DLINE;
       aconf->flags = CONF_FLAGS_E_LINED;
-      add_host_user_port_fields(aconf,host_field,user_field,port_field);
+      conf_add_fields(aconf,host_field,pass_field,user_field,port_field);
       conf_add_d_line(aconf);
       aconf = NULL;
       break;
 
     case 'D': /* Deny lines (immediate refusal) */
       aconf->status = CONF_DLINE;
-      add_host_user_port_fields(aconf,host_field,user_field,port_field);
+      conf_add_fields(aconf,host_field,pass_field,user_field,port_field);
       conf_add_d_line(aconf);
       aconf = NULL;
       break;
@@ -2055,7 +2055,7 @@ static struct ConfItem* oldParseOneLine(char* line,struct ConfItem* aconf,
     case 'H': /* Hub server line */
     case 'h':
       aconf->status = CONF_HUB;
-      add_host_user_port_fields(aconf,host_field,user_field,port_field);
+      conf_add_fields(aconf,host_field,pass_field,user_field,port_field);
       conf_add_hub_or_leaf(aconf);
       break;
 
@@ -2090,7 +2090,7 @@ static struct ConfItem* oldParseOneLine(char* line,struct ConfItem* aconf,
     case 'K': /* Kill user line on irc.conf           */
     case 'k':
       aconf->status = CONF_KILL;
-      add_host_user_port_fields(aconf,host_field,user_field,port_field);
+      conf_add_fields(aconf,host_field,pass_field,user_field,port_field);
       conf_add_k_line(aconf);
       aconf = NULL;
       break;
@@ -2098,7 +2098,7 @@ static struct ConfItem* oldParseOneLine(char* line,struct ConfItem* aconf,
     case 'L': /* guaranteed leaf server */
     case 'l':
       aconf->status = CONF_LEAF;
-      add_host_user_port_fields(aconf,host_field,user_field,port_field);
+      conf_add_fields(aconf,host_field,pass_field,user_field,port_field);
       conf_add_hub_or_leaf(aconf);
       break;
 
@@ -2107,7 +2107,7 @@ static struct ConfItem* oldParseOneLine(char* line,struct ConfItem* aconf,
     case 'M':
     case 'm':
       aconf->status = CONF_ME;
-      add_host_user_port_fields(aconf,host_field,user_field,port_field);
+      conf_add_fields(aconf,host_field,pass_field,user_field,port_field);
       conf_add_me(aconf);
       ConfigFileEntry.hub = 0;
       if(port_field)
@@ -2125,7 +2125,7 @@ static struct ConfItem* oldParseOneLine(char* line,struct ConfItem* aconf,
       /* but which tries to connect ME        */
       aconf->status = CONF_NOCONNECT_SERVER;
       ++*pncount;
-      add_host_user_port_fields(aconf,host_field,user_field,port_field);
+      conf_add_fields(aconf,host_field,pass_field,user_field,port_field);
       aconf = conf_add_server(aconf,class_field,*pncount,*pccount);
       break;
 
@@ -2133,7 +2133,7 @@ static struct ConfItem* oldParseOneLine(char* line,struct ConfItem* aconf,
       /* password and host where connection is  */
     case 'O':
       aconf->status = CONF_OPERATOR;
-      add_host_user_port_fields(aconf,host_field,user_field,port_field);
+      conf_add_fields(aconf,host_field,pass_field,user_field,port_field);
       /* defaults */
       aconf->port = 
 	CONF_OPER_GLOBAL_KILL|CONF_OPER_REMOTE|CONF_OPER_UNKLINE|
@@ -2148,7 +2148,7 @@ static struct ConfItem* oldParseOneLine(char* line,struct ConfItem* aconf,
       /* Local Operator, (limited privs --SRB) */
     case 'o':
       aconf->status = CONF_LOCOP;
-      add_host_user_port_fields(aconf,host_field,user_field,port_field);
+      conf_add_fields(aconf,host_field,pass_field,user_field,port_field);
       aconf->port = CONF_OPER_UNKLINE|CONF_OPER_K;
       if(port_field)
 	aconf->port = oper_privs_from_string(aconf->port,port_field);
@@ -2160,14 +2160,14 @@ static struct ConfItem* oldParseOneLine(char* line,struct ConfItem* aconf,
     case 'P': /* listen port line */
     case 'p':
       aconf->status = CONF_LISTEN_PORT;
-      add_host_user_port_fields(aconf,host_field,user_field,port_field);
+      conf_add_fields(aconf,host_field,pass_field,user_field,port_field);
       conf_add_port(aconf);
       break;
 
     case 'Q': /* reserved nicks */
     case 'q': 
       aconf->status = CONF_QUARANTINED_NICK;
-      add_host_user_port_fields(aconf,host_field,user_field,port_field);
+      conf_add_fields(aconf,host_field,pass_field,user_field,port_field);
       conf_add_q_line(aconf);
       aconf = NULL;
       break;
@@ -2175,7 +2175,7 @@ static struct ConfItem* oldParseOneLine(char* line,struct ConfItem* aconf,
     case 'U': /* Uphost, ie. host where client reading */
     case 'u': /* this should connect.                  */
       aconf->status = CONF_ULINE;
-      add_host_user_port_fields(aconf,host_field,user_field,port_field);
+      conf_add_fields(aconf,host_field,pass_field,user_field,port_field);
       conf_add_u_line(aconf);
       aconf = NULL;
       break;
@@ -2183,7 +2183,7 @@ static struct ConfItem* oldParseOneLine(char* line,struct ConfItem* aconf,
     case 'X': /* rejected gecos */
     case 'x': 
       aconf->status = CONF_XLINE;
-      add_host_user_port_fields(aconf,host_field,user_field,port_field);
+      conf_add_fields(aconf,host_field,pass_field,user_field,port_field);
       conf_add_x_line(aconf);
       aconf = NULL;
       break;
@@ -2191,7 +2191,7 @@ static struct ConfItem* oldParseOneLine(char* line,struct ConfItem* aconf,
     case 'Y':
     case 'y':
       aconf->status = CONF_CLASS;
-      add_host_user_port_fields(aconf,host_field,user_field,port_field);
+      conf_add_fields(aconf,host_field,pass_field,user_field,port_field);
       if(class_field)
 	sendq = atoi(class_field);
       conf_add_class(aconf,sendq);
@@ -3866,22 +3866,26 @@ static void conf_add_q_line(struct ConfItem *aconf)
 }
 
 /*
- * add_host_user_port_fields
+ * conf_add_fields
  * inputs       - pointer to config item
  *              - pointer to host_field
+ *		- pointer to pass_field
  *              - pointer to user_field
  *              - pointer to port_field
  * output       - NONE
- * side effects - update host/user/port fields of given aconf
+ * side effects - update host/pass/user/port fields of given aconf
  */
 
-static void add_host_user_port_fields(struct ConfItem *aconf,
+static void conf_add_fields(struct ConfItem *aconf,
                                char *host_field,
+                               char *pass_field,
                                char *user_field,
                                char *port_field)
 {
   if(host_field)
     DupString(aconf->host, host_field);
+  if(pass_field)
+    DupString(aconf->passwd, pass_field);
   if(user_field)
     DupString(aconf->user, user_field);
   if(port_field)
