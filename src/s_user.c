@@ -328,6 +328,7 @@ int register_local_user(struct Client *cptr, struct Client *sptr,
   struct ConfItem*  aconf;
   struct User*     user = sptr->user;
   char        tmpstr2[IRCD_BUFSIZE];
+  char	      ipaddr[HOSTIPLEN];
   int  status;
   dlink_node *ptr;
   dlink_node *m;
@@ -453,16 +454,18 @@ int register_local_user(struct Client *cptr, struct Client *sptr,
       add_to_id_hash_table(sptr->user->id, sptr);
     }
 
+  inetntop(sptr->localClient->aftype, IN_ADDR(sptr->localClient->ip), 
+  				ipaddr, HOSTIPLEN);
   sendto_realops_flags(FLAGS_CCONN,
 		       "Client connecting: %s (%s@%s) [%s] {%s}",
 		       nick, sptr->username, sptr->host,
-		       inetntoa((char *)&sptr->localClient->ip),
+		       ipaddr,
 		       get_client_class(sptr));
   
   sendto_realops_flags(FLAGS_DRONE,
 		       "Cn: %s (%s@%s) [%s] [%s]",
 		       nick, sptr->username, sptr->host,
-		       inetntoa((char *)&sptr->localClient->ip),
+		       ipaddr,
 		       sptr->info);
   
   if ((++Count.local) > Count.max_loc)
