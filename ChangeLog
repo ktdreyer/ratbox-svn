@@ -1,3 +1,15 @@
+leeh        2002/11/17 02:32:54 UTC	(20021117_0)
+
+  Modified files:
+    contrib              m_okick.c 
+  Log:
+  - helps if the server kicks the channel, not itself ;p
+  
+  Revision  Changes    Path
+  1.2       +2 -2      ircd-ratbox/contrib/m_okick.c
+
+
+
 leeh        2002/11/15 01:59:26 UTC	(20021115_0)
 
   Modified files:
