@@ -1,3 +1,8 @@
+*** 20010329_2 by fl_
+- transferred the masking from channel.c for /names to m_who.c for
+  /who..  we now randomly poll /who lists too.. 
+
+
 *** 20010329_1 by db
 - cleaned up s_debug.c memory reporting somewhat, there is still
   a duplicate user memory report to cleanup
