@@ -1,3 +1,7 @@
+*** 20010904_2 by leeh
+- added two new conf options for shide.. hidden and allow_hidden
+
+
 *** 20010904_1 by leeh
 - changed the strcat()'s for the config info to pointers..
 
