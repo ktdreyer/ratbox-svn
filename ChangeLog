@@ -1,3 +1,24 @@
+leeh        2005/02/02 16:12:12 EST	(20050202_1)
+
+  Modified files:
+    include              client.h numeric.h s_conf.h 
+    modules/core         m_message.c 
+    src                  messages.tab newconf.c s_conf.c 
+  Log:
+  - first part of the target change code, add the storage of targets for
+    localuser, throttle messages when they fill all the available slots
+  
+  Revision  Changes    Path
+  7.262     +5 -1      ircd-ratbox/include/client.h
+  7.55      +2 -0      ircd-ratbox/include/numeric.h
+  7.310     +1 -0      ircd-ratbox/include/s_conf.h
+  1.159     +65 -1     ircd-ratbox/modules/core/m_message.c
+  7.123     +1 -1      ircd-ratbox/src/messages.tab
+  7.197     +1 -0      ircd-ratbox/src/newconf.c
+  7.503     +1 -0      ircd-ratbox/src/s_conf.c
+
+
+
 leeh        2005/02/02 13:28:10 EST	(20050202_0)
 
   Modified files:
