@@ -877,7 +877,7 @@ nick_from_server(struct Client *client_p, struct Client *source_p, int parc,
           if (source_p->user)
             {
               add_history(source_p,1);
-              sendto_ll_serv_butone(client_p, source_p, 0, ":%s NICK %s :%lu",
+              sendto_ll_serv_butone(client_p, source_p, 0, ":%s NICK %s :%u",
                                     parv[0], nick, source_p->tsinfo);
             }
     }

@@ -289,7 +289,7 @@ set_time(void)
  }
  if (newtime < CurrentTime)
  {
-  ircsprintf(to_send, "System clock is running backwards - (%lu < %lu)",
+  ircsprintf(to_send, "System clock is running backwards - (%u < %u)",
              newtime, CurrentTime);
   report_error(to_send, me.name, 0);
   set_back_events(CurrentTime - newtime);

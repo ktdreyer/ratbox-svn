@@ -182,7 +182,7 @@ static void m_cjoin(struct Client *client_p,
                        root_vchan->chname);
 
   sendto_channel_remote(chptr, client_p,
-			":%s SJOIN %lu %s + :@%s", me.name,
+			":%s SJOIN %u %s + :@%s", me.name,
 			chptr->channelts,
 			chptr->chname,
 			source_p->name);

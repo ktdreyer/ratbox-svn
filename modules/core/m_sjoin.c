@@ -254,7 +254,7 @@ static void ms_sjoin(struct Client *client_p,
 
   if (newts < 800000000)
     {
-      sendto_realops_flags(FLAGS_DEBUG, "*** Bogus TS %lu on %s ignored from %s",
+      sendto_realops_flags(FLAGS_DEBUG, "*** Bogus TS %u on %s ignored from %s",
 			   newts, chptr->chname, client_p->name);
       newts = oldts;
     }
@@ -369,7 +369,7 @@ static void ms_sjoin(struct Client *client_p,
       modebuf[1] = '\0';
     }
 
-  ircsprintf(buf, ":%s SJOIN %lu %s %s %s :", parv[0], tstosend, parv[2],
+  ircsprintf(buf, ":%s SJOIN %u %s %s %s :", parv[0], tstosend, parv[2],
           modebuf, parabuf);
 
   mbuf = modebuf;
