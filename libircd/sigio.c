@@ -237,8 +237,8 @@ comm_select(unsigned long delay)
 	fde_t *F;
 	struct siginfo si;
 	struct timespec timeout;
-	timeout.tv_sec = 0;
-	timeout.tv_nsec = 1000000 * delay;
+	timeout.tv_sec = (delay / 1000000);
+	timeout.tv_nsec = (delay % 1000000) * delay;
 	for (;;)
 	{
 		if(!sigio_is_screwed)
