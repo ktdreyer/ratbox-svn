@@ -47,7 +47,7 @@ struct ctrl_command
   int datalen;
   int gotdatalen;
   int readdata;
-  unsigned char *data;
+  void *data;
 };
 
 typedef void cmd_handler(struct ctrl_command *);

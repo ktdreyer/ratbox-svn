@@ -45,7 +45,7 @@
 
 static int check_error(int, int, int);
 
-static char *fd_name(int fd)
+static const char *fd_name(int fd)
 {
   if (fd == CONTROL_R.fd)
     return "control read";
@@ -114,7 +114,7 @@ void io_loop(int nfds)
   }
 }
 
-void send_data_blocking(int fd, unsigned char *data, int datalen)
+void send_data_blocking(int fd, void *data, int datalen)
 {
   int ret;
   fd_set wfds;
@@ -291,7 +291,7 @@ void send_zipstats(struct ctrl_command *unused)
  *     flush the control fd sendq, then (blocking) send an
  *     error message over the control fd.
  */
-void send_error(char *message, ...)
+void send_error(const char *message, ...)
 {
   va_list args;
   static int sending_error = 0;

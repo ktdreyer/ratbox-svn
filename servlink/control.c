@@ -70,7 +70,7 @@ struct command_def command_table[] =
 void cmd_set_zip_out_level(struct ctrl_command *cmd)
 {
 #ifdef HAVE_LIBZ
-  out_state.zip_state.level = *cmd->data;
+  out_state.zip_state.level = (int)cmd->data;
   if ((out_state.zip_state.level < -1) ||
       (out_state.zip_state.level > 9))
     send_error("invalid compression level %d",
@@ -131,7 +131,7 @@ void cmd_start_zip_in(struct ctrl_command *cmd)
 void cmd_set_crypt_in_cipher(struct ctrl_command *cmd)
 {
 #ifdef HAVE_LIBCRYPTO
-  unsigned int cipher = *cmd->data;
+  unsigned int cipher = (unsigned int)cmd->data;
 
   if (in_state.crypt_state.cipher)
     send_error("can't set decryption cipher - already set!");
@@ -266,7 +266,7 @@ void cmd_start_crypt_in(struct ctrl_command *cmd)
 void cmd_set_crypt_out_cipher(struct ctrl_command *cmd)
 {
 #ifdef HAVE_LIBCRYPTO
-  unsigned int cipher = *cmd->data;
+  unsigned int cipher = (unsigned int)cmd->data;
 
   if (out_state.crypt_state.cipher)
     send_error("can't set encryption cipher - already set!");
