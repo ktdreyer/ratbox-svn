@@ -1,3 +1,8 @@
+*** 20010207_7 by db
+- This fixes testline... find_tkline can be handed a NULL ip from testline.
+
+
+
 *** 20010207_6 by wcampbel
 More bogus C++ // comments
 
