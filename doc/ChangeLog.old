@@ -1,3 +1,6 @@
+*** 20010102_7 by davidt
+Fix /list #channame
+
 *** 20010102_6 by a1kmm
 Fixed up m_server a little to prevent the kiddies from killing recently established servers by dormant
 unregistered connections.
