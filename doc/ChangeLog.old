@@ -1,3 +1,8 @@
+*** 20010210_11 by a1kmm
+- Fixed IP I/K lines to work properly, but we still have to put IP I lines and normal I lines on the
+  same precedence scheme.
+
+
 *** 20010210_10 by fl_
 - added extra logging for numerics sent to servers.. this should
   be removed once we fix the causes of it (admin only for now)
