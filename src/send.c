@@ -802,8 +802,7 @@ match_it(const struct Client *one, const char *mask, int what)
 /*
  * sendto_match_servs
  *
- * send to all servers which match the mask at the end of a channel name
- * (if there is a mask present) or to all if no mask.
+ * send to all servers the channel given
  */
 
 void
@@ -820,6 +819,8 @@ sendto_match_servs(struct Channel *chptr, struct Client *from, const char *patte
       if (*chptr->chname == '&')
         return;
     }
+  else
+    return; /* an ooopsies *
 
   for(cptr = serv_cptr_list; cptr; cptr = cptr->next_server_client)
     {
