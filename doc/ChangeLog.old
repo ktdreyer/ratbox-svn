@@ -1,3 +1,8 @@
+*** 20001226_2 by db
+- fix core in m_list.c if /list of non-existent channel is done. oops
+
+
+
 *** 20001226_1 by spookey
  - moved basename() to irc_basename() -- compatability issue with old glibc systems (string.h used to declare basename())
 
