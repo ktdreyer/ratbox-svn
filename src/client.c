@@ -1141,12 +1141,7 @@ exit_remote_pending(void *unused)
   dlink_node *ptr, *next;
   int count = 0;
 
-  /* XXX: 1500 is an arbitrary number of exits to do at once.. */
-#ifdef EFNET
-  for(ptr = remote_exit_pending.head; ptr != NULL && count <= 15000; ptr = next)
-#else
-  for(ptr = remote_exit_pending.head; ptr != NULL && count <= 1500; ptr = next)
-#endif
+  for(ptr = remote_exit_pending.head; ptr != NULL && count <= PENDING_COUNT; ptr = next)
   {
     rexit = ptr->data;
     next = ptr->next;

@@ -330,6 +330,12 @@
 #define TOPIC_HEAP_SIZE		256
 #endif
 
+#ifdef EFNET
+#define PENDING_COUNT		15000
+#else
+#define PENDING_COUNT 		1000
+#endif
+
 /* DEBUGMODE is used mostly for internal development, it is likely
  * to make your client server very sluggish.
  * You usually shouldn't need this. -Dianora
