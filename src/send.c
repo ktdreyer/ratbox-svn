@@ -701,7 +701,7 @@ sendto_remove_channels_local(struct Client *user, const char *pattern, ...)
 
   if (user->user != NULL)
   {
-    for (ptr = user->user->channel.head; ptr; ptr = ptr_next)
+    for (ptr = user->user->channel.head; ptr && user->user->channel.head != NULL; ptr = ptr_next)
     {
       ptr_next = ptr->next;
       chptr = ptr->data;
