@@ -212,10 +212,10 @@ static int do_whois(struct Client *client_p, struct Client *source_p,
       found = global_whois(source_p,nick,wilds,glob);
     }
 
-  if(found)
-    sendto_one(source_p, form_str(RPL_ENDOFWHOIS), me.name, parv[0], parv[1]);
-  else
+  if(!found)
     sendto_one(source_p, form_str(ERR_NOSUCHNICK), me.name, parv[0], nick);
+
+  sendto_one(source_p, form_str(RPL_ENDOFWHOIS), me.name, parv[0], parv[1]);
 
   return 0;
 }
@@ -329,7 +329,8 @@ static int single_whois(struct Client *source_p,struct Client *target_p,
 
   if(showperson)
     whois_person(source_p,target_p,glob);
-  return 0;
+
+  return showperson;
 }
 
 /*

@@ -133,7 +133,8 @@ static void mo_trace(struct Client *client_p, struct Client *source_p,
             if(match(tname, ac2ptr->name) || match(ac2ptr->name, tname))
             {
               break;
-            } else
+            }
+            else
               ac2ptr = NULL;
           }
         }

@@ -94,7 +94,6 @@ int     ServerRunning;          /* GLOBAL - server execution state */
 struct Client me;               /* That's me */
 struct LocalUser meLocalUser;	/* That's also part of me */
 
-//struct Client* GlobalClientList = 0; /* Pointer to beginning of Client list */
 dlink_list GlobalClientList;
 
 struct JupedChannel *JupedChannelList = 0;

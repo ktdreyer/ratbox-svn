@@ -207,10 +207,13 @@ static struct squit_parms *find_squit(struct Client *client_p,
   DLINK_FOREACH(ptr, GlobalClientList.head)
     {
       target_p = (struct Client *)ptr->data;
+
+      if(!IsServer(target_p) || !IsMe(target_p))
+        continue;
+
       if(match(server, target_p->name))
-      {
-		break;  	        
-      } else
+        break;  	        
+      else
         target_p = NULL;
     }
 
