@@ -1,3 +1,21 @@
+leeh        2005/01/09 20:38:09 EST	(20050110_1)
+
+  Modified files:
+    include              channel.h 
+    src                  c_mode.c channel.c io.c s_alis.c 
+  Log:
+  - added support for chanmode +r, registered only
+  - give SERVICES capab on connect
+  
+  Revision  Changes    Path
+  1.23      +1 -0      rserv/include/channel.h
+  1.25      +16 -0     rserv/src/c_mode.c
+  1.36      +7 -0      rserv/src/channel.c
+  1.32      +1 -1      rserv/src/io.c
+  1.30      +3 -0      rserv/src/s_alis.c
+
+
+
 leeh        2005/01/09 20:30:51 EST	(20050110_0)
 
   Modified files:
