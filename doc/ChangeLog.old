@@ -1,3 +1,15 @@
+androsyn    2002/07/12 20:48:24 EDT	(20020713_0)
+
+  Modified files:
+    src                  client.c 
+  Log:
+  Make dead_link exit message consistant
+  
+  Revision  Changes    Path
+  7.290     +9 -4      ircd-hybrid-7/src/client.c
+
+
+
 androsyn    2002/07/12 15:42:29 EDT	(20020712_12)
 
   Modified files:
