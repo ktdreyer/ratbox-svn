@@ -1,3 +1,8 @@
+*** 19990802_1 by db
+- removed struct.h
+
+
+
 *** 19990801_19 by lusky
 testing to see that the serial number isn't jumping
 
