@@ -1,3 +1,7 @@
+*** 20010111_12 by a1kmm
+- Do not show the blocks 0s old(like the ones from sendto_one!) so we don't get in a loop.
+
+
 *** 20010111_11 by a1kmm
 - We now support %nu and %0nu (sort of, they are equivalent) in sprintf_irc.
 
