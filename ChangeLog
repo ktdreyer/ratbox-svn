@@ -1,3 +1,25 @@
+leeh        2005/01/04 13:51:23 EST	(20050104_5)
+
+  Modified files:
+    include              channel.h s_chanserv.h 
+    src                  c_mode.c channel.c s_alis.c s_chanserv.c 
+                         service.c 
+  Log:
+  - make chmode_to_string() take a struct chmode rather than struct channel
+  - added CHANSERV::SET::MODES, used when chanserv creates the channel
+  - tweaked CHANSERV::SET::NOOPS behaviour
+  
+  Revision  Changes    Path
+  1.17      +5 -2      rserv/include/channel.h
+  1.18      +1 -0      rserv/include/s_chanserv.h
+  1.19      +94 -0     rserv/src/c_mode.c
+  1.32      +33 -30    rserv/src/channel.c
+  1.27      +5 -5      rserv/src/s_alis.c
+  1.29      +60 -5     rserv/src/s_chanserv.c
+  1.35      +1 -1      rserv/src/service.c
+
+
+
 leeh        2005/01/04 13:47:40 EST	(20050104_4)
 
   Modified files:
