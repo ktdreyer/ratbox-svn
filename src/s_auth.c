@@ -291,12 +291,6 @@ static int start_auth_query(struct AuthRequest* auth)
   struct sockaddr_in localaddr;
   unsigned int          locallen = sizeof(struct sockaddr_in);
   int                fd;
-#ifndef IPV6
-  unsigned long ip;
-#endif
-#ifdef IPV6
-	return 1;
-#endif
 
   if ((fd = comm_open(DEF_FAM, SOCK_STREAM, 0, "ident")) == -1)
     {
@@ -334,17 +328,10 @@ static int start_auth_query(struct AuthRequest* auth)
   getsockname(auth->client->fd, (struct sockaddr*) &localaddr, &locallen);
   localaddr.sin_port = htons(0);
 
-/*  memcpy(&sock, &auth->client->localClient->ip,
-	 sizeof(struct sockaddr_in)); */
   auth->fd = fd;
   SetAuthConnect(auth);
-#ifdef IPV6
-  /* XXX: Write auth checking for IPv6 */
-#else
-  ip = ntohl(IN_ADDR(auth->client->localClient->ip));
-  comm_connect_tcp(fd, (char *)&ip, 113, 
+  comm_connect_tcp(fd, auth->client->localClient->sockhost, 113, 
     (struct sockaddr *)&localaddr, locallen, auth_connect_callback, auth);
-#endif
   return 1; /* We suceed here for now */
 }
 
