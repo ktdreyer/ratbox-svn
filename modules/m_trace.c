@@ -309,12 +309,16 @@ static int report_this_status(struct Client *source_p, struct Client *target_p,
     {
     case STAT_CONNECTING:
       sendto_one(source_p, form_str(RPL_TRACECONNECTING), me.name,
-		 source_p->name, class_name, name);
+                 source_p->name, class_name, 
+		 IsSetOperAdmin(source_p) ? name : target_p->name);
+		   
       cnt++;
       break;
     case STAT_HANDSHAKE:
       sendto_one(source_p, form_str(RPL_TRACEHANDSHAKE), me.name,
-		 source_p->name, class_name, name);
+                 source_p->name, class_name, 
+                 IsSetOperAdmin(source_p) ? name : target_p->name);
+		   
       cnt++;
       break;
     case STAT_ME:
