@@ -739,9 +739,8 @@ int m_unregistered(struct Client* cptr, struct Client* sptr, int parc, char* par
 
 int m_registered(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
 {
-  /*  return send_error_to_client(sptr, ERR_ALREADYREGISTRED); */
-  sendto_one(cptr, ":%s NOTICE %s :Already registered",
-	     me.name,cptr->name);
+  sendto_one(cptr, form_str(ERR_ALREADYREGISTRED),   
+             me.name, parv[0]); 
   return 0;
 }
 
