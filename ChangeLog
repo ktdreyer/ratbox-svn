@@ -1,3 +1,15 @@
+leeh        2004/10/16 19:36:30 EDT	(20041016_3)
+
+  Modified files:
+    src                  s_chanserv.c 
+  Log:
+  - make the chanserv ban duration in minutes not seconds
+  
+  Revision  Changes    Path
+  1.12      +2 -1      rserv/src/s_chanserv.c
+
+
+
 leeh        2004/10/16 18:47:50 EDT	(20041016_2)
 
   Modified files:
