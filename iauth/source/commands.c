@@ -36,12 +36,14 @@
 static struct CommandTable *GetCommand(struct CommandTable *cmdlist,
                                        char *name);
 
+static void c_server(struct Server *sptr, int ac, char **av);
 static void c_doauth(struct Server *sptr, int ac, char **av);
 static void c_class(struct Server *sptr, int ac, char **av);
 static void c_class_add(struct Server *sptr, int ac, char **av);
 static void c_class_clear(struct Server *sptr, int ac, char **av);
 
 struct CommandTable Commands[] = {
+	{ "Server", c_server },
 	{ "DoAuth", c_doauth },
 	{ "Class", c_class },
 
@@ -111,6 +113,25 @@ GetCommand(struct CommandTable *cmdlist, char *name)
 	else
 		return ((struct CommandTable *) -1); /* multiple matches found */
 } /* GetCommand() */
+
+/*
+c_server()
+ When an ircd server connects, it should send a "Server" string
+to identify itself
+
+av[0] = "Server"
+av[1] = server name
+*/
+
+static void
+c_server(struct Server *sptr, int ac, char **av)
+
+{
+	if (ac < 2)
+		return;
+
+	sptr->name = MyStrdup(av[1]);
+} /* c_server() */
 
 /*
 c_doauth()

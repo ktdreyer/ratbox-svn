@@ -9,6 +9,7 @@
 #define CONFFILE     "iauth.conf"
 #define LOGFILE      "iauth.log"
 
+#undef SPOOF_FREEFORM
 #define DEBUGMODE
 
 /* CONNECTTIMEOUT -

@@ -30,6 +30,7 @@
 #include "log.h"
 #include "match.h"
 #include "misc.h"
+#include "mtree.h"
 #include "setup.h"
 
 /*
@@ -355,6 +356,8 @@ AddServerBan(char *user, char *host, char *reason, time_t expires)
 		ptr->next->prev = ptr;
 	ServerBanList = ptr;
 
+	TreeAddKline(ptr);
+
 	return (ptr);
 } /* AddServerBan() */
 
@@ -381,6 +384,12 @@ FindServerBan(char *user, char *host)
 {
 	struct ServerBan *tmp;
 
+	tmp = (struct ServerBan *) SearchKlineTree(user, host);
+	if (tmp)
+		fprintf(stderr, "FOUND KLINE: [%s@%s]\n", tmp->username, tmp->hostname);
+	return (tmp);
+
+#if 0
 	for (tmp = ServerBanList; tmp; tmp = tmp->next)
 	{
 		if (match(tmp->username, user) && match(tmp->hostname, host))
@@ -388,6 +397,7 @@ FindServerBan(char *user, char *host)
 	}
 
 	return (NULL);
+#endif /* 0 */
 } /* FindServerBan() */
 
 /*
@@ -445,6 +455,7 @@ ParseIlineFlags(struct Iline *iptr, char *user)
 				break;
 
 			case '>':
+				SetIlineExempt(iptr);
 				SetIlineSuperExempt(iptr);
 				break;
 
@@ -507,6 +518,11 @@ AddIline(char *spoofhost, char *password, char *user, char *host, int class)
 		ptr->next->prev = ptr;
 	IlineList = ptr;
 
+	/*
+	 * Add ptr to the Iline tree
+	 */
+	TreeAddIline(ptr);
+
 	return (ptr);
 } /* AddIline() */
 
@@ -563,12 +579,17 @@ CheckIline(char *user, char *host, char *pass, struct Iline **imatch)
 {
 	struct Iline *iptr;
 
-	if (!(iptr = FindIline(user, host)))
+	iptr = (struct Iline *) SearchIlineTree(user, host);
+	if (iptr)
+		fprintf(stderr, "FOUND IN TREE: [%s@%s]\n", iptr->username, iptr->hostname);
+
+	if (!iptr)
 		return (IL_ERR_NOTAUTHORIZED);
 
 	if (iptr->class)
 	{
-		if (iptr->class->links >= iptr->class->maxLinks)
+		if ((iptr->class->links >= iptr->class->maxLinks) &&
+				!IsIlineSuperExempt(iptr))
 			return (IL_ERR_FULL);
 
 		++iptr->class->links;

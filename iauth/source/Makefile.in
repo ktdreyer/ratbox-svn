@@ -26,6 +26,7 @@ SOURCES =     \
   log.c       \
   match.c     \
   misc.c      \
+  mtree.c     \
   res.c       \
   sock.c
 

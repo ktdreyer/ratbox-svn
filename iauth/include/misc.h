@@ -28,6 +28,7 @@
 char *strncpy_irc(char *s1, const char *s2, size_t n);
 void *MyMalloc(size_t x);
 char *MyStrdup(char *str);
+void *MyRealloc(void *oldptr, size_t newsize);
 void MyFree(void *ptr);
 
 #endif /* INCLUDED_misc_h */

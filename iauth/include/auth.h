@@ -47,19 +47,19 @@ struct AuthRequest
 {
 	struct AuthRequest *next, *prev;
 
-	unsigned int flags;      /* current state of request */
-	time_t       timeout;    /* time when query expires */
-	int          identfd;    /* ident query socket descriptor */
+	unsigned int flags;                /* current state of request */
+	time_t       timeout;              /* time when query expires */
+	int          identfd;              /* ident query socket descriptor */
 	char         clientid[IDLEN + 1];  /* unique client ID */
 
-	struct Server *server;   /* server where request came from */
+	struct Server *server;      /* server where request came from */
 
-	struct in_addr ip;       /* ip address of client */
+	struct in_addr ip;          /* ip address of client */
 
 	struct DNSReply *dns_reply; /* result from resolver query */
 
-	unsigned int remoteport; /* client's remote port */
-	unsigned int localport;  /* server's local port */
+	unsigned int remoteport;    /* client's remote port */
+	unsigned int localport;     /* server's local port */
 
 	char         nickname[NICKLEN + 1]; /* user's nickname */
 	char         username[USERLEN + 1]; /* user's ident */

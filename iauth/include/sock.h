@@ -24,7 +24,9 @@
 struct Port;
 struct Server;
 
-/* sock.c prototypes */
+/*
+ * Prototypes
+ */
 
 void tosock(int sockfd, char *format, ...);
 void InitListenPorts();
@@ -35,7 +37,7 @@ void CheckConnections();
  * External variable declarations
  */
 
-extern struct Port *PortList;
+extern struct Port     *PortList;
 extern struct Server   *ServerList;
 
 #define  NOSOCK        (-1)
@@ -44,8 +46,6 @@ extern struct Server   *ServerList;
 #define  USERLEN       10   /* length of username */
 #define  HOSTLEN       63   /* length of hostname */
 #define  IDLEN         50   /* should be ample for a client id */
-
-struct Kline;
 
 struct Port
 {
@@ -59,7 +59,8 @@ struct Server
 {
 	struct Server *next, *prev;
 
-	int sockfd;            /* socket descriptor for their connection */
+	int sockfd;    /* socket descriptor for their connection */
+	char *name;    /* server name */
 };
 
 #endif /* INCLUDED_sock_h */

@@ -73,6 +73,25 @@ MyStrdup(char *str)
 } /* MyStrdup() */
 
 /*
+MyRealloc()
+	calls realloc() with 'oldptr' and 'newsize'; returns pointer to
+allocated memory if successful, otherwise calls outofmemory()
+*/
+
+void *
+MyRealloc(void *oldptr, size_t newsize)
+
+{
+	void	*ptr;
+
+	ptr = (void *) realloc(oldptr, newsize);
+	if (!ptr)
+		outofmemory();
+
+	return (ptr);
+} /* MyRealloc() */
+
+/*
 MyFree()
  Free a pointer
 */

@@ -641,23 +641,28 @@ CompleteAuthRequest(struct AuthRequest *auth)
 			break;
 	}
 
-	if ((kptr = FindServerBan(auth->username, auth->hostname)))
+
+	if (iptr)
 	{
-		/*
-		 * They are K-lined
-		 */
-		badauth = 1;
-		sprintf(reason,
-			"*** Banned: %s",
-			kptr->reason);
-	}
-	else if ((qptr = FindQuarantine(auth->nickname, auth->username, auth->hostname)))
-	{
-		badauth = 1;
-		sprintf(reason,
-			"*** Quarantined Nickname: %s",
-			qptr->reason);
-	}
+		if (!IsIlineExempt(iptr) &&
+				(kptr = FindServerBan(auth->username, auth->hostname)))
+		{
+			/*
+			 * They are K-lined
+			 */
+			badauth = 1;
+			sprintf(reason,
+				"*** Banned: %s",
+				kptr->reason);
+		}
+		else if ((qptr = FindQuarantine(auth->nickname, auth->username, auth->hostname)))
+		{
+			badauth = 1;
+			sprintf(reason,
+				"*** Quarantined Nickname: %s",
+				qptr->reason);
+		}
+	} /* if (iptr) */
 
 	if (badauth)
 	{
@@ -667,6 +672,8 @@ CompleteAuthRequest(struct AuthRequest *auth)
 	}
 	else
 	{
+		assert(iptr != 0);
+
 		/*
 		 * If the ident query failed, make their username "~",
 		 * which will tell the ircd server to use the given
@@ -674,6 +681,29 @@ CompleteAuthRequest(struct AuthRequest *auth)
 		 */
 		if (!*auth->username)
 			strcpy(auth->username, "~");
+
+	#ifdef SPOOF_FREEFORM
+
+		if (iptr->spoofhost && IsIlineSpoof(iptr))
+		{
+			strncpy_irc(auth->hostname, iptr->spoofhost, HOSTLEN);
+			auth->hostname[HOSTLEN] = '\0';
+		}
+
+	#else
+
+		if (auth->server->name)
+		{
+			/*
+			 * They have the spoof flag in their I: line, but
+			 * SPOOF_FREEFORM is not defined - make their
+			 * hostname: oper.server
+			 */
+			strcpy(auth->hostname, "oper.");
+			strncpy_irc(&auth->hostname[5], auth->server->name, HOSTLEN - 5);
+		}
+
+	#endif /* SPOOF_FREEFORM */
 
 		len = sprintf(buf, "DoneAuth %s %s %s %d\n",
 			auth->clientid,

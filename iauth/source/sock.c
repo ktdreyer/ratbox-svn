@@ -675,6 +675,7 @@ EstablishConnection(struct Port *portptr)
 	assert(portptr != 0);
 
 	newconn = (struct Server *) MyMalloc(sizeof(struct Server));
+	memset(newconn, 0, sizeof(struct Server));
 
 	clientlen = sizeof(ClientAddr);
 	newconn->sockfd = accept(portptr->sockfd, (struct sockaddr *) &ClientAddr, &clientlen);
