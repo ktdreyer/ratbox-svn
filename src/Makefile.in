@@ -15,13 +15,10 @@ LIBS=@LIBS@ -lsqlite
 CFLAGS=-g -O0 -Wall -Werror -Wunused -Wshadow -Wmissing-declarations -Wwrite-strings -DPREFIX=\"$(PREFIX)\"
 MAKE = make
 
-SERVICEDIRS=s_userserv s_chanserv
-SERVICELIBS=s_userserv.a s_chanserv.a
-
 # Anything marked with the .PHONY attribute is always considered "out of date"
 .PHONY: $(BIN)
 
-SRCS = 			\
+BSRCS = 		\
         balloc.c        \
         c_error.c       \
 	c_message.c	\
@@ -29,6 +26,7 @@ SRCS = 			\
         cache.c         \
 	channel.c	\
 	client.c	\
+	crypt.c		\
 	conf.c		\
 	event.c		\
 	hook.c		\
@@ -45,18 +43,14 @@ SRCS = 			\
         u_stats.c       \
 	ucommand.c
 
+SRCS = ${BSRCS} s_userserv.c
+
 OBJS=$(SRCS:.c=.o)
 
 all: $(BIN)
 
 $(BIN): $(OBJS) y.tab.o lex.yy.o
-	@for i in $(SERVICEDIRS); do \
-		echo "build -> $$i"; \
-		cd $$i; \
-		$(MAKE) build || exit; cd ..; \
-	done
-
-	${CC} ${CFLAGS} ${LDFLAGS} -o $@ ${OBJS} y.tab.o lex.yy.o -L . $(SERVICELIBS) $(LIBS) $(LEXLIB)
+	${CC} ${CFLAGS} ${LDFLAGS} -o $@ ${OBJS} y.tab.o lex.yy.o $(LIBS) $(LEXLIB)
 
 .c.o:
 	${CC} $(INCLUDES) ${CFLAGS} -c $<
@@ -76,19 +70,9 @@ lex.yy.c:	lexer.l
 build: $(BIN)
 
 clean:
-	@for i in $(SERVICEDIRS); do \
-		cd $$i; \
-		$(MAKE) clean || exit; cd ..; \
-	done
-
 	$(RM) -f $(BIN) *.o y.tab.* lex.yy.c
 
 distclean: clean
-	@for i in $(SERVICEDIRS); do \
-		cd $$i; \
-		$(MAKE) distclean || exit; cd ..; \
-	done
-
 	$(RM) Makefile
 
 depend:

@@ -264,8 +264,10 @@ main(int argc, char *argv[])
 #ifdef USER_SERVICE
 	init_s_userserv();
 #endif
+#if 0
 #ifdef CHANNEL_SERVICE
 	init_s_chanserv();
+#endif
 #endif
 
 	first_time = CURRENT_TIME;

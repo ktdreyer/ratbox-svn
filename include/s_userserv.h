@@ -15,6 +15,8 @@ struct user_reg
 	time_t reg_time;
 	time_t last_time;
 
+	int flags;
+
 	dlink_node node;
 	dlink_list channels;
 };
@@ -28,10 +30,5 @@ extern void add_user_reg(struct user_reg *);
 
 extern struct user_reg *find_user_reg(struct client *, const char *name);
 extern struct user_reg *find_user_reg_nick(struct client *, const char *name);
-
-extern void load_user_db(void);
-extern void write_user_db_entry(struct user_reg *);
-
-extern const char *get_crypt(const char *password, const char *salt);
 
 #endif

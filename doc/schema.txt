@@ -4,7 +4,8 @@ CREATE TABLE users (
 	username TEXT,
 	password TEXT,
 	reg_time TIMESTAMP,
-	last_used TIMESTAMP
+	last_used TIMESTAMP,
+	flags INTEGER
 );
 
 CREATE TABLE channels (
