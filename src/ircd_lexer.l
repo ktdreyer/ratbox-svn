@@ -149,6 +149,8 @@ port		{ return PORT; }
 quarantine	{ return QUARANTINE; }
 reason		{ return REASON; }
 rehash		{ return REHASH; }
+redirserv       { return REDIRSERV; }
+redirport       { return REDIRPORT; }
 reject		{ return TREJECT; }
 remote		{ return REMOTE; }
 send_password	{ return SEND_PASSWORD; }

@@ -24,6 +24,10 @@
  * $Id$
  *
  * $Log$
+ * Revision 7.46  2000/12/21 20:05:38  db
+ * - added redirserv redirport to auth {} block
+ *   I've been wanting this one a long time, finally epic supports it. yay.
+ *
  * Revision 7.45  2000/12/21 02:05:48  ejb
  * - removed hide_chanops from config since its not used anymore.
  *
@@ -527,9 +531,10 @@ typedef struct QlineItem {
 #define CONF_HUB                0x2000
 #define CONF_ELINE              0x4000
 #define CONF_FLINE              0x8000
-#define CONF_DLINE              0x20000
-#define CONF_XLINE              0x40000
-#define CONF_ULINE              0x80000
+#define CONF_DLINE             0x20000
+#define CONF_XLINE             0x40000
+#define CONF_ULINE             0x80000
+
 
 #define CONF_OPS                (CONF_OPERATOR | CONF_LOCOP)
 #define CONF_SERVER_MASK        (CONF_CONNECT_SERVER | CONF_NOCONNECT_SERVER)
@@ -551,6 +556,7 @@ typedef struct QlineItem {
 #define CONF_FLAGS_ALLOW_AUTO_CONN      0x0400
 #define CONF_FLAGS_SPOOF_IP             0x1000
 #define CONF_FLAGS_LAZY_LINK            0x2000
+#define CONF_FLAGS_REDIR                0x4000
 
 
 /* Macros for aConfItem */

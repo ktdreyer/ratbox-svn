@@ -55,6 +55,9 @@ int   class_number_per_ip_var;
 int   class_max_number_var;
 int   class_sendq_var;
 
+char* class_redirserv_var;
+int   class_redirport_var;
+
 %}
 
 %union {
@@ -125,6 +128,8 @@ int   class_sendq_var;
 %token  QUARANTINE
 %token  QUARANTINE
 %token  REASON
+%token  REDIRSERV
+%token  REDIRPORT
 %token  REHASH
 %token  REMOTE
 %token  SENDQ
@@ -253,7 +258,6 @@ serverinfo_item:        serverinfo_name | serverinfo_vhost |
 serverinfo_name:        NAME '=' QSTRING ';' 
   {
     yy_aconf->host = yylval.string;
-    yylval.string = (char *)NULL;
   };
 
 serverinfo_description: DESCRIPTION '=' QSTRING ';'
@@ -341,20 +345,14 @@ logging_item:           logging_path | logging_oper_log |
 
 logging_path:           LOGPATH '=' QSTRING ';' 
                         {
-                          MyFree(yylval.string);
-                          yylval.string = (char *)NULL;
                         };
 
 logging_oper_log:	OPER_LOG '=' QSTRING ';'
                         {
-                          MyFree(yylval.string);
-                          yylval.string = (char *)NULL;
                         };
 
 logging_gline_log:	GLINE_LOG '=' QSTRING ';'
                         {
-                          MyFree(yylval.string);
-                          yylval.string = (char *)NULL;
                         };
 
 logging_log_level:     LOG_LEVEL '=' T_L_CRIT ';'
@@ -429,13 +427,10 @@ oper_user:      USER '='  QSTRING ';'
 	DupString(yy_aconf->user,yylval.string);
 	p++;
 	DupString(yy_aconf->host,p);
-        MyFree(yylval.string);
-        yylval.string = (char *)NULL;
       }
     else
       {
 	yy_aconf->host = yylval.string;
-        yylval.string = (char *)NULL;
 	DupString(yy_aconf->user,"*");
       }
   };
@@ -443,13 +438,11 @@ oper_user:      USER '='  QSTRING ';'
 oper_password:  PASSWORD '=' QSTRING ';'
   {
     yy_aconf->passwd = yylval.string;
-    yylval.string = (char *)NULL;
   };
 
 oper_class:     CLASS '=' QSTRING ';'
   {
     yy_aconf->className = yylval.string;
-    yylval.string = (char *)NULL;
   };
 
 oper_global:    GLOBAL '=' TYES ';' {yy_aconf->status = CONF_OPERATOR;} |
@@ -506,7 +499,7 @@ class_entry:    CLASS
     if(class_name_var)
       MyFree(class_name_var);
 
-    class_name_var = (char *)NULL;
+    class_name_var = NULL;
     class_ping_time_var = 0;
     class_number_per_ip_var = 0;
     class_max_number_var = 0;
@@ -536,7 +529,6 @@ class_item:     class_name |
 class_name:     NAME '=' QSTRING ';' 
   {
     class_name_var = yylval.string;
-    yylval.string = (char *)NULL;
   };
 
 class_ping_time:        PING_TIME '=' NUMBER ';'
@@ -563,6 +555,7 @@ class_sendq:    SENDQ '=' NUMBER ';'
   {
     class_sendq_var = yylval.number;
   };
+
 
 /***************************************************************************
  *  section listen
@@ -594,7 +587,6 @@ listen_item:    listen_name | listen_port | listen_address
 listen_name:    NAME '=' QSTRING ';' 
   {
     yy_aconf->host = yylval.string;
-    yylval.string = (char *)NULL;
   };
 
 listen_port:    PORT '=' NUMBER ';'
@@ -605,7 +597,6 @@ listen_port:    PORT '=' NUMBER ';'
 listen_address: IP '=' QSTRING ';'
   {
     yy_aconf->passwd = yylval.string;
-    yylval.string = (char *)NULL;
   };
 
 /***************************************************************************
@@ -656,7 +647,8 @@ auth_items:     auth_items auth_item |
 
 auth_item:      auth_user | auth_passwd | auth_class |
                 auth_kline_exempt | auth_have_ident |
-                auth_exceed_limit | auth_no_tilde | auth_spoof
+                auth_exceed_limit | auth_no_tilde | auth_spoof |
+                auth_redir_serv | auth_redir_port
 
 auth_user:   USER '=' QSTRING ';'
   {
@@ -668,8 +660,6 @@ auth_user:   USER '=' QSTRING ';'
 	DupString(yy_aconf->user,yylval.string);
 	p++;
 	DupString(yy_aconf->host,p);
-        MyFree(yylval.string);
-        yylval.string = (char *)NULL;
       }
     else
       {
@@ -693,13 +683,11 @@ auth_user:   USER '=' QSTRING ';'
 auth_passwd:  PASSWORD '=' QSTRING ';' 
   {
     yy_aconf->passwd = yylval.string;
-    yylval.string = (char *)NULL;
   };
 
 auth_spoof:   SPOOF '=' QSTRING ';' 
   {
     yy_aconf->name = yylval.string;
-    yylval.string = (char *)NULL;
     yy_aconf->flags |= CONF_FLAGS_SPOOF_IP;
   };
 
@@ -743,10 +731,21 @@ auth_no_tilde:        NO_TILDE '=' TYES ';'
     yy_aconf->flags &= ~CONF_FLAGS_NO_TILDE;
   };
 
+auth_redir_serv:    REDIRSERV '=' QSTRING ';'
+  {
+    yy_aconf->flags |= CONF_FLAGS_REDIR;
+    DupString(yy_aconf->name,yylval.string);
+  };
+
+auth_redir_port:    REDIRPORT '=' NUMBER ';'
+  {
+    yy_aconf->flags |= CONF_FLAGS_REDIR;
+    yy_aconf->port = yylval.number;
+  };
+
 auth_class:   CLASS '=' QSTRING ';'
   {
     yy_aconf->className = yylval.string;
-    yylval.string = (char *)NULL;
   };
 
 /***************************************************************************
@@ -777,13 +776,11 @@ quarantine_item:        quarantine_name | quarantine_reason
 quarantine_name:        NAME '=' QSTRING ';'
   {
     yy_aconf->host = yylval.string;
-    yylval.string = (char *)NULL;
   };
 
 quarantine_reason:      REASON '=' QSTRING ';' 
   {
     yy_aconf->passwd = yylval.string;
-    yylval.string = (char *)NULL;
   };
 
 /***************************************************************************
@@ -963,26 +960,22 @@ connect_name:   NAME '=' QSTRING ';'
       }
 
     MyFree(yylval.string);
-    yylval.string = (char *)NULL;
   };
 
 connect_host:   HOST '=' QSTRING ';' 
   {
     yy_cconf->host = yylval.string;
     DupString(yy_nconf->host,yylval.string);
-    yylval.string = (char *)NULL;
   };
  
 connect_send_password:  SEND_PASSWORD '=' QSTRING ';'
   {
     yy_cconf->passwd = yylval.string;
-    yylval.string = (char *)NULL;
   };
 
 connect_accept_password: ACCEPT_PASSWORD '=' QSTRING ';'
   {
     yy_nconf->passwd = yylval.string;
-    yylval.string = (char *)NULL;
   };
 
 connect_port:   PORT '=' NUMBER ';' { yy_cconf->port = yylval.number; };
@@ -1014,14 +1007,12 @@ connect_hub_mask:       HUB_MASK '=' QSTRING ';'
 	hub_confs = make_conf();
 	hub_confs->status = CONF_HUB;
 	hub_confs->host = yylval.string;
-        yylval.string = (char *)NULL;
       }
     else
       {
 	yy_hconf = make_conf();
 	yy_hconf->status = CONF_HUB;
 	yy_hconf->host = yylval.string;
-        yylval.string = (char *)NULL;
 	yy_hconf->next = hub_confs;
 	hub_confs = yy_hconf;
       }
@@ -1033,7 +1024,6 @@ connect_leaf_mask:       LEAF_MASK '=' QSTRING ';'
       {
 	leaf_confs = make_conf();
 	leaf_confs->status = CONF_LEAF;
-	leaf_confs->host = yylval.string;
         yylval.string = (char *)NULL;
       }
     else
@@ -1041,7 +1031,6 @@ connect_leaf_mask:       LEAF_MASK '=' QSTRING ';'
 	yy_lconf = make_conf();
 	yy_lconf->status = CONF_LEAF;
 	yy_lconf->host = yylval.string;
-        yylval.string = (char *)NULL;
 	yy_lconf->next = leaf_confs;
 	leaf_confs = yy_lconf;
       }
@@ -1051,7 +1040,6 @@ connect_class:  CLASS '=' QSTRING ';'
   {
     yy_cconf->className = yylval.string;
     DupString(yy_nconf->className,yylval.string);
-    yylval.string = (char *)NULL;
   };
 
 
@@ -1099,7 +1087,6 @@ kill_user:      USER '=' QSTRING ';'
 	p++;
 	DupString(yy_aconf->host,p);
         MyFree(yylval.string);
-        yylval.string = (char *)NULL;
       }
     else
       {
@@ -1112,7 +1099,6 @@ kill_user:      USER '=' QSTRING ';'
 kill_reason:    REASON '=' QSTRING ';' 
   {
     yy_aconf->passwd = yylval.string; 
-    yylval.string = (char *)NULL;
   };
 
 /***************************************************************************
@@ -1166,7 +1152,6 @@ deny_ip:        IP '=' IP_TYPE ';'
 deny_reason:    REASON '=' QSTRING ';' 
   {
     yy_aconf->passwd = yylval.string;
-    yylval.string = (char *)NULL;
   };
 
 /***************************************************************************
@@ -1209,13 +1194,11 @@ gecos_item:      gecos_name | gecos_reason | gecos_action
 gecos_name:    NAME '=' QSTRING ';' 
   {
     yy_aconf->host = yylval.string; 
-    yylval.string = (char *)NULL;
   };
 
 gecos_reason:    REASON '=' QSTRING ';' 
   {
     yy_aconf->passwd = yylval.string;
-    yylval.string = (char *)NULL;
   };
 
 gecos_action:    ACTION '=' TREJECT ';'

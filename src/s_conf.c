@@ -500,6 +500,15 @@ int attach_Iline(struct Client* cptr, const char* username)
     {
       if (aconf->status & CONF_CLIENT)
         {
+	  if (aconf->flags & CONF_FLAGS_REDIR)
+	    {
+	      sendto_one(cptr, form_str(RPL_REDIR),
+			 me.name, cptr->name,
+			 aconf->name ? aconf->name : "", aconf->port);
+	      return(NOT_AUTHORIZED);
+	    }
+
+
 	  if (ConfigFileEntry.glines)
 	    {
 	      if (!IsConfElined(aconf))
@@ -2755,6 +2764,8 @@ void conf_add_hub_or_leaf(struct ConfItem *aconf)
  * inputs       - pointer to config item
  * output       - NONE
  * side effects - Add a class
+ *
+ * Can I PULEASE rip this function out soon? -db
  */
 
 void conf_add_class(struct ConfItem *aconf,int sendq)
@@ -2770,7 +2781,7 @@ void conf_add_class(struct ConfItem *aconf,int sendq)
     {
       add_class(aconf->host, atoi(aconf->passwd),
 		atoi(aconf->user), aconf->port,
-		sendq );
+		sendq);
     }
 }
 

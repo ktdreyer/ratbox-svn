@@ -32,6 +32,8 @@ struct Class {
   int           pingFreq;
   int           maxLinks;
   long          maxSendq;
+  char*         servname;
+  int           servport;
   int           links;
 };
 
