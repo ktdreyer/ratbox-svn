@@ -1,3 +1,9 @@
+*** 20010126_2 by db
+- This fixes odd cores associated with accept code /quit and nick changes...
+  ALL references to a client must be removed when it exits!
+
+
+
 *** 20010126_1 by ejb
 - does this make IPv6 work? let's see.
 
