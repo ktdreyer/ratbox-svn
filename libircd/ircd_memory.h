@@ -85,6 +85,7 @@ MyFree(void *x)
 		free(x);
 }
 
+#ifndef HAVE_STRDUP
 extern inline void
 _DupString(char **x, const char *y)
 {
@@ -93,11 +94,15 @@ _DupString(char **x, const char *y)
 		outofmemory();
 	strcpy((*x), y);
 }
+#endif /* HAVE_STRDUP */
 #endif /* __GNUC__ */
 #endif /* __APPLE__ */
 
+#ifdef HAVE_STRDUP
+#define DupString(x,y) do { (*x) = strdup(y); if(x == NULL) outofmemory(); } while(0)
+#else
 #define DupString(x,y) _DupString(&x, y)
-
+#endif
 
 #ifndef WE_ARE_MEMORY_C
 #undef strdup

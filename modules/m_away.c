@@ -120,8 +120,7 @@ m_away(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	else
 		MyFree(away);
 
-	away = (char *) MyMalloc(strlen(awy2) + 1);
-	strcpy(away, awy2);
+	DupString(away, awy2);
 
 	source_p->user->away = away;
 

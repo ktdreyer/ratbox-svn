@@ -71,13 +71,14 @@ MyFree(void *x)
 		free((x));
 }
 
+#ifndef HAVE_STRDUP
 void
 _DupString(char **x, const char *y)
 {
 	(*x) = malloc(strlen(y) + 1);
 	strcpy((*x), y);
 }
-
+#endif
 
 /*
  * outofmemory()

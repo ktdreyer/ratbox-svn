@@ -261,6 +261,11 @@ AC_CHECK_FUNCS(strlcat strlcpy)
 dnl check for socketpair
 AC_CHECK_FUNCS(socketpair)
 
+dnl check for strdup
+AC_CHECK_FUNCS(strdup)
+
+AC_FUNC_ALLOCA
+
 dnl check for MSG_NOSIGNAL
 AC_MSG_CHECKING(for MSG_NOSIGNAL)
 AC_TRY_COMPILE([#include <sys/socket.h>], 
