@@ -1,3 +1,27 @@
+androsyn    2002/08/09 21:41:42 EDT	(20020810_3)
+
+  Modified files:
+    modules              m_accept.c m_names.c m_rehash.c 
+                         m_restart.c m_stats.c m_unkline.c m_who.c 
+    modules/core         m_die.c m_kill.c m_server.c m_sjoin.c 
+  Log:
+  Make modules/ use the DLINK_FOREACH macros
+  
+  Revision  Changes    Path
+  1.25      +3 -3      ircd-ratbox/modules/core/m_die.c
+  1.68      +2 -2      ircd-ratbox/modules/core/m_kill.c
+  1.89      +3 -3      ircd-ratbox/modules/core/m_server.c
+  1.144     +2 -2      ircd-ratbox/modules/core/m_sjoin.c
+  1.33      +2 -2      ircd-ratbox/modules/m_accept.c
+  1.47      +2 -2      ircd-ratbox/modules/m_names.c
+  1.42      +2 -2      ircd-ratbox/modules/m_rehash.c
+  1.24      +3 -3      ircd-ratbox/modules/m_restart.c
+  1.112     +8 -9      ircd-ratbox/modules/m_stats.c
+  1.50      +2 -2      ircd-ratbox/modules/m_unkline.c
+  1.65      +9 -8      ircd-ratbox/modules/m_who.c
+
+
+
 ejb         2002/08/09 21:04:09 EDT	(20020810_2)
 
   Modified files:
