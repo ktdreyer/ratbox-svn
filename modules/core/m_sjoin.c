@@ -162,7 +162,11 @@ int     ms_sjoin(struct Client *cptr,
       case 't':
         mode.mode |= MODE_TOPICLIMIT;
         break;
-      case 'k':
+		  case 'z':
+			  mode.mode |= MODE_HIDEOPS;
+			  break;
+			  
+		  case 'k':
          strncpy_irc(mode.key, parv[4 + args], KEYLEN);
         args++;
         if (parc < 5+args) return 0;
