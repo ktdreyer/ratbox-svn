@@ -1,3 +1,15 @@
+androsyn    2001/12/16 02:43:28 EST	(20011216_2)
+
+  Modified files:
+    src                  restart.c 
+  Log:
+  Fixed misleading message on server restart
+  
+  Revision  Changes    Path
+  7.18      +2 -3      ircd-hybrid-7/src/restart.c
+
+
+
 wcampbel    2001/12/16 00:10:18 EST	(20011216_1)
 
   Modified files:
