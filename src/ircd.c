@@ -625,23 +625,21 @@ main(int argc, char *argv[])
 		exit(EXIT_FAILURE);
 	}
 
-	if (testing_conf)
-		server_state_foreground = 1;
-
 	setup_signals();
-	/* We need this to initialise the fd array before anything else */
-	fdlist_init();
-
-	if(!server_state_foreground)
-	{
-		comm_close_all();
-	}
-
-	init_netio();		/* This needs to be setup early ! -- adrian */
 
 #ifdef __CYGWIN__
 	server_state_foreground = 1;
 #endif
+
+	if (testing_conf)
+		server_state_foreground = 1;
+
+	/* We need this to initialise the fd array before anything else */
+	fdlist_init();
+	if(!server_state_foreground)
+	{
+		comm_close_all();
+	}
 
 	/* Check if there is pidfile and daemon already running */
 	if(!testing_conf)
@@ -655,6 +653,8 @@ main(int argc, char *argv[])
 		else
 			print_startup(getpid());
 	}
+
+	init_netio();		/* This needs to be setup early ! -- adrian */
 
 	/* Init the event subsystem */
 	eventInit();
