@@ -1,3 +1,22 @@
+leeh        2005/01/04 13:34:41 EST	(20050104_1)
+
+  Modified files:
+    doc                  schema.txt 
+    include              s_chanserv.h 
+    src                  s_chanserv.c 
+  Added files:
+    help/chanserv        modauto 
+  Log:
+  - added CHANSERV::MODAUTO to allow autoop/autovoice
+  
+  Revision  Changes    Path
+  1.12      +1 -0      rserv/doc/schema.txt
+  1.3       +5 -0      rserv/help/chanserv/modauto (new)
+  1.16      +7 -0      rserv/include/s_chanserv.h
+  1.26      +132 -5    rserv/src/s_chanserv.c
+
+
+
 leeh        2005/01/04 13:32:51 EST	(20050104_0)
 
   Modified files:
