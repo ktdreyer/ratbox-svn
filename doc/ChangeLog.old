@@ -1,3 +1,7 @@
+*** 20010818_2 by davidt
+- Add m_map.c to contrib/, since it was in TODO and I was bored.
+
+
 *** 20010818_1 by leeh
 - doc updates
 - added a blank dline.conf
