@@ -1,3 +1,23 @@
+androsyn    2004/03/01 18:48:07 EST	(20040301_16)
+
+  Modified files:
+    .                    configure configure.ac 
+    include              setup.h.in 
+    tools                Makefile.in 
+  Removed files:
+    tools                encspeed.c 
+  Log:
+  Remove random bits and pieces of cryptlinks
+  
+  Revision  Changes    Path
+  7.204     +2 -686    ircd-ratbox/configure
+  7.18      +3 -22     ircd-ratbox/configure.ac
+  7.77      +0 -21     ircd-ratbox/include/setup.h.in
+  7.34      +3 -8      ircd-ratbox/tools/Makefile.in
+  7.8       +0 -238    ircd-ratbox/tools/encspeed.c (dead)
+
+
+
 androsyn    2004/03/01 15:59:54 EST	(20040301_15)
 
   Modified files:
