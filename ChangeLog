@@ -1,3 +1,17 @@
+androsyn    2003/01/05 14:19:57 UTC	(20030105_0)
+
+  Added files:
+    include              hostmask.h 
+    src                  hostmask.c 
+  Log:
+  Add back hostmask.{c,h}
+  
+  Revision  Changes    Path
+  1.29      +105 -0    ircd-ratbox/include/hostmask.h (new)
+  7.82      +768 -0    ircd-ratbox/src/hostmask.c (new)
+
+
+
 leeh        2003/01/01 19:00:21 UTC	(20030101_0)
 
   Modified files:
