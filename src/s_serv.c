@@ -895,7 +895,7 @@ static void server_burst(struct Client *cptr)
 	      send_channel_modes(cptr, chptr);
 
 	      for ( vchan = chptr->next_vchan; vchan;
-		    vchan = chptr->next_vchan)
+		    vchan = vchan->next_vchan)
 		{
 		  for (l = vchan->members; l; l = l->next)
 		    {
