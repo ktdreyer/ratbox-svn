@@ -1,3 +1,15 @@
+leeh        2002/12/02 16:38:31 UTC	(20021202_1)
+
+  Modified files:
+    modules/core         m_sjoin.c 
+  Log:
+  - dont try to send NULL parameters to users.
+  
+  Revision  Changes    Path
+  1.157     +17 -15    ircd-ratbox/modules/core/m_sjoin.c
+
+
+
 leeh        2002/12/02 16:17:51 UTC	(20021202_0)
 
   Modified files:
