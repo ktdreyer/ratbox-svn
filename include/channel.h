@@ -185,7 +185,7 @@ extern void channel_member_names(struct Channel *chptr, struct Client *,
 extern void add_invite(struct Channel *chptr, struct Client *who);
 extern void del_invite(struct Channel *chptr, struct Client *who);
 
-extern void burst_channel(struct Channel *, struct Client *);
+extern void burst_channels(struct Client *);
 extern void channel_modes(struct Channel *chptr, struct Client *who, char *, char *);
 
 extern void check_spambot_warning(struct Client *source_p, const char *name);

@@ -281,7 +281,6 @@ extern void add_server_to_list(struct Client *);
 extern void remove_server_from_list(struct Client *);
 
 extern void initServerMask(void);
-extern void sendnick_TS(struct Client *, struct Client *);
 extern int serv_connect(struct ConfItem *, struct Client *);
 extern unsigned long nextFreeMask(void);
 extern void cryptlink_init(struct Client *client_p, struct ConfItem *aconf, int fd);

@@ -135,7 +135,6 @@ struct SlinkRplDef slinkrpltab[] = {
 
 unsigned long nextFreeMask();
 static unsigned long freeMask;
-static void server_burst(struct Client *client_p);
 #ifndef __VMS
 static int fork_server(struct Client *client_p);
 #endif
@@ -787,49 +786,55 @@ send_capabilities(struct Client *client_p, struct ConfItem *aconf,
 
 
 /*
- * sendnick_TS
+ * burst_users
  * 
  * inputs	- client (server) to send nick towards
  * 		- client to send nick for
  * output	- NONE
  * side effects	- NICK message is sent towards given client_p
  */
-void
-sendnick_TS(struct Client *client_p, struct Client *target_p)
+static void
+burst_users(struct Client *client_p)
 {
+	struct Client *target_p;
+	dlink_node *ptr;
 	static char ubuf[12];
 
-	if(!IsPerson(target_p))
-		return;
-
-	send_umode(NULL, target_p, 0, SEND_UMODES, ubuf);
-	if(!*ubuf)
+	DLINK_FOREACH(ptr, global_client_list.head)
 	{
-		ubuf[0] = '+';
-		ubuf[1] = '\0';
+		target_p = ptr->data;
+
+		if(!IsPerson(target_p))
+			return;
+
+		send_umode(NULL, target_p, 0, SEND_UMODES, ubuf);
+		if(!*ubuf)
+		{
+			ubuf[0] = '+';
+			ubuf[1] = '\0';
+		}
+
+		if(HasID(target_p) && IsCapable(client_p, CAP_UID))
+			sendto_one(client_p, "CLIENT %s %d %lu %s %s %s %s %s :%s",
+					target_p->name,
+					target_p->hopcount + 1,
+					(unsigned long) target_p->tsinfo,
+					ubuf,
+					target_p->username, target_p->host,
+					target_p->user->server, target_p->user->id, target_p->info);
+		else
+			sendto_one(client_p, "NICK %s %d %lu %s %s %s %s :%s",
+					target_p->name,
+					target_p->hopcount + 1,
+					(unsigned long) target_p->tsinfo,
+					ubuf,
+					target_p->username, target_p->host,
+					target_p->user->server, target_p->info);
+
+		if(ConfigFileEntry.burst_away && !EmptyString(target_p->user->away))
+			sendto_one(client_p, ":%s AWAY :%s",
+					ID_or_name(target_p, client_p), target_p->user->away);
 	}
-
-	if(HasID(target_p) && IsCapable(client_p, CAP_UID))
-		sendto_one(client_p, "CLIENT %s %d %lu %s %s %s %s %s :%s",
-			   target_p->name,
-			   target_p->hopcount + 1,
-			   (unsigned long) target_p->tsinfo,
-			   ubuf,
-			   target_p->username, target_p->host,
-			   target_p->user->server, target_p->user->id, target_p->info);
-	else
-		sendto_one(client_p, "NICK %s %d %lu %s %s %s %s :%s",
-			   target_p->name,
-			   target_p->hopcount + 1,
-			   (unsigned long) target_p->tsinfo,
-			   ubuf,
-			   target_p->username, target_p->host,
-			   target_p->user->server, target_p->info);
-
-
-	if(ConfigFileEntry.burst_away && !EmptyString(target_p->user->away))
-		sendto_one(client_p, ":%s AWAY :%s",
-			   ID_or_name(target_p, client_p), target_p->user->away);
 }
 
 /*
@@ -1125,7 +1130,14 @@ server_estab(struct Client *client_p)
 		}
 	}
 
-	server_burst(client_p);
+	burst_users(client_p);
+	burst_channels(client_p);
+
+	if(IsCapable(client_p, CAP_EOB))
+		sendto_one(client_p, ":%s EOB", me.name);
+
+	/* Always send a PING after connect burst is done */
+	sendto_one(client_p, "PING :%s", me.name);
 
 	return 0;
 }
@@ -1457,53 +1469,6 @@ fork_server(struct Client *server)
 	return -1;
 }
 #endif
-
-/*
- * server_burst
- *
- * inputs       - struct Client pointer server
- *              -
- * output       - none
- * side effects - send a server burst
- * bugs		- still too long
- */
-static void
-server_burst(struct Client *client_p)
-{
-	struct Client *target_p;
-	struct Channel *chptr;
-	struct hook_burst_channel hinfo;
-	dlink_node *ptr;
-
-	/* first loop nicks then channels, it saves the remote server
-	 * introducing users to channels, then colliding them out of it
-	 */
-	DLINK_FOREACH(ptr, global_client_list.head)
-	{
-		target_p = ptr->data;
-
-		sendnick_TS(client_p, target_p);
-	}
-
-	DLINK_FOREACH(ptr, global_channel_list.head)
-	{
-		chptr = ptr->data;
-		if(dlink_list_length(&chptr->members) > 0)
-		{
-			burst_channel(chptr, client_p);
-			hinfo.chptr = chptr;
-			hinfo.client = client_p;
-			hook_call_event(h_burst_channel_id, &hinfo);
-		}
-	}
-
-	if(IsCapable(client_p, CAP_EOB))
-		sendto_one(client_p, ":%s EOB", me.name);
-
-	/* Always send a PING after connect burst is done */
-	sendto_one(client_p, "PING :%s", me.name);
-
-}
 
 /*
  * set_autoconn - set autoconnect mode

@@ -30,6 +30,7 @@
 #include "client.h"
 #include "common.h"
 #include "hash.h"
+#include "hook.h"
 #include "irc_string.h"
 #include "sprintf_irc.h"
 #include "ircd.h"
@@ -291,76 +292,88 @@ burst_mode_list(struct Client *client_p, char *chname, dlink_list *list, char fl
 		sendto_one(client_p, "%s%s %s", buf, mbuf, pbuf);
 }
 
-/* burst_channel()
+/* burst_channels()
  *
- * input	- channel to burst, client to burst to
+ * input	- client to burst all channels to
  * output	-
- * side effects - client gets SJOIN's of all members in the channel
+ * side effects - client gets SJOIN's of all members in all channels
  */
 void
-burst_channel(struct Channel *chptr, struct Client *client_p)
+burst_channels(struct Client *client_p)
 {
+	struct Channel *chptr;
+	struct hook_burst_channel hinfo;
 	static char modebuf[MODEBUFLEN];
 	static char parabuf[MODEBUFLEN];
 	struct membership *msptr;
 	dlink_node *ptr;
+	dlink_node *uptr;
 	int tlen;		/* length of t (temp pointer) */
 	int mlen;		/* minimum length */
 	int cur_len = 0;	/* current length */
 	char *t;		/* temp char pointer */
 
-	if(*chptr->chname != '#')
-		return;
-
-	s_assert(chptr->members.head != NULL);
-	if(chptr->members.head == NULL)
-		return;
-
-	*modebuf = *parabuf = '\0';
-	channel_modes(chptr, client_p, modebuf, parabuf);
-
-	cur_len = mlen = ircsprintf(buf, ":%s SJOIN %lu %s %s %s:", me.name,
-				    (unsigned long) chptr->channelts,
-				    chptr->chname, modebuf, parabuf);
-
-	t = buf + mlen;
-
-	DLINK_FOREACH(ptr, chptr->members.head)
+	DLINK_FOREACH(ptr, global_channel_list.head)
 	{
-		msptr = ptr->data;
+		chptr = ptr->data;
 
-		tlen = strlen(msptr->client_p->name) + 1;
-		if(is_chanop(msptr))
-			tlen++;
-		if(is_voiced(msptr))
-			tlen++;
+		s_assert(dlink_list_length(&chptr->members) > 0);
+		if(dlink_list_length(&chptr->members) <= 0)
+			continue;
 
-		if(cur_len + tlen >= BUFSIZE - 3)
+		if(*chptr->chname != '#')
+			return;
+
+		hinfo.chptr = chptr;
+		hinfo.client = client_p;
+		hook_call_event(h_burst_channel_id, &hinfo);
+
+		*modebuf = *parabuf = '\0';
+		channel_modes(chptr, client_p, modebuf, parabuf);
+
+		cur_len = mlen = ircsprintf(buf, ":%s SJOIN %lu %s %s %s:", me.name,
+				(unsigned long) chptr->channelts,
+				chptr->chname, modebuf, parabuf);
+
+		t = buf + mlen;
+
+		DLINK_FOREACH(uptr, chptr->members.head)
 		{
-			sendto_one(client_p, "%s", buf);
-			cur_len = mlen;
-			t = buf + mlen;
+			msptr = uptr->data;
+
+			tlen = strlen(msptr->client_p->name) + 1;
+			if(is_chanop(msptr))
+				tlen++;
+			if(is_voiced(msptr))
+				tlen++;
+
+			if(cur_len + tlen >= BUFSIZE - 3)
+			{
+				sendto_one(client_p, "%s", buf);
+				cur_len = mlen;
+				t = buf + mlen;
+			}
+
+			ircsprintf(t, "%s%s ", find_channel_status(msptr, 1), 
+					msptr->client_p->name);
+
+			cur_len += tlen;
+			t += tlen;
 		}
 
-		ircsprintf(t, "%s%s ", find_channel_status(msptr, 1), 
-			   msptr->client_p->name);
+		/* remove trailing space */
+		t--;
+		*t = '\0';
+		sendto_one(client_p, "%s", buf);
 
-		cur_len += tlen;
-		t += tlen;
+		burst_mode_list(client_p, chptr->chname, &chptr->banlist, 'b');
+
+		if(IsCapable(client_p, CAP_EX))
+			burst_mode_list(client_p, chptr->chname, &chptr->exceptlist, 'e');
+
+		if(IsCapable(client_p, CAP_IE))
+			burst_mode_list(client_p, chptr->chname, &chptr->invexlist, 'I');
 	}
-
-	/* remove trailing space */
-	t--;
-	*t = '\0';
-	sendto_one(client_p, "%s", buf);
-
-	burst_mode_list(client_p, chptr->chname, &chptr->banlist, 'b');
-
-	if(IsCapable(client_p, CAP_EX))
-		burst_mode_list(client_p, chptr->chname, &chptr->exceptlist, 'e');
-
-	if(IsCapable(client_p, CAP_IE))
-		burst_mode_list(client_p, chptr->chname, &chptr->invexlist, 'I');
 }
 
 /* check_channel_name()
