@@ -1,3 +1,15 @@
+androsyn    2003/02/04 02:43:24 UTC	(20030204_1)
+
+  Modified files:
+    src                  s_auth.c 
+  Log:
+  Back out my sendheader changes
+  
+  Revision  Changes    Path
+  7.127     +7 -4      ircd-ratbox/src/s_auth.c
+
+
+
 androsyn    2003/02/04 02:18:39 UTC	(20030204_0)
 
   Modified files:
