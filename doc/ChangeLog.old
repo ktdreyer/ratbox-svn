@@ -1,3 +1,23 @@
+leeh        2002/06/15 08:33:28 EDT	(20020615_4)
+
+  Modified files:
+    contrib              README 
+  Added files:
+    contrib              README.LMH lmh.diff 
+  Removed files:
+    contrib              remote-unkline.diff temp-dline.diff 
+  Log:
+  - nuked my old patches, added my shiny new one along with a readme.
+  
+  Revision  Changes    Path
+  1.20      +8 -6      ircd-hybrid-7/contrib/README
+  1.1       +135 -0    ircd-hybrid-7/contrib/README.LMH (new)
+  1.1       +4888 -0   ircd-hybrid-7/contrib/lmh.diff (new)
+  1.3       +0 -373    ircd-hybrid-7/contrib/remote-unkline.diff (dead)
+  1.5       +0 -533    ircd-hybrid-7/contrib/temp-dline.diff (dead)
+
+
+
 androsyn    2002/06/15 03:35:52 EDT	(20020615_3)
 
   Modified files:
