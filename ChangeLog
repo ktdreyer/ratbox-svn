@@ -1,3 +1,24 @@
+leeh        2002/08/13 20:23:24 EDT	(20020814_1)
+
+  Modified files:
+    contrib              m_owho.c m_owhois.c 
+    include              newconf.h s_conf.h 
+    src                  newconf.c 
+  Log:
+  - did the ref counting, extended the config option to the other two
+    modules.
+  
+    its probably make sense to do one for tburst too..
+  
+  Revision  Changes    Path
+  1.2       +21 -1     ircd-ratbox/contrib/m_owho.c
+  1.2       +19 -1     ircd-ratbox/contrib/m_owhois.c
+  7.7       +1 -0      ircd-ratbox/include/newconf.h
+  7.190     +1 -0      ircd-ratbox/include/s_conf.h
+  7.18      +14 -0     ircd-ratbox/src/newconf.c
+
+
+
 leeh        2002/08/13 20:11:15 EDT	(20020814_0)
 
   Modified files:
