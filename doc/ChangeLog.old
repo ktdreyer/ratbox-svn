@@ -1,3 +1,8 @@
+*** 20010616_7 by toot
+started reformatting some code in channel.c.. it was hell to read
+commited it so far so as not to get out of sync :)
+
+
 *** 20010616_6 by a1kmm
 - '>' != '<'
 
