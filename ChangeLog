@@ -1,3 +1,16 @@
+leeh        2005/02/07 19:19:32 EST	(20050208_0)
+
+  Modified files:
+    src                  s_conf.c 
+  Log:
+  - added support for kline.conf.perm et al, these take the same formats
+    as their non-permanent partners, but you cant remove them via the ircd.
+  
+  Revision  Changes    Path
+  7.504     +33 -67    ircd-ratbox/src/s_conf.c
+
+
+
 leeh        2005/02/02 19:18:59 EST	(20050203_1)
 
   Modified files:
