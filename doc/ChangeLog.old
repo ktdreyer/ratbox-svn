@@ -1,3 +1,8 @@
+*** 20001214_12 by db
+- added modlist admins can now list all loaded modules.
+
+
+
 *** 20001214_11 by spookey
 Minor _version misplacement.. (above the #else ,  not below it =P)
 
