@@ -1,3 +1,8 @@
+*** 20000105_5 by db
+- split out m_drop.c m_cburst.c m_lljoin.c
+
+
+
 *** 20000105_4 by db
 - further cleanups to s_conf.c
 
