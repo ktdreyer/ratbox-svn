@@ -3,15 +3,12 @@ leeh        2002/06/25 19:06:55 EDT	(20020626_0)
   Modified files:
     .                    ChangeLog 
     doc                  example.conf index.txt 
-  Removed files:
-    doc                  example.conf.efnet 
   Log:
   - doc updates
   
   Revision  Changes    Path
   7.3804    +13 -53    ircd-hybrid-7/ChangeLog
   7.163     +1 -1      ircd-hybrid-7/doc/example.conf
-  7.17      +0 -833    ircd-hybrid-7/doc/example.conf.efnet (dead)
   1.17      +0 -2      ircd-hybrid-7/doc/index.txt
 
 
