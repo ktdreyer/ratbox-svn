@@ -14,6 +14,8 @@
  *   You should have received a copy of the GNU General Public License
  *   along with this program; if not, write to the Free Software
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *
+ * $Id$
  ************************************************************************/
 
 #include <sys/types.h>
@@ -141,17 +143,13 @@ void	id_init()
   id_reseed((char *)&st, sizeof(st));
 
 #ifdef RPATH
-  alarm(3);
   fd = open(RPATH, O_RDONLY);
   if (fd > 0)
     {
       read(fd, databuf, 16);
       close(fd);
-      alarm(0);
       md5_block(databuf_int, seed, seed);    	
     }
-  else
-    alarm(0);
 #endif
 }
 
@@ -160,7 +158,6 @@ void	save_random()
   int fd;
 
 #ifdef	RPATH
-  alarm(3);
   fd = open(RPATH, O_WRONLY|O_CREAT|O_TRUNC);
   if (fd > 0)
     {
@@ -171,7 +168,6 @@ void	save_random()
 #endif
       close(fd);
     }
-  alarm(0);
 #endif
 }
 
