@@ -1,3 +1,7 @@
+*** 20010424_1 by androsyn
+Fixed a potential buglet where we ignore EAGAIN when returning from recv()
+
+
 *** 20010423_1 by db
 - removed docs for code we have removed
 - hint. someone should write up a doc on how the hash kline code works. hint
