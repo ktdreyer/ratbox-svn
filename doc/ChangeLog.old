@@ -1,3 +1,7 @@
+*** 20010920_1 by jdc
+- contrib/m_jupe.c: Cosmetical change ("Juped:" --> "JUPED:").
+
+
 *** 20010919_2 by lusky
 pass CFLAGS during linking too
 
