@@ -72,6 +72,13 @@ thats INADDR_NONE. Find, fix.
 * ok, this sucks. search for cptr->since, and esp in src/parse.c .
   All this flood protection has to come out and reappear in *one* place!
 
+* Hrm. Since diane changed the user->channel code to use dlink_lists,
+  she's made some things faster (deopping lists of people in a net.join,
+  finding an op, etc) but some things slower (deleting from the channel,
+  change_channel_membership(), etc.) What needs to happen is that for
+  each channel a user is on, a flag needs to be set tracking which list
+  they're on so we don't have to search the lists when we want to change
+  their status. This could become a slow-CPU sticking point.
 
 Done things:
 
