@@ -375,6 +375,7 @@ int main(int argc, char *argv[])
   time_t      delay = 0;
 
   printf("ircd version %s\n", version);
+  printf("ircd: pid %d\n", (int)getpid());
 
   /*
    * save server boot time right away, so getrusage works correctly
