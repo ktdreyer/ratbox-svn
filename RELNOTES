@@ -26,6 +26,8 @@ it is important you read this file before upgrading.
 - fixed global capabs to not lose capabilities we dont ourselves support
 - fixed ERR_NOSUCHNICK/ERR_NOSUCHSERVER to not leak UIDs
 - disallow servernames beginning with a digit, as they break TS6
+- fix errors when attempting to send to clients we just had a read error for
+- allow blank gecos fields
 
 -- ircd-ratbox-2.0b4
 - fixed stats L

@@ -1189,18 +1189,17 @@ void
 dead_link(struct Client *client_p)
 {
 	struct abort_client *abt;
+
 	s_assert(!IsMe(client_p));
-	if(IsDead(client_p) || IsAborted(client_p) || 
-	   IsMe(client_p) || !MyConnect(client_p))
+	if(IsAnyDead(client_p) || IsMe(client_p) || !MyConnect(client_p))
 		return;
 
 	abt = (struct abort_client *) MyMalloc(sizeof(struct abort_client));
+
 	if(client_p->flags & FLAGS_SENDQEX)
 		strlcpy(abt->notice, "Max SendQ exceeded", sizeof(abt->notice));
 	else
-	{
 		ircsnprintf(abt->notice, sizeof(abt->notice), "Write error: %s", strerror(errno));
-	}
 
     	abt->client = client_p;
 	s_assert(dlinkFind(&abort_list, client_p) == NULL);
@@ -2082,7 +2081,7 @@ error_exit_client(struct Client *client_p, int error)
 	char errmsg[255];
 	int current_error = comm_get_sockerr(client_p->localClient->fd);
 
-	if(IsClosing(client_p) || IsDead(client_p))
+	if(IsAnyDead(source_p))
 		return;
 
 	SetClosing(client_p);
