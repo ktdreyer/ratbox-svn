@@ -131,7 +131,7 @@ extern void    del_invite (struct Client *, struct Channel *);
 extern int     check_channel_name(const char* name);
 extern void    channel_modes(struct Client *, char *, char *, struct Channel*);
 extern void    set_channel_mode(struct Client *, struct Client *, 
-                                struct Channel *, int, char **);
+                                struct Channel *, int, char **, char *);
 extern struct Channel* get_channel(struct Client *,char*,int );
 extern void    add_invite (struct Client *, struct Channel *);
 extern void    clear_bans_exceptions_denies(struct Client *,struct Channel *);

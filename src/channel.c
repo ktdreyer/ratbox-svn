@@ -968,7 +968,8 @@ void set_channel_mode(struct Client *cptr,
                       struct Client *sptr,
                       struct Channel *chptr,
                       int parc,
-                      char *parv[])
+                      char *parv[],
+		      char *real_name)
 {
   int   errors_sent = 0, opcnt = 0, len = 0, tmp, nusers;
   int   keychange = 0, limitset = 0;
@@ -1100,7 +1101,7 @@ void set_channel_mode(struct Client *cptr,
                 {
                   if(!errsent(SM_ERR_NOTONCHANNEL, &errors_sent))
                     sendto_one(sptr, form_str(ERR_NOTONCHANNEL),
-                               me.name, sptr->name, chptr->chname);
+                               me.name, sptr->name, real_name);
                   /* eat the parameter */
                   parc--;
                   parv++;
@@ -1150,7 +1151,7 @@ void set_channel_mode(struct Client *cptr,
             {
               if (MyClient(sptr))
                 sendto_one(sptr, form_str(ERR_USERNOTINCHANNEL), me.name, 
-                           sptr->name, arg, chptr->chname);
+                           sptr->name, arg, real_name);
               break;
             }
 
@@ -1167,7 +1168,7 @@ void set_channel_mode(struct Client *cptr,
           if (IsServer(sptr))
             {
               ts_warn( "MODE %c%c on %s for %s from server %s (ignored)", 
-                       (whatt == MODE_ADD ? '+' : '-'), c, chptr->chname, 
+                       (whatt == MODE_ADD ? '+' : '-'), c, real_name, 
                        who->name,sptr->name);
               break;
             }
@@ -1184,7 +1185,7 @@ void set_channel_mode(struct Client *cptr,
             {
               if (MyClient(sptr) && !errsent(SM_ERR_NOOPS, &errors_sent))
                 sendto_one(sptr, form_str(ERR_CHANOPRIVSNEEDED), me.name, 
-                           sptr->name, chptr->chname);
+                           sptr->name, real_name);
               break;
             }
         
@@ -1245,7 +1246,7 @@ void set_channel_mode(struct Client *cptr,
             {
               if (!errsent(SM_ERR_NOOPS, &errors_sent) && MyClient(sptr))
                 sendto_one(sptr, form_str(ERR_CHANOPRIVSNEEDED), me.name, 
-                           sptr->name, chptr->chname);
+                           sptr->name, real_name);
               break;
             }
 
@@ -1253,7 +1254,7 @@ void set_channel_mode(struct Client *cptr,
           if ((whatt == MODE_ADD) && (*chptr->mode.key))
             {
               sendto_one(sptr, form_str(ERR_KEYSET), me.name, 
-                         sptr->name, chptr->chname);
+                         sptr->name, real_name);
               break;
             }
 #endif
@@ -1279,11 +1280,11 @@ void set_channel_mode(struct Client *cptr,
                 break;
 
               sendto_channel_butserv(chptr, sptr, ":%s MODE %s -k %s", 
-                                     sptr->name, chptr->chname,
+                                     sptr->name, real_name,
                                      chptr->mode.key);
 
               sendto_match_servs(chptr, cptr, ":%s MODE %s -k %s",
-                                 sptr->name, chptr->chname,
+                                 sptr->name, real_name,
                                  chptr->mode.key);
             }
 #endif
@@ -1345,14 +1346,14 @@ void set_channel_mode(struct Client *cptr,
                   for (lp = chptr->invexlist; lp; lp = lp->next)
                     sendto_one(cptr, form_str(RPL_INVITELIST),
                                me.name, cptr->name,
-                               chptr->chname,
+                               real_name,
                                lp->value.banptr->banstr,
                                lp->value.banptr->who,
                                lp->value.banptr->when);
 
                   sendto_one(sptr, form_str(RPL_ENDOFINVITELIST),
                              me.name, sptr->name, 
-                             chptr->chname);
+                             real_name);
                 }
               break;
             }
@@ -1366,7 +1367,7 @@ void set_channel_mode(struct Client *cptr,
               if (!errsent(SM_ERR_NOOPS, &errors_sent) && MyClient(sptr))
                 sendto_one(sptr, form_str(ERR_CHANOPRIVSNEEDED),
                            me.name, sptr->name, 
-                           chptr->chname);
+                           real_name);
               break;
             }
           
@@ -1448,19 +1449,19 @@ void set_channel_mode(struct Client *cptr,
                   for (lp = chptr->exceptlist; lp; lp = lp->next)
                     sendto_one(cptr, form_str(RPL_EXCEPTLIST),
                                me.name, cptr->name,
-                               chptr->chname,
+                               real_name,
                                lp->value.banptr->banstr,
                                lp->value.banptr->who,
                                lp->value.banptr->when);
 
                   sendto_one(sptr, form_str(RPL_ENDOFEXCEPTLIST),
                              me.name, sptr->name, 
-                             chptr->chname);
+                             real_name);
                 }
               else
                 {
                   sendto_one(sptr, form_str(ERR_CHANOPRIVSNEEDED), me.name, 
-                               sptr->name, chptr->chname);
+                               sptr->name, real_name);
                 }
               break;
             }
@@ -1474,7 +1475,7 @@ void set_channel_mode(struct Client *cptr,
               if (!errsent(SM_ERR_NOOPS, &errors_sent) && MyClient(sptr))
                 sendto_one(sptr, form_str(ERR_CHANOPRIVSNEEDED),
                            me.name, sptr->name, 
-                           chptr->chname);
+                           real_name);
               break;
             }
           
@@ -1552,13 +1553,13 @@ void set_channel_mode(struct Client *cptr,
                   for (lp = chptr->denylist; lp; lp = lp->next)
                     sendto_one(cptr, form_str(RPL_BANLIST),
                                me.name, cptr->name,
-                               chptr->chname,
+                               real_name,
                                lp->value.banptr->banstr,
                                lp->value.banptr->who,
                                lp->value.banptr->when);
                   sendto_one(sptr, form_str(RPL_ENDOFBANLIST),
                              me.name, sptr->name, 
-                             chptr->chname);
+                             real_name);
                   break;
             }
           arg = check_string(*parv++);
@@ -1571,7 +1572,7 @@ void set_channel_mode(struct Client *cptr,
               if (!errsent(SM_ERR_NOOPS, &errors_sent) && MyClient(sptr))
                 sendto_one(sptr, form_str(ERR_CHANOPRIVSNEEDED),
                            me.name, sptr->name, 
-                           chptr->chname);
+                           real_name);
               break;
             }
           
@@ -1632,14 +1633,14 @@ void set_channel_mode(struct Client *cptr,
               for (lp = chptr->banlist; lp; lp = lp->next)
                 sendto_one(cptr, form_str(RPL_BANLIST),
                            me.name, cptr->name,
-                           chptr->chname,
+                           real_name,
                            lp->value.banptr->banstr,
                            lp->value.banptr->who,
                            lp->value.banptr->when);
 
               sendto_one(sptr, form_str(RPL_ENDOFBANLIST),
                          me.name, sptr->name, 
-                         chptr->chname);
+                         real_name);
               break;
             }
 
@@ -1662,7 +1663,7 @@ void set_channel_mode(struct Client *cptr,
               if (!errsent(SM_ERR_NOOPS, &errors_sent) && MyClient(sptr))
                 sendto_one(sptr, form_str(ERR_CHANOPRIVSNEEDED),
                            me.name, sptr->name, 
-                           chptr->chname);
+                           real_name);
               break;
             }
 
@@ -1786,7 +1787,7 @@ void set_channel_mode(struct Client *cptr,
             {
               if (MyClient(sptr) && !errsent(SM_ERR_NOOPS, &errors_sent))
                 sendto_one(sptr, form_str(ERR_CHANOPRIVSNEEDED), me.name, 
-                           sptr->name, chptr->chname);
+                           sptr->name, real_name);
               break;
             }
 
@@ -1847,14 +1848,14 @@ void set_channel_mode(struct Client *cptr,
                   chptr->mode.mode |= MODE_JUPED;
                   sendto_realops("%s!%s@%s locally juping channel %s",
                                  sptr->name, sptr->username,
-                                 sptr->host, chptr->chname);
+                                 sptr->host, real_name);
                 }
               else if(whatt == MODE_DEL)
                 {
                   chptr->mode.mode &= ~MODE_JUPED;
                   sendto_realops("%s!%s@%s locally unjuping channel %s",
                                  sptr->name, sptr->username,
-                                 sptr->host, chptr->chname);
+                                 sptr->host, real_name);
                 }
             }
           break;
@@ -1865,7 +1866,7 @@ void set_channel_mode(struct Client *cptr,
             {
               if (MyClient(sptr) && !errsent(SM_ERR_NOOPS, &errors_sent))
                 sendto_one(sptr, form_str(ERR_CHANOPRIVSNEEDED), me.name, 
-                           sptr->name, chptr->chname);
+                           sptr->name, real_name);
               break;
             }
 
@@ -1917,7 +1918,7 @@ void set_channel_mode(struct Client *cptr,
             {
               if (MyClient(sptr) && !errsent(SM_ERR_NOOPS, &errors_sent))
                 sendto_one(sptr, form_str(ERR_CHANOPRIVSNEEDED), me.name, 
-                           sptr->name, chptr->chname);
+                           sptr->name, real_name);
               break;
             }
 
@@ -1969,7 +1970,7 @@ void set_channel_mode(struct Client *cptr,
             {
               if (MyClient(sptr) && !errsent(SM_ERR_NOOPS, &errors_sent))
                 sendto_one(sptr, form_str(ERR_CHANOPRIVSNEEDED), me.name, 
-                           sptr->name, chptr->chname);
+                           sptr->name, real_name);
               break;
             }
 
@@ -2038,7 +2039,7 @@ void set_channel_mode(struct Client *cptr,
             {
               if (MyClient(sptr) && !errsent(SM_ERR_NOOPS, &errors_sent))
                 sendto_one(sptr, form_str(ERR_CHANOPRIVSNEEDED), me.name, 
-                           sptr->name, chptr->chname);
+                           sptr->name, real_name);
               break;
             }
 
@@ -2109,7 +2110,7 @@ void set_channel_mode(struct Client *cptr,
             {
               if (MyClient(sptr) && !errsent(SM_ERR_NOOPS, &errors_sent))
                 sendto_one(sptr, form_str(ERR_CHANOPRIVSNEEDED), me.name, 
-                           sptr->name, chptr->chname);
+                           sptr->name, real_name);
               break;
             }
 
@@ -2186,7 +2187,7 @@ void set_channel_mode(struct Client *cptr,
   if(*modebuf)
     {
       sendto_channel_butserv(chptr, sptr, ":%s MODE %s %s %s", 
-                           sptr->name, chptr->chname,
+                           sptr->name, real_name,
                            modebuf, parabuf);
 
       sendto_match_servs(chptr, cptr, ":%s MODE %s %s %s",
@@ -2197,7 +2198,7 @@ void set_channel_mode(struct Client *cptr,
   if(*modebuf_new)
     {
       sendto_channel_butserv(chptr, sptr, ":%s MODE %s %s %s", 
-                             sptr->name, chptr->chname,
+                             sptr->name, real_name,
                              modebuf_new, parabuf_new);
 
       sendto_match_cap_servs(chptr, cptr, CAP_EX, ":%s MODE %s %s %s",
@@ -2207,7 +2208,7 @@ void set_channel_mode(struct Client *cptr,
   if(*modebuf_newer)
     {
       sendto_channel_butserv(chptr, sptr, ":%s MODE %s %s %s",
-                             sptr->name, chptr->chname,
+                             sptr->name, real_name,
                              modebuf_newer, parabuf_newer);
       sendto_match_cap_servs(chptr, cptr, CAP_DE, ":%s MODE %s %s %s",
                              sptr->name, chptr->chname,
@@ -2216,7 +2217,7 @@ void set_channel_mode(struct Client *cptr,
   if(*modebuf_invex)
     {
       sendto_channel_butserv(chptr, sptr, ":%s MODE %s %s %s",
-			     sptr->name, chptr->chname,
+			     sptr->name, real_name,
 			     modebuf_invex, parabuf_invex);
       sendto_match_cap_servs(chptr, cptr, CAP_IE, ":%s MODE %s %s %s",
 			     sptr->name, chptr->chname,

@@ -24,6 +24,7 @@
  */
 #include "handlers.h"
 #include "channel.h"
+#include "vchannel.h"
 #include "client.h"
 #include "hash.h"
 #include "irc_string.h"
@@ -99,6 +100,7 @@
 int m_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 {
   struct Channel* chptr;
+  struct Channel* vchan;
   static char     modebuf[MODEBUFLEN];
   static char     parabuf[MODEBUFLEN];
 
@@ -159,11 +161,35 @@ int m_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   {
       *modebuf = *parabuf = '\0';
       modebuf[1] = '\0';
-      channel_modes(sptr, modebuf, parabuf, chptr);
-      sendto_one(sptr, form_str(RPL_CHANNELMODEIS), me.name, parv[0],
-                 chptr->chname, modebuf, parabuf);
-      sendto_one(sptr, form_str(RPL_CREATIONTIME), me.name, parv[0],
-                 chptr->chname, chptr->channelts);
+
+      if (HasVchans(chptr))
+	{
+	  vchan = map_vchan(chptr,sptr);
+	  if(vchan == 0)
+	    {
+	      channel_modes(sptr, modebuf, parabuf, chptr);
+	      sendto_one(sptr, form_str(RPL_CHANNELMODEIS), me.name, parv[0],
+			 chptr->chname, modebuf, parabuf);
+	      sendto_one(sptr, form_str(RPL_CREATIONTIME), me.name, parv[0],
+			 chptr->chname, chptr->channelts);
+	    }
+	  else
+	    {
+	      channel_modes(sptr, modebuf, parabuf, vchan);
+	      sendto_one(sptr, form_str(RPL_CHANNELMODEIS), me.name, parv[0],
+			 chptr->chname, modebuf, parabuf);
+	      sendto_one(sptr, form_str(RPL_CREATIONTIME), me.name, parv[0],
+			 chptr->chname, vchan->channelts);
+	    }
+	}
+      else
+	{
+	  channel_modes(sptr, modebuf, parabuf, chptr);
+	  sendto_one(sptr, form_str(RPL_CHANNELMODEIS), me.name, parv[0],
+		     chptr->chname, modebuf, parabuf);
+	  sendto_one(sptr, form_str(RPL_CREATIONTIME), me.name, parv[0],
+		     chptr->chname, chptr->channelts);
+	}
       return 0;
     }
 
@@ -171,7 +197,25 @@ int m_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
    * and in that case, channel has been cached using CBURST
    */
 
-  set_channel_mode(cptr, sptr, chptr, parc - 2, parv + 2);
+      if (HasVchans(chptr))
+	{
+	  vchan = map_vchan(chptr,sptr);
+	  if(vchan == 0)
+	    {
+	      set_channel_mode(cptr, sptr, chptr, parc - 2, parv + 2, 
+			       chptr->chname );
+	    }
+	  else
+	    {
+	      set_channel_mode(cptr, sptr, vchan, parc - 2, parv + 2,
+			       chptr->chname);
+	    }
+	}
+      else
+	{
+	  set_channel_mode(cptr, sptr, chptr, parc - 2, parv + 2,
+			   chptr->chname);
+	}
 
   return 0;
 }
@@ -179,6 +223,7 @@ int m_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 int ms_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 {
   struct Channel* chptr;
+  struct Channel* vchan;
   static char     modebuf[MODEBUFLEN];
   static char     parabuf[MODEBUFLEN];
 
@@ -234,11 +279,35 @@ int ms_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
     {
       *modebuf = *parabuf = '\0';
       modebuf[1] = '\0';
-      channel_modes(sptr, modebuf, parabuf, chptr);
-      sendto_one(sptr, form_str(RPL_CHANNELMODEIS), me.name, parv[0],
-                 chptr->chname, modebuf, parabuf);
-      sendto_one(sptr, form_str(RPL_CREATIONTIME), me.name, parv[0],
-                 chptr->chname, chptr->channelts);
+
+      if (HasVchans(chptr))
+	{
+	  vchan = map_vchan(chptr,sptr);
+	  if(vchan == 0)
+	    {
+	      channel_modes(sptr, modebuf, parabuf, chptr);
+	      sendto_one(sptr, form_str(RPL_CHANNELMODEIS), me.name, parv[0],
+			 chptr->chname, modebuf, parabuf);
+	      sendto_one(sptr, form_str(RPL_CREATIONTIME), me.name, parv[0],
+			 chptr->chname, chptr->channelts);
+	    }
+	  else
+	    {
+	      channel_modes(sptr, modebuf, parabuf, vchan);
+	      sendto_one(sptr, form_str(RPL_CHANNELMODEIS), me.name, parv[0],
+			 chptr->chname, modebuf, parabuf);
+	      sendto_one(sptr, form_str(RPL_CREATIONTIME), me.name, parv[0],
+			 chptr->chname, vchan->channelts);
+	    }
+	}
+      else
+	{
+	  channel_modes(sptr, modebuf, parabuf, chptr);
+	  sendto_one(sptr, form_str(RPL_CHANNELMODEIS), me.name, parv[0],
+		     chptr->chname, modebuf, parabuf);
+	  sendto_one(sptr, form_str(RPL_CREATIONTIME), me.name, parv[0],
+		     chptr->chname, chptr->channelts);
+	}
       return 0;
     }
 
@@ -246,7 +315,25 @@ int ms_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
    * and in that case, channel has been cached using CBURST
    */
 
-  set_channel_mode(cptr, sptr, chptr, parc - 2, parv + 2);
+      if (HasVchans(chptr))
+	{
+	  vchan = map_vchan(chptr,sptr);
+	  if(vchan == 0)
+	    {
+	      set_channel_mode(cptr, sptr, chptr, parc - 2, parv + 2,
+			       chptr->chname);
+	    }
+	  else
+	    {
+	      set_channel_mode(cptr, sptr, vchan, parc - 2, parv + 2,
+			       chptr->chname);
+	    }
+	}
+      else
+	{
+	  set_channel_mode(cptr, sptr, chptr, parc - 2, parv + 2,
+			   chptr->chname);
+	}
 
   return 0;
 }
