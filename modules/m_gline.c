@@ -47,6 +47,7 @@
 #include "hash.h"
 #include "parse.h"
 #include "modules.h"
+#include "list.h"
 
 #include <assert.h>
 #include <string.h>
@@ -635,8 +636,11 @@ add_new_majority_gline(const char* oper_nick,
 		       const char* host,
 		       const char* reason)
 {
+  dlink_node *pending_node;
+
   struct gline_pending *pending = (struct gline_pending*)
     MyMalloc(sizeof(struct gline_pending));
+
   assert(0 != pending);
 
   memset(pending, 0, sizeof(struct gline_pending));
@@ -655,8 +659,8 @@ add_new_majority_gline(const char* oper_nick,
   pending->last_gline_time = CurrentTime;
   pending->time_request1 = CurrentTime;
 
-  pending->next = pending_glines;
-  pending_glines = pending;
+  pending_node = make_dlink_node();
+  dlinkAdd(pending, pending_node, &pending_glines);
 }
 
 /*
@@ -682,24 +686,27 @@ majority_gline(struct Client *sptr,
 	       const char *host,
 	       const char *reason)
 {
+  dlink_node *pending_node;
   struct gline_pending *gline_pending_ptr;
 
   /* special case condition where there are no pending glines */
 
-  if (pending_glines == NULL) /* first gline request placed */
+  if (dlink_list_length(&pending_glines) == 0) /* first gline request placed */
     {
       add_new_majority_gline(oper_nick, oper_user, oper_host, oper_server,
                              user, host, reason);
       return NO;
     }
 
-  for (gline_pending_ptr = pending_glines;
-      gline_pending_ptr; gline_pending_ptr = gline_pending_ptr->next)
+  for (pending_node = pending_glines.head;
+       pending_node; pending_node = pending_node->next)
     {
+      gline_pending_ptr = pending_node->data;
+
       if( (irccmp(gline_pending_ptr->user,user) == 0) &&
-          (irccmp(gline_pending_ptr->host,host) ==0 ) )
+          (irccmp(gline_pending_ptr->host,host) == 0 ) )
         {
-          if(((irccmp(gline_pending_ptr->oper_user1,oper_user) == 0) &&
+          if(((irccmp(gline_pending_ptr->oper_user1,oper_user) == 0) ||
               (irccmp(gline_pending_ptr->oper_host1,oper_host) == 0)) ||
               (irccmp(gline_pending_ptr->oper_server1,oper_server) == 0) )
             {
@@ -713,7 +720,7 @@ majority_gline(struct Client *sptr,
             {
               /* if two other opers on two different servers have voted yes */
 
-              if(((irccmp(gline_pending_ptr->oper_user2,oper_user)==0) &&
+              if(((irccmp(gline_pending_ptr->oper_user2,oper_user)==0) ||
                   (irccmp(gline_pending_ptr->oper_host2,oper_host)==0)) ||
                   (irccmp(gline_pending_ptr->oper_server2,oper_server)==0))
                 {

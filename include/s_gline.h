@@ -16,11 +16,7 @@
  *   along with this program; if not, write to the Free Software
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- *
- * "m_gline.h". - Headers file.
- *
  * $Id$
- *
  */
 
 #ifndef INCLUDED_s_gline_h
@@ -65,8 +61,6 @@ typedef struct gline_pending
   time_t last_gline_time;       /* for expiring entry */
   char user[USERLEN + 1];
   char host[HOSTLEN + 1];
-
-  struct gline_pending *next;
 }gline_pending_t;
 
 /* how long a pending G line can be around
@@ -76,5 +70,6 @@ typedef struct gline_pending
 #define GLINE_PENDING_EXPIRE 600
 #define CLEANUP_GLINES_TIME  1800
 
-extern struct gline_pending *pending_glines;
+dlink_list pending_glines;
+
 #endif

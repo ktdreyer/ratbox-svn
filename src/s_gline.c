@@ -46,6 +46,7 @@
 #include "s_gline.h"
 #include "hash.h"
 #include "event.h"
+#include "list.h"
 
 #include <assert.h>
 #include <string.h>
@@ -55,12 +56,10 @@
 #include <fcntl.h>
 #include "memdebug.h"
 
-static struct ConfItem *glines=NULL;
-struct gline_pending *pending_glines=NULL;
+dlink_list glines;
 
 static void expire_glines(void);
 static void expire_pending_glines(void);
-
 
 /* add_gline
  *
@@ -71,8 +70,9 @@ static void expire_pending_glines(void);
 void
 add_gline(struct ConfItem *aconf)
 {
-  aconf->next = glines;
-  glines = aconf;
+  dlink_node *gline_node;
+  gline_node = make_dlink_node();
+  dlinkAdd(aconf, gline_node, &glines);
 }
 
 /* find_gkill
@@ -98,14 +98,18 @@ find_gkill(struct Client* cptr, char* username)
 struct ConfItem*
 find_is_glined(const char* host, const char* name)
 {
+  dlink_node *gline_node;
   struct ConfItem *kill_ptr; 
 
-  for(kill_ptr = glines; kill_ptr; kill_ptr = kill_ptr->next)
+  for(gline_node = glines.head; gline_node; gline_node = gline_node->next)
     {
+      kill_ptr = gline_node->data;
       if( (kill_ptr->name && (!name || match(kill_ptr->name,name)))
 	  &&
 	  (kill_ptr->host && (!host || match(kill_ptr->host,host))))
-	return(kill_ptr);
+        {
+          return(kill_ptr);
+        }
     }
 
   return((struct ConfItem *)NULL);
@@ -123,6 +127,8 @@ find_is_glined(const char* host, const char* name)
 void
 report_glines(struct Client *sptr)
 {
+  dlink_node *pending_node;
+  dlink_node *gline_node;
   struct gline_pending *glp_ptr;
   struct ConfItem *kill_ptr;
   char timebuffer[MAX_DATE_STRING];
@@ -134,8 +140,9 @@ report_glines(struct Client *sptr)
   sendto_one(sptr,":%s NOTICE %s :Pending G-lines",
 	     me.name, sptr->name);
 
-  for(glp_ptr = pending_glines; glp_ptr; glp_ptr = glp_ptr->next)
+  for(pending_node = pending_glines.head; pending_node; pending_node = pending_node->next)
     {
+      glp_ptr = pending_node->data;
       tmptr = localtime(&glp_ptr->time_request1);
       strftime(timebuffer, MAX_DATE_STRING, "%Y/%m/%d %H:%M:%S", tmptr);
 
@@ -172,8 +179,9 @@ report_glines(struct Client *sptr)
   sendto_one(sptr,":%s NOTICE %s :End of Pending G-lines",
 	     me.name, sptr->name);
 
-  for( kill_ptr = glines; kill_ptr; kill_ptr = kill_ptr->next)
+  for(gline_node = glines.head; gline_node; gline_node = gline_node->next)
     {
+      kill_ptr = gline_node->data;
       if(kill_ptr->host != NULL)
 	host = kill_ptr->host;
       else
@@ -204,22 +212,19 @@ report_glines(struct Client *sptr)
 int
 remove_gline_match(const char* user, const char* host)
 {
+  dlink_node *gline_node;
   struct ConfItem *kill_ptr;
-  struct ConfItem *last_ptr=NULL;
 
-  for( kill_ptr = glines; kill_ptr; kill_ptr = kill_ptr->next)
+  for(gline_node = glines.head; gline_node; gline_node = gline_node->next)
     {
+      kill_ptr = gline_node->data;
       if(!irccmp(kill_ptr->host,host) && !irccmp(kill_ptr->name,user))
 	{
-	  if(last_ptr != NULL)
-	    last_ptr->next = kill_ptr->next;
-	  else
-	    glines = kill_ptr->next;
-
           free_conf(kill_ptr);
+          dlinkDelete(gline_node, &glines);
+          free_dlink_node(gline_node);
           return 1;
 	}
-      last_ptr = kill_ptr;
     }
   return 0;
 }
@@ -254,25 +259,18 @@ cleanup_glines(void *notused)
 static void
 expire_glines()
 {
+  dlink_node *gline_node;
   struct ConfItem *kill_ptr;
-  struct ConfItem *last_ptr = NULL;
-  struct ConfItem *next_ptr;
 
-  for(kill_ptr = glines; kill_ptr; kill_ptr = next_ptr)
+  for(gline_node = glines.head; gline_node; gline_node = gline_node->next)
     {
-      next_ptr = kill_ptr->next;
-
+      kill_ptr = gline_node->data;
       if(kill_ptr->hold <= CurrentTime)
 	{
-	  if(last_ptr != NULL)
-	    last_ptr->next = next_ptr;
-	  else
-	    glines->next = next_ptr;
-
 	  free_conf(kill_ptr);
+          dlinkDelete(gline_node, &glines);
+          free_dlink_node(gline_node);
 	}
-      else
-	last_ptr = kill_ptr;
     }
 }
 
@@ -289,34 +287,19 @@ expire_glines()
 static void
 expire_pending_glines()
 {
+  dlink_node *pending_node;
   struct gline_pending *glp_ptr;
-  struct gline_pending *last_glp_ptr = NULL;
-  struct gline_pending *next_glp_ptr = NULL;
 
-  if(pending_glines == NULL)
-    return;
-
-  for( glp_ptr = pending_glines; glp_ptr; glp_ptr = next_glp_ptr)
+  for(pending_node = pending_glines.head; pending_node; pending_node = pending_node->next)
     {
-      next_glp_ptr = glp_ptr->next;
-
+      glp_ptr = pending_node->data;
       if( (glp_ptr->last_gline_time + GLINE_PENDING_EXPIRE) <= CurrentTime )
         {
-          if(last_glp_ptr != NULL)
-            last_glp_ptr->next = next_glp_ptr;
-          else
-            pending_glines = next_glp_ptr;
-
           MyFree(glp_ptr->reason1);
           MyFree(glp_ptr->reason2);
           MyFree(glp_ptr);
+          dlinkDelete(pending_node, &pending_glines);
+          free_dlink_node(pending_node);
         }
-      else
-	last_glp_ptr = glp_ptr;
     }
 }
-
-
-
-
-

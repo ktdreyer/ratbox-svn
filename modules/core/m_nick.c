@@ -123,9 +123,9 @@ int mr_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
     {
       sendto_realops_flags(FLAGS_REJ,
 			   "Quarantined nick [%s] from user %s",
-			   nick,get_client_name(cptr, HIDE_IP));
-      sendto_one(sptr, form_str(ERR_ERRONEUSNICKNAME),
-		 me.name, parv[0], parv[1]);
+			   nick, get_client_name(cptr, HIDE_IP));
+      sendto_one(sptr, form_str(ERR_UNAVAILRESOURCE),
+		 me.name, BadPtr(parv[0]) ? "*" : parv[0], nick);
       return 0;
     }
 
@@ -175,7 +175,7 @@ int m_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   if (clean_nick_name(nick) == 0)
     {
       sendto_one(sptr, form_str(ERR_ERRONEUSNICKNAME),
-                 me.name, BadPtr(parv[0]) ? "*" : parv[0], parv[1]);
+                 me.name, parv[0], nick);
       return 0;
     }
 
@@ -183,9 +183,9 @@ int m_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
     {
       sendto_realops_flags(FLAGS_REJ,
 			   "Quarantined nick [%s] from user %s",
-			   nick,get_client_name(cptr, HIDE_IP));
-      sendto_one(sptr, form_str(ERR_ERRONEUSNICKNAME),
-		 me.name, parv[0], parv[1]);
+			   nick, get_client_name(cptr, HIDE_IP));
+      sendto_one(sptr, form_str(ERR_UNAVAILRESOURCE),
+		 me.name, parv[0], nick);
       return 0;
     }
 
@@ -234,15 +234,14 @@ int m_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 	  else
 	    {
 	      sendto_one(sptr, form_str(ERR_NICKNAMEINUSE),
-			 /* parv[0] is empty when connecting */
-			 me.name, BadPtr(parv[0]) ? "*" : parv[0], nick);
+			 me.name, parv[0], nick);
 	    }
 	}
       else
 	{
 	  if (MyConnect(sptr))
 	    sendto_one(sptr, form_str(ERR_NICKNAMEINUSE), me.name,
-		       BadPtr(parv[0]) ? "*" : parv[0], nick);
+		       parv[0], nick);
 	}
     }
   else
