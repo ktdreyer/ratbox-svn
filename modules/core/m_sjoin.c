@@ -97,18 +97,23 @@ int     ms_sjoin(struct Client *cptr,
 		 char *parv[])
 {
   struct Channel *chptr;
-  struct Channel *top_chptr;	/* XXX vchans */
-  struct Client       *acptr;
-  time_t        newts;
-  time_t        oldts;
-  time_t        tstosend;
-  static        struct Mode mode, *oldmode;
-  int   args = 0, keep_our_modes = 1, keep_new_modes = 1;
-  int   doesop = 0, fl, people = 0, isnew;
-  register      char *s, *s0;
-  static        char buf[BUFSIZE];
-  static        char sjbuf[BUFSIZE];
-  char          *nick_pointer;
+  struct Channel *top_chptr=NULL;	/* XXX vchans */
+  struct Client  *acptr;
+  time_t         newts;
+  time_t         oldts;
+  time_t         tstosend;
+  static         struct Mode mode, *oldmode;
+  int            args = 0;
+  int            keep_our_modes = 1;
+  int            keep_new_modes = 1;
+  int            doesop = 0;
+  int            fl;
+  int            people = 0;
+  int            isnew;
+  register       char *s, *s0;
+  static         char buf[BUFSIZE];
+  static         char sjbuf[BUFSIZE];
+  char           *nick_pointer;
   char    *p;
   int hide_or_not;
   dlink_node *m;
@@ -186,8 +191,6 @@ int     ms_sjoin(struct Client *cptr,
 
   /* XXX vchan cruft */
   /* vchans are encoded as "##mainchanname_timestamp" */
-
-  top_chptr = NULL;
 
   if(parv[2][1] == '#')
     {
@@ -288,6 +291,18 @@ int     ms_sjoin(struct Client *cptr,
       remove_our_modes(hide_or_not, chptr, top_chptr, sptr);
     }
 
+  /* XXX */
+  if(top_chptr != NULL)
+    sendto_channel_local(ALL_MEMBERS,
+			 chptr, ":%s MODE %s %s %s",
+			 me.name,
+			 top_chptr->chname, modebuf, parabuf);
+  else
+    sendto_channel_local(ALL_MEMBERS,
+			 chptr, ":%s MODE %s %s %s",
+			 me.name,
+			 chptr->chname, modebuf, parabuf);
+
   *modebuf = *parabuf = '\0';
   if (parv[3][0] != '0' && keep_new_modes)
     channel_modes(chptr, sptr, modebuf, parabuf);
@@ -300,7 +315,7 @@ int     ms_sjoin(struct Client *cptr,
   ircsprintf(buf, ":%s SJOIN %lu %s %s %s :", parv[0], tstosend, parv[2],
           modebuf, parabuf);
 
-  mbuf = modebuf + strlen(modebuf);
+  mbuf = modebuf;
   para[0] = para[1] = para[2] = para[3] = "";
   pargs = 0;
   nick_pointer = sjbuf;
@@ -334,10 +349,6 @@ int     ms_sjoin(struct Client *cptr,
 	  s++;
 	}
       
-      /* Lets think about this one for a bit... 
-       * if seen it should be respected.. but not necessarily
-       * ever sent!
-       */
       if (*s == '%')
 	{
 	  fl |= MODE_HALFOP;
