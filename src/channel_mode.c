@@ -2013,9 +2013,7 @@ send_mode_changes(struct Client *client_p, struct Client *source_p,
 {
   int pbl, mbl, nc, mc;
   int i, st;
-#ifdef HALFOPS
   int dir = MODE_QUERY;
-#endif
 
   /* bail out if we have nothing to do... */
   if (!(mode_count
