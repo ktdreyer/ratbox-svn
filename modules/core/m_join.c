@@ -26,7 +26,6 @@
 #include "handlers.h"
 #include "channel.h"
 #include "vchannel.h"
-#include "m_invite.h"
 #include "client.h"
 #include "common.h"   /* bleah */
 #include "hash.h"
@@ -323,9 +322,9 @@ int     m_join(struct Client *cptr,
 	}
 
       if (joining_vchan)
-	(void)names_on_this_channel(sptr, chptr, root_chptr->chname);
+        (void)channel_member_names(sptr, chptr, root_chptr->chname);
       else
-	(void)names_on_this_channel(sptr, chptr, name);
+        (void)channel_member_names(sptr, chptr, name);
       
       if(successful_join_count)
 	sptr->last_join_time = CurrentTime;

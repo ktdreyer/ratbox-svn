@@ -26,7 +26,6 @@
 #include "handlers.h"
 #include "channel.h"
 #include "vchannel.h"
-#include "m_invite.h"
 #include "client.h"
 #include "common.h"   /* bleah */
 #include "hash.h"

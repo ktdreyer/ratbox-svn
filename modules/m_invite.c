@@ -26,7 +26,6 @@
 #include "common.h"
 #include "channel.h"
 #include "list.h"
-#include "m_invite.h"
 #include "vchannel.h"
 #include "client.h"
 #include "hash.h"
@@ -48,8 +47,6 @@ _modinit(void)
   mod_add_cmd(MSG_INVITE, &invite_msgtab);
 }
 
-void add_invite(struct Channel *chptr, struct Client *who);
-int  list_length(struct SLink *lp);
 
 /*
 ** m_invite
@@ -238,90 +235,3 @@ int     ms_invite(struct Client *cptr,
   return 0;
 }
 
-/*
- * add_invite
- *
- * inputs	- pointer to channel block
- * 		- pointer to client to add invite to
- * output	- none
- * side effects	- 
- *
- * This one is ONLY used by m_invite.c
- */
-void add_invite(struct Channel *chptr, struct Client *who)
-{
-  struct SLink  *inv, **tmp;
-
-  del_invite(chptr, who);
-  /*
-   * delete last link in chain if the list is max length
-   */
-  if (list_length(who->user->invited) >= MAXCHANNELSPERUSER)
-    {
-      del_invite(who->user->invited->value.chptr,who);
-    }
-  /*
-   * add client to channel invite list
-   */
-  inv = make_link();
-  inv->value.cptr = who;
-  inv->next = chptr->invites;
-  chptr->invites = inv;
-  /*
-   * add channel to the end of the client invite list
-   */
-  for (tmp = &(who->user->invited); *tmp; tmp = &((*tmp)->next))
-    ;
-  inv = make_link();
-  inv->value.chptr = chptr;
-  inv->next = NULL;
-  (*tmp) = inv;
-}
-
-/*
- * del_invite
- *
- * inputs	- pointer to channel block
- * 		- pointer to client to remove invites from
- * output	- none
- * side effects	- Delete Invite block from channel invite list
- *		  and client invite list
- *
- * urgh. This one is used elsewhere, hence has to be global.
- */
-void del_invite(struct Channel *chptr, struct Client *who)
-{
-  struct SLink  **inv, *tmp;
-
-  for (inv = &(chptr->invites); (tmp = *inv); inv = &tmp->next)
-    if (tmp->value.cptr == who)
-      {
-        *inv = tmp->next;
-        free_link(tmp);
-        break;
-      }
-
-  for (inv = &(who->user->invited); (tmp = *inv); inv = &tmp->next)
-    if (tmp->value.chptr == chptr)
-      {
-        *inv = tmp->next;
-        free_link(tmp);
-        break;
-      }
-}
-
-/* 
- * inputs	- pointer to slink list
- * output	- returns the length of list
- * side effects	- return the length (>=0) of a chain of struct SLinks.
- *
- * XXX would an int length for invite length be worth it? -db
- */
-int     list_length(struct SLink *lp)
-{
-  int   count = 0;
-
-  for (; lp; lp = lp->next)
-    count++;
-  return count;
-}

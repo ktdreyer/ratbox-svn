@@ -26,7 +26,6 @@
 #include "common.h"
 #include "channel.h"
 #include "list.h"
-#include "m_invite.h"
 #include "vchannel.h"
 #include "client.h"
 #include "hash.h"

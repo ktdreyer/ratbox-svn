@@ -44,8 +44,6 @@
 
 void names_all_visible_channels(struct Client *sptr);
 void names_non_public_non_secret(struct Client *sptr);
-char *pub_or_secret(struct Channel *chptr);
-char *chanop_or_voice(struct SLink *lp);
 
 struct Message names_msgtab = {
   MSG_NAMES, 0, 0, MFLG_SLOW, 0,
@@ -128,13 +126,13 @@ int     m_names( struct Client *cptr,
 	    {
 	      vchan = map_vchan(ch2ptr,sptr);
 	      if(vchan == 0)
-		names_on_this_channel( sptr, ch2ptr, ch2ptr->chname );
+		channel_member_names( sptr, ch2ptr, ch2ptr->chname );
 	      else
-		names_on_this_channel( sptr, vchan, ch2ptr->chname );
+		channel_member_names( sptr, vchan, ch2ptr->chname );
 	    }
 	  else
 	    {
-	      names_on_this_channel( sptr, ch2ptr, ch2ptr->chname );
+	      channel_member_names( sptr, ch2ptr, ch2ptr->chname );
 	    }
 	}
     }
@@ -191,7 +189,7 @@ void names_all_visible_channels(struct Client *sptr)
 		chname = bchan->chname;
 	    }
 
-	  ircsprintf(buf,"%s %s :", pub_or_secret(chptr), chname);
+	  ircsprintf(buf,"%s %s :", channel_pub_or_secret(chptr), chname);
 	  len = strlen(buf);
 	  cur_len = len + mlen;
 
@@ -291,83 +289,6 @@ void names_non_public_non_secret(struct Client *sptr)
 
   if (reply_to_send)
     sendto_one(sptr, form_str(RPL_NAMREPLY), me.name, sptr->name, buf);
-}
-
-/*
- * names_on_this_channel
- *
- * inputs	- pointer to client struct requesting names
- * output	- none
- * side effects	- lists all non public non secret channels
- */
-
-void names_on_this_channel( struct Client *sptr,
-			    struct Channel *chptr,
-			    char *name_of_channel)
-{
-  int mlen;
-  int len;
-  int cur_len;
-  int reply_to_send = NO;
-  char buf[BUFSIZE];
-  char buf2[2*NICKLEN];
-  struct Client *c2ptr;
-  struct SLink  *lp;
-
-  mlen = strlen(me.name) + NICKLEN + 7;
-
-  /* Find users on same channel (defined by chptr) */
-
-  ircsprintf(buf, "%s %s :", pub_or_secret(chptr), name_of_channel);
-  len = strlen(buf);
-
-  cur_len = mlen + len;
-
-  for (lp = chptr->members; lp; lp = lp->next)
-    {
-      c2ptr = lp->value.cptr;
-      ircsprintf(buf2,"%s%s ", chanop_or_voice(lp), c2ptr->name);
-      strcat(buf,buf2);
-      cur_len += strlen(buf2);
-      reply_to_send = YES;
-
-      if ((cur_len + NICKLEN) > (BUFSIZE - 3))
-	{
-	  sendto_one(sptr, form_str(RPL_NAMREPLY),
-		     me.name, sptr->name, buf);
-	  ircsprintf(buf,"%s %s :", pub_or_secret(chptr), name_of_channel);
-	  reply_to_send = NO;
-	  cur_len = mlen + len;
-	}
-    }
-
-  if(reply_to_send)
-    sendto_one(sptr, form_str(RPL_NAMREPLY), me.name, sptr->name, buf);
-}
-
-
-char *pub_or_secret(struct Channel *chptr)
-{
-  if(PubChannel(chptr))
-    return("=");
-  else if(SecretChannel(chptr))
-    return("@");
-  else
-    return("*");
-}
-
-
-char *chanop_or_voice(struct SLink *lp)
-{
-  /* lp should not be NULL */
-  if ( lp == NULL )
-    return ("");
-
-  if (lp->flags & CHFL_CHANOP)
-    return("@");
-  else if (lp->flags & CHFL_VOICE)
-    return("+");
-  return("");
 }
 
 int ms_names( struct Client *cptr,

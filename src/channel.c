@@ -66,6 +66,7 @@ static  int     add_id (struct Client *, struct Channel *, char *, int);
 static  int     del_id (struct Channel *, char *, int);
 static  void    free_channel_masks(struct Channel *);
 static  void    sub1_from_channel (struct Channel *);
+static  int     list_length(struct SLink *lp);
 
 /* static functions used in set_mode */
 static char* pretty_mask(char *);
@@ -2716,6 +2717,151 @@ static void destroy_channel(struct Channel *chptr)
   /* Wheee */
 }
 
+
+/*
+ * channel_member_names
+ *
+ * inputs	- pointer to client struct requesting names
+ * output	- none
+ * side effects	- lists all names on given channel
+ */
+
+void channel_member_names( struct Client *sptr,
+			   struct Channel *chptr,
+			   char *name_of_channel)
+{
+  int mlen;
+  int len;
+  int cur_len;
+  int reply_to_send = NO;
+  char buf[BUFSIZE];
+  char buf2[2*NICKLEN];
+  struct Client *c2ptr;
+  struct SLink  *lp;
+
+  mlen = strlen(me.name) + NICKLEN + 7;
+
+  /* Find users on same channel (defined by chptr) */
+
+  ircsprintf(buf, "%s %s :", channel_pub_or_secret(chptr), name_of_channel);
+  len = strlen(buf);
+
+  cur_len = mlen + len;
+
+  for (lp = chptr->members; lp; lp = lp->next)
+    {
+      c2ptr = lp->value.cptr;
+      ircsprintf(buf2,"%s%s ", channel_chanop_or_voice(lp), c2ptr->name);
+      strcat(buf,buf2);
+      cur_len += strlen(buf2);
+      reply_to_send = YES;
+
+      if ((cur_len + NICKLEN) > (BUFSIZE - 3))
+	{
+	  sendto_one(sptr, form_str(RPL_NAMREPLY),
+		     me.name, sptr->name, buf);
+	  ircsprintf(buf,"%s %s :", channel_pub_or_secret(chptr),
+		     name_of_channel);
+	  reply_to_send = NO;
+	  cur_len = mlen + len;
+	}
+    }
+
+  if(reply_to_send)
+    sendto_one(sptr, form_str(RPL_NAMREPLY), me.name, sptr->name, buf);
+}
+
+
+/*
+ * channel_pub_or_secret
+ *
+ * inputs	- pointer to channel
+ * output	- string pointer "=" if public, "@" if secret else "*"
+ * side effects	-
+ */
+
+char *channel_pub_or_secret(struct Channel *chptr)
+{
+  if(PubChannel(chptr))
+    return("=");
+  else if(SecretChannel(chptr))
+    return("@");
+  else
+    return("*");
+}
+
+/*
+ * channel_chanop_or_voice
+ *
+ * inputs	- pointer to struct SLink
+ * output	- string pointer "@" if chanop, "+" if not
+ * side effects	-
+ */
+
+char *channel_chanop_or_voice(struct SLink *lp)
+{
+  /* lp should not be NULL */
+  if ( lp == NULL )
+    return ("");
+
+  if (lp->flags & CHFL_CHANOP)
+    return("@");
+  else if (lp->flags & CHFL_VOICE)
+    return("+");
+  return("");
+}
+
+/*
+ * add_invite
+ *
+ * inputs	- pointer to channel block
+ * 		- pointer to client to add invite to
+ * output	- none
+ * side effects	- 
+ *
+ * This one is ONLY used by m_invite.c
+ */
+void add_invite(struct Channel *chptr, struct Client *who)
+{
+  struct SLink  *inv, **tmp;
+
+  del_invite(chptr, who);
+  /*
+   * delete last link in chain if the list is max length
+   */
+  if (list_length(who->user->invited) >= MAXCHANNELSPERUSER)
+    {
+      del_invite(who->user->invited->value.chptr,who);
+    }
+  /*
+   * add client to channel invite list
+   */
+  inv = make_link();
+  inv->value.cptr = who;
+  inv->next = chptr->invites;
+  chptr->invites = inv;
+  /*
+   * add channel to the end of the client invite list
+   */
+  for (tmp = &(who->user->invited); *tmp; tmp = &((*tmp)->next))
+    ;
+  inv = make_link();
+  inv->value.chptr = chptr;
+  inv->next = NULL;
+  (*tmp) = inv;
+}
+
+/*
+ * del_invite
+ *
+ * inputs	- pointer to channel block
+ * 		- pointer to client to remove invites from
+ * output	- none
+ * side effects	- Delete Invite block from channel invite list
+ *		  and client invite list
+ *
+ * urgh. This one is used elsewhere, hence has to be global.
+ */
 void del_invite(struct Channel *chptr, struct Client *who)
 {
   struct SLink  **inv, *tmp;
@@ -2735,4 +2881,20 @@ void del_invite(struct Channel *chptr, struct Client *who)
         free_link(tmp);
         break;
       }
+}
+
+/* 
+ * inputs	- pointer to slink list
+ * output	- returns the length of list
+ * side effects	- return the length (>=0) of a chain of struct SLinks.
+ *
+ * XXX would an int length for invite length be worth it? -db
+ */
+int     list_length(struct SLink *lp)
+{
+  int   count = 0;
+
+  for (; lp; lp = lp->next)
+    count++;
+  return count;
 }
