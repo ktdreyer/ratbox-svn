@@ -488,8 +488,6 @@ free_channel_list(dlink_list * list)
 	DLINK_FOREACH_SAFE(ptr, next_ptr, list->head)
 	{
 		actualBan = ptr->data;
-		MyFree(actualBan->banstr);
-		MyFree(actualBan->who);
 		BlockHeapFree(ban_heap, actualBan);
 
 		free_dlink_node(ptr);
