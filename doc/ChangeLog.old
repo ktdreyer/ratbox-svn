@@ -1,3 +1,9 @@
+*** 20001218_6 by ejb
+- remove whois_notice stupidity
+- +a umode is now set automatically for admin=yes; opers, and cannot be changed.
+
+
+
 *** 20001218_5 by db
 - ok. redid the way the bitmaps were cleared for lazylinks.
   the old code walked all the global channels, clearing the
