@@ -1,3 +1,48 @@
+leeh        2003/12/01 17:48:50 EST	(20031201_0)
+
+  Modified files:
+    include              newconf.h 
+    modules              m_admin.c m_help.c m_info.c m_kline.c 
+                         m_list.c m_motd.c m_names.c m_resv.c 
+                         m_stats.c m_wallops.c m_who.c m_whois.c 
+                         m_whowas.c m_xline.c 
+    src                  cache.c ircd.c ircd_lexer.l newconf.c 
+  Removed files:
+    modules              m_operwall.c 
+  Log:
+  - via stable:
+    - reenable notices for clustered commands
+    - merge operwall/wallops again, with seperate ms_wallops() handler
+    - removed ratelimiting on local admin requests
+    - removed support for unregistered clients doing motd
+    - commited modified for TS6 version of larnes patch to send
+      ENDOF numerics on ratelimited commands
+    - fix -conftest to not check pidfile, and not print startup
+  
+  Revision  Changes    Path
+  7.30      +2 -0      ircd-ratbox/include/newconf.h
+  1.56      +14 -12    ircd-ratbox/modules/m_admin.c
+  1.65      +4 -1      ircd-ratbox/modules/m_help.c
+  1.99      +2 -3      ircd-ratbox/modules/m_info.c
+  1.169     +45 -112   ircd-ratbox/modules/m_kline.c
+  1.74      +2 -1      ircd-ratbox/modules/m_list.c
+  1.51      +4 -17     ircd-ratbox/modules/m_motd.c
+  1.77      +4 -2      ircd-ratbox/modules/m_names.c
+  1.54      +0 -91     ircd-ratbox/modules/m_operwall.c (dead)
+  1.45      +26 -45    ircd-ratbox/modules/m_resv.c
+  1.187     +6 -4      ircd-ratbox/modules/m_stats.c
+  1.52      +30 -8     ircd-ratbox/modules/m_wallops.c
+  1.105     +4 -2      ircd-ratbox/modules/m_who.c
+  1.133     +3 -1      ircd-ratbox/modules/m_whois.c
+  1.47      +3 -1      ircd-ratbox/modules/m_whowas.c
+  1.36      +33 -57    ircd-ratbox/modules/m_xline.c
+  1.11      +1 -1      ircd-ratbox/src/cache.c
+  7.322     +11 -11    ircd-ratbox/src/ircd.c
+  1.158     +9 -1      ircd-ratbox/src/ircd_lexer.l
+  7.121     +3 -4      ircd-ratbox/src/newconf.c
+
+
+
 androsyn    2003/11/27 12:11:07 EST	(20031127_0)
 
   Added files:
