@@ -1,3 +1,31 @@
+androsyn    2002/04/06 00:04:48 EST	(20020406_0)
+
+  Modified files:
+    include              channel.h 
+    modules/core         m_mode.c m_sjoin.c 
+    src                  channel.c channel_mode.c 
+  Log:
+  Lee's patch..here is the description he gave:
+  
+  The following patch adds back support for bouncing modes from clients we
+  deop on an SJOIN.
+  
+  Basically - when we bounce a clients status (either halfop or chanop) we
+  add a user to a chptr->deopped LL.  Whenever we receive a mode, we search
+  this list for the client, ignoring it if theyre found.
+  
+  Whenever we change a clients membership on a channel (from anything, to
+  anything), we scan the deopped list, removing them if theyre there.
+  
+  Revision  Changes    Path
+  7.104     +1 -0      ircd-hybrid-7/include/channel.h
+  1.49      +5 -3      ircd-hybrid-7/modules/core/m_mode.c
+  1.130     +2 -2      ircd-hybrid-7/modules/core/m_sjoin.c
+  7.304     +14 -0     ircd-hybrid-7/src/channel.c
+  7.25      +6 -0      ircd-hybrid-7/src/channel_mode.c
+
+
+
 db          2002/04/05 11:08:11 EST	(20020405_0)
 
   Modified files:
