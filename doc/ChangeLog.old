@@ -1,3 +1,7 @@
+*** 20001116_6 by toot
+removed mo_knock, m_knock is fine for opers.
+
+
 *** 20001116_5 by toot
 use the topic setters nickname in the !list, if available
 
