@@ -37,7 +37,7 @@
 static void mo_close(struct Client*, struct Client*, int, char**);
 
 struct Message close_msgtab = {
-  "CLOSE", 0, 0, 1, 0, MFLG_SLOW, 0,
+  "CLOSE", 0, 0, 0, 0, MFLG_SLOW, 0,
   {m_unregistered, m_not_oper, m_ignore, mo_close}
 };
 #ifndef STATIC_MODULES
