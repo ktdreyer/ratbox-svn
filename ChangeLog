@@ -1,3 +1,39 @@
+leeh        2005/03/21 20:24:39 UTC	(20050321_3)
+
+  Modified files:
+    include              s_stats.h 
+    modules              m_stats.c 
+    modules/core         m_nick.c 
+    src                  Makefile.in client.c ircd.c listener.c 
+                         parse.c reject.c s_auth.c s_conf.c 
+                         s_serv.c s_user.c 
+  Removed files:
+    src                  s_stats.c 
+  Log:
+  - stop declaring a ServerStats structure, as well as a pointer to it and
+    linking them together.
+  - merge tstats() and count_memory() into m_stats.c
+  - move the ServerStats definition to ircd.c
+  - remove s_stats.c
+  
+  Revision  Changes    Path
+  7.23      +2 -6      ircd-ratbox/include/s_stats.h
+  1.171     +13 -13    ircd-ratbox/modules/core/m_nick.c
+  1.250     +316 -4    ircd-ratbox/modules/m_stats.c
+  7.157     +1 -2      ircd-ratbox/src/Makefile.in
+  7.501     +25 -25    ircd-ratbox/src/client.c
+  7.382     +2 -1      ircd-ratbox/src/ircd.c
+  7.131     +3 -3      ircd-ratbox/src/listener.c
+  7.193     +5 -5      ircd-ratbox/src/parse.c
+  1.39      +1 -1      ircd-ratbox/src/reject.c
+  7.198     +4 -4      ircd-ratbox/src/s_auth.c
+  7.516     +6 -6      ircd-ratbox/src/s_conf.c
+  7.432     +1 -1      ircd-ratbox/src/s_serv.c
+  7.44      +0 -390    ircd-ratbox/src/s_stats.c (dead)
+  7.349     +5 -5      ircd-ratbox/src/s_user.c
+
+
+
 leeh        2005/03/21 17:09:08 UTC	(20050321_2)
 
   Modified files:
