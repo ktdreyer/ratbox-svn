@@ -1,3 +1,9 @@
+*** 20001229_14 by wcampbel
+1. Added links_notice to example.conf
+2. Corrected Riedel's nick in ChangeLog
+3. Fixed some general {} settings in ircd_parser.y (stats_p_notice, glines)
+
+
 *** 20001229_13 by wcampbel
 Minor correction to send.txt
 
