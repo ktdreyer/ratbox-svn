@@ -44,7 +44,7 @@ void send_knock(struct Client *, struct Client *,
 
 struct Message knock_msgtab = {
   MSG_KNOCK, 0, 1, MFLG_SLOW, 0,
-  {m_unregistered, m_knock, m_ignore, mo_knock}
+  {m_unregistered, m_knock, m_ignore, m_knock}
 };
 
 void
@@ -106,23 +106,6 @@ int     m_knock(struct Client *cptr,
 
   send_knock(cptr, sptr, chptr, parv[1]);
 
-  return 0;
-}
-
-int     mo_knock(struct Client *cptr,
-               struct Client *sptr,
-               int parc,
-               char *parv[])
-{
-  struct Channel *chptr;
-
-  chptr = parse_knock_args(cptr, sptr, parc, parv);
-
-  if (!chptr)
-    return 0;
-
-  send_knock(cptr, sptr, chptr, parv[1]);
-  
   return 0;
 }
 

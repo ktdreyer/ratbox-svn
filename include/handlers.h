@@ -153,7 +153,6 @@ extern int mo_gline(struct Client*, struct Client*, int, char**);
 extern int mo_info(struct Client*, struct Client*, int, char**);
 extern int mo_kill(struct Client*, struct Client*, int, char**);
 extern int mo_kline(struct Client*, struct Client*, int, char**);
-extern int mo_knock(struct Client*, struct Client*, int, char**);
 extern int mo_notice(struct Client*, struct Client*, int, char**);
 extern int mo_oper(struct Client*, struct Client*, int, char**);
 extern int mo_operwall(struct Client*, struct Client*, int, char**);
