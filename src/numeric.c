@@ -45,6 +45,7 @@
  */
 const char* form_str(int numeric)
 {
+  const char *num_ptr;
 
   assert(-1 < numeric);
   assert(numeric < ERR_LAST_ERR_MSG);
@@ -55,7 +56,11 @@ const char* form_str(int numeric)
   if (numeric < 0)
     numeric = ERR_LAST_ERR_MSG;
 
-  return (const char *) _(replies[numeric]);
+  num_ptr = replies[numeric];
+  if (num_ptr == NULL)
+    num_ptr = replies[ERR_LAST_ERR_MSG];
+
+  return (num_ptr);
 }
 
 
