@@ -6,6 +6,8 @@
 
      ----------------------------------------------------------------------
 
+   ircd-hybrid
+
    In an effort to reduce the damage caused to a network by a hacked O-line,
    Hybrid supports an OpenSSL based challenge-response system. This new
    system allows the admin to remove all oper block passwords from the conf
@@ -58,14 +60,22 @@
 
    The keys can be generated with the openssl command as follows:
 
-       openssl genrsa -des3 -out rsa.key 1024
+       openssl genrsa -des3(1) -out rsa.key 1024(2)
        openssl rsa -in rsa.key -pubout -out rsa.pub
    
 
+   (1)
+           The -des3 must be included in order to create a key with a
+           passphrase. Omitting this option will create a non protected key.
+   (2)
+           The key size must be 1024 or below. The challenge sent for a
+           longer keysize will be too long to fit into the ircd's 512 byte
+           line constraint.
+
    It is highly recommended that you set a password on your private key.
 
-   A key pair can also be generated with the tools/mkkeypair utility. No
-   password will be set, however.
+   The tools/mkkeypair utility cannot be used to create a key suitable for
+   use in CHALLENGE.
 
      ----------------------------------------------------------------------
 
@@ -178,6 +188,138 @@
    conf. The use of public/private key encryption provides far greater
    security over having a single password, and may (if the key is kept
    secure, and has a good passphrase) virtually eliminate hacked O-lines.
+
+     ----------------------------------------------------------------------
+
+                                  A. Numerics
+
+ :server 381 user :You have entered... the Twilight Zone!.
+ :server 386 user :challenge-text
+ :server 464 user :Password Incorrect
+ :server 491 user :Only few of mere mortals may try to enter the twilight zone
+   
+
+     Note: The text used can be changed by the server administrator.
+
+     ----------------------------------------------------------------------
+
+                                  B. Scripting
+
+   The following script is for EPIC 4 only. It was written by Greg Prosser,
+   xyst <gregp@blackened.net>.
+
+   Please note that passphrase protected keys cannot be used in conjunction
+   with this script.
+
+   BEGIN challenge.irc
+
+      
+
+      
+ # challenge.irc -- authenticate to a hybrid-7 server with challenge response
+ #                  oper authentication.  --gnp (xyst)
+ # note: this is almost gauranteed to not work if your key needs a passphrase
+ #
+ # credit goes to hop for pipe from the default script archive, which doesn't
+ # work, but gave me a framework for execing stuff and getting the response.
+
+ # For Hybrid's cvs...
+ # $Id$
+
+ xecho ... Loading challenge.irc by xyst, feer.
+
+ # you might want to change these..
+
+ @challenge.path=[~/.irc/respond]
+ @challenge.key=[~/.irc/challenge.identity]
+ @challenge.num=0
+ @challenge.response=[]
+ @challenge.savepath=[~/.irc/challenge.config]
+
+ alias rsaconfig {
+     if ([$0])
+     {
+         switch ($tolower($0))
+         {
+             (resppath)
+             {
+                 if ([$1])
+                 {
+                     @challenge.resp=[$1]
+                     xecho $G Challenge -- resppath is now: $1
+                 } {
+                     xecho $G Challenge -- resppath: $challenge.path
+                 }
+             }
+             (keypath)
+             {
+                 if ([$1])
+                 {
+                     @challenge.key=[$1]
+                     xecho $G Challenge -- keypath is now: $1
+                 } {
+                     xecho $G Challenge -- keypath: $challenge.key
+                 }
+             }
+             (save)
+             {
+                 @unlink($challenge.savepath)
+                 @fd=open($challenge.savepath W)
+                 @write($fd @challenge.path=[$challenge.path])
+                 @write($fd @challenge.key=[$challenge.key])
+                 @close($fd)
+                 xecho $G Challenge -- saved settings.
+             }
+             (*)
+             {
+                 xecho $G Usage: /rsaconfig <resppath|keypath> [value]
+             }
+         }
+     } {
+         xecho $G Current settings for challenge.irc:
+         rsaconfig resppath
+         rsaconfig keypath
+         xecho $G Type /rsaconfig <resppath|keypath> <value> to change these, /rsaconfig save saves them.
+     }
+ }
+
+ alias challenge {
+     if ([$0])
+     {
+         ^quote challenge $0
+     } {
+         xecho $G Usage: /challenge <username>
+     }
+ }
+
+ on ^386 * {
+     xecho $G Got oper-challenge from server, sending response..
+     @challenge.num++
+     ^on ^exec "chall$challenge.num *" {
+         @challenge.response=[$1]
+     }
+     ^exec -name chall$challenge.num $challenge.path $challenge.key $1
+     ^wait %chall$challenge.num
+     ^on exec -"chall$challenge.num *"
+     ^stack push on raw_irc
+     ^stack push on 381
+     ^on ^raw_irc "$S 464 *" { xecho $G Challenge incorrect.  Check your key.;^stack pop on raw_irc;^stack pop on 381 }
+     ^on -381 * { ^stack pop on 381;^stack pop on raw_irc }
+     ^quote challenge +$challenge.response
+ }
+
+ if ([$fexist($challenge.savepath)] > 0)
+ {
+     xecho $G Loading settings from $challenge.savepath ..
+     ^load $challenge.savepath
+ } {
+     xecho $G Config file not found, try /rsaconfig save\; using defaults.
+ }
+
+ rsaconfig
+
+      
+   
 
   Notes
 
