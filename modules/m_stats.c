@@ -290,10 +290,6 @@ static void do_non_priv_stats(struct Client *sptr, char *name, char *target,
   switch (statchar)
     {
     case 'K' :
-      if(target != (char *)NULL)
-        report_matching_host_klines(sptr,target);
-      else
-	report_matching_host_klines(sptr,sptr->host);
       stats_spy(sptr,statchar);
       break;
 

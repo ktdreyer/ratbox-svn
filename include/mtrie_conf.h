@@ -2,7 +2,6 @@
 #ifndef INCLUDED_mtrie_conf_h
 #define INCLUDED_mtrie_conf_h
 
-/* This one is my trademark no? -db */
 #ifndef FOREVER
 #define FOREVER for(;;)
 #endif
@@ -17,7 +16,6 @@ extern struct ConfItem* find_matching_mtrie_conf(const char* host,
                                            unsigned long ip);
 extern void report_mtrie_conf_links(struct Client *,int);
 extern void clear_mtrie_conf_links(void);
-extern void report_matching_host_klines(struct Client *,char *);
 
 
 /* As ircd only allow 63 characters in a hostname, 100 is more than enough */
@@ -41,7 +39,6 @@ extern void report_matching_host_klines(struct Client *,char *);
  * If a domain_level is ever filled up, an overflow domain_level is created.
  * simple.
  *
- * -Dianora
  *
  *
  * [domain_level "com" "ca" "org"]

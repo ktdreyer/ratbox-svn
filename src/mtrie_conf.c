@@ -85,7 +85,6 @@ static struct ConfItem* look_in_unsortable_klines(const char* host, const char* 
 static struct ConfItem* find_wild_card_iline(const char* user);
 
 static void report_sub_mtrie(struct Client *sptr,int,DOMAIN_LEVEL *);
-static void report_unsortable_klines(struct Client *,char *);
 static void clear_sub_mtrie(DOMAIN_LEVEL *);
 static struct ConfItem *find_matching_ip_i_line(unsigned long);
 
@@ -109,12 +108,9 @@ static struct ConfItem *ip_i_lines=(struct ConfItem *)NULL;
  * output       - NONE
  * side effects -
  */
-
 void add_mtrie_conf_entry(struct ConfItem *aconf,int flags)
 {
   char tokenized_host[HOSTLEN+1];
-  unsigned long ip_host;
-  unsigned long ip_mask;
 
   /* Sanity tests are always good */
   if(!aconf->host || !aconf->user)
@@ -124,18 +120,6 @@ void add_mtrie_conf_entry(struct ConfItem *aconf,int flags)
     }
 
   stack_pointer = 0;
-
-  /* check to see if its a kline on user@ip.ip.ip.ip/mask
-   * or user@ip.ip.ip.* or user@ip.ip.ip.ip
-   */
-
-  if(is_address(aconf->host,&ip_host,&ip_mask) && (aconf->status & CONF_KILL))
-    {
-      aconf->ip = ip_host & ip_mask;
-      aconf->ip_mask = ip_mask;
-      add_ip_Kline(aconf);
-      return;
-    }
 
   switch(sortable(tokenized_host,aconf->host))
     {
@@ -205,22 +189,6 @@ void add_mtrie_conf_entry(struct ConfItem *aconf,int flags)
 }
 
 /*
- * add_ip_Iline()
- *
- * tiny function to keep the interface clean...
- *
- * inputs       -
- * output       - NONE
- * side effects -
- */
-void add_ip_Iline( struct ConfItem *aconf )
-{
-  aconf->next = ip_i_lines;
-  ip_i_lines = aconf;
-}
-
-
-/*
  * create_sub_mtrie
  *
  * inputs       - DOMAIN_LEVEL pointer
@@ -261,6 +229,21 @@ static void create_sub_mtrie(DOMAIN_LEVEL *cur_level,
       last_piece->next_level = cur_level;
     }
   create_sub_mtrie(cur_level,aconf,flags,host);
+}
+
+/*
+ * add_ip_Iline()
+ *
+ * tiny function to keep the interface clean...
+ *
+ * inputs       -
+ * output       - NONE
+ * side effects -
+ */
+void add_ip_Iline( struct ConfItem *aconf )
+{
+  aconf->next = ip_i_lines;
+  ip_i_lines = aconf;
 }
 
 
@@ -915,8 +898,6 @@ static struct ConfItem *find_sub_mtrie(DOMAIN_LEVEL *cur_level,
  *
  * modified for use with mtrie_conf.c
  */
-
-
 static int sortable(char *tokenized,char *p)
 {
   int  state=0;
@@ -1055,9 +1036,7 @@ static void tokenize_and_stack(char* tokenized, const char* p)
  * inputs       - host name
  *              - username
  * output       - struct ConfItem pointer or NULL
- * side effects -
- *
- * scan the link list of unsortable patterns
+ * side effects - scan the link list of unsortable iline patterns
  */
 
 static struct ConfItem *look_in_unsortable_ilines(const char* host, const char* user)
@@ -1081,9 +1060,7 @@ static struct ConfItem *look_in_unsortable_ilines(const char* host, const char* 
  * inputs       - host name
  *              - username
  * output       - struct ConfItem pointer or NULL
- * side effects -
- *
- * scan the link list of unsortable patterns
+ * side effects - scan the link list of unsortable kline patterns
  */
 
 static struct ConfItem *look_in_unsortable_klines(const char* host, const char* user)
@@ -1120,121 +1097,6 @@ static struct ConfItem* find_wild_card_iline(const char* user)
     }
   return((struct ConfItem *)NULL);
 }
-
-/*
- * report_matching_host_klines
- *
- * inputs       - pointer to struct Client to send reply to
- *              - hostname to match
- * output       - NONE
- * side effects -
- * all klines in the same domain as hostname given are listed.
- *
- * two_letter_tld is for future use.
- * The idea is to descend one level deeper to list two letter tld
- * K lines.
- */
-
-void report_matching_host_klines(struct Client *sptr,char *host)
-{
-  DOMAIN_PIECE *cur_piece;
-  DOMAIN_LEVEL *cur_level;
-  unsigned long ip_host;
-  unsigned long ip_mask;
-  char *cur_dns_piece;
-  char *p;
-  int two_letter_tld = 0;
-  char tokenized_host[HOSTLEN+1];
-
-  if (strlen(host) > (size_t) HOSTLEN)
-    return;
-
-  if(is_address(host,&ip_host,&ip_mask))
-    {
-      return;
-    }
-
-  stack_pointer = 0;
-  tokenize_and_stack(tokenized_host,host);
-
-  p = host;
-
-  while(*p)
-    p++;
-  p -= 4;       
-  if(p[3] == '\0')
-    two_letter_tld = YES;
-
-  cur_dns_piece = dns_stack[--stack_pointer];
-  if(!cur_dns_piece)
-    return;
-
-  cur_piece = find_host_piece(trie_list,CONF_KILL,cur_dns_piece,"*");
-
-  if(cur_piece == (DOMAIN_PIECE *)NULL)
-    return;
-
-  if(!(cur_piece->flags & CONF_KILL))
-    return;
-
-  if(cur_piece->next_level)
-    cur_level = cur_piece->next_level;
-  else
-    return;
-
-  cur_dns_piece = dns_stack[--stack_pointer];
-  if(!cur_dns_piece)
-    return;
-
-  cur_piece = find_host_piece(cur_level,CONF_KILL,cur_dns_piece,"*");
-
-  if(cur_piece == (DOMAIN_PIECE *)NULL)
-    return;
-
-  if(!(cur_piece->flags & CONF_KILL))
-    return;
-
-  if(cur_piece->next_level)
-    cur_level = cur_piece->next_level;
-  else
-    return;
-
-  report_sub_mtrie(sptr,CONF_KILL,cur_level);
-  report_ip_Klines(sptr);
-  report_unsortable_klines(sptr,host);
-
-}
-
-/*
- * report_unsortable_klines()
- *
- * inputs       - pointer to client pointer to report to
- *              - pointer to host name needed
- * output       - NONE
- * side effects - report the klines in the unsortable list
- */
-
-static void report_unsortable_klines(struct Client *sptr,char *need_host)
-{
-  struct ConfItem *found_conf;
-  char *host, *pass, *user, *name, *classname;
-  int port;
-
-  for(found_conf = unsortable_list_klines;
-      found_conf;found_conf=found_conf->next)
-    {
-      get_printable_conf(found_conf, &name, &host, &pass, &user, &port,
-			 &classname);
-
-      if(match(host,need_host))
-        {
-          sendto_one(sptr, form_str(RPL_STATSKLINE), me.name,
-                     sptr->name, 'K', host,
-                     name, pass);
-        }
-    }
-}
-
 
 /*
  * report_mtrie_conf_links()
@@ -1341,8 +1203,6 @@ void report_mtrie_conf_links(struct Client *sptr, int flags)
  * output       - pointer to static string with prefixes listed in ascii form
  * side effects - NONE
  */
-
-/* urgh. now used also in dline_conf.c */
 char *show_iline_prefix(struct Client *sptr,struct ConfItem *aconf,char *name)
 {
   static char prefix_of_host[MAXPREFIX];
