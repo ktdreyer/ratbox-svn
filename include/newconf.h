@@ -136,6 +136,7 @@ extern 	char *		conf_cur_block_name;
 	void    conf_set_oper_die				(void *data);
 	void    conf_set_oper_rehash				(void *data);
 	void    conf_set_oper_admin				(void *data);
+        void    conf_set_oper_hidden_admin                      (void *data);
 	void	conf_set_oper_flags				(void *data);
 
 	int	conf_begin_class				(struct TopConf *tc);

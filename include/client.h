@@ -399,19 +399,21 @@ struct LocalUser
 /*      OPER_SPY                0x000400 */
 /*                              0x000800 */
 #define OPER_OPERWALL		0x001000
+#define OPER_HIDDENADMIN        0x002000
 #define OPER_FLAGS      (OPER_GLOBAL_KILL | OPER_REMOTE | OPER_UNKLINE |\
                          OPER_GLINE | OPER_N | OPER_K | OPER_DIE |\
-                         OPER_REHASH | OPER_ADMIN | OPER_XLINE | OPER_OPERWALL|0x000400)
+                         OPER_REHASH | OPER_ADMIN | OPER_XLINE | OPER_OPERWALL|\
+                         0x000400 | OPER_HIDDENADMIN)
                                         
-#define FLAGS2_EXEMPTGLINE      0x001000
-#define FLAGS2_EXEMPTKLINE      0x002000
-#define FLAGS2_EXEMPTFLOOD      0x004000
-#define FLAGS2_NOLIMIT          0x008000
-#define FLAGS2_IDLE_LINED       0x010000
-#define FLAGS2_RESTRICTED       0x020000
-#define FLAGS2_PING_COOKIE      0x040000
-#define FLAGS2_IP_SPOOFING      0x080000
-#define FLAGS2_FLOODDONE        0x100000
+#define FLAGS2_EXEMPTGLINE      0x004000
+#define FLAGS2_EXEMPTKLINE      0x008000
+#define FLAGS2_EXEMPTFLOOD      0x010000
+#define FLAGS2_NOLIMIT          0x020000
+#define FLAGS2_IDLE_LINED       0x040000
+#define FLAGS2_RESTRICTED       0x080000
+#define FLAGS2_PING_COOKIE      0x100000
+#define FLAGS2_IP_SPOOFING      0x200000
+#define FLAGS2_FLOODDONE        0x400000
 
 #define SEND_UMODES  (UMODE_INVISIBLE | UMODE_OPER | UMODE_WALLOP | \
                       UMODE_ADMIN)
@@ -527,7 +529,9 @@ struct LocalUser
 #define IsOperXline(x)          ((x)->flags2 & OPER_XLINE)
 #define IsOperDie(x)            ((x)->flags2 & OPER_DIE)
 #define IsOperRehash(x)         ((x)->flags2 & OPER_REHASH)
-#define IsOperAdmin(x)          ((x)->flags2 & OPER_ADMIN)
+#define IsOperHiddenAdmin(x)    ((x)->flags2 & OPER_HIDDENADMIN)
+#define IsOperAdmin(x)          (((x)->flags2 & OPER_ADMIN) || \
+                                 ((x)->flags2 & OPER_HIDDENADMIN))
 #define IsOperOperWall(x)	((x)->flags2 & OPER_OPERWALL)
 
 #define IsFloodDone(x)          ((x)->flags2 & FLAGS2_FLOODDONE)

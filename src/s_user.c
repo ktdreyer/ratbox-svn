@@ -1073,7 +1073,8 @@ user_mode(struct Client *client_p, struct Client *source_p, int parc, char *parv
       source_p->umodes &= ~UMODE_NCHANGE; /* only tcm's really need this */
     }
 
-  if (MyConnect(source_p) && (source_p->umodes & UMODE_ADMIN) && !IsOperAdmin(source_p))
+  if (MyConnect(source_p) && (source_p->umodes & UMODE_ADMIN) && 
+      (!IsOperAdmin(source_p) || IsOperHiddenAdmin(source_p)))
     {
       sendto_one(source_p,":%s NOTICE %s :*** You need oper and A flag for +a",
                  me.name, parv[0]);
@@ -1343,7 +1344,7 @@ oper_up( struct Client *source_p, struct ConfItem *aconf )
   else
     operprivs = "";
 
-  if (IsOperAdmin(source_p))
+  if (IsOperAdmin(source_p) && !IsOperHiddenAdmin(source_p))
     source_p->umodes |= UMODE_ADMIN;
 
   sendto_realops_flags(UMODE_ALL, L_ALL,

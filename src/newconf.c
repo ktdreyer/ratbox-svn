@@ -356,6 +356,8 @@ void	newconf_init()
 	add_conf_item("operator", "die", CF_YESNO, conf_set_oper_die);
 	add_conf_item("operator", "rehash", CF_YESNO, conf_set_oper_rehash);
 	add_conf_item("operator", "admin", CF_YESNO, conf_set_oper_admin);
+        add_conf_item("operator", "hidden_admin", CF_YESNO,
+                      conf_set_oper_hidden_admin);
 	add_conf_item("operator", "encrypted", CF_YESNO, conf_set_oper_encrypted);
 	add_conf_item("operator", "rsa_public_key_file", CF_QSTRING,
 			conf_set_oper_rsa_public_key_file);
@@ -891,6 +893,7 @@ struct mode_table flag_table[] = {
 	{"rehash",		OPER_REHASH},
 	{"die",			OPER_DIE},
 	{"admin",		OPER_ADMIN},
+        {"hidden_admin",        OPER_HIDDENADMIN},
 	{"xline",		OPER_XLINE},
 	{"operwall",		OPER_OPERWALL},
 	{NULL}
@@ -1264,6 +1267,16 @@ void	conf_set_oper_admin(void *data)
 		yy_achead->port |= OPER_ADMIN;
 	else
 		yy_achead->port &= ~OPER_ADMIN;
+}
+
+void    conf_set_oper_hidden_admin(void *data)
+{
+        int yesno = *(int*) data;
+
+        if(yesno)
+                yy_achead->port |= OPER_HIDDENADMIN;
+        else
+                yy_achead->port &= ~OPER_HIDDENADMIN;
 }
 
 int	conf_begin_class(struct TopConf *tc)

@@ -106,7 +106,7 @@ static void mo_resv(struct Client *client_p, struct Client *source_p,
   {
     struct ResvEntry *resv_p;
 
-    if(!IsAdmin(source_p) && (strchr(parv[1], '*') || strchr(parv[1], '?')))
+    if(!IsOperAdmin(source_p) && (strchr(parv[1], '*') || strchr(parv[1], '?')))
     {
       sendto_one(source_p,
                  ":%s NOTICE %s :You must be an admin to perform a wildcard RESV",
