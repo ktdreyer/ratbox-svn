@@ -1403,7 +1403,7 @@ static void read_conf(FBFILE* file)
   scount = lineno = 0;
 
   class0 = find_class("default");       /* which one is the default class ? */
-  ServerInfo.specific_virtual_host = 0;   /* This is a dumb place to do this got a better idea? */
+  ServerInfo.specific_ipv4_vhost = 0;   /* This is a dumb place to do this got a better idea? */
 
 #ifdef HAVE_LIBCRYPTO
   /* reset default cipher priority */ 

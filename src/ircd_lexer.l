@@ -208,7 +208,8 @@ unkline		{ return UNKLINE; }
 user		{ return USER;} 
 vchans_oper_only { return VCHANS_OPER_ONLY; }
 disable_vchans  { return DISABLE_VCHANS; }
-vhost		{ return VHOST; }
+ipv4_vhost	{ return IPV4_VHOST; }
+ipv6_vhost	{ return IPV6_VHOST; }
 warn		{ return WARN; }
 yes		{ return TYES; }
 

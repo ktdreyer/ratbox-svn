@@ -2025,7 +2025,7 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
     add_client_to_list(client_p);
     client_p->localClient->aftype = DEF_FAM;
     /* Now, initiate the connection */
-    if(ServerInfo.specific_virtual_host)
+    if(ServerInfo.specific_ipv4_vhost)
       {
 	struct irc_sockaddr ipn;
 	memset(&ipn, 0, sizeof(struct irc_sockaddr));
