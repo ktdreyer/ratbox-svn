@@ -210,7 +210,6 @@ remove_user_from_channel(struct Channel *chptr, struct Client *who)
   else {
     assert(0 == 1); /* This ain't supposed to happen */
   }
-#endif
 
   free_dlink_node(ptr);
 
