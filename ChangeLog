@@ -1,3 +1,20 @@
+leeh        2005/03/21 22:42:11 UTC	(20050321_8)
+
+  Modified files:
+    include              newconf.h patricia.h s_conf.h s_newconf.h 
+                         sprintf_irc.h 
+  Log:
+  - stop some headers including system headers
+  
+  Revision  Changes    Path
+  7.36      +0 -4      ircd-ratbox/include/newconf.h
+  7.24      +0 -9      ircd-ratbox/include/patricia.h
+  7.320     +0 -5      ircd-ratbox/include/s_conf.h
+  7.50      +0 -4      ircd-ratbox/include/s_newconf.h
+  7.20      +0 -2      ircd-ratbox/include/sprintf_irc.h
+
+
+
 leeh        2005/03/21 22:02:58 UTC	(20050321_7)
 
   Modified files:
