@@ -1,3 +1,7 @@
+*** 20010101_38 by wcampbel
+Added some more conf variables to INFO
+
+
 *** 20010101_37 by davidt
 Fix a buffer overflow in send_mode_list
 
