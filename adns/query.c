@@ -344,10 +344,10 @@ int adns_submit_reverse(adns_state ads,
 			adns_query *query_r) {
   if (type != adns_r_ptr && type != adns_r_ptr_raw && type != adns_r_ptr_ip6 && type != adns_r_ptr_ip6_old ) return EINVAL;
 #ifdef IPV6
-  if(addr->sa_family == AF_INET6 && type != adns_r_ptr_ip6_old)
+  if(addr->sa_family == AF_INET6 && type == adns_r_ptr_ip6_old)
   	  return adns_submit_reverse_ip6(ads,addr,"ip6.int", type,flags,context,query_r);
   else
-  if(addr->sa_family == AF_INET6 && type != adns_r_ptr_ip6)
+  if(addr->sa_family == AF_INET6 && type == adns_r_ptr_ip6)
   	  return adns_submit_reverse_ip6(ads,addr,"ip6.arpa", type,flags,context,query_r);
   else
 #endif
