@@ -1,3 +1,7 @@
+*** 20010120_15 by davidt
+- Change "%s: %s" to "%s :%s" to fix remote klines
+
+
 *** 20010120_14 by fl_
 - ambiguous messages are bloody annoying..
 
