@@ -1,3 +1,15 @@
+leeh        2002/07/17 12:34:48 EDT	(20020717_2)
+
+  Modified files:
+    contrib              lmh.diff 
+  Log:
+  - helps if I run diff with -N.
+  
+  Revision  Changes    Path
+  1.10      +180 -31   ircd-hybrid-7/contrib/lmh.diff
+
+
+
 leeh        2002/07/17 12:29:08 EDT	(20020717_1)
 
   Modified files:
