@@ -1,3 +1,16 @@
+androsyn    2002/12/07 23:07:10 UTC	(20021207_6)
+
+  Modified files:
+    src                  s_conf.c 
+  Log:
+  Shift the add_ip_limit into add_conf so that it covers the cases of an oper
+  switching classes..
+  
+  Revision  Changes    Path
+  7.380     +8 -4      ircd-ratbox/src/s_conf.c
+
+
+
 androsyn    2002/12/07 23:03:13 UTC	(20021207_5)
 
   Modified files:
