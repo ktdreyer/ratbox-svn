@@ -1,3 +1,18 @@
+jdc         2001/12/09 23:17:36 EST	(20011210_4)
+
+  Modified files:
+    include              irc_string.h sprintf_irc.h 
+    src                  sprintf_irc.c 
+  Log:
+  - Fixes for ircsprintf() declaration problems.
+  
+  Revision  Changes    Path
+  7.32      +1 -13     ircd-hybrid-7/include/irc_string.h
+  7.6       +15 -0     ircd-hybrid-7/include/sprintf_irc.h
+  7.11      +1 -2      ircd-hybrid-7/src/sprintf_irc.c
+
+
+
 jdc         2001/12/09 22:55:31 EST	(20011210_3)
 
   Modified files:
