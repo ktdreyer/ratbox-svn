@@ -1,3 +1,14 @@
+*** 20010103_22 by adrian
+
+
+* add mem_frob(ptr, len) which will frob a block of RAM with 0xdeadbeef.
+  Nice for debugging
+
+* frob cptr memory once we've finished with it. This should help us trap
+  bugs where we are referencing cptr/localptr RAM after its been freed,
+  which is evil bad and wrong.
+
+
 *** 20010103_21 by adrian
 
 
