@@ -1,6 +1,6 @@
 # Generated automatically from Makefile.in by configure.
 #
-# Makefile.in for ircd/src
+# Makefile.in for ircd/modules
 #
 # $Id$
 #
@@ -40,6 +40,7 @@ SRCS =                          \
   m_kline.c \
   m_knock.c \
   m_links.c \
+  m_list.c \
   m_lljoin.c \
   m_locops.c \
   m_ltrace.c \

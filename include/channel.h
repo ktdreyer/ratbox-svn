@@ -128,6 +128,9 @@ extern char *channel_chanop_or_voice(struct SLink *lp);
 extern void add_invite(struct Channel *chptr, struct Client *who);
 extern void del_invite(struct Channel *chptr, struct Client *who);
 
+extern int list_continue(struct Client *sptr);
+extern void list_one_channel(struct Client *sptr,struct Channel *chptr);
+
 /* this should eliminate a lot of ifdef's in the main code... -orabidoo */
 
 #define BANSTR(l)  ((l)->value.banptr->banstr)

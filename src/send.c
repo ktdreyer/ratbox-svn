@@ -208,13 +208,8 @@ send_queued_write(int fd, void *data)
      * sendq is now empty.. if there a blocked list?
      */
     if (IsSendqPopped(to) && (DBufLength(&to->sendQ) == 0)) {
-      char* parv[2];
-      char  param[HOSTLEN + 1];
       ClearSendqPop(to);
-      parv[0] = param;
-      parv[1] = 0;
-      strcpy(param, to->name);
-      m_list(to, to, 1, parv);
+      list_continue(to);
     }
     if (rlen < len) {    
       /* ..or should I continue until rlen==0? */
