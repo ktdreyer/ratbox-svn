@@ -1,3 +1,7 @@
+*** 19991230_10 by wnder
+IAuth fixups
+
+
 *** 19991230_9 by db
 - oopsies in opcount code spotted by Perly.. flag has to be used
   before set...
