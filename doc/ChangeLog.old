@@ -1,3 +1,8 @@
+*** 20001224_11 by db
+- remove last remnant of evil #ifdef CHROOT
+
+
+
 *** 20001224_10 by adrian
 
 
