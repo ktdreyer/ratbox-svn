@@ -1,3 +1,11 @@
+*** 20010824_6 by davidt
+- Fix configure[.in] so --enable-assert/--disable-assert do what they claim,
+  not the opposite.
+- Add hooks for m_iodebug.so, to allow dumping the raw IO to a logfile
+  using m_iodebug.c (not committed, since it could also be used for slightly
+  different reasons...)
+
+
 *** 20010824_5 by leeh
 - commented out the no oper motd line.. if they dont see one, there isnt 
   one.. seems kinda obvious surely? :)
