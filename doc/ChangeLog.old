@@ -1,3 +1,16 @@
+jmallett    2002/02/16 22:56:57 EST	(20020217_6)
+
+  Modified files:
+    src                  modules.c 
+  Log:
+  Move our preprocessor definition for the dl*(3) shims for dyld systems to
+  the appropriate location.
+  
+  Revision  Changes    Path
+  7.94      +4 -3      ircd-hybrid-7/src/modules.c
+
+
+
 androsyn    2002/02/16 22:11:30 EST	(20020217_5)
 
   Modified files:
