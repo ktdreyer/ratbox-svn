@@ -1,3 +1,15 @@
+db          2002/07/18 03:12:53 EDT	(20020718_2)
+
+  Modified files:
+    src                  messages.tab 
+  Log:
+  - This adds (core) to any module listed that is a core module
+  
+  Revision  Changes    Path
+  7.69      +1 -1      ircd-hybrid-7/src/messages.tab
+
+
+
 leeh        2002/07/17 19:31:13 EDT	(20020718_1)
 
   Modified files:
