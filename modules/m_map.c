@@ -29,18 +29,18 @@
 #include "client.h"
 #include "modules.h"
 #include "handlers.h"
+#include "numeric.h"
 #include "send.h"
 
+static void m_map(struct Client *client_p, struct Client *source_p,
+                    int parc, char *parv[]);
 static void mo_map(struct Client *client_p, struct Client *source_p,
                     int parc, char *parv[]);
-static void map_server(struct Client *source_p, struct Client *server,
-                       int depth, int prefix);
-
+static void dump_map(struct Client *client_p,struct Client *root, char *pbuf);
 struct Message map_msgtab = {
   "MAP", 0, 1, 0, MFLG_SLOW, 0,
-  {m_unregistered, m_not_oper, m_ignore, mo_map}
+  {m_unregistered, m_map, m_ignore, mo_map}
 };
-
 void
 _modinit(void)
 {
@@ -54,58 +54,100 @@ _moddeinit(void)
 }
 
 char *_version = "20010818";
+static char buf[BUFSIZE];
+
+/* m_map
+**	parv[0] = sender prefix
+*/
+static void m_map(struct Client *client_p, struct Client *source_p,
+                    int parc, char *parv[])
+{
+  if (!GlobalSetOptions.hide_server)
+  {
+    dump_map(client_p,&me,buf);
+    return;
+  }
+
+  m_not_oper(client_p,source_p,parc,parv);
+  return;
+}
 
 /*
-** mo_opme
+** mo_map
 **      parv[0] = sender prefix
-**      parv[1] = channel
 */
 static void mo_map(struct Client *client_p, struct Client *source_p,
                     int parc, char *parv[])
 {
-  sendto_one(source_p, ":%s NOTICE %s :%-59.59s Hops Users",
-             me.name, source_p->name, "Server");
-
-  map_server(source_p, &me, 0, 0);
+  dump_map(client_p,&me,buf);
+  sendto_one(client_p, form_str(RPL_MAPEND), me.name,client_p->name);
 }
 
-static void map_server(struct Client *source_p, struct Client *server,
-                       int depth, int prefix)
+/*
+** dump_map
+**   dumps server map, called recursively.
+*/
+static void dump_map(struct Client *client_p,struct Client *root_p, char *pbuf)
 {
-  struct Client *leaf;
-  char buf[BUFSIZE];
-  int padding;
-  int prefix_next = 1;
+  int pad = 50;    /* position on which we add | Users: */
+  
+  int cnt = 0, i = 0, len;
   int users = 0;
-  struct Client *user;
- 
-  /* XXX - sigh, is there a quicker way to count the number of users? */
-  for( user = server->serv->users; user; user = user->lnext )
-    users++;
-
-  /* left align "PaddingServername" in a 60 char collumn */
-  padding = 60 - strlen(server->name) - (depth * 3);
-  if ( padding < 0 )
-    padding = 0;
- 
-  /* Produce :%s NOTICE %s :%A.21s%.Bs%Cs%d    %d
-   * where A = size of indent
-   *       B = max length of server name (i.e. 60 - size of indent)
-   *       C = size of padding to right of server name
-   */
-  snprintf(buf, BUFSIZE, ":%%s NOTICE %%s :%%%d.21s%%.%ds%%%ds%%d    %%d",
-           (depth * 3), (60 - (depth * 3)), padding);
-
-  /* display server */
-  sendto_one( source_p, buf, me.name, source_p ->name,
-              (prefix ? "-> " : ""), server->name,
-              "", depth, users );
-
-  /* decend into each server linked to this server */
-  for ( leaf = server->serv->servers; leaf; leaf = leaf->lnext )
+  struct Client *server_p,*user_p;
+        
+  *pbuf= '\0';
+       
+  strncat(pbuf,root_p->name,BUFSIZE - ((size_t) pbuf - (size_t) buf));
+  len = strlen(buf);
+  buf[len] = ' ';
+	
+  if (len < pad)
   {
-    map_server( source_p, leaf, depth + 1, prefix_next );
-    prefix_next = 0; /* only prefix "->" on the first link to each server */
+     for (i = len+1 ; i < pad ; i++)
+     {
+       buf[i] = '-';
+     }
   }
+	
+  /* FIXME: add serv->usercnt */
+  for( user_p = root_p->serv->users; user_p; user_p = user_p->lnext )
+    users++;
+        
+  snprintf(buf + pad, BUFSIZE - pad ," | Users: %5d (%4.1f%%)",users,
+           100 * (float) users / (float) Count.total);
+        
+  sendto_one(client_p, form_str(RPL_MAP),me.name,client_p->name,buf);
+        
+  if ((server_p = root_p->serv->servers))
+  {
+    for (; server_p; server_p = server_p->lnext)
+    {
+      cnt++;
+    }
+    
+    if (cnt)
+    {
+      if (pbuf > buf + 3)
+      {
+        pbuf[-2] = ' ';
+        if (pbuf[-3] == '`')
+          pbuf[-3] = ' ';
+      }
+    }
+  }
+  for (i = 1,server_p = root_p->serv->servers; server_p; server_p=server_p->lnext)
+  {
+    *pbuf = ' ';
+    if (i < cnt)
+      *(pbuf + 1) = '|';
+    else
+      *(pbuf + 1) = '`';
+      
+    *(pbuf + 2) = '-';
+    *(pbuf + 3) = ' ';
+    dump_map(client_p,server_p,pbuf+4);
+ 
+    i++;
+   }
 }
 

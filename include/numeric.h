@@ -138,6 +138,9 @@ extern const char* form_str(int);
 #define RPL_MYINFO           004
 #define RPL_ISUPPORT         005
 #define RPL_REDIR            10
+#define RPL_MAP		     15		/* Undernet extension */
+#define RPL_MAPMORE	     16		/* Undernet extension */
+#define RPL_MAPEND	     17		/* Undernet extension */
 #define RPL_YOURID           20
 
 /*
