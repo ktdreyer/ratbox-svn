@@ -1,3 +1,10 @@
+*** 20010123_1 by db
+- this fixes paul's /whois core. basically, network_name, network_desc
+  moved from ConfigFileEntry to ServerInfo. These two modules weren't
+  changed somehow to use the new structs. *oops*
+
+
+
 *** 20010122_8 by wcampbel
 Fixed the off by 1 error in the syntax error in the conf notice
 
