@@ -201,14 +201,11 @@ struct LocalUser
 	unsigned int receiveK;	/* Statistics: total k-bytes received */
 	unsigned short sendB;	/* counters to count upto 1-k lots of bytes */
 	unsigned short receiveB;	/* sent and received. */
-	unsigned int lastrecvM;	/* to check for activity --Mika */
-	int priority;
 	struct Listener *listener;	/* listener accepted from */
 	struct ConfItem *att_conf;	/* attached conf */
 	struct server_conf *att_sconf;
 
 	struct sockaddr_storage ip;
-	unsigned long serverMask;	/* Only used for Lazy Links */
 	time_t last_nick_change;
 	int number_of_nick_changes;
 
