@@ -1,3 +1,12 @@
+*** 20001208_14 by db
+- sped up m_sjoin.c somewhat... also fixed a bug where the code
+  would relink the same vchan over and over again to the root. oops.
+  This resulted in 277 #ircd-coders !nympho !shig !shig !shig !shig !shig !shig !shig !shig
+  oops.
+  Still have to deal with empty vchans...
+
+
+
 *** 20001208_13 by toot
 depend updates
 
