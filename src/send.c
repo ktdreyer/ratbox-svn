@@ -1137,13 +1137,6 @@ sendto_realops_flags(int flags, const char *pattern, ...)
   len = send_format(nbuf, pattern, args);
   va_end(args);
 
-  if(len > 400)
-    {
-      nbuf[400] = '\r';
-      nbuf[401] = '\n';
-      nbuf[402] = '\0';
-    }
-
   if (flags == FLAGS_ALL)
     {
       for (ptr = oper_list.head; ptr; ptr = ptr->next)

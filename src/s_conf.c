@@ -3146,6 +3146,7 @@ void conf_add_x_line(struct ConfItem *aconf)
 
 void conf_add_u_line(struct ConfItem *aconf)
 {
+  aconf->next = u_conf;
   u_conf = aconf;
 }
 

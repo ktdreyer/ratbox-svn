@@ -81,7 +81,7 @@ extern ConfigFileEntryType ConfigFileEntry; /* defined in ircd.c */
 
 /* Local function prototypes */
 
-time_t  valid_tkline(struct Client *sptr, int argc, char *string);
+time_t  valid_tkline(struct Client *sptr, char *string);
 char *cluster(char *);
 int find_user_host(struct Client *sptr,
                    char *user_host_or_nick, char *user, char *host);
@@ -96,6 +96,10 @@ int is_ip_kline(char *host,unsigned long *ip, unsigned long *ip_mask);
 void apply_kline(struct Client *sptr, struct ConfItem *aconf,
 		 const char *current_date,
 		 int ip_kline, unsigned long ip, unsigned long ip_mask);
+
+void apply_tkline(struct Client *sptr, struct ConfItem *aconf,
+		  const char *current_date, int temporary_kline_time,
+		  int ip_kline, unsigned long ip, unsigned long ip_mask);
 
 char *_version = "20001122";
 
@@ -119,52 +123,76 @@ char host[HOSTLEN+2];
 int mo_kline(struct Client *cptr,
                 struct Client *sptr,
                 int parc,
-                char *parv[])
+                char **parv)
 {
-  char *reason = NULL;
+  char *reason = "No Reason";
   const char* current_date;
+  const char* target_server=NULL;
   int  ip_kline = NO;
   struct ConfItem *aconf;
-  time_t temporary_kline_time=0;
-  char *argv;
+  time_t tkline_time=0;
   unsigned long ip;
   unsigned long ip_mask;
 
-
   if(!IsSetOperK(sptr))
     {
-      sendto_one(sptr,":%s NOTICE %s :You have no K flag",me.name,parv[0]);
+      sendto_one(sptr,":%s NOTICE %s :You have no K flag",
+		 me.name,sptr->name);
       return 0;
     }
 
-  argv = parv[1];
+  parv++;
+  parc--;
 
-  temporary_kline_time = valid_tkline(sptr,parc,argv);
-
-  if( temporary_kline_time == -1 )
-    return 0;
-  else if( temporary_kline_time > 0 )
+  if(parc == 0)
     {
-      argv = parv[2];
+      sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
+		 me.name, sptr->name, "KLINE");
+      return -1;
+    }
+
+  tkline_time = valid_tkline(sptr,*parv);
+
+  if( tkline_time == -1 )
+    return 0;
+  else if( tkline_time > 0 )
+    {
+      parv++;
       parc--;
     }
 
-  if ( find_user_host(sptr,argv,user,host) == 0 )
+  if(parc == 0)
+    {
+      sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
+		 me.name, sptr->name, "KLINE");
+      return -1;
+    }
+
+  if ( find_user_host(sptr,*parv,user,host) == 0 )
     return 0;
+  parc--;
+  parv++;
 
-  if(temporary_kline_time)
-    argv = parv[3];
-  else
-    argv = parv[2];
+  if(parc != 0)
+    {
+      if(match(*parv,"ON"))
+	{
+	  parc--;
+	  parv++;
+	  if(parc == 0)
+	    {
+	      sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
+			 me.name, sptr->name, "KLINE");
+	      return -1;
+	    }
+	  target_server = *parv;
+	  parc--;
+	  parv++;
+	}
+    }
 
-  if ((parc > 2) && argv) 
-    if ( valid_comment(sptr, argv) == 0 )
-      return 0;
-
-  if(argv && *argv)
-    reason = argv;
-  else
-    reason = "No reason";
+  if(parc != 0)
+    reason = *parv;
 
   if( valid_user_host(sptr,user,host) == 0 )
     return 0;
@@ -186,30 +214,21 @@ int mo_kline(struct Client *cptr,
 
   aconf->port = 0;
 
-  if(temporary_kline_time)
+  if(tkline_time)
     {
       ircsprintf(buffer,
 		 "Temporary K-line %d min. - %s (%s)",
-		 temporary_kline_time,
+		 tkline_time,
 		 reason,
 		 current_date);
       DupString(aconf->passwd, buffer );
-      aconf->hold = CurrentTime + temporary_kline_time;
       if (ip_kline)
 	{
 	  aconf->ip = ip;
 	  aconf->ip_mask = ip_mask;
 	}
-      add_temp_kline(aconf);
-      sendto_realops_flags(FLAGS_ALL,
-		   "%s added temporary %d min. K-Line for [%s@%s] [%s]",
-        parv[0],
-        temporary_kline_time/60,
-        user,
-        host,
-        reason );
-      check_klines();
-      return 0;
+      apply_tkline(sptr, aconf, current_date, tkline_time,
+		   ip_kline, ip, ip_mask);
     }
   else
     {
@@ -217,13 +236,16 @@ int mo_kline(struct Client *cptr,
 		 reason,
 		 current_date);
       DupString(aconf->passwd, buffer );
+
+      apply_kline(sptr, aconf, current_date, ip_kline, ip, ip_mask);
     }
 
-  sendto_cap_serv_butone(CAP_KLN, &me,
-			 ":%s KLINE %s %s %s : %s",
-			 me.name, sptr->name, user, host, reason);
-
-  apply_kline(sptr, aconf, current_date, ip_kline, ip, ip_mask);
+  if(target_server != NULL)
+    sendto_cap_serv_butone(CAP_KLN, &me,
+			   ":%s KLINE %s %s %d %s %s : %s",
+			   me.name, sptr->name,
+			   target_server,
+			   tkline_time, user, host, reason);
 
   return 0;
 } /* mo_kline() */
@@ -241,12 +263,20 @@ int ms_kline(struct Client *cptr,
   const char *current_date;
   struct Client *rcptr=NULL;
   struct ConfItem *aconf=NULL;
+  int    tkline_time;
 
-  if(parc < 5)
+  if(parc < 7)
     return 0;
 
-  sendto_cap_serv_butone (CAP_KLN, cptr, ":%s KLINE %s %s %s : %s",
-			  parv[0], parv[1], parv[2], parv[3], parv[4]);
+  /* parv[0] parv[1] parv[2]       parv[3]     parv[4] parv[5] parv[6] */
+  /* server  oper    target_server tkline_time user    host    reason */
+  sendto_cap_serv_butone (CAP_KLN, cptr, ":%s KLINE %s %s %s %s %s: %s",
+			  parv[0], parv[1],
+			  parv[2], parv[3],
+			  parv[4], parv[5],parv[6]);
+
+  if(!match(parv[2],me.name))
+    return 0;
 
   if ((rcptr = hash_find_client(parv[1],(struct Client *)NULL)))
     {
@@ -264,16 +294,9 @@ int ms_kline(struct Client *cptr,
   if( rcptr->host == NULL )
     return 0;
 
-  if(!find_u_conf(sptr->name,rcptr->username,rcptr->host))
-    {
-      sendto_realops_flags(FLAGS_ALL,
-		   "*** Received Unauthorized kline from %s!%s@%s on %s",
-			   rcptr->name,
-			   rcptr->username,
-			   rcptr->host,
-			   sptr->name);
-    }
-  else
+  tkline_time = atoi(parv[3]);
+
+  if(find_u_conf(sptr->name,rcptr->username,rcptr->host))
     {
       sendto_realops_flags(FLAGS_ALL,
 			   "*** Received kline from %s!%s@%s on %s",
@@ -284,11 +307,14 @@ int ms_kline(struct Client *cptr,
       aconf = make_conf();
 
       aconf->status = CONF_KILL;
-      DupString(aconf->user, parv[2]);
-      DupString(aconf->host, parv[3]);
-      DupString(aconf->passwd, parv[4]);
+      DupString(aconf->user, parv[4]);
+      DupString(aconf->host, parv[5]);
+      DupString(aconf->passwd, parv[6]);
       current_date = smalldate((time_t) 0);
-      apply_kline(rcptr, aconf, current_date, 0, 0, 0);
+      if(tkline_time)
+	apply_tkline(rcptr, aconf, current_date, tkline_time, 0, 0, 0);
+      else
+	apply_kline(rcptr, aconf, current_date, 0, 0, 0);	
     }
 
   return 0;
@@ -327,6 +353,29 @@ void apply_kline(struct Client *sptr, struct ConfItem *aconf,
 }
 
 /*
+ * apply_tkline
+ *
+ * inputs	-
+ * output	- NONE
+ * side effects	- tkline as given is placed
+ */
+void apply_tkline(struct Client *sptr, struct ConfItem *aconf,
+		  const char *current_date, int temporary_kline_time,
+		  int ip_kline, unsigned long ip, unsigned long ip_mask)
+{
+  aconf->hold = CurrentTime + temporary_kline_time;
+  add_temp_kline(aconf);
+  sendto_realops_flags(FLAGS_ALL,
+		       "%s added temporary %d min. K-Line for [%s@%s] [%s]",
+		       sptr->name,
+		       temporary_kline_time/60,
+		       user,
+		       host,
+		       aconf->passwd);
+  check_klines();
+}
+
+/*
  * valid_tkline()
  * 
  * inputs       - pointer to client requesting kline
@@ -336,7 +385,7 @@ void apply_kline(struct Client *sptr, struct ConfItem *aconf,
  *              - 0 if not an integer number, else the number
  * side effects - none
  */
-time_t valid_tkline(struct Client *sptr, int parc, char *p)
+time_t valid_tkline(struct Client *sptr, char *p)
 {
   time_t result = 0;
 
@@ -352,19 +401,12 @@ time_t valid_tkline(struct Client *sptr, int parc, char *p)
         return(0);
     }
   /* in the degenerate case where oper does a /quote kline 0 user@host :reason 
-     i.e. they specifically use 0, I am going to return 1 instead
-     as a return value of non-zero is used to flag it as a temporary kline
-  */
+   * i.e. they specifically use 0, I am going to return 1 instead
+   * as a return value of non-zero is used to flag it as a temporary kline
+   */
 
   if(result == 0)
     result = 1;
-
-  if(parc < 3)
-    {
-      sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
-		 me.name, sptr->name, "KLINE");
-      return -1;
-    }
 
   if(result > (24*60))
     result = (24*60); /* Max it at 24 hours */

@@ -1,7 +1,7 @@
 There have been quite a few changes in Hybrid-7 from previous versions.
 This document is an overview of what new features are included
 
-AWAY is now propegated.  
+AWAY is now propogated.  
 
 The conf file format has been vastly improved.  The old conf format is 
 still supported, but is deprecated.  Many options that were defined at
@@ -63,7 +63,7 @@ the timestamp protocol will remove the newer side's ops.  These preserved
 channels replace the old NO_CHANOPS_ON_SPLIT and NO_JOIN_ON_SPLIT options.
 
 Due to the new flood control for users, the multiple message restriction has
-been removed. (/msg nic1,nick2,nick3 message)
+been removed. (/msg nick1,nick2,nick3 message)
 
 Nearly all commands are now modules.  MODLIST will list all loaded modules, 
 MODUNLOAD will remove a module from the ircd, and MODLOAD will load a new

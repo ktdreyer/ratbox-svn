@@ -91,6 +91,15 @@ sendto_channel_butone()
                   e.g. if channel message is coming from "cptr"
                   it must not be sent back to cptr.
 
+
+sendto_ll_serv_butone(struct Client *one, struct Client *sptr, int add,
+		      const char *pattern, ...)
+
+                - This function is almost identical to sendto_channel_butone
+                  however, it will also not send on a nick as given by sptr,
+                  if target server does not "know" about it.
+                  As the name implies, it is used for "lazylinks"
+
 sendto_serv_butone()
                 - This function sends specified var args message
                   to all connected servers except the client "one"
@@ -198,7 +207,7 @@ sendto_realops_flags()
                 - combines old sendto_realops and sendto_realops_flags
                   sends specified message to opers locally only
                   depending on flags. FLAGS_ALL is a special case
-                  to sends to any oper.
+                  to send to any oper.
 
                   usage - sendto_realops_flags(int flags,
                                                const char *pattern, ... );
@@ -273,3 +282,5 @@ send_message()
                   must be pre-calculated. 
 
 -- Diane Bruce 
+
+$Id$
