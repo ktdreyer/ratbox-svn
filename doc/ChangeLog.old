@@ -1,3 +1,9 @@
+*** 19991217_1 by db
+1) folded in d line fix from -6
+2) folded in res.c core bug fix from -6
+
+
+
 *** 19991109_1 by db
 - changes to sendto_one_type to not send @# style of message to non
   CHW servers
