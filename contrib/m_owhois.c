@@ -80,7 +80,7 @@ _modinit(void)
 void
 _moddeinit(void)
 {
-  hook_del_event("doing_whois");
+  hook_del_event("doing_whois_local");
   hook_del_event("doing_whois_global");
   mod_del_cmd(&whois_msgtab);
   remove_conf_item("operator", "oper_spy");
