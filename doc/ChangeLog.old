@@ -1,3 +1,14 @@
+*** 20001129_5 by db
+- reworked register_user
+  moved all check for conf/kline notification etc. back into s_conf.c
+  where I think maybe it belongs, in any case, this cleans up register_user
+  no more **char preason. *ugh*
+- removed the kludge '|' handling in reasons. *ugh*
+
+  Who knows what evil lies in ircd code...
+
+
+
 *** 20001129_4 by db
 - redid luser code, removed cache, if this is still needed after all the
   bug fixes done (!) then add an event to recalculate luser counts.
