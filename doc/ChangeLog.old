@@ -1,3 +1,9 @@
+*** 20010528_3 by jdc
+* Removed time_t long check.  I'll just typecast the bastards to be
+  longs...
+
+
+
 *** 20010528_2 by a1kmm
 - Ignore server commands from other servers with a user prefix.
 
