@@ -1,3 +1,7 @@
+*** 20010524_3 by kreator
+- fix small typo in example conf (comRession options :-)
+
+
 *** 20010524_2 by leeh
 - %u -> %lu
 - %d -> %ld
