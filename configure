@@ -2266,9 +2266,12 @@ fi
 if test "$ac_cv_func_gettext" = "yes" -o "$ac_cv_lib_intl_gettext" = "yes"; then
 	echo "Building with gettext."
 	MSGFMT="msgfmt -o"
+	SUBDIR_MESSAGES="messages"
 else
 	MSGFMT="echo"
+	SUBDIR_MESSAGES=""
 fi
+
 
 LDFLAGS_EXTRA=$LDFLAGS
 
@@ -2436,6 +2439,7 @@ s%@CPP@%$CPP%g
 s%@SELECT_SRC@%$SELECT_SRC%g
 s%@SSL_DEFINE@%$SSL_DEFINE%g
 s%@SSL_LIBS@%$SSL_LIBS%g
+s%@SUBDIR_MESSAGES@%$SUBDIR_MESSAGES%g
 s%@LDFLAGS_EXTRA@%$LDFLAGS_EXTRA%g
 s%@MSGFMT@%$MSGFMT%g
 
