@@ -1,3 +1,14 @@
+*** 20010531_6 by davidt
+- Replace sendto_*serv* with sendto_server.
+  sendto_server(one, NULL, NULL, NOCAPS, NOCAPS, NOFLAGS, format, ...)
+  works like sendto_serv_butone() did before, perhaps it should be made
+  into a macro... but we don't seem to _use_ a simple 'sendto_serv_butone()'
+  in many places any more, lazylinks/etc make it a bit more complicated.
+- Also fix a few compile warnings, which mostly appear to have already been
+  committed by toot, so that just added some conflicts for me to sort out
+  before committing.  Maybe I should just do one thing at a time :)
+
+
 *** 20010531_5 by toot
 . added call to set_default_conf before parsing the conf
 . fixed a few compile warnings
