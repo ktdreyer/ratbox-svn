@@ -1,3 +1,26 @@
+leeh        2002/08/08 10:50:23 EDT	(20020808_14)
+
+  Modified files:
+    .                    configure 
+    include              s_conf.h s_gline.h 
+    modules              m_gline.c m_unkline.c 
+    src                  client.c hostmask.c s_conf.c s_gline.c 
+  Log:
+  - CIDR glines
+  
+  Revision  Changes    Path
+  7.151     +2 -2      ircd-ratbox/configure
+  7.186     +1 -0      ircd-ratbox/include/s_conf.h
+  7.12      +0 -2      ircd-ratbox/include/s_gline.h
+  1.82      +3 -3      ircd-ratbox/modules/m_gline.c
+  1.49      +10 -10    ircd-ratbox/modules/m_unkline.c
+  7.295     +5 -3      ircd-ratbox/src/client.c
+  7.70      +11 -2     ircd-ratbox/src/hostmask.c
+  7.319     +16 -23    ircd-ratbox/src/s_conf.c
+  1.22      +1 -42     ircd-ratbox/src/s_gline.c
+
+
+
 leeh        2002/08/08 07:50:35 EDT	(20020808_13)
 
   Modified files:
