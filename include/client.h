@@ -231,6 +231,7 @@ struct LocalUser
 
   struct irc_inaddr ip;
   unsigned short    port;       /* and the remote port# too :-) */
+  int 		    aftype;	/* Makes life easier for DNS res in IPV6 */
   struct DNSReply*  dns_reply;  /* result returned from resolver query */
   unsigned long     serverMask; /* Only used for Lazy Links */
   time_t            last_nick_change;
@@ -258,8 +259,6 @@ struct LocalUser
   int allow_read;	/* how many we're allowed to read in this second */
   int actually_read;    /* how many we've actually read in this second */
   int sent_parsed;      /* how many messages we've parsed in this second */
-
-  u_short aftype;       /* ipv6 or v4 (?) */
 };
 
 /*
