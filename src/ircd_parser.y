@@ -313,7 +313,7 @@ sizespec:	NUMBER
 		= {
 			$$ = $1;
 		}
-		NUMBER BYTES
+		| NUMBER BYTES
 		= { 
 			$$ = $1;
 		}
