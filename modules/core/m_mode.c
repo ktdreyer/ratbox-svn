@@ -27,7 +27,6 @@
 #include "handlers.h"
 #include "channel.h"
 #include "channel_mode.h"
-#include "vchannel.h"
 #include "client.h"
 #include "hash.h"
 #include "irc_string.h"
@@ -74,14 +73,10 @@ static void m_mode(struct Client *client_p, struct Client *source_p,
               int parc, char *parv[])
 {
   struct Channel* chptr=NULL;
-  struct Channel* root;
   static char     modebuf[MODEBUFLEN];
   static char     parabuf[MODEBUFLEN];
   dlink_node	*ptr;
   int n = 2;
-#ifdef VCHANS
-  struct Channel* vchan;
-#endif
 
   /* Now, try to find the channel in question */
   if (!IsChanPrefix(parv[1][0]))
@@ -141,51 +136,6 @@ static void m_mode(struct Client *client_p, struct Client *source_p,
   
   /* Now known the channel exists */
 
-  root = chptr;
-
-#ifdef VCHANS
-  if ((parc > 2) && parv[2][0] == '!')
-    {
-     struct Client *target_p;
-     if (!(target_p = find_client(++parv[2])))
-       {
-        sendto_one(source_p, form_str(ERR_NOSUCHCHANNEL), me.name,
-                   parv[0], root->chname);
-        return;
-       }
-     if ((chptr = map_vchan(root, target_p)) == NULL)
-       {
-        sendto_one(source_p, form_str(ERR_NOSUCHCHANNEL), me.name,
-                   parv[0], root->chname);
-        return;
-       }
-     n++;
-    }
-
-  else
-    {
-      if (HasVchans(chptr))
-        {
-          if ((vchan = map_vchan(chptr,source_p)) != NULL)
-            chptr = vchan; /* root = chptr, chptr = vchan */
-
-          /* XXX - else? the user isn't on any vchan, so we
-           *       end up giving them the mode of the root
-           *       channel.  MODE #vchan !nick ? (ugh)
-           */
-        }
-      else if (IsVchan(chptr))
-        {
-          vchan = find_bchan(chptr);
-          root = vchan;  /* root = vchan, chptr = chptr */
-
-          /* XXX - else? the user isn't on any vchan,
-           *       but they asked for MODE ##vchan_12345
-           *       we send MODE #vchan
-           */
-        }
-    }
-#endif
 
   if (parc < n+1)
     {
@@ -200,7 +150,7 @@ static void m_mode(struct Client *client_p, struct Client *source_p,
       if (!IsOper(source_p))
 	sendto_one(source_p, form_str(RPL_CREATIONTIME),
 		   me.name, parv[0],
-		   parv[1], root->channelts);
+		   parv[1], chptr->channelts);
       else
 	sendto_one(source_p, form_str(RPL_CREATIONTIME),
 		   me.name, parv[0],
@@ -219,7 +169,7 @@ static void m_mode(struct Client *client_p, struct Client *source_p,
     }
 
     set_channel_mode(client_p, source_p, chptr, parc - n, parv + n, 
-                     root->chname);
+                     chptr->chname);
   }
 }
 

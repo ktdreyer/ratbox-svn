@@ -35,7 +35,6 @@
 #include "s_conf.h"
 #include "s_serv.h"
 #include "send.h"
-#include "vchannel.h"
 #include "list.h"
 #include "msg.h"
 #include "parse.h"
@@ -215,11 +214,6 @@ static int list_named_channel(struct Client *source_p,char *name)
   struct Channel *chptr;
   char id_and_topic[TOPICLEN+NICKLEN+6]; /* <!!>, space and null */
   char *p;
-#ifdef VCHANS
-  dlink_node *ptr;
-  struct Channel *root_chptr;
-  struct Channel *tmpchptr;
-#endif
 
   sendto_one(source_p, form_str(RPL_LISTSTART), me.name, source_p->name);
 
@@ -242,34 +236,12 @@ static int list_named_channel(struct Client *source_p,char *name)
       return 0;
     }
 
-#ifdef VCHANS
-  if (HasVchans(chptr))
-    ircsprintf(id_and_topic, "<!%s> %s", pick_vchan_id(chptr), chptr->topic == NULL ? "" : chptr->topic );
-  else
-#endif
-    ircsprintf(id_and_topic, "%s", chptr->topic == NULL ? "" : chptr->topic);
+  ircsprintf(id_and_topic, "%s", chptr->topic == NULL ? "" : chptr->topic);
 
   if (ShowChannel(source_p, chptr))
     sendto_one(source_p, form_str(RPL_LIST), me.name, source_p->name,
                chptr->chname, chptr->users, id_and_topic);
       
-  /* Deal with subvchans */
- 
-#ifdef VCHANS
-  for (ptr = chptr->vchan_list.head; ptr; ptr = ptr->next)
-    {
-      tmpchptr = ptr->data;
-
-      if (ShowChannel(source_p, tmpchptr))
-	{
-          root_chptr = find_bchan(tmpchptr);
-          ircsprintf(id_and_topic, "<!%s> %s", pick_vchan_id(tmpchptr), tmpchptr->topic == NULL ? "" : chptr->topic);
-          sendto_one(source_p, form_str(RPL_LIST), me.name, source_p->name,
-                     root_chptr->chname, tmpchptr->users, id_and_topic);
-        }
-    }
-#endif
-  
   sendto_one(source_p, form_str(RPL_LISTEND), me.name, source_p->name);
   return 0;
 }
@@ -284,31 +256,6 @@ static int list_named_channel(struct Client *source_p,char *name)
  */
 static void list_one_channel(struct Client *source_p, struct Channel *chptr)
 {
-#ifdef VCHANS
-  struct Channel *root_chptr;
-  char  id_and_topic[TOPICLEN+NICKLEN+6]; /* <!!>, plus space and null */
-
-  if(IsVchan(chptr) || HasVchans(chptr))
-    {
-      root_chptr = find_bchan(chptr);
-      
-      if(root_chptr != NULL)
-        {
-          ircsprintf(id_and_topic, "<!%s> %s", pick_vchan_id(chptr), chptr->topic == NULL ? "" : chptr->topic );
-          sendto_one(source_p, form_str(RPL_LIST), me.name, source_p->name,
-                     root_chptr->chname, chptr->users, id_and_topic);
-        }
-      else
-        {
-          ircsprintf(id_and_topic, "<!%s> %s", pick_vchan_id(chptr), chptr->topic == NULL ? "" : chptr->topic );
-          sendto_one(source_p, form_str(RPL_LIST), me.name, source_p->name,
-                     chptr->chname, chptr->users, id_and_topic);     
-        }
-    }
-  else
-#endif
-    {
-      sendto_one(source_p, form_str(RPL_LIST), me.name, source_p->name,
-                 chptr->chname, chptr->users, chptr->topic == NULL ? "" : chptr->topic );
-    }
+  sendto_one(source_p, form_str(RPL_LIST), me.name, source_p->name,
+             chptr->chname, chptr->users, chptr->topic == NULL ? "" : chptr->topic );
 }

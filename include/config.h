@@ -310,7 +310,6 @@
  * If you have enabled efnet specific code these will be disabled automatically
  * else they are here for anyone else.
  */
-#define VCHANS
 #define ANONOPS
 #define HALFOPS
 

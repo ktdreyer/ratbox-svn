@@ -26,7 +26,6 @@
 #include "tools.h"
 #include "handlers.h"
 #include "channel.h"
-#include "vchannel.h"
 #include "client.h"
 #include "common.h"  
 #include "hash.h"
@@ -125,7 +124,6 @@ static void part_one_client(struct Client *client_p,
                             char *reason)
 {
   struct Channel *chptr;
-  struct Channel *bchan;
 
   if ((chptr = hash_find_channel(name)) == NULL)
     {
@@ -134,26 +132,7 @@ static void part_one_client(struct Client *client_p,
       return;
     }
 
-#ifdef VCHANS
-  if (IsVchan(chptr) || HasVchans(chptr))
-    {
-      if(HasVchans(chptr))
-        {
-          /* Set chptr to actual channel, bchan to the base channel */
-          bchan = chptr;
-          chptr = map_vchan(bchan,source_p);
-        }
-      else
-        {
-          /* chptr = chptr; */
-          bchan = find_bchan(chptr);
-        }
-    }
-  else
-#endif
-    bchan = chptr; /* not a vchan */
-
-  if (!chptr || !bchan || !IsMember(source_p, chptr))
+  if (!chptr || !IsMember(source_p, chptr))
     {
       sendto_one(source_p, form_str(ERR_NOTONCHANNEL),
                  me.name, source_p->name, name);
@@ -182,7 +161,7 @@ static void part_one_client(struct Client *client_p,
                            source_p->name,
                            source_p->username,
                            source_p->host,
-                           bchan->chname,
+                           chptr->chname,
                            reason);
     }
   else
@@ -196,7 +175,7 @@ static void part_one_client(struct Client *client_p,
                            source_p->name,
                            source_p->username,
                            source_p->host,
-                           bchan->chname);
+                           chptr->chname);
     }
   remove_user_from_channel(chptr, source_p);
 }

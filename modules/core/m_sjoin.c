@@ -27,7 +27,6 @@
 #include "handlers.h"
 #include "channel.h"
 #include "channel_mode.h"
-#include "vchannel.h"
 #include "client.h"
 #include "hash.h"
 #include "irc_string.h"
@@ -100,7 +99,6 @@ static void ms_sjoin(struct Client *client_p,
                     char *parv[])
 {
   struct Channel *chptr;
-  struct Channel *top_chptr=NULL;	/* XXX vchans */
   struct Client  *target_p, *lclient_p;
   time_t         newts;
   time_t         oldts;
@@ -125,9 +123,6 @@ static void ms_sjoin(struct Client *client_p,
 #ifdef HALFOPS
   static         char sjbuf_hops[BUFSIZE]; /* buffer with halfops as % */
   register char  *hops;
-#endif
-#ifdef VCHANS
-  int            vc_ts = 0;
 #endif
 
   *buf = '\0';
@@ -203,63 +198,6 @@ static void ms_sjoin(struct Client *client_p,
   if ((chptr = get_or_create_channel(source_p, parv[2], &isnew)) == NULL)
     return; /* channel name too long? */
 
-  /* XXX vchan cruft */
-  /* vchans are encoded as "##mainchanname_timestamp" */
-
-#ifdef VCHANS
-  if ( (parv[2][1] == '#') && (ConfigChannel.use_vchans) )
-    {
-      char *subp;
-
-      /* possible sub vchan being sent along ? */
-      if ((subp = strrchr(parv[2],'_')))
-	{
-          vc_ts = atol(subp+1);
-	  /* 
-           * XXX - Could be a vchan, but we can't be _sure_
-           *
-           * We now test the timestamp matches below,
-           * but that can still be faked.
-           *
-           * If there was some way to pass an extra bit of
-           * information over non-hybrid-7 servers, through SJOIN,
-           * we could tell other servers that it's a vchan.
-           * That's probably not possible, unfortunately :(
-           */
-
-	  *subp = '\0';	/* fugly hack for now ... */
-
-	  /* + 1 skip the extra '#' in the name */
-	  if ((top_chptr = hash_find_channel(parv[2] + 1)) != NULL)
-	    {
-	      /* If the vchan is already in the vchan_list for this
-	       * root, don't re-add it.
-	       */
-              /* Compare timestamps too */
-	      if (dlinkFind(&top_chptr->vchan_list,chptr) == NULL &&
-                 newts == vc_ts)
-		{
-		  m = make_dlink_node();
-		  dlinkAdd(chptr, m, &top_chptr->vchan_list);
-		  chptr->root_chptr=top_chptr;
-		}
-	    }
-          /* check TS before creating a root channel */
-	  else if (newts == vc_ts)
-	    {
-	      top_chptr = get_or_create_channel(source_p, (parv[2] + 1), NULL);
-	      m = make_dlink_node();
-	      dlinkAdd(chptr, m, &top_chptr->vchan_list);
-	      chptr->root_chptr=top_chptr;
-              /* let users access it somehow... */
-              chptr->vchan_id[0] = '!';
-              chptr->vchan_id[1] = '\0';
-	    }
-
-	  *subp = '_';	/* fugly hack, restore '_' */
-	}
-    }
-#endif
 
   oldts = chptr->channelts;
 
@@ -570,27 +508,11 @@ static void ms_sjoin(struct Client *client_p,
       if (!IsMember(target_p, chptr))
         {
           add_user_to_channel(chptr, target_p, fl);
-	  /* XXX vchan stuff */
-
-#ifdef VCHANS
-	  if (top_chptr)
-	    {
-	      add_vchan_to_client_cache(target_p,top_chptr, chptr);
-	      sendto_channel_local(ALL_MEMBERS,chptr, ":%s!%s@%s JOIN :%s",
-				   target_p->name,
-				   target_p->username,
-				   target_p->host,
-				   top_chptr->chname);
-	    }
-	  else
-#endif
-	    {
-	      sendto_channel_local(ALL_MEMBERS,chptr, ":%s!%s@%s JOIN :%s",
-				   target_p->name,
-				   target_p->username,
-				   target_p->host,
-				   parv[2]);
-	    }
+	  sendto_channel_local(ALL_MEMBERS,chptr, ":%s!%s@%s JOIN :%s",
+			       target_p->name,
+			       target_p->username,
+			       target_p->host,
+			       parv[2]);
 	}
 
       if (fl & MODE_CHANOP)
@@ -880,7 +802,6 @@ static void remove_a_mode( int hide_or_not,
   char buf[BUFSIZE];
   char lmodebuf[MODEBUFLEN];
   char *lpara[MAXMODEPARAMS];
-  char *chname;
   int count = 0;
 
   mbuf = lmodebuf;
@@ -888,14 +809,8 @@ static void remove_a_mode( int hide_or_not,
 
   lpara[0] = lpara[1] = lpara[2] = lpara[3] = "";
 
-  chname = chptr->chname;
 
-#ifdef VCHANS
-  if (IsVchan(chptr) && top_chptr)
-    chname = top_chptr->chname;
-#endif
-
-  ircsprintf(buf,":%s MODE %s ", me.name, chname);
+  ircsprintf(buf,":%s MODE %s ", me.name, chptr->chname);
 
   for (ptr = list->head; ptr && ptr->data; ptr = ptr->next)
     {
@@ -910,7 +825,7 @@ static void remove_a_mode( int hide_or_not,
 	  sendto_channel_local(hide_or_not, chptr,
 			       ":%s MODE %s %s %s %s %s %s",
 			       me.name,
-			       chname,
+			       chptr->chname,
 			       lmodebuf,
 			       lpara[0], lpara[1], lpara[2], lpara[3] );
 
@@ -927,7 +842,7 @@ static void remove_a_mode( int hide_or_not,
       sendto_channel_local(hide_or_not, chptr,
 			   ":%s MODE %s %s %s %s %s %s",
 			   me.name,
-			   chname,
+			   chptr->chname,
 			   lmodebuf,
 			   lpara[0], lpara[1], lpara[2], lpara[3] );
 

@@ -29,7 +29,6 @@
 #include "channel.h"
 #include "channel_mode.h"
 #include "list.h"
-#include "vchannel.h"
 #include "client.h"
 #include "hash.h"
 #include "irc_string.h"
@@ -77,11 +76,8 @@ m_invite(struct Client *client_p,
          struct Client *source_p, int parc, char *parv[])
 {
   struct Client *target_p;
-  struct Channel *chptr, *vchan;
+  struct Channel *chptr;
   int chop;                     /* Is channel op */
-#ifdef VCHANS
-  struct Channel *vchan2;
-#endif
 
   if (*parv[2] == '\0')
   {
@@ -143,33 +139,15 @@ m_invite(struct Client *client_p,
 
   /* By this point, chptr is non NULL */
 
-#ifdef VCHANS
-  if (!(HasVchans(chptr) && (vchan = map_vchan(chptr, source_p))))
-    vchan = chptr;
-  if (IsVchan(chptr))
-    chptr = chptr->root_chptr;
-#else
-  vchan = chptr;
-#endif
   
-  if (MyClient(source_p) && !IsMember(source_p, vchan))
+  if (MyClient(source_p) && !IsMember(source_p, chptr))
   {
     sendto_one(source_p, form_str(ERR_NOTONCHANNEL), me.name, parv[0],
                parv[2]);
     return;
   }
 
-#ifdef VCHANS
-  if ((vchan2 = map_vchan(chptr, target_p)))
-  {
-    if (MyClient(source_p) && ((vchan2->mode.mode & MODE_SECRET) == 0))
-      sendto_one(source_p, form_str(ERR_USERONCHANNEL), me.name, parv[0],
-                 parv[1], parv[2]);
-    return;
-  }
-#endif
-
-  if (IsMember(target_p, vchan))
+  if (IsMember(target_p, chptr))
   {
     if (MyClient(source_p))
       sendto_one(source_p, form_str(ERR_USERONCHANNEL),
@@ -179,7 +157,7 @@ m_invite(struct Client *client_p,
 
   chop = is_chan_op(chptr, source_p);
 
-  if (chptr && (vchan->mode.mode & MODE_INVITEONLY))
+  if (chptr && (chptr->mode.mode & MODE_INVITEONLY))
   {
     if (!chop)
     {
@@ -211,13 +189,13 @@ m_invite(struct Client *client_p,
 
     if ((chptr->lazyLinkChannelExists &
          target_p->from->localClient->serverMask) == 0)
-      burst_channel(target_p->from, vchan);
+      burst_channel(target_p->from, chptr);
   }
 
   if (MyConnect(target_p))
   {
     if (chop)
-      add_invite(vchan, target_p);
+      add_invite(chptr, target_p);
     sendto_one(target_p, ":%s!%s@%s INVITE %s :%s", source_p->name,
                source_p->username, source_p->host, target_p->name,
                chptr->chname);
@@ -226,19 +204,19 @@ m_invite(struct Client *client_p,
   /* if the channel is +pi, broadcast everywhere thats CAP_PARA, send to
    * target if target isnt CAP_PARA capable, else just send to target
    */
-  if(ParanoidChannel(vchan))
+  if(ParanoidChannel(chptr))
   {
     sendto_channel_remote(source_p, client_p,
   		  	  ONLY_CHANOPS_HALFOPS, CAP_PARA, NOCAPS,
                           chptr, ":%s INVITE %s :%s", parv[0], 
-                          target_p->name, vchan->chname);
+                          target_p->name, chptr->chname);
 			  
     if(!MyConnect(target_p) && (target_p->from != client_p) &&
        !IsCapable(target_p->from, CAP_PARA))
       sendto_one(target_p->from, ":%s INVITE %s :%s", parv[0],
-                 target_p->name, vchan->chname);
+                 target_p->name, chptr->chname);
 
-    sendto_channel_local(ONLY_CHANOPS_HALFOPS, vchan,
+    sendto_channel_local(ONLY_CHANOPS_HALFOPS, chptr,
                          ":%s NOTICE %s :%s is inviting %s to %s.",
 			 me.name, chptr->chname, source_p->name,
 			 target_p->name, chptr->chname);
@@ -246,6 +224,6 @@ m_invite(struct Client *client_p,
   else if(!MyConnect(target_p) && (target_p->from != client_p))
   {
     sendto_one(target_p->from, ":%s INVITE %s :%s", parv[0],
-               target_p->name, vchan->chname);
+               target_p->name, chptr->chname);
   }
 }

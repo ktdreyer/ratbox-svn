@@ -30,7 +30,6 @@
 #include "hash.h"
 #include "channel.h"
 #include "channel_mode.h"
-#include "vchannel.h"
 #include "hash.h"
 #include "ircd.h"
 #include "numeric.h"
@@ -375,9 +374,6 @@ static void whois_person(struct Client *source_p,struct Client *target_p, int gl
   int tlen;
   int reply_to_send = NO;
   struct hook_mfunc_data hd;
-#ifdef VCHANS
-  struct Channel *bchan;
-#endif
   
   a2client_p = find_server(target_p->user->server);
           
@@ -397,15 +393,6 @@ static void whois_person(struct Client *source_p,struct Client *target_p, int gl
     {
       chptr = lp->data;
       chname = chptr->chname;
-
-#ifdef VCHANS
-      if (IsVchan(chptr))
-	{
-	  bchan = find_bchan (chptr);
-	  if (bchan != NULL)
-	    chname = bchan->chname;
-	}
-#endif
 
       if (ShowChannel(source_p, chptr))
 	{

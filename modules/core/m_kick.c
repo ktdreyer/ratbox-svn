@@ -27,7 +27,6 @@
 #include "handlers.h"
 #include "channel.h"
 #include "channel_mode.h"
-#include "vchannel.h"
 #include "client.h"
 #include "irc_string.h"
 #include "ircd.h"
@@ -76,9 +75,6 @@ static void m_kick(struct Client *client_p,
 {
   struct Client *who;
   struct Channel *chptr;
-#ifdef VCHANS
-  struct Channel *vchan;
-#endif
   int   chasing = 0;
   char  *comment;
   char  *name;
@@ -114,16 +110,6 @@ static void m_kick(struct Client *client_p,
       return;
     }
 
-#ifdef VCHANS
-  if (HasVchans(chptr))
-    {
-      vchan = map_vchan(chptr,source_p);
-      if(vchan != 0)
-	{
-	  chptr = vchan;
-	}
-    }
-#endif
 
   if (!IsServer(source_p) && !is_any_op(chptr, source_p) ) 
     { 

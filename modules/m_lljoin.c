@@ -26,7 +26,6 @@
 #include "tools.h"
 #include "channel.h"
 #include "channel_mode.h"
-#include "vchannel.h"
 #include "client.h"
 #include "hash.h"
 #include "common.h"
@@ -93,16 +92,10 @@ static void ms_lljoin(struct Client *client_p,
   char *chname = NULL;
   char *nick = NULL;
   char *key = NULL;
-  char *vkey = NULL;
   int  flags;
   int  i;
   struct Client *target_p;
-  struct Channel *chptr, *vchan_chptr, *root_vchan;
-#ifdef VCHANS
-  int cjoin = 0;
-  int  vc_ts;
-  char *pvc = NULL;
-#endif
+  struct Channel *chptr;
 
   if(uplink && !IsCapable(uplink,CAP_LL))
     {
@@ -120,22 +113,9 @@ static void ms_lljoin(struct Client *client_p,
   if(nick == NULL)
     return;
 
-#ifdef VCHANS
-  if (nick[0] == '!')
+  if(parc >3)
   {
-    cjoin = 1;
-    nick++;
-  }
- 
-  if(parc > 4)
-  {
-    key = parv[4];
-    vkey = parv[3];
-  }
-#endif
-  else if(parc >3)
-  {
-    key = vkey = parv[3];
+    key = parv[3];
   }
 
   flags = 0;
@@ -148,81 +128,37 @@ static void ms_lljoin(struct Client *client_p,
   if( !MyClient(target_p) )
     return;
 
-  chptr = hash_find_channel(chname);
+  chptr = get_or_create_channel(target_p, chname, NULL);
 
-#ifdef VCHANS
-  if (cjoin)
-  {
-    if(!chptr) /* Uhm, bad! */
-    {
-      sendto_realops_flags(FLAGS_ALL, L_ALL,
-        "LLJOIN %s %s called by %s, but root chan doesn't exist!",
-        chname, nick, client_p->name);
-      return;
-    }
+  if(chptr == NULL)
+    return;
+
+  if (chptr->users == 0)
     flags = CHFL_CHANOP;
+  else
+    flags = 0;
 
-    if(! (vchan_chptr = cjoin_channel(chptr, target_p, chname)))
+  /* XXX in m_join.c :( */
+  /* check_spambot_warning(target_p, chname); */
+
+  /* They _could_ join a channel twice due to lag */
+  if(chptr)
+  {
+    if (IsMember(target_p, chptr))    /* already a member, ignore this */
       return;
-
-    root_vchan = chptr;
-    chptr = vchan_chptr;
   }
   else
-#endif
   {
-#ifdef VCHANS
-    if (chptr)
-    {
-      vchan_chptr = select_vchan(chptr, target_p, vkey, chname);
-    }
-    else
-#endif
-    {
-      chptr = vchan_chptr = get_or_create_channel(target_p, chname, NULL);
-      flags = CHFL_CHANOP;
-    }
-   
-#ifdef VCHANS
-    if (vchan_chptr != chptr)
-    {
-      root_vchan = chptr;
-      chptr = vchan_chptr;
-    }
-    else
-#endif
-      root_vchan = chptr;
+    sendto_one(target_p, form_str(ERR_UNAVAILRESOURCE),
+               me.name, nick, chptr->chname);
+    return;
+  }
 
-    if(!chptr || !root_vchan)
-      return;
-
-    if (chptr->users == 0)
-      flags = CHFL_CHANOP;
-    else
-      flags = 0;
-
-    /* XXX in m_join.c :( */
-    /* check_spambot_warning(target_p, chname); */
-
-    /* They _could_ join a channel twice due to lag */
-    if(chptr)
-    {
-      if (IsMember(target_p, chptr))    /* already a member, ignore this */
-        return;
-    }
-    else
-    {
-      sendto_one(target_p, form_str(ERR_UNAVAILRESOURCE),
-                 me.name, nick, root_vchan->chname);
-      return;
-    }
-
-    if( (i = can_join(target_p, chptr, key)) )
-    {
-      sendto_one(target_p,
-                 form_str(i), me.name, nick, root_vchan->chname);
-      return;
-    }
+  if( (i = can_join(target_p, chptr, key)) )
+  {
+    sendto_one(target_p,
+               form_str(i), me.name, nick, chptr->chname);
+    return;
   }
 
   if ((target_p->user->joined >= ConfigChannel.max_chans_per_user) &&
@@ -230,42 +166,13 @@ static void ms_lljoin(struct Client *client_p,
                              ConfigChannel.max_chans_per_user*3)))
     {
       sendto_one(target_p, form_str(ERR_TOOMANYCHANNELS),
-		 me.name, nick, root_vchan->chname );
+		 me.name, nick, chptr->chname );
       return; 
     }
   
   if(flags == CHFL_CHANOP)
     {
       chptr->channelts = CurrentTime;
-      /*
-       * XXX - this is a rather ugly hack.
-       *
-       * Unfortunately, there's no way to pass
-       * the fact that it is a vchan through SJOIN...
-       */
-      /* Prevent users creating a fake vchan */
-#ifdef VCHANS
-      if (chname[0] == '#' && chname[1] == '#')
-        {
-          if ((pvc = strrchr(chname+3, '_')))
-          {
-            /*
-             * OK, name matches possible vchan:
-             * ##channel_blah
-             */
-            pvc++; /*  point pvc after last _ */
-            vc_ts = atol(pvc);
-            /*
-             * if blah is the same as the TS, up the TS
-             * by one, to prevent this channel being
-             * seen as a vchan
-             */
-            if (vc_ts == CurrentTime)
-              chptr->channelts++;
-          }
-        }
-#endif
-
       sendto_one(uplink,
 		 ":%s SJOIN %lu %s + :@%s",
 		 me.name,
@@ -298,17 +205,13 @@ static void ms_lljoin(struct Client *client_p,
 
   add_user_to_channel(chptr, target_p, flags);
 
-#ifdef VCHANS
-  if ( chptr != root_vchan )
-    add_vchan_to_client_cache(target_p,root_vchan,chptr);
-#endif
  
   sendto_channel_local(ALL_MEMBERS, chptr,
 		       ":%s!%s@%s JOIN :%s",
 		       target_p->name,
 		       target_p->username,
 		       target_p->host,
-		       root_vchan->chname);
+		       chptr->chname);
   
   if( flags & CHFL_CHANOP )
   {
@@ -317,7 +220,7 @@ static void ms_lljoin(struct Client *client_p,
       
     sendto_channel_local(ALL_MEMBERS,chptr,
                          ":%s MODE %s +nt",
-                         me.name, root_vchan->chname);
+                         me.name, chptr->chname);
     sendto_one(uplink, 
                ":%s MODE %s +nt",
                me.name, chptr->chname);

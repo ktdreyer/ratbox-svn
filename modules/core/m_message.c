@@ -37,7 +37,6 @@
 
 #include "channel.h"
 #include "channel_mode.h"
-#include "vchannel.h"
 #include "irc_string.h"
 #include "hash.h"
 #include "class.h"
@@ -451,19 +450,7 @@ msg_channel(int p_or_n, char *command,
             struct Client *client_p,
             struct Client *source_p, struct Channel *chptr, char *text)
 {
-  struct Channel *vchan = NULL;
-  char *chname = NULL;
   int result;
-
-  chname = RootChan(chptr)->chname;
-
-#ifdef VCHANS
-  if (HasVchans(chptr))
-    vchan = map_vchan(chptr, source_p);
-#endif
-  
-  if (!vchan)
-    vchan = chptr;
 
   if (MyClient(source_p))
   {
@@ -473,19 +460,19 @@ msg_channel(int p_or_n, char *command,
   }
 
   /* chanops and voiced can flood their own channel with impunity */
-  if ((result = can_send(vchan, source_p)))
+  if ((result = can_send(chptr, source_p)))
   {
     if (result == CAN_SEND_OPV ||
-        !flood_attack_channel(p_or_n, source_p, vchan, chname))
+        !flood_attack_channel(p_or_n, source_p, chptr, chptr->chname))
     {
-      sendto_channel_butone(client_p, source_p, vchan, command, ":%s", text);
+      sendto_channel_butone(client_p, source_p, chptr, command, ":%s", text);
     }
   }
   else
   {
     if (p_or_n != NOTICE)
       sendto_one(source_p, form_str(ERR_CANNOTSENDTOCHAN),
-                 me.name, source_p->name, chname);
+                 me.name, source_p->name, chptr->chname);
   }
 }
 
@@ -508,8 +495,6 @@ msg_channel_flags(int p_or_n, char *command, struct Client *client_p,
                   struct Client *source_p, struct Channel *chptr,
                   int flags, char *text)
 {
-  struct Channel *vchan = NULL;
-  char *chname = NULL;
   int type;
   char c;
 
@@ -529,15 +514,6 @@ msg_channel_flags(int p_or_n, char *command, struct Client *client_p,
     c = '@';
   }
 
-  chname = RootChan(chptr)->chname;
-
-#ifdef VCHANS
-  if (HasVchans(chptr))
-    vchan = map_vchan(chptr, source_p);
-#endif
-
-  if (!vchan)
-    vchan = chptr;
 
   if (MyClient(source_p))
   {
@@ -546,19 +522,19 @@ msg_channel_flags(int p_or_n, char *command, struct Client *client_p,
       source_p->user->last = CurrentTime;
   }
 
-  sendto_channel_local(type, vchan, ":%s!%s@%s %s %c%s :%s",
+  sendto_channel_local(type, chptr, ":%s!%s@%s %s %c%s :%s",
                        source_p->name, source_p->username,
-                       source_p->host, command, c, chname, text);
+                       source_p->host, command, c, chptr->chname, text);
 
   if (chptr->chname[0] == '&')
     return;
 
-  sendto_channel_remote(source_p, client_p, type, CAP_CHW, CAP_UID, vchan,
+  sendto_channel_remote(source_p, client_p, type, CAP_CHW, CAP_UID, chptr,
                 ":%s %s %c%s :%s", source_p->name, command, c,
-                vchan->chname, text);
-  sendto_channel_remote(source_p, client_p, type, CAP_CHW|CAP_UID, NOCAPS, vchan,
+                chptr->chname, text);
+  sendto_channel_remote(source_p, client_p, type, CAP_CHW|CAP_UID, NOCAPS, chptr,
                 ":%s %s %c%s :%s", ID(source_p), command, c,
-                vchan->chname, text);
+                chptr->chname, text);
 
   /* non CAP_CHW servers? */
 }
@@ -763,7 +739,7 @@ flood_attack_channel(int p_or_n, struct Client *source_p,
       if (MyClient(source_p) && (p_or_n != NOTICE))
         sendto_one(source_p,
                    ":%s NOTICE %s :*** Message to %s throttled due to flooding",
-                   me.name, source_p->name, chname);
+                   me.name, source_p->name, chptr->chname);
       return 1;
     }
     else
