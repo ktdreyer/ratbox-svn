@@ -1,3 +1,15 @@
+leeh        2002/07/28 17:37:22 EDT	(20020728_1)
+
+  Modified files:
+    src                  channel_mode.c 
+  Log:
+  - removed some unused vars.
+  
+  Revision  Changes    Path
+  7.47      +1 -7      ircd-hybrid-7/src/channel_mode.c
+
+
+
 leeh        2002/07/28 15:19:05 EDT	(20020728_0)
 
   Modified files:
