@@ -80,7 +80,7 @@ int scount = 0;       /* used by yyparse(), etc */
 /* internally defined functions */
 
 static void lookup_confhost(struct ConfItem* aconf);
-static int  SplitUserHost( struct ConfItem * );
+static int  SplitUserHost(struct ConfItem *aconf);
 
 static void     set_default_conf(void);
 static void     validate_conf(void);
@@ -88,6 +88,7 @@ static void     read_conf(FBFILE*);
 static void     clear_out_old_conf(void);
 static void     flush_deleted_I_P(void);
 static void     expire_tklines(dlink_list *);
+static int 	is_attached(struct Client *client_p, struct ConfItem *aconf);
 
 FBFILE* conf_fbfile_in;
 char    conf_line_in[256];
@@ -97,6 +98,7 @@ extern char yytext[];
 /* address of class 0 conf */
 static struct   Class* class0;
 
+static  int     verify_access(struct Client *client_p, const char *username);
 static  int     attach_iline(struct Client *, struct ConfItem *);
 
 static void clear_special_conf(struct ConfItem **);
@@ -145,6 +147,7 @@ struct ConfItem        *u_conf = ((struct ConfItem *)NULL);
 static void conf_dns_callback(void* vptr, adns_answer *reply)
 {
   struct ConfItem *aconf = (struct ConfItem *) vptr;
+
   if (reply->status == adns_s_ok)
   {
 #ifdef IPV6
@@ -430,14 +433,15 @@ void report_specials(struct Client* source_p, int flags, int numeric)
  *		  Look for conf lines which have the same
  * 		  status as the flags passed.
  */
-int check_client(struct Client *client_p, struct Client *source_p, char *username)
+int 
+check_client(struct Client *client_p, struct Client *source_p, char *username)
 {
   static char     sockname[HOSTLEN + 1];
   int             i;
  
   ClearAccess(source_p);
 
-  if ((i = attach_Iline(source_p, username)))
+  if ((i = verify_access(source_p, username)))
     {
       ilog(L_INFO, "Access denied: %s[%s]", source_p->name, sockname);
     }
@@ -454,7 +458,8 @@ int check_client(struct Client *client_p, struct Client *source_p, char *usernam
 			   get_client_host(source_p),
 			   source_p->localClient->sockhost);
 			   
-      ilog(L_INFO,"Too many connections on IP from %s.", get_client_host(source_p));
+      ilog(L_INFO,"Too many connections on IP from %s.",
+	   get_client_host(source_p));
       
       ServerStats->is_ref++;
       (void)exit_client(client_p, source_p, &me, 
@@ -511,13 +516,15 @@ int check_client(struct Client *client_p, struct Client *source_p, char *usernam
 }
 
 /*
- * attach_Iline
+ * verify_access
  *
- * inputs	-
- * output	-
+ * inputs	- pointer to client to verify
+ *		- pointer to proposed username
+ * output	- 0 if success -'ve if not
  * side effect	- find the first (best) I line to attach.
  */
-int attach_Iline(struct Client* client_p, const char* username)
+static int 
+verify_access(struct Client* client_p, const char* username)
 {
   struct ConfItem* aconf;
   struct ConfItem* gkill_conf;
@@ -604,9 +611,10 @@ int attach_Iline(struct Client* client_p, const char* username)
  * inputs	- client pointer
  *		- conf pointer
  * output	-
- * side effects	-
+ * side effects	- do actual attach
  */
-static int attach_iline(struct Client *client_p, struct ConfItem *aconf)
+static 
+int attach_iline(struct Client *client_p, struct ConfItem *aconf)
 {
   IP_ENTRY *ip_found;
   ip_found = find_or_add_ip(&client_p->localClient->ip);
@@ -644,7 +652,8 @@ static IP_ENTRY *free_ip_entries;
  *
  */
 
-void clear_ip_hash_table()
+void 
+clear_ip_hash_table()
 {
   void *block_IP_ENTRIES;        /* block of IP_ENTRY's */
   IP_ENTRY *new_IP_ENTRY;        /* new IP_ENTRY being made */
@@ -740,7 +749,8 @@ find_or_add_ip(struct irc_inaddr *ip_in)
  * XXX: Broken for IPV6
  */
 
-void remove_one_ip(struct irc_inaddr *ip_in)
+void 
+remove_one_ip(struct irc_inaddr *ip_in)
 {
   IP_ENTRY *ptr, **lptr;
   int hash_index = hash_ip(ip_in);
@@ -781,7 +791,8 @@ void remove_one_ip(struct irc_inaddr *ip_in)
  * side effects - hopefully, none
  */
 
-static int hash_ip(struct irc_inaddr *addr)
+static 
+int hash_ip(struct irc_inaddr *addr)
 {
 #ifndef IPV6
   int hash;
@@ -815,7 +826,8 @@ static int hash_ip(struct irc_inaddr *addr)
  * used in the hash.
  */
 
-void count_ip_hash(int *number_ips_stored,u_long *mem_ips_stored)
+void 
+count_ip_hash(int *number_ips_stored,u_long *mem_ips_stored)
 {
   IP_ENTRY *ip_hash_ptr;
   int i;
@@ -844,7 +856,8 @@ void count_ip_hash(int *number_ips_stored,u_long *mem_ips_stored)
  * output        -
  * side effects        -
  */
-void iphash_stats(struct Client *client_p, struct Client *source_p,
+void 
+iphash_stats(struct Client *client_p, struct Client *source_p,
 		  int parc, char *parv[],FBFILE* out)
 {
   IP_ENTRY *ip_hash_ptr;
@@ -889,11 +902,16 @@ void iphash_stats(struct Client *client_p, struct Client *source_p,
 }
 
 /*
-** detach_conf
-**        Disassociate configuration from the client.
-**      Also removes a class from the list if marked for deleting.
-*/
-int detach_conf(struct Client* client_p,struct ConfItem* aconf)
+ * detach_conf
+ *
+ * inputs	- pointer to client to detach
+ * 		- pointer to conf item to detach
+ * output	- 0 for success, -1 for failure
+ * side effects	- Disassociate configuration from the client.
+ *		  Also removes a class from the list if marked for deleting.
+ */
+int 
+detach_conf(struct Client* client_p,struct ConfItem* aconf)
 {
   dlink_node *ptr;
 
@@ -929,7 +947,16 @@ int detach_conf(struct Client* client_p,struct ConfItem* aconf)
   return -1;
 }
 
-static int is_attached(struct ConfItem *aconf,struct Client *client_p)
+/*
+ * is_attached
+ *
+ * inputs	- pointer to client to check
+ * 		- pointer to conf item to check
+ * output	- 1 if attached, 0 if not
+ * side effects	- 
+ */
+static int 
+is_attached(struct Client *client_p, struct ConfItem *aconf)
 {
   dlink_node *ptr=NULL;
 
@@ -951,11 +978,12 @@ static int is_attached(struct ConfItem *aconf,struct Client *client_p)
  *                connection). Note, that this automatically changes the
  *                attachment if there was an old one...
  */
-int attach_conf(struct Client *client_p,struct ConfItem *aconf)
+int 
+attach_conf(struct Client *client_p,struct ConfItem *aconf)
 {
   dlink_node *lp;
 
-  if (is_attached(aconf, client_p))
+  if (is_attached(client_p, aconf))
     {
       return 1;
     }
@@ -1004,7 +1032,8 @@ int attach_conf(struct Client *client_p,struct ConfItem *aconf)
  * NOTE: this will allow C:::* and N:::* because the match mask is the
  * conf line and not the name
  */
-int attach_confs(struct Client* client_p, const char* name, int statmask)
+int 
+attach_confs(struct Client* client_p, const char* name, int statmask)
 {
   struct ConfItem* tmp;
   int              conf_counter = 0;
@@ -1041,7 +1070,8 @@ int attach_confs(struct Client* client_p, const char* name, int statmask)
  * C/N lines are completely gone now, the name exists only for historical
  * reasons - A1kmm.
  */
-int attach_cn_lines(struct Client *client_p, const char* name, const char* host)
+int 
+attach_cn_lines(struct Client *client_p, const char* name, const char* host)
 {
   struct ConfItem* ptr;
 
@@ -1063,10 +1093,19 @@ int attach_cn_lines(struct Client *client_p, const char* name, const char* host)
 }
 
 /*
- * find a conf entry which matches the hostname and has the same name.
+ * find_conf_exact
+ *
+ * inputs	- pointer to name to find
+ *		- pointer to username to find
+ *		- pointer to host to find
+ *		- int mask of type of conf to find
+ * output	- NULL or pointer to conf found
+ * side effects	- find a conf entry which matches the hostname
+ *		  and has the same name.
  */
-struct ConfItem* find_conf_exact(const char* name, const char* user, 
-                           const char* host, int statmask)
+struct ConfItem* 
+find_conf_exact(const char* name, const char* user, 
+		const char* host, int statmask)
 {
   struct ConfItem *tmp;
 
@@ -1096,8 +1135,18 @@ struct ConfItem* find_conf_exact(const char* name, const char* user,
   return NULL;
 }
 
-struct ConfItem* find_conf_name(dlink_list *list, const char* name, 
-                                int statmask)
+/*
+ * find_conf_name
+ *
+ * inputs	- pointer to conf link list to search
+ *		- pointer to name to find
+ *		- int mask of type of conf to find
+ * output	- NULL or pointer to conf found
+ * side effects	- find a conf entry which matches the name
+ *		  and has the given mask.
+ */
+struct ConfItem* 
+find_conf_name(dlink_list *list, const char* name, int statmask)
 {
   dlink_node *ptr;
   struct ConfItem* aconf;
@@ -1112,19 +1161,18 @@ struct ConfItem* find_conf_name(dlink_list *list, const char* name,
   return NULL;
 }
 
-/* 
- * NOTES
- *
- * C:192.168.0.240:password:irc.server.name:...
- * C:irc.server.name:password:irc.server.name
- * C:host:passwd:name:port:class
- * N:host:passwd:name:hostmask number:class
- */
 /*
- * Added for new access check    meLazy <- no youShithead, your code sucks
+ * find_conf_host
+ *
+ * inputs	- pointer to conf link list to search
+ *		- pointer to host to find
+ *		- int mask of type of conf to find
+ * output	- NULL or pointer to conf found
+ * side effects	- find a conf entry which matches the name
+ *		  and has the given mask.
  */
-struct ConfItem* find_conf_host(dlink_list *list, const char* host, 
-                                int statmask)
+struct ConfItem* 
+find_conf_host(dlink_list *list, const char* host, int statmask)
 {
   dlink_node *ptr;
   struct ConfItem *aconf;
@@ -1141,11 +1189,17 @@ struct ConfItem* find_conf_host(dlink_list *list, const char* host,
 /*
  * find_conf_ip
  *
- * Find a conf line using the IP# stored in it to search upon.
- * Added 1/8/92 by Avalon.
+ * inputs	- pointer to conf link list to search
+ *		- pointer to ip to match on
+ *		- pointer to username to match on
+ *		- int mask of type of conf to find
+ * output	- NULL or pointer to conf found
+ * side effects	- find a conf entry which matches the ip/name
+ *		  and has the given mask.
+ *
  */
-struct ConfItem *find_conf_ip(dlink_list *list, char *ip, char *user, 
-                              int statmask)
+struct ConfItem *
+find_conf_ip(dlink_list *list, char *ip, char *user, int statmask)
 {
   dlink_node *ptr;
   struct ConfItem *aconf;
@@ -1169,9 +1223,17 @@ struct ConfItem *find_conf_ip(dlink_list *list, char *ip, char *user,
 }
 
 /*
- * find_conf_by_name - return a conf item that matches name and type
+ * find_conf_by_name
+ *
+ * inputs	- pointer to name to match on
+ *		- int mask of type of conf to find
+ * output	- NULL or pointer to conf found
+ * side effects	- find a conf entry which matches the name
+ *		  and has the given mask.
+ *
  */
-struct ConfItem* find_conf_by_name(const char* name, int status)
+struct ConfItem* 
+find_conf_by_name(const char* name, int status)
 {
   struct ConfItem* conf;
   assert(0 != name);
@@ -1189,9 +1251,17 @@ struct ConfItem* find_conf_by_name(const char* name, int status)
 }
 
 /*
- * find_conf_by_name - return a conf item that matches host and type
+ * find_conf_by_host
+ *
+ * inputs	- pointer to hostname to match on
+ *		- int mask of type of conf to find
+ * output	- NULL or pointer to conf found
+ * side effects	- find a conf entry which matches the host
+ *		  and has the given mask.
+ *
  */
-struct ConfItem* find_conf_by_host(const char* host, int status)
+struct ConfItem* 
+find_conf_by_host(const char* host, int status)
 {
   struct ConfItem* conf;
   assert(0 != host);
@@ -1211,9 +1281,13 @@ struct ConfItem* find_conf_by_host(const char* host, int status)
 /*
  * find_conf_entry
  *
- * - looks for a match on all given fields.
+ * inputs	- pointer to conf item to search on
+ *		- int mask of type of conf to find
+ * output	- NULL or pointer to conf found
+ * side effects - looks for a match on all given fields.
  */
-struct ConfItem *find_conf_entry(struct ConfItem *aconf, int mask)
+struct ConfItem *
+find_conf_entry(struct ConfItem *aconf, int mask)
 {
   struct ConfItem *bconf;
 
@@ -1256,7 +1330,8 @@ struct ConfItem *find_conf_entry(struct ConfItem *aconf, int mask)
  * output       - NULL or pointer to found struct ConfItem
  * side effects - looks for a match on name field
  */
-struct ConfItem *find_x_conf(char *to_find)
+struct ConfItem *
+find_x_conf(char *to_find)
 {
   struct ConfItem *aconf;
 
@@ -1281,7 +1356,8 @@ struct ConfItem *find_x_conf(char *to_find)
  * output       - NULL or pointer to found struct ConfItem
  * side effects - looks for a matches on all fields
  */
-int find_u_conf(char *server,char *user,char *host)
+int 
+find_u_conf(char *server,char *user,char *host)
 {
   struct ConfItem *aconf;
 
@@ -1310,7 +1386,8 @@ int find_u_conf(char *server,char *user,char *host)
  * output       - none
  * side effects - clears given special conf lines
  */
-static void clear_special_conf(struct ConfItem **this_conf)
+static void 
+clear_special_conf(struct ConfItem **this_conf)
 {
   struct ConfItem *aconf;
   struct ConfItem *next_aconf;
@@ -1331,21 +1408,23 @@ static void clear_special_conf(struct ConfItem **this_conf)
  * as a result of an operator issuing this command, else assume it has been
  * called as a result of the server receiving a HUP signal.
  */
-int rehash(struct Client *client_p,struct Client *source_p, int sig)
+int rehash
+(struct Client *client_p,struct Client *source_p, int sig)
 {
   if (sig)
-  {
-    sendto_realops_flags(FLAGS_ALL, L_ALL,"Got signal SIGHUP, reloading ircd conf. file");
-  }
+    {
+      sendto_realops_flags(FLAGS_ALL, L_ALL,
+			   "Got signal SIGHUP, reloading ircd conf. file");
+    }
 
   restart_resolver();
   /* don't close listeners until we know we can go ahead with the rehash */
   read_conf_files(NO);
 
   if (ServerInfo.description != NULL)
-  {
-    strncpy_irc(me.info, ServerInfo.description, REALLEN);
-  }
+    {
+      strncpy_irc(me.info, ServerInfo.description, REALLEN);
+    }
 
   flush_deleted_I_P();
   check_klines();
@@ -1354,12 +1433,18 @@ int rehash(struct Client *client_p,struct Client *source_p, int sig)
 
 /*
  * set_default_conf()
- *   - Set default values here.  This is called **PRIOR** to parsing the
- *     configuration file.  If you want to do some validation of values
- *     later, put them in validate_conf().
+ *
+ * inputs	- NONE
+ * output	- NONE
+ * side effects	- Set default values here.
+ *		  This is called **PRIOR** to parsing the
+ *		  configuration file.  If you want to do some validation
+ *		  of values later, put them in validate_conf().
  */
+
 #define YES     1
 #define NO      0
+
 static void set_default_conf(void)
 {
   class0 = find_class("default");       /* which one is the default class ? */
@@ -1476,13 +1561,14 @@ static void set_default_conf(void)
 
 /*
  * read_conf() 
- *    Read configuration file.
  *
  *
- * Inputs        - file descriptor pointing to config file to use
- * Outputs       - None
+ * inputs       - file descriptor pointing to config file to use
+ * output       - None
+ * side effects	- Read configuration file.
  */
-static void read_conf(FBFILE* file)
+static void 
+read_conf(FBFILE* file)
 {
   scount = lineno = 0;
 
@@ -1493,7 +1579,8 @@ static void read_conf(FBFILE* file)
   check_class();      /* Make sure classes are valid */
 }
 
-static void validate_conf(void)
+static void 
+validate_conf(void)
 {
   if(ConfigFileEntry.ts_warn_delta < TS_WARN_DELTA_MIN)
     ConfigFileEntry.ts_warn_delta = TS_WARN_DELTA_DEFAULT;
@@ -1523,8 +1610,8 @@ static void validate_conf(void)
  * Output	- none
  * Side effects	- add given conf to link list
  */
-
-void conf_add_conf(struct ConfItem *aconf)
+void 
+conf_add_conf(struct ConfItem *aconf)
 {
   (void)collapse(aconf->host);
   (void)collapse(aconf->user);
@@ -1549,7 +1636,8 @@ void conf_add_conf(struct ConfItem *aconf)
  * side effects - splits user@host found in a name field of conf given
  *		  stuff the user into ->user and the host into ->host
  */
-static int SplitUserHost(struct ConfItem *aconf)
+static int 
+SplitUserHost(struct ConfItem *aconf)
 {
   char *p;
   char *new_user;
@@ -1578,7 +1666,8 @@ static int SplitUserHost(struct ConfItem *aconf)
  * line and convert an IP addresses in a.b.c.d number for to IP#s.
  *
  */
-static void lookup_confhost(struct ConfItem* aconf)
+static void 
+lookup_confhost(struct ConfItem* aconf)
 {
   if (BadPtr(aconf->host) || BadPtr(aconf->name))
     {
@@ -1602,31 +1691,33 @@ static void lookup_confhost(struct ConfItem* aconf)
 /*
  * conf_connect_allowed (untested)
  */
-int conf_connect_allowed(struct irc_inaddr *addr, int aftype)
+int 
+conf_connect_allowed(struct irc_inaddr *addr, int aftype)
 {
 #ifdef PACE_CONNECT
- IP_ENTRY *ip_found;
+  IP_ENTRY *ip_found;
 #endif
- struct ConfItem *aconf = find_dline(addr, aftype);
+  struct ConfItem *aconf = find_dline(addr, aftype);
  
- /* DLINE exempt also gets you out of static limits/pacing... */
- if (aconf && (aconf->status & CONF_EXEMPTDLINE))
-  return 0;
+  /* DLINE exempt also gets you out of static limits/pacing... */
+  if (aconf && (aconf->status & CONF_EXEMPTDLINE))
+    return 0;
  
- if (aconf)
-  return BANNED_CLIENT;
+  if (aconf)
+    return BANNED_CLIENT;
+
 #ifdef PACE_CONNECT
- ip_found = find_or_add_ip(addr);
- if ((CurrentTime - ip_found->last_attempt) <
-     ConfigFileEntry.throttle_time)
- {
+  ip_found = find_or_add_ip(addr);
+  if ((CurrentTime - ip_found->last_attempt) <
+      ConfigFileEntry.throttle_time)
+    {
+      ip_found->last_attempt = CurrentTime;
+      ip_found->count--;
+      return TOO_FAST;
+    }
   ip_found->last_attempt = CurrentTime;
-  ip_found->count--;
-  return TOO_FAST;
- }
- ip_found->last_attempt = CurrentTime;
 #endif
- return 0;
+  return 0;
 }
 
 /*
@@ -1637,7 +1728,8 @@ int conf_connect_allowed(struct irc_inaddr *addr, int aftype)
  * side effects	- See if this user is klined already,
  *		  and if so, return struct ConfItem pointer
  */
-struct ConfItem *find_kill(struct Client* client_p)
+struct ConfItem *
+find_kill(struct Client* client_p)
 {
   struct ConfItem *aconf;
   assert(0 != client_p);
@@ -1658,7 +1750,6 @@ struct ConfItem *find_kill(struct Client* client_p)
  * Side effects  - links in given struct ConfItem into 
  *                 temporary kline link list
  */
-
 void
 add_temp_kline(struct ConfItem *aconf)
 {
@@ -1720,7 +1811,8 @@ expire_tklines(dlink_list *tklist)
  * also, set the oper privs if given client_p non NULL
  */
 
-char *oper_privs_as_string(struct Client *client_p,int port)
+char *
+oper_privs_as_string(struct Client *client_p,int port)
 {
   static char privs_out[16];
   char *privs_ptr;
@@ -1820,8 +1912,8 @@ char *oper_privs_as_string(struct Client *client_p,int port)
  * side effects -
  *
  */
-
-char *oper_flags_as_string(int flags)
+char *
+oper_flags_as_string(int flags)
 {
   /* This MUST be extended if we add any more modes... -Hwy */
   static char flags_out[18];
@@ -1877,25 +1969,29 @@ char *oper_flags_as_string(int flags)
 char*
 get_oper_name(struct Client *client_p)
 {
- dlink_node *cnode;
- static char buffer[NICKLEN+USERLEN+HOSTLEN+HOSTLEN+5]; /* +5 for !,@,{,} and null */
- if (MyConnect(client_p))
- {
-  for (cnode=client_p->localClient->confs.head; cnode; cnode=cnode->next)
-   if (((struct ConfItem*)cnode->data)->status & CONF_OPERATOR)
-   {
-    ircsprintf(buffer, "%s!%s@%s{%s}", client_p->name,
-               client_p->username, client_p->host,
-               ((struct ConfItem*)cnode->data)->name);
-    return buffer;
-   }
-  /* Probably should assert here for now. If there is an oper out there 
-   * with no oper{} conf attached, it would be good for us to know... */
-  assert(0); /* Oper without oper conf! */
- }
- ircsprintf(buffer, "%s!%s@%s{%s}", client_p->name,
-            client_p->username, client_p->host, client_p->servptr->name);
- return buffer;
+  dlink_node *cnode;
+
+  /* +5 for !,@,{,} and null */
+  static char buffer[NICKLEN+USERLEN+HOSTLEN+HOSTLEN+5];
+
+  if (MyConnect(client_p))
+    {
+      for (cnode=client_p->localClient->confs.head; cnode; cnode=cnode->next)
+	if (((struct ConfItem*)cnode->data)->status & CONF_OPERATOR)
+	  {
+	    ircsprintf(buffer, "%s!%s@%s{%s}", client_p->name,
+		       client_p->username, client_p->host,
+		       ((struct ConfItem*)cnode->data)->name);
+	    return buffer;
+	  }
+      /* Probably should assert here for now. If there is an oper out there 
+       * with no oper{} conf attached, it would be good for us to know...
+       */
+      assert(0); /* Oper without oper conf! */
+    }
+  ircsprintf(buffer, "%s!%s@%s{%s}", client_p->name,
+	     client_p->username, client_p->host, client_p->servptr->name);
+  return buffer;
 }
 
 /*
@@ -1915,7 +2011,8 @@ get_oper_name(struct Client *client_p)
  * in aconf, or "<NULL>" port is set to aconf->port in all cases.
  */
 
-void get_printable_conf(struct ConfItem *aconf, char **name, char **host,
+void 
+get_printable_conf(struct ConfItem *aconf, char **name, char **host,
                            char **pass, char **user,int *port,char **classname)
 {
   static  char        null[] = "<NULL>";
@@ -1936,7 +2033,8 @@ void get_printable_conf(struct ConfItem *aconf, char **name, char **host,
  * output       - none
  * side effects - read all conf files needed, ircd.conf kline.conf etc.
  */
-void read_conf_files(int cold)
+void 
+read_conf_files(int cold)
 {
   FBFILE *file;
   const char *filename, *kfilename, *dfilename; /* kline or conf filename */
@@ -2015,7 +2113,8 @@ void read_conf_files(int cold)
  * output       - none
  * side effects - Clear out the old configuration
  */
-static void clear_out_old_conf(void)
+static 
+void clear_out_old_conf(void)
 {
   struct ConfItem **tmp = &ConfigItemList;
   struct ConfItem *tmp2;
@@ -2125,7 +2224,8 @@ static void clear_out_old_conf(void)
  * side effects - This function removes I/P conf items
  */
 
-static void flush_deleted_I_P(void)
+static 
+void flush_deleted_I_P(void)
 {
   struct ConfItem **tmp = &ConfigItemList;
   struct ConfItem *tmp2;
@@ -2165,13 +2265,14 @@ static void flush_deleted_I_P(void)
  *                forwarding the kline onto the next U lined server
  *                
  */
-void WriteKlineOrDline( KlineType type,
-			struct Client *source_p,
-			char *user,
-			char *host,
-			const char *reason,
-			const char *current_date,
-			time_t cur_time)
+void 
+WriteKlineOrDline( KlineType type,
+		   struct Client *source_p,
+		   char *user,
+		   char *host,
+		   const char *reason,
+		   const char *current_date,
+		   time_t cur_time)
 {
   char buffer[1024];
   FBFILE *out;
@@ -2223,7 +2324,8 @@ void WriteKlineOrDline( KlineType type,
 
   if (fbputs(buffer,out) == -1)
     {
-      sendto_realops_flags(FLAGS_ALL, L_ALL,"*** Problem writing to %s",filename);
+      sendto_realops_flags(FLAGS_ALL, L_ALL,
+			   "*** Problem writing to %s",filename);
       fbclose(out);
       return;
     }
@@ -2267,7 +2369,8 @@ get_conf_name(KlineType type)
  *
  */
 
-void conf_add_class(struct ConfItem *aconf,int sendq)
+void 
+conf_add_class(struct ConfItem *aconf,int sendq)
 {
   /*
   ** If conf line is a class definition, create a class entry
@@ -2291,7 +2394,8 @@ void conf_add_class(struct ConfItem *aconf,int sendq)
  * side effects - Add a class pointer to a conf 
  */
 
-void conf_add_class_to_conf(struct ConfItem *aconf)
+void 
+conf_add_class_to_conf(struct ConfItem *aconf)
 {
   if(aconf->className == NULL)
     {
@@ -2412,18 +2516,24 @@ void conf_add_k_conf(struct ConfItem *aconf)
 void
 conf_add_d_conf(struct ConfItem *aconf)
 {
- if (aconf->host == NULL)
-  return;
- aconf->user = NULL;
- /* XXX - Should 'd' ever be in the old conf? For new conf we don't
-  *       need this anyway, so I will disable it for now... -A1kmm */
- if (parse_netmask(aconf->host, NULL, NULL) == HM_HOST)
- {
-  ilog(L_WARN,"Invalid Dline %s ignored",aconf->host);
+  if (aconf->host == NULL)
+    return;
+
+  aconf->user = NULL;
+
+  /* XXX - Should 'd' ever be in the old conf? For new conf we don't
+   *       need this anyway, so I will disable it for now... -A1kmm
+   */
+
+  if (parse_netmask(aconf->host, NULL, NULL) == HM_HOST)
+    {
+      ilog(L_WARN,"Invalid Dline %s ignored",aconf->host);
       free_conf(aconf);
-  return;
- }
- add_conf_by_address(aconf->host, CONF_DLINE, NULL, aconf);
+    }
+  else
+    {
+      add_conf_by_address(aconf->host, CONF_DLINE, NULL, aconf);
+    }
 }
 
 /*
@@ -2433,7 +2543,8 @@ conf_add_d_conf(struct ConfItem *aconf)
  * side effects - Add a X line
  */
 
-void conf_add_x_conf(struct ConfItem *aconf)
+void 
+conf_add_x_conf(struct ConfItem *aconf)
 {
   MyFree(aconf->user);
   aconf->user = NULL;
@@ -2450,7 +2561,8 @@ void conf_add_x_conf(struct ConfItem *aconf)
  * side effects - Add an U line
  */
 
-void conf_add_u_conf(struct ConfItem *aconf)
+void 
+conf_add_u_conf(struct ConfItem *aconf)
 {
   aconf->next = u_conf;
   u_conf = aconf;
@@ -2469,12 +2581,13 @@ void conf_add_u_conf(struct ConfItem *aconf)
  * side effects - update host/pass/user/port fields of given aconf
  */
 
-void conf_add_fields(struct ConfItem *aconf,
-                               char *host_field,
-                               char *pass_field,
-                               char *user_field,
-                               char *port_field,
-		     	       char *class_field)
+void 
+conf_add_fields(struct ConfItem *aconf,
+		char *host_field,
+		char *pass_field,
+		char *user_field,
+		char *port_field,
+		char *class_field)
 {
   if(host_field)
     DupString(aconf->host, host_field);
@@ -2495,7 +2608,8 @@ void conf_add_fields(struct ConfItem *aconf,
  * output	- none
  * side effects	- message to opers and log file entry is made
  */
-void yyerror(char *msg)
+void 
+yyerror(char *msg)
 {
   char newlinebuf[BUFSIZE];
 
@@ -2508,7 +2622,8 @@ void yyerror(char *msg)
       lineno + 1, msg, newlinebuf);
 }
 
-int conf_fbgets(char *lbuf,int max_size, FBFILE *fb)
+int 
+conf_fbgets(char *lbuf,int max_size, FBFILE *fb)
 {
   char* buff;
 
@@ -2520,7 +2635,8 @@ int conf_fbgets(char *lbuf,int max_size, FBFILE *fb)
   return(strlen(lbuf));
 }
 
-int conf_yy_fatal_error(char *msg)
+int 
+conf_yy_fatal_error(char *msg)
 {
 #if 0
   sendto_realops_flags(FLAGS_ALL, L_ALL,
@@ -2530,31 +2646,34 @@ int conf_yy_fatal_error(char *msg)
 }
 
 #ifdef PACE_CONNECT
+
 /* void flush_expired_ips(void *unused)
- * Input: None.
- * Output: None.
- * Side-effects: Deletes all IP address entries which should have expired.
+ *
+ * inputs	- none.
+ * output	- none.
+ * side effects	- Deletes all IP address entries which should have expired.
  */
 void
 flush_expired_ips(void *unused)
 {
- int i;
- time_t expire_before = CurrentTime - ConfigFileEntry.throttle_time;
- IP_ENTRY *ie, **iee;
- for (i=0; i<IP_HASH_SIZE; i++)
- {
-  for (iee=ip_hash_table+i, ie=*iee; ie; ie=*iee)
-  {
-   if (ie->count == 0 && ie->last_attempt <= expire_before)
-   {
-    *iee=ie->next;
-    ie->next = free_ip_entries;
-    free_ip_entries = ie;
-   }
-   else
-    iee = &ie->next;
-  }
-  *iee = NULL;
- }
+  int i;
+  time_t expire_before = CurrentTime - ConfigFileEntry.throttle_time;
+  IP_ENTRY *ie, **iee;
+
+  for (i=0; i<IP_HASH_SIZE; i++)
+    {
+      for (iee=ip_hash_table+i, ie=*iee; ie; ie=*iee)
+	{
+	  if (ie->count == 0 && ie->last_attempt <= expire_before)
+	    {
+	      *iee=ie->next;
+	      ie->next = free_ip_entries;
+	      free_ip_entries = ie;
+	    }
+	  else
+	    iee = &ie->next;
+	}
+      *iee = NULL;
+    }
 }
 #endif
