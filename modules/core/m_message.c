@@ -311,11 +311,12 @@ static int build_target_list(int p_or_n,
   for (nick = strtoken(&p, target_list, ","); nick; 
        nick = strtoken(&p, (char *)NULL, ","))
     {
+      char *with_prefix;
       /*
       ** channels are privmsg'd a lot more than other clients, moved up here
       ** plain old channel msg ?
       */
-
+       
       if( IsChanPrefix(*nick) )
 	{
 	  if( (chptr = hash_find_channel(nick, NullChn)) )
@@ -351,11 +352,11 @@ static int build_target_list(int p_or_n,
       /* @#channel or +#channel message ? */
 
       type = 0;
-
+      with_prefix = nick;
       /*  allow %+@ if someone wants to do that */
       for(;;)
       {
-        if(*nick == '@')
+        if(*nick == '@') 
           type |= MODE_CHANOP;
         else if(*nick == '%')
           type |= MODE_CHANOP|MODE_HALFOP;
@@ -379,9 +380,16 @@ static int build_target_list(int p_or_n,
 	  /* At this point, nick+1 should be a channel name i.e. #foo or &foo
 	   * if the channel is found, fine, if not report an error
 	   */
-
+	 
 	  if ( (chptr = hash_find_channel(nick, NullChn)) )
 	    {
+		
+	      if((type & MODE_CHANOP) && !is_chan_op(chptr, sptr))
+	      {
+		sendto_one(sptr, form_str(ERR_NOSUCHNICK),
+		           me.name, sptr->name, with_prefix);
+			continue;			
+	      }
 	      if( !duplicate_ptr(chptr, *targets, i) )
 		{
                   *targets = MyRealloc(*targets, sizeof(struct entity *) * (i + 1));

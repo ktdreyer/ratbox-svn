@@ -75,12 +75,10 @@ int mo_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   struct Client*    acptr;
   const char* inpath = cptr->name;
   char*       user;
-  char*       path;
   char*       reason;
-  int         chasing = 0;
 
   user = parv[1];
-  path = parv[2]; /* Either defined or NULL (parc >= 2!!) */
+  reason = parv[2]; /* Either defined or NULL (parc >= 2!!) */
 
   if (!IsSetOperK(sptr))
     {
@@ -88,8 +86,13 @@ int mo_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       return 0;
     }
 
-  if (!BadPtr(path) && (strlen(path) > (size_t) KILLLEN))
-    path[KILLLEN] = '\0';
+  if (!BadPtr(reason))
+    {
+      if(strlen(reason) > (size_t) KILLLEN)
+	reason[KILLLEN] = '\0';
+    }
+  else
+    reason = "<No reason given>";
 
   if (!(acptr = find_client(user, NULL)))
     {
@@ -106,7 +109,6 @@ int mo_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
         }
       sendto_one(sptr,":%s NOTICE %s :KILL changed from %s to %s",
                  me.name, parv[0], user, acptr->name);
-      chasing = 1;
     }
   if (IsServer(acptr) || IsMe(acptr))
     {
@@ -122,73 +124,22 @@ int mo_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       return 0;
     }
 
-  if (!IsServer(cptr))
-    {
-      /*
-      ** The kill originates from this server, initialize path.
-      ** (In which case the 'path' may contain user suplied
-      ** explanation ...or some nasty comment, sigh... >;-)
-      **
-      **        ...!operhost!oper
-      **        ...!operhost!oper (comment)
-      */
-      inpath = cptr->host;
-      if (!BadPtr(path))
-        {
-          ircsprintf(buf, "%s!%s%s (%s)",
-                     cptr->username, cptr->name,
-                     IsOper(sptr) ? "" : "(L)", path);
-          path = buf;
-          reason = path;
-        }
-      else
-        path = cptr->name;
-    }
-  else if (BadPtr(path))
-    path = "*no-path*"; /* Bogus server sending??? */
   /*
-  ** Notify all *local* opers about the KILL (this includes the one
-  ** originating the kill, if from this server--the special numeric
-  ** reply message is not generated anymore).
+  ** The kill originates from this server
   **
-  ** Note: "acptr->name" is used instead of "user" because we may
-  **     have changed the target because of the nickname change.
+  **        ...!operhost!oper
+  **        ...!operhost!oper (comment)
   */
-  if(BadPtr(parv[2]))
-    {
-      reason = sptr->name;
-    }
-  else
-    {
-      if(IsOper(cptr))
-        {
-          reason = parv[2];
-        }
-      else
-        {
-          reason = strchr(parv[2], ' ');
-	  if(reason)
-	    reason++;
-	  else
-	    reason = parv[2];
-	}
-    }
+  ircsprintf(buf, "%s!%s (%s)",
+	     cptr->username, cptr->name, reason);
 
-  if (IsOper(sptr)) /* send it normally */
-    {
-      sendto_realops_flags(FLAGS_ALL,
-		   "Received KILL message for %s. From %s Path: %s!%s", 
-		   acptr->name, parv[0], inpath, path);
-    }
-  else
-    sendto_realops_flags(FLAGS_SKILL,
-			 "Received KILL message for %s. From %s",
-			 acptr->name, parv[0]);
+  sendto_realops_flags(FLAGS_ALL,
+		       "Received KILL message for %s. From %s (%s)", 
+		       acptr->name, parv[0], reason);
 
 #if defined(USE_SYSLOG) && defined(SYSLOG_KILL)
-  if (IsGlobalOper(sptr))
-    log(L_INFO,"KILL From %s For %s Path %s!%s",
-                        parv[0], acptr->name, inpath, path);
+  log(L_INFO,"KILL From %s For %s Path %s",
+      parv[0], acptr->name, buf );
 #endif
   /*
   ** And pass on the message to other servers. Note, that if KILL
@@ -196,13 +147,9 @@ int mo_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   ** back.
   ** Suicide kills are NOT passed on --SRB
   */
-  if (!MyConnect(acptr) || !MyConnect(sptr) || !IsOper(sptr))
+  if (!MyConnect(acptr))
     {
-      relay_kill(cptr, sptr, acptr, inpath, path);
-      if (chasing && IsServer(cptr))
-        sendto_one(cptr, ":%s KILL %s :%s!%s",
-                   me.name, acptr->name, inpath, path);
-
+      relay_kill(cptr, sptr, acptr, cptr->username, cptr->name);
       /*
       ** Set FLAGS_KILLED. This prevents exit_one_client from sending
       ** the unnecessary QUIT for this. (This flag should never be
@@ -211,7 +158,7 @@ int mo_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       acptr->flags |= FLAGS_KILLED;
     }
 
-  return exit_client(cptr, acptr, sptr, "Disconnected");
+  return exit_client(cptr, acptr, sptr, reason);
 }
 
 /*
@@ -238,19 +185,6 @@ int ms_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 
   user = parv[1];
   path = parv[2]; /* Either defined or NULL (parc >= 2!!) */
-
-  if (MyClient(sptr) && IsOper(sptr) && !IsSetOperK(sptr))
-    {
-      sendto_one(sptr,":%s NOTICE %s :You have no K flag",me.name,parv[0]);
-      return 0;
-    }
-
-  if (IsOper(cptr))
-    {
-      if (!BadPtr(path))
-        if (strlen(path) > (size_t) KILLLEN)
-          path[KILLLEN] = '\0';
-    }
 
   if (!(acptr = find_client(user, NULL)))
     {
@@ -316,18 +250,19 @@ int ms_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   if (IsOper(sptr)) /* send it normally */
     {
       sendto_realops_flags(FLAGS_ALL,
-		   "Received KILL message for %s. From %s Path: %s!%s", 
-		   acptr->name, parv[0], inpath, path);
+			   "Received KILL message for %s. From %s Path: %s!%s",
+			   acptr->name, parv[0], inpath, path);
     }
   else
-    sendto_realops_flags(FLAGS_SKILL,
-			 "Received KILL message for %s. From %s",
-			 acptr->name, parv[0]);
+    {
+      sendto_realops_flags(FLAGS_SKILL,
+			   "Received KILL message for %s. From %s",
+			   acptr->name, parv[0]);
+    }
 
 #if defined(USE_SYSLOG) && defined(SYSLOG_KILL)
-  if (IsOperGlobalKill(sptr))
-    log(L_INFO,"KILL From %s For %s Path %s!%s",
-                        parv[0], acptr->name, inpath, path);
+  log(L_INFO,"KILL From %s For %s Path %s!%s",
+      parv[0], acptr->name, inpath, path);
 #endif
   /*
   ** And pass on the message to other servers. Note, that if KILL
@@ -349,7 +284,7 @@ int ms_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       acptr->flags |= FLAGS_KILLED;
     }
 
-  return exit_client(cptr, acptr, sptr, "Disconnected");
+  return exit_client(cptr, acptr, sptr, reason );
 }
 
 static void relay_kill(struct Client *one, struct Client *sptr,
