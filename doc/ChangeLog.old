@@ -1,3 +1,10 @@
+*** 20010106_11 by fl_
+- added an IsServer() check in parse.c
+- split up three identical error messages in m_server.c, so you knew
+  which one youre getting
+- fixes for jupe/opme
+
+
 *** 20010106_10 by toot
 put quiet_on_ban in example.conf
 
