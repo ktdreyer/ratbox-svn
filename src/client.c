@@ -361,9 +361,6 @@ check_pings_list(dlink_list *list)
                   log(L_NOTICE, "No response from %s, closing link",
                       get_client_name(cptr, FALSE));
                 }
-
-              cptr->flags2 |= FLAGS2_PING_TIMEOUT;
-
 	      (void)ircsprintf(scratch,
 			       "Ping timeout: %d seconds",
 			       (int)(CurrentTime - cptr->lasttime));
@@ -455,11 +452,11 @@ check_klines(void)
 	  if(IsConfElined(aconf))
 	    {
 	      sendto_realops_flags(FLAGS_ALL,
-			   "D-line over-ruled for %s client is E-lined",
+			   "DLINE over-ruled for %s, client is kline_exempt",
 				   get_client_name(cptr, FALSE));
 	      continue;
 	    }
-	  sendto_realops_flags(FLAGS_ALL,"D-line active for %s",
+	  sendto_realops_flags(FLAGS_ALL,"DLINE active for %s",
 			 get_client_name(cptr, FALSE));
 	      
 	  if(ConfigFileEntry.kline_with_connection_closed)
@@ -491,13 +488,21 @@ check_klines(void)
 	      if(IsElined(cptr))
 		{
 		  sendto_realops_flags(FLAGS_ALL,
-			       "G-line over-ruled for %s client is E-lined",
+		       "GLINE over-ruled for %s, client is kline_exempt",
 				       get_client_name(cptr,FALSE));
 		  continue;
 		}
 	      
+	      if(IsExemptGline(cptr))
+		{
+		  sendto_realops_flags(FLAGS_ALL,
+		       "GLINE over-ruled for %s, client is gline_exempt",
+				       get_client_name(cptr,FALSE));
+		  continue;
+		}
+
 	      sendto_realops_flags(FLAGS_ALL,
-				   "G-line active for %s",
+				   "GLINE active for %s",
 				   get_client_name(cptr, FALSE));
 		  
 	      if (ConfigFileEntry.kline_with_connection_closed)
@@ -531,13 +536,13 @@ check_klines(void)
 		if(aconf->status & CONF_ELINE)
 		  {
 		    sendto_realops_flags(FLAGS_ALL,
-				 "K-line over-ruled for %s client is E-lined",
+			 "KLINE over-ruled for %s, client is kline_exmpt",
 					 get_client_name(cptr,FALSE));
 		    continue;
 		  }
 		    
 		sendto_realops_flags(FLAGS_ALL,
-				     "K-line active for %s",
+				     "KLINE active for %s",
 				     get_client_name(cptr, FALSE));
 
 		if (ConfigFileEntry.kline_with_connection_closed)

@@ -202,7 +202,7 @@ read_packet(int fd, void *data)
     cptr->lasttime = CurrentTime;
   if (cptr->lasttime > cptr->since)
     cptr->since = CurrentTime;
-  cptr->flags &= ~(FLAGS_PINGSENT | FLAGS_NONL);
+  cptr->flags &= ~FLAGS_PINGSENT;
 
   /*
    * Before we even think of parsing what we just read, stick

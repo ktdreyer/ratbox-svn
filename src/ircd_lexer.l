@@ -103,6 +103,7 @@ fname_foperlog  { return FNAME_FOPERLOG; }
 gecos		{ return GECOS; }
 general		{ return GENERAL; }
 gline		{ return GLINE; }
+gline_exempt    { return GLINE_EXEMPT; }
 gline_time      { return GLINE_TIME; }
 gline_log       { return GLINE_LOG; }
 global_kill	{ return GLOBAL_KILL; }

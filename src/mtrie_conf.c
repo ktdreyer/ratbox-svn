@@ -77,7 +77,6 @@ static struct ConfItem *ip_i_lines=(struct ConfItem *)NULL;
 
 /* internally defined functions */
 
-static void report_dup(char,struct ConfItem *);
 static int sortable(char *,char *);
 static void tokenize_and_stack(char* tokenized_out, const char* host);
 static void create_sub_mtrie(DOMAIN_LEVEL *,struct ConfItem *,int,char *);
@@ -342,12 +341,8 @@ static void find_or_add_user_piece(DOMAIN_PIECE *piece_ptr,
               /* if requested kline aconf =exactly=
                * matches an already present aconf
                * discard the requested K line
-               * it should also be NOTICE'd back to the 
-               * oper who did the K-line, if I'm not 
-               * reading the conf file.
                */
 
-              report_dup('K',aconf);
               free_conf(aconf); /* toss it in the garbage */
 
               found_aconf->status |= flags;
@@ -358,7 +353,6 @@ static void find_or_add_user_piece(DOMAIN_PIECE *piece_ptr,
             }
           else if(flags & CONF_KILL)
             {
-              report_dup('K',found_aconf);
               if(found_aconf->clients)
                 found_aconf->status |= CONF_ILLEGAL;
               else
@@ -372,7 +366,6 @@ static void find_or_add_user_piece(DOMAIN_PIECE *piece_ptr,
               /* another I line/CONF_CLIENT exactly matching this
                * toss the new one into the garbage
                */
-              report_dup('I',aconf);
               free_conf(aconf); 
               found_aconf->status |= flags;
               piece_ptr->flags |= flags;
@@ -416,14 +409,11 @@ static void find_or_add_user_piece(DOMAIN_PIECE *piece_ptr,
             {
               if(flags & CONF_CLIENT)
                 {
-                  report_dup('I',aconf);
                   free_conf(aconf);     /* toss new I line into the garbage */
                 }
               else
                 {
                   /* Its a K line */
-                  report_dup('K',aconf);
-
                   if(found_aconf->clients)
                     found_aconf->status |= CONF_ILLEGAL;
                   else
@@ -1430,28 +1420,6 @@ static struct ConfItem *find_matching_ip_i_line(unsigned long host_ip)
         return(aconf);
     }
   return((struct ConfItem *)NULL);
-}
-
-/*
- * report_dup()
- *
- * input        - char type
- *              - pointer to struct ConfItem
- * output       - NONE
- * side effects -
- * report a duplicate conf item found in the mtrie
- *
- */
-
-static void report_dup(char type,struct ConfItem *aconf)
-{
-  char *name, *host, *pass, *user, *classname;
-  int port;
-
-  get_printable_conf(aconf, &name, &host, &pass, &user, &port, &classname);
-
-  sendto_realops_flags(FLAGS_ALL,"DUP: %c: (%s@%s) pass %s name %s port %d",
-                 type,user,host,pass,name,port);
 }
 
 /*

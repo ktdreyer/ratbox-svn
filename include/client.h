@@ -333,7 +333,6 @@ struct LocalUser
 #define FLAGS_CHKACCESS    0x0040 /* ok to check clients access if set */
 #define FLAGS_GOTID        0x0080 /* successful ident lookup achieved */
 #define FLAGS_NEEDID       0x0100 /* I-lines say must use ident return */
-#define FLAGS_NONL         0x0200 /* No \n in buffer */
 #define FLAGS_NORMALEX     0x0400 /* Client exited normally */
 #define FLAGS_SENDQEX      0x0800 /* Sendq exceeded */
 #define FLAGS_IPHASH       0x1000 /* iphashed this client */
@@ -367,7 +366,7 @@ struct LocalUser
 
 
 /* *sigh* overflow flags */
-#define FLAGS2_PING_TIMEOUT 0x0001
+#define FLAGS2_EXEMPTGLINE  0x0001	/* client can't be G-lined */
 #define FLAGS2_E_LINED      0x0002      /* client is graced with E line */
 #define FLAGS2_F_LINED      0x0004      /* client is graced with F line */
 
@@ -421,7 +420,6 @@ struct LocalUser
 #define DoAccess(x)             ((x)->flags & FLAGS_CHKACCESS)
 #define IsDead(x)               ((x)->flags & FLAGS_DEADSOCKET)
 #define SetAccess(x)            ((x)->flags |= FLAGS_CHKACCESS)
-#define NoNewLine(x)            ((x)->flags & FLAGS_NONL)
 #define ClearAccess(x)          ((x)->flags &= ~FLAGS_CHKACCESS)
 #define MyConnect(x)            ((x)->localClient != NULL)
 #define MyClient(x)             (MyConnect(x) && IsClient(x))
@@ -475,6 +473,8 @@ struct LocalUser
 #define SetElined(x)            ((x)->flags2 |= FLAGS2_E_LINED)
 #define IsFlined(x)             ((x)->flags2 & FLAGS2_F_LINED)
 #define SetFlined(x)            ((x)->flags2 |= FLAGS2_F_LINED)
+#define IsExemptGline(x)        ((x)->flags2 & FLAGS2_EXEMPTGLINE)
+#define SetExemptGline(x)       ((x)->flags2 |= FLAGS2_EXEMPTGLINE)
 #define SetIPSpoof(x)           ((x)->flags2 |= FLAGS2_IP_SPOOFING)
 #define IsIPSpoof(x)            ((x)->flags2 & FLAGS2_IP_SPOOFING)
 #define SetIPHidden(x)          ((x)->flags2 |= FLAGS2_IP_HIDDEN)
