@@ -1,3 +1,21 @@
+androsyn    2002/05/20 19:07:42 EDT	(20020521_0)
+
+  Modified files:
+    include              client.h ircd.h send.h 
+    src                  client.c packet.c send.c 
+  Log:
+  Okay..the abort_list is back.  Someday we will fix this properly *sigh*
+  
+  Revision  Changes    Path
+  7.146     +1 -0      ircd-hybrid-7/include/client.h
+  7.49      +1 -0      ircd-hybrid-7/include/ircd.h
+  7.56      +0 -2      ircd-hybrid-7/include/send.h
+  7.267     +35 -3     ircd-hybrid-7/src/client.c
+  7.80      +3 -1      ircd-hybrid-7/src/packet.c
+  7.195     +11 -97    ircd-hybrid-7/src/send.c
+
+
+
 androsyn    2002/05/20 13:53:54 EDT	(20020520_5)
 
   Modified files:
