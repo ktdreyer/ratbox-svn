@@ -6,3 +6,5 @@ fixklines
 convertklines
 encspeed
 convertilines
+*.deps
+.libs

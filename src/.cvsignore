@@ -8,3 +8,4 @@ ircd_lexer.c
 ircd_parser.c
 ircd_parser.h
 .deps
+.libs
