@@ -1235,28 +1235,28 @@ check_spambot_warning(struct Client *source_p, const char *name)
  */
 void check_splitmode(void *unused)
 {
-  if(splitmode)
-  {
-    if((Count.server >= split_servers) &&
-       (Count.total >= split_users))
-    {
-      splitmode = 0;
-      
-      sendto_realops_flags(FLAGS_ALL, L_ALL,
-                           "Network rejoined, deactivating splitmode");
-      eventDelete(check_splitmode, NULL);
-    }
-  }
-  else
+  if(splitchecking && (ConfigChannel.no_join_on_split ||
+     ConfigChannel.no_create_on_split))
   {
     if((Count.server < split_servers) &&
        (Count.total < split_users))
     {
-      splitmode = 1;
+      if(!splitmode)
+      {
+        splitmode = 1;
 
-      sendto_realops_flags(FLAGS_ALL,L_ALL,
+        sendto_realops_flags(FLAGS_ALL,L_ALL,
                            "Network split, activating splitmode");
-      eventAdd("check_splitmode", check_splitmode, NULL, 60);
+        eventAdd("check_splitmode", check_splitmode, NULL, 60);
+      }
+    }
+    else if(splitmode)
+    {
+      splitmode = 0;
+    
+      sendto_realops_flags(FLAGS_ALL, L_ALL,
+                           "Network rejoined, deactivating splitmode");
+      eventDelete(check_splitmode, NULL);
     }
   }
 }

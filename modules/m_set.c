@@ -88,7 +88,7 @@ static void quote_max(struct Client *, int);
 static void quote_msglocale(struct Client *, char *);
 static void quote_spamnum(struct Client *, int);
 static void quote_spamtime(struct Client *, int);
-static void quote_splitmode(struct Client *, int);
+static void quote_splitmode(struct Client *, char *);
 static void quote_splitnum(struct Client *, int);
 static void quote_splitusers(struct Client *, int);
 static void list_quote_commands(struct Client *);
@@ -115,7 +115,7 @@ static struct SetStruct set_cmd_table[] =
   { "MSGLOCALE",	quote_msglocale,	1,	0 },
   { "SPAMNUM",		quote_spamnum,		0,	1 },
   { "SPAMTIME",		quote_spamtime,		0,	1 },
-  { "SPLITMODE",	quote_splitmode,	0,	1 },
+  { "SPLITMODE",	quote_splitmode,	1,	0 },
   { "SPLITNUM",		quote_splitnum,		0,	1 },
   { "SPLITUSERS",	quote_splitusers,	0,	1 },
   /* -------------------------------------------------------- */
@@ -379,37 +379,82 @@ static void quote_spamtime( struct Client *source_p, int newval )
   }
 }
 
-/* SET SPLITMODE */
-static void quote_splitmode(struct Client *source_p, int newval)
+/* this table is what splitmode may be set to */
+static char *splitmode_values[] =
 {
-  if(newval >= 0)
+  "OFF",
+  "ON",
+  "AUTO",
+  NULL
+};
+
+/* this table is what splitmode may be */
+static char *splitmode_status[] =
+{
+  "OFF",
+  "AUTO (OFF)",
+  "ON",
+  "AUTO (ON)",
+  NULL
+};
+
+/* SET SPLITMODE */
+static void quote_splitmode(struct Client *source_p, char *charval)
+{
+  if(charval)
   {
-    if((newval > 0) && !splitmode)
+    int newval;
+
+    for(newval = 0; splitmode_values[newval]; newval++)
+    {
+      if(!irccmp(splitmode_values[newval], charval))
+        break;
+    }
+
+    /* OFF */
+    if(newval == 0)
     {
       sendto_realops_flags(FLAGS_ALL, L_ALL, 
-                           "%s is manually activating splitmode",
+                           "%s is disabling splitmode",
                            get_oper_name(source_p));
-      sendto_one(source_p, ":%s NOTICE %s :SPLITMODE has been activated",
-                 me.name, source_p->name);
-      splitmode = 1;
+
+      splitmode = 0;
+      splitchecking = 0;
+
+      eventDelete(check_splitmode, NULL);
     }
-    else if((newval == 0) && splitmode)
+    /* ON */
+    else if(newval == 1)
     {
       sendto_realops_flags(FLAGS_ALL, L_ALL,
-                           "%s is manually deactivating splitmode",
-			   get_oper_name(source_p));
-      sendto_one(source_p, ":%s NOTICE %s :SPLITMODE has been deactivated",
-                 me.name, source_p->name);
+                           "%s is enabling and activating splitmode",
+	                   get_oper_name(source_p));
 		 
-      splitmode = 0;
+      splitmode = 1;
+      splitchecking = 0;
 
       /* we might be deactivating an automatic splitmode, so pull the event */
       eventDelete(check_splitmode, NULL);
     }
+    /* AUTO */
+    else if(newval == 2)
+    {
+      sendto_realops_flags(FLAGS_ALL, L_ALL,
+                           "%s is enabling automatic splitmode",
+			   get_oper_name(source_p));
+
+      splitchecking = 1;
+      check_splitmode();
+    }
   }
   else
-    sendto_one(source_p, ":%s NOTICE %s :SPLITMODE is currently %i", 
-               me.name, source_p->name, splitmode);
+    /* if we add splitchecking to splitmode*2 we get a unique table to 
+     * pull values back out of, splitmode can be four states - but you can
+     * only set to three, which means we cant use the same table --fl_
+     */
+    sendto_one(source_p, ":%s NOTICE %s :SPLITMODE is currently %s", 
+               me.name, source_p->name, 
+	       splitmode_status[(splitchecking + (splitmode*2))]);
 }
 
 /* SET SPLITNUM */
@@ -421,6 +466,9 @@ static void quote_splitnum(struct Client *source_p, int newval)
                          "%s has changed SPLITNUM to %i", 
 			 source_p->name, newval);
     split_servers = newval;
+
+    if(splitchecking)
+      check_splitmode();
   }
   else
     sendto_one(source_p, ":%s NOTICE %s :SPLITNUM is currently %i", 
@@ -436,6 +484,9 @@ static void quote_splitusers(struct Client *source_p, int newval)
                          "%s has changed SPLITUSERS to %i", 
 			 source_p->name, newval);
     split_users = newval;
+
+    if(splitchecking)
+      check_splitmode();
   }
   else
     sendto_one(source_p, ":%s NOTICE %s :SPLITUSERS is currently %i", 

@@ -11,7 +11,6 @@ SET <option> <value>
                 HARD_FDLIMIT in config.h)
   IDLETIME    - The number of seconds a client can be idle
                 before disconnecting them
-  SHIDE       - Turn server hiding on or off on the fly
   FLOODCOUNT  - The number of lines allowed before
                 throttling a connection due to flooding
                 Note that this variable is used for both
@@ -23,3 +22,12 @@ SET <option> <value>
   MSGLOCALE   - Set the gettext() message locale
                 standard - Compiled in defaults
                 custom   - Old CUSTOM_ERR messages
+  SPLITMODE   - Sets splitmode to <value>:
+                 ON   - splitmode is permanently on
+                 OFF  - splitmode is permanently off
+                 AUTO - ircd chooses splitmode based on 
+                        SPLITUSERS and SPLITNUM
+  SPLITUSERS  - Sets the minimum amount of users needed to
+                deactivate automatic splitmode.
+  SPLITNUM    - Sets the minimum amount of servers needed to
+                deactivate automatic splitmode.

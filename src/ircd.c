@@ -152,6 +152,7 @@ time_t  nextconnect = 1;        /* time for next try_connections call */
 int     default_server_capabs = 0x00000000;
 
 int splitmode;
+int splitchecking;
 int split_users;
 int split_servers;
 
@@ -379,8 +380,12 @@ static void initialize_global_set_options(void)
   split_users = ConfigChannel.split_server_count;
   split_servers = ConfigChannel.split_user_count;
 
-  if(split_users && split_servers)
+  if(split_users && split_servers && (ConfigChannel.no_create_on_split ||
+     ConfigChannel.no_join_on_split))
+  {
     splitmode = 1;
+    splitchecking = 1;
+  }
 
   /* memset( &ConfigChannel, 0, sizeof(ConfigChannel)); */
 

@@ -95,6 +95,7 @@ extern time_t         nextconnect;
 extern int            default_server_capabs;
 
 extern int splitmode;
+extern int splitchecking;
 extern int split_users;
 extern int split_servers;
 
