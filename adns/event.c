@@ -551,7 +551,7 @@ void adns__fdevents(adns_state ads,
 }
 
 /* Wrappers for select(2). */
-
+#if 0
 void adns_beforeselect(adns_state ads, int *maxfd_io, fd_set *readfds_io,
 		       fd_set *writefds_io, fd_set *exceptfds_io,
 		       struct timeval **tv_mod, struct timeval *tv_tobuf,
@@ -605,7 +605,7 @@ void adns_afterselect(adns_state ads, int maxfd, const fd_set *readfds,
 xit:
   adns__consistency(ads,0,cc_entex);
 }
-
+#endif
 /* General helpful functions. */
 
 void adns_globalsystemfailure(adns_state ads) {
@@ -684,7 +684,7 @@ int adns__internal_check(adns_state ads,
   free(qu);
   return 0;
 }
-
+#if 0
 int adns_wait(adns_state ads,
 	      adns_query *query_io,
 	      adns_answer **answer_r,
@@ -717,7 +717,7 @@ int adns_wait(adns_state ads,
   adns__consistency(ads,0,cc_entex);
   return r;
 }
-
+#endif
 int adns_check(adns_state ads,
 	       adns_query *query_io,
 	       adns_answer **answer_r,

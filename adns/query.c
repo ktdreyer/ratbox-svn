@@ -358,7 +358,7 @@ int adns_submit_reverse(adns_state ads,
 	  return adns_submit_reverse_any(ads,addr,"in-addr.arpa",type,flags,context,query_r);
 }
 
-
+#if 0
 int adns_synchronous(adns_state ads,
 		     const char *owner,
 		     adns_rrtype type,
@@ -375,7 +375,7 @@ int adns_synchronous(adns_state ads,
 
   return r;
 }
-
+#endif
 static void *alloc_common(adns_query qu, size_t sz) {
   allocnode *an;
 

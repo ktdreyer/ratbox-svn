@@ -167,6 +167,10 @@ auth_dns_callback(void *vptr, adns_answer * reply)
 
 	struct AuthRequest *auth = (struct AuthRequest *) vptr;
 	ClearDNSPending(auth);
+
+
+
+
 	if(reply && (reply->status == adns_s_ok))
 	{
 		if(strlen(*reply->rrs.str) <= HOSTLEN)
@@ -177,11 +181,27 @@ auth_dns_callback(void *vptr, adns_answer * reply)
 		else {
 			sendheader(auth->client, REPORT_HOST_TOOLONG);
 		}
-	}
-	else
+		MyFree(reply);
+	} else
+#ifdef IPV6
+	if(ConfigFileEntry.fallback_to_ip6_int && auth->client->localClient->ip.ss_family == AF_INET6 
+		&& auth->ip6_int == 0)
+	{
+		MyFree(reply);
+		if(adns_getaddr((struct sockaddr *)&auth->client->localClient->ip, 
+				auth->client->localClient->ip.ss_family, 
+				&auth->dns_query, 0)) 
+		{
+			sendheader(auth->client, REPORT_FAIL_DNS);
+		} else {
+			SetDNSPending(auth);
+			auth->ip6_int = 1;
+			return;
+		}
+	} else
+#endif
 		sendheader(auth->client, REPORT_FAIL_DNS);
 	
-	MyFree(reply);
 	release_auth_client(auth);
 }
 
@@ -360,8 +380,18 @@ start_auth(struct Client *client)
 
 	/* No DNS cache now, remember? -- adrian */
 	if(adns_getaddr((struct sockaddr *)&client->localClient->ip, client->localClient->ip.ss_family,
-		     &auth->dns_query))
+		     &auth->dns_query, 1))
+	{
+#ifdef IPV6
+		if(ConfigFileEntry.fallback_to_ip6_int && auth->client->localClient->ip.ss_family == AF_INET6 &&
+		   !adns_getaddr((struct sockaddr *)&auth->client->localClient->ip, client->localClient->ip.ss_family,
+			         &auth->dns_query, 0))
+		{
+			SetDNSPending(auth);
+		} else		
+#endif
 		sendheader(client, REPORT_FAIL_DNS);
+	}
 	else 
 		SetDNSPending(auth);
 

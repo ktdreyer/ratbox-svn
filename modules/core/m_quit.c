@@ -55,7 +55,7 @@ DECLARE_MODULE_AV1(quit, NULL, NULL, quit_clist, NULL, NULL, "$Revision$");
 static int
 m_quit(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
-	char *comment = LOCAL_COPY((parc > 1 && parv[1]) ? parv[1] : client_p->name);
+	char *comment = LOCAL_COPY((parc > 1 && parv[1]) ? parv[1] : ((client_p->name) ? client_p->name : ""));
 	char reason[REASONLEN + 1];
 
 	if(strlen(comment) > (size_t) REASONLEN)

@@ -283,8 +283,10 @@ static int di_inaddr(adns_state ads, const void *datap_a, const void *datap_b) {
 
 #ifdef IPV6
 static adns_status cs_in6addr(vbuf *vb, const void *datap) {
+#ifndef NDEBUG
   const struct in6_addr *rrp= datap;
   struct in6_addr rr= *rrp;
+#endif
   char ia[IP6STRLEN];
 
   assert(inet_ntop(AF_INET6, &rr, ia, IP6STRLEN) != NULL);
