@@ -83,6 +83,9 @@ void channel_member_list(struct Client *sptr,
 
 static void delete_members(dlink_list *list);
 
+static int check_banned(struct Channel *chptr, struct Client *who, 
+			char *s, char *s2);
+
 /* static functions used in set_mode */
 static char* pretty_mask(char *);
 static char *fix_key(char *);
@@ -130,18 +133,22 @@ static char* check_string(char* s)
 }
 
 /*
+ * make_nick_user_host
+ *
+ * inputs	- pointer to location to place string
+ *		- pointer to nick
+ *		- pointer to name
+ *		- pointer to host
+ * side effects -
  * create a string of form "foo!bar@fubar" given foo, bar and fubar
  * as the parameters.  If NULL, they become "*".
  */
-static char* make_nick_user_host(const char* nick, 
-                                 const char* name, const char* host)
+static void make_nick_user_host(char *s,
+			   const char* nick, 
+			   const char* name, const char* host)
 {
-  static char namebuf[NICKLEN + USERLEN + HOSTLEN + 6];
   int   n;
-  char* s;
   const char* p;
-
-  s = namebuf;
 
   for (p = nick, n = NICKLEN; *p && n--; )
     *s++ = *p++;
@@ -152,7 +159,6 @@ static char* make_nick_user_host(const char* nick,
   for(p = host, n = HOSTLEN; *p && n--; )
     *s++ = *p++;
   *s = '\0';
-  return namebuf;
 }
 
 /*
@@ -316,18 +322,40 @@ static int del_id(struct Channel *chptr, char *banid, int type)
  */
 int is_banned(struct Channel *chptr, struct Client *who)
 {
-  dlink_node *ban;
-  dlink_node *except;
-  struct Ban *actualBan=NULL;
-  struct Ban *actualExcept=NULL;
   char  s[NICKLEN+USERLEN+HOSTLEN+6];
-  char  *s2;
+  char  s2[NICKLEN+USERLEN+HOSTLEN+6];
 
   if (!IsPerson(who))
     return (0);
 
-  strcpy(s, make_nick_user_host(who->name, who->username, who->host));
-  s2 = make_nick_user_host(who->name, who->username, who->localClient->sockhost);
+  make_nick_user_host(s,who->name, who->username, who->host);
+  make_nick_user_host(s2,who->name, who->username, who->localClient->sockhost);
+
+  return(check_banned(chptr,who,s,s2));
+}
+
+/*
+ * check_banned 
+ * 
+ * inputs	- pointer to channel block
+ * 		- pointer to client to check access fo
+ *		- pointer to pre-formed nick!user@host 
+ *		- pointer to pre-formed nick!user@ip
+ * output	- returns an int 0 if not banned,
+ *                CHFL_BAN if banned (or +d'd)
+ *
+ * IP_BAN_ALL from comstud
+ * always on...
+ *
+ * +e code from orabidoo
+ */
+static int check_banned(struct Channel *chptr, struct Client *who, 
+			char *s, char *s2)
+{
+  dlink_node *ban;
+  dlink_node *except;
+  struct Ban *actualBan=NULL;
+  struct Ban *actualExcept=NULL;
 
   for (ban = chptr->banlist.head; ban; ban = ban->next)
     {
@@ -583,12 +611,15 @@ int can_join(struct Client *sptr, struct Channel *chptr, char *key)
   dlink_node *ptr;
   struct Ban *invex = NULL;
   char  s[NICKLEN+USERLEN+HOSTLEN+6];
-  char  *s2;
+  char  s2[NICKLEN+USERLEN+HOSTLEN+6];
 
-  strcpy(s, make_nick_user_host(sptr->name, sptr->username, sptr->host));
-  s2 = make_nick_user_host(sptr->name, sptr->username, sptr->localClient->sockhost);
+  assert(sptr->localClient != NULL);
 
-  if ((is_banned(chptr,sptr)) == CHFL_BAN)
+  make_nick_user_host(s,sptr->name, sptr->username, sptr->host);
+  make_nick_user_host(s2,sptr->name, sptr->username,
+		      sptr->localClient->sockhost);
+
+  if ((check_banned(chptr,sptr,s,s2)) == CHFL_BAN)
     return (ERR_BANNEDFROMCHAN);
 
   if (chptr->mode.mode & MODE_INVITEONLY)
@@ -943,22 +974,33 @@ static void send_members(struct Client *cptr,
  */
 static char* pretty_mask(char* mask)
 {
+  static char  s[NICKLEN+USERLEN+HOSTLEN+6];
   char* cp = mask;
   char* user;
   char* host;
 
   if ((user = strchr(cp, '!')))
     *user++ = '\0';
+
   if ((host = strrchr(user ? user : cp, '@')))
     {
       *host++ = '\0';
       if (!user)
-        return make_nick_user_host("*", check_string(cp), check_string(host));
+	{
+	  make_nick_user_host(s,"*", check_string(cp), check_string(host));
+	  return(s);
+	}
+
     }
   else if (!user && strchr(cp, '.'))
-    return make_nick_user_host("*", "*", check_string(cp));
-  return make_nick_user_host(check_string(cp), check_string(user), 
-                             check_string(host));
+    {
+      make_nick_user_host(s,"*", "*", check_string(cp));
+      return(s);
+    }
+
+  make_nick_user_host(s,check_string(cp), check_string(user), 
+		      check_string(host));
+  return(s);
 }
 
 /*
