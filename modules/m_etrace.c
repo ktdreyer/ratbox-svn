@@ -51,10 +51,11 @@
 #include "modules.h"
 
 static int m_etrace(struct Client *, struct Client *, int, const char **);
+static int me_etrace(struct Client *, struct Client *, int, const char **);
 
 struct Message etrace_msgtab = {
 	"ETRACE", 0, 0, 0, MFLG_SLOW,
-	{mg_unreg, mg_not_oper, mg_ignore, mg_ignore, mg_ignore, {m_etrace, 0}}
+	{mg_unreg, mg_not_oper, mg_ignore, mg_ignore, {me_etrace, 0}, {m_etrace, 0}}
 };
 
 mapi_clist_av1 etrace_clist[] =  { &etrace_msgtab, NULL };
@@ -63,11 +64,13 @@ DECLARE_MODULE_AV1(etrace, NULL, NULL, etrace_clist, NULL, NULL, "$Revision$");
 
 static void do_etrace(struct Client *source_p, int ipv4, int ipv6);
 static void do_etrace_full(struct Client *source_p);
+static void do_single_etrace(struct Client *source_p, struct Client *target_p);
 
 /*
  * m_etrace
  *      parv[0] = sender prefix
- *      parv[1] = servername
+ *      parv[1] = options [or target]
+ *	parv[2] = [target]
  */
 static int
 m_etrace(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
@@ -83,10 +86,41 @@ m_etrace(struct Client *client_p, struct Client *source_p, int parc, const char 
 			do_etrace(source_p, 1, 0);
 #endif
 		else
-			do_etrace(source_p, 1, 1);
+		{
+			struct Client *target_p = find_named_person(parv[1]);
+
+			if(target_p)
+			{
+				if(!MyClient(target_p))
+					sendto_one(target_p, ":%s ENCAP %s ETRACE %s",
+						get_id(source_p, target_p),
+						target_p->user->server,
+						get_id(target_p, target_p));
+				else
+					do_single_etrace(source_p, target_p);
+			}
+			else
+				sendto_one_numeric(source_p, ERR_NOSUCHNICK,
+						form_str(ERR_NOSUCHNICK), parv[1]);
+		}
 	}
 	else
 		do_etrace(source_p, 1, 1);
+
+	return 0;
+}
+
+static int
+me_etrace(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
+{
+	struct Client *target_p;
+
+	if(parc < 2 || EmptyString(parv[1]))
+		return 0;
+
+	/* we cant etrace remotes.. we shouldnt even get sent them */
+	if((target_p = find_person(parv[1])) && MyClient(target_p))
+		do_single_etrace(source_p, target_p);
 
 	return 0;
 }
@@ -151,4 +185,32 @@ do_etrace_full(struct Client *source_p)
 
 	sendto_one_numeric(source_p, RPL_ENDOFTRACE, form_str(RPL_ENDOFTRACE), me.name);
 }
+
+/*
+ * do_single_etrace  - searches local clients and displays those matching
+ *                     a pattern
+ * input             - source client, target client, full (or not?)
+ * output	     - etrace results
+ * side effects	     - etrace results are displayed
+ */
+static void
+do_single_etrace(struct Client *source_p, struct Client *target_p)
+{
+        char ip[HOSTIPLEN];
+
+        inetntop_sock((struct sockaddr *) &target_p->localClient->ip, ip, sizeof(ip));
+
+        sendto_one(source_p, form_str(RPL_ETRACEFULL),
+        	           me.name, source_p->name,
+                           IsOper(target_p) ? "Oper" : "User",
+                       	   get_client_class(target_p),
+                    	   target_p->name, target_p->username, target_p->host,
+#ifdef HIDE_SPOOF_IPS
+              	           IsIPSpoof(target_p) ? "255.255.255.255" :
+#endif
+     	                   ip, target_p->localClient->fullcaps, target_p->info);
+
+        sendto_one_numeric(source_p, RPL_ENDOFTRACE, form_str(RPL_ENDOFTRACE), target_p->name);
+}
+
 
