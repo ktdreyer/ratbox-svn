@@ -221,4 +221,4 @@ comm_select(unsigned long delay)
   return COMM_OK;
 }
 
-#endif /* USE_KQUEUE */
+#endif /* USE_EPOLL */
