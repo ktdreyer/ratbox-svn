@@ -1,3 +1,16 @@
+leeh        2002/09/16 18:11:03 UTC	(20020916_0)
+
+  Modified files:
+    modules              m_challenge.c 
+  Log:
+  - straightened up challenge so it has the same behaviour on notices of
+    failure as m_oper.c
+  
+  Revision  Changes    Path
+  1.40      +70 -53    ircd-ratbox/modules/m_challenge.c
+
+
+
 leeh        2002/09/15 13:01:40 UTC	(20020915_2)
 
   Modified files:
