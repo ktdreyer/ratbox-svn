@@ -1,3 +1,22 @@
+leeh        2002/04/30 13:21:25 EDT	(20020430_7)
+
+  Modified files:
+    doc                  convertconf-example.conf example.conf 
+                         example.conf.efnet 
+    src                  packet.c 
+  Log:
+  - fixed a > that shouldve been >=
+  - added back flood control for opers.  will allow a burst of 16 lines,
+    then 2 per second afterward.
+  
+  Revision  Changes    Path
+  7.3       +3 -1      ircd-hybrid-7/doc/convertconf-example.conf
+  7.157     +3 -1      ircd-hybrid-7/doc/example.conf
+  7.10      +3 -1      ircd-hybrid-7/doc/example.conf.efnet
+  7.76      +21 -4     ircd-hybrid-7/src/packet.c
+
+
+
 leeh        2002/04/30 11:18:01 EDT	(20020430_6)
 
   Modified files:
