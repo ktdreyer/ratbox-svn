@@ -43,7 +43,6 @@ struct Client;
 struct Channel;
 
 struct HashEntry {
-  int    hits;
   int    links;
   void*  list;
 };
