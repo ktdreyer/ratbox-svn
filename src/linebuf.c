@@ -25,7 +25,7 @@ static BlockHeap *linebuf_bl = NULL;
 /*
  * linebuf_init
  *
- * Initialise the dbuf mechanism
+ * Initialise the linebuf mechanism
  */
 void
 linebuf_init(void)

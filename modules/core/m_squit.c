@@ -138,13 +138,10 @@ int ms_squit(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       */
       if (MyConnect(found_squit->acptr))
 	{
-	  /* XXX vararg send_operwall */
-#if 0
-	  send_operwall( &me, NULL
+	  send_operwall( &me, NULL,
 			 ":Received SQUIT %s from %s (%s)",
-			 squit_parms->server_name,
+			 found_squit->server_name,
 			 get_client_name(sptr,FALSE), comment);
-#endif
 	  log(L_TRACE, "SQUIT From %s : %s (%s)", parv[0],
 	      found_squit->server_name, comment);
 	}
