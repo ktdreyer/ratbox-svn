@@ -1,3 +1,11 @@
+*** 20001224_13 by adrian
+
+
+Stick in an #error in the code - I still haven't finished the poll() code,
+so I haven't rewritten the select code ..
+
+
+
 *** 20001224_12 by db
 - removed lame test that was restarting irc.mcs.net for no reason..
   under heavy ddos the server was being lagged enough to restart..
