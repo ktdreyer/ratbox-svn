@@ -1,3 +1,7 @@
+*** 20010704_2 by leeh
+- fixed a couple of compile warnings
+
+
 *** 20010704_1 by leeh
 - added the letter 'Q' to the front of a stats Q.. 
   'q' == /resv
