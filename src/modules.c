@@ -35,6 +35,7 @@
 #include "handlers.h"
 #include "numeric.h"
 #include "ircd_defs.h"
+#include "irc_string.h"
 
 static char unknown_ver[] = "<unknown>";
 
@@ -81,20 +82,24 @@ static int findmodule_byname (char *name)
  * output	- 0 if successful, -1 if error
  * side effects	- module is unloaded
  */
-int
-unload_one_module (char *name)
+int unload_one_module (char *name)
 {
   int index;
+  void (*deinitfunc)(void) = NULL;
 
   if ((index = findmodule_byname (name)) == -1) 
     return -1;
 
+  deinitfunc = (void (*)(void))dlsym (modlist[index]->address, "_moddeinit");
+
+  if( deinitfunc != NULL )
+    {
+      deinitfunc ();
+    }
+
   MyFree(modlist[index]->name);
-  MyFree(modlist[index]);
   memcpy( &modlist[index], &modlist[index+1],
 	  sizeof(struct module) * ((num_mods-1) - index) );
-
-  mod_del_cmd(name);
 
   log (L_INFO, "Module %s unloaded", name);
   sendto_realops ("Module %s unloaded", name);
@@ -209,8 +214,7 @@ load_one_module (char *path)
   modlist [num_mods] = malloc (sizeof (struct module));
   modlist [num_mods]->address = tmpptr;
   modlist [num_mods]->version = ver;
-  modlist [num_mods]->name = malloc (strlen (mod_basename) + 1);
-  (void)strcpy (modlist[num_mods]->name, mod_basename);
+  DupString(modlist [num_mods]->name, mod_basename );
   num_mods++;
 
   initfunc ();
@@ -304,13 +308,6 @@ mo_modunload (struct Client *cptr, struct Client *sptr, int parc, char **parv)
       return 0;
     }
 
-  if( strcmp(m_bn,MSG_MODLOAD) == 0)
-    return 0;
-
-  if( strcmp(m_bn,MSG_MODUNLOAD) == 0)
-    return 0;
-  
-
   if (findmodule_byname (m_bn) == -1)
     {
       sendto_one (sptr, ":%s NOTICE %s :Module %s is not loaded",
@@ -319,6 +316,10 @@ mo_modunload (struct Client *cptr, struct Client *sptr, int parc, char **parv)
       return 0;
     }
 
-  (void)unload_one_module (m_bn);
+  if( unload_one_module (m_bn) == -1 )
+    {
+      sendto_one (sptr, ":%s NOTICE %s :Module %s is not loaded",
+		  me.name, sptr->name, m_bn);
+    }
   free (m_bn);
 }
