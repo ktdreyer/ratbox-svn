@@ -528,10 +528,6 @@ static void stats_L_list(struct Client *sptr,char *name, int doall, int wilds,
     {
       acptr = ptr->data;
 
-      if (IsPerson(acptr) &&
-	  !IsOper(acptr) &&
-	  (acptr != sptr))
-	continue;
       if (IsInvisible(acptr) && (doall || wilds) &&
 	  !(MyConnect(sptr) && IsOper(sptr)) &&
 	  !IsOper(acptr) && (acptr != sptr))
