@@ -634,16 +634,18 @@ static void stats_operedup(struct Client *source_p)
       ptr = target_p->localClient->confs.head;
       aconf = ptr->data;
 
-      sendto_one(source_p, ":%s %d %s :[O][%s] %s (%s@%s) Idle: %d",
+      sendto_one(source_p, ":%s %d %s :[%c][%s] %s (%s@%s) Idle: %d",
                  me.name, RPL_STATSDEBUG, source_p->name,
+                 IsOperAdmin(target_p) ? 'A' : 'O',
 		 oper_privs_as_string(target_p, aconf->port),
 		 target_p->name, target_p->username, target_p->host,
 		 (int)(CurrentTime - target_p->user->last));
     }
     else
     {
-      sendto_one(source_p, ":%s %d %s :[O] %s (%s@%s) Idle: %d",
+      sendto_one(source_p, ":%s %d %s :[%c] %s (%s@%s) Idle: %d",
                  me.name, RPL_STATSDEBUG, source_p->name,
+                 IsOperAdmin(target_p) ? 'A' : 'O',
 		 target_p->name, target_p->username, target_p->host,
 		 (int)(CurrentTime - target_p->user->last));
     }
