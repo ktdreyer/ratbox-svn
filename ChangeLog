@@ -1,3 +1,18 @@
+leeh        2004/03/22 18:18:28 EST	(20040322_5)
+
+  Modified files:
+    .                    RELNOTES 
+    include              patchlevel.h 
+  Log:
+  - updated RELNOTES
+  - revved patchlevel to 2.0b5
+  
+  Revision  Changes    Path
+  1.89      +1 -0      ircd-ratbox/RELNOTES
+  7.57      +1 -1      ircd-ratbox/include/patchlevel.h
+
+
+
 leeh        2004/03/22 18:00:00 EST	(20040322_4)
 
   Modified files:
