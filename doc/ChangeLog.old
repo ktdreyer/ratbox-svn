@@ -1,3 +1,9 @@
+*** 20010102_3 by db
+- ircsprintf() returns the length of the string it formats, 
+  I forgot. This means don't have to use an unnecessary strlen()
+
+
+
 *** 20010102_2 by davidt
 - Add back (fixed) logic to m_burst.c (otherwise LL cjoin breaks)
 - Fix some more cases in m_join.c that reveal the vchan's true name..
