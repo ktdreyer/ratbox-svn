@@ -99,7 +99,8 @@ static void add_new_majority_gline(const char *, const char *, const char *,
                                    const char *);
 
 static int check_wild_gline(char *, char *);
-
+static int invalid_gline(struct Client *, char *, char *, char *);
+		       
 static void ms_gline(struct Client*, struct Client*, int, char**);
 static void mo_gline(struct Client*, struct Client*, int, char**);
 
@@ -190,14 +191,10 @@ static void mo_gline(struct Client *client_p,
 		     parv[0]);
 	  return;
 	}
+
+      if(invalid_gline(source_p, user, host, parv[2]))
+        return;
 			
-      if(strchr(parv[2], ':'))
-	{
-	  sendto_one(source_p,
-		     ":%s NOTICE %s :Invalid character ':' in comment",
-		     me.name, parv[2]);
-	  return;
-	}
 	  
       /*
        * Now we must check the user and host to make sure there
@@ -339,6 +336,9 @@ static void ms_gline(struct Client *client_p,
   else
     return;
 
+ if(invalid_gline(acptr, user, host, (char *)reason))
+    return;
+    
   /* send in hyb-7 to compatable servers */
   sendto_server(client_p, acptr, NULL, CAP_GLN, NOCAPS, LL_ICLIENT,
                 ":%s GLINE %s %s :%s",
@@ -441,6 +441,33 @@ check_wild_gline(char *user, char *host)
        return 1;
     else
        return 0;
+}
+
+/* invalid_gline
+ *
+ * inputs	- pointer to source client
+ *		- pointer to ident
+ *		- pointer to host
+ *		- pointer to reason
+ * outputs	- 1 if invalid, 0 if valid
+ */
+static int invalid_gline(struct Client *source_p, char *luser, char *lhost,
+                       char *lreason)
+{
+  if(strchr(luser, '#') || strchr(lhost, '#') || strchr(lreason, '#'))
+  {
+    sendto_one(source_p, ":%s NOTICE %s :Invalid character '#' in gline",
+               me.name, source_p->name);
+    return 1;
+  }
+  
+  if(strchr(luser, '!'))
+  {
+    sendto_one(source_p, ":%s NOTICE %s :Invalid character '!' in gline",
+               me.name, source_p->name);
+    return 1;
+  }
+
 }
 
 /*

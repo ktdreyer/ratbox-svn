@@ -94,7 +94,7 @@ static int find_user_host(struct Client *source_p,
 
 /* needed to remove unused definition warning */
 static int valid_comment(struct Client *source_p, char *comment);
-static int valid_user_host(char *user, char *host);
+static int valid_user_host(struct Client *source_p, char *user, char *host);
 static int valid_wild_card(char *user, char *host);
 static int already_placed_kline(struct Client*, char*, char*);
 static void apply_kline(struct Client *source_p, struct ConfItem *aconf,
@@ -188,12 +188,8 @@ static void mo_kline(struct Client *client_p,
   if(0 != parc)
     reason = *parv;
 
-  if(valid_user_host(user,host))
-    {
-       sendto_one(source_p, ":%s NOTICE %s :Invalid character '#' in kline",
-                   me.name, source_p->name);
-       return;
-    }
+  if(valid_user_host(source_p, user,host))
+     return;
 
   if(valid_wild_card(user,host))
     {
@@ -297,7 +293,7 @@ static void ms_kline(struct Client *client_p,
   if(!IsPerson(source_p))
     return;
 
-  if(valid_user_host(kuser, khost))
+  if(valid_user_host(source_p, kuser, khost))
     {
       sendto_realops_flags(FLAGS_ALL,
              "*** %s!%s@%s on %s is requesting an Invalid K-Line for [%s@%s] [%s]",
@@ -819,21 +815,34 @@ static int find_user_host(struct Client *source_p,
 
 /*
  * valid_user_host
- * inputs       - pointer to user buffer
+ * inputs       - pointer to source
+ *              - pointer to user buffer
  *              - pointer to host buffer
  * output	- 1 if not valid user or host, 0 if valid
  * side effects -
  */
-static int valid_user_host(char *luser, char *lhost)
+static int valid_user_host(struct Client *source_p, char *luser, char *lhost)
 {
   /*
    * Check for # in user@host
    */
 
   if(strchr(lhost, '#') || strchr(luser, '#'))
-      return 1;
-  else
-      return 0;
+  {
+    sendto_one(source_p, ":%s NOTICE %s :Invalid character '#' in kline",
+               me.name, source_p->name);		    
+    return 1;
+  }
+
+  /* Dont let people kline *!ident@host, as the ! is invalid.. */
+  if(strchr(luser, '!'))
+  {
+    sendto_one(source_p, ":%s NOTICE %s :Invalid character '!' in kline",
+               me.name, source_p->name);
+    return 1;
+  }
+
+  return 0;
 }
 
 /*
