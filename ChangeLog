@@ -1,3 +1,16 @@
+leeh        2004/04/12 12:22:20 EDT	(20040412_8)
+
+  Modified files:
+    src                  class.c messages.tab 
+  Log:
+  - add sendqeob to stats Y
+  
+  Revision  Changes    Path
+  7.62      +13 -15    ircd-ratbox/src/class.c
+  7.113     +1 -1      ircd-ratbox/src/messages.tab
+
+
+
 androsyn    2004/04/12 12:03:28 EDT	(20040412_7)
 
   Modified files:
