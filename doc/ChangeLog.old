@@ -1,3 +1,15 @@
+leeh        2002/04/28 12:47:55 EDT	(20020428_7)
+
+  Modified files:
+    src                  messages.tab 
+  Log:
+  - shifted a %d so its a parameter
+  
+  Revision  Changes    Path
+  7.66      +1 -1      ircd-hybrid-7/src/messages.tab
+
+
+
 leeh        2002/04/28 12:38:24 EDT	(20020428_6)
 
   Modified files:
