@@ -46,7 +46,8 @@
 ** InitMessageFile
 **
 */
-void InitMessageFile(MotdType motdType, char *fileName, MessageFile *motd)
+void
+InitMessageFile(MotdType motdType, char *fileName, MessageFile *motd)
   {
     strlcpy(motd->fileName, fileName, PATH_MAX);
     motd->motdType = motdType;
@@ -61,7 +62,8 @@ void InitMessageFile(MotdType motdType, char *fileName, MessageFile *motd)
 ** user requested motd, but not on each connecting client.
 */
 
-int SendMessageFile(struct Client *source_p, MessageFile *motdToPrint)
+int
+SendMessageFile(struct Client *source_p, MessageFile *motdToPrint)
 {
   MessageFileLine *linePointer;
   MotdType motdType;
@@ -144,16 +146,17 @@ int SendMessageFile(struct Client *source_p, MessageFile *motdToPrint)
 /*
  * ReadMessageFile() - original From CoMSTuD, added Aug 29, 1996
  *
- * inputs	- poiner to MessageFileptr
+ * inputs	- pointer to MessageFileptr
  * output	-
  * side effects	-
  */
 
-int ReadMessageFile(MessageFile *MessageFileptr)
+int 
+ReadMessageFile(MessageFile *MessageFileptr)
 {
   struct stat sb;
   struct tm *local_tm;
-
+  
   /* used to clear out old MessageFile entries */
   MessageFileLine *mptr = 0;
   MessageFileLine *next_mptr = 0;
@@ -166,16 +169,15 @@ int ReadMessageFile(MessageFile *MessageFileptr)
   char *p;
   FBFILE* file;
 
-  if( stat(MessageFileptr->fileName, &sb) < 0 )
-    return -1;
-
-  for( mptr = MessageFileptr->contentsOfFile; mptr; mptr = next_mptr)
+  for(mptr = MessageFileptr->contentsOfFile; mptr; mptr = next_mptr)
     {
       next_mptr = mptr->next;
       MyFree(mptr);
     }
 
   MessageFileptr->contentsOfFile = NULL;
+  if(stat(MessageFileptr->fileName, &sb) < 0)
+    return -1;
 
   local_tm = localtime(&sb.st_mtime);
 
@@ -189,10 +191,10 @@ int ReadMessageFile(MessageFile *MessageFileptr)
                local_tm->tm_min);
 
 
-  if ((file = fbopen(MessageFileptr->fileName, "r")) == 0)
+  if((file = fbopen(MessageFileptr->fileName, "r")) == 0)
     return(-1);
 
-  while (fbgets(buffer, MESSAGELINELEN, file))
+  while(fbgets(buffer, MESSAGELINELEN, file))
     {
       if ((p = strchr(buffer, '\n')))
         *p = '\0';
@@ -201,7 +203,7 @@ int ReadMessageFile(MessageFile *MessageFileptr)
       strlcpy(newMessageLine->line, buffer, MESSAGELINELEN);
       newMessageLine->next = (MessageFileLine *)NULL;
 
-      if (MessageFileptr->contentsOfFile)
+      if(MessageFileptr->contentsOfFile)
         {
           if (currentMessageLine)
             currentMessageLine->next = newMessageLine;
@@ -217,6 +219,3 @@ int ReadMessageFile(MessageFile *MessageFileptr)
   fbclose(file);
   return(0);
 }
-
-
-
