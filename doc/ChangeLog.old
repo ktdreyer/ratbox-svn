@@ -1,3 +1,9 @@
+*** 20000101_3 by db
+- Preliminary rough cut at Lazy Links, still a lot of mopping up to do
+  'n' in c/n's means try lazy link, 'N' means do normal.
+
+
+
 *** 20000101_2 by db
 - Cleanups to allow DEBUGMODE to compile
 
