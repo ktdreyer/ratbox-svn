@@ -43,6 +43,7 @@
 #include "modules.h"
 
 #include <string.h>
+#include <time.h>
 #include "memdebug.h"
 
 static int do_whois(struct Client *cptr, struct Client *sptr,
@@ -85,7 +86,7 @@ static int m_whois(struct Client *cptr,
                    int parc,
                    char *parv[])
 {
-   struct Client *acptr;
+   static time_t last_used = 0;
   
   if (parc < 2)
     {
@@ -94,16 +95,27 @@ static int m_whois(struct Client *cptr,
       return 0;
     }
 
-  /* We need this to keep compatibility with hyb6 */
-  if ((acptr = hash_find_client(parv[1], (struct Client*)NULL)) &&
-      !MyConnect(acptr) && IsClient(acptr) && parc > 2)
+  if(parc > 2)
     {
-      client_burst_if_needed(acptr->from, sptr);
-      sendto_one(acptr->from, ":%s WHOIS %s :%s", parv[0], parv[1],
-                 parv[1]);
-      return 0;
+
+      if((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
+        {             
+          /* safe enough to give this on a local connect only */
+          if(MyClient(sptr))
+            sendto_one(sptr,form_str(RPL_LOAD2HI),me.name,sptr->name);
+          return 0;
+        }
+      else
+        last_used = CurrentTime;
+
+      if (hunt_server(cptr,sptr,":%s WHOIS %s :%s", 1, parc, parv) !=
+          HUNTED_ISME)
+        {
+          return 0;
+        }
+      parv[1] = parv[2];
+
     }
-  
 
  return(do_whois(cptr,sptr,parc,parv));
 }
@@ -454,12 +466,23 @@ static int ms_whois(struct Client *cptr,
                     int parc,
                     char *parv[])
 {
+  struct Client *acptr;
   if (parc < 2)
     {
       sendto_one(sptr, form_str(ERR_NONICKNAMEGIVEN),
                  me.name, parv[0]);
       return 0;
     }
- 
-  return( m_whois(cptr,sptr,parc,parv) );
+
+  /* We need this to keep compatibility with hyb6 */
+  if ((acptr = hash_find_client(parv[1], (struct Client*)NULL)) &&
+      !MyConnect(acptr) && IsClient(acptr) && parc > 2)
+    {
+      client_burst_if_needed(acptr->from, sptr);
+      sendto_one(acptr->from, ":%s WHOIS %s :%s", parv[0], parv[1],
+                 parv[1]);  
+      return 0;
+    }
+
+  return( do_whois(cptr,sptr,parc,parv) );
 }
