@@ -474,7 +474,7 @@ log_gline_request(
   char        filenamebuf[PATH_MAX + 1];
   static char timebuffer[MAX_DATE_STRING];
   struct tm*  tmptr;
-  int         out;
+  FBFILE      *out;
 
   if(ConfigFileEntry.glinefile == NULL)
     {
@@ -484,7 +484,8 @@ log_gline_request(
 
   ircsprintf(filenamebuf, "%s.%s", 
              ConfigFileEntry.glinefile, small_file_date((time_t)0));
-  if ((out = file_open(filenamebuf, O_RDWR|O_APPEND|O_CREAT,0644))==-1)
+
+  if ((out = fbopen(filenamebuf, "a")) == NULL)
     {
       sendto_realops_flags(FLAGS_ALL,"*** Problem opening %s",filenamebuf);
       return;
@@ -499,11 +500,11 @@ log_gline_request(
            oper_nick,oper_user,oper_host,oper_server,
            timebuffer);
 
-  if (write(out, buffer, strlen(buffer)) <= 0)
+  if (fbputs(buffer, out) == NULL)
     {
       sendto_realops_flags(FLAGS_ALL,"*** Problem writing to %s",filenamebuf);
     }
-  file_close(out);
+  fbclose(out);
 }
 
 /*
@@ -527,11 +528,18 @@ log_gline(struct Client *sptr,
   struct tm*   tmptr;
   FBFILE       *out;
 
+  if(ConfigFileEntry.glinefile == NULL)
+    {
+      sendto_realops_flags(FLAGS_ALL,"*** Problem opening glinefile.");
+      return;
+    }
+
   ircsprintf(filenamebuf, "%s.%s", 
                 ConfigFileEntry.glinefile, small_file_date((time_t) 0));
 
   if ((out = fbopen(filenamebuf, "a")) == NULL)
     {
+      sendto_realops_flags(FLAGS_ALL,"*** Problem opening %s",filenamebuf);
       return;
     }
 
@@ -541,8 +549,9 @@ log_gline(struct Client *sptr,
   ircsprintf(buffer,"#Gline for %s@%s %s added by the following\n",
                    user,host,timebuffer);
 
-  if (safe_write(sptr, filenamebuf, out, buffer))
+  if ( (fbputs(buffer,out) == NULL) )
     {
+      sendto_realops_flags(FLAGS_ALL,"*** Problem writing to %s",filenamebuf);
       fbclose(out);
       return;
     }
@@ -555,9 +564,9 @@ log_gline(struct Client *sptr,
                    (gline_pending_ptr->reason1)?
                    (gline_pending_ptr->reason1):"No reason");
 
-  if (safe_write(sptr,filenamebuf,out,buffer))
+  if ( (fbputs(buffer,out) == NULL) )
     {
-      fbclose(out);
+      sendto_realops_flags(FLAGS_ALL,"*** Problem writing to %s",filenamebuf);
       return;
     }
 
@@ -569,8 +578,12 @@ log_gline(struct Client *sptr,
                    (gline_pending_ptr->reason2)?
                    (gline_pending_ptr->reason2):"No reason");
 
-  if (safe_write(sptr, filenamebuf, out, buffer))
-    return;
+  if ( (fbputs(buffer,out) == NULL) )
+    {
+      sendto_realops_flags(FLAGS_ALL,"*** Problem writing to %s",filenamebuf);
+      fbclose(out);
+      return;
+    }
 
   ircsprintf(buffer, "#%s!%s@%s on %s [%s]\n",
                    oper_nick,
@@ -579,12 +592,20 @@ log_gline(struct Client *sptr,
                    oper_server,
                    (reason)?reason:"No reason");
 
-  if (safe_write(sptr,filenamebuf,out,buffer))
-    return;
+  if ( (fbputs(buffer,out) == NULL) )
+    {
+      sendto_realops_flags(FLAGS_ALL,"*** Problem writing to %s",filenamebuf);
+      fbclose(out);
+      return;
+    }
 
   ircsprintf(buffer, "K:%s:%s:%s\n", host,user,reason);
-  if (safe_write(sptr,filenamebuf,out,buffer))
-    return;
+  if ( (fbputs(buffer,out) == NULL) )
+    {
+      sendto_realops_flags(FLAGS_ALL,"*** Problem writing to %s",filenamebuf);
+      fbclose(out);
+      return;
+    }
 
   fbclose(out);
 }

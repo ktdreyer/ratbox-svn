@@ -261,28 +261,4 @@ int fbstat(struct stat* sb, FBFILE* fb)
   return fstat(fb->fd, sb);
 }
 
-/*
- * safe_write - write string to file, if an error occurs
- * notify opers, return -1
- *
- * inputs       - client pointer
- *              - filename to write to
- *              - open FBFILE * to write on
- *              - buffer to write
- * output       - -1 if error on write, 0 if ok
- * side effects - function tries to write buffer safely
- *                i.e. checking for disk full errors etc.
- */
-int safe_write(struct Client *sptr, const char *filename,
-	       FBFILE *out, char *buffer)
-{
-  assert(out != NULL);
-  assert(buffer != NULL);
 
-  if (fbputs(buffer, out) <= 0)
-    {
-      sendto_realops_flags(FLAGS_ALL,"*** Problem writing to %s",filename);
-      return -1;
-    }
-  return 0;
-}

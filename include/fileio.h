@@ -83,6 +83,4 @@ extern int     fbstat(struct stat* sb, FBFILE* fb);
 extern int     file_open(const char *filename, int mode, int fmode);
 extern void    file_close(int fd);
 
-extern int safe_write(struct Client *, const char *, FBFILE * ,char *);
-
 #endif /* INCLUDED_fileio_h */
