@@ -550,10 +550,7 @@ BlockHeapDestroy(BlockHeap * bh)
           free(walker);
       }
 
-    if(bh != NULL)
-      {
-	free(bh);
-      }
+    free(bh);
     return(0);
 }
 #endif
