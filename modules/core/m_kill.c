@@ -126,14 +126,10 @@ static void mo_kill(struct Client *client_p, struct Client *source_p,
       return;
     }
 
-  /*
-  ** The kill originates from this server
-  **
-  **        ...!operhost!oper
-  **        ...!operhost!oper (comment)
-  */
+#if 0
   ircsprintf(buf, "%s!%s (%s)",
 	     inpath, client_p->username, reason);
+#endif
 
   if(MyOper(target_p))
       sendto_one(target_p, ":%s KILL %s :%s", parv[0], target_p->name, reason);
@@ -144,8 +140,8 @@ static void mo_kill(struct Client *client_p, struct Client *source_p,
 		       "Received KILL message for %s. From %s Path: %s (%s)", 
 		       target_p->name, parv[0], me.name, reason);
 
-  log(L_INFO,"KILL From %s For %s Path %s ",
-      parv[0], target_p->name, buf );
+  log(L_INFO,"KILL From %s For %s Path %s (%s)",
+      parv[0], target_p->name, me.name, reason);
 
 
   /*
@@ -182,9 +178,7 @@ static void ms_kill(struct Client *client_p, struct Client *source_p,
   char*       user;
   char*       reason;
   int         chasing = 0;
-#if 0
-  char*       path;
-#endif
+  *buf = '\0';
 
   if (*parv[1] == '\0')
     {
@@ -269,12 +263,13 @@ static void ms_kill(struct Client *client_p, struct Client *source_p,
   else
     {
       sendto_realops_flags(FLAGS_SKILL,
-			   "Received KILL message for %s From: %s %s",
+			   "Received KILL message for %s. From %s %s",
 			   target_p->name, parv[0], reason);
     }
 
-  log(L_INFO,"KILL From %s For %s Path %s (%s)",
-      parv[0], target_p->name, inpath, reason);
+  log(L_INFO,"KILL From %s For %s Path %s %s",
+          parv[0], target_p->name, parv[0], reason);
+
   /*
   ** And pass on the message to other servers. Note, that if KILL
   ** was changed, the message has to be sent to all links, also
