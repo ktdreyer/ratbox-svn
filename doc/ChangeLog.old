@@ -1,3 +1,11 @@
+*** 20001228_2 by lusky
+fixed some typos in ChangeLog (yes, you can edit ChangeLog even though
+   it's automatically updated).
+Major cleanup to Hybrid-team
+version.c.SH now reads ../Hybrid-team
+removed configure from Makefile.in and added new make autoconf option
+
+
 *** 20001228_1 by lusky
 fixed socklen_t check
 
