@@ -41,7 +41,7 @@ static inline void free_block(void *ptr, size_t size)
 }
 
 #ifndef MAP_ANON
-int zero_fd = -1;
+static int zero_fd = -1;
 void initBlockHeap(void)
 {
     zero_fd = open("/dev/zero", O_RDWR);
