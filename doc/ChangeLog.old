@@ -1,3 +1,27 @@
+leeh        2002/04/06 13:09:05 EST	(20020406_5)
+
+  Modified files:
+    tools                Makefile.in convertconf.c 
+  Added files:
+    tools                convertilines.c 
+  Removed files:
+    tools                ircd.conf ircd.conf.new 
+  Log:
+  - removed ircd.conf/ircd.conf.new, old convertconf remnants
+  - added a proper I: -> auth {}; converter, which groups I: together
+    based on classes/spoofs/passwords/flags
+  - stripped I: parsing from convertconf, added a notice to people to use
+    convertilines
+  
+  Revision  Changes    Path
+  7.30      +9 -3      ircd-hybrid-7/tools/Makefile.in
+  1.30      +3 -114    ircd-hybrid-7/tools/convertconf.c
+  7.1       +590 -0    ircd-hybrid-7/tools/convertilines.c (new)
+  1.6       +0 -40     ircd-hybrid-7/tools/ircd.conf (dead)
+  1.13      +0 -177    ircd-hybrid-7/tools/ircd.conf.new (dead)
+
+
+
 db          2002/04/06 12:31:04 EST	(20020406_4)
 
   Modified files:
