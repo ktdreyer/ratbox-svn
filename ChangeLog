@@ -1,3 +1,67 @@
+leeh        2004/01/10 13:32:04 EST	(20040110_0)
+
+  Modified files:
+    .                    configure 
+    autoconf             configure.in 
+    doc                  example.conf 
+    include              c_init.h channel.h client.h conf.h 
+                         config.h io.h service.h tools.h 
+    src                  Makefile.in c_message.c c_mode.c client.c 
+                         conf.c io.c rserv.c s_alis.c scommand.c 
+                         service.c tools.c u_stats.c ucommand.c 
+  Added files:
+    include              newconf.h 
+    src                  lexer.l newconf.c parser.y s_hoststat.c 
+  Log:
+  - ported the config parser from ircd-ratbox
+  - rewrote example.conf
+  - add flags to conf_oper, so encryption of password is optional per oper {};
+  - change the service notice handlers to use already split parv/parc
+  - fix ALIS to handle the parv/parc properly
+  - add a hostname hash table and user@host list as a dlink off host hash
+  - add a basic hoststat service with CLONES/HOST
+  - make autoconn a config option
+  - mode +beI parser
+  - moved RECONNECT_DELAY and PING_TIME to the config
+  - added /ctcp service chat handler to listen to a port for them to dcc in
+  - add dcc_vhost config option, controlling vhost for inbound/outbound dccs
+  - add dcc_{low|high}_port config option, controlling port range to listen on
+  - moved some stuff out of sock_open() into new sock_create()
+  - added set_default_conf() and validate_conf()
+  
+  Revision  Changes    Path
+  1.7       +2 -0      rserv/autoconf/configure.in
+  1.7       +162 -46   rserv/configure
+  1.3       +77 -109   rserv/doc/example.conf
+  1.11      +3 -0      rserv/include/c_init.h
+  1.5       +3 -0      rserv/include/channel.h
+  1.11      +22 -0     rserv/include/client.h
+  1.6       +27 -6     rserv/include/conf.h
+  1.10      +0 -19     rserv/include/config.h
+  1.9       +30 -5     rserv/include/io.h
+  1.1       +67 -0     rserv/include/newconf.h (new)
+  1.7       +1 -1      rserv/include/service.h
+  1.7       +2 -0      rserv/include/tools.h
+  1.13      +21 -4     rserv/src/Makefile.in
+  1.10      +37 -27    rserv/src/c_message.c
+  1.8       +58 -0     rserv/src/c_mode.c
+  1.12      +131 -0    rserv/src/client.c
+  1.12      +57 -291   rserv/src/conf.c
+  1.17      +330 -201  rserv/src/io.c
+  1.1       +265 -0    rserv/src/lexer.l (new)
+  1.1       +628 -0    rserv/src/newconf.c (new)
+  1.1       +306 -0    rserv/src/parser.y (new)
+  1.17      +4 -1      rserv/src/rserv.c
+  1.15      +31 -59    rserv/src/s_alis.c
+  1.1       +156 -0    rserv/src/s_hoststat.c (new)
+  1.11      +2 -2      rserv/src/scommand.c
+  1.9       +47 -1     rserv/src/service.c
+  1.4       +32 -0     rserv/src/tools.c
+  1.6       +1 -1      rserv/src/u_stats.c
+  1.10      +6 -8      rserv/src/ucommand.c
+
+
+
 leeh        2004/01/08 08:26:43 EST	(20040108_2)
 
   Modified files:
