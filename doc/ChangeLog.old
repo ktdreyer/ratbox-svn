@@ -1,3 +1,7 @@
+*** 20001230_7 by toot
+moved the code that set vchan_id up
+
+
 *** 20001230_6 by lusky
 - more compile warning fixes.  mmmm, socklen_t.  compiles on redhat6.1 now
   without warnings (if you fix the broken /usr/include/bits/socket.h
