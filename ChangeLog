@@ -1,3 +1,15 @@
+leeh        2002/09/10 17:05:37 UTC	(20020910_0)
+
+  Modified files:
+    modules/core         m_nick.c 
+  Log:
+  - fix another null nick bug
+  
+  Revision  Changes    Path
+  1.103     +9 -1      ircd-ratbox/modules/core/m_nick.c
+
+
+
 leeh        2002/09/09 14:52:27 UTC	(20020909_0)
 
   Modified files:
