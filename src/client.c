@@ -1321,7 +1321,7 @@ const char* comment         /* Reason for the exit */
           Count.myserver--;
 
 	  if(ConfigFileEntry.hub)
-	    restoreUnusedServerMask(sptr->localClient->serverMask);
+	    remove_lazylink_flags(sptr->localClient->serverMask);
 	  else
 	    uplink = NULL;
         }

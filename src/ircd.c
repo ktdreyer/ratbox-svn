@@ -137,6 +137,9 @@ dlink_list lclient_list;        /* local clients only ON this server */
 dlink_list serv_list;           /* local servers know to this server ONLY */
 dlink_list oper_list;           /* our opers, duplicated in lclient_list */
 
+dlink_list lazylink_channels;   /* known about lazylink channels on HUB */
+dlink_list lazylink_nicks;	/* known about lazylink nicks on HUB */
+
 static size_t      initialVMTop = 0;   /* top of virtual memory at init */
 static const char* logFileName = LPATH;
 static int         bootDaemon  = 1;
@@ -480,6 +483,14 @@ int main(int argc, char *argv[])
   memset(&me, 0, sizeof(me));
   memset(&meLocalUser, 0, sizeof(meLocalUser));
   me.localClient = &meLocalUser;
+
+  /* Make sure all lists are zeroed */
+  memset(&unknown_list, 0, sizeof(unknown_list));
+  memset(&lclient_list, 0, sizeof(lclient_list));
+  memset(&serv_list, 0, sizeof(serv_list));
+  memset(&oper_list, 0, sizeof(oper_list));
+  memset(&lazylink_channels, 0, sizeof(lazylink_channels));
+  memset(&lazylink_nicks, 0, sizeof(lazylink_nicks));
 
   lclient_list.head = lclient_list.tail = NULL;
   oper_list.head = oper_list.tail = NULL;

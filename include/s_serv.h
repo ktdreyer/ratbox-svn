@@ -110,13 +110,19 @@ extern void        show_servers(struct Client *);
 extern time_t      try_connections(time_t currenttime);
 
 extern void        initServerMask(void);
-extern void        restoreUnusedServerMask(unsigned long);
 extern void        burst_members(struct Client *cptr, dlink_list *list);
 extern void        sjoin_channel(struct Client *cptr, struct Channel *chptr);
 extern void	   sendnick_TS(struct Client*, struct Client* );
 extern int         serv_connect(struct ConfItem *, struct Client *);
 
 extern struct Client *uplink; /* NON NULL if leaf and is this servers uplink */
+
+
+
+void add_lazylinkchannel(struct Client *cptr, struct Channel *chptr);
+void add_lazylinkclient(struct Client *cptr, struct Client *sptr);
+void remove_lazylink_flags(unsigned long mask);
+
 #endif /* INCLUDED_s_serv_h */
 
 

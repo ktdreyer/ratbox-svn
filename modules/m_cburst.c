@@ -69,10 +69,6 @@ char *_version = "20001122";
 /*
  * This function will "burst" the given channel onto
  * the given LL capable server.
- * If the nick is given as well, then I also check ot
- * see if that nick can join the given channel. If
- * the nick can join, a LLJOIN message is sent back to leaf
- * stating the nick can join, otherwise a non join message is sent.
  */
 
 int     ms_cburst(struct Client *cptr,

@@ -68,6 +68,7 @@ int MaxClientCount     = 1;
 
 struct Client *uplink=NULL;
 
+
 /*
  * list of recognized server capabilities.  "TS" is not on the list
  * because all servers that we talk to already do TS, and the kludged
@@ -1026,7 +1027,8 @@ cjoin_all(struct Client *cptr)
  * output	- none
  * side effects	- All sjoins for channel(s) given by chptr are sent
  *                for all channel members. If channel has vchans, send
- *                them on.
+ *                them on. ONLY called by hub on behalf of a lazylink
+ *		  so cptr is always guaranteed to be a LL leaf.
  */
 void
 sjoin_channel(struct Client *cptr, struct Channel *chptr)
@@ -1038,7 +1040,7 @@ sjoin_channel(struct Client *cptr, struct Channel *chptr)
   current_serial++;
 
   send_channel_modes(cptr, chptr);
-  chptr->lazyLinkChannelExists |= cptr->localClient->serverMask;
+  add_lazylinkchannel(cptr,chptr);
 
   sendto_one(cptr, ":%s TOPIC %s :%s",
 	     me.name, chptr->chname, chptr->topic);
@@ -1050,11 +1052,130 @@ sjoin_channel(struct Client *cptr, struct Channel *chptr)
           vchan = ptr->data;
 
 	  send_channel_modes(cptr, vchan);
-          vchan->lazyLinkChannelExists |= cptr->localClient->serverMask;
+	  add_lazylinkchannel(cptr, vchan);
 
           sendto_one(cptr, ":%s TOPIC %s :%s",
 	     me.name, vchan->chname, vchan->topic);
 
+	}
+    }
+}
+
+/*
+ * add_lazylinkchannel
+ *
+ * inputs	- pointer to server being introduced to this hub
+ *		- pointer to channel structure being introduced
+ * output	- NONE
+ * side effects	- The channel pointed to by chptr is now known
+ *		  to be on lazyleaf server given by cptr.
+ *		  mark that in the bit map and add to the list
+ *		  of channels to examine after this newly introduced
+ *		  server is squit off.
+ */
+void
+add_lazylinkchannel(struct Client *cptr, struct Channel *chptr)
+{
+  dlink_node *m;
+
+  assert(cptr->localClient != NULL);
+
+  chptr->lazyLinkChannelExists |= cptr->localClient->serverMask;
+
+  m = make_dlink_node();
+
+  dlinkAdd(chptr, m, &lazylink_channels);
+}
+
+/*
+ * add_lazylinkclient
+ *
+ * inputs	- pointer to server being introduced to this hub
+ *		- pointer to client being introduced
+ * output	- NONE
+ * side effects	- The client pointed to by sptr is now known
+ *		  to be on lazyleaf server given by cptr.
+ *		  mark that in the bit map and add to the list
+ *		  of clients to examine after this newly introduced
+ *		  server is squit off.
+ */
+void
+add_lazylinkclient(struct Client *cptr, struct Client *sptr)
+{
+  dlink_node *m;
+
+  assert(cptr->localClient != NULL);
+
+  sptr->lazyLinkClientExists |= cptr->localClient->serverMask;
+
+  m = make_dlink_node();
+
+  dlinkAdd(sptr, m, &lazylink_nicks);
+}
+
+/*
+ * remove_lazylink_flags
+ *
+ * inputs	- pointer to server quitting
+ * output	- NONE
+ * side effects	- All the channels on the lazylink channel list are examined
+ *		  If they hold a bit corresponding to the servermask
+ *		  attached to cptr, clear that bit. If this bitmask
+ *		  goes to 0, then the channel is no longer known to
+ *		  be on any lazylink server, and can be removed from the 
+ *		  link list.
+ *
+ *		  Similar is done for lazylink clients
+ *
+ *		  This function must be run by the HUB on any exiting
+ *		  lazylink leaf server, while the pointer is still valid.
+ *		  Hence must be run from client.c in exit_one_client()
+ *
+ *		  The old code scanned all channels, this code only
+ *		  scans channels/clients on the lazylink_channels
+ *		  lazylink_clients lists.
+ */
+void
+remove_lazylink_flags(unsigned long mask)
+{
+  dlink_node *ptr;
+  dlink_node *next_ptr;
+  struct Channel *chptr;
+  struct Client *acptr;
+  unsigned long clear_mask;
+
+  if(!mask) /* On 0 mask, don't do anything */
+    return;
+
+  clear_mask = ~mask;
+
+  freeMask |= mask;
+
+  for (ptr = lazylink_channels.head; ptr; ptr = next_ptr)
+    {
+      next_ptr = ptr->next;
+
+      chptr = ptr->data;
+      chptr->lazyLinkChannelExists &= clear_mask;
+
+      if ( chptr->lazyLinkChannelExists == 0 )
+	{
+	  dlinkDelete(ptr, &lazylink_channels);
+	  free_dlink_node(ptr);
+	}
+    }
+
+  for (ptr = lazylink_nicks.head; ptr; ptr = next_ptr)
+    {
+      next_ptr = ptr->next;
+
+      acptr = ptr->data;
+      acptr->lazyLinkClientExists &= clear_mask;
+
+      if ( acptr->lazyLinkClientExists == 0 )
+	{
+	  dlinkDelete(ptr, &lazylink_nicks);
+	  free_dlink_node(ptr);
 	}
     }
 }
@@ -1160,31 +1281,6 @@ void show_servers(struct Client *cptr)
 void initServerMask(void)
 {
   freeMask = 0xFFFFFFFFL;
-}
-
-/*
- * nextUnusedServerMask
- *
- * inputs	- unsigned long mask 
- * output	- NONE
- * side effects	-
- */
-void restoreUnusedServerMask(unsigned long mask)
-{
-  struct Channel*   chptr;
-  unsigned long clear_mask;
-
-  if(!mask) /* On 0 mask, don't do anything */
-    return;
-
-  freeMask |= mask;
-
-  clear_mask = ~mask;
-
-  for (chptr = GlobalChannelList; chptr; chptr = chptr->nextch)
-    {
-      chptr->lazyLinkChannelExists &= clear_mask;
-    }
 }
 
 /*
@@ -1456,7 +1552,6 @@ serv_connect_callback(int fd, int status, void *data)
     if(m != NULL)
       {
 	dlinkDelete(m, &unknown_list);
-	m = make_dlink_node();
 	dlinkAdd(cptr, m, &serv_list);
       }
 
