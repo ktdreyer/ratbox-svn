@@ -1318,7 +1318,7 @@ int fork_server(struct Client *server)
     if(dup2(data_pipe[0], 4) < 0)
       exit(1);
     if(dup2(server->fd, 5) < 0)
-      return -1;
+      exit(1);
 #ifdef MISSING_SOCKPAIR
     /* only uni-directional pipes, so use 6/7 for writing */
     if(dup2(ctrl_pipe2[1], 6) < 0)
@@ -1327,7 +1327,7 @@ int fork_server(struct Client *server)
       exit(1);
 #endif
 
-    for(i = 0; i <= LAST_SLINK_FD; i++)
+    for(i = 3; i <= LAST_SLINK_FD; i++)
       if(!set_non_blocking(i))
         exit(1);
     for(i = (LAST_SLINK_FD + 1); i < MAXCONNECTIONS; i++)
