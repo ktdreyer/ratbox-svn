@@ -1,3 +1,11 @@
+*** 20001226_6 by db
+- fixed bug in m_nick, leafs always should send their nick changes
+  since a leaf always introduces all of its clients to their uplink
+  but hubs should continue to watch they do not send nick changes for
+  clients that have not been introduced yet to leafs.
+
+
+
 *** 20001226_5 by db
 - number of wrong counts in the parmcount table.. caused these to core
   parc inludes the source as well as arguments
