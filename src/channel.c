@@ -213,15 +213,15 @@ add_id(struct Client *client_p, struct Channel *chptr, char *banid, int type)
 
   ban = make_dlink_node();
 
-  actualBan = (struct Ban *) MyMalloc(sizeof(struct Ban));
+  actualBan = (struct Ban *)MyMalloc(sizeof(struct Ban));
   DupString(actualBan->banstr, banid);
 
   if (IsPerson(client_p))
     {
       actualBan->who =
-        (char *) MyMalloc(strlen(client_p->name) +
-                          strlen(client_p->username) +
-                          strlen(client_p->host) + 3);
+        (char *)MyMalloc(strlen(client_p->name) +
+                         strlen(client_p->username) +
+                         strlen(client_p->host) + 3);
       ircsprintf(actualBan->who, "%s!%s@%s",
                  client_p->name, client_p->username, client_p->host);
     }
@@ -848,7 +848,7 @@ channel_modes(struct Channel *chptr, struct Client *client_p,
     {
       *mbuf++ = 'k';
       if (IsMember(client_p, chptr) || IsServer(client_p))
-        (void) strcat(pbuf, chptr->mode.key);
+        (void)strcat(pbuf, chptr->mode.key);
     }
 
   *mbuf++ = '\0';
@@ -977,7 +977,7 @@ send_members(struct Client *client_p,
   char *t;                      /* temp char pointer */
 
   ircsprintf(buf, ":%s SJOIN %lu %s %s %s :", me.name,
-             (unsigned long) chptr->channelts,
+             (unsigned long)chptr->channelts,
              chptr->chname, lmodebuf, lparabuf);
 
   cur_len = mlen = strlen(buf);
@@ -1270,7 +1270,7 @@ chm_simple(struct Client *client_p, struct Client *source_p,
 
   /* XXX this causes warnings on a 64bit compiler 
    * sizeof(void *) > sizeof(int) */
-  chf = (int) d;
+  chf = (int)d;
 
   if (dir < 0 && !(chptr->mode.mode & chf))
     {
@@ -2206,6 +2206,7 @@ struct ChannelMode
                 char c, void *d);
   void *d;
 }
+/* *INDENT-OFF* */
 ModeTable[255] =
 {
   {chm_nosuch, NULL},
@@ -2268,6 +2269,7 @@ ModeTable[255] =
   {chm_nosuch, NULL},                             /* y */
   {chm_nosuch, NULL},                             /* z */
 };
+/* *INDENT-ON* */
 
 /* int get_channel_access(struct Client *source_p, struct Channel *chptr)
  * Input: The client, the channel
@@ -2688,9 +2690,9 @@ set_channel_mode(struct Client *client_p, struct Client *source_p,
           cc = 0;
         else
           cc = c - 'A' + 1;
-        ModeTable[(int) cc].func(client_p, source_p, chptr, parc, &parn,
-                                 parv, &errors, alevel, dir, c,
-                                 ModeTable[(int) cc].d);
+        ModeTable[(int)cc].func(client_p, source_p, chptr, parc, &parn,
+                                parv, &errors, alevel, dir, c,
+                                ModeTable[(int)cc].d);
         break;
       }
 
@@ -4094,7 +4096,7 @@ get_channel(struct Client *client_p, char *chname, int flag)
 
   if (flag == CREATE)
     {
-      chptr = (struct Channel *) MyMalloc(sizeof(struct Channel) + len + 1);
+      chptr = (struct Channel *)MyMalloc(sizeof(struct Channel) + len + 1);
 
       /*
        * NOTE: strcpy ok here, we have allocated strlen + 1
@@ -4324,7 +4326,7 @@ destroy_channel(struct Channel *chptr)
           break;
         }
     }
-  MyFree((char *) chptr);
+  MyFree((char *)chptr);
   Count.chan--;
 }
 
@@ -4348,7 +4350,7 @@ delete_members(struct Channel *chptr, dlink_list * list)
   for (ptr = list->head; ptr; ptr = next_ptr)
     {
       next_ptr = ptr->next;
-      who = (struct Client *) ptr->data;
+      who = (struct Client *)ptr->data;
 
       /* remove reference to chptr from who */
       for (ptr_ch = who->user->channel.head; ptr_ch; ptr_ch = next_ptr_ch)
