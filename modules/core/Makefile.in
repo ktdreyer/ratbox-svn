@@ -112,7 +112,7 @@ libmodules.a: $(S_OBJS)
 
 install: all
 	@echo "Installing modules into $(AUTOMODULEDIR) .."
-	@for file in $(OBJS); do \
+	@for file in $(SH_OBJS); do \
 		$(INSTALL_DATA) $$file $(AUTOMODULEDIR); \
 	done
 
