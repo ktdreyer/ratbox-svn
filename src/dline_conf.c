@@ -153,7 +153,7 @@ void add_ip_Iline(struct ConfItem *conf_ptr)
 	node->data = conf_ptr;	
 }
 
-void report_Ilines(struct Client *sptr)
+void report_ip_Ilines(struct Client *sptr)
 {
 	patricia_node_t *node;
 	char *name, *host, *pass, *user, *classname, conftype;
