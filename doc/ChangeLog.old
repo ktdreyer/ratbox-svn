@@ -1,3 +1,6 @@
+*** 20010106_19 by davidt
+Yet another lazylinks fix.  Prevent a lazyleaf introducing other servers, even if it has a matching hub_mask...
+
 *** 20010106_18 by db
 - fixed leaf server code, please read comments in m_server.c
 - removed leaf{} block, its really unnecessary read above
