@@ -1,3 +1,18 @@
+androsyn    2002/08/15 20:52:15 EDT	(20020816_4)
+
+  Modified files:
+    include              tools.h 
+    src                  tools.c 
+  Log:
+  Make dlink_list keep track of the number of nodes it has on itself.  This
+  should safe walking the list just to get the number of nodes.
+  
+  Revision  Changes    Path
+  1.23      +11 -20    ircd-ratbox/include/tools.h
+  7.26      +9 -17     ircd-ratbox/src/tools.c
+
+
+
 androsyn    2002/08/15 20:29:26 EDT	(20020816_3)
 
   Modified files:
