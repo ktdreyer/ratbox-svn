@@ -1,3 +1,64 @@
+ejb         2002/08/25 21:47:40 EDT	(20020826_1)
+
+  Modified files:
+    .                    Makefile.in configure 
+    autoconf             configure.in 
+    modules              .depend 
+    src                  .depend ircd.c s_auth.c s_bsd.c 
+                         s_bsd_kqueue.c sprintf_irc.c 
+  Removed files:
+    iauth                .cvsignore Makefile.in 
+    iauth/include        auth.h class.h commands.h conf.h iauth.h 
+                         log.h match.h misc.h mtree.h res.h 
+                         setup.h sock.h 
+    iauth/source         .cvsignore .depend Makefile.in auth.c 
+                         class.c commands.c conf.c iauth.c log.c 
+                         match.c misc.c mtree.c res.c sock.c 
+  Log:
+  - smelly hamster death to iauth (muahaha)
+  
+  Revision  Changes      Path
+  7.39      +1 -3        ircd-ratbox/Makefile.in
+  7.150     +1 -3        ircd-ratbox/autoconf/configure.in
+  7.154     +7080 -3076  ircd-ratbox/configure
+  1.2       +0 -1        ircd-ratbox/iauth/.cvsignore (dead)
+  7.8       +0 -22       ircd-ratbox/iauth/Makefile.in (dead)
+  7.6       +0 -116      ircd-ratbox/iauth/include/auth.h (dead)
+  7.3       +0 -48       ircd-ratbox/iauth/include/class.h (dead)
+  7.3       +0 -36       ircd-ratbox/iauth/include/commands.h (dead)
+  7.5       +0 -146      ircd-ratbox/iauth/include/conf.h (dead)
+  7.6       +0 -50       ircd-ratbox/iauth/include/iauth.h (dead)
+  7.2       +0 -37       ircd-ratbox/iauth/include/log.h (dead)
+  7.2       +0 -89       ircd-ratbox/iauth/include/match.h (dead)
+  7.4       +0 -34       ircd-ratbox/iauth/include/misc.h (dead)
+  7.6       +0 -115      ircd-ratbox/iauth/include/mtree.h (dead)
+  7.3       +0 -52       ircd-ratbox/iauth/include/res.h (dead)
+  7.4       +0 -23       ircd-ratbox/iauth/include/setup.h (dead)
+  7.5       +0 -66       ircd-ratbox/iauth/include/sock.h (dead)
+  1.2       +0 -1        ircd-ratbox/iauth/source/.cvsignore (dead)
+  7.6       +0 -26       ircd-ratbox/iauth/source/.depend (dead)
+  7.12      +0 -64       ircd-ratbox/iauth/source/Makefile.in (dead)
+  7.10      +0 -722      ircd-ratbox/iauth/source/auth.c (dead)
+  7.3       +0 -133      ircd-ratbox/iauth/source/class.c (dead)
+  7.4       +0 -232      ircd-ratbox/iauth/source/commands.c (dead)
+  7.7       +0 -695      ircd-ratbox/iauth/source/conf.c (dead)
+  7.6       +0 -111      ircd-ratbox/iauth/source/iauth.c (dead)
+  1.2       +0 -97       ircd-ratbox/iauth/source/log.c (dead)
+  1.2       +0 -467      ircd-ratbox/iauth/source/match.c (dead)
+  7.6       +0 -116      ircd-ratbox/iauth/source/misc.c (dead)
+  7.9       +0 -1168     ircd-ratbox/iauth/source/mtree.c (dead)
+  7.5       +0 -1711     ircd-ratbox/iauth/source/res.c (dead)
+  7.11      +0 -773      ircd-ratbox/iauth/source/sock.c (dead)
+  1.12      +584 -585    ircd-ratbox/modules/.depend
+  7.13      +425 -409    ircd-ratbox/src/.depend
+  7.253     +0 -1        ircd-ratbox/src/ircd.c
+  7.108     +0 -1        ircd-ratbox/src/s_auth.c
+  7.176     +0 -1        ircd-ratbox/src/s_bsd.c
+  1.29      +0 -1        ircd-ratbox/src/s_bsd_kqueue.c
+  7.18      +2 -1        ircd-ratbox/src/sprintf_irc.c
+
+
+
 leeh        2002/08/25 21:16:33 EDT	(20020826_0)
 
   Modified files:
