@@ -1,3 +1,22 @@
+androsyn    2003/09/01 13:11:14 EDT	(20030901_5)
+
+  Modified files:
+    modules              m_encap.c m_map.c 
+    modules/core         m_quit.c 
+    src                  .depend fdlist.c modules.c 
+  Log:
+  some files need sprintf_irc.h
+  
+  Revision  Changes    Path
+  1.42      +2 -1      ircd-ratbox/modules/core/m_quit.c
+  1.11      +2 -1      ircd-ratbox/modules/m_encap.c
+  1.33      +2 -1      ircd-ratbox/modules/m_map.c
+  7.33      +6 -259    ircd-ratbox/src/.depend
+  7.43      +1 -0      ircd-ratbox/src/fdlist.c
+  7.131     +2 -0      ircd-ratbox/src/modules.c
+
+
+
 androsyn    2003/09/01 13:09:31 EDT	(20030901_4)
 
   Modified files:
