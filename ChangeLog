@@ -1,3 +1,16 @@
+leeh        2003/05/15 14:52:24 UTC	(20030515_6)
+
+  Modified files:
+    modules              m_kline.c m_unkline.c 
+  Log:
+  - removed the "*** received kline from blah" notices - theyre pointless.
+  
+  Revision  Changes    Path
+  1.152     +1 -7      ircd-ratbox/modules/m_kline.c
+  1.86      +1 -10     ircd-ratbox/modules/m_unkline.c
+
+
+
 leeh        2003/05/15 14:48:49 UTC	(20030515_5)
 
   Modified files:
