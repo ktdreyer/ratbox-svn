@@ -68,7 +68,7 @@ _moddeinit(void)
   mod_del_cmd(&names_msgtab);
 }
 
-char *_version = "20001122";
+char *_version = "20010615";
 #endif
 
 /************************************************************************
@@ -111,7 +111,6 @@ static void m_names(struct Client *client_p,
         {
           if (HasVchans(ch2ptr))
             {
-
               vchan = map_vchan(ch2ptr, source_p);
 
               if ((vkey && !vkey[1]) || (!vchan && !vkey))
@@ -126,13 +125,15 @@ static void m_names(struct Client *client_p,
                     return;
                 }
               channel_member_names(source_p, vchan, ch2ptr->chname, 1);
-
             }
           else
             {
               channel_member_names(source_p, ch2ptr, ch2ptr->chname, 1);
             }
         }
+      else
+        sendto_one(source_p, form_str(RPL_ENDOFNAMES), me.name,
+                   parv[0], para);
     }
   else
     {
@@ -146,9 +147,9 @@ static void m_names(struct Client *client_p,
 /*
  * names_all_visible_channels
  *
- * inputs	- pointer to client struct requesting names
- * output	- none
- * side effects	- lists all visible channels whee!
+ * inputs       - pointer to client struct requesting names
+ * output       - none
+ * side effects - lists all visible channels whee!
  */
 
 static void names_all_visible_channels(struct Client *source_p)
@@ -164,13 +165,13 @@ static void names_all_visible_channels(struct Client *source_p)
   for (chptr = GlobalChannelList; chptr; chptr = chptr->nextch)
     {
       if (IsVchan(chptr))
-	{
-	  bchan = find_bchan (chptr);
-	  if (bchan != NULL)
-	    chname = bchan->chname;
-	}
+        {
+          bchan = find_bchan (chptr);
+          if (bchan != NULL)
+            chname = bchan->chname;
+        }
       else
-	chname = chptr->chname;
+        chname = chptr->chname;
 
       /* Find users on same channel (defined by chptr) */
 
@@ -181,9 +182,9 @@ static void names_all_visible_channels(struct Client *source_p)
 /*
  * names_non_public_non_secret
  *
- * inputs	- pointer to client struct requesting names
- * output	- none
- * side effects	- lists all non public non secret channels
+ * inputs       - pointer to client struct requesting names
+ * output       - none
+ * side effects - lists all non public non secret channels
  */
 
 static void names_non_public_non_secret(struct Client *source_p)
@@ -200,7 +201,7 @@ static void names_non_public_non_secret(struct Client *source_p)
   char *t;
 
   ircsprintf(buf,form_str(RPL_NAMREPLY),
-	     me.name,source_p->name," * * :");
+             me.name,source_p->name," * * :");
 
   mlen = strlen(buf);
   cur_len = mlen;
@@ -222,17 +223,17 @@ static void names_non_public_non_secret(struct Client *source_p)
           ch3ptr = lp->data;
 
           if ( (!PubChannel(ch3ptr) || IsMember(source_p, ch3ptr)) ||
-	       (SecretChannel(ch3ptr)))
-	  {
+               (SecretChannel(ch3ptr)))
+          {
             dont_show = YES;
-	    break;
-	  }
+            break;
+          }
         }
       if (dont_show) /* on any secret channels or shown already? */
         continue;
 
-      if(lp == NULL)	/* Nothing to do. yay */
-	continue;
+      if(lp == NULL)    /* Nothing to do. yay */
+        continue;
 
       if ( (cur_len + NICKLEN + 2)  > (BUFSIZE - 3))
         {
@@ -242,10 +243,10 @@ static void names_non_public_non_secret(struct Client *source_p)
         }
 
       if(ch3ptr->mode.mode & MODE_HIDEOPS)
-	ircsprintf(t," %s ", c2ptr->name);
+        ircsprintf(t," %s ", c2ptr->name);
       else
-	ircsprintf(t,"%s%s ", channel_chanop_or_voice(ch3ptr, c2ptr),
-		   c2ptr->name);
+        ircsprintf(t,"%s%s ", channel_chanop_or_voice(ch3ptr, c2ptr),
+                   c2ptr->name);
 
       tlen = strlen(t);
       cur_len += tlen;
@@ -272,7 +273,7 @@ static void ms_names( struct Client *client_p,
   if( ServerInfo.hub )
     {
       if(!IsCapable(client_p->from,CAP_LL))
-	return;
+        return;
     }
 
   m_names(client_p,source_p,parc,parv);
