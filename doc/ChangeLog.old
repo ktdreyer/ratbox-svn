@@ -1,3 +1,9 @@
+*** 20001022_4 by db
+- added patches for invite by  Ryan Lortie <desertangel@mindless.com> (desrt)
+- updated contributors/core group
+
+
+
 *** 20001022_3 by db
 - removed chan_id
 - Can't reject long channels for interoperability reasons
