@@ -36,9 +36,11 @@
 
 static patricia_tree_t *reject_tree;
 static dlink_list delay_exit;
+static dlink_list reject_list;
 
 struct reject_data
 {
+	dlink_node rnode;
 	time_t time;
 	unsigned int count;
 };
@@ -66,19 +68,22 @@ reject_exit(void *unused)
 static void
 reject_expires(void *unused)
 {
+	dlink_node *ptr, *next;
 	patricia_node_t *pnode;
 	struct reject_data *rdata;
 	
-	PATRICIA_WALK(reject_tree->head, pnode)
+	DLINK_FOREACH_SAFE(ptr, next, reject_list.head)
 	{
-		rdata = pnode->data;
+		pnode = ptr->data;
+		rdata = pnode->data;		
+
 		if(rdata->time + ConfigFileEntry.reject_duration < CurrentTime)
 		{
+			dlinkDelete(ptr, &reject_list);
 			MyFree(rdata);
 			patricia_remove(reject_tree, pnode);
 		}
 	}
-	PATRICIA_WALK_END;
 }
 
 void
@@ -114,6 +119,7 @@ add_reject(struct Client *client_p)
 	{
 		pnode = make_and_lookup_ip(reject_tree, &client_p->localClient->ip, GET_SS_LEN(client_p->localClient->ip));
 		pnode->data = rdata = MyMalloc(sizeof(struct reject_data));
+		dlinkAdd(pnode, &rdata->rnode, &reject_list);
 		rdata->time = CurrentTime;
 		rdata->count = 1;
 	}
@@ -150,14 +156,15 @@ check_reject(struct Client *client_p)
 
 void flush_reject(void)
 {
+	dlink_node *ptr, *next;
 	patricia_node_t *pnode;
 	struct reject_data *rdata;
 	
-	PATRICIA_WALK(reject_tree->head, pnode)
+	DLINK_FOREACH_SAFE(ptr, next, reject_list.head)
 	{
-		rdata = pnode->data;
+		pnode = ptr->data;
+		rdata = pnode->data;		
 		MyFree(rdata);
 		patricia_remove(reject_tree, pnode);
 	}
-	PATRICIA_WALK_END;
 }
