@@ -1,3 +1,9 @@
+*** 20010122_7 by ejb
+- initial commit of androsyn's ipv6 code, hacked up so it compiles. 
+  it accepts a connection, but doesn't get further than the initial
+  connection, seems an fd is being weirded somewhere.
+
+
 *** 20010122_6 by fl_
 - fixes opers@server and ident%host@server..
 - I didnt add users@server, as we if people really want it, they can
