@@ -1,3 +1,16 @@
+androsyn    2004/04/27 07:35:35 EDT	(20040427_0)
+
+  Modified files:
+    src                  s_user.c 
+  Log:
+  Move the move to lclient_list up a little and put in an assert to test if
+  are not already on the lclient_list
+  
+  Revision  Changes    Path
+  7.319     +2 -1      ircd-ratbox/src/s_user.c
+
+
+
 leeh        2004/04/26 19:02:36 EDT	(20040426_3)
 
   Modified files:
