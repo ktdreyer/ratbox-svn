@@ -1,3 +1,21 @@
+leeh        2001/12/15 17:39:12 EST	(20011215_12)
+
+  Modified files:
+    contrib              Makefile.in 
+    src                  s_conf.c 
+  Added files:
+    contrib              m_jupe.c 
+  Log:
+  - added jupe back, its not dangerous
+  - missing %s
+  
+  Revision  Changes    Path
+  1.28      +1 -0      ircd-hybrid-7/contrib/Makefile.in
+  1.1       +195 -0    ircd-hybrid-7/contrib/m_jupe.c (new)
+  7.285     +2 -2      ircd-hybrid-7/src/s_conf.c
+
+
+
 leeh        2001/12/15 17:20:09 EST	(20011215_11)
 
   Modified files:
