@@ -823,10 +823,10 @@ set_default_conf(void)
 	ConfigChannel.burst_topicwho = NO;
 	ConfigChannel.invite_ops_only = YES;
 
-	ConfigChannel.default_split_user_count = 0;
-	ConfigChannel.default_split_server_count = 0;
+	ConfigChannel.default_split_user_count = 15000;
+	ConfigChannel.default_split_server_count = 10;
 	ConfigChannel.no_join_on_split = NO;
-	ConfigChannel.no_create_on_split = NO;
+	ConfigChannel.no_create_on_split = YES;
 
 	ConfigServerHide.flatten_links = 0;
 	ConfigServerHide.links_delay = 300;
@@ -891,6 +891,14 @@ validate_conf(void)
 		ConfigFileEntry.client_flood = CLIENT_FLOOD_MAX;
 
 	GlobalSetOptions.idletime = (ConfigFileEntry.idletime * 60);
+
+	if(!split_users || !split_servers ||
+	   (!ConfigChannel.no_create_on_split && !ConfigChannel.no_join_on_split))
+	{
+		eventDelete(check_splitmode, NULL);
+		splitmode = 0;
+		splitchecking = 0;
+	}
 }
 
 /*

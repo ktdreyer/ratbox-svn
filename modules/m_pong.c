@@ -91,6 +91,7 @@ ms_pong(struct Client *client_p, struct Client *source_p, int parc, const char *
 					     source_p->name,
 					     (signed int) (CurrentTime - source_p->localClient->firsttime));
 		SetEob(source_p);
+		eob_count++;
 	}
 
 	return 0;

@@ -123,6 +123,7 @@ int splitmode;
 int splitchecking;
 int split_users;
 int split_servers;
+int eob_count;
 
 /*
  * get_vm_top - get the operating systems notion of the resident set size
@@ -688,7 +689,7 @@ main(int argc, char *argv[])
 		ConfigServerHide.links_disabled = 1;
 
 	if(splitmode)
-		eventAddIsh("check_splitmode", check_splitmode, NULL, 60);
+		eventAdd("check_splitmode", check_splitmode, NULL, 2);
 
 	ServerRunning = 1;
 

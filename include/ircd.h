@@ -96,6 +96,7 @@ extern int splitmode;
 extern int splitchecking;
 extern int split_users;
 extern int split_servers;
+int eob_count;
 
 extern dlink_list unknown_list;
 extern dlink_list lclient_list;

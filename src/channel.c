@@ -709,28 +709,6 @@ check_spambot_warning(struct Client *source_p, const char *name)
 	}
 }
 
-/* finish_splitmode()
- *
- * inputs	-
- * outputs	-
- * side effects - splitmode is finished
- */
-static void
-finish_splitmode(void)
-{
-	if(dlink_list_length(&global_serv_list) < (unsigned long) split_servers ||
-	   Count.total < split_users)
-	{
-		eventAddIsh("check_splitmode", check_splitmode, NULL, 10);
-		return;
-	}
-
-	splitmode = 0;
-
-	sendto_realops_flags(UMODE_ALL, L_ALL,
-			     "Network rejoined, deactivating splitmode");
-}
-
 /* check_splitmode()
  *
  * input	-
@@ -743,24 +721,26 @@ check_splitmode(void *unused)
 {
 	if(splitchecking && (ConfigChannel.no_join_on_split || ConfigChannel.no_create_on_split))
 	{
-		if(!splitmode && 
-		   ((dlink_list_length(&global_serv_list) < (unsigned long)split_servers) ||
-		    (Count.total < split_users)))
+		/* not split, we're being asked to check now because someone
+		 * has left
+		 */
+		if(!splitmode)
 		{
-			splitmode = 1;
+			if(eob_count < split_servers || Count.total < split_users)
+			{
+				splitmode = 1;
+				sendto_realops_flags(UMODE_ALL, L_ALL,
+					     "Network split, activating splitmode");
+				eventAddIsh("check_splitmode", check_splitmode, NULL, 2);
+			}
+		}
+		/* in splitmode, check whether its finished */
+		else if(eob_count >= split_servers && Count.total >= split_users)
+		{
+			splitmode = 0;
 
 			sendto_realops_flags(UMODE_ALL, L_ALL,
-					     "Network split, activating splitmode");
-			eventAddIsh("check_splitmode", check_splitmode, NULL, 10);
-		}
-		else if(splitmode && 
-			(dlink_list_length(&global_serv_list) >= (unsigned long)split_servers) &&
-			(Count.total >= split_users))
-		{
-			/* splitmode ended, if we're delaying the
-			 * end of split, add an event, else finish it
-			 */
-			finish_splitmode();
+				     "Network rejoined, deactivating splitmode");
 
 			eventDelete(check_splitmode, NULL);
 		}
