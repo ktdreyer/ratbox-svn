@@ -1,3 +1,10 @@
+*** 20010719_2 by androsyn
+Fix for the broken fix of the compile warnings that I fixed yesterday on
+64bit platforms, but ended up needing to refix on 32bit platforms.
+
+The universe truly hates me :P
+
+
 *** 20010719_1 by a1kmm
 - Re-enabled the #ifdef PACE_CONNECTs
 - Added a configuration option throttle_time = <seconds>; Set to 0 to
