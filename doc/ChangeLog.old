@@ -1,3 +1,9 @@
+*** 20001130_2 by db
+- server names should not be given in /squit messages if
+  server hide is turned on
+
+
+
 *** 20001130_1 by db
 - squished bug in m_names.c which caused the module to suddenly
   throw up when names without a paramter was given. I forgot
