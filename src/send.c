@@ -304,18 +304,8 @@ send_queued_write(int fd, void *data)
 #endif
   
   if (linebuf_len(&to->localClient->buf_sendq)) {
-    retlen = linebuf_flush(to->fd, &to->localClient->buf_sendq);
-    if ((retlen < 0) && (ignoreErrno(errno))) {
-      /* we have a non-fatal error, so just continue */
-    } else if (retlen < 0) {
-      /* We have a fatal error */
-      dead_link(to, "Write error to %s, closing link");
-      return;
-    } else if (retlen == 0) {
-      /* 0 bytes is an EOF .. */
-      dead_link(to, "EOF during write to %s, closing link");
-      return;
-    } else {
+    while((retlen = linebuf_flush(to->fd, &to->localClient->buf_sendq)) > 0)
+    {
       /* We have some data written .. update counters */
 #ifndef NDEBUG
       hdata.len = retlen;
@@ -332,6 +322,17 @@ send_queued_write(int fd, void *data)
         me.localClient->sendK += (me.localClient->sendB >> 10);
         me.localClient->sendB &= 0x03ff;
       }
+    }
+    if ((retlen < 0) && (ignoreErrno(errno))) {
+      /* we have a non-fatal error, so just continue */
+    } else if (retlen < 0) {
+      /* We have a fatal error */
+      dead_link(to, "Write error to %s, closing link");
+      return;
+    } else if (retlen == 0) {
+      /* 0 bytes is an EOF .. */
+      dead_link(to, "EOF during write to %s, closing link");
+      return;
     }
   }
 

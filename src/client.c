@@ -133,6 +133,7 @@ struct Client* make_client(struct Client* from)
       client_p->since = client_p->lasttime = client_p->firsttime = CurrentTime;
 
       localClient = (struct LocalUser *)BlockHeapAlloc(lclient_heap);
+      memset(localClient, 0, sizeof(struct LocalUser));
 
       client_p->localClient = localClient;
       client_p->localClient->ctrlfd = -1;
@@ -1259,6 +1260,9 @@ const char* comment         /* Reason for the exit */
 
   if (MyConnect(source_p))
     {
+      /* Attempt to flush any queued data */
+      if (source_p->fd > -1)
+        send_queued_write(source_p->fd, source_p);
       if (source_p->flags & FLAGS_IPHASH)
         remove_one_ip(&source_p->localClient->ip);
 

@@ -1445,8 +1445,13 @@ int fork_server(struct Client *server)
           (i == slink_fds[0][0][0]) || (i == slink_fds[1][0][1]) ||
           (i == server->fd))
         set_non_blocking(i);
-      else if (i > 2) /* don't close std*, it upsets solaris */
-        close(i);
+      else
+      {
+#ifdef VMS
+        if (i > 2) /* don't close std* */
+#endif
+          close(i);
+      }
     }
 
     sprintf(fd_str[0], "%d", slink_fds[0][0][0]); /* ctrl read */
