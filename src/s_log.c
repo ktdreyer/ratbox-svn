@@ -85,13 +85,13 @@ static const char *logLevelToString[] = { "L_CRIT",
 #if defined(USE_LOGFILE)
 
 static int
-open_log (const char *filename)
+open_log(const char *filename)
 {
-	logFile = fbopen (filename, "a");
+	logFile = fbopen(filename, "a");
 	if(logFile == NULL)
 	{
 #ifdef USE_SYSLOG
-		syslog (LOG_ERR, "Unable to open log file: %s: %s", filename, strerror (errno));
+		syslog(LOG_ERR, "Unable to open log file: %s: %s", filename, strerror(errno));
 #endif
 		return 0;
 	}
@@ -102,82 +102,82 @@ open_log (const char *filename)
 
 #if defined(USE_LOGFILE)
 static void
-write_log (const char *message)
+write_log(const char *message)
 {
 	char buf[LOG_BUFSIZE];
 
 	if(logFile == NULL)
 		return;
 
-	snprintf (buf, LOG_BUFSIZE, "[%s] %s\n", smalldate (), message);
-	fbputs (buf, logFile);
+	snprintf(buf, LOG_BUFSIZE, "[%s] %s\n", smalldate(), message);
+	fbputs(buf, logFile);
 }
 #endif
 
 void
-ilog (int priority, const char *fmt, ...)
+ilog(int priority, const char *fmt, ...)
 {
 	char buf[LOG_BUFSIZE];
 	va_list args;
-	assert (-1 < priority);
+	assert(-1 < priority);
 	if(fmt == NULL)
 		return;
 
 	if(priority > logLevel)
 		return;
 
-	va_start (args, fmt);
-	vsprintf (buf, fmt, args);
-	va_end (args);
+	va_start(args, fmt);
+	vsprintf(buf, fmt, args);
+	va_end(args);
 
 #ifdef USE_SYSLOG
 	if(priority <= L_DEBUG)
-		syslog (sysLogLevel[priority], "%s", buf);
+		syslog(sysLogLevel[priority], "%s", buf);
 #endif
 #if defined(USE_LOGFILE)
-	write_log (buf);
+	write_log(buf);
 #endif
 }
 
 void
-init_log (const char *filename)
+init_log(const char *filename)
 {
 #if defined(USE_LOGFILE)
-	open_log (filename);
+	open_log(filename);
 #endif
 #ifdef USE_SYSLOG
-	openlog ("ircd", LOG_PID | LOG_NDELAY, LOG_FACILITY);
+	openlog("ircd", LOG_PID | LOG_NDELAY, LOG_FACILITY);
 #endif
 #ifndef SYSLOG_USERS
-	eventAddIsh ("user_log_resync", user_log_resync, NULL, 60);
+	eventAddIsh("user_log_resync", user_log_resync, NULL, 60);
 #endif
 }
 
 void
-reopen_log (const char *filename)
+reopen_log(const char *filename)
 {
 #if defined(USE_LOGFILE)
-	fbclose (logFile);
-	open_log (filename);
+	fbclose(logFile);
+	open_log(filename);
 #endif
 
 }
 
 void
-set_log_level (int level)
+set_log_level(int level)
 {
 	if(L_ERROR < level && level <= L_DEBUG)
 		logLevel = level;
 }
 
 int
-get_log_level (void)
+get_log_level(void)
 {
 	return (logLevel);
 }
 
 const char *
-get_log_level_as_string (int level)
+get_log_level_as_string(int level)
 {
 	if(level > L_DEBUG)
 		level = L_DEBUG;
@@ -197,7 +197,7 @@ get_log_level_as_string (int level)
  *		  either SYSLOG or to file.
  */
 void
-log_user_exit (struct Client *source_p)
+log_user_exit(struct Client *source_p)
 {
 	time_t on_for;
 
@@ -205,16 +205,16 @@ log_user_exit (struct Client *source_p)
 
 #ifdef SYSLOG_USERS
 
-	if(IsPerson (source_p))
+	if(IsPerson(source_p))
 	{
 
-		ilog (L_INFO, "%s (%3ld:%02ld:%02ld): %s!%s@%s %ld/%ld\n",
-		      myctime (source_p->firsttime),
-		      (signed long) on_for / 3600,
-		      (signed long) (on_for % 3600) / 60,
-		      (signed long) on_for % 60,
-		      source_p->name, source_p->username, source_p->host,
-		      source_p->localClient->sendK, source_p->localClient->receiveK);
+		ilog(L_INFO, "%s (%3ld:%02ld:%02ld): %s!%s@%s %ld/%ld\n",
+		     myctime(source_p->firsttime),
+		     (signed long) on_for / 3600,
+		     (signed long) (on_for % 3600) / 60,
+		     (signed long) on_for % 60,
+		     source_p->name, source_p->username, source_p->host,
+		     source_p->localClient->sendK, source_p->localClient->receiveK);
 	}
 
 #else
@@ -227,34 +227,34 @@ log_user_exit (struct Client *source_p)
 		 * removing the file.
 		 * -Taner
 		 */
-		if(IsPerson (source_p))
+		if(IsPerson(source_p))
 		{
 			if(user_log_fb == NULL)
 			{
 				if((ConfigFileEntry.fname_userlog[0] != '\0')
 				   && (user_log_fb =
-				       fbopen (ConfigFileEntry.fname_userlog, "r")) != NULL)
+				       fbopen(ConfigFileEntry.fname_userlog, "r")) != NULL)
 				{
-					fbclose (user_log_fb);
-					user_log_fb = fbopen (ConfigFileEntry.fname_userlog, "a");
+					fbclose(user_log_fb);
+					user_log_fb = fbopen(ConfigFileEntry.fname_userlog, "a");
 				}
 			}
 
 			if(user_log_fb != NULL)
 			{
-				ircsprintf (linebuf,
-					    "%s (%3ld:%02ld:%02ld): %s!%s@%s %d/%d\n",
-					    myctime (source_p->firsttime),
-					    (signed long) on_for / 3600,
-					    (signed long) (on_for % 3600) /
-					    60, (signed long) on_for % 60,
-					    source_p->name,
-					    source_p->username,
-					    source_p->host,
-					    source_p->localClient->sendK,
-					    source_p->localClient->receiveK);
+				ircsprintf(linebuf,
+					   "%s (%3ld:%02ld:%02ld): %s!%s@%s %d/%d\n",
+					   myctime(source_p->firsttime),
+					   (signed long) on_for / 3600,
+					   (signed long) (on_for % 3600) /
+					   60, (signed long) on_for % 60,
+					   source_p->name,
+					   source_p->username,
+					   source_p->host,
+					   source_p->localClient->sendK,
+					   source_p->localClient->receiveK);
 
-				fbputs (linebuf, user_log_fb);
+				fbputs(linebuf, user_log_fb);
 			}
 		}
 	}
@@ -270,11 +270,11 @@ log_user_exit (struct Client *source_p)
  * side effects	-
  */
 static void
-user_log_resync (void *notused)
+user_log_resync(void *notused)
 {
 	if(user_log_fb != NULL)
 	{
-		fbclose (user_log_fb);
+		fbclose(user_log_fb);
 		user_log_fb = NULL;
 	}
 }
@@ -289,7 +289,7 @@ user_log_resync (void *notused)
  */
 
 void
-log_oper (struct Client *source_p, char *name)
+log_oper(struct Client *source_p, char *name)
 {
 	FBFILE *oper_fb;
 	char linebuf[BUFSIZE];
@@ -297,22 +297,22 @@ log_oper (struct Client *source_p, char *name)
 	if(ConfigFileEntry.fname_operlog[0] == '\0')
 		return;
 
-	if(IsPerson (source_p))
+	if(IsPerson(source_p))
 	{
-		if((oper_fb = fbopen (ConfigFileEntry.fname_operlog, "r")) != NULL)
+		if((oper_fb = fbopen(ConfigFileEntry.fname_operlog, "r")) != NULL)
 		{
-			fbclose (oper_fb);
-			oper_fb = fbopen (ConfigFileEntry.fname_operlog, "a");
+			fbclose(oper_fb);
+			oper_fb = fbopen(ConfigFileEntry.fname_operlog, "a");
 		}
 
 		if(oper_fb != NULL)
 		{
-			ircsprintf (linebuf, "%s OPER (%s) by (%s!%s@%s)\n",
-				    myctime (CurrentTime), name,
-				    source_p->name, source_p->username, source_p->host);
+			ircsprintf(linebuf, "%s OPER (%s) by (%s!%s@%s)\n",
+				   myctime(CurrentTime), name,
+				   source_p->name, source_p->username, source_p->host);
 
-			fbputs (linebuf, oper_fb);
-			fbclose (oper_fb);
+			fbputs(linebuf, oper_fb);
+			fbclose(oper_fb);
 		}
 	}
 }
@@ -324,7 +324,7 @@ log_oper (struct Client *source_p, char *name)
  * side effects - FNAME_FOPERLOG is written to, if present
  */
 void
-log_foper (struct Client *source_p, char *name)
+log_foper(struct Client *source_p, char *name)
 {
 	FBFILE *oper_fb;
 	char linebuf[BUFSIZE];
@@ -332,22 +332,22 @@ log_foper (struct Client *source_p, char *name)
 	if(ConfigFileEntry.fname_foperlog[0] == '\0')
 		return;
 
-	if(IsPerson (source_p))
+	if(IsPerson(source_p))
 	{
-		if((oper_fb = fbopen (ConfigFileEntry.fname_foperlog, "r")) != NULL)
+		if((oper_fb = fbopen(ConfigFileEntry.fname_foperlog, "r")) != NULL)
 		{
-			fbclose (oper_fb);
-			oper_fb = fbopen (ConfigFileEntry.fname_foperlog, "a");
+			fbclose(oper_fb);
+			oper_fb = fbopen(ConfigFileEntry.fname_foperlog, "a");
 		}
 
 		if(oper_fb != NULL)
 		{
-			ircsprintf (linebuf,
-				    "%s FAILED OPER (%s) by (%s!%s@%s)\n",
-				    myctime (CurrentTime), name,
-				    source_p->name, source_p->username, source_p->host);
-			fbputs (linebuf, oper_fb);
-			fbclose (oper_fb);
+			ircsprintf(linebuf,
+				   "%s FAILED OPER (%s) by (%s!%s@%s)\n",
+				   myctime(CurrentTime), name,
+				   source_p->name, source_p->username, source_p->host);
+			fbputs(linebuf, oper_fb);
+			fbclose(oper_fb);
 		}
 	}
 }
@@ -357,17 +357,17 @@ log_foper (struct Client *source_p, char *name)
  * returns a date in the form YY/MM/DD HH.MM
  */
 const char *
-smalldate (void)
+smalldate(void)
 {
 	static char buf[MAX_DATE_STRING];
 	struct tm *lt;
 	time_t lclock;
 
 	lclock = CurrentTime;
-	lt = localtime (&lclock);
+	lt = localtime(&lclock);
 
-	ircsprintf (buf, "%d/%d/%d %02d.%02d",
-		    lt->tm_year + 1900, lt->tm_mon + 1, lt->tm_mday, lt->tm_hour, lt->tm_min);
+	ircsprintf(buf, "%d/%d/%d %02d.%02d",
+		   lt->tm_year + 1900, lt->tm_mon + 1, lt->tm_mday, lt->tm_hour, lt->tm_min);
 
 	return buf;
 }

@@ -58,13 +58,13 @@
  * Thu Nov 24 18:22:48 1986 
  */
 const char *
-myctime (time_t value)
+myctime(time_t value)
 {
 	static char buf[32];
 	char *p;
 
-	strcpy (buf, ctime (&value));
-	if((p = strchr (buf, '\n')) != NULL)
+	strcpy(buf, ctime(&value));
+	if((p = strchr(buf, '\n')) != NULL)
 		*p = '\0';
 	return buf;
 }
@@ -78,11 +78,11 @@ myctime (time_t value)
  * -Dianora
  */
 char *
-clean_string (char *dest, const unsigned char *src, size_t len)
+clean_string(char *dest, const unsigned char *src, size_t len)
 {
 	char *d = dest;
-	assert (0 != dest);
-	assert (0 != src);
+	assert(0 != dest);
+	assert(0 != src);
 
 	if(dest == NULL || src == NULL)
 		return NULL;
@@ -96,7 +96,7 @@ clean_string (char *dest, const unsigned char *src, size_t len)
 			*d++ = '.';
 			--len;
 		}
-		else if(!IsPrint (*src))	/* if NOT printable */
+		else if(!IsPrint(*src))	/* if NOT printable */
 		{
 			*d++ = '^';
 			--len;
@@ -119,12 +119,12 @@ clean_string (char *dest, const unsigned char *src, size_t len)
  * NOTE: jdc: I have a gut feeling there's a faster way to do this.
  */
 char *
-strip_tabs (char *dest, const unsigned char *src, size_t len)
+strip_tabs(char *dest, const unsigned char *src, size_t len)
 {
 	char *d = dest;
 	/* Sanity check; we don't want anything nasty... */
-	assert (0 != dest);
-	assert (0 != src);
+	assert(0 != dest);
+	assert(0 != src);
 
 	if(dest == NULL || src == NULL)
 		return NULL;
@@ -152,7 +152,7 @@ strip_tabs (char *dest, const unsigned char *src, size_t len)
  *
  */
 char *
-strtoken (char **save, char *str, const char *fs)
+strtoken(char **save, char *str, const char *fs)
 {
 	char *pos = *save;	/* keep last position across calls */
 	char *tmp;
@@ -160,7 +160,7 @@ strtoken (char **save, char *str, const char *fs)
 	if(str)
 		pos = str;	/* new string scan */
 
-	while (pos && *pos && strchr (fs, *pos) != NULL)
+	while (pos && *pos && strchr(fs, *pos) != NULL)
 		++pos;		/* skip leading separators */
 
 	if(!pos || !*pos)
@@ -168,7 +168,7 @@ strtoken (char **save, char *str, const char *fs)
 
 	tmp = pos;		/* now, keep position of the token */
 
-	while (*pos && strchr (fs, *pos) == NULL)
+	while (*pos && strchr(fs, *pos) == NULL)
 		++pos;		/* skip content of the token */
 
 	if(*pos)
@@ -224,7 +224,7 @@ static const char *IpQuadTab[] = {
  */
 
 const char *
-inetntoa (const char *in)
+inetntoa(const char *in)
 {
 	static char buf[16];
 	char *bufptr = buf;
@@ -274,9 +274,9 @@ inetntoa (const char *in)
  * sizeof(int) < 4.  sizeof(int) > 4 is fine; all the world's not a VAX.
  */
 
-static const char *inet_ntop4 (const u_char * src, char *dst, unsigned int size);
+static const char *inet_ntop4(const u_char * src, char *dst, unsigned int size);
 #ifdef IPV6
-static const char *inet_ntop6 (const u_char * src, char *dst, unsigned int size);
+static const char *inet_ntop6(const u_char * src, char *dst, unsigned int size);
 #endif
 
 /* const char *
@@ -291,11 +291,11 @@ static const char *inet_ntop6 (const u_char * src, char *dst, unsigned int size)
  *	Paul Vixie, 1996.
  */
 static const char *
-inet_ntop4 (const unsigned char *src, char *dst, unsigned int size)
+inet_ntop4(const unsigned char *src, char *dst, unsigned int size)
 {
 	if(size < 16)
 		return NULL;
-	return strcpy (dst, inetntoa ((const char *) src));
+	return strcpy(dst, inetntoa((const char *) src));
 }
 
 /* const char *
@@ -306,7 +306,7 @@ inet_ntop4 (const unsigned char *src, char *dst, unsigned int size)
  */
 #ifdef IPV6
 static const char *
-inet_ntop6 (const unsigned char *src, char *dst, unsigned int size)
+inet_ntop6(const unsigned char *src, char *dst, unsigned int size)
 {
 	/*
 	 * Note that int32_t and int16_t need only be "at least" large enough
@@ -329,7 +329,7 @@ inet_ntop6 (const unsigned char *src, char *dst, unsigned int size)
 	 *      Copy the input (bytewise) array into a wordwise array.
 	 *      Find the longest run of 0x00's in src[] for :: shorthanding.
 	 */
-	memset (words, '\0', sizeof words);
+	memset(words, '\0', sizeof words);
 	for (i = 0; i < IN6ADDRSZ; i += 2)
 		words[i / 2] = (src[i] << 8) | src[i + 1];
 	best.base = -1;
@@ -381,12 +381,12 @@ inet_ntop6 (const unsigned char *src, char *dst, unsigned int size)
 		if(i == 6 && best.base == 0 &&
 		   (best.len == 6 || (best.len == 5 && words[5] == 0xffff)))
 		{
-			if(!inet_ntop4 (src + 12, tp, sizeof tmp - (tp - tmp)))
+			if(!inet_ntop4(src + 12, tp, sizeof tmp - (tp - tmp)))
 				return (NULL);
-			tp += strlen (tp);
+			tp += strlen(tp);
 			break;
 		}
-		tp += SPRINTF ((tp, "%x", words[i]));
+		tp += SPRINTF((tp, "%x", words[i]));
 	}
 	/* Was it a trailing run of 0x00's? */
 	if(best.base != -1 && (best.base + best.len) == (IN6ADDRSZ / INT16SZ))
@@ -401,7 +401,7 @@ inet_ntop6 (const unsigned char *src, char *dst, unsigned int size)
 	{
 		return (NULL);
 	}
-	return strcpy (dst, tmp);
+	return strcpy(dst, tmp);
 }
 #endif
 
@@ -414,21 +414,21 @@ inet_ntop6 (const unsigned char *src, char *dst, unsigned int size)
  *	Paul Vixie, 1996.
  */
 const char *
-inetntop (int af, const void *src, char *dst, unsigned int size)
+inetntop(int af, const void *src, char *dst, unsigned int size)
 {
 	switch (af)
 	{
 	case AF_INET:
-		return (inet_ntop4 (src, dst, size));
+		return (inet_ntop4(src, dst, size));
 #ifdef IPV6
 	case AF_INET6:
-		if(IN6_IS_ADDR_V4MAPPED ((const struct in6_addr *) src) ||
-		   IN6_IS_ADDR_V4COMPAT ((const struct in6_addr *) src))
+		if(IN6_IS_ADDR_V4MAPPED((const struct in6_addr *) src) ||
+		   IN6_IS_ADDR_V4COMPAT((const struct in6_addr *) src))
 			return (inet_ntop4
 				((unsigned char *)
 				 &((struct in6_addr *) src)->s6_addr[12], dst, size));
 		else
-			return (inet_ntop6 (src, dst, size));
+			return (inet_ntop6(src, dst, size));
 
 
 #endif
@@ -466,7 +466,7 @@ inetntop (int af, const void *src, char *dst, unsigned int size)
  *	Paul Vixie, 1996.
  */
 static int
-inet_pton4 (src, dst)
+inet_pton4(src, dst)
      const char *src;
      u_char *dst;
 {
@@ -505,7 +505,7 @@ inet_pton4 (src, dst)
 	}
 	if(octets < 4)
 		return (0);
-	memcpy (dst, tmp, INADDRSZ);
+	memcpy(dst, tmp, INADDRSZ);
 	return (1);
 }
 
@@ -525,7 +525,7 @@ inet_pton4 (src, dst)
  */
 
 static int
-inet_pton6 (src, dst)
+inet_pton6(src, dst)
      const char *src;
      u_char *dst;
 {
@@ -535,7 +535,7 @@ inet_pton6 (src, dst)
 	int ch, saw_xdigit;
 	u_int val;
 
-	tp = memset (tmp, '\0', IN6ADDRSZ);
+	tp = memset(tmp, '\0', IN6ADDRSZ);
 	endp = tp + IN6ADDRSZ;
 	colonp = NULL;
 	/* Leading :: requires some special handling. */
@@ -545,11 +545,11 @@ inet_pton6 (src, dst)
 	curtok = src;
 	saw_xdigit = 0;
 	val = 0;
-	while ((ch = tolower (*src++)) != '\0')
+	while ((ch = tolower(*src++)) != '\0')
 	{
 		const char *pch;
 
-		pch = strchr (xdigits, ch);
+		pch = strchr(xdigits, ch);
 		if(pch != NULL)
 		{
 			val <<= 4;
@@ -583,7 +583,7 @@ inet_pton6 (src, dst)
 		}
 		if(*src != '\0' && ch == '.')
 		{
-			if(((tp + INADDRSZ) <= endp) && inet_pton4 (curtok, tp) > 0)
+			if(((tp + INADDRSZ) <= endp) && inet_pton4(curtok, tp) > 0)
 			{
 				tp += INADDRSZ;
 				saw_xdigit = 0;
@@ -621,12 +621,12 @@ inet_pton6 (src, dst)
 	}
 	if(tp != endp)
 		return (0);
-	memcpy (dst, tmp, IN6ADDRSZ);
+	memcpy(dst, tmp, IN6ADDRSZ);
 	return (1);
 }
 #endif
 int
-inetpton (af, src, dst)
+inetpton(af, src, dst)
      int af;
      const char *src;
      void *dst;
@@ -634,18 +634,18 @@ inetpton (af, src, dst)
 	switch (af)
 	{
 	case AF_INET:
-		return (inet_pton4 (src, dst));
+		return (inet_pton4(src, dst));
 #ifdef IPV6
 	case AF_INET6:
 		/* Somebody might have passed as an IPv4 address this is sick but it works */
-		if(inet_pton4 (src, dst))
+		if(inet_pton4(src, dst))
 		{
 			char tmp[HOSTIPLEN];
-			ircsprintf (tmp, "::ffff:%s", src);
-			return (inet_pton6 (tmp, dst));
+			ircsprintf(tmp, "::ffff:%s", src);
+			return (inet_pton6(tmp, dst));
 		}
 		else
-			return (inet_pton6 (src, dst));
+			return (inet_pton6(src, dst));
 #endif
 	default:
 		return (-1);
@@ -688,7 +688,7 @@ inetpton (af, src, dst)
 
 #ifndef HAVE_STRLCAT
 size_t
-strlcat (char *dst, const char *src, size_t siz)
+strlcat(char *dst, const char *src, size_t siz)
 {
 	char *d = dst;
 	const char *s = src;
@@ -700,7 +700,7 @@ strlcat (char *dst, const char *src, size_t siz)
 	n = siz - dlen;
 
 	if(n == 0)
-		return (dlen + strlen (s));
+		return (dlen + strlen(s));
 	while (*s != '\0')
 	{
 		if(n != 1)
@@ -717,7 +717,7 @@ strlcat (char *dst, const char *src, size_t siz)
 
 #ifndef HAVE_STRLCPY
 size_t
-strlcpy (char *dst, const char *src, size_t siz)
+strlcpy(char *dst, const char *src, size_t siz)
 {
 	char *d = dst;
 	const char *s = src;

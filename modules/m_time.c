@@ -38,9 +38,9 @@
 #include "packet.h"
 #include "sprintf_irc.h"
 
-static void m_time (struct Client *, struct Client *, int, char **);
-static void mo_time (struct Client *, struct Client *, int, char **);
-static char *date (void);
+static void m_time(struct Client *, struct Client *, int, char **);
+static void mo_time(struct Client *, struct Client *, int, char **);
+static char *date(void);
 
 struct Message time_msgtab = {
 	"TIME", 0, 0, 0, 0, MFLG_SLOW, 0,
@@ -60,15 +60,15 @@ static const char *weekdays[] = {
 
 #ifndef STATIC_MODULES
 void
-_modinit (void)
+_modinit(void)
 {
-	mod_add_cmd (&time_msgtab);
+	mod_add_cmd(&time_msgtab);
 }
 
 void
-_moddeinit (void)
+_moddeinit(void)
 {
-	mod_del_cmd (&time_msgtab);
+	mod_del_cmd(&time_msgtab);
 }
 
 const char *_version = "$Revision$";
@@ -80,20 +80,20 @@ const char *_version = "$Revision$";
  *      parv[1] = servername
  */
 static void
-m_time (struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+m_time(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
 {
 	/* this is not rate limited, so end the grace period */
-	if(MyClient (source_p) && !IsFloodDone (source_p))
-		flood_endgrace (source_p);
+	if(MyClient(source_p) && !IsFloodDone(source_p))
+		flood_endgrace(source_p);
 
 	/* This is safe enough to use during non hidden server mode */
 	if(!ConfigServerHide.disable_remote)
 	{
-		if(hunt_server (client_p, source_p, ":%s TIME :%s", 1, parc, parv) != HUNTED_ISME)
+		if(hunt_server(client_p, source_p, ":%s TIME :%s", 1, parc, parv) != HUNTED_ISME)
 			return;
 	}
 
-	sendto_one (source_p, form_str (RPL_TIME), me.name, parv[0], me.name, date ());
+	sendto_one(source_p, form_str(RPL_TIME), me.name, parv[0], me.name, date());
 }
 
 /*
@@ -102,10 +102,10 @@ m_time (struct Client *client_p, struct Client *source_p, int parc, char *parv[]
  *      parv[1] = servername
  */
 static void
-mo_time (struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+mo_time(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
 {
-	if(hunt_server (client_p, source_p, ":%s TIME :%s", 1, parc, parv) == HUNTED_ISME)
-		sendto_one (source_p, form_str (RPL_TIME), me.name, parv[0], me.name, date ());
+	if(hunt_server(client_p, source_p, ":%s TIME :%s", 1, parc, parv) == HUNTED_ISME)
+		sendto_one(source_p, form_str(RPL_TIME), me.name, parv[0], me.name, date());
 }
 
 /* date()
@@ -113,7 +113,7 @@ mo_time (struct Client *client_p, struct Client *source_p, int parc, char *parv[
  * returns date in human readable form
  */
 static char *
-date (void)
+date(void)
 {
 	static char buf[80];
 	char plus;
@@ -124,10 +124,10 @@ date (void)
 	int minswest;
 
 	lclock = CurrentTime;
-	gm = gmtime (&lclock);
-	memcpy ((void *) &gmbuf, (void *) gm, sizeof (gmbuf));
+	gm = gmtime(&lclock);
+	memcpy((void *) &gmbuf, (void *) gm, sizeof(gmbuf));
 	gm = &gmbuf;
-	lt = localtime (&lclock);
+	lt = localtime(&lclock);
 
 	if(lt->tm_yday == gm->tm_yday)
 		minswest = (gm->tm_hour - lt->tm_hour) * 60 + (gm->tm_min - lt->tm_min);
@@ -141,10 +141,10 @@ date (void)
 	if(minswest < 0)
 		minswest = -minswest;
 
-	ircsprintf (buf, "%s %s %d %d -- %02u:%02u:%02u %c%02u:%02u",
-		    weekdays[lt->tm_wday], months[lt->tm_mon], lt->tm_mday,
-		    lt->tm_year + 1900, lt->tm_hour, lt->tm_min, lt->tm_sec,
-		    plus, minswest / 60, minswest % 60);
+	ircsprintf(buf, "%s %s %d %d -- %02u:%02u:%02u %c%02u:%02u",
+		   weekdays[lt->tm_wday], months[lt->tm_mon], lt->tm_mday,
+		   lt->tm_year + 1900, lt->tm_hour, lt->tm_min, lt->tm_sec,
+		   plus, minswest / 60, minswest % 60);
 
 	return buf;
 }

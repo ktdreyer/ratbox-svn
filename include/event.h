@@ -34,7 +34,7 @@
 #define	MAX_EVENTS	50
 
 
-typedef void EVH (void *);
+typedef void EVH(void *);
 
 /* The list of event processes */
 struct ev_entry
@@ -47,15 +47,15 @@ struct ev_entry
 	int active;
 };
 
-extern void eventAdd (const char *name, EVH * func, void *arg, time_t when);
-extern void eventAddIsh (const char *name, EVH * func, void *arg, time_t delta_ish);
-extern void eventRun (void);
-extern time_t eventNextTime (void);
-extern void eventInit (void);
-extern void eventDelete (EVH * func, void *);
-extern int eventFind (EVH * func, void *);
-extern void set_back_events (time_t);
+extern void eventAdd(const char *name, EVH * func, void *arg, time_t when);
+extern void eventAddIsh(const char *name, EVH * func, void *arg, time_t delta_ish);
+extern void eventRun(void);
+extern time_t eventNextTime(void);
+extern void eventInit(void);
+extern void eventDelete(EVH * func, void *);
+extern int eventFind(EVH * func, void *);
+extern void set_back_events(time_t);
 
-extern void show_events (struct Client *source_p);
+extern void show_events(struct Client *source_p);
 
 #endif /* INCLUDED_event_h */

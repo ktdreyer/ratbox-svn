@@ -37,8 +37,8 @@
 #include "parse.h"
 #include "modules.h"
 
-static void m_lusers (struct Client *, struct Client *, int, char **);
-static void ms_lusers (struct Client *, struct Client *, int, char **);
+static void m_lusers(struct Client *, struct Client *, int, char **);
+static void ms_lusers(struct Client *, struct Client *, int, char **);
 
 struct Message lusers_msgtab = {
 	"LUSERS", 0, 0, 0, 0, MFLG_SLOW, 0,
@@ -47,15 +47,15 @@ struct Message lusers_msgtab = {
 #ifndef STATIC_MODULES
 
 void
-_modinit (void)
+_modinit(void)
 {
-	mod_add_cmd (&lusers_msgtab);
+	mod_add_cmd(&lusers_msgtab);
 }
 
 void
-_moddeinit (void)
+_moddeinit(void)
 {
-	mod_del_cmd (&lusers_msgtab);
+	mod_del_cmd(&lusers_msgtab);
 }
 
 const char *_version = "$Revision$";
@@ -70,15 +70,15 @@ const char *_version = "$Revision$";
  * to cause a force
  */
 static void
-m_lusers (struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+m_lusers(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
 {
 	static time_t last_used = 0;
 
 	if((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
 	{
 		/* safe enough to give this on a local connect only */
-		if(MyClient (source_p))
-			sendto_one (source_p, form_str (RPL_LOAD2HI), me.name, parv[0]);
+		if(MyClient(source_p))
+			sendto_one(source_p, form_str(RPL_LOAD2HI), me.name, parv[0]);
 		return;
 	}
 	else
@@ -86,12 +86,12 @@ m_lusers (struct Client *client_p, struct Client *source_p, int parc, char *parv
 
 	if(parc > 2 && !ConfigServerHide.disable_remote)
 	{
-		if(hunt_server (client_p, source_p, ":%s LUSERS %s :%s", 2, parc, parv) !=
+		if(hunt_server(client_p, source_p, ":%s LUSERS %s :%s", 2, parc, parv) !=
 		   HUNTED_ISME)
 			return;
 	}
 
-	show_lusers (source_p);
+	show_lusers(source_p);
 }
 
 /*
@@ -104,17 +104,17 @@ m_lusers (struct Client *client_p, struct Client *source_p, int parc, char *parv
  * to cause a force
  */
 static void
-ms_lusers (struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+ms_lusers(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
 {
 	if(parc > 2)
 	{
-		if(hunt_server (client_p, source_p, ":%s LUSERS %s :%s", 2, parc, parv)
+		if(hunt_server(client_p, source_p, ":%s LUSERS %s :%s", 2, parc, parv)
 		   != HUNTED_ISME)
 		{
 			return;
 		}
 	}
 
-	if(IsClient (source_p))
-		show_lusers (source_p);
+	if(IsClient(source_p))
+		show_lusers(source_p);
 }

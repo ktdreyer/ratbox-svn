@@ -40,7 +40,7 @@
 
 static char buf[BUFSIZE];
 
-static void m_userhost (struct Client *, struct Client *, int, char **);
+static void m_userhost(struct Client *, struct Client *, int, char **);
 
 struct Message userhost_msgtab = {
 	"USERHOST", 0, 0, 1, 0, MFLG_SLOW, 0,
@@ -49,15 +49,15 @@ struct Message userhost_msgtab = {
 
 #ifndef STATIC_MODULES
 void
-_modinit (void)
+_modinit(void)
 {
-	mod_add_cmd (&userhost_msgtab);
+	mod_add_cmd(&userhost_msgtab);
 }
 
 void
-_moddeinit (void)
+_moddeinit(void)
 {
-	mod_del_cmd (&userhost_msgtab);
+	mod_del_cmd(&userhost_msgtab);
 }
 
 const char *_version = "$Revision$";
@@ -68,7 +68,7 @@ const char *_version = "$Revision$";
  * information only (no spurious AWAY labels or channels).
  */
 static void
-m_userhost (struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+m_userhost(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
 {
 	struct Client *target_p;
 	char response[NICKLEN * 2 + USERLEN + HOSTLEN + 30];
@@ -77,7 +77,7 @@ m_userhost (struct Client *client_p, struct Client *source_p, int parc, char *pa
 	int cur_len;
 	int rl;
 
-	cur_len = ircsprintf (buf, form_str (RPL_USERHOST), me.name, parv[0], "");
+	cur_len = ircsprintf(buf, form_str(RPL_USERHOST), me.name, parv[0], "");
 	t = buf + cur_len;
 
 	for (i = 0; i < 5; i++)
@@ -85,7 +85,7 @@ m_userhost (struct Client *client_p, struct Client *source_p, int parc, char *pa
 		if(parv[i + 1] == NULL)
 			break;
 
-		if((target_p = find_person (parv[i + 1])) != NULL)
+		if((target_p = find_person(parv[i + 1])) != NULL)
 		{
 			/*
 			 * Show real IP for USERHOST on yourself.
@@ -100,27 +100,27 @@ m_userhost (struct Client *client_p, struct Client *source_p, int parc, char *pa
 			 * including your nick and the nick of someone not known to
 			 * the leaf, you'll get your spoofed IP.  tough.
 			 */
-			if(MyClient (target_p) && (target_p == source_p))
+			if(MyClient(target_p) && (target_p == source_p))
 			{
-				rl = ircsprintf (response, "%s%s=%c%s@%s ",
-						 target_p->name,
-						 IsOper (target_p) ? "*" : "",
-						 (target_p->user->away) ? '-' : '+',
-						 target_p->username,
-						 target_p->localClient->sockhost);
+				rl = ircsprintf(response, "%s%s=%c%s@%s ",
+						target_p->name,
+						IsOper(target_p) ? "*" : "",
+						(target_p->user->away) ? '-' : '+',
+						target_p->username,
+						target_p->localClient->sockhost);
 			}
 			else
 			{
-				rl = ircsprintf (response, "%s%s=%c%s@%s ",
-						 target_p->name,
-						 IsOper (target_p) ? "*" : "",
-						 (target_p->user->away) ? '-' : '+',
-						 target_p->username, target_p->host);
+				rl = ircsprintf(response, "%s%s=%c%s@%s ",
+						target_p->name,
+						IsOper(target_p) ? "*" : "",
+						(target_p->user->away) ? '-' : '+',
+						target_p->username, target_p->host);
 			}
 
 			if((rl + cur_len) < (BUFSIZE - 10))
 			{
-				ircsprintf (t, "%s", response);
+				ircsprintf(t, "%s", response);
 				t += rl;
 				cur_len += rl;
 			}
@@ -129,5 +129,5 @@ m_userhost (struct Client *client_p, struct Client *source_p, int parc, char *pa
 		}
 	}
 
-	sendto_one (source_p, "%s", buf);
+	sendto_one(source_p, "%s", buf);
 }

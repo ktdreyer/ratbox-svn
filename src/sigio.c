@@ -67,7 +67,7 @@ static int sigio_signal;
 static int sigio_is_screwed = 0;	/* We overflowed our sigio queue */
 static sigset_t our_sigset;
 
-static void poll_update_pollfds (int, short, PF *);
+static void poll_update_pollfds(int, short, PF *);
 
 /* 
  * static void mask_our_signal(int s)
@@ -77,16 +77,16 @@ static void poll_update_pollfds (int, short, PF *);
  * Side Effects:  Block the said signal
  */
 static void
-mask_our_signal (int s)
+mask_our_signal(int s)
 {
-	sigemptyset (&our_sigset);
-	sigaddset (&our_sigset, s);
-	sigaddset (&our_sigset, SIGIO);
-	sigprocmask (SIG_BLOCK, &our_sigset, NULL);
+	sigemptyset(&our_sigset);
+	sigaddset(&our_sigset, s);
+	sigaddset(&our_sigset, SIGIO);
+	sigprocmask(SIG_BLOCK, &our_sigset, NULL);
 }
 
 static void
-poll_update_pollfds (int fd, short event, PF * handler)
+poll_update_pollfds(int fd, short event, PF * handler)
 {
 	fde_t *F = &fd_table[fd];
 	struct pollfd *pf;
@@ -102,7 +102,7 @@ poll_update_pollfds (int fd, short event, PF * handler)
 
 	pf = &pfds[comm_index];
 
-	
+
 	/* Update the events */
 	if(handler != NULL)
 	{
@@ -147,14 +147,14 @@ poll_update_pollfds (int fd, short event, PF * handler)
  * Side Effect: Sets the FD up for SIGIO
  */
 void
-setup_sigio_fd (int fd)
+setup_sigio_fd(int fd)
 {
 	int flags;
-	flags = fcntl (fd, F_GETFL, 0);
+	flags = fcntl(fd, F_GETFL, 0);
 	flags |= O_ASYNC | O_NONBLOCK;
-	fcntl (fd, F_SETFL, flags);
-	fcntl (fd, F_SETSIG, sigio_signal);
-	fcntl (fd, F_SETOWN, getpid ());
+	fcntl(fd, F_SETFL, flags);
+	fcntl(fd, F_SETSIG, sigio_signal);
+	fcntl(fd, F_SETOWN, getpid());
 }
 
 /*
@@ -166,13 +166,13 @@ setup_sigio_fd (int fd)
  *		 be called to initialise the network loop code.
  */
 void
-init_netio (void)
+init_netio(void)
 {
 	sigio_signal = SIGRTMIN;
-	pfds = MyMalloc (MAXCONNECTIONS * sizeof (struct pollfd));
-	index_to_fde = MyMalloc (MAXCONNECTIONS * sizeof (fde_t *));
+	pfds = MyMalloc(MAXCONNECTIONS * sizeof(struct pollfd));
+	index_to_fde = MyMalloc(MAXCONNECTIONS * sizeof(fde_t *));
 
-	mask_our_signal (sigio_signal);
+	mask_our_signal(sigio_signal);
 }
 
 /*
@@ -182,23 +182,23 @@ init_netio (void)
  * and deregister interest in a pending IO state for a given FD.
  */
 void
-comm_setselect (int fd, fdlist_t list, unsigned int type, PF * handler,
-		void *client_data, time_t timeout)
+comm_setselect(int fd, fdlist_t list, unsigned int type, PF * handler,
+	       void *client_data, time_t timeout)
 {
 	fde_t *F = &fd_table[fd];
-	assert (fd >= 0);
-	assert (F->flags.open);
+	assert(fd >= 0);
+	assert(F->flags.open);
 	if(type & COMM_SELECT_READ)
 	{
 		F->read_handler = handler;
 		F->read_data = client_data;
-		poll_update_pollfds (fd, POLLIN, handler);
+		poll_update_pollfds(fd, POLLIN, handler);
 	}
 	if(type & COMM_SELECT_WRITE)
 	{
 		F->write_handler = handler;
 		F->write_data = client_data;
-		poll_update_pollfds (fd, POLLOUT, handler);
+		poll_update_pollfds(fd, POLLOUT, handler);
 	}
 	if(timeout)
 		F->timeout = CurrentTime + (timeout / 1000);
@@ -218,7 +218,7 @@ comm_setselect (int fd, fdlist_t list, unsigned int type, PF * handler,
  * events.
  */
 int
-comm_select (unsigned long delay)
+comm_select(unsigned long delay)
 {
 	int num = 0;
 	int revents = 0;
@@ -236,12 +236,12 @@ comm_select (unsigned long delay)
 	{
 		if(!sigio_is_screwed)
 		{
-			if((sig = sigtimedwait (&our_sigset, &si, &timeout)) > 0)
+			if((sig = sigtimedwait(&our_sigset, &si, &timeout)) > 0)
 			{
 				if(sig == SIGIO)
 				{
-					ilog (L_WARN,
-					      "Kernel RT Signal queue overflowed.  Is /proc/sys/kernel/rtsig-max too small?");
+					ilog(L_WARN,
+					     "Kernel RT Signal queue overflowed.  Is /proc/sys/kernel/rtsig-max too small?");
 					sigio_is_screwed = 1;
 					break;
 				}
@@ -251,31 +251,33 @@ comm_select (unsigned long delay)
 				num++;
 				F = &fd_table[fd];
 				if(!F->flags.open || F->fd < 0)
-					continue;	
-				
-				set_time ();
-				if(F->flags.open && (revents & (POLLRDNORM | POLLIN | POLLHUP | POLLERR)))
+					continue;
+
+				set_time();
+				if(F->flags.open
+				   && (revents & (POLLRDNORM | POLLIN | POLLHUP | POLLERR)))
 				{
 					callbacks_called++;
 					hdl = F->read_handler;
 					F->read_handler = NULL;
 					if(hdl)
-						hdl (fd, F->read_data);
+						hdl(fd, F->read_data);
 				}
-				
-				if(F->flags.open && (revents & (POLLWRNORM | POLLOUT | POLLHUP | POLLERR)))
+
+				if(F->flags.open
+				   && (revents & (POLLWRNORM | POLLOUT | POLLHUP | POLLERR)))
 				{
 					callbacks_called++;
 					hdl = F->write_handler;
 					F->write_handler = NULL;
 					if(hdl)
-						hdl (fd, F->write_data);
+						hdl(fd, F->write_data);
 				}
 
 				if(F->read_handler == NULL)
-					poll_update_pollfds (fd, POLLIN, NULL);
+					poll_update_pollfds(fd, POLLIN, NULL);
 				if(F->write_handler == NULL)
-					poll_update_pollfds (fd, POLLOUT, NULL);
+					poll_update_pollfds(fd, POLLOUT, NULL);
 
 				F = NULL;
 			}
@@ -289,30 +291,30 @@ comm_select (unsigned long delay)
 
 	if(!sigio_is_screwed)	/* We don't need to proceed */
 	{
-		set_time ();
+		set_time();
 		return 0;
 	}
 	for (;;)
 	{
 		if(sigio_is_screwed)
 		{
-			signal (sigio_signal, SIG_IGN);
-			signal (sigio_signal, SIG_DFL);
+			signal(sigio_signal, SIG_IGN);
+			signal(sigio_signal, SIG_DFL);
 			sigio_is_screwed = 0;
 		}
-		num = poll (pfds, used_count, 0);
+		num = poll(pfds, used_count, 0);
 		if(num >= 0)
 			break;
-		if(ignoreErrno (errno))
+		if(ignoreErrno(errno))
 			continue;
 		/* error! */
-		set_time ();
+		set_time();
 		return -1;
 		/* NOTREACHED */
 	}
 
 	/* update current time again, eww.. */
-	set_time ();
+	set_time();
 
 	if(num == 0)
 		return 0;
@@ -330,7 +332,7 @@ comm_select (unsigned long delay)
 			hdl = F->read_handler;
 			F->read_handler = NULL;
 			if(hdl)
-				hdl (fd, F->read_data);
+				hdl(fd, F->read_data);
 		}
 
 		if(F->flags.open == 0)
@@ -341,16 +343,16 @@ comm_select (unsigned long delay)
 			hdl = F->write_handler;
 			F->write_handler = NULL;
 			if(hdl)
-				hdl (fd, F->write_data);
+				hdl(fd, F->write_data);
 		}
 
 		if(F->read_handler == NULL)
-			poll_update_pollfds (fd, POLLIN, NULL);
+			poll_update_pollfds(fd, POLLIN, NULL);
 		if(F->write_handler == NULL)
-			poll_update_pollfds (fd, POLLOUT, NULL);
+			poll_update_pollfds(fd, POLLOUT, NULL);
 
 	}
-	mask_our_signal (sigio_signal);
+	mask_our_signal(sigio_signal);
 	return 0;
 }
 

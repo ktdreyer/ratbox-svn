@@ -35,7 +35,7 @@
 #include "parse.h"
 #include "modules.h"
 
-static void mr_pass (struct Client *, struct Client *, int, char **);
+static void mr_pass(struct Client *, struct Client *, int, char **);
 
 struct Message pass_msgtab = {
 	"PASS", 0, 0, 2, 0, MFLG_SLOW | MFLG_UNREG, 0,
@@ -44,15 +44,15 @@ struct Message pass_msgtab = {
 
 #ifndef STATIC_MODULES
 void
-_modinit (void)
+_modinit(void)
 {
-	mod_add_cmd (&pass_msgtab);
+	mod_add_cmd(&pass_msgtab);
 }
 
 void
-_moddeinit (void)
+_moddeinit(void)
 {
-	mod_del_cmd (&pass_msgtab);
+	mod_del_cmd(&pass_msgtab);
 }
 
 const char *_version = "$Revision$";
@@ -67,18 +67,18 @@ const char *_version = "$Revision$";
  *      parv[2] = optional extra version information
  */
 static void
-mr_pass (struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+mr_pass(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
 {
 	const char *password = parv[1];
 
-	if(EmptyString (password))
+	if(EmptyString(password))
 	{
-		sendto_one (client_p, form_str (ERR_NEEDMOREPARAMS),
-			    me.name, BadPtr (parv[0]) ? "*" : parv[0], "PASS");
+		sendto_one(client_p, form_str(ERR_NEEDMOREPARAMS),
+			   me.name, BadPtr(parv[0]) ? "*" : parv[0], "PASS");
 		return;
 	}
 
-	strlcpy (client_p->localClient->passwd, password, sizeof (client_p->localClient->passwd));
+	strlcpy(client_p->localClient->passwd, password, sizeof(client_p->localClient->passwd));
 
 	if(parc > 2)
 	{
@@ -90,7 +90,7 @@ mr_pass (struct Client *client_p, struct Client *source_p, int parc, char *parv[
 		 * safely assume if there is a ":TS" then its a TS server
 		 * -Dianora
 		 */
-		if(0 == irccmp (parv[2], "TS") && client_p->tsinfo == 0)
+		if(0 == irccmp(parv[2], "TS") && client_p->tsinfo == 0)
 			client_p->tsinfo = TS_DOESTS;
 	}
 }

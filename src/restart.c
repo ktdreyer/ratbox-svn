@@ -42,28 +42,27 @@
 extern char **myargv;
 
 void
-restart (const char *mesg)
+restart(const char *mesg)
 {
 	static int was_here = NO;	/* redundant due to restarting flag below */
 
 	if(was_here)
-		abort ();
+		abort();
 	was_here = YES;
 
-	ilog (L_NOTICE,
-	      "Restarting Server because: %s, memory data limit: %ld", mesg, get_maxrss ());
+	ilog(L_NOTICE, "Restarting Server because: %s, memory data limit: %ld", mesg, get_maxrss());
 
-	server_reboot ();
+	server_reboot();
 }
 
 void
-server_reboot (void)
+server_reboot(void)
 {
 	int i;
 
-	sendto_realops_flags (UMODE_ALL, L_ALL, "Restarting server...");
+	sendto_realops_flags(UMODE_ALL, L_ALL, "Restarting server...");
 
-	ilog (L_NOTICE, "Restarting server...");
+	ilog(L_NOTICE, "Restarting server...");
 	/*
 	 * XXX we used to call flush_connections() here. But since this routine
 	 * doesn't exist anymore, we won't be flushing. This is ok, since 
@@ -75,8 +74,8 @@ server_reboot (void)
 	 * close everything the "wrong" way for now, and just LEAVE...
 	 */
 	for (i = 0; i < MAXCONNECTIONS; ++i)
-		close (i);
-	execv (SPATH, myargv);
+		close(i);
+	execv(SPATH, myargv);
 
-	exit (-1);
+	exit(-1);
 }

@@ -41,7 +41,7 @@
  * -- adrian
  */
 void
-mem_frob (void *data, int len)
+mem_frob(void *data, int len)
 {
 	/* correct for Intel only! little endian */
 	unsigned char b[4] = { 0xef, 0xbe, 0xad, 0xde };
@@ -63,11 +63,11 @@ mem_frob (void *data, int len)
  *   -- adrian
  */
 void
-dlinkAdd (void *data, dlink_node * m, dlink_list * list)
+dlinkAdd(void *data, dlink_node * m, dlink_list * list)
 {
-	assert (data != NULL);
-	assert (m != NULL);
-	assert (list != NULL);
+	assert(data != NULL);
+	assert(m != NULL);
+	assert(list != NULL);
 
 	m->data = data;
 	m->next = list->head;
@@ -83,17 +83,17 @@ dlinkAdd (void *data, dlink_node * m, dlink_list * list)
 }
 
 void
-dlinkAddBefore (dlink_node * b, void *data, dlink_node * m, dlink_list * list)
+dlinkAddBefore(dlink_node * b, void *data, dlink_node * m, dlink_list * list)
 {
-	assert (b != NULL);
-	assert (data != NULL);
-	assert (m != NULL);
-	assert (list != NULL);
+	assert(b != NULL);
+	assert(data != NULL);
+	assert(m != NULL);
+	assert(list != NULL);
 
 	/* Shortcut - if its the first one, call dlinkAdd only */
 	if(b == list->head)
 	{
-		dlinkAdd (data, m, list);
+		dlinkAdd(data, m, list);
 	}
 	else
 	{
@@ -107,11 +107,11 @@ dlinkAddBefore (dlink_node * b, void *data, dlink_node * m, dlink_list * list)
 }
 
 void
-dlinkAddTail (void *data, dlink_node * m, dlink_list * list)
+dlinkAddTail(void *data, dlink_node * m, dlink_list * list)
 {
-	assert (data != NULL);
-	assert (m != NULL);
-	assert (list != NULL);
+	assert(data != NULL);
+	assert(m != NULL);
+	assert(list != NULL);
 
 	m->data = data;
 	m->next = NULL;
@@ -131,10 +131,10 @@ dlinkAddTail (void *data, dlink_node * m, dlink_list * list)
  * often of all non-spontaneous functions. So it had better be
  * efficient. */
 void
-dlinkDelete (dlink_node * m, dlink_list * list)
+dlinkDelete(dlink_node * m, dlink_list * list)
 {
-	assert (m != NULL);
-	assert (list != NULL);
+	assert(m != NULL);
+	assert(list != NULL);
 
 	/* Assumption: If m->next == NULL, then list->tail == m
 	 *      and:   If m->prev == NULL, then list->head == m
@@ -164,13 +164,13 @@ dlinkDelete (dlink_node * m, dlink_list * list)
  * side effects	- Look for ptr in the linked listed pointed to by link.
  */
 dlink_node *
-dlinkFind (dlink_list * list, void *data)
+dlinkFind(dlink_list * list, void *data)
 {
 	dlink_node *ptr;
-	assert (list != NULL);
-	assert (data != NULL);
+	assert(list != NULL);
+	assert(data != NULL);
 
-	DLINK_FOREACH (ptr, list->head)
+	DLINK_FOREACH(ptr, list->head)
 	{
 		if(ptr->data == data)
 			return (ptr);
@@ -179,10 +179,10 @@ dlinkFind (dlink_list * list, void *data)
 }
 
 void
-dlinkMoveList (dlink_list * from, dlink_list * to)
+dlinkMoveList(dlink_list * from, dlink_list * to)
 {
-	assert (from != NULL);
-	assert (to != NULL);
+	assert(from != NULL);
+	assert(to != NULL);
 
 	/* There are three cases */
 	/* case one, nothing in from list */
@@ -210,14 +210,14 @@ dlinkMoveList (dlink_list * from, dlink_list * to)
 }
 
 dlink_node *
-dlinkFindDelete (dlink_list * list, void *data)
+dlinkFindDelete(dlink_list * list, void *data)
 {
 	dlink_node *m;
 
-	assert (list != NULL);
-	assert (data != NULL);
+	assert(list != NULL);
+	assert(data != NULL);
 
-	DLINK_FOREACH (m, list->head)
+	DLINK_FOREACH(m, list->head)
 	{
 		if(m->data != data)
 			continue;
@@ -240,16 +240,16 @@ dlinkFindDelete (dlink_list * list, void *data)
 }
 
 int
-dlinkFindDestroy (dlink_list * list, void *data)
+dlinkFindDestroy(dlink_list * list, void *data)
 {
 	void *ptr;
-	assert (list != NULL);
-	assert (data != NULL);
+	assert(list != NULL);
+	assert(data != NULL);
 
-	ptr = dlinkFindDelete (list, data);
+	ptr = dlinkFindDelete(list, data);
 	if(ptr != NULL)
 	{
-		free_dlink_node (ptr);
+		free_dlink_node(ptr);
 		return 1;
 	}
 	return 0;
@@ -257,11 +257,11 @@ dlinkFindDestroy (dlink_list * list, void *data)
 
 
 void
-dlinkMoveNode (dlink_node * m, dlink_list * oldlist, dlink_list * newlist)
+dlinkMoveNode(dlink_node * m, dlink_list * oldlist, dlink_list * newlist)
 {
-	assert (m != NULL);
-	assert (oldlist != NULL);
-	assert (newlist != NULL);
+	assert(m != NULL);
+	assert(oldlist != NULL);
+	assert(newlist != NULL);
 	/* Assumption: If m->next == NULL, then list->tail == m
 	 *      and:   If m->prev == NULL, then list->head == m
 	 */
@@ -294,11 +294,11 @@ dlinkMoveNode (dlink_node * m, dlink_list * oldlist, dlink_list * newlist)
  */
 static BlockHeap *dnode_heap;
 void
-init_dlink_nodes (void)
+init_dlink_nodes(void)
 {
-	dnode_heap = BlockHeapCreate (sizeof (dlink_node), DNODE_HEAP_SIZE);
+	dnode_heap = BlockHeapCreate(sizeof(dlink_node), DNODE_HEAP_SIZE);
 	if(dnode_heap == NULL)
-		outofmemory ();
+		outofmemory();
 }
 
 /*
@@ -309,11 +309,11 @@ init_dlink_nodes (void)
  * side effects	- NONE
  */
 dlink_node *
-make_dlink_node (void)
+make_dlink_node(void)
 {
 	dlink_node *lp;
 
-	lp = (dlink_node *) BlockHeapAlloc (dnode_heap);;
+	lp = (dlink_node *) BlockHeapAlloc(dnode_heap);;
 
 	lp->next = NULL;
 	lp->prev = NULL;
@@ -328,9 +328,9 @@ make_dlink_node (void)
  * side effects	- free given dlink_node 
  */
 void
-free_dlink_node (dlink_node * ptr)
+free_dlink_node(dlink_node * ptr)
 {
-	assert (ptr != NULL);
+	assert(ptr != NULL);
 
-	BlockHeapFree (dnode_heap, ptr);
+	BlockHeapFree(dnode_heap, ptr);
 }

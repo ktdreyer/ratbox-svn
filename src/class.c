@@ -47,26 +47,26 @@
 struct Class *ClassList;
 
 struct Class *
-make_class (void)
+make_class(void)
 {
 	struct Class *tmp;
 
-	tmp = (struct Class *) MyMalloc (sizeof (struct Class));
-	memset (tmp, 0, sizeof (struct Class));
+	tmp = (struct Class *) MyMalloc(sizeof(struct Class));
+	memset(tmp, 0, sizeof(struct Class));
 #ifdef IPV6
-	tmp->ip_limits = New_Patricia (128);
+	tmp->ip_limits = New_Patricia(128);
 #else
-	tmp->ip_limits = New_Patricia (32);
+	tmp->ip_limits = New_Patricia(32);
 #endif
 	return tmp;
 }
 
 void
-free_class (struct Class *tmp)
+free_class(struct Class *tmp)
 {
-	Destroy_Patricia (tmp->ip_limits, NULL);
-	MyFree (tmp->class_name);
-	MyFree ((char *) tmp);
+	Destroy_Patricia(tmp->ip_limits, NULL);
+	MyFree(tmp->class_name);
+	MyFree((char *) tmp);
 
 }
 
@@ -78,12 +78,12 @@ free_class (struct Class *tmp)
  * side effects - NONE
  */
 static int
-get_conf_ping (struct ConfItem *aconf)
+get_conf_ping(struct ConfItem *aconf)
 {
-	if((aconf) && ClassPtr (aconf))
-		return (ConfPingFreq (aconf));
+	if((aconf) && ClassPtr(aconf))
+		return (ConfPingFreq(aconf));
 
-	Debug ((DEBUG_DEBUG, "No Ping For %s", (aconf) ? aconf->name : "*No Conf*"));
+	Debug((DEBUG_DEBUG, "No Ping For %s", (aconf) ? aconf->name : "*No Conf*"));
 
 	return (BAD_PING);
 }
@@ -96,12 +96,12 @@ get_conf_ping (struct ConfItem *aconf)
  * side effects - NONE
  */
 const char *
-get_client_class (struct Client *target_p)
+get_client_class(struct Client *target_p)
 {
 	struct ConfItem *aconf;
 	const char *retc = "unknown";
 
-	if((target_p != NULL) && !IsMe (target_p))
+	if((target_p != NULL) && !IsMe(target_p))
 	{
 		aconf = target_p->localClient->att_conf;
 
@@ -122,7 +122,7 @@ get_client_class (struct Client *target_p)
  * side effects - NONE
  */
 int
-get_client_ping (struct Client *target_p)
+get_client_ping(struct Client *target_p)
 {
 	int ping = 0;
 	struct ConfItem *aconf;
@@ -132,7 +132,7 @@ get_client_ping (struct Client *target_p)
 	if(aconf != NULL)
 	{
 		if(aconf->status & (CONF_CLIENT | CONF_SERVER))
-			ping = get_conf_ping (aconf);
+			ping = get_conf_ping(aconf);
 	}
 	else
 	{
@@ -142,7 +142,7 @@ get_client_ping (struct Client *target_p)
 	if(ping <= 0)
 		ping = DEFAULT_PINGFREQUENCY;
 
-	Debug ((DEBUG_DEBUG, "Client %s Ping %d", target_p->name, ping));
+	Debug((DEBUG_DEBUG, "Client %s Ping %d", target_p->name, ping));
 	return (ping);
 }
 
@@ -154,10 +154,10 @@ get_client_ping (struct Client *target_p)
  * side effects - NONE
  */
 int
-get_con_freq (struct Class *clptr)
+get_con_freq(struct Class *clptr)
 {
 	if(clptr)
-		return (ConFreq (clptr));
+		return (ConFreq(clptr));
 	return (DEFAULT_CONNECTFREQUENCY);
 }
 
@@ -169,28 +169,28 @@ get_con_freq (struct Class *clptr)
  *                is updated with new values.
  */
 void
-add_class (struct Class *classptr)
+add_class(struct Class *classptr)
 {
 	struct Class *tmpptr;
 
-	tmpptr = find_class (classptr->class_name);
+	tmpptr = find_class(classptr->class_name);
 
 	if(tmpptr == ClassList)
 	{
 		classptr->next = tmpptr->next;
 		tmpptr->next = classptr;
-		CurrUsers (classptr) = 0;
+		CurrUsers(classptr) = 0;
 	}
 	else
 	{
-		MaxUsers (tmpptr) = MaxUsers (classptr);
-		MaxLocal (tmpptr) = MaxLocal (classptr);
-		MaxGlobal (tmpptr) = MaxGlobal (classptr);
-		MaxIdent (tmpptr) = MaxIdent (classptr);
-		PingFreq (tmpptr) = PingFreq (classptr);
-		MaxSendq (tmpptr) = MaxSendq (classptr);
+		MaxUsers(tmpptr) = MaxUsers(classptr);
+		MaxLocal(tmpptr) = MaxLocal(classptr);
+		MaxGlobal(tmpptr) = MaxGlobal(classptr);
+		MaxIdent(tmpptr) = MaxIdent(classptr);
+		PingFreq(tmpptr) = PingFreq(classptr);
+		MaxSendq(tmpptr) = MaxSendq(classptr);
 
-		free_class (classptr);
+		free_class(classptr);
 	}
 }
 
@@ -203,7 +203,7 @@ add_class (struct Class *classptr)
  * side effects	- NONE
  */
 struct Class *
-find_class (const char *classname)
+find_class(const char *classname)
 {
 	struct Class *cltmp;
 
@@ -213,7 +213,7 @@ find_class (const char *classname)
 	}
 
 	for (cltmp = ClassList; cltmp; cltmp = cltmp->next)
-		if(!strcmp (ClassName (cltmp), classname))
+		if(!strcmp(ClassName(cltmp), classname))
 			return cltmp;
 	return ClassList;
 }
@@ -226,19 +226,19 @@ find_class (const char *classname)
  * side effects	- 
  */
 void
-check_class ()
+check_class()
 {
 	struct Class *cltmp, *cltmp2;
 
-	Debug ((DEBUG_DEBUG, "Class check:"));
+	Debug((DEBUG_DEBUG, "Class check:"));
 
 	for (cltmp2 = cltmp = ClassList; cltmp; cltmp = cltmp2->next)
 	{
-		if(MaxUsers (cltmp) < 0)
+		if(MaxUsers(cltmp) < 0)
 		{
 			cltmp2->next = cltmp->next;
-			if(CurrUsers (cltmp) <= 0)
-				free_class (cltmp);
+			if(CurrUsers(cltmp) <= 0)
+				free_class(cltmp);
 		}
 		else
 			cltmp2 = cltmp;
@@ -253,15 +253,15 @@ check_class ()
  * side effects	- 
  */
 void
-initclass ()
+initclass()
 {
-	ClassList = make_class ();
+	ClassList = make_class();
 
-	DupString (ClassName (ClassList), "default");
-	ConFreq (ClassList) = DEFAULT_CONNECTFREQUENCY;
-	PingFreq (ClassList) = DEFAULT_PINGFREQUENCY;
-	MaxUsers (ClassList) = 1;
-	MaxSendq (ClassList) = DEFAULT_SENDQ;
+	DupString(ClassName(ClassList), "default");
+	ConFreq(ClassList) = DEFAULT_CONNECTFREQUENCY;
+	PingFreq(ClassList) = DEFAULT_PINGFREQUENCY;
+	MaxUsers(ClassList) = 1;
+	MaxSendq(ClassList) = DEFAULT_SENDQ;
 }
 
 /*
@@ -272,17 +272,16 @@ initclass ()
  * side effects	- class report is done to this client
  */
 void
-report_classes (struct Client *source_p)
+report_classes(struct Client *source_p)
 {
 	struct Class *cltmp;
 
 	for (cltmp = ClassList; cltmp; cltmp = cltmp->next)
-		sendto_one (source_p, form_str (RPL_STATSYLINE), me.name,
-			    source_p->name, 'Y', ClassName (cltmp),
-			    PingFreq (cltmp), ConFreq (cltmp),
-			    MaxUsers (cltmp), MaxSendq (cltmp),
-			    MaxLocal (cltmp), MaxIdent (cltmp),
-			    MaxGlobal (cltmp), MaxIdent (cltmp));
+		sendto_one(source_p, form_str(RPL_STATSYLINE), me.name,
+			   source_p->name, 'Y', ClassName(cltmp),
+			   PingFreq(cltmp), ConFreq(cltmp),
+			   MaxUsers(cltmp), MaxSendq(cltmp),
+			   MaxLocal(cltmp), MaxIdent(cltmp), MaxGlobal(cltmp), MaxIdent(cltmp));
 }
 
 /*
@@ -293,19 +292,19 @@ report_classes (struct Client *source_p)
  * side effects	- NONE
  */
 long
-get_sendq (struct Client *client_p)
+get_sendq(struct Client *client_p)
 {
 	int sendq = DEFAULT_SENDQ;
 	struct ConfItem *aconf;
 
-	if((client_p != NULL) && !IsMe (client_p))
+	if((client_p != NULL) && !IsMe(client_p))
 	{
 		aconf = client_p->localClient->att_conf;
 
 		if(aconf != NULL)
 		{
 			if(aconf->status & (CONF_CLIENT | CONF_SERVER))
-				sendq = ConfMaxSendq (aconf);
+				sendq = ConfMaxSendq(aconf);
 		}
 	}
 

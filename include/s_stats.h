@@ -71,7 +71,7 @@ struct ServerStatistics
 
 extern struct ServerStatistics *ServerStats;
 
-extern void init_stats (void);
-extern void tstats (struct Client *client);
+extern void init_stats(void);
+extern void tstats(struct Client *client);
 
 #endif /* INCLUDED_s_stats_h */

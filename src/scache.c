@@ -57,20 +57,20 @@ SCACHE;
 static SCACHE *scache_hash[SCACHE_HASH_SIZE];
 
 void
-clear_scache_hash_table (void)
+clear_scache_hash_table(void)
 {
-	memset (scache_hash, 0, sizeof (scache_hash));
+	memset(scache_hash, 0, sizeof(scache_hash));
 }
 
 static int
-hash (const char *string)
+hash(const char *string)
 {
 	int hash_value;
 
 	hash_value = 0;
 	while (*string)
 	{
-		hash_value += ToLower (*string);
+		hash_value += ToLower(*string);
 		/* I don't like auto increments inside macro calls... -db */
 		string++;
 	}
@@ -87,22 +87,22 @@ hash (const char *string)
  */
 
 const char *
-find_or_add (const char *name)
+find_or_add(const char *name)
 {
 	int hash_index;
 	SCACHE *ptr;
 
-	ptr = scache_hash[hash_index = hash (name)];
+	ptr = scache_hash[hash_index = hash(name)];
 	for (; ptr; ptr = ptr->next)
 	{
-		if(!irccmp (ptr->name, name))
+		if(!irccmp(ptr->name, name))
 			return (ptr->name);
 	}
 
-	ptr = (SCACHE *) MyMalloc (sizeof (SCACHE));
-	assert (0 != ptr);
+	ptr = (SCACHE *) MyMalloc(sizeof(SCACHE));
+	assert(0 != ptr);
 
-	strlcpy (ptr->name, name, sizeof (ptr->name));
+	strlcpy(ptr->name, name, sizeof(ptr->name));
 
 	ptr->next = scache_hash[hash_index];
 	scache_hash[hash_index] = ptr;
@@ -117,7 +117,7 @@ find_or_add (const char *name)
  * side effects	-
  */
 void
-count_scache (size_t * number_servers_cached, size_t * mem_servers_cached)
+count_scache(size_t * number_servers_cached, size_t * mem_servers_cached)
 {
 	SCACHE *scache_ptr;
 	int i;
@@ -132,7 +132,7 @@ count_scache (size_t * number_servers_cached, size_t * mem_servers_cached)
 		{
 			*number_servers_cached = *number_servers_cached + 1;
 			*mem_servers_cached = *mem_servers_cached +
-				(strlen (scache_ptr->name) + sizeof (SCACHE *));
+				(strlen(scache_ptr->name) + sizeof(SCACHE *));
 
 			scache_ptr = scache_ptr->next;
 		}

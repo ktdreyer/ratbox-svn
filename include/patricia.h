@@ -90,28 +90,28 @@ typedef struct _patricia_tree_t
 patricia_tree_t;
 
 
-patricia_node_t *match_ip (patricia_tree_t * tree, struct irc_inaddr *ip);
-patricia_node_t *match_string (patricia_tree_t * tree, const char *string);
-patricia_node_t *match_exact_string (patricia_tree_t * tree, const char *string);
-patricia_node_t *patricia_search_exact (patricia_tree_t * patricia, prefix_t * prefix);
-patricia_node_t *patricia_search_best (patricia_tree_t * patricia, prefix_t * prefix);
-patricia_node_t *patricia_search_best2 (patricia_tree_t * patricia,
-					prefix_t * prefix, int inclusive);
-patricia_node_t *patricia_lookup (patricia_tree_t * patricia, prefix_t * prefix);
+patricia_node_t *match_ip(patricia_tree_t * tree, struct irc_inaddr *ip);
+patricia_node_t *match_string(patricia_tree_t * tree, const char *string);
+patricia_node_t *match_exact_string(patricia_tree_t * tree, const char *string);
+patricia_node_t *patricia_search_exact(patricia_tree_t * patricia, prefix_t * prefix);
+patricia_node_t *patricia_search_best(patricia_tree_t * patricia, prefix_t * prefix);
+patricia_node_t *patricia_search_best2(patricia_tree_t * patricia,
+				       prefix_t * prefix, int inclusive);
+patricia_node_t *patricia_lookup(patricia_tree_t * patricia, prefix_t * prefix);
 
-void patricia_remove (patricia_tree_t * patricia, patricia_node_t * node);
-patricia_tree_t *New_Patricia (int maxbits);
-void Clear_Patricia (patricia_tree_t * patricia, void_fn_t func);
-void Destroy_Patricia (patricia_tree_t * patricia, void_fn_t func);
-void patricia_process (patricia_tree_t * patricia, void_fn_t func);
-void init_patricia (void);
+void patricia_remove(patricia_tree_t * patricia, patricia_node_t * node);
+patricia_tree_t *New_Patricia(int maxbits);
+void Clear_Patricia(patricia_tree_t * patricia, void_fn_t func);
+void Destroy_Patricia(patricia_tree_t * patricia, void_fn_t func);
+void patricia_process(patricia_tree_t * patricia, void_fn_t func);
+void init_patricia(void);
 
 
 #if 0
-prefix_t *ascii2prefix (int family, char *string);
+prefix_t *ascii2prefix(int family, char *string);
 #endif
-patricia_node_t *make_and_lookup (patricia_tree_t * tree, char *string);
-patricia_node_t *make_and_lookup_ip (patricia_tree_t * tree, int family, void *in, int bitlen);
+patricia_node_t *make_and_lookup(patricia_tree_t * tree, char *string);
+patricia_node_t *make_and_lookup_ip(patricia_tree_t * tree, int family, void *in, int bitlen);
 
 
 #define PATRICIA_MAXBITS 128

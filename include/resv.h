@@ -41,17 +41,17 @@ struct ResvEntry
 extern dlink_list resv_channel_list;
 extern dlink_list resv_nick_list;
 
-extern struct ResvEntry *create_resv (const char *, const char *, int);
+extern struct ResvEntry *create_resv(const char *, const char *, int);
 
-extern int delete_resv (struct ResvEntry *);
-extern void clear_resv (void);
+extern int delete_resv(struct ResvEntry *);
+extern void clear_resv(void);
 
-extern int find_channel_resv (const char *);
-extern int find_nick_resv (const char *);
-extern struct ResvEntry *get_nick_resv (const char *);
+extern int find_channel_resv(const char *);
+extern int find_nick_resv(const char *);
+extern struct ResvEntry *get_nick_resv(const char *);
 
-extern void report_resv (struct Client *);
+extern void report_resv(struct Client *);
 
-extern int clean_resv_nick (char *);
+extern int clean_resv_nick(char *);
 
 #endif /* INCLUDED_hash_h */

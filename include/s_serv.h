@@ -226,8 +226,8 @@ struct EncCapability
 
 #define MAX_SLINKRPL            2
 
-typedef void SlinkRplHnd (unsigned int replyid, unsigned int datalen,
-			  unsigned char *data, struct Client *client_p);
+typedef void SlinkRplHnd(unsigned int replyid, unsigned int datalen,
+			 unsigned char *data, struct Client *client_p);
 struct SlinkRplDef
 {
 	unsigned int replyid;
@@ -263,32 +263,32 @@ extern int refresh_user_links;
 #define HUNTED_PASS     1	/* if message passed onwards successfully */
 
 
-extern int check_server (const char *name, struct Client *server, int cryptlink);
-extern int hunt_server (struct Client *client_pt,
-			struct Client *source_pt,
-			const char *command, int server, int parc, char **parv);
-extern const char *my_name_for_link (const char *name, struct ConfItem *conf);
-extern void send_capabilities (struct Client *, struct ConfItem *conf, int, int);
-extern void write_links_file (void *);
-extern int server_estab (struct Client *client_p);
-extern void set_autoconn (struct Client *, char *, char *, int);
-extern const char *show_capabilities (struct Client *client);
-extern void try_connections (void *unused);
-extern void start_collect_zipstats (void);
-extern void collect_zipstats (void *unused);
+extern int check_server(const char *name, struct Client *server, int cryptlink);
+extern int hunt_server(struct Client *client_pt,
+		       struct Client *source_pt,
+		       const char *command, int server, int parc, char **parv);
+extern const char *my_name_for_link(const char *name, struct ConfItem *conf);
+extern void send_capabilities(struct Client *, struct ConfItem *conf, int, int);
+extern void write_links_file(void *);
+extern int server_estab(struct Client *client_p);
+extern void set_autoconn(struct Client *, char *, char *, int);
+extern const char *show_capabilities(struct Client *client);
+extern void try_connections(void *unused);
+extern void start_collect_zipstats(void);
+extern void collect_zipstats(void *unused);
 
-extern void add_server_to_list (struct Client *);
-extern void remove_server_from_list (struct Client *);
+extern void add_server_to_list(struct Client *);
+extern void remove_server_from_list(struct Client *);
 
-extern void initServerMask (void);
-extern void sendnick_TS (struct Client *, struct Client *);
-extern int serv_connect (struct ConfItem *, struct Client *);
-extern unsigned long nextFreeMask (void);
-extern void cryptlink_init (struct Client *client_p, struct ConfItem *aconf, int fd);
-extern void cryptlink_regen_key (void *);
-extern void cryptlink_error (struct Client *client_p, const char *type,
-			     const char *reason, const char *client_reason);
+extern void initServerMask(void);
+extern void sendnick_TS(struct Client *, struct Client *);
+extern int serv_connect(struct ConfItem *, struct Client *);
+extern unsigned long nextFreeMask(void);
+extern void cryptlink_init(struct Client *client_p, struct ConfItem *aconf, int fd);
+extern void cryptlink_regen_key(void *);
+extern void cryptlink_error(struct Client *client_p, const char *type,
+			    const char *reason, const char *client_reason);
 
-struct EncCapability *check_cipher (struct Client *client_p, struct ConfItem *aconf);
+struct EncCapability *check_cipher(struct Client *client_p, struct ConfItem *aconf);
 
 #endif /* INCLUDED_s_serv_h */

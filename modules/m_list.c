@@ -44,10 +44,10 @@
 #include "linebuf.h"
 
 
-static void m_list (struct Client *, struct Client *, int, char **);
-static void mo_list (struct Client *, struct Client *, int, char **);
-static int list_all_channels (struct Client *);
-static void list_one_channel (struct Client *, struct Channel *);
+static void m_list(struct Client *, struct Client *, int, char **);
+static void mo_list(struct Client *, struct Client *, int, char **);
+static int list_all_channels(struct Client *);
+static void list_one_channel(struct Client *, struct Channel *);
 
 struct Message list_msgtab = {
 	"LIST", 0, 0, 0, 0, MFLG_SLOW, 0,
@@ -56,20 +56,20 @@ struct Message list_msgtab = {
 #ifndef STATIC_MODULES
 
 void
-_modinit (void)
+_modinit(void)
 {
-	mod_add_cmd (&list_msgtab);
+	mod_add_cmd(&list_msgtab);
 }
 
 void
-_moddeinit (void)
+_moddeinit(void)
 {
-	mod_del_cmd (&list_msgtab);
+	mod_del_cmd(&list_msgtab);
 }
 const char *_version = "$Revision$";
 #endif
-static int list_all_channels (struct Client *source_p);
-static int list_named_channel (struct Client *source_p, char *name);
+static int list_all_channels(struct Client *source_p);
+static int list_named_channel(struct Client *source_p, char *name);
 
 
 /*
@@ -78,7 +78,7 @@ static int list_named_channel (struct Client *source_p, char *name);
 **      parv[1] = channel
 */
 static void
-m_list (struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+m_list(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
 {
 	static time_t last_used = 0L;
 
@@ -87,7 +87,7 @@ m_list (struct Client *client_p, struct Client *source_p, int parc, char *parv[]
 	 * traffic involved in /list.. -- fl_ */
 	if(((last_used + ConfigFileEntry.pace_wait) > CurrentTime))
 	{
-		sendto_one (source_p, form_str (RPL_LOAD2HI), me.name, parv[0]);
+		sendto_one(source_p, form_str(RPL_LOAD2HI), me.name, parv[0]);
 		return;
 	}
 	else
@@ -95,13 +95,13 @@ m_list (struct Client *client_p, struct Client *source_p, int parc, char *parv[]
 
 
 	/* If no arg, do all channels *whee*, else just one channel */
-	if(parc < 2 || BadPtr (parv[1]))
+	if(parc < 2 || BadPtr(parv[1]))
 	{
-		list_all_channels (source_p);
+		list_all_channels(source_p);
 	}
 	else
 	{
-		list_named_channel (source_p, parv[1]);
+		list_named_channel(source_p, parv[1]);
 	}
 }
 
@@ -112,17 +112,17 @@ m_list (struct Client *client_p, struct Client *source_p, int parc, char *parv[]
 **      parv[1] = channel
 */
 static void
-mo_list (struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+mo_list(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
 {
 
 	/* If no arg, do all channels *whee*, else just one channel */
-	if(parc < 2 || BadPtr (parv[1]))
+	if(parc < 2 || BadPtr(parv[1]))
 	{
-		list_all_channels (source_p);
+		list_all_channels(source_p);
 	}
 	else
 	{
-		list_named_channel (source_p, parv[1]);
+		list_named_channel(source_p, parv[1]);
 	}
 }
 
@@ -134,38 +134,38 @@ mo_list (struct Client *client_p, struct Client *source_p, int parc, char *parv[
  * side effects	- list all channels to source_p
  */
 static int
-list_all_channels (struct Client *source_p)
+list_all_channels(struct Client *source_p)
 {
 	struct Channel *chptr;
 	dlink_node *ptr;
 	int sendq_limit;
 
 	/* give them an output limit of 90% of their sendq. --fl */
-	sendq_limit = (int) get_sendq (source_p);
+	sendq_limit = (int) get_sendq(source_p);
 	sendq_limit /= 10;
 	sendq_limit *= 9;
 
-	sendto_one (source_p, form_str (RPL_LISTSTART), me.name, source_p->name);
+	sendto_one(source_p, form_str(RPL_LISTSTART), me.name, source_p->name);
 
-	DLINK_FOREACH (ptr, global_channel_list.head)
+	DLINK_FOREACH(ptr, global_channel_list.head)
 	{
 		chptr = ptr->data;
 
 		/* if theyre overflowing their sendq, stop. --fl */
-		if(linebuf_len (&source_p->localClient->buf_sendq) > sendq_limit)
+		if(linebuf_len(&source_p->localClient->buf_sendq) > sendq_limit)
 		{
-			sendto_one (source_p, form_str (ERR_TOOMANYMATCHES),
-				    me.name, source_p->name, "LIST");
+			sendto_one(source_p, form_str(ERR_TOOMANYMATCHES),
+				   me.name, source_p->name, "LIST");
 			break;
 		}
 
-		if(SecretChannel (chptr) && !IsMember (source_p, chptr))
+		if(SecretChannel(chptr) && !IsMember(source_p, chptr))
 			continue;
 
-		list_one_channel (source_p, chptr);
+		list_one_channel(source_p, chptr);
 	}
 
-	sendto_one (source_p, form_str (RPL_LISTEND), me.name, source_p->name);
+	sendto_one(source_p, form_str(RPL_LISTEND), me.name, source_p->name);
 	return 0;
 }
 
@@ -176,40 +176,40 @@ list_all_channels (struct Client *source_p)
  * side effects	- list all channels to source_p
  */
 static int
-list_named_channel (struct Client *source_p, char *name)
+list_named_channel(struct Client *source_p, char *name)
 {
 	struct Channel *chptr;
 	char id_and_topic[TOPICLEN + NICKLEN + 6];	/* <!!>, space and null */
 	char *p;
 
-	sendto_one (source_p, form_str (RPL_LISTSTART), me.name, source_p->name);
+	sendto_one(source_p, form_str(RPL_LISTSTART), me.name, source_p->name);
 
-	if((p = strchr (name, ',')))
+	if((p = strchr(name, ',')))
 		*p = '\0';
 
 	if(*name == '\0')
 	{
-		sendto_one (source_p, form_str (ERR_NOSUCHNICK), me.name, source_p->name, name);
-		sendto_one (source_p, form_str (RPL_LISTEND), me.name, source_p->name);
+		sendto_one(source_p, form_str(ERR_NOSUCHNICK), me.name, source_p->name, name);
+		sendto_one(source_p, form_str(RPL_LISTEND), me.name, source_p->name);
 		return 0;
 	}
 
-	chptr = hash_find_channel (name);
+	chptr = hash_find_channel(name);
 
 	if(chptr == NULL)
 	{
-		sendto_one (source_p, form_str (ERR_NOSUCHNICK), me.name, source_p->name, name);
-		sendto_one (source_p, form_str (RPL_LISTEND), me.name, source_p->name);
+		sendto_one(source_p, form_str(ERR_NOSUCHNICK), me.name, source_p->name, name);
+		sendto_one(source_p, form_str(RPL_LISTEND), me.name, source_p->name);
 		return 0;
 	}
 
-	ircsprintf (id_and_topic, "%s", chptr->topic == NULL ? "" : chptr->topic);
+	ircsprintf(id_and_topic, "%s", chptr->topic == NULL ? "" : chptr->topic);
 
-	if(ShowChannel (source_p, chptr))
-		sendto_one (source_p, form_str (RPL_LIST), me.name, source_p->name,
-			    chptr->chname, chptr->users, id_and_topic);
+	if(ShowChannel(source_p, chptr))
+		sendto_one(source_p, form_str(RPL_LIST), me.name, source_p->name,
+			   chptr->chname, chptr->users, id_and_topic);
 
-	sendto_one (source_p, form_str (RPL_LISTEND), me.name, source_p->name);
+	sendto_one(source_p, form_str(RPL_LISTEND), me.name, source_p->name);
 	return 0;
 }
 
@@ -222,8 +222,8 @@ list_named_channel (struct Client *source_p, char *name)
  * side effects -
  */
 static void
-list_one_channel (struct Client *source_p, struct Channel *chptr)
+list_one_channel(struct Client *source_p, struct Channel *chptr)
 {
-	sendto_one (source_p, form_str (RPL_LIST), me.name, source_p->name,
-		    chptr->chname, chptr->users, chptr->topic == NULL ? "" : chptr->topic);
+	sendto_one(source_p, form_str(RPL_LIST), me.name, source_p->name,
+		   chptr->chname, chptr->users, chptr->topic == NULL ? "" : chptr->topic);
 }

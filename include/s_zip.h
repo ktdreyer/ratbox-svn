@@ -49,9 +49,9 @@ struct Zdata
 };
 
 
-extern int zip_init (struct Client *);
-extern void zip_free (struct Client *);
-extern char *unzip_packet (struct Client *, char *, int *);
-extern char *zip_buffer (struct Client *, char *, int *, int);
+extern int zip_init(struct Client *);
+extern void zip_free(struct Client *);
+extern char *unzip_packet(struct Client *, char *, int *);
+extern char *zip_buffer(struct Client *, char *, int *, int);
 
 #endif /* INCLUDED_s_zip_h */

@@ -58,7 +58,7 @@
 
 struct config_server_hide ConfigServerHide;
 
-extern int yyparse ();		/* defined in y.tab.c */
+extern int yyparse();		/* defined in y.tab.c */
 extern int lineno;
 extern char linebuf[];
 extern char conffilebuf[IRCD_BUFSIZE + 1];
@@ -70,7 +70,7 @@ int scount = 0;			/* used by yyparse(), etc */
 
 static BlockHeap *xline_heap = NULL;
 static BlockHeap *shared_heap = NULL;
-static void conf_heap_gc (void *);
+static void conf_heap_gc(void *);
 
 dlink_list tkline_min;
 dlink_list tkline_hour;
@@ -89,17 +89,17 @@ dlink_list shared_list;
 
 /* internally defined functions */
 
-static void lookup_confhost (struct ConfItem *aconf);
-static int SplitUserHost (struct ConfItem *aconf);
+static void lookup_confhost(struct ConfItem *aconf);
+static int SplitUserHost(struct ConfItem *aconf);
 
-static void set_default_conf (void);
-static void validate_conf (void);
-static void read_conf (FBFILE *);
-static void clear_out_old_conf (void);
-static void flush_deleted_I_P (void);
+static void set_default_conf(void);
+static void validate_conf(void);
+static void read_conf(FBFILE *);
+static void clear_out_old_conf(void);
+static void flush_deleted_I_P(void);
 
-static void expire_tkline (dlink_list *, int);
-static void expire_tdline (dlink_list *, int);
+static void expire_tkline(dlink_list *, int);
+static void expire_tdline(dlink_list *, int);
 
 FBFILE *conf_fbfile_in;
 extern char yytext[];
@@ -107,11 +107,11 @@ extern char yytext[];
 /* address of class 0 conf */
 static struct Class *class0;
 
-static int verify_access (struct Client *client_p, const char *username);
-static int attach_iline (struct Client *, struct ConfItem *);
+static int verify_access(struct Client *client_p, const char *username);
+static int attach_iline(struct Client *, struct ConfItem *);
 
-static void clear_xlines (void);
-static void clear_shared (void);
+static void clear_xlines(void);
+static void clear_shared(void);
 
 /* general conf items link list root */
 struct ConfItem *ConfigItemList = NULL;
@@ -123,10 +123,10 @@ struct ConfItem *ConfigItemList = NULL;
  * side effects - garbage collection of various conf heaps
  */
 static void
-conf_heap_gc (void *unused)
+conf_heap_gc(void *unused)
 {
-	BlockHeapGarbageCollect (xline_heap);
-	BlockHeapGarbageCollect (shared_heap);
+	BlockHeapGarbageCollect(xline_heap);
+	BlockHeapGarbageCollect(shared_heap);
 }
 
 /* init_conf()
@@ -136,11 +136,11 @@ conf_heap_gc (void *unused)
  * side effects - starts some events etc for s_conf.c
  */
 void
-init_conf (void)
+init_conf(void)
 {
-	xline_heap = BlockHeapCreate (sizeof (struct xline), XLINE_HEAP_SIZE);
-	shared_heap = BlockHeapCreate (sizeof (struct shared), SHARED_HEAP_SIZE);
-	eventAddIsh ("conf_heap_gc", conf_heap_gc, NULL, 600);
+	xline_heap = BlockHeapCreate(sizeof(struct xline), XLINE_HEAP_SIZE);
+	shared_heap = BlockHeapCreate(sizeof(struct shared), SHARED_HEAP_SIZE);
+	eventAddIsh("conf_heap_gc", conf_heap_gc, NULL, 600);
 }
 
 /*
@@ -154,21 +154,21 @@ init_conf (void)
  * if successful save hp in the conf item it was called with
  */
 static void
-conf_dns_callback (void *vptr, adns_answer * reply)
+conf_dns_callback(void *vptr, adns_answer * reply)
 {
 	struct ConfItem *aconf = (struct ConfItem *) vptr;
 
 	if(reply && reply->status == adns_s_ok)
 	{
 #ifdef IPV6
-		copy_s_addr (IN_ADDR (aconf->ipnum), reply->rrs.addr->addr.inet6.sin6_addr.s6_addr);
+		copy_s_addr(IN_ADDR(aconf->ipnum), reply->rrs.addr->addr.inet6.sin6_addr.s6_addr);
 #else
-		copy_s_addr (IN_ADDR (aconf->ipnum), reply->rrs.addr->addr.inet.sin_addr.s_addr);
+		copy_s_addr(IN_ADDR(aconf->ipnum), reply->rrs.addr->addr.inet.sin_addr.s_addr);
 #endif
-		MyFree (reply);
+		MyFree(reply);
 	}
 
-	MyFree (aconf->dns_query);
+	MyFree(aconf->dns_query);
 	aconf->dns_query = NULL;
 }
 
@@ -178,14 +178,14 @@ conf_dns_callback (void *vptr, adns_answer * reply)
  * allocate a dns_query and start ns lookup.
  */
 static void
-conf_dns_lookup (struct ConfItem *aconf)
+conf_dns_lookup(struct ConfItem *aconf)
 {
 	if(aconf->dns_query == NULL)
 	{
-		aconf->dns_query = MyMalloc (sizeof (struct DNSQuery));
+		aconf->dns_query = MyMalloc(sizeof(struct DNSQuery));
 		aconf->dns_query->ptr = aconf;
 		aconf->dns_query->callback = conf_dns_callback;
-		adns_gethost (aconf->host, aconf->aftype, aconf->dns_query);
+		adns_gethost(aconf->host, aconf->aftype, aconf->dns_query);
 	}
 }
 
@@ -197,12 +197,12 @@ conf_dns_lookup (struct ConfItem *aconf)
  * side effects	- none
  */
 struct ConfItem *
-make_conf ()
+make_conf()
 {
 	struct ConfItem *aconf;
 
-	aconf = (struct ConfItem *) MyMalloc (sizeof (struct ConfItem));
-	memset (aconf, 0, sizeof (struct ConfItem));
+	aconf = (struct ConfItem *) MyMalloc(sizeof(struct ConfItem));
+	memset(aconf, 0, sizeof(struct ConfItem));
 	aconf->status = CONF_ILLEGAL;
 	aconf->aftype = AF_INET;
 	return (aconf);
@@ -216,37 +216,37 @@ make_conf ()
  * side effects	- crucial password fields are zeroed, conf is freed
  */
 void
-free_conf (struct ConfItem *aconf)
+free_conf(struct ConfItem *aconf)
 {
-	assert (aconf != NULL);
+	assert(aconf != NULL);
 	if(aconf == NULL)
 		return;
 
-	assert (!(aconf->status & CONF_CLIENT) ||
-		(aconf->host && strcmp (aconf->host, "NOMATCH")) || (aconf->clients == -1));
+	assert(!(aconf->status & CONF_CLIENT) ||
+	       (aconf->host && strcmp(aconf->host, "NOMATCH")) || (aconf->clients == -1));
 
-	delete_adns_queries (aconf->dns_query);
+	delete_adns_queries(aconf->dns_query);
 
 	/* security.. */
 	if(aconf->passwd)
-		memset (aconf->passwd, 0, strlen (aconf->passwd));
+		memset(aconf->passwd, 0, strlen(aconf->passwd));
 	if(aconf->spasswd)
-		memset (aconf->spasswd, 0, strlen (aconf->spasswd));
+		memset(aconf->spasswd, 0, strlen(aconf->spasswd));
 
-	MyFree (aconf->passwd);
-	MyFree (aconf->spasswd);
-	MyFree (aconf->name);
-	MyFree (aconf->className);
-	MyFree (aconf->user);
-	MyFree (aconf->host);
+	MyFree(aconf->passwd);
+	MyFree(aconf->spasswd);
+	MyFree(aconf->name);
+	MyFree(aconf->className);
+	MyFree(aconf->user);
+	MyFree(aconf->host);
 
 #ifdef HAVE_LIBCRYPTO
 	if(aconf->rsa_public_key)
-		RSA_free (aconf->rsa_public_key);
+		RSA_free(aconf->rsa_public_key);
 
-	MyFree (aconf->rsa_public_key_file);
+	MyFree(aconf->rsa_public_key_file);
 #endif
-	MyFree ((char *) aconf);
+	MyFree((char *) aconf);
 }
 
 /* make_xline()
@@ -256,18 +256,18 @@ free_conf (struct ConfItem *aconf)
  * side effects - creates an xline based on information
  */
 struct xline *
-make_xline (const char *gecos, const char *reason, int type)
+make_xline(const char *gecos, const char *reason, int type)
 {
 	struct xline *xconf;
 
-	xconf = BlockHeapAlloc (xline_heap);
-	memset (xconf, 0, sizeof (struct xline));
+	xconf = BlockHeapAlloc(xline_heap);
+	memset(xconf, 0, sizeof(struct xline));
 
-	if(!BadPtr (gecos))
-		DupString (xconf->gecos, gecos);
+	if(!BadPtr(gecos))
+		DupString(xconf->gecos, gecos);
 
-	if(!BadPtr (reason))
-		DupString (xconf->reason, reason);
+	if(!BadPtr(reason))
+		DupString(xconf->reason, reason);
 
 	xconf->type = type;
 	return xconf;
@@ -280,15 +280,15 @@ make_xline (const char *gecos, const char *reason, int type)
  * side effects - xline is freed
  */
 void
-free_xline (struct xline *xconf)
+free_xline(struct xline *xconf)
 {
-	assert (xconf != NULL);
+	assert(xconf != NULL);
 	if(xconf == NULL)
 		return;
 
-	MyFree (xconf->gecos);
-	MyFree (xconf->reason);
-	BlockHeapFree (xline_heap, xconf);
+	MyFree(xconf->gecos);
+	MyFree(xconf->reason);
+	BlockHeapFree(xline_heap, xconf);
 }
 
 /* clear_xlines()
@@ -298,18 +298,18 @@ free_xline (struct xline *xconf)
  * side effects - nukes list of xlines
  */
 static void
-clear_xlines (void)
+clear_xlines(void)
 {
 	struct xline *xconf;
 	dlink_node *ptr;
 	dlink_node *next_ptr;
 
-	DLINK_FOREACH_SAFE (ptr, next_ptr, xline_list.head)
+	DLINK_FOREACH_SAFE(ptr, next_ptr, xline_list.head)
 	{
 		xconf = ptr->data;
 
-		free_xline (xconf);
-		dlinkDestroy (ptr, &xline_list);
+		free_xline(xconf);
+		dlinkDestroy(ptr, &xline_list);
 	}
 }
 
@@ -321,16 +321,16 @@ clear_xlines (void)
  * side effects - looks for a match on name field
  */
 struct xline *
-find_xline (char *gecos)
+find_xline(char *gecos)
 {
 	struct xline *xconf;
 	dlink_node *ptr;
 
-	DLINK_FOREACH (ptr, xline_list.head)
+	DLINK_FOREACH(ptr, xline_list.head)
 	{
 		xconf = ptr->data;
 
-		if(match_esc (xconf->gecos, gecos))
+		if(match_esc(xconf->gecos, gecos))
 			return xconf;
 	}
 
@@ -344,12 +344,12 @@ find_xline (char *gecos)
  * side effects - creates a shared block
  */
 struct shared *
-make_shared (void)
+make_shared(void)
 {
 	struct shared *uconf;
 
-	uconf = BlockHeapAlloc (shared_heap);
-	memset (uconf, 0, sizeof (struct shared));
+	uconf = BlockHeapAlloc(shared_heap);
+	memset(uconf, 0, sizeof(struct shared));
 
 	return uconf;
 }
@@ -361,16 +361,16 @@ make_shared (void)
  * side effects - shared block is freed.
  */
 void
-free_shared (struct shared *uconf)
+free_shared(struct shared *uconf)
 {
-	assert (uconf != NULL);
+	assert(uconf != NULL);
 	if(uconf == NULL)
 		return;
 
-	MyFree (uconf->username);
-	MyFree (uconf->host);
-	MyFree (uconf->servername);
-	BlockHeapFree (shared_heap, uconf);
+	MyFree(uconf->username);
+	MyFree(uconf->host);
+	MyFree(uconf->servername);
+	BlockHeapFree(shared_heap, uconf);
 }
 
 /* clear_shared()
@@ -380,18 +380,18 @@ free_shared (struct shared *uconf)
  * side effects - shared blocks are nuked
  */
 static void
-clear_shared (void)
+clear_shared(void)
 {
 	struct shared *uconf;
 	dlink_node *ptr;
 	dlink_node *next_ptr;
 
-	DLINK_FOREACH_SAFE (ptr, next_ptr, shared_list.head)
+	DLINK_FOREACH_SAFE(ptr, next_ptr, shared_list.head)
 	{
 		uconf = ptr->data;
 
-		free_shared (uconf);
-		dlinkDestroy (ptr, &shared_list);
+		free_shared(uconf);
+		dlinkDestroy(ptr, &shared_list);
 	}
 }
 
@@ -402,23 +402,23 @@ clear_shared (void)
  * side effects -
  */
 int
-find_shared (const char *username, const char *host, const char *servername, int flags)
+find_shared(const char *username, const char *host, const char *servername, int flags)
 {
 	struct shared *uconf;
 	dlink_node *ptr;
 
-	DLINK_FOREACH (ptr, shared_list.head)
+	DLINK_FOREACH(ptr, shared_list.head)
 	{
 		uconf = ptr->data;
 
 		if((uconf->flags & flags) == 0)
 			continue;
 
-		if((BadPtr (uconf->servername)
-		    || match (uconf->servername, servername))
-		   && (BadPtr (uconf->username)
-		       || match (uconf->username, username))
-		   && (BadPtr (uconf->host) || match (uconf->host, host)))
+		if((BadPtr(uconf->servername)
+		    || match(uconf->servername, servername))
+		   && (BadPtr(uconf->username)
+		       || match(uconf->username, username))
+		   && (BadPtr(uconf->host) || match(uconf->host, host)))
 			return YES;
 	}
 
@@ -458,7 +458,7 @@ report_array[] =
  * side effects	-
  */
 void
-report_configured_links (struct Client *source_p, int mask)
+report_configured_links(struct Client *source_p, int mask)
 {
 	struct ConfItem *tmp;
 	struct LinkReport *p;
@@ -480,7 +480,7 @@ report_configured_links (struct Client *source_p, int mask)
 			if(p->conf_type == 0)
 				return;
 
-			get_printable_conf (tmp, &name, &host, &pass, &user, &port, &classname);
+			get_printable_conf(tmp, &name, &host, &pass, &user, &port, &classname);
 
 			if(mask & CONF_SERVER)
 			{
@@ -508,44 +508,44 @@ report_configured_links (struct Client *source_p, int mask)
 				/* Allow admins to see actual ips */
 				/* except if HIDE_SERVERS_IPS is defined */
 #ifndef HIDE_SERVERS_IPS
-				if(IsOperAdmin (source_p))
-					sendto_one (source_p,
-						    form_str (p->rpl_stats),
-						    me.name, source_p->name,
-						    c, host, buf, name, port,
-						    classname,
-						    oper_flags_as_string ((int) tmp->hold));
+				if(IsOperAdmin(source_p))
+					sendto_one(source_p,
+						   form_str(p->rpl_stats),
+						   me.name, source_p->name,
+						   c, host, buf, name, port,
+						   classname,
+						   oper_flags_as_string((int) tmp->hold));
 				else
 #endif
-					sendto_one (source_p,
-						    form_str (p->rpl_stats),
-						    me.name, source_p->name,
-						    c, "*@127.0.0.1", buf, name, port, classname);
+					sendto_one(source_p,
+						   form_str(p->rpl_stats),
+						   me.name, source_p->name,
+						   c, "*@127.0.0.1", buf, name, port, classname);
 
 			}
 			else if(mask & (CONF_OPERATOR))
 			{
 				/* Don't allow non opers to see oper privs */
-				if(IsOper (source_p))
-					sendto_one (source_p,
-						    form_str (p->rpl_stats),
-						    me.name, source_p->name,
-						    p->conf_char, user, host,
-						    name,
-						    oper_privs_as_string
-						    (NULL, port), classname,
-						    oper_flags_as_string ((int) tmp->hold));
+				if(IsOper(source_p))
+					sendto_one(source_p,
+						   form_str(p->rpl_stats),
+						   me.name, source_p->name,
+						   p->conf_char, user, host,
+						   name,
+						   oper_privs_as_string
+						   (NULL, port), classname,
+						   oper_flags_as_string((int) tmp->hold));
 				else
-					sendto_one (source_p,
-						    form_str (p->rpl_stats),
-						    me.name, source_p->name,
-						    p->conf_char, user, host,
-						    name, "0", classname, "");
+					sendto_one(source_p,
+						   form_str(p->rpl_stats),
+						   me.name, source_p->name,
+						   p->conf_char, user, host,
+						   name, "0", classname, "");
 			}
 			else
-				sendto_one (source_p, form_str (p->rpl_stats),
-					    me.name, source_p->name,
-					    p->conf_char, host, name, port, classname);
+				sendto_one(source_p, form_str(p->rpl_stats),
+					   me.name, source_p->name,
+					   p->conf_char, host, name, port, classname);
 		}
 	}
 }
@@ -565,69 +565,69 @@ report_configured_links (struct Client *source_p, int mask)
  * 		  status as the flags passed.
  */
 int
-check_client (struct Client *client_p, struct Client *source_p, char *username)
+check_client(struct Client *client_p, struct Client *source_p, char *username)
 {
 	static char sockname[HOSTLEN + 1];
 	int i;
 
-	ClearAccess (source_p);
+	ClearAccess(source_p);
 
-	if((i = verify_access (source_p, username)))
+	if((i = verify_access(source_p, username)))
 	{
-		ilog (L_INFO, "Access denied: %s[%s]", source_p->name, sockname);
+		ilog(L_INFO, "Access denied: %s[%s]", source_p->name, sockname);
 	}
 
 	switch (i)
 	{
 	case SOCKET_ERROR:
-		exit_client (client_p, source_p, &me, "Socket Error");
+		exit_client(client_p, source_p, &me, "Socket Error");
 		break;
 
 	case TOO_MANY_LOCAL:
-		sendto_realops_flags (UMODE_FULL, L_ALL,
-				      "Too many local connections for %s",
-				      get_client_name (source_p, SHOW_IP));
+		sendto_realops_flags(UMODE_FULL, L_ALL,
+				     "Too many local connections for %s",
+				     get_client_name(source_p, SHOW_IP));
 
-		ilog (L_INFO, "Too many local connections from %s",
-		      log_client_name (source_p, SHOW_IP));
+		ilog(L_INFO, "Too many local connections from %s",
+		     log_client_name(source_p, SHOW_IP));
 
 		ServerStats->is_ref++;
-		exit_client (client_p, source_p, &me, "Too many host connections (local)");
+		exit_client(client_p, source_p, &me, "Too many host connections (local)");
 		break;
 
 	case TOO_MANY_GLOBAL:
-		sendto_realops_flags (UMODE_FULL, L_ALL,
-				      "Too many global connections for %s",
-				      get_client_name (source_p, SHOW_IP));
-		ilog (L_INFO, "Too many global connections from %s",
-		      log_client_name (source_p, SHOW_IP));
+		sendto_realops_flags(UMODE_FULL, L_ALL,
+				     "Too many global connections for %s",
+				     get_client_name(source_p, SHOW_IP));
+		ilog(L_INFO, "Too many global connections from %s",
+		     log_client_name(source_p, SHOW_IP));
 
 		ServerStats->is_ref++;
-		exit_client (client_p, source_p, &me, "Too many host connections (global)");
+		exit_client(client_p, source_p, &me, "Too many host connections (global)");
 		break;
 
 	case TOO_MANY_IDENT:
-		sendto_realops_flags (UMODE_FULL, L_ALL,
-				      "Too many user connections for %s",
-				      get_client_name (source_p, SHOW_IP));
-		ilog (L_INFO, "Too many user connections from %s",
-		      log_client_name (source_p, SHOW_IP));
+		sendto_realops_flags(UMODE_FULL, L_ALL,
+				     "Too many user connections for %s",
+				     get_client_name(source_p, SHOW_IP));
+		ilog(L_INFO, "Too many user connections from %s",
+		     log_client_name(source_p, SHOW_IP));
 
 		ServerStats->is_ref++;
-		exit_client (client_p, source_p, &me, "Too many user connections (global)");
+		exit_client(client_p, source_p, &me, "Too many user connections (global)");
 		break;
 
 	case I_LINE_FULL:
-		sendto_realops_flags (UMODE_FULL, L_ALL,
-				      "I-line is full for %s (%s).",
-				      get_client_name (source_p, SHOW_IP),
-				      source_p->localClient->sockhost);
+		sendto_realops_flags(UMODE_FULL, L_ALL,
+				     "I-line is full for %s (%s).",
+				     get_client_name(source_p, SHOW_IP),
+				     source_p->localClient->sockhost);
 
-		ilog (L_INFO, "Too many connections from %s.", log_client_name (source_p, SHOW_IP));
+		ilog(L_INFO, "Too many connections from %s.", log_client_name(source_p, SHOW_IP));
 
 		ServerStats->is_ref++;
-		exit_client (client_p, source_p, &me,
-			     "No more connections allowed in your connection class");
+		exit_client(client_p, source_p, &me,
+			    "No more connections allowed in your connection class");
 		break;
 
 	case NOT_AUTHORIZED:
@@ -636,29 +636,28 @@ check_client (struct Client *client_p, struct Client *source_p, char *username)
 			ServerStats->is_ref++;
 			/* jdc - lists server name & port connections are on */
 			/*       a purely cosmetical change */
-			inetntop (source_p->localClient->aftype,
-				  &IN_ADDR (source_p->localClient->ip), ipaddr, HOSTIPLEN);
-			sendto_realops_flags (UMODE_UNAUTH, L_ALL,
-					      "Unauthorised client connection from %s [%s] on [%s/%u].",
-					      get_client_name (source_p,
-							       SHOW_IP),
-					      ipaddr,
-					      source_p->localClient->
-					      listener->name,
-					      source_p->localClient->listener->port);
+			inetntop(source_p->localClient->aftype,
+				 &IN_ADDR(source_p->localClient->ip), ipaddr, HOSTIPLEN);
+			sendto_realops_flags(UMODE_UNAUTH, L_ALL,
+					     "Unauthorised client connection from %s [%s] on [%s/%u].",
+					     get_client_name(source_p,
+							     SHOW_IP),
+					     ipaddr,
+					     source_p->localClient->
+					     listener->name, source_p->localClient->listener->port);
 
-			ilog (L_INFO,
-			      "Unauthorised client connection from %s on [%s/%u].",
-			      log_client_name (source_p, SHOW_IP),
-			      source_p->localClient->listener->name,
-			      source_p->localClient->listener->port);
+			ilog(L_INFO,
+			     "Unauthorised client connection from %s on [%s/%u].",
+			     log_client_name(source_p, SHOW_IP),
+			     source_p->localClient->listener->name,
+			     source_p->localClient->listener->port);
 
-			exit_client (client_p, source_p, &me,
-				     "You are not authorised to use this server");
+			exit_client(client_p, source_p, &me,
+				    "You are not authorised to use this server");
 			break;
 		}
 	case BANNED_CLIENT:
-		exit_client (client_p, client_p, &me, "*** Banned ");
+		exit_client(client_p, client_p, &me, "*** Banned ");
 		ServerStats->is_ref++;
 		break;
 
@@ -678,21 +677,21 @@ check_client (struct Client *client_p, struct Client *source_p, char *username)
  * side effect	- find the first (best) I line to attach.
  */
 static int
-verify_access (struct Client *client_p, const char *username)
+verify_access(struct Client *client_p, const char *username)
 {
 	struct ConfItem *aconf;
 	char non_ident[USERLEN + 1];
 
-	if(IsGotId (client_p))
+	if(IsGotId(client_p))
 	{
-		aconf = find_address_conf (client_p->host, client_p->username,
-					   &client_p->localClient->ip);
+		aconf = find_address_conf(client_p->host, client_p->username,
+					  &client_p->localClient->ip);
 	}
 	else
 	{
-		strlcpy (non_ident, "~", sizeof (non_ident));
-		strlcat (non_ident, username, sizeof (non_ident));
-		aconf = find_address_conf (client_p->host, non_ident, &client_p->localClient->ip);
+		strlcpy(non_ident, "~", sizeof(non_ident));
+		strlcat(non_ident, username, sizeof(non_ident));
+		aconf = find_address_conf(client_p->host, non_ident, &client_p->localClient->ip);
 	}
 
 	if(aconf != NULL)
@@ -701,55 +700,54 @@ verify_access (struct Client *client_p, const char *username)
 		{
 			if(aconf->flags & CONF_FLAGS_REDIR)
 			{
-				sendto_one (client_p, form_str (RPL_REDIR),
-					    me.name, client_p->name,
-					    aconf->name ? aconf->name : "", aconf->port);
+				sendto_one(client_p, form_str(RPL_REDIR),
+					   me.name, client_p->name,
+					   aconf->name ? aconf->name : "", aconf->port);
 				return (NOT_AUTHORIZED);
 			}
 
 
-			if(IsConfDoIdentd (aconf))
-				SetNeedId (client_p);
-			if(IsConfRestricted (aconf))
-				SetRestricted (client_p);
+			if(IsConfDoIdentd(aconf))
+				SetNeedId(client_p);
+			if(IsConfRestricted(aconf))
+				SetRestricted(client_p);
 
 			/* Thanks for spoof idea amm */
-			if(IsConfDoSpoofIp (aconf))
+			if(IsConfDoSpoofIp(aconf))
 			{
 #ifndef HIDE_SPOOF_IPS
-				if(!IsConfNoSpoofNotice (aconf))
+				if(!IsConfNoSpoofNotice(aconf))
 				{
-					sendto_realops_flags (UMODE_ALL,
-							      L_ADMIN,
-							      "%s spoofing: %s as %s",
-							      client_p->name,
-							      client_p->host, aconf->name);
+					sendto_realops_flags(UMODE_ALL,
+							     L_ADMIN,
+							     "%s spoofing: %s as %s",
+							     client_p->name,
+							     client_p->host, aconf->name);
 				}
 #endif
-				strlcpy (client_p->host, aconf->name, sizeof (client_p->host));
-				SetIPSpoof (client_p);
+				strlcpy(client_p->host, aconf->name, sizeof(client_p->host));
+				SetIPSpoof(client_p);
 			}
-			return (attach_iline (client_p, aconf));
+			return (attach_iline(client_p, aconf));
 		}
 		else if(aconf->status & CONF_KILL)
 		{
 			if(ConfigFileEntry.kline_with_reason)
 			{
-				sendto_one (client_p,
-					    ":%s NOTICE %s :*** Banned %s",
-					    me.name, client_p->name, aconf->passwd);
+				sendto_one(client_p,
+					   ":%s NOTICE %s :*** Banned %s",
+					   me.name, client_p->name, aconf->passwd);
 			}
 			return (BANNED_CLIENT);
 		}
 		else if(aconf->status & CONF_GLINE)
 		{
-			sendto_one (client_p, ":%s NOTICE %s :*** G-lined",
-				    me.name, client_p->name);
+			sendto_one(client_p, ":%s NOTICE %s :*** G-lined", me.name, client_p->name);
 
 			if(ConfigFileEntry.kline_with_reason)
-				sendto_one (client_p,
-					    ":%s NOTICE %s :*** Banned %s",
-					    me.name, client_p->name, aconf->passwd);
+				sendto_one(client_p,
+					   ":%s NOTICE %s :*** Banned %s",
+					   me.name, client_p->name, aconf->passwd);
 
 			return (BANNED_CLIENT);
 		}
@@ -768,32 +766,32 @@ verify_access (struct Client *client_p, const char *username)
  */
 
 static int
-add_ip_limit (struct Client *client_p, struct ConfItem *aconf)
+add_ip_limit(struct Client *client_p, struct ConfItem *aconf)
 {
 	patricia_node_t *pnode;
 
 	/* If the limits are 0 don't do anything.. */
-	if(ConfCidrAmount (aconf) == 0 || ConfCidrBitlen (aconf) == 0)
+	if(ConfCidrAmount(aconf) == 0 || ConfCidrBitlen(aconf) == 0)
 		return -1;
 
-	pnode = match_ip (ConfIpLimits (aconf), (void *) &IN_ADDR (client_p->localClient->ip));
+	pnode = match_ip(ConfIpLimits(aconf), (void *) &IN_ADDR(client_p->localClient->ip));
 
 	if(pnode == NULL)
-		pnode = make_and_lookup_ip (ConfIpLimits (aconf), DEF_FAM,
-					    &IN_ADDR (client_p->localClient->
-						      ip), ConfCidrBitlen (aconf));
+		pnode = make_and_lookup_ip(ConfIpLimits(aconf), DEF_FAM,
+					   &IN_ADDR(client_p->localClient->
+						    ip), ConfCidrBitlen(aconf));
 
-	assert (pnode != NULL);
+	assert(pnode != NULL);
 
 	if(pnode != NULL)
 	{
-		if(((unsigned long) pnode->data) >= ConfCidrAmount (aconf)
-		   && !IsConfExemptLimits (aconf))
+		if(((unsigned long) pnode->data) >= ConfCidrAmount(aconf)
+		   && !IsConfExemptLimits(aconf))
 		{
 			/* This should only happen if the limits are set to 0 */
 			if((unsigned long) pnode->data == 0)
 			{
-				patricia_remove (ConfIpLimits (aconf), pnode);
+				patricia_remove(ConfIpLimits(aconf), pnode);
 			}
 			return (0);
 		}
@@ -803,22 +801,22 @@ add_ip_limit (struct Client *client_p, struct ConfItem *aconf)
 }
 
 static void
-remove_ip_limit (struct Client *client_p, struct ConfItem *aconf)
+remove_ip_limit(struct Client *client_p, struct ConfItem *aconf)
 {
 	patricia_node_t *pnode;
 
 	/* If the limits are 0 don't do anything.. */
-	if(ConfCidrAmount (aconf) == 0 || ConfCidrBitlen (aconf) == 0)
+	if(ConfCidrAmount(aconf) == 0 || ConfCidrBitlen(aconf) == 0)
 		return;
 
-	pnode = match_ip (ConfIpLimits (aconf), (void *) &IN_ADDR (client_p->localClient->ip));
+	pnode = match_ip(ConfIpLimits(aconf), (void *) &IN_ADDR(client_p->localClient->ip));
 	if(pnode == NULL)
 		return;
 
 	((unsigned long) pnode->data)--;
 	if(((unsigned long) pnode->data) == 0)
 	{
-		patricia_remove (ConfIpLimits (aconf), pnode);
+		patricia_remove(ConfIpLimits(aconf), pnode);
 	}
 
 }
@@ -832,7 +830,7 @@ remove_ip_limit (struct Client *client_p, struct ConfItem *aconf)
  * side effects	- do actual attach
  */
 static int
-attach_iline (struct Client *client_p, struct ConfItem *aconf)
+attach_iline(struct Client *client_p, struct ConfItem *aconf)
 {
 	struct Client *target_p;
 	dlink_node *ptr;
@@ -844,22 +842,22 @@ attach_iline (struct Client *client_p, struct ConfItem *aconf)
 
 
 
-	if(IsConfExemptLimits (aconf))
-		return (attach_conf (client_p, aconf));
+	if(IsConfExemptLimits(aconf))
+		return (attach_conf(client_p, aconf));
 
 	if(*client_p->username == '~')
 		unidented = 1;
 
 
 	/* find_hostname() returns the head of the list to search */
-	DLINK_FOREACH (ptr, find_hostname (client_p->host))
+	DLINK_FOREACH(ptr, find_hostname(client_p->host))
 	{
 		target_p = ptr->data;
 
-		if(irccmp (client_p->host, target_p->host) != 0)
+		if(irccmp(client_p->host, target_p->host) != 0)
 			continue;
 
-		if(MyConnect (target_p))
+		if(MyConnect(target_p))
 			local_count++;
 
 		global_count++;
@@ -869,19 +867,19 @@ attach_iline (struct Client *client_p, struct ConfItem *aconf)
 			if(*target_p->username == '~')
 				ident_count++;
 		}
-		else if(irccmp (target_p->username, client_p->username) == 0)
+		else if(irccmp(target_p->username, client_p->username) == 0)
 			ident_count++;
 
-		if(ConfMaxLocal (aconf) && local_count >= ConfMaxLocal (aconf))
+		if(ConfMaxLocal(aconf) && local_count >= ConfMaxLocal(aconf))
 			return (TOO_MANY_LOCAL);
-		else if(ConfMaxGlobal (aconf) && global_count >= ConfMaxGlobal (aconf))
+		else if(ConfMaxGlobal(aconf) && global_count >= ConfMaxGlobal(aconf))
 			return (TOO_MANY_GLOBAL);
-		else if(ConfMaxIdent (aconf) && ident_count >= ConfMaxIdent (aconf))
+		else if(ConfMaxIdent(aconf) && ident_count >= ConfMaxIdent(aconf))
 			return (TOO_MANY_IDENT);
 	}
 
 
-	return (attach_conf (client_p, aconf));
+	return (attach_conf(client_p, aconf));
 }
 
 /*
@@ -893,7 +891,7 @@ attach_iline (struct Client *client_p, struct ConfItem *aconf)
  *		  Also removes a class from the list if marked for deleting.
  */
 int
-detach_conf (struct Client *client_p)
+detach_conf(struct Client *client_p)
 {
 	struct ConfItem *aconf;
 
@@ -902,27 +900,27 @@ detach_conf (struct Client *client_p)
 
 	if(aconf != NULL)
 	{
-		if(ClassPtr (aconf))
+		if(ClassPtr(aconf))
 		{
-			remove_ip_limit (client_p, aconf);
+			remove_ip_limit(client_p, aconf);
 
 			if(aconf->status & CONF_CLIENT_MASK)
 			{
-				if(ConfCurrUsers (aconf) > 0)
-					--ConfCurrUsers (aconf);
+				if(ConfCurrUsers(aconf) > 0)
+					--ConfCurrUsers(aconf);
 			}
 
-			if(ConfMaxUsers (aconf) == -1 && ConfCurrUsers (aconf) == 0)
+			if(ConfMaxUsers(aconf) == -1 && ConfCurrUsers(aconf) == 0)
 			{
-				free_class (ClassPtr (aconf));
-				ClassPtr (aconf) = NULL;
+				free_class(ClassPtr(aconf));
+				ClassPtr(aconf) = NULL;
 			}
 
 		}
 
 		aconf->clients--;
-		if(!aconf->clients && IsIllegal (aconf))
-			free_conf (aconf);
+		if(!aconf->clients && IsIllegal(aconf))
+			free_conf(aconf);
 
 		client_p->localClient->att_conf = NULL;
 		return 0;
@@ -943,50 +941,50 @@ detach_conf (struct Client *client_p)
  *                attachment if there was an old one...
  */
 int
-attach_conf (struct Client *client_p, struct ConfItem *aconf)
+attach_conf(struct Client *client_p, struct ConfItem *aconf)
 {
-	if(IsIllegal (aconf))
+	if(IsIllegal(aconf))
 		return (NOT_AUTHORIZED);
 
 	if((aconf->status & CONF_OPERATOR) == 0)
 	{
-		if(ClassPtr (aconf))
+		if(ClassPtr(aconf))
 		{
-			if(!add_ip_limit (client_p, aconf))
+			if(!add_ip_limit(client_p, aconf))
 			{
 				return (TOO_MANY_LOCAL);
 			}
 		}
 
 		if((aconf->status & CONF_CLIENT) &&
-		   ConfCurrUsers (aconf) >= ConfMaxUsers (aconf) && ConfMaxUsers (aconf) > 0)
+		   ConfCurrUsers(aconf) >= ConfMaxUsers(aconf) && ConfMaxUsers(aconf) > 0)
 		{
-			if(!IsConfExemptLimits (aconf))
+			if(!IsConfExemptLimits(aconf))
 			{
 				return (I_LINE_FULL);
 			}
 			else
 			{
-				send (client_p->localClient->fd,
-				      "NOTICE FLINE :I: line is full, but you have an >I: line!\n",
-				      56, 0);
-				SetExemptLimits (client_p);
+				send(client_p->localClient->fd,
+				     "NOTICE FLINE :I: line is full, but you have an >I: line!\n",
+				     56, 0);
+				SetExemptLimits(client_p);
 			}
 
 		}
 	}
 
 	if(aconf->status & FLAGS2_RESTRICTED)
-		SetRestricted (client_p);
+		SetRestricted(client_p);
 
 	if(client_p->localClient->att_conf != NULL)
-		detach_conf (client_p);
+		detach_conf(client_p);
 
 	client_p->localClient->att_conf = aconf;
 
 	aconf->clients++;
 	if(aconf->status & CONF_CLIENT_MASK)
-		ConfCurrUsers (aconf)++;
+		ConfCurrUsers(aconf)++;
 	return (0);
 }
 
@@ -1000,24 +998,24 @@ attach_conf (struct Client *client_p, struct ConfItem *aconf)
  * side effects - find connect block and attach them to connecting client
  */
 int
-attach_connect_block (struct Client *client_p, const char *name, const char *host)
+attach_connect_block(struct Client *client_p, const char *name, const char *host)
 {
 	struct ConfItem *ptr;
 
-	assert (client_p != NULL);
-	assert (host != NULL);
+	assert(client_p != NULL);
+	assert(host != NULL);
 	if(client_p == NULL || host == NULL)
 		return (0);
 
 	for (ptr = ConfigItemList; ptr; ptr = ptr->next)
 	{
-		if(IsIllegal (ptr))
+		if(IsIllegal(ptr))
 			continue;
 		if(ptr->status != CONF_SERVER)
 			continue;
-		if((match (name, ptr->name) == 0) || (match (ptr->host, host) == 0))
+		if((match(name, ptr->name) == 0) || (match(ptr->host, host) == 0))
 			continue;
-		attach_conf (client_p, ptr);
+		attach_conf(client_p, ptr);
 		return (-1);
 	}
 	return (0);
@@ -1035,42 +1033,41 @@ attach_connect_block (struct Client *client_p, const char *name, const char *hos
  *		  and has the same name.
  */
 struct ConfItem *
-find_conf_exact (const char *name, const char *user, const char *host, int statmask)
+find_conf_exact(const char *name, const char *user, const char *host, int statmask)
 {
 	struct ConfItem *tmp;
 	struct irc_inaddr ip, cip;
-	char addr[HOSTLEN+1];
+	char addr[HOSTLEN + 1];
 	int bits, cbits;
 
 	for (tmp = ConfigItemList; tmp; tmp = tmp->next)
 	{
-		if(!(tmp->status & statmask) || !tmp->name || !tmp->host ||
-		   irccmp (tmp->name, name))
+		if(!(tmp->status & statmask) || !tmp->name || !tmp->host || irccmp(tmp->name, name))
 			continue;
 		/*
 		 ** Accept if the *real* hostname (usually sockethost)
 		 ** socket host) matches *either* host or name field
 		 ** of the configuration.
 		 */
-		if(!match (tmp->user, user) || irccmp (tmp->name, name))
+		if(!match(tmp->user, user) || irccmp(tmp->name, name))
 			continue;
 
 		strlcpy(addr, tmp->host, sizeof(addr));
-		if(parse_netmask (addr, &ip, &bits) && parse_netmask (host, &cip, &cbits))
+		if(parse_netmask(addr, &ip, &bits) && parse_netmask(host, &cip, &cbits))
 		{
 			MyFree(addr);
-			if(!comp_with_mask (&IN_ADDR (ip), &IN_ADDR (cip), bits))
+			if(!comp_with_mask(&IN_ADDR(ip), &IN_ADDR(cip), bits))
 				continue;
 
 		}
-		else if(!match (tmp->host, host))
+		else if(!match(tmp->host, host))
 		{
 			continue;
 		}
 
 		if(tmp->status & CONF_OPERATOR)
 		{
-			if(tmp->clients < ConfMaxUsers (tmp))
+			if(tmp->clients < ConfMaxUsers(tmp))
 				return (tmp);
 			else
 				continue;
@@ -1092,16 +1089,16 @@ find_conf_exact (const char *name, const char *user, const char *host, int statm
  *
  */
 struct ConfItem *
-find_conf_by_name (const char *name, int status)
+find_conf_by_name(const char *name, int status)
 {
 	struct ConfItem *conf;
-	assert (name != NULL);
+	assert(name != NULL);
 	if(name == NULL)
 		return (NULL);
 
 	for (conf = ConfigItemList; conf; conf = conf->next)
 	{
-		if(conf->status == status && conf->name && match (name, conf->name))
+		if(conf->status == status && conf->name && match(name, conf->name))
 			return (conf);
 	}
 	return (NULL);
@@ -1118,15 +1115,15 @@ find_conf_by_name (const char *name, int status)
  *
  */
 struct ConfItem *
-find_conf_by_host (const char *host, int status)
+find_conf_by_host(const char *host, int status)
 {
 	struct ConfItem *conf;
-	assert (host != NULL);
+	assert(host != NULL);
 	if(host == NULL)
 		return (NULL);
 	for (conf = ConfigItemList; conf; conf = conf->next)
 	{
-		if(conf->status == status && conf->host && match (host, conf->host))
+		if(conf->status == status && conf->host && match(host, conf->host))
 			return (conf);
 	}
 	return (NULL);
@@ -1140,26 +1137,26 @@ find_conf_by_host (const char *host, int status)
  * called as a result of the server receiving a HUP signal.
  */
 int
-rehash (int sig)
+rehash(int sig)
 {
 	if(sig != 0)
 	{
-		sendto_realops_flags (UMODE_ALL, L_ALL,
-				      "Got signal SIGHUP, reloading ircd conf. file");
+		sendto_realops_flags(UMODE_ALL, L_ALL,
+				     "Got signal SIGHUP, reloading ircd conf. file");
 	}
 
-	restart_resolver ();
+	restart_resolver();
 	/* don't close listeners until we know we can go ahead with the rehash */
-	read_conf_files (NO);
+	read_conf_files(NO);
 
 	if(ServerInfo.description != NULL)
 	{
-		strlcpy (me.info, ServerInfo.description, sizeof (me.info));
+		strlcpy(me.info, ServerInfo.description, sizeof(me.info));
 	}
 
-	flush_deleted_I_P ();
-	check_banned_lines ();
-	reopen_log (logFileName);
+	flush_deleted_I_P();
+	check_banned_lines();
+	reopen_log(logFileName);
 	return (0);
 }
 
@@ -1179,9 +1176,9 @@ rehash (int sig)
 #define UNSET  -1
 
 static void
-set_default_conf (void)
+set_default_conf(void)
 {
-	class0 = find_class ("default");	/* which one is the default class ? */
+	class0 = find_class("default");	/* which one is the default class ? */
 
 #ifdef HAVE_LIBCRYPTO
 	ServerInfo.rsa_private_key = NULL;
@@ -1191,12 +1188,12 @@ set_default_conf (void)
 	/* ServerInfo.name is not rehashable */
 	/* ServerInfo.name = ServerInfo.name; */
 	ServerInfo.description = NULL;
-	DupString (ServerInfo.network_name, NETWORK_NAME_DEFAULT);
-	DupString (ServerInfo.network_desc, NETWORK_DESC_DEFAULT);
+	DupString(ServerInfo.network_name, NETWORK_NAME_DEFAULT);
+	DupString(ServerInfo.network_desc, NETWORK_DESC_DEFAULT);
 
-	memset (&ServerInfo.ip, 0, sizeof (ServerInfo.ip));
+	memset(&ServerInfo.ip, 0, sizeof(ServerInfo.ip));
 	ServerInfo.specific_ipv4_vhost = 0;
-	memset (&ServerInfo.ip6, 0, sizeof (ServerInfo.ip6));
+	memset(&ServerInfo.ip6, 0, sizeof(ServerInfo.ip6));
 	ServerInfo.specific_ipv6_vhost = 0;
 
 	ServerInfo.max_clients = MAX_CLIENTS;	/* XXX - these don't seem to */
@@ -1209,7 +1206,7 @@ set_default_conf (void)
 	AdminInfo.email = NULL;
 	AdminInfo.description = NULL;
 
-	set_log_level (L_NOTICE);
+	set_log_level(L_NOTICE);
 
 	ConfigFileEntry.failed_oper_notice = YES;
 	ConfigFileEntry.anti_nick_flood = NO;
@@ -1243,7 +1240,7 @@ set_default_conf (void)
 	ConfigFileEntry.idletime = 0;
 	ConfigFileEntry.dots_in_ident = 0;
 	ConfigFileEntry.max_targets = MAX_TARGETS_DEFAULT;
-	DupString (ConfigFileEntry.servlink_path, SLPATH);
+	DupString(ConfigFileEntry.servlink_path, SLPATH);
 	ConfigFileEntry.egdpool_path = NULL;
 	ConfigFileEntry.use_whois_actually = YES;
 	ConfigFileEntry.burst_away = NO;
@@ -1317,19 +1314,19 @@ set_default_conf (void)
  * side effects	- Read configuration file.
  */
 static void
-read_conf (FBFILE * file)
+read_conf(FBFILE * file)
 {
 	scount = lineno = 0;
 
-	set_default_conf ();	/* Set default values prior to conf parsing */
-	yyparse ();		/* Load the values from the conf */
-	validate_conf ();	/* Check to make sure some values are still okay. */
+	set_default_conf();	/* Set default values prior to conf parsing */
+	yyparse();		/* Load the values from the conf */
+	validate_conf();	/* Check to make sure some values are still okay. */
 	/* Some global values are also loaded here. */
-	check_class ();		/* Make sure classes are valid */
+	check_class();		/* Make sure classes are valid */
 }
 
 static void
-validate_conf (void)
+validate_conf(void)
 {
 	if(ConfigFileEntry.ts_warn_delta < TS_WARN_DELTA_MIN)
 		ConfigFileEntry.ts_warn_delta = TS_WARN_DELTA_DEFAULT;
@@ -1338,13 +1335,13 @@ validate_conf (void)
 		ConfigFileEntry.ts_max_delta = TS_MAX_DELTA_DEFAULT;
 
 	if(ConfigFileEntry.servlink_path == NULL)
-		DupString (ConfigFileEntry.servlink_path, SLPATH);
+		DupString(ConfigFileEntry.servlink_path, SLPATH);
 
 	if(ServerInfo.network_name == NULL)
-		DupString (ServerInfo.network_name, NETWORK_NAME_DEFAULT);
+		DupString(ServerInfo.network_name, NETWORK_NAME_DEFAULT);
 
 	if(ServerInfo.network_desc == NULL)
-		DupString (ServerInfo.network_desc, NETWORK_DESC_DEFAULT);
+		DupString(ServerInfo.network_desc, NETWORK_DESC_DEFAULT);
 
 	if((ConfigFileEntry.client_flood < CLIENT_FLOOD_MIN) ||
 	   (ConfigFileEntry.client_flood > CLIENT_FLOOD_MAX))
@@ -1360,10 +1357,10 @@ validate_conf (void)
  * Side effects	- add given conf to link list
  */
 void
-conf_add_conf (struct ConfItem *aconf)
+conf_add_conf(struct ConfItem *aconf)
 {
-	(void) collapse (aconf->host);
-	(void) collapse (aconf->user);
+	(void) collapse(aconf->host);
+	(void) collapse(aconf->user);
 
 	aconf->next = ConfigItemList;
 	ConfigItemList = aconf;
@@ -1378,26 +1375,26 @@ conf_add_conf (struct ConfItem *aconf)
  *		  stuff the user into ->user and the host into ->host
  */
 static int
-SplitUserHost (struct ConfItem *aconf)
+SplitUserHost(struct ConfItem *aconf)
 {
 	char *p;
 	char *new_user;
 	char *new_host;
 
-	if((p = strchr (aconf->host, '@')))
+	if((p = strchr(aconf->host, '@')))
 	{
 		*p = '\0';
-		DupString (new_user, aconf->host);
-		MyFree (aconf->user);
+		DupString(new_user, aconf->host);
+		MyFree(aconf->user);
 		aconf->user = new_user;
 		p++;
-		DupString (new_host, p);
-		MyFree (aconf->host);
+		DupString(new_host, p);
+		MyFree(aconf->host);
 		aconf->host = new_host;
 	}
 	else
 	{
-		DupString (aconf->user, "*");
+		DupString(aconf->user, "*");
 	}
 	return (1);
 }
@@ -1408,23 +1405,23 @@ SplitUserHost (struct ConfItem *aconf)
  *
  */
 static void
-lookup_confhost (struct ConfItem *aconf)
+lookup_confhost(struct ConfItem *aconf)
 {
-	if(BadPtr (aconf->host) || BadPtr (aconf->name))
+	if(BadPtr(aconf->host) || BadPtr(aconf->name))
 	{
-		ilog (L_ERROR, "Host/server name error: (%s) (%s)", aconf->host, aconf->name);
+		ilog(L_ERROR, "Host/server name error: (%s) (%s)", aconf->host, aconf->name);
 		return;
 	}
 
-	if(strchr (aconf->host, '*') || strchr (aconf->host, '?'))
+	if(strchr(aconf->host, '*') || strchr(aconf->host, '?'))
 		return;
 	/*
 	 ** Do name lookup now on hostnames given and store the
 	 ** ip numbers in conf structure.
 	 */
-	if(inetpton (DEF_FAM, aconf->host, &IN_ADDR (aconf->ipnum)) <= 0)
+	if(inetpton(DEF_FAM, aconf->host, &IN_ADDR(aconf->ipnum)) <= 0)
 	{
-		conf_dns_lookup (aconf);
+		conf_dns_lookup(aconf);
 	}
 }
 
@@ -1437,9 +1434,9 @@ lookup_confhost (struct ConfItem *aconf)
  * side effects	- none
  */
 int
-conf_connect_allowed (struct irc_inaddr *addr)
+conf_connect_allowed(struct irc_inaddr *addr)
 {
-	struct ConfItem *aconf = find_dline (addr);
+	struct ConfItem *aconf = find_dline(addr);
 
 	/* DLINE exempt also gets you out of static limits/pacing... */
 	if(aconf && (aconf->status & CONF_EXEMPTDLINE))
@@ -1460,14 +1457,14 @@ conf_connect_allowed (struct irc_inaddr *addr)
  *		  and if so, return struct ConfItem pointer
  */
 struct ConfItem *
-find_kill (struct Client *client_p)
+find_kill(struct Client *client_p)
 {
 	struct ConfItem *aconf;
-	assert (client_p != NULL);
+	assert(client_p != NULL);
 	if(client_p == NULL)
 		return (NULL);
 
-	aconf = find_address_conf (client_p->host, client_p->username, &client_p->localClient->ip);
+	aconf = find_address_conf(client_p->host, client_p->username, &client_p->localClient->ip);
 	if(aconf == NULL)
 		return (aconf);
 	if((aconf->status & CONF_KILL) || (aconf->status & CONF_GLINE))
@@ -1484,19 +1481,19 @@ find_kill (struct Client *client_p)
  *                 temporary kline link list
  */
 void
-add_temp_kline (struct ConfItem *aconf)
+add_temp_kline(struct ConfItem *aconf)
 {
 	if(aconf->hold >= CurrentTime + (10080 * 60))
-		dlinkAddAlloc (aconf, &tkline_week);
+		dlinkAddAlloc(aconf, &tkline_week);
 	else if(aconf->hold >= CurrentTime + (1440 * 60))
-		dlinkAddAlloc (aconf, &tkline_day);
+		dlinkAddAlloc(aconf, &tkline_day);
 	else if(aconf->hold >= CurrentTime + (60 * 60))
-		dlinkAddAlloc (aconf, &tkline_hour);
+		dlinkAddAlloc(aconf, &tkline_hour);
 	else
-		dlinkAddAlloc (aconf, &tkline_min);
+		dlinkAddAlloc(aconf, &tkline_min);
 
 	aconf->flags |= CONF_FLAGS_TEMPORARY;
-	add_conf_by_address (aconf->host, CONF_KILL, aconf->user, aconf);
+	add_conf_by_address(aconf->host, CONF_KILL, aconf->user, aconf);
 }
 
 /* add_temp_dline()
@@ -1506,47 +1503,47 @@ add_temp_kline (struct ConfItem *aconf)
  * side effects - added to tdline link list and address hash
  */
 void
-add_temp_dline (struct ConfItem *aconf)
+add_temp_dline(struct ConfItem *aconf)
 {
 	if(aconf->hold >= CurrentTime + (10080 * 60))
-		dlinkAddAlloc (aconf, &tdline_week);
+		dlinkAddAlloc(aconf, &tdline_week);
 	else if(aconf->hold >= CurrentTime + (1440 * 60))
-		dlinkAddAlloc (aconf, &tdline_day);
+		dlinkAddAlloc(aconf, &tdline_day);
 	else if(aconf->hold >= CurrentTime + (60 * 60))
-		dlinkAddAlloc (aconf, &tdline_hour);
+		dlinkAddAlloc(aconf, &tdline_hour);
 	else
-		dlinkAddAlloc (aconf, &tdline_min);
+		dlinkAddAlloc(aconf, &tdline_min);
 
 	aconf->flags |= CONF_FLAGS_TEMPORARY;
-	add_conf_by_address (aconf->host, CONF_DLINE, aconf->user, aconf);
+	add_conf_by_address(aconf->host, CONF_DLINE, aconf->user, aconf);
 }
 
 void
-cleanup_temps_min (void *notused)
+cleanup_temps_min(void *notused)
 {
-	expire_tkline (&tkline_min, TEMP_MIN);
-	expire_tdline (&tdline_min, TEMP_MIN);
+	expire_tkline(&tkline_min, TEMP_MIN);
+	expire_tdline(&tdline_min, TEMP_MIN);
 }
 
 void
-cleanup_temps_hour (void *notused)
+cleanup_temps_hour(void *notused)
 {
-	expire_tkline (&tkline_hour, TEMP_HOUR);
-	expire_tdline (&tdline_hour, TEMP_HOUR);
+	expire_tkline(&tkline_hour, TEMP_HOUR);
+	expire_tdline(&tdline_hour, TEMP_HOUR);
 }
 
 void
-cleanup_temps_day (void *notused)
+cleanup_temps_day(void *notused)
 {
-	expire_tkline (&tkline_day, TEMP_DAY);
-	expire_tdline (&tdline_day, TEMP_DAY);
+	expire_tkline(&tkline_day, TEMP_DAY);
+	expire_tdline(&tdline_day, TEMP_DAY);
 }
 
 void
-cleanup_temps_week (void *notused)
+cleanup_temps_week(void *notused)
 {
-	expire_tkline (&tkline_week, TEMP_WEEK);
-	expire_tdline (&tdline_week, TEMP_WEEK);
+	expire_tkline(&tkline_week, TEMP_WEEK);
+	expire_tdline(&tdline_week, TEMP_WEEK);
 }
 
 /* expire_tkline()
@@ -1557,13 +1554,13 @@ cleanup_temps_week (void *notused)
  * side effects - expire tklines and moves them between lists
  */
 static void
-expire_tkline (dlink_list * tklist, int type)
+expire_tkline(dlink_list * tklist, int type)
 {
 	dlink_node *ptr;
 	dlink_node *next_ptr;
 	struct ConfItem *aconf;
 
-	DLINK_FOREACH_SAFE (ptr, next_ptr, tklist->head)
+	DLINK_FOREACH_SAFE(ptr, next_ptr, tklist->head)
 	{
 		aconf = ptr->data;
 
@@ -1571,14 +1568,13 @@ expire_tkline (dlink_list * tklist, int type)
 		{
 			/* Alert opers that a TKline expired - Hwy */
 			if(ConfigFileEntry.tkline_expire_notices)
-				sendto_realops_flags (UMODE_ALL, L_ALL,
-						      "Temporary K-line for [%s@%s] expired",
-						      (aconf->user) ? aconf->
-						      user : "*",
-						      (aconf->host) ? aconf->host : "*");
+				sendto_realops_flags(UMODE_ALL, L_ALL,
+						     "Temporary K-line for [%s@%s] expired",
+						     (aconf->user) ? aconf->
+						     user : "*", (aconf->host) ? aconf->host : "*");
 
-			delete_one_address_conf (aconf);
-			dlinkDestroy (ptr, tklist);
+			delete_one_address_conf(aconf);
+			dlinkDestroy(ptr, tklist);
 		}
 		else if((type == TEMP_WEEK
 			 && aconf->hold < (CurrentTime + (10080 * 60)))
@@ -1588,15 +1584,15 @@ expire_tkline (dlink_list * tklist, int type)
 		{
 			/* expires within a hour, check every minute.. */
 			if(aconf->hold < CurrentTime + (60 * 60))
-				dlinkMoveNode (ptr, tklist, &tkline_min);
+				dlinkMoveNode(ptr, tklist, &tkline_min);
 
 			/* .. a day, check hourly */
 			else if(aconf->hold < CurrentTime + (1440 * 60))
-				dlinkMoveNode (ptr, tklist, &tkline_hour);
+				dlinkMoveNode(ptr, tklist, &tkline_hour);
 
 			/* .. a week, check daily */
 			else if(aconf->hold < CurrentTime + (10080 * 60))
-				dlinkMoveNode (ptr, tklist, &tkline_day);
+				dlinkMoveNode(ptr, tklist, &tkline_day);
 		}
 	}
 }
@@ -1609,25 +1605,25 @@ expire_tkline (dlink_list * tklist, int type)
  * side effects - expire tdlines and moves them between lists
  */
 static void
-expire_tdline (dlink_list * tdlist, int type)
+expire_tdline(dlink_list * tdlist, int type)
 {
 	dlink_node *ptr;
 	dlink_node *next_ptr;
 	struct ConfItem *aconf;
 
-	DLINK_FOREACH_SAFE (ptr, next_ptr, tdlist->head)
+	DLINK_FOREACH_SAFE(ptr, next_ptr, tdlist->head)
 	{
 		aconf = ptr->data;
 
 		if(aconf->hold <= CurrentTime)
 		{
 			if(ConfigFileEntry.tkline_expire_notices)
-				sendto_realops_flags (UMODE_ALL, L_ALL,
-						      "Temporary D-line for [%s] expired",
-						      aconf->host);
+				sendto_realops_flags(UMODE_ALL, L_ALL,
+						     "Temporary D-line for [%s] expired",
+						     aconf->host);
 
-			delete_one_address_conf (aconf);
-			dlinkDestroy (ptr, tdlist);
+			delete_one_address_conf(aconf);
+			dlinkDestroy(ptr, tdlist);
 		}
 		else if((type == TEMP_WEEK
 			 && aconf->hold < (CurrentTime + (10080 * 60)))
@@ -1637,15 +1633,15 @@ expire_tdline (dlink_list * tdlist, int type)
 		{
 			/* expires within an hour, check every minute.. */
 			if(aconf->hold < CurrentTime + (60 * 60))
-				dlinkMoveNode (ptr, tdlist, &tdline_min);
+				dlinkMoveNode(ptr, tdlist, &tdline_min);
 
 			/* .. a day, check hourly */
 			else if(aconf->hold < CurrentTime + (1440 * 60))
-				dlinkMoveNode (ptr, tdlist, &tdline_hour);
+				dlinkMoveNode(ptr, tdlist, &tdline_hour);
 
 			/* .. a week, check daily */
 			else if(aconf->hold < CurrentTime + (10080 * 60))
-				dlinkMoveNode (ptr, tdlist, &tdline_day);
+				dlinkMoveNode(ptr, tdlist, &tdline_day);
 		}
 	}
 }
@@ -1661,7 +1657,7 @@ expire_tdline (dlink_list * tdlist, int type)
  */
 
 char *
-oper_privs_as_string (struct Client *client_p, int port)
+oper_privs_as_string(struct Client *client_p, int port)
 {
 	static char privs_out[16];
 	char *privs_ptr;
@@ -1741,7 +1737,7 @@ oper_privs_as_string (struct Client *client_p, int port)
  *
  */
 char *
-oper_flags_as_string (int flags)
+oper_flags_as_string(int flags)
 {
 	/* This MUST be extended if we add any more modes... -Hwy */
 	static char flags_out[18];
@@ -1795,30 +1791,29 @@ oper_flags_as_string (int flags)
  * Side effects: None.
  */
 char *
-get_oper_name (struct Client *client_p)
+get_oper_name(struct Client *client_p)
 {
 	struct ConfItem *aconf;
 
 	/* +5 for !,@,{,} and null */
 	static char buffer[NICKLEN + USERLEN + HOSTLEN + HOSTLEN + 5];
 
-	if(MyOper (client_p))
+	if(MyOper(client_p))
 	{
 		aconf = client_p->localClient->att_conf;
 
 		if(aconf->status & CONF_OPERATOR)
 		{
-			ircsprintf (buffer, "%s!%s@%s{%s}",
-				    client_p->name, client_p->username,
-				    client_p->host, aconf->name);
+			ircsprintf(buffer, "%s!%s@%s{%s}",
+				   client_p->name, client_p->username, client_p->host, aconf->name);
 			return buffer;
 		}
 
-		assert (0);
+		assert(0);
 	}
 
-	ircsprintf (buffer, "%s!%s@%s{%s}",
-		    client_p->name, client_p->username, client_p->host, client_p->servptr->name);
+	ircsprintf(buffer, "%s!%s@%s{%s}",
+		   client_p->name, client_p->username, client_p->host, client_p->servptr->name);
 	return buffer;
 }
 
@@ -1840,17 +1835,17 @@ get_oper_name (struct Client *client_p)
  */
 
 void
-get_printable_conf (struct ConfItem *aconf, char **name, char **host,
-		    char **pass, char **user, int *port, char **classname)
+get_printable_conf(struct ConfItem *aconf, char **name, char **host,
+		   char **pass, char **user, int *port, char **classname)
 {
 	static char null[] = "<NULL>";
 	static char zero[] = "default";
 
-	*name = BadPtr (aconf->name) ? null : aconf->name;
-	*host = BadPtr (aconf->host) ? null : aconf->host;
-	*pass = BadPtr (aconf->passwd) ? null : aconf->passwd;
-	*user = BadPtr (aconf->user) ? null : aconf->user;
-	*classname = BadPtr (aconf->className) ? zero : aconf->className;
+	*name = BadPtr(aconf->name) ? null : aconf->name;
+	*host = BadPtr(aconf->host) ? null : aconf->host;
+	*pass = BadPtr(aconf->passwd) ? null : aconf->passwd;
+	*user = BadPtr(aconf->user) ? null : aconf->user;
+	*classname = BadPtr(aconf->className) ? zero : aconf->className;
 	*port = (int) aconf->port;
 }
 
@@ -1862,7 +1857,7 @@ get_printable_conf (struct ConfItem *aconf, char **name, char **host,
  * side effects - read all conf files needed, ircd.conf kline.conf etc.
  */
 void
-read_conf_files (int cold)
+read_conf_files(int cold)
 {
 	FBFILE *file;
 	const char *filename, *kfilename, *dfilename;	/* kline or conf filename */
@@ -1871,7 +1866,7 @@ read_conf_files (int cold)
 
 	conf_fbfile_in = NULL;
 
-	filename = get_conf_name (CONF_TYPE);
+	filename = get_conf_name(CONF_TYPE);
 
 	/* We need to know the initial filename for the yyerror() to report
 	   FIXME: The full path is in conffilenamebuf first time since we
@@ -1879,104 +1874,104 @@ read_conf_files (int cold)
 
 	   - Gozem 2002-07-21 
 	 */
-	strlcpy (conffilebuf, filename, sizeof (conffilebuf));
+	strlcpy(conffilebuf, filename, sizeof(conffilebuf));
 
-	if((conf_fbfile_in = fbopen (filename, "r")) == NULL)
+	if((conf_fbfile_in = fbopen(filename, "r")) == NULL)
 	{
 		if(cold)
 		{
-			ilog (L_CRIT, "Failed in reading configuration file %s", filename);
-			exit (-1);
+			ilog(L_CRIT, "Failed in reading configuration file %s", filename);
+			exit(-1);
 		}
 		else
 		{
-			sendto_realops_flags (UMODE_ALL, L_ALL,
-					      "Can't open file '%s' - aborting rehash!", filename);
+			sendto_realops_flags(UMODE_ALL, L_ALL,
+					     "Can't open file '%s' - aborting rehash!", filename);
 			return;
 		}
 	}
 
 	if(!cold)
-		clear_out_old_conf ();
+		clear_out_old_conf();
 
-	read_conf (conf_fbfile_in);
-	fbclose (conf_fbfile_in);
+	read_conf(conf_fbfile_in);
+	fbclose(conf_fbfile_in);
 
-	kfilename = get_conf_name (KLINE_TYPE);
-	if(irccmp (filename, kfilename))
+	kfilename = get_conf_name(KLINE_TYPE);
+	if(irccmp(filename, kfilename))
 	{
-		if((file = fbopen (kfilename, "r")) == NULL)
+		if((file = fbopen(kfilename, "r")) == NULL)
 		{
 			if(cold)
-				ilog (L_ERROR, "Failed reading kline file %s", filename);
+				ilog(L_ERROR, "Failed reading kline file %s", filename);
 			else
-				sendto_realops_flags (UMODE_ALL, L_ALL,
-						      "Can't open %s file klines could be missing!",
-						      kfilename);
+				sendto_realops_flags(UMODE_ALL, L_ALL,
+						     "Can't open %s file klines could be missing!",
+						     kfilename);
 		}
 		else
 		{
-			parse_k_file (file);
-			fbclose (file);
+			parse_k_file(file);
+			fbclose(file);
 		}
 	}
 
-	dfilename = get_conf_name (DLINE_TYPE);
-	if(irccmp (filename, dfilename) && irccmp (kfilename, dfilename))
+	dfilename = get_conf_name(DLINE_TYPE);
+	if(irccmp(filename, dfilename) && irccmp(kfilename, dfilename))
 	{
-		if((file = fbopen (dfilename, "r")) == NULL)
+		if((file = fbopen(dfilename, "r")) == NULL)
 		{
 			if(cold)
-				ilog (L_ERROR, "Failed reading dline file %s", dfilename);
+				ilog(L_ERROR, "Failed reading dline file %s", dfilename);
 			else
-				sendto_realops_flags (UMODE_ALL, L_ALL,
-						      "Can't open %s file dlines could be missing!",
-						      dfilename);
+				sendto_realops_flags(UMODE_ALL, L_ALL,
+						     "Can't open %s file dlines could be missing!",
+						     dfilename);
 		}
 		else
 		{
-			parse_d_file (file);
-			fbclose (file);
+			parse_d_file(file);
+			fbclose(file);
 		}
 	}
 
 	xfilename = ConfigFileEntry.xlinefile;
 
-	if(irccmp (filename, xfilename) && irccmp (kfilename, xfilename) &&
-	   irccmp (dfilename, xfilename))
+	if(irccmp(filename, xfilename) && irccmp(kfilename, xfilename) &&
+	   irccmp(dfilename, xfilename))
 	{
-		if((file = fbopen (xfilename, "r")) == NULL)
+		if((file = fbopen(xfilename, "r")) == NULL)
 		{
 			if(cold)
-				ilog (L_ERROR, "Failed reading xline file %s", xfilename);
+				ilog(L_ERROR, "Failed reading xline file %s", xfilename);
 			else
-				sendto_realops_flags (UMODE_ALL, L_ALL,
-						      "Can't open %s file xlines could be missing!",
-						      xfilename);
+				sendto_realops_flags(UMODE_ALL, L_ALL,
+						     "Can't open %s file xlines could be missing!",
+						     xfilename);
 		}
 		else
 		{
-			parse_x_file (file);
-			fbclose (file);
+			parse_x_file(file);
+			fbclose(file);
 		}
 	}
 
-	resvfilename = get_conf_name (RESV_TYPE);
-	if(irccmp (filename, resvfilename))
+	resvfilename = get_conf_name(RESV_TYPE);
+	if(irccmp(filename, resvfilename))
 	{
-		if((file = fbopen (resvfilename, "r")) == NULL)
+		if((file = fbopen(resvfilename, "r")) == NULL)
 		{
 			if(cold)
-				ilog (L_ERROR, "Failed reading xline file %s", resvfilename);
+				ilog(L_ERROR, "Failed reading xline file %s", resvfilename);
 			else
-				sendto_realops_flags (UMODE_ALL, L_ALL,
-						      "Can't open %s file resvs could be missing!",
-						      resvfilename);
+				sendto_realops_flags(UMODE_ALL, L_ALL,
+						     "Can't open %s file resvs could be missing!",
+						     resvfilename);
 		}
 		else
 		{
-			parse_resv_file (file);
-			fbclose (file);
+			parse_resv_file(file);
+			fbclose(file);
 		}
 	}
 }
@@ -1989,7 +1984,7 @@ read_conf_files (int cold)
  * side effects - Clear out the old configuration
  */
 static void
-clear_out_old_conf (void)
+clear_out_old_conf(void)
 {
 	struct ConfItem **tmp = &ConfigItemList;
 	struct ConfItem *tmp2;
@@ -2021,7 +2016,7 @@ clear_out_old_conf (void)
 		else
 		{
 			*tmp = tmp2->next;
-			free_conf (tmp2);
+			free_conf(tmp2);
 		}
 	}
 
@@ -2029,62 +2024,62 @@ clear_out_old_conf (void)
 	 * don't delete the class table, rather mark all entries
 	 * for deletion. The table is cleaned up by check_class. - avalon
 	 */
-	assert (ClassList != NULL);
+	assert(ClassList != NULL);
 
 	for (cltmp = ClassList->next; cltmp; cltmp = cltmp->next)
-		MaxUsers (cltmp) = -1;
+		MaxUsers(cltmp) = -1;
 
-	clear_out_address_conf ();
-	clear_xlines ();
-	clear_shared ();
-	clear_clusters ();
+	clear_out_address_conf();
+	clear_xlines();
+	clear_shared();
+	clear_clusters();
 
 	/* clean out module paths */
 #ifndef STATIC_MODULES
-	mod_clear_paths ();
+	mod_clear_paths();
 #endif
 
 	/* clean out ServerInfo */
-	MyFree (ServerInfo.description);
+	MyFree(ServerInfo.description);
 	ServerInfo.description = NULL;
-	MyFree (ServerInfo.network_name);
+	MyFree(ServerInfo.network_name);
 	ServerInfo.network_name = NULL;
-	MyFree (ServerInfo.network_desc);
+	MyFree(ServerInfo.network_desc);
 	ServerInfo.network_desc = NULL;
 #ifdef HAVE_LIBCRYPTO
 	if(ServerInfo.rsa_private_key != NULL)
 	{
-		RSA_free (ServerInfo.rsa_private_key);
+		RSA_free(ServerInfo.rsa_private_key);
 		ServerInfo.rsa_private_key = NULL;
 	}
 	if(ServerInfo.rsa_private_key_file != NULL)
 	{
-		MyFree (ServerInfo.rsa_private_key_file);
+		MyFree(ServerInfo.rsa_private_key_file);
 		ServerInfo.rsa_private_key_file = NULL;
 	}
 #endif
 
 	/* clean out old resvs from the conf */
-	clear_resv ();
+	clear_resv();
 
 	/* clean out AdminInfo */
-	MyFree (AdminInfo.name);
+	MyFree(AdminInfo.name);
 	AdminInfo.name = NULL;
-	MyFree (AdminInfo.email);
+	MyFree(AdminInfo.email);
 	AdminInfo.email = NULL;
-	MyFree (AdminInfo.description);
+	MyFree(AdminInfo.description);
 	AdminInfo.description = NULL;
 
 	/* operator{} and class{} blocks are freed above */
 	/* clean out listeners */
-	close_listeners ();
+	close_listeners();
 
 	/* auth{}, quarantine{}, shared{}, connect{}, kill{}, deny{}, exempt{}
 	 * and gecos{} blocks are freed above too
 	 */
 
 	/* clean out general */
-	MyFree (ConfigFileEntry.servlink_path);
+	MyFree(ConfigFileEntry.servlink_path);
 	ConfigFileEntry.servlink_path = NULL;
 #ifdef HAVE_LIBCRYPTO
 	ConfigFileEntry.default_cipher_preference = NULL;
@@ -2102,7 +2097,7 @@ clear_out_old_conf (void)
  */
 
 static void
-flush_deleted_I_P (void)
+flush_deleted_I_P(void)
 {
 	struct ConfItem **tmp = &ConfigItemList;
 	struct ConfItem *tmp2;
@@ -2119,7 +2114,7 @@ flush_deleted_I_P (void)
 			*tmp = tmp2->next;
 			tmp2->next = NULL;
 			if(!tmp2->clients)
-				free_conf (tmp2);
+				free_conf(tmp2);
 		}
 	}
 }
@@ -2139,20 +2134,20 @@ flush_deleted_I_P (void)
  *                opers and the user.
  */
 void
-write_confitem (KlineType type, struct Client *source_p, char *user,
-		char *host, const char *reason, const char *oper_reason,
-		const char *current_date, int xtype)
+write_confitem(KlineType type, struct Client *source_p, char *user,
+	       char *host, const char *reason, const char *oper_reason,
+	       const char *current_date, int xtype)
 {
 	char buffer[1024];
 	FBFILE *out;
 	const char *filename;	/* filename to use for kline */
 
-	filename = get_conf_name (type);
+	filename = get_conf_name(type);
 
 
-	if((out = fbopen (filename, "a")) == NULL)
+	if((out = fbopen(filename, "a")) == NULL)
 	{
-		sendto_realops_flags (UMODE_ALL, L_ALL, "*** Problem opening %s ", filename);
+		sendto_realops_flags(UMODE_ALL, L_ALL, "*** Problem opening %s ", filename);
 		return;
 	}
 
@@ -2161,90 +2156,89 @@ write_confitem (KlineType type, struct Client *source_p, char *user,
 
 	if(type == KLINE_TYPE)
 	{
-		ircsprintf (buffer,
-			    "\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",%ld\n",
-			    user, host, reason, oper_reason, current_date,
-			    get_oper_name (source_p), CurrentTime);
+		ircsprintf(buffer,
+			   "\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",%ld\n",
+			   user, host, reason, oper_reason, current_date,
+			   get_oper_name(source_p), CurrentTime);
 	}
 	else if(type == DLINE_TYPE)
 	{
-		ircsprintf (buffer,
-			    "\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",%ld\n", host,
-			    reason, oper_reason, current_date,
-			    get_oper_name (source_p), CurrentTime);
+		ircsprintf(buffer,
+			   "\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",%ld\n", host,
+			   reason, oper_reason, current_date, get_oper_name(source_p), CurrentTime);
 	}
 	else if(type == RESV_TYPE)
 	{
-		ircsprintf (buffer, "\"%s\",\"%s\",\"%s\",%lu\n",
-			    host, reason, get_oper_name (source_p), CurrentTime);
+		ircsprintf(buffer, "\"%s\",\"%s\",\"%s\",%lu\n",
+			   host, reason, get_oper_name(source_p), CurrentTime);
 	}
 
-	if(fbputs (buffer, out) == -1)
+	if(fbputs(buffer, out) == -1)
 	{
-		sendto_realops_flags (UMODE_ALL, L_ALL, "*** Problem writing to %s", filename);
-		fbclose (out);
+		sendto_realops_flags(UMODE_ALL, L_ALL, "*** Problem writing to %s", filename);
+		fbclose(out);
 		return;
 	}
 
-	fbclose (out);
+	fbclose(out);
 
 	if(type == KLINE_TYPE)
 	{
-		if(BadPtr (oper_reason))
+		if(BadPtr(oper_reason))
 		{
-			sendto_realops_flags (UMODE_ALL, L_ALL,
-					      "%s added K-Line for [%s@%s] [%s]",
-					      get_oper_name (source_p), user, host, reason);
-			ilog (L_TRACE, "%s added K-Line for [%s@%s] [%s]",
-			      source_p->name, user, host, reason);
+			sendto_realops_flags(UMODE_ALL, L_ALL,
+					     "%s added K-Line for [%s@%s] [%s]",
+					     get_oper_name(source_p), user, host, reason);
+			ilog(L_TRACE, "%s added K-Line for [%s@%s] [%s]",
+			     source_p->name, user, host, reason);
 		}
 		else
 		{
-			sendto_realops_flags (UMODE_ALL, L_ALL,
-					      "%s added K-Line for [%s@%s] [%s|%s]",
-					      get_oper_name (source_p), user,
-					      host, reason, oper_reason);
-			ilog (L_TRACE, "%s added K-Line for [%s@%s] [%s|%s]",
-			      source_p->name, user, host, reason, oper_reason);
+			sendto_realops_flags(UMODE_ALL, L_ALL,
+					     "%s added K-Line for [%s@%s] [%s|%s]",
+					     get_oper_name(source_p), user,
+					     host, reason, oper_reason);
+			ilog(L_TRACE, "%s added K-Line for [%s@%s] [%s|%s]",
+			     source_p->name, user, host, reason, oper_reason);
 		}
 
-		sendto_one (source_p, ":%s NOTICE %s :Added K-Line [%s@%s]",
-			    me.name, source_p->name, user, host);
+		sendto_one(source_p, ":%s NOTICE %s :Added K-Line [%s@%s]",
+			   me.name, source_p->name, user, host);
 	}
 	else if(type == DLINE_TYPE)
 	{
-		if(BadPtr (oper_reason))
+		if(BadPtr(oper_reason))
 		{
-			sendto_realops_flags (UMODE_ALL, L_ALL,
-					      "%s added D-Line for [%s] [%s]",
-					      get_oper_name (source_p), host, reason);
-			ilog (L_TRACE, "%s added D-Line for [%s] [%s]",
-			      get_oper_name (source_p), host, reason);
+			sendto_realops_flags(UMODE_ALL, L_ALL,
+					     "%s added D-Line for [%s] [%s]",
+					     get_oper_name(source_p), host, reason);
+			ilog(L_TRACE, "%s added D-Line for [%s] [%s]",
+			     get_oper_name(source_p), host, reason);
 		}
 		else
 		{
-			sendto_realops_flags (UMODE_ALL, L_ALL,
-					      "%s added D-Line for [%s] [%s|%s]",
-					      get_oper_name (source_p), host, reason, oper_reason);
-			ilog (L_TRACE, "%s added D-Line for [%s] [%s|%s]",
-			      get_oper_name (source_p), host, reason, oper_reason);
+			sendto_realops_flags(UMODE_ALL, L_ALL,
+					     "%s added D-Line for [%s] [%s|%s]",
+					     get_oper_name(source_p), host, reason, oper_reason);
+			ilog(L_TRACE, "%s added D-Line for [%s] [%s|%s]",
+			     get_oper_name(source_p), host, reason, oper_reason);
 		}
 
-		sendto_one (source_p,
-			    ":%s NOTICE %s :Added D-Line [%s] to %s", me.name,
-			    source_p->name, host, filename);
+		sendto_one(source_p,
+			   ":%s NOTICE %s :Added D-Line [%s] to %s", me.name,
+			   source_p->name, host, filename);
 
 	}
 	else if(type == RESV_TYPE)
 	{
-		sendto_realops_flags (UMODE_ALL, L_ALL,
-				      "%s added RESV for [%s] [%s]",
-				      get_oper_name (source_p), host, reason);
-		ilog (L_TRACE, "%s added RESV for [%s] [%s]", source_p->name, host, reason);
+		sendto_realops_flags(UMODE_ALL, L_ALL,
+				     "%s added RESV for [%s] [%s]",
+				     get_oper_name(source_p), host, reason);
+		ilog(L_TRACE, "%s added RESV for [%s] [%s]", source_p->name, host, reason);
 
-		sendto_one (source_p,
-			    ":%s NOTICE %s :Added RESV for [%s] [%s]",
-			    me.name, source_p->name, host, reason);
+		sendto_one(source_p,
+			   ":%s NOTICE %s :Added RESV for [%s] [%s]",
+			   me.name, source_p->name, host, reason);
 	}
 }
 
@@ -2255,7 +2249,7 @@ write_confitem (KlineType type, struct Client *source_p, char *user,
  * side effects - none
  */
 const char *
-get_conf_name (KlineType type)
+get_conf_name(KlineType type)
 {
 	if(type == CONF_TYPE)
 	{
@@ -2281,44 +2275,44 @@ get_conf_name (KlineType type)
  */
 
 void
-conf_add_class_to_conf (struct ConfItem *aconf)
+conf_add_class_to_conf(struct ConfItem *aconf)
 {
 	if(aconf->className == NULL)
 	{
-		DupString (aconf->className, "default");
-		ClassPtr (aconf) = class0;
+		DupString(aconf->className, "default");
+		ClassPtr(aconf) = class0;
 		return;
 	}
 
-	ClassPtr (aconf) = find_class (aconf->className);
+	ClassPtr(aconf) = find_class(aconf->className);
 
-	if(ClassPtr (aconf) == class0)
+	if(ClassPtr(aconf) == class0)
 	{
 		if(aconf->status == CONF_CLIENT)
 		{
-			sendto_realops_flags (UMODE_ALL, L_ALL,
-					      "Warning -- Using default class for missing class \"%s\" in auth{} for %s@%s",
-					      aconf->className, aconf->user, aconf->host);
+			sendto_realops_flags(UMODE_ALL, L_ALL,
+					     "Warning -- Using default class for missing class \"%s\" in auth{} for %s@%s",
+					     aconf->className, aconf->user, aconf->host);
 		}
 		else if(aconf->status == CONF_SERVER || aconf->status == CONF_OPERATOR)
 		{
-			sendto_realops_flags (UMODE_ALL, L_ALL,
-					      "Warning -- Using default class for missing class \"%s\" in %s{} for %s",
-					      aconf->className,
-					      aconf->status ==
-					      CONF_SERVER ? "connect" : "operator", aconf->name);
+			sendto_realops_flags(UMODE_ALL, L_ALL,
+					     "Warning -- Using default class for missing class \"%s\" in %s{} for %s",
+					     aconf->className,
+					     aconf->status ==
+					     CONF_SERVER ? "connect" : "operator", aconf->name);
 		}
 
-		MyFree (aconf->className);
-		DupString (aconf->className, "default");
+		MyFree(aconf->className);
+		DupString(aconf->className, "default");
 		return;
 	}
 
-	if(ConfMaxUsers (aconf) < 0)
+	if(ConfMaxUsers(aconf) < 0)
 	{
-		ClassPtr (aconf) = find_class (0);
-		MyFree (aconf->className);
-		DupString (aconf->className, "default");
+		ClassPtr(aconf) = find_class(0);
+		MyFree(aconf->className);
+		DupString(aconf->className, "default");
 		return;
 	}
 }
@@ -2334,31 +2328,31 @@ conf_add_class_to_conf (struct ConfItem *aconf)
  * side effects - Add a connect block
  */
 int
-conf_add_server (struct ConfItem *aconf, int lcount)
+conf_add_server(struct ConfItem *aconf, int lcount)
 {
-	conf_add_class_to_conf (aconf);
+	conf_add_class_to_conf(aconf);
 
 	if(lcount > MAXCONFLINKS || !aconf->host || !aconf->name)
 	{
-		sendto_realops_flags (UMODE_ALL, L_ALL, "Bad connect block");
-		ilog (L_WARN, "Bad connect block");
+		sendto_realops_flags(UMODE_ALL, L_ALL, "Bad connect block");
+		ilog(L_WARN, "Bad connect block");
 		return (-1);
 	}
 
-	if(BadPtr (aconf->passwd) && !(aconf->flags & CONF_FLAGS_CRYPTLINK))
+	if(BadPtr(aconf->passwd) && !(aconf->flags & CONF_FLAGS_CRYPTLINK))
 	{
-		sendto_realops_flags (UMODE_ALL, L_ALL, "Bad connect block, name %s", aconf->name);
-		ilog (L_WARN, "Bad connect block, host %s", aconf->name);
+		sendto_realops_flags(UMODE_ALL, L_ALL, "Bad connect block, name %s", aconf->name);
+		ilog(L_WARN, "Bad connect block, host %s", aconf->name);
 		return (-1);
 	}
 
-	if(SplitUserHost (aconf) < 0)
+	if(SplitUserHost(aconf) < 0)
 	{
-		sendto_realops_flags (UMODE_ALL, L_ALL, "Bad connect block, name %s", aconf->name);
-		ilog (L_WARN, "Bad connect block, name %s", aconf->name);
+		sendto_realops_flags(UMODE_ALL, L_ALL, "Bad connect block, name %s", aconf->name);
+		ilog(L_WARN, "Bad connect block, name %s", aconf->name);
 		return (-1);
 	}
-	lookup_confhost (aconf);
+	lookup_confhost(aconf);
 	return (0);
 }
 
@@ -2369,7 +2363,7 @@ conf_add_server (struct ConfItem *aconf, int lcount)
  * side effects - Add a d/D line
  */
 void
-conf_add_d_conf (struct ConfItem *aconf)
+conf_add_d_conf(struct ConfItem *aconf)
 {
 	if(aconf->host == NULL)
 		return;
@@ -2380,14 +2374,14 @@ conf_add_d_conf (struct ConfItem *aconf)
 	 *       need this anyway, so I will disable it for now... -A1kmm
 	 */
 
-	if(!parse_netmask (aconf->host, NULL, NULL))
+	if(!parse_netmask(aconf->host, NULL, NULL))
 	{
-		ilog (L_WARN, "Invalid Dline %s ignored", aconf->host);
-		free_conf (aconf);
+		ilog(L_WARN, "Invalid Dline %s ignored", aconf->host);
+		free_conf(aconf);
 	}
 	else
 	{
-		add_conf_by_address (aconf->host, CONF_DLINE, NULL, aconf);
+		add_conf_by_address(aconf->host, CONF_DLINE, NULL, aconf);
 	}
 }
 
@@ -2404,21 +2398,21 @@ conf_add_d_conf (struct ConfItem *aconf)
  */
 
 void
-conf_add_fields (struct ConfItem *aconf,
-		 const char *host_field,
-		 const char *pass_field,
-		 const char *user_field, const char *port_field, const char *class_field)
+conf_add_fields(struct ConfItem *aconf,
+		const char *host_field,
+		const char *pass_field,
+		const char *user_field, const char *port_field, const char *class_field)
 {
 	if(host_field != NULL)
-		DupString (aconf->host, host_field);
+		DupString(aconf->host, host_field);
 	if(pass_field != NULL)
-		DupString (aconf->passwd, pass_field);
+		DupString(aconf->passwd, pass_field);
 	if(user_field != NULL)
-		DupString (aconf->user, user_field);
+		DupString(aconf->user, user_field);
 	if(port_field != NULL)
-		aconf->port = atoi (port_field);
+		aconf->port = atoi(port_field);
 	if(class_field != NULL)
-		DupString (aconf->className, class_field);
+		DupString(aconf->className, class_field);
 }
 
 /*
@@ -2429,31 +2423,31 @@ conf_add_fields (struct ConfItem *aconf,
  * side effects	- message to opers and log file entry is made
  */
 void
-yyerror (const char *msg)
+yyerror(const char *msg)
 {
 	char newlinebuf[BUFSIZE];
 
-	strip_tabs (newlinebuf, (const unsigned char *) linebuf, strlen (linebuf));
+	strip_tabs(newlinebuf, (const unsigned char *) linebuf, strlen(linebuf));
 
-	sendto_realops_flags (UMODE_ALL, L_ALL, "\"%s\", line %d: %s at '%s'",
-			      conffilebuf, lineno + 1, msg, newlinebuf);
+	sendto_realops_flags(UMODE_ALL, L_ALL, "\"%s\", line %d: %s at '%s'",
+			     conffilebuf, lineno + 1, msg, newlinebuf);
 
-	ilog (L_WARN, "\"%s\", line %d: %s at '%s'", conffilebuf, lineno + 1, msg, newlinebuf);
+	ilog(L_WARN, "\"%s\", line %d: %s at '%s'", conffilebuf, lineno + 1, msg, newlinebuf);
 }
 
 int
-conf_fbgets (char *lbuf, int max_size, FBFILE * fb)
+conf_fbgets(char *lbuf, int max_size, FBFILE * fb)
 {
 	char *buff;
 
-	if((buff = fbgets (lbuf, max_size, fb)) == NULL)
+	if((buff = fbgets(lbuf, max_size, fb)) == NULL)
 		return (0);
 
-	return (strlen (lbuf));
+	return (strlen(lbuf));
 }
 
 int
-conf_yy_fatal_error (const char *msg)
+conf_yy_fatal_error(const char *msg)
 {
 	return (0);
 }

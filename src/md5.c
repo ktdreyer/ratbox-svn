@@ -54,8 +54,8 @@ static u_int32_t seed[MD5_BLOCK_SIZE] = {
 };
 
 static unsigned char *seed_char = (unsigned char *) seed;
-static void id_reseed (char *in, int len);
-static void md5_block (u_int32_t * in, u_int32_t * out, u_int32_t * x);
+static void id_reseed(char *in, int len);
+static void md5_block(u_int32_t * in, u_int32_t * out, u_int32_t * x);
 
 
 static u_int32_t databuf_int[MD5_HASH_SIZE];
@@ -141,7 +141,7 @@ static char base64_values[] = {
 };
 
 void
-id_init ()
+id_init()
 {
 	int fd;
 
@@ -153,43 +153,43 @@ id_init ()
 	}
 	st;
 
-	gettimeofday (&st.tv, NULL);
-	st.pid = rand ();
-	st.ppid = rand ();
-	id_reseed ((char *) &st, sizeof (st));
+	gettimeofday(&st.tv, NULL);
+	st.pid = rand();
+	st.ppid = rand();
+	id_reseed((char *) &st, sizeof(st));
 
 #ifdef RPATH
-	fd = open (RPATH, O_RDONLY);
+	fd = open(RPATH, O_RDONLY);
 	if(fd > 0)
 	{
-		read (fd, databuf, 16);
-		close (fd);
-		md5_block (databuf_int, seed, seed);
+		read(fd, databuf, 16);
+		close(fd);
+		md5_block(databuf_int, seed, seed);
 	}
 #endif
 }
 
 void
-save_random ()
+save_random()
 {
 	int fd;
 
 #ifdef	RPATH
-	fd = open (RPATH, O_WRONLY | O_CREAT | O_TRUNC);
+	fd = open(RPATH, O_WRONLY | O_CREAT | O_TRUNC);
 	if(fd > 0)
 	{
-		write (fd, seed_char, 16);
+		write(fd, seed_char, 16);
 /* by default on VMS, files can only be read by their owner */
 #ifndef VMS
-		fchmod (fd, 0600);
+		fchmod(fd, 0600);
 #endif
-		close (fd);
+		close(fd);
 	}
 #endif
 }
 
 static void
-md5_block (u_int32_t * in, u_int32_t * out, u_int32_t * x)
+md5_block(u_int32_t * in, u_int32_t * out, u_int32_t * x)
 {
 	u_int32_t a, b, c, d;
 	int i, j;
@@ -201,34 +201,34 @@ md5_block (u_int32_t * in, u_int32_t * out, u_int32_t * x)
 	for (i = 0; i < 4; i++)
 	{
 		j = 4 * i;
-		a = b + rotl (a + F (b, c, d) + x[ork[j]] + t[j], ors[j]);
-		d = a + rotl (d + F (a, b, c) + x[ork[j + 1]] + t[j + 1], ors[j + 1]);
-		c = d + rotl (c + F (d, a, b) + x[ork[j + 2]] + t[j + 2], ors[j + 2]);
-		b = c + rotl (b + F (c, d, a) + x[ork[j + 3]] + t[j + 3], ors[j + 3]);
+		a = b + rotl(a + F(b, c, d) + x[ork[j]] + t[j], ors[j]);
+		d = a + rotl(d + F(a, b, c) + x[ork[j + 1]] + t[j + 1], ors[j + 1]);
+		c = d + rotl(c + F(d, a, b) + x[ork[j + 2]] + t[j + 2], ors[j + 2]);
+		b = c + rotl(b + F(c, d, a) + x[ork[j + 3]] + t[j + 3], ors[j + 3]);
 	}
 	for (i = 0; i < 4; i++)
 	{
 		j = 4 * i + 16;
-		a = b + rotl (a + G (b, c, d) + x[ork[j]] + t[j], ors[j]);
-		d = a + rotl (d + G (a, b, c) + x[ork[j + 1]] + t[j + 1], ors[j + 1]);
-		c = d + rotl (c + G (d, a, b) + x[ork[j + 2]] + t[j + 2], ors[j + 2]);
-		b = c + rotl (b + G (c, d, a) + x[ork[j + 3]] + t[j + 3], ors[j + 3]);
+		a = b + rotl(a + G(b, c, d) + x[ork[j]] + t[j], ors[j]);
+		d = a + rotl(d + G(a, b, c) + x[ork[j + 1]] + t[j + 1], ors[j + 1]);
+		c = d + rotl(c + G(d, a, b) + x[ork[j + 2]] + t[j + 2], ors[j + 2]);
+		b = c + rotl(b + G(c, d, a) + x[ork[j + 3]] + t[j + 3], ors[j + 3]);
 	}
 	for (i = 0; i < 4; i++)
 	{
 		j = 4 * i + 32;
-		a = b + rotl (a + H (b, c, d) + x[ork[j]] + t[j], ors[j]);
-		d = a + rotl (d + H (a, b, c) + x[ork[j + 1]] + t[j + 1], ors[j + 1]);
-		c = d + rotl (c + H (d, a, b) + x[ork[j + 2]] + t[j + 2], ors[j + 2]);
-		b = c + rotl (b + H (c, d, a) + x[ork[j + 3]] + t[j + 3], ors[j + 3]);
+		a = b + rotl(a + H(b, c, d) + x[ork[j]] + t[j], ors[j]);
+		d = a + rotl(d + H(a, b, c) + x[ork[j + 1]] + t[j + 1], ors[j + 1]);
+		c = d + rotl(c + H(d, a, b) + x[ork[j + 2]] + t[j + 2], ors[j + 2]);
+		b = c + rotl(b + H(c, d, a) + x[ork[j + 3]] + t[j + 3], ors[j + 3]);
 	}
 	for (i = 0; i < 4; i++)
 	{
 		j = 4 * i + 48;
-		a = b + rotl (a + I (b, c, d) + x[ork[j]] + t[j], ors[j]);
-		d = a + rotl (d + I (a, b, c) + x[ork[j + 1]] + t[j + 1], ors[j + 1]);
-		c = d + rotl (c + I (d, a, b) + x[ork[j + 2]] + t[j + 2], ors[j + 2]);
-		b = c + rotl (b + I (c, d, a) + x[ork[j + 3]] + t[j + 3], ors[j + 3]);
+		a = b + rotl(a + I(b, c, d) + x[ork[j]] + t[j], ors[j]);
+		d = a + rotl(d + I(a, b, c) + x[ork[j + 1]] + t[j + 1], ors[j + 1]);
+		c = d + rotl(c + I(d, a, b) + x[ork[j + 2]] + t[j + 2], ors[j + 2]);
+		b = c + rotl(b + I(c, d, a) + x[ork[j + 3]] + t[j + 3], ors[j + 3]);
 	}
 
 	a += in[0];
@@ -246,7 +246,7 @@ md5_block (u_int32_t * in, u_int32_t * out, u_int32_t * x)
  * using MyMalloc().  It should be freed after use.
  */
 int
-base64_block (char **output, char *data, int len)
+base64_block(char **output, char *data, int len)
 {
 	unsigned char *out;
 	unsigned char *in = (unsigned char *) data;
@@ -254,7 +254,7 @@ base64_block (char **output, char *data, int len)
 	int i;
 	int count = 0;
 
-	out = MyMalloc (((((len + 2) - ((len + 2) % 3)) / 3) * 4) + 1);
+	out = MyMalloc(((((len + 2) - ((len + 2) % 3)) / 3) * 4) + 1);
 
 	/* process 24 bits at a time */
 	for (i = 0; i < len; i += 3)
@@ -300,7 +300,7 @@ base64_block (char **output, char *data, int len)
  * using MyMalloc().  It should be freed after use.
  */
 int
-unbase64_block (char **output, char *data, int len)
+unbase64_block(char **output, char *data, int len)
 {
 	unsigned char *out;
 	unsigned char *in = (unsigned char *) data;
@@ -311,7 +311,7 @@ unbase64_block (char **output, char *data, int len)
 	if((len % 4) != 0)
 		return 0;
 
-	out = MyMalloc (((len / 4) * 3) + 1);
+	out = MyMalloc(((len / 4) * 3) + 1);
 
 	/* process 32 bits at a time */
 	for (i = 0; (i + 3) < len; i += 4)
@@ -350,22 +350,22 @@ unbase64_block (char **output, char *data, int len)
 }
 
 static void
-id_reseed (char *in, int len)
+id_reseed(char *in, int len)
 {
 	int i;
 
 	for (i = 0; i < len; i++)
 		databuf[i % (4 * MD5_HASH_SIZE)] += in[i];
-	md5_block (databuf_int, seed, seed);
+	md5_block(databuf_int, seed, seed);
 }
 
 char *
-id_get ()
+id_get()
 {
 	static char id[ID_GEN_LEN + 1];
 	int i;
 
-	md5_block (databuf_int, seed, seed);
+	md5_block(databuf_int, seed, seed);
 
 	id[0] = '.';
 	for (i = 1; i < ID_GEN_LEN; i++)

@@ -38,13 +38,13 @@
 static dlink_list hostconf[HOSTCONF_SIZE];
 
 void
-init_confmatch (void)
+init_confmatch(void)
 {
 	memset(&hostconf, 0, sizeof(hostconf));
 }
 
 static int
-wildcard_to_cidr (const char *host, struct irc_inaddr *in, int *cidr)
+wildcard_to_cidr(const char *host, struct irc_inaddr *in, int *cidr)
 {
 	uint32_t current_ip = 0L;
 	unsigned int octet = 0;
@@ -52,17 +52,17 @@ wildcard_to_cidr (const char *host, struct irc_inaddr *in, int *cidr)
 	char c;
 
 #ifdef IPV6
-	uint32_t *ip = &((uint32_t *) PIN_ADDR (in))[3];
-	((uint32_t *) PIN_ADDR (in))[0] = 0;
-	((uint32_t *) PIN_ADDR (in))[1] = 0;
-	((uint32_t *) PIN_ADDR (in))[2] = htonl (0xffff);
+	uint32_t *ip = &((uint32_t *) PIN_ADDR(in))[3];
+	((uint32_t *) PIN_ADDR(in))[0] = 0;
+	((uint32_t *) PIN_ADDR(in))[1] = 0;
+	((uint32_t *) PIN_ADDR(in))[2] = htonl(0xffff);
 #else
-	uint32_t *ip = PIN_ADDR (in);
+	uint32_t *ip = PIN_ADDR(in);
 #endif
 
 	while ((c = *host))
 	{
-		if(IsDigit (c))
+		if(IsDigit(c))
 		{
 			octet *= 10;
 			octet += (*host & 0xF);
@@ -91,15 +91,15 @@ wildcard_to_cidr (const char *host, struct irc_inaddr *in, int *cidr)
 	return 0;
 }
 
-static  int
-hash_text (const char *start)
+static int
+hash_text(const char *start)
 {
 	const char *p = start;
 	unsigned long h = 0;
 
 	while (*p)
 	{
-		h = (h << 4) - (h + (unsigned char) ToLower (*p++));
+		h = (h << 4) - (h + (unsigned char) ToLower(*p++));
 	}
 	return (h & (HOSTCONF_SIZE - 1));
 }
@@ -111,29 +111,29 @@ hash_text (const char *start)
  * Side-effects: None.
  */
 static unsigned long
-get_mask_hash (const char *text)
+get_mask_hash(const char *text)
 {
 	const char *hp = "", *p;
 
-	for (p = text + strlen (text) - 1; p >= text; p--)
+	for (p = text + strlen(text) - 1; p >= text; p--)
 	{
 		if(*p == '*' || *p == '?')
-			return hash_text (hp);
+			return hash_text(hp);
 		else if(*p == '.')
 			hp = p + 1;
 	}
-	return hash_text (text);
+	return hash_text(text);
 }
 
 
 int
-parse_netmask (const char *address, struct irc_inaddr *addr, int *bits)
+parse_netmask(const char *address, struct irc_inaddr *addr, int *bits)
 {
 	char *p;
 	struct irc_inaddr laddr;
 	int lbits;
-	
-	p = strchr (address, '/');
+
+	p = strchr(address, '/');
 
 	if(addr == NULL)
 		addr = &laddr;
@@ -150,19 +150,19 @@ parse_netmask (const char *address, struct irc_inaddr *addr, int *bits)
 	if(p != NULL)
 	{
 		*p = '\0';
-		*bits = strtol (++p, NULL, 10);
+		*bits = strtol(++p, NULL, 10);
 		if(*bits == 0 && errno == EINVAL)
 			return 0;
 #ifdef IPV6
 		/* Add 96 bits to our IPv4 masks */
-		if(IN6_IS_ADDR_V4MAPPED (PIN_ADDR (addr)))
+		if(IN6_IS_ADDR_V4MAPPED(PIN_ADDR(addr)))
 			*bits += 96;
 #endif
 
 	}
-	else if((p = strchr (address, '*')) != NULL)
+	else if((p = strchr(address, '*')) != NULL)
 	{
-		if(wildcard_to_cidr (address, addr, bits))
+		if(wildcard_to_cidr(address, addr, bits))
 		{
 #ifdef IPV6
 			*bits += 96;
@@ -171,7 +171,7 @@ parse_netmask (const char *address, struct irc_inaddr *addr, int *bits)
 		}
 	}
 
-	if(inetpton (DEF_FAM, address, addr) == 0)
+	if(inetpton(DEF_FAM, address, addr) == 0)
 	{
 		return 0;
 	}
@@ -179,37 +179,37 @@ parse_netmask (const char *address, struct irc_inaddr *addr, int *bits)
 }
 
 static void
-add_conf_by_host (struct ConfItem *aconf)
+add_conf_by_host(struct ConfItem *aconf)
 {
 	dlink_list *list;
 	int lmask;
-	lmask = get_mask_hash (aconf->host);
+	lmask = get_mask_hash(aconf->host);
 	list = &hostconf[lmask];
-	dlinkAddAlloc (aconf, list);
+	dlinkAddAlloc(aconf, list);
 }
 
 void
-add_conf_by_address (const char *address, int type, const char *username, struct ConfItem *aconf)
+add_conf_by_address(const char *address, int type, const char *username, struct ConfItem *aconf)
 {
 	struct irc_inaddr addr;
 	int bits;
-	if(parse_netmask (address, &addr, &bits))
+	if(parse_netmask(address, &addr, &bits))
 	{
 		/* An IP/cidr mask */
-		if((type & CONF_DLINE || type & CONF_EXEMPTDLINE) || BadPtr (username) ||
+		if((type & CONF_DLINE || type & CONF_EXEMPTDLINE) || BadPtr(username) ||
 		   (*username == '*' && *(username + 1) == '\0'))
 		{
-			add_ipline (aconf, type, &addr, bits);
+			add_ipline(aconf, type, &addr, bits);
 			return;
 		}
 	}
 
-	add_conf_by_host (aconf);
+	add_conf_by_host(aconf);
 }
 
 
 struct ConfItem *
-find_conf_by_address (const char *hostname, struct irc_inaddr *addr, int type, const char *username)
+find_conf_by_address(const char *hostname, struct irc_inaddr *addr, int type, const char *username)
 {
 	struct ConfItem *aconf;
 	const char *p = hostname;
@@ -224,16 +224,16 @@ find_conf_by_address (const char *hostname, struct irc_inaddr *addr, int type, c
 	{
 		while (p != NULL)
 		{
-			list = &hostconf[hash_text (p)];
-			DLINK_FOREACH (ptr, list->head)
+			list = &hostconf[hash_text(p)];
+			DLINK_FOREACH(ptr, list->head)
 			{
 				aconf = ptr->data;
-				if(match (aconf->user, username) && match (aconf->host, hostname) &&
+				if(match(aconf->user, username) && match(aconf->host, hostname) &&
 				   aconf->status & type)
 					return (aconf);
 			}
 
-			p = strchr (p, '.');
+			p = strchr(p, '.');
 			if(p != NULL)
 				p++;
 			else
@@ -244,10 +244,10 @@ find_conf_by_address (const char *hostname, struct irc_inaddr *addr, int type, c
 		for (x = 0; x < HOSTCONF_SIZE; x++)
 		{
 			list = &hostconf[x];
-			DLINK_FOREACH (ptr, list->head)
+			DLINK_FOREACH(ptr, list->head)
 			{
 				aconf = ptr->data;
-				if(match (aconf->user, username) && match (aconf->host, hostname) &&
+				if(match(aconf->user, username) && match(aconf->host, hostname) &&
 				   aconf->status & type)
 					return (aconf);
 			}
@@ -256,10 +256,10 @@ find_conf_by_address (const char *hostname, struct irc_inaddr *addr, int type, c
 
 	if(addr != NULL)
 	{
-		aconf = find_generic_line (type, addr);
+		aconf = find_generic_line(type, addr);
 		if(aconf != NULL)
 		{
-			if(match (aconf->user, username) && aconf->status & type)
+			if(match(aconf->user, username) && aconf->status & type)
 				return aconf;
 		}
 	}
@@ -269,24 +269,24 @@ find_conf_by_address (const char *hostname, struct irc_inaddr *addr, int type, c
 
 
 struct ConfItem *
-find_dline (struct irc_inaddr *ip)
+find_dline(struct irc_inaddr *ip)
 {
 	struct ConfItem *aconf;
 
-	aconf = find_ipdline (ip);
+	aconf = find_ipdline(ip);
 
 	/* Found a e/D line.maybe exempt..return */
 	if(aconf != NULL)
 		return (aconf);
 	/* Check and see if we match an IP Kline */
-	aconf = find_ipkline (ip);
+	aconf = find_ipkline(ip);
 	if(aconf != NULL)
 		return (aconf);
 
 	/* This is a new one.. IP Glines */
 	if(ConfigFileEntry.glines)
 	{
-		aconf = find_ipgline (ip);
+		aconf = find_ipgline(ip);
 		if(aconf != NULL)
 			return (aconf);
 	}
@@ -295,67 +295,67 @@ find_dline (struct irc_inaddr *ip)
 
 
 struct ConfItem *
-find_gline (struct Client *client_p)
+find_gline(struct Client *client_p)
 {
-	return (find_conf_by_address (client_p->host,
-				      &client_p->localClient->ip, CONF_GLINE, client_p->username));
+	return (find_conf_by_address(client_p->host,
+				     &client_p->localClient->ip, CONF_GLINE, client_p->username));
 }
 
 struct ConfItem *
-find_kline (struct Client *client_p)
+find_kline(struct Client *client_p)
 {
-	return (find_conf_by_address (client_p->host,
-				      &client_p->localClient->ip, CONF_KILL, client_p->username));
+	return (find_conf_by_address(client_p->host,
+				     &client_p->localClient->ip, CONF_KILL, client_p->username));
 }
 
 
 struct ConfItem *
-find_address_conf (const char *host, const char *user, struct irc_inaddr *ip)
+find_address_conf(const char *host, const char *user, struct irc_inaddr *ip)
 {
 	struct ConfItem *iconf, *kconf;
 
-	iconf = find_conf_by_address (host, ip, CONF_CLIENT, user);
+	iconf = find_conf_by_address(host, ip, CONF_CLIENT, user);
 	if(iconf == NULL)
 		return NULL;
 
-	if(IsConfExemptKline (iconf))
+	if(IsConfExemptKline(iconf))
 		return (iconf);
 
-	kconf = find_conf_by_address (host, ip, CONF_KILL, user);
+	kconf = find_conf_by_address(host, ip, CONF_KILL, user);
 
 	if(ConfigFileEntry.glines)
 	{
-		kconf = find_conf_by_address (host, ip, CONF_GLINE, user);
-		if((kconf != NULL) && !IsConfExemptGline (iconf))
+		kconf = find_conf_by_address(host, ip, CONF_GLINE, user);
+		if((kconf != NULL) && !IsConfExemptGline(iconf))
 			return (kconf);
 	}
 	return (iconf);
 }
 
 void
-delete_one_address_conf (struct ConfItem *aconf)
+delete_one_address_conf(struct ConfItem *aconf)
 {
 	struct irc_inaddr addr;
 	int bits, lmask;
 	dlink_list *list;
-	if(parse_netmask (aconf->host, &addr, &bits))
+	if(parse_netmask(aconf->host, &addr, &bits))
 	{
 		/* An IP line */
-		delete_ipline (aconf, aconf->status);
+		delete_ipline(aconf, aconf->status);
 		return;
 	}
 
-	lmask = hash_text (aconf->host);
+	lmask = hash_text(aconf->host);
 	list = &hostconf[lmask];
 
-	dlinkFindDestroy (list, aconf);
+	dlinkFindDestroy(list, aconf);
 	aconf->status |= CONF_ILLEGAL;
 	if(!aconf->clients)
-		free_conf (aconf);
+		free_conf(aconf);
 }
 
 void
-clear_out_address_conf (void)
+clear_out_address_conf(void)
 {
 	int x;
 	dlink_list *list;
@@ -364,50 +364,50 @@ clear_out_address_conf (void)
 	for (x = 0; x < HOSTCONF_SIZE; x++)
 	{
 		list = &hostconf[x];
-		DLINK_FOREACH_SAFE (ptr, tmp, list->head)
+		DLINK_FOREACH_SAFE(ptr, tmp, list->head)
 		{
 			aconf = (struct ConfItem *) ptr->data;
 			aconf->status |= CONF_ILLEGAL;
 			if(!aconf->clients)
-				free_conf (aconf);
+				free_conf(aconf);
 
-			dlinkDestroy (ptr, list);
+			dlinkDestroy(ptr, list);
 		}
 	}
 }
 
 char *
-show_iline_prefix (struct Client *sptr, struct ConfItem *aconf, char *name)
+show_iline_prefix(struct Client *sptr, struct ConfItem *aconf, char *name)
 {
 	static char prefix_of_host[USERLEN + 15];
 	char *prefix_ptr;
 
 	prefix_ptr = prefix_of_host;
-	if(IsNoTilde (aconf))
+	if(IsNoTilde(aconf))
 		*prefix_ptr++ = '-';
-	if(IsLimitIp (aconf))
+	if(IsLimitIp(aconf))
 		*prefix_ptr++ = '!';
-	if(IsNeedIdentd (aconf))
+	if(IsNeedIdentd(aconf))
 		*prefix_ptr++ = '+';
-	if(IsPassIdentd (aconf))
+	if(IsPassIdentd(aconf))
 		*prefix_ptr++ = '$';
-	if(IsNoMatchIp (aconf))
+	if(IsNoMatchIp(aconf))
 		*prefix_ptr++ = '%';
-	if(IsConfDoSpoofIp (aconf))
+	if(IsConfDoSpoofIp(aconf))
 		*prefix_ptr++ = '=';
-	if(MyOper (sptr) && IsConfExemptKline (aconf))
+	if(MyOper(sptr) && IsConfExemptKline(aconf))
 		*prefix_ptr++ = '^';
-	if(MyOper (sptr) && IsConfExemptLimits (aconf))
+	if(MyOper(sptr) && IsConfExemptLimits(aconf))
 		*prefix_ptr++ = '>';
-	if(MyOper (sptr) && IsConfIdlelined (aconf))
+	if(MyOper(sptr) && IsConfIdlelined(aconf))
 		*prefix_ptr++ = '<';
 	*prefix_ptr = '\0';
-	strncpy (prefix_ptr, name, USERLEN);
+	strncpy(prefix_ptr, name, USERLEN);
 	return (prefix_of_host);
 }
 
 void
-report_klines (struct Client *source_p)
+report_klines(struct Client *source_p)
 {
 	dlink_list *list;
 	dlink_node *ptr;
@@ -418,7 +418,7 @@ report_klines (struct Client *source_p)
 	for (x = 0; x < HOSTCONF_SIZE; x++)
 	{
 		list = &hostconf[x];
-		DLINK_FOREACH (ptr, list->head)
+		DLINK_FOREACH(ptr, list->head)
 		{
 			aconf = ptr->data;
 
@@ -426,16 +426,16 @@ report_klines (struct Client *source_p)
 				continue;
 			if(!(aconf->status & CONF_KILL))
 				continue;
-			get_printable_conf (aconf, &name, &host, &pass, &user, &port, &classname);
-			sendto_one (source_p, form_str (RPL_STATSKLINE), me.name,
-				    source_p->name, 'K', host, user, pass);
+			get_printable_conf(aconf, &name, &host, &pass, &user, &port, &classname);
+			sendto_one(source_p, form_str(RPL_STATSKLINE), me.name,
+				   source_p->name, 'K', host, user, pass);
 
 		}
 	}
 }
 
 void
-report_glines (struct Client *source_p)
+report_glines(struct Client *source_p)
 {
 	dlink_list *list;
 	dlink_node *ptr;
@@ -445,7 +445,7 @@ report_glines (struct Client *source_p)
 	for (x = 0; x < HOSTCONF_SIZE; x++)
 	{
 		list = &hostconf[x];
-		DLINK_FOREACH (ptr, list->head)
+		DLINK_FOREACH(ptr, list->head)
 		{
 			aconf = ptr->data;
 			if(aconf->flags & CONF_FLAGS_TEMPORARY)
@@ -454,16 +454,16 @@ report_glines (struct Client *source_p)
 			if(!(aconf->status & CONF_GLINE))
 				continue;
 
-			get_printable_conf (aconf, &name, &host, &pass, &user, &port, &classname);
-			sendto_one (source_p, form_str (RPL_STATSKLINE), me.name,
-				    source_p->name, 'G', host, user, pass);
+			get_printable_conf(aconf, &name, &host, &pass, &user, &port, &classname);
+			sendto_one(source_p, form_str(RPL_STATSKLINE), me.name,
+				   source_p->name, 'G', host, user, pass);
 
 		}
 	}
 }
 
 void
-report_ilines (struct Client *source_p)
+report_ilines(struct Client *source_p)
 {
 	dlink_list *list;
 	dlink_node *ptr;
@@ -474,7 +474,7 @@ report_ilines (struct Client *source_p)
 	for (x = 0; x < HOSTCONF_SIZE; x++)
 	{
 		list = &hostconf[x];
-		DLINK_FOREACH (ptr, list->head)
+		DLINK_FOREACH(ptr, list->head)
 		{
 			aconf = ptr->data;
 			if(aconf->flags & CONF_FLAGS_TEMPORARY)
@@ -483,14 +483,14 @@ report_ilines (struct Client *source_p)
 			if(!(aconf->status & CONF_CLIENT))
 				continue;
 
-			get_printable_conf (aconf, &name, &host, &pass, &user, &port, &classname);
-			sendto_one (source_p, form_str (RPL_STATSILINE), me.name,
-				    source_p->name, (IsConfRestricted (aconf)) ? 'i' : 'I', name,
-				    show_iline_prefix (source_p, aconf, user),
+			get_printable_conf(aconf, &name, &host, &pass, &user, &port, &classname);
+			sendto_one(source_p, form_str(RPL_STATSILINE), me.name,
+				   source_p->name, (IsConfRestricted(aconf)) ? 'i' : 'I', name,
+				   show_iline_prefix(source_p, aconf, user),
 #ifdef HIDE_SPOOF_IPS
-				    IsConfDoSpoofIp (aconf) ? "255.255.255.255" :
+				   IsConfDoSpoofIp(aconf) ? "255.255.255.255" :
 #endif
-				    host, port, classname);
+				   host, port, classname);
 		}
 
 	}

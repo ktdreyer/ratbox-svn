@@ -43,11 +43,11 @@
  * MyMalloc - allocate memory, call outofmemory on failure
  */
 void *
-MyMalloc (size_t size)
+MyMalloc(size_t size)
 {
-	void *ret = calloc (1, size);
+	void *ret = calloc(1, size);
 	if(ret == NULL)
-		outofmemory ();
+		outofmemory();
 	return ret;
 }
 
@@ -55,27 +55,27 @@ MyMalloc (size_t size)
  * MyRealloc - reallocate memory, call outofmemory on failure
  */
 void *
-MyRealloc (void *x, size_t y)
+MyRealloc(void *x, size_t y)
 {
-	void *ret = realloc (x, y);
+	void *ret = realloc(x, y);
 
 	if(ret == NULL)
-		outofmemory ();
+		outofmemory();
 	return ret;
 }
 
 void
-MyFree (void *x)
+MyFree(void *x)
 {
 	if(x)
-		free ((x));
+		free((x));
 }
 
 void
-_DupString (char **x, const char *y)
+_DupString(char **x, const char *y)
 {
-	(*x) = malloc (strlen (y) + 1);
-	strcpy ((*x), y);
+	(*x) = malloc(strlen(y) + 1);
+	strcpy((*x), y);
 }
 
 
@@ -87,15 +87,15 @@ _DupString (char **x, const char *y)
  * side effects - simply try to report there is a problem. Abort if it was called more than once
  */
 void
-outofmemory ()
+outofmemory()
 {
 	static int was_here = 0;
 
 	if(was_here)
-		abort ();
+		abort();
 
 	was_here = 1;
 
-	ilog (L_CRIT, "Out of memory: restarting server...");
-	restart ("Out of Memory");
+	ilog(L_CRIT, "Out of memory: restarting server...");
+	restart("Out of Memory");
 }

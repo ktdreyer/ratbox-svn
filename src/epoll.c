@@ -99,10 +99,10 @@ struct epoll_event
 };
 
 
-static _syscall1 (int, epoll_create, int, maxfds);
-static _syscall4 (int, epoll_ctl, int, epfd, int, op, int, fd, struct epoll_event *, events);
-static _syscall4 (int, epoll_wait, int, epfd, struct epoll_event *, pevents,
-		  int, maxevents, int, timeout);
+static _syscall1(int, epoll_create, int, maxfds);
+static _syscall4(int, epoll_ctl, int, epfd, int, op, int, fd, struct epoll_event *, events);
+static _syscall4(int, epoll_wait, int, epfd, struct epoll_event *, pevents,
+		 int, maxevents, int, timeout);
 
 #endif /* HAVE_EPOLL_LIB */
 
@@ -114,13 +114,13 @@ static _syscall4 (int, epoll_wait, int, epfd, struct epoll_event *, pevents,
  * the network loop code.
  */
 void
-init_netio (void)
+init_netio(void)
 {
-	ep = epoll_create (MAX_CLIENTS);
+	ep = epoll_create(MAX_CLIENTS);
 	if(ep < 0)
 	{
-		ilog (L_CRIT, "init_netio: Couldn't open epoll fd!\n");
-		exit (115);	/* Whee! */
+		ilog(L_CRIT, "init_netio: Couldn't open epoll fd!\n");
+		exit(115);	/* Whee! */
 	}
 }
 
@@ -131,16 +131,16 @@ init_netio (void)
  * and deregister interest in a pending IO state for a given FD.
  */
 void
-comm_setselect (int fd, fdlist_t list, unsigned int type, PF * handler,
-		void *client_data, time_t timeout)
+comm_setselect(int fd, fdlist_t list, unsigned int type, PF * handler,
+	       void *client_data, time_t timeout)
 {
 	struct epoll_event ep_event;
 
 	fde_t *F = &fd_table[fd];
 	int old_flags = F->pflags;
 	int op = 0;
-	assert (fd >= 0);
-	assert (F->flags.open);
+	assert(fd >= 0);
+	assert(F->flags.open);
 
 	/* Update the list, even though we're not using it .. */
 	F->list = list;
@@ -188,9 +188,9 @@ comm_setselect (int fd, fdlist_t list, unsigned int type, PF * handler,
 
 	ep_event.events = F->pflags;
 	ep_event.data.ptr = F;
-	if(epoll_ctl (ep, op, fd, &ep_event) != 0)
+	if(epoll_ctl(ep, op, fd, &ep_event) != 0)
 	{
-		ilog (L_ERROR, "comm_setselect(): epoll_ctl failed: %s", strerror (errno));
+		ilog(L_ERROR, "comm_setselect(): epoll_ctl failed: %s", strerror(errno));
 	}
 
 
@@ -206,15 +206,15 @@ comm_setselect (int fd, fdlist_t list, unsigned int type, PF * handler,
  */
 
 int
-comm_select (unsigned long delay)
+comm_select(unsigned long delay)
 {
 	int num, i;
 	static struct epoll_event pfd[EPOLL_LENGTH];
 
-	num = epoll_wait (ep, pfd, EPOLL_LENGTH, delay);
-	set_time ();
+	num = epoll_wait(ep, pfd, EPOLL_LENGTH, delay);
+	set_time();
 
-	if(num < 0 && !ignoreErrno (errno))
+	if(num < 0 && !ignoreErrno(errno))
 	{
 		return COMM_ERROR;
 	}
@@ -231,9 +231,9 @@ comm_select (unsigned long delay)
 			callbacks_called++;
 			hdl = F->read_handler;
 			if(hdl)
-				hdl (F->fd, F->read_data);
+				hdl(F->fd, F->read_data);
 			else
-				ilog (L_WARN, "s_bsd_epoll.c: NULL read handler called");
+				ilog(L_WARN, "s_bsd_epoll.c: NULL read handler called");
 		}
 
 		if(F->flags.open == 0)
@@ -246,9 +246,9 @@ comm_select (unsigned long delay)
 			callbacks_called++;
 			hdl = F->write_handler;
 			if(hdl)
-				hdl (F->fd, F->write_data);
+				hdl(F->fd, F->write_data);
 			else
-				ilog (L_WARN, "s_bsd_epoll.c: NULL write handler called");
+				ilog(L_WARN, "s_bsd_epoll.c: NULL write handler called");
 		}
 	}
 	return COMM_OK;

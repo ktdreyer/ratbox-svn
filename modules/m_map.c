@@ -32,9 +32,9 @@
 
 #define USER_COL       50	/* display | Users: %d at col 50 */
 
-static void m_map (struct Client *client_p, struct Client *source_p, int parc, char *parv[]);
-static void mo_map (struct Client *client_p, struct Client *source_p, int parc, char *parv[]);
-static void dump_map (struct Client *client_p, struct Client *root, char *pbuf);
+static void m_map(struct Client *client_p, struct Client *source_p, int parc, char *parv[]);
+static void mo_map(struct Client *client_p, struct Client *source_p, int parc, char *parv[]);
+static void dump_map(struct Client *client_p, struct Client *root, char *pbuf);
 
 struct Message map_msgtab = {
 	"MAP", 0, 0, 0, 0, MFLG_SLOW, 0,
@@ -43,15 +43,15 @@ struct Message map_msgtab = {
 
 #ifndef STATIC_MODULES
 void
-_modinit (void)
+_modinit(void)
 {
-	mod_add_cmd (&map_msgtab);
+	mod_add_cmd(&map_msgtab);
 }
 
 void
-_moddeinit (void)
+_moddeinit(void)
 {
-	mod_del_cmd (&map_msgtab);
+	mod_del_cmd(&map_msgtab);
 }
 
 const char *_version = "$Revision$";
@@ -63,16 +63,16 @@ static char buf[BUFSIZE];
 **	parv[0] = sender prefix
 */
 static void
-m_map (struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+m_map(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
 {
 	if(ConfigFileEntry.map_oper_only || ConfigServerHide.flatten_links)
 	{
-		m_not_oper (client_p, source_p, parc, parv);
+		m_not_oper(client_p, source_p, parc, parv);
 		return;
 	}
 
-	dump_map (client_p, &me, buf);
-	sendto_one (client_p, form_str (RPL_MAPEND), me.name, client_p->name);
+	dump_map(client_p, &me, buf);
+	sendto_one(client_p, form_str(RPL_MAPEND), me.name, client_p->name);
 	return;
 }
 
@@ -81,10 +81,10 @@ m_map (struct Client *client_p, struct Client *source_p, int parc, char *parv[])
 **      parv[0] = sender prefix
 */
 static void
-mo_map (struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+mo_map(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
 {
-	dump_map (client_p, &me, buf);
-	sendto_one (client_p, form_str (RPL_MAPEND), me.name, client_p->name);
+	dump_map(client_p, &me, buf);
+	sendto_one(client_p, form_str(RPL_MAPEND), me.name, client_p->name);
 }
 
 /*
@@ -92,15 +92,15 @@ mo_map (struct Client *client_p, struct Client *source_p, int parc, char *parv[]
 **   dumps server map, called recursively.
 */
 static void
-dump_map (struct Client *client_p, struct Client *root_p, char *pbuf)
+dump_map(struct Client *client_p, struct Client *root_p, char *pbuf)
 {
 	int cnt = 0, i = 0, len;
 	struct Client *server_p;
 	dlink_node *ptr;
 	*pbuf = '\0';
 
-	strncat (pbuf, root_p->name, BUFSIZE - ((size_t) pbuf - (size_t) buf));
-	len = strlen (buf);
+	strncat(pbuf, root_p->name, BUFSIZE - ((size_t) pbuf - (size_t) buf));
+	len = strlen(buf);
 	buf[len] = ' ';
 
 	if(len < USER_COL)
@@ -111,15 +111,15 @@ dump_map (struct Client *client_p, struct Client *root_p, char *pbuf)
 		}
 	}
 
-	snprintf (buf + USER_COL, BUFSIZE - USER_COL,
-		  " | Users: %5d (%4.1f%%)", root_p->serv->usercnt,
-		  100 * (float) root_p->serv->usercnt / (float) Count.total);
+	snprintf(buf + USER_COL, BUFSIZE - USER_COL,
+		 " | Users: %5d (%4.1f%%)", root_p->serv->usercnt,
+		 100 * (float) root_p->serv->usercnt / (float) Count.total);
 
-	sendto_one (client_p, form_str (RPL_MAP), me.name, client_p->name, buf);
+	sendto_one(client_p, form_str(RPL_MAP), me.name, client_p->name, buf);
 
 	if(root_p->serv->servers.head != NULL)
 	{
-		cnt += dlink_list_length (&root_p->serv->servers);
+		cnt += dlink_list_length(&root_p->serv->servers);
 
 		if(cnt)
 		{
@@ -132,7 +132,7 @@ dump_map (struct Client *client_p, struct Client *root_p, char *pbuf)
 		}
 	}
 	i = 1;
-	DLINK_FOREACH (ptr, root_p->serv->servers.head)
+	DLINK_FOREACH(ptr, root_p->serv->servers.head)
 	{
 		server_p = (struct Client *) ptr->data;
 		*pbuf = ' ';
@@ -143,7 +143,7 @@ dump_map (struct Client *client_p, struct Client *root_p, char *pbuf)
 
 		*(pbuf + 2) = '-';
 		*(pbuf + 3) = ' ';
-		dump_map (client_p, server_p, pbuf + 4);
+		dump_map(client_p, server_p, pbuf + 4);
 
 		i++;
 	}

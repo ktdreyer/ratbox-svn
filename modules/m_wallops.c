@@ -38,8 +38,8 @@
 #include "modules.h"
 #include "client.h"
 
-static void ms_wallops (struct Client *, struct Client *, int, char **);
-static void mo_wallops (struct Client *, struct Client *, int, char **);
+static void ms_wallops(struct Client *, struct Client *, int, char **);
+static void mo_wallops(struct Client *, struct Client *, int, char **);
 
 struct Message wallops_msgtab = {
 	"WALLOPS", 0, 0, 2, 0, MFLG_SLOW, 0,
@@ -48,15 +48,15 @@ struct Message wallops_msgtab = {
 
 #ifndef STATIC_MODULES
 void
-_modinit (void)
+_modinit(void)
 {
-	mod_add_cmd (&wallops_msgtab);
+	mod_add_cmd(&wallops_msgtab);
 }
 
 void
-_moddeinit (void)
+_moddeinit(void)
 {
-	mod_del_cmd (&wallops_msgtab);
+	mod_del_cmd(&wallops_msgtab);
 }
 
 const char *_version = "$Revision$";
@@ -67,20 +67,20 @@ const char *_version = "$Revision$";
  *      parv[1] = message text
  */
 static void
-mo_wallops (struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+mo_wallops(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
 {
 	char *message;
 
 	message = parv[1];
 
-	if(EmptyString (message))
+	if(EmptyString(message))
 	{
-		sendto_one (source_p, form_str (ERR_NEEDMOREPARAMS), me.name, parv[0], "WALLOPS");
+		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS), me.name, parv[0], "WALLOPS");
 		return;
 	}
 
-	sendto_wallops_flags (UMODE_OPERWALL, source_p, "OPERWALL - %s", message);
-	sendto_server (NULL, NULL, NOCAPS, NOCAPS, ":%s WALLOPS :%s", parv[0], message);
+	sendto_wallops_flags(UMODE_OPERWALL, source_p, "OPERWALL - %s", message);
+	sendto_server(NULL, NULL, NOCAPS, NOCAPS, ":%s WALLOPS :%s", parv[0], message);
 }
 
 /*
@@ -89,22 +89,22 @@ mo_wallops (struct Client *client_p, struct Client *source_p, int parc, char *pa
  *      parv[1] = message text
  */
 static void
-ms_wallops (struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+ms_wallops(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
 {
 	char *message;
 
 	message = parv[1];
 
-	if(EmptyString (message))
+	if(EmptyString(message))
 	{
-		sendto_one (source_p, form_str (ERR_NEEDMOREPARAMS), me.name, parv[0], "WALLOPS");
+		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS), me.name, parv[0], "WALLOPS");
 		return;
 	}
 
-	if(IsClient (source_p))
-		sendto_wallops_flags (UMODE_OPERWALL, source_p, "OPERWALL - %s", message);
+	if(IsClient(source_p))
+		sendto_wallops_flags(UMODE_OPERWALL, source_p, "OPERWALL - %s", message);
 	else
-		sendto_wallops_flags (UMODE_WALLOP, source_p, "%s", message);
+		sendto_wallops_flags(UMODE_WALLOP, source_p, "%s", message);
 
-	sendto_server (client_p, NULL, NOCAPS, NOCAPS, ":%s WALLOPS :%s", parv[0], message);
+	sendto_server(client_p, NULL, NOCAPS, NOCAPS, ":%s WALLOPS :%s", parv[0], message);
 }

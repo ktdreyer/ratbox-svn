@@ -40,7 +40,7 @@
 
 #define UFLAGS  (FLAGS_INVISIBLE|FLAGS_WALLOP|FLAGS_SERVNOTICE)
 
-static void mr_user (struct Client *, struct Client *, int, char **);
+static void mr_user(struct Client *, struct Client *, int, char **);
 
 struct Message user_msgtab = {
 	"USER", 0, 0, 5, 0, MFLG_SLOW, 0L,
@@ -49,15 +49,15 @@ struct Message user_msgtab = {
 
 #ifndef STATIC_MODULES
 void
-_modinit (void)
+_modinit(void)
 {
-	mod_add_cmd (&user_msgtab);
+	mod_add_cmd(&user_msgtab);
 }
 
 void
-_moddeinit (void)
+_moddeinit(void)
 {
-	mod_del_cmd (&user_msgtab);
+	mod_del_cmd(&user_msgtab);
 }
 
 const char *_version = "$Revision$";
@@ -71,22 +71,22 @@ const char *_version = "$Revision$";
 **      parv[4] = users real name info
 */
 static void
-mr_user (struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+mr_user(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
 {
 	char *p;
 
-	if((p = strchr (parv[1], '@')))
+	if((p = strchr(parv[1], '@')))
 		*p = '\0';
 
 	if(*parv[4] == '\0')
 	{
-		sendto_one (source_p, form_str (ERR_NEEDMOREPARAMS),
-			    me.name, BadPtr (parv[0]) ? "*" : parv[0], "USER");
+		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
+			   me.name, BadPtr(parv[0]) ? "*" : parv[0], "USER");
 		return;
 	}
 
-	do_local_user (parv[0], client_p, source_p, parv[1],	/* username */
-		       parv[2],	/* host */
-		       parv[3],	/* server */
-		       parv[4] /* users real name */ );
+	do_local_user(parv[0], client_p, source_p, parv[1],	/* username */
+		      parv[2],	/* host */
+		      parv[3],	/* server */
+		      parv[4] /* users real name */ );
 }

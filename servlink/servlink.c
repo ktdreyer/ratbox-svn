@@ -18,7 +18,7 @@
  *   $Id$
  */
 
-#include "setup.h"                                                   
+#include "setup.h"
 
 #include <sys/types.h>
 #include <sys/time.h>
@@ -43,70 +43,71 @@
 
 static void usage(void);
 
-struct slink_state       in_state;
-struct slink_state       out_state;
+struct slink_state in_state;
+struct slink_state out_state;
 
-struct fd_table          fds[5] =
-        {
-          { 0,  read_ctrl, NULL },
-          { 0,       NULL, NULL },
-          { 0,       NULL, NULL },
-          { 0,       NULL, NULL },
-          { 0,       NULL, NULL }
-        };
+struct fd_table fds[5] = {
+	{0, read_ctrl, NULL},
+	{0, NULL, NULL},
+	{0, NULL, NULL},
+	{0, NULL, NULL},
+	{0, NULL, NULL}
+};
 
 /* usage();
  *
  * Display usage message
  */
-static void usage(void)
+static void
+usage(void)
 {
-  fprintf(stderr, "ircd-ratbox server link v1.0\n");
-  fprintf(stderr, "2001-06-04\n");
-  fprintf(stderr, "\n");
-  fprintf(stderr, "This program is called by the ircd-ratbox ircd.\n");
-  fprintf(stderr, "It cannot be used on its own.\n");
-  exit(1);
+	fprintf(stderr, "ircd-ratbox server link v1.0\n");
+	fprintf(stderr, "2001-06-04\n");
+	fprintf(stderr, "\n");
+	fprintf(stderr, "This program is called by the ircd-ratbox ircd.\n");
+	fprintf(stderr, "It cannot be used on its own.\n");
+	exit(1);
 }
 
-int main(int argc, char *argv[])
+int
+main(int argc, char *argv[])
 {
-  int max_fd = 0;
-  int i;
+	int max_fd = 0;
+	int i;
 #ifdef SERVLINK_DEBUG
-  int GDBAttached = 0;
+	int GDBAttached = 0;
 
-  while (!GDBAttached)
-    sleep(1);
+	while (!GDBAttached)
+		sleep(1);
 #endif
 
 #ifdef HAVE_LIBCRYPTO
-  /* load error strings */
-  ERR_load_crypto_strings();
+	/* load error strings */
+	ERR_load_crypto_strings();
 #endif
 
-  /* Make sure we are running under ircd.. */
-  if (argc != 6 || strcmp(argv[0], "-slink"))
-    usage(); /* exits */
+	/* Make sure we are running under ircd.. */
+	if(argc != 6 || strcmp(argv[0], "-slink"))
+		usage();	/* exits */
 
-  for (i = 0; i < 5; i++ )
-  {
-    fds[i].fd = atoi(argv[i+1]);
-    if (fds[i].fd < 0)
-      exit(1);
-    if (fds[i].fd > max_fd)
-      max_fd = fds[i].fd;
-  }
-  
-  /* set file descriptors to nonblocking mode */
-  for (i = 0; i < 5; i++)
-  {
-    fcntl(fds[i].fd, F_SETFL, O_NONBLOCK);
-  }
+	for (i = 0; i < 5; i++)
+	{
+		fds[i].fd = atoi(argv[i + 1]);
+		if(fds[i].fd < 0)
+			exit(1);
+		if(fds[i].fd > max_fd)
+			max_fd = fds[i].fd;
+	}
 
-  /* enter io loop */
-  io_loop(max_fd + 1);
+	/* set file descriptors to nonblocking mode */
+	for (i = 0; i < 5; i++)
+	{
+		fcntl(fds[i].fd, F_SETFL, O_NONBLOCK);
+	}
 
-  /* NOTREACHED */
-  return(0);
-} /* main() */
+	/* enter io loop */
+	io_loop(max_fd + 1);
+
+	/* NOTREACHED */
+	return (0);
+}				/* main() */

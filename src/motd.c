@@ -47,9 +47,9 @@
 **
 */
 void
-InitMessageFile (MotdType motdType, const char *fileName, MessageFile * motd)
+InitMessageFile(MotdType motdType, const char *fileName, MessageFile * motd)
 {
-	strlcpy (motd->fileName, fileName, sizeof (motd->fileName));
+	strlcpy(motd->fileName, fileName, sizeof(motd->fileName));
 	motd->motdType = motdType;
 	motd->contentsOfFile = NULL;
 	motd->lastChangedDate[0] = '\0';
@@ -63,7 +63,7 @@ InitMessageFile (MotdType motdType, const char *fileName, MessageFile * motd)
 */
 
 int
-SendMessageFile (struct Client *source_p, MessageFile * motdToPrint)
+SendMessageFile(struct Client *source_p, MessageFile * motdToPrint)
 {
 	MessageFileLine *linePointer;
 	MotdType motdType;
@@ -77,23 +77,22 @@ SendMessageFile (struct Client *source_p, MessageFile * motdToPrint)
 	switch (motdType)
 	{
 	case USER_MOTD:
-		nick = BadPtr (source_p->name) ? "*" : source_p->name;
+		nick = BadPtr(source_p->name) ? "*" : source_p->name;
 
 		if(motdToPrint->contentsOfFile == NULL)
 		{
-			sendto_one (source_p, form_str (ERR_NOMOTD), me.name, nick);
+			sendto_one(source_p, form_str(ERR_NOMOTD), me.name, nick);
 			return 0;
 		}
 
-		sendto_one (source_p, form_str (RPL_MOTDSTART), me.name, nick, me.name);
+		sendto_one(source_p, form_str(RPL_MOTDSTART), me.name, nick, me.name);
 
 		for (linePointer = motdToPrint->contentsOfFile; linePointer;
 		     linePointer = linePointer->next)
 		{
-			sendto_one (source_p,
-				    form_str (RPL_MOTD), me.name, nick, linePointer->line);
+			sendto_one(source_p, form_str(RPL_MOTD), me.name, nick, linePointer->line);
 		}
-		sendto_one (source_p, form_str (RPL_ENDOFMOTD), me.name, nick);
+		sendto_one(source_p, form_str(RPL_ENDOFMOTD), me.name, nick);
 		return 0;
 		/* NOT REACHED */
 		break;
@@ -105,8 +104,8 @@ SendMessageFile (struct Client *source_p, MessageFile * motdToPrint)
 		for (linePointer = motdToPrint->contentsOfFile; linePointer;
 		     linePointer = linePointer->next)
 		{
-			sendto_one (source_p, ":%s 364 %s %s",
-				    me.name, source_p->name, linePointer->line);
+			sendto_one(source_p, ":%s 364 %s %s",
+				   me.name, source_p->name, linePointer->line);
 		}
 		return 0;
 		/* NOT REACHED */
@@ -119,7 +118,7 @@ SendMessageFile (struct Client *source_p, MessageFile * motdToPrint)
  *          source_p->name); */
 			return -1;
 		}
-		sendto_one (source_p, ":%s NOTICE %s :Start of OPER MOTD", me.name, source_p->name);
+		sendto_one(source_p, ":%s NOTICE %s :Start of OPER MOTD", me.name, source_p->name);
 		break;
 
 	default:
@@ -127,17 +126,17 @@ SendMessageFile (struct Client *source_p, MessageFile * motdToPrint)
 		/* NOT REACHED */
 	}
 
-	sendto_one (source_p, ":%s NOTICE %s :%s", me.name, source_p->name,
-		    motdToPrint->lastChangedDate);
+	sendto_one(source_p, ":%s NOTICE %s :%s", me.name, source_p->name,
+		   motdToPrint->lastChangedDate);
 
 
 	for (linePointer = motdToPrint->contentsOfFile; linePointer;
 	     linePointer = linePointer->next)
 	{
-		sendto_one (source_p,
-			    ":%s NOTICE %s :%s", me.name, source_p->name, linePointer->line);
+		sendto_one(source_p,
+			   ":%s NOTICE %s :%s", me.name, source_p->name, linePointer->line);
 	}
-	sendto_one (source_p, ":%s NOTICE %s :End", me.name, source_p->name);
+	sendto_one(source_p, ":%s NOTICE %s :End", me.name, source_p->name);
 	return 0;
 }
 
@@ -150,7 +149,7 @@ SendMessageFile (struct Client *source_p, MessageFile * motdToPrint)
  */
 
 int
-ReadMessageFile (MessageFile * MessageFileptr)
+ReadMessageFile(MessageFile * MessageFileptr)
 {
 	struct stat sb;
 	struct tm *local_tm;
@@ -170,33 +169,33 @@ ReadMessageFile (MessageFile * MessageFileptr)
 	for (mptr = MessageFileptr->contentsOfFile; mptr; mptr = next_mptr)
 	{
 		next_mptr = mptr->next;
-		MyFree (mptr);
+		MyFree(mptr);
 	}
 
 	MessageFileptr->contentsOfFile = NULL;
-	if(stat (MessageFileptr->fileName, &sb) < 0)
+	if(stat(MessageFileptr->fileName, &sb) < 0)
 		return -1;
 
-	local_tm = localtime (&sb.st_mtime);
+	local_tm = localtime(&sb.st_mtime);
 
 	if(local_tm)
-		ircsprintf (MessageFileptr->lastChangedDate,
-			    "%d/%d/%d %d:%d",
-			    local_tm->tm_mday,
-			    local_tm->tm_mon + 1,
-			    1900 + local_tm->tm_year, local_tm->tm_hour, local_tm->tm_min);
+		ircsprintf(MessageFileptr->lastChangedDate,
+			   "%d/%d/%d %d:%d",
+			   local_tm->tm_mday,
+			   local_tm->tm_mon + 1,
+			   1900 + local_tm->tm_year, local_tm->tm_hour, local_tm->tm_min);
 
 
-	if((file = fbopen (MessageFileptr->fileName, "r")) == 0)
+	if((file = fbopen(MessageFileptr->fileName, "r")) == 0)
 		return (-1);
 
-	while (fbgets (buffer, MESSAGELINELEN, file))
+	while (fbgets(buffer, MESSAGELINELEN, file))
 	{
-		if((p = strchr (buffer, '\n')))
+		if((p = strchr(buffer, '\n')))
 			*p = '\0';
-		newMessageLine = (MessageFileLine *) MyMalloc (sizeof (MessageFileLine));
+		newMessageLine = (MessageFileLine *) MyMalloc(sizeof(MessageFileLine));
 
-		strlcpy (newMessageLine->line, buffer, sizeof (newMessageLine->line));
+		strlcpy(newMessageLine->line, buffer, sizeof(newMessageLine->line));
 		newMessageLine->next = NULL;
 
 		if(MessageFileptr->contentsOfFile)
@@ -212,6 +211,6 @@ ReadMessageFile (MessageFile * MessageFileptr)
 		}
 	}
 
-	fbclose (file);
+	fbclose(file);
 	return (0);
 }

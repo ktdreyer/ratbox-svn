@@ -75,15 +75,15 @@ struct BlockHeap
 typedef struct BlockHeap BlockHeap;
 
 
-extern int BlockHeapFree (BlockHeap * bh, void *ptr);
-extern void *BlockHeapAlloc (BlockHeap * bh);
+extern int BlockHeapFree(BlockHeap * bh, void *ptr);
+extern void *BlockHeapAlloc(BlockHeap * bh);
 
-extern BlockHeap *BlockHeapCreate (size_t elemsize, int elemsperblock);
-extern int BlockHeapDestroy (BlockHeap * bh);
+extern BlockHeap *BlockHeapCreate(size_t elemsize, int elemsperblock);
+extern int BlockHeapDestroy(BlockHeap * bh);
 
 
-extern int BlockHeapGarbageCollect (BlockHeap *);
-extern void initBlockHeap (void);
-extern void BlockHeapUsage (BlockHeap * bh, size_t * bused, size_t * bfree, size_t * bmemusage);
+extern int BlockHeapGarbageCollect(BlockHeap *);
+extern void initBlockHeap(void);
+extern void BlockHeapUsage(BlockHeap * bh, size_t * bused, size_t * bfree, size_t * bmemusage);
 
 #endif /* INCLUDED_blalloc_h */

@@ -134,18 +134,18 @@ int split_users;
 int split_servers;
 
 static int
-irc_sleep (unsigned long useconds)
+irc_sleep(unsigned long useconds)
 {
 #ifdef HAVE_NANOSLEEP
 	struct timespec t;
 	t.tv_sec = useconds / (unsigned long) 1000000;
 	t.tv_nsec = (useconds % (unsigned long) 1000000) * 1000;
-	return nanosleep (&t, NULL);
+	return nanosleep(&t, NULL);
 #else
 	struct timeval t;
 	t.tv_sec = 0;
 	t.tv_usec = useconds;
-	return select (0, NULL, NULL, NULL, &t);
+	return select(0, NULL, NULL, NULL, &t);
 #endif
 }
 
@@ -153,7 +153,7 @@ irc_sleep (unsigned long useconds)
  * get_vm_top - get the operating systems notion of the resident set size
  */
 static unsigned long
-get_vm_top (void)
+get_vm_top(void)
 {
 	/*
 	 * NOTE: sbrk is not part of the ANSI C library or the POSIX.1 standard
@@ -166,7 +166,7 @@ get_vm_top (void)
 	 * returned. We really shouldn't be using it here but...
 	 */
 #ifndef VMS
-	void *vptr = sbrk (0);
+	void *vptr = sbrk(0);
 	return (unsigned long) vptr;
 #else
 	return 0;
@@ -177,21 +177,21 @@ get_vm_top (void)
  * get_maxrss - get the operating systems notion of the resident set size
  */
 unsigned long
-get_maxrss (void)
+get_maxrss(void)
 {
-	return get_vm_top () - initialVMTop;
+	return get_vm_top() - initialVMTop;
 }
 
 /*
  * print_startup - print startup information
  */
 static void
-print_startup (int pid)
+print_startup(int pid)
 {
-	printf ("ircd: version %s\n", ircd_version);
-	printf ("ircd: pid %d\n", pid);
-	printf ("ircd: running in %s mode from %s\n",
-		!server_state.foreground ? "background" : "foreground", ConfigFileEntry.dpath);
+	printf("ircd: version %s\n", ircd_version);
+	printf("ircd: pid %d\n", pid);
+	printf("ircd: running in %s mode from %s\n",
+	       !server_state.foreground ? "background" : "foreground", ConfigFileEntry.dpath);
 }
 
 /*
@@ -202,59 +202,59 @@ print_startup (int pid)
  * side effects	- if boot_daemon flag is not set, don't daemonize
  */
 static void
-init_sys (void)
+init_sys(void)
 {
 #if defined(RLIMIT_FD_MAX) && !defined(VMS) && defined(HAVE_SYS_RLIMIT_H)
 	struct rlimit limit;
 
-	if(!getrlimit (RLIMIT_FD_MAX, &limit))
+	if(!getrlimit(RLIMIT_FD_MAX, &limit))
 	{
 
 		if(limit.rlim_max < MAXCONNECTIONS)
 		{
-			fprintf (stderr, "ircd fd table too big\n");
-			fprintf (stderr, "Hard Limit: %ld IRC max: %d\n",
-				 (long) limit.rlim_max, MAXCONNECTIONS);
-			fprintf (stderr, "Fix MAXCONNECTIONS\n");
-			exit (-1);
+			fprintf(stderr, "ircd fd table too big\n");
+			fprintf(stderr, "Hard Limit: %ld IRC max: %d\n",
+				(long) limit.rlim_max, MAXCONNECTIONS);
+			fprintf(stderr, "Fix MAXCONNECTIONS\n");
+			exit(-1);
 		}
 
 		limit.rlim_cur = limit.rlim_max;	/* make soft limit the max */
-		if(setrlimit (RLIMIT_FD_MAX, &limit) == -1)
+		if(setrlimit(RLIMIT_FD_MAX, &limit) == -1)
 		{
-			fprintf (stderr, "error setting max fd's to %ld\n", (long) limit.rlim_cur);
-			exit (EXIT_FAILURE);
+			fprintf(stderr, "error setting max fd's to %ld\n", (long) limit.rlim_cur);
+			exit(EXIT_FAILURE);
 		}
 	}
 #endif /* RLIMIT_FD_MAX */
 }
 
 static int
-make_daemon (void)
+make_daemon(void)
 {
 #ifndef VMS
 	int pid;
 
-	if((pid = fork ()) < 0)
+	if((pid = fork()) < 0)
 	{
-		perror ("fork");
-		exit (EXIT_FAILURE);
+		perror("fork");
+		exit(EXIT_FAILURE);
 	}
 	else if(pid > 0)
 	{
-		print_startup (pid);
-		exit (EXIT_SUCCESS);
+		print_startup(pid);
+		exit(EXIT_SUCCESS);
 	}
 
-	setsid ();
+	setsid();
 	/*  fclose(stdin);
 	   fclose(stdout);
 	   fclose(stderr); */
 #else
 	/* if we get here, assume we've been detached.
 	   better set a process name. */
-	$DESCRIPTOR (myname, "IRCD-HYBRID-7");
-	SYS$SETPRN (&myname);
+	$DESCRIPTOR(myname, "IRCD-HYBRID-7");
+	SYS$SETPRN(&myname);
 #endif
 	return 0;
 }
@@ -285,27 +285,27 @@ struct lgetopt myopts[] = {
 };
 
 void
-set_time (void)
+set_time(void)
 {
 	static char to_send[200];
 	struct timeval newtime;
 	newtime.tv_sec = 0;
 	newtime.tv_usec = 0;
-	if(gettimeofday (&newtime, NULL) == -1)
+	if(gettimeofday(&newtime, NULL) == -1)
 	{
-		ilog (L_ERROR, "Clock Failure (%d)", errno);
-		sendto_realops_flags (UMODE_ALL, L_ALL,
-				      "Clock Failure (%d), TS can be corrupted", errno);
+		ilog(L_ERROR, "Clock Failure (%d)", errno);
+		sendto_realops_flags(UMODE_ALL, L_ALL,
+				     "Clock Failure (%d), TS can be corrupted", errno);
 
-		restart ("Clock Failure");
+		restart("Clock Failure");
 	}
 	if(newtime.tv_sec < CurrentTime)
 	{
-		ircsprintf (to_send,
-			    "System clock is running backwards - (%lu < %lu)",
-			    (unsigned long) newtime.tv_sec, (unsigned long) CurrentTime);
-		report_error (L_ALL, to_send, me.name, 0);
-		set_back_events (CurrentTime - newtime.tv_sec);
+		ircsprintf(to_send,
+			   "System clock is running backwards - (%lu < %lu)",
+			   (unsigned long) newtime.tv_sec, (unsigned long) CurrentTime);
+		report_error(L_ALL, to_send, me.name, 0);
+		set_back_events(CurrentTime - newtime.tv_sec);
 	}
 	SystemTime.tv_sec = newtime.tv_sec;
 	SystemTime.tv_usec = newtime.tv_usec;
@@ -319,22 +319,22 @@ static float in_curr_bandwidth = 0.0;
 static float out_curr_bandwidth = 0.0;
 
 void
-get_current_bandwidth (struct Client *source_p, struct Client *target_p)
+get_current_bandwidth(struct Client *source_p, struct Client *target_p)
 {
 	if(ConfigFileEntry.htm_messages == 0)
 	{
-		sendto_one (source_p, ":%s NOTICE %s :HTM mode is disabled",
-			    me.name, source_p->name);
+		sendto_one(source_p, ":%s NOTICE %s :HTM mode is disabled",
+			   me.name, source_p->name);
 		return;
 	}
-	sendto_one (source_p,
-		    ":%s NOTICE %s :Current traffic: - In (%.1fk/s) Out (%.1fk/s)",
-		    me.name, source_p->name, in_curr_bandwidth, out_curr_bandwidth);
+	sendto_one(source_p,
+		   ":%s NOTICE %s :Current traffic: - In (%.1fk/s) Out (%.1fk/s)",
+		   me.name, source_p->name, in_curr_bandwidth, out_curr_bandwidth);
 
 }
 
 static void
-check_htm (void)
+check_htm(void)
 {
 	long htm_trigger = (long) ConfigFileEntry.htm_trigger;
 	long htm_check = (long) ConfigFileEntry.htm_interval;
@@ -355,15 +355,15 @@ check_htm (void)
 	{
 		if(!htm_mode)
 		{
-			sendto_realops_flags (UMODE_ALL, L_ALL,
-					      "Entering high-traffic mode - In (%.1fk/s) Out(%.1fk/s)",
-					      in_curr_bandwidth, out_curr_bandwidth);
+			sendto_realops_flags(UMODE_ALL, L_ALL,
+					     "Entering high-traffic mode - In (%.1fk/s) Out(%.1fk/s)",
+					     in_curr_bandwidth, out_curr_bandwidth);
 		}
 		else
 		{
-			sendto_realops_flags (UMODE_ALL, L_ALL,
-					      "Still in high-traffic mode - In(%.1fk/s) Out(%.1fk/s)",
-					      in_curr_bandwidth, out_curr_bandwidth);
+			sendto_realops_flags(UMODE_ALL, L_ALL,
+					     "Still in high-traffic mode - In(%.1fk/s) Out(%.1fk/s)",
+					     in_curr_bandwidth, out_curr_bandwidth);
 		}
 		htm_mode = 1;
 	}
@@ -371,7 +371,7 @@ check_htm (void)
 	{
 		if(htm_mode)
 		{
-			sendto_realops_flags (UMODE_ALL, L_ALL, "Exiting high traffic mode");
+			sendto_realops_flags(UMODE_ALL, L_ALL, "Exiting high traffic mode");
 			htm_mode = 0;
 		}
 	}
@@ -380,7 +380,7 @@ check_htm (void)
 }
 
 static void
-io_loop (void)
+io_loop(void)
 {
 	unsigned long empty_cycles = 0, st = 0, delay;
 	while (ServerRunning)
@@ -390,9 +390,9 @@ io_loop (void)
 		 * event
 		 */
 
-		delay = eventNextTime ();
+		delay = eventNextTime();
 		if(delay <= CurrentTime)
-			eventRun ();
+			eventRun();
 
 
 		if(callbacks_called > 0)
@@ -406,25 +406,25 @@ io_loop (void)
 		if(st > 250000)
 			st = 250000;
 
-		irc_sleep (st);
+		irc_sleep(st);
 
-		comm_select (0);
+		comm_select(0);
 		if(ConfigFileEntry.htm_messages)
-			check_htm ();
+			check_htm();
 
 		/*
 		 * Check to see whether we have to rehash the configuration ..
 		 */
 		if(dorehash)
 		{
-			rehash (1);
+			rehash(1);
 			dorehash = 0;
 		}
 		if(doremotd)
 		{
-			ReadMessageFile (&ConfigFileEntry.motd);
-			sendto_realops_flags (UMODE_ALL, L_ALL,
-					      "Got signal SIGUSR1, reloading ircd motd file");
+			ReadMessageFile(&ConfigFileEntry.motd);
+			sendto_realops_flags(UMODE_ALL, L_ALL,
+					     "Got signal SIGUSR1, reloading ircd motd file");
 			doremotd = 0;
 		}
 	}
@@ -438,9 +438,9 @@ io_loop (void)
  * side effects - This sets all global set options needed 
  */
 static void
-initialize_global_set_options (void)
+initialize_global_set_options(void)
 {
-	memset (&GlobalSetOptions, 0, sizeof (GlobalSetOptions));
+	memset(&GlobalSetOptions, 0, sizeof(GlobalSetOptions));
 	/* memset( &ConfigFileEntry, 0, sizeof(ConfigFileEntry)); */
 
 	GlobalSetOptions.maxclients = MAX_CLIENTS;
@@ -480,15 +480,15 @@ initialize_global_set_options (void)
  * side effects - Set up all message files needed, motd etc.
  */
 static void
-initialize_message_files (void)
+initialize_message_files(void)
 {
-	InitMessageFile (USER_MOTD, MPATH, &ConfigFileEntry.motd);
-	InitMessageFile (OPER_MOTD, OPATH, &ConfigFileEntry.opermotd);
-	InitMessageFile (USER_LINKS, LIPATH, &ConfigFileEntry.linksfile);
+	InitMessageFile(USER_MOTD, MPATH, &ConfigFileEntry.motd);
+	InitMessageFile(OPER_MOTD, OPATH, &ConfigFileEntry.opermotd);
+	InitMessageFile(USER_LINKS, LIPATH, &ConfigFileEntry.linksfile);
 
-	ReadMessageFile (&ConfigFileEntry.motd);
-	ReadMessageFile (&ConfigFileEntry.opermotd);
-	ReadMessageFile (&ConfigFileEntry.linksfile);
+	ReadMessageFile(&ConfigFileEntry.motd);
+	ReadMessageFile(&ConfigFileEntry.opermotd);
+	ReadMessageFile(&ConfigFileEntry.linksfile);
 }
 
 /*
@@ -498,7 +498,7 @@ initialize_message_files (void)
  * output       - none
  */
 static void
-initialize_server_capabs (void)
+initialize_server_capabs(void)
 {
 	default_server_capabs &= ~CAP_ZIP;
 }
@@ -512,26 +512,26 @@ initialize_server_capabs (void)
  * side effects - write the pid of the ircd to filename
  */
 static void
-write_pidfile (const char *filename)
+write_pidfile(const char *filename)
 {
 	FBFILE *fb;
 	char buff[32];
-	if((fb = fbopen (filename, "w")))
+	if((fb = fbopen(filename, "w")))
 	{
-		unsigned int pid = (unsigned int) getpid ();
+		unsigned int pid = (unsigned int) getpid();
 
-		ircsprintf (buff, "%u\n", pid);
-		if((fbputs (buff, fb) == -1))
+		ircsprintf(buff, "%u\n", pid);
+		if((fbputs(buff, fb) == -1))
 		{
-			ilog (L_ERROR, "Error writing %u to pid file %s (%s)",
-			      pid, filename, strerror (errno));
+			ilog(L_ERROR, "Error writing %u to pid file %s (%s)",
+			     pid, filename, strerror(errno));
 		}
-		fbclose (fb);
+		fbclose(fb);
 		return;
 	}
 	else
 	{
-		ilog (L_ERROR, "Error opening pid file %s", filename);
+		ilog(L_ERROR, "Error opening pid file %s", filename);
 	}
 }
 
@@ -545,16 +545,16 @@ write_pidfile (const char *filename)
  * -kre
  */
 static void
-check_pidfile (const char *filename)
+check_pidfile(const char *filename)
 {
 	FBFILE *fb;
 	char buff[32];
 	pid_t pidfromfile;
 
 	/* Don't do logging here, since we don't have log() initialised */
-	if((fb = fbopen (filename, "r")))
+	if((fb = fbopen(filename, "r")))
 	{
-		if(fbgets (buff, 20, fb) == NULL)
+		if(fbgets(buff, 20, fb) == NULL)
 		{
 			/*
 			   log(L_ERROR, "Error reading from pid file %s (%s)", filename,
@@ -563,15 +563,15 @@ check_pidfile (const char *filename)
 		}
 		else
 		{
-			pidfromfile = atoi (buff);
-			if(!kill (pidfromfile, 0))
+			pidfromfile = atoi(buff);
+			if(!kill(pidfromfile, 0))
 			{
 				/* log(L_ERROR, "Server is already running"); */
-				printf ("ircd: daemon is already running\n");
-				exit (-1);
+				printf("ircd: daemon is already running\n");
+				exit(-1);
 			}
 		}
-		fbclose (fb);
+		fbclose(fb);
 	}
 	else
 	{
@@ -588,16 +588,16 @@ check_pidfile (const char *filename)
  * -kre
  */
 static void
-setup_corefile (void)
+setup_corefile(void)
 {
 #if !defined(VMS) && defined(HAVE_SYS_RESOURCE_H)
 	struct rlimit rlim;	/* resource limits */
 
 	/* Set corefilesize to maximum */
-	if(!getrlimit (RLIMIT_CORE, &rlim))
+	if(!getrlimit(RLIMIT_CORE, &rlim))
 	{
 		rlim.rlim_cur = rlim.rlim_max;
-		setrlimit (RLIMIT_CORE, &rlim);
+		setrlimit(RLIMIT_CORE, &rlim);
 	}
 #endif
 }
@@ -610,61 +610,61 @@ setup_corefile (void)
  * -AndroSyn
  */
 static void
-cleanup_zombies (void *unused)
+cleanup_zombies(void *unused)
 {
 	int status;
-	waitpid (-1, &status, WNOHANG);
+	waitpid(-1, &status, WNOHANG);
 }
 
 int
-main (int argc, char *argv[])
+main(int argc, char *argv[])
 {
 	/* Check to see if the user is running us as root, which is a nono */
-	if(geteuid () == 0)
+	if(geteuid() == 0)
 	{
-		fprintf (stderr, "Don't run ircd as root!!!\n");
+		fprintf(stderr, "Don't run ircd as root!!!\n");
 		return -1;
 	}
 
 	/*
 	 * save server boot time right away, so getrusage works correctly
 	 */
-	set_time ();
+	set_time();
 	/*
 	 * Setup corefile size immediately after boot -kre
 	 */
-	setup_corefile ();
+	setup_corefile();
 
 	/*
 	 * set initialVMTop before we allocate any memory
 	 */
-	initialVMTop = get_vm_top ();
+	initialVMTop = get_vm_top();
 
 	ServerRunning = 0;
 	/* It ain't random, but it ought to be a little harder to guess */
-	srand (SystemTime.tv_sec ^ (SystemTime.tv_usec | (getpid () << 20)));
-	memset (&me, 0, sizeof (me));
-	memset (&meLocalUser, 0, sizeof (meLocalUser));
+	srand(SystemTime.tv_sec ^ (SystemTime.tv_usec | (getpid() << 20)));
+	memset(&me, 0, sizeof(me));
+	memset(&meLocalUser, 0, sizeof(meLocalUser));
 	me.localClient = &meLocalUser;
 
 	/* Make sure all lists are zeroed */
-	memset (&unknown_list, 0, sizeof (unknown_list));
-	memset (&lclient_list, 0, sizeof (lclient_list));
-	memset (&serv_list, 0, sizeof (serv_list));
-	memset (&global_serv_list, 0, sizeof (global_serv_list));
-	memset (&oper_list, 0, sizeof (oper_list));
+	memset(&unknown_list, 0, sizeof(unknown_list));
+	memset(&lclient_list, 0, sizeof(lclient_list));
+	memset(&serv_list, 0, sizeof(serv_list));
+	memset(&global_serv_list, 0, sizeof(global_serv_list));
+	memset(&oper_list, 0, sizeof(oper_list));
 
-	dlinkAddTail (&me, &me.node, &global_client_list);
+	dlinkAddTail(&me, &me.node, &global_client_list);
 
-	memset ((void *) &Count, 0, sizeof (Count));
-	memset ((void *) &server_state, 0, sizeof (server_state));
+	memset((void *) &Count, 0, sizeof(Count));
+	memset((void *) &server_state, 0, sizeof(server_state));
 
 	Count.server = 1;	/* us */
-	memset ((void *) &ServerInfo, 0, sizeof (ServerInfo));
-	memset ((void *) &AdminInfo, 0, sizeof (AdminInfo));
+	memset((void *) &ServerInfo, 0, sizeof(ServerInfo));
+	memset((void *) &AdminInfo, 0, sizeof(AdminInfo));
 
 	/* Initialise the channel capability usage counts... */
-	init_chcap_usage_counts ();
+	init_chcap_usage_counts();
 
 	ConfigFileEntry.dpath = DPATH;
 	ConfigFileEntry.configfile = CPATH;	/* Server configuration file */
@@ -675,20 +675,20 @@ main (int argc, char *argv[])
 	ConfigFileEntry.resvfile = RESVPATH;
 	ConfigFileEntry.connect_timeout = 30;	/* Default to 30 */
 	myargv = argv;
-	umask (077);		/* better safe than sorry --SRB */
+	umask(077);		/* better safe than sorry --SRB */
 
-	parseargs (&argc, &argv, myopts);
+	parseargs(&argc, &argv, myopts);
 
 	if(printVersion)
 	{
-		printf ("ircd: version %s\n", ircd_version);
-		exit (EXIT_SUCCESS);
+		printf("ircd: version %s\n", ircd_version);
+		exit(EXIT_SUCCESS);
 	}
 
-	if(chdir (ConfigFileEntry.dpath))
+	if(chdir(ConfigFileEntry.dpath))
 	{
-		perror ("chdir");
-		exit (EXIT_FAILURE);
+		perror("chdir");
+		exit(EXIT_FAILURE);
 	}
 
 #ifdef __CYGWIN__
@@ -697,127 +697,127 @@ main (int argc, char *argv[])
 
 	if(!server_state.foreground)
 	{
-		make_daemon ();
+		make_daemon();
 	}
 	else
 	{
-		print_startup (getpid ());
+		print_startup(getpid());
 	}
 
-	setup_signals ();
+	setup_signals();
 	/* We need this to initialise the fd array before anything else */
-	fdlist_init ();
-	init_netio ();		/* This needs to be setup early ! -- adrian */
+	fdlist_init();
+	init_netio();		/* This needs to be setup early ! -- adrian */
 	/* Check if there is pidfile and daemon already running */
-	check_pidfile (pidFileName);
+	check_pidfile(pidFileName);
 	/* Init the event subsystem */
-	eventInit ();
-	init_sys ();
+	eventInit();
+	init_sys();
 
 	if(!server_state.foreground)
 	{
-		close_all_connections ();
+		close_all_connections();
 	}
-	init_log (logFileName);
-	initBlockHeap ();
-	init_dlink_nodes ();
-	init_patricia ();
-	newconf_init ();
-	initialize_message_files ();
-	linebuf_init ();	/* set up some linebuf stuff to control paging */
-	init_hash ();
-	id_init ();
-	clear_scache_hash_table ();	/* server cache name table */
-	init_iplines ();
-	init_confmatch ();
-	clear_hash_parse ();
-	init_client ();
-	init_conf ();
-	initUser ();
-	init_channels ();
-	initclass ();
-	initwhowas ();
-	init_stats ();
-	init_hooks ();
-	load_all_modules (1);
+	init_log(logFileName);
+	initBlockHeap();
+	init_dlink_nodes();
+	init_patricia();
+	newconf_init();
+	initialize_message_files();
+	linebuf_init();		/* set up some linebuf stuff to control paging */
+	init_hash();
+	id_init();
+	clear_scache_hash_table();	/* server cache name table */
+	init_iplines();
+	init_confmatch();
+	clear_hash_parse();
+	init_client();
+	init_conf();
+	initUser();
+	init_channels();
+	initclass();
+	initwhowas();
+	init_stats();
+	init_hooks();
+	load_all_modules(1);
 #ifndef STATIC_MODULES
-	load_core_modules (1);
+	load_core_modules(1);
 #endif
-	initServerMask ();
-	init_auth ();		/* Initialise the auth code */
-	init_resolver ();	/* Needs to be setup before the io loop */
-	read_conf_files (YES);	/* cold start init conf files */
+	initServerMask();
+	init_auth();		/* Initialise the auth code */
+	init_resolver();	/* Needs to be setup before the io loop */
+	read_conf_files(YES);	/* cold start init conf files */
 #ifndef STATIC_MODULES
 
-	mod_add_path (IRCD_PREFIX "/modules");
-	mod_add_path (IRCD_PREFIX "/modules/autoload");
+	mod_add_path(IRCD_PREFIX "/modules");
+	mod_add_path(IRCD_PREFIX "/modules/autoload");
 #endif
 
-	initialize_server_capabs ();	/* Set up default_server_capabs */
-	initialize_global_set_options ();
+	initialize_server_capabs();	/* Set up default_server_capabs */
+	initialize_global_set_options();
 
 	if(ServerInfo.name == NULL)
 	{
-		fprintf (stderr, "ERROR: No server name specified in serverinfo block.\n");
-		ilog (L_CRIT, "No server name specified in serverinfo block.");
-		exit (EXIT_FAILURE);
+		fprintf(stderr, "ERROR: No server name specified in serverinfo block.\n");
+		ilog(L_CRIT, "No server name specified in serverinfo block.");
+		exit(EXIT_FAILURE);
 	}
 	/* Can't use strncpy_irc here because we didn't malloc enough... -A1kmm */
-	strncpy (me.name, ServerInfo.name, HOSTLEN);
+	strncpy(me.name, ServerInfo.name, HOSTLEN);
 
 	/* serverinfo{} description must exist.  If not, error out. */
 	if(ServerInfo.description == NULL)
 	{
-		fprintf (stderr, "ERROR: No server description specified in serverinfo block.\n");
-		ilog (L_CRIT, "ERROR: No server description specified in serverinfo block.");
-		exit (EXIT_FAILURE);
+		fprintf(stderr, "ERROR: No server description specified in serverinfo block.\n");
+		ilog(L_CRIT, "ERROR: No server description specified in serverinfo block.");
+		exit(EXIT_FAILURE);
 	}
-	strncpy (me.info, ServerInfo.description, REALLEN);
+	strncpy(me.info, ServerInfo.description, REALLEN);
 
 	me.from = &me;
 	me.servptr = &me;
-	SetMe (&me);
-	make_server (&me);
+	SetMe(&me);
+	make_server(&me);
 	me.serv->up = me.name;
 	me.lasttime = me.since = me.firsttime = CurrentTime;
-	add_to_client_hash_table (me.name, &me);
+	add_to_client_hash_table(me.name, &me);
 
-	add_server_to_list (&me);	/* add ourselves to global_serv_list */
+	add_server_to_list(&me);	/* add ourselves to global_serv_list */
 
-	check_class ();
-	write_pidfile (pidFileName);
+	check_class();
+	write_pidfile(pidFileName);
 
-	ilog (L_NOTICE, "Server Ready");
+	ilog(L_NOTICE, "Server Ready");
 
-	eventAddIsh ("cleanup_channels", cleanup_channels, NULL, CLEANUP_CHANNELS_TIME);
+	eventAddIsh("cleanup_channels", cleanup_channels, NULL, CLEANUP_CHANNELS_TIME);
 
-	eventAddIsh ("cleanup_glines", cleanup_glines, NULL, CLEANUP_GLINES_TIME);
+	eventAddIsh("cleanup_glines", cleanup_glines, NULL, CLEANUP_GLINES_TIME);
 
-	eventAddIsh ("cleanup_temps_min", cleanup_temps_min, NULL, 60);
-	eventAddIsh ("cleanup_temps_hour", cleanup_temps_hour, NULL, 3600);
-	eventAddIsh ("cleanup_temps_day", cleanup_temps_day, NULL, 86400);
-	eventAddIsh ("cleanup_temps_week", cleanup_temps_week, NULL, 604800);
+	eventAddIsh("cleanup_temps_min", cleanup_temps_min, NULL, 60);
+	eventAddIsh("cleanup_temps_hour", cleanup_temps_hour, NULL, 3600);
+	eventAddIsh("cleanup_temps_day", cleanup_temps_day, NULL, 86400);
+	eventAddIsh("cleanup_temps_week", cleanup_temps_week, NULL, 604800);
 
 	/* We want try_connections to be called as soon as possible now! -- adrian */
 	/* No, 'cause after a restart it would cause all sorts of nick collides */
-	eventAddIsh ("try_connections", try_connections, NULL, STARTUP_CONNECTIONS_TIME);
+	eventAddIsh("try_connections", try_connections, NULL, STARTUP_CONNECTIONS_TIME);
 
-	eventAddIsh ("collect_zipstats", collect_zipstats, NULL, ZIPSTATS_TIME);
+	eventAddIsh("collect_zipstats", collect_zipstats, NULL, ZIPSTATS_TIME);
 
 	/* Setup the timeout check. I'll shift it later :)  -- adrian */
-	eventAddIsh ("comm_checktimeouts", comm_checktimeouts, NULL, 1);
-	eventAddIsh ("cleanup_zombies", cleanup_zombies, NULL, 30);
+	eventAddIsh("comm_checktimeouts", comm_checktimeouts, NULL, 1);
+	eventAddIsh("cleanup_zombies", cleanup_zombies, NULL, 30);
 
 	if(ConfigServerHide.links_delay > 0)
-		eventAddIsh ("write_links_file", write_links_file, NULL,
-			     ConfigServerHide.links_delay);
+		eventAddIsh("write_links_file", write_links_file, NULL,
+			    ConfigServerHide.links_delay);
 	else
 		ConfigServerHide.links_disabled = 1;
 
 	if(splitmode)
-		eventAddIsh ("check_splitmode", check_splitmode, NULL, 60);
+		eventAddIsh("check_splitmode", check_splitmode, NULL, 60);
 
 	ServerRunning = 1;
-	io_loop ();
+	io_loop();
 	return 0;
 }

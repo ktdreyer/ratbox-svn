@@ -40,11 +40,11 @@
 #include "s_conf.h"
 
 
-static void mr_motd (struct Client *, struct Client *, int, char **);
-static void m_motd (struct Client *, struct Client *, int, char **);
-static void mo_motd (struct Client *, struct Client *, int, char **);
+static void mr_motd(struct Client *, struct Client *, int, char **);
+static void m_motd(struct Client *, struct Client *, int, char **);
+static void mo_motd(struct Client *, struct Client *, int, char **);
 
-static void motd_spy (struct Client *);
+static void motd_spy(struct Client *);
 
 struct Message motd_msgtab = {
 	"MOTD", 0, 0, 0, 1, MFLG_SLOW, 0,
@@ -52,17 +52,17 @@ struct Message motd_msgtab = {
 };
 #ifndef STATIC_MODULES
 void
-_modinit (void)
+_modinit(void)
 {
-	hook_add_event ("doing_motd");
-	mod_add_cmd (&motd_msgtab);
+	hook_add_event("doing_motd");
+	mod_add_cmd(&motd_msgtab);
 }
 
 void
-_moddeinit (void)
+_moddeinit(void)
 {
-	hook_del_event ("doing_motd");
-	mod_del_cmd (&motd_msgtab);
+	hook_del_event("doing_motd");
+	mod_del_cmd(&motd_msgtab);
 }
 
 const char *_version = "$Revision$";
@@ -73,11 +73,11 @@ const char *_version = "$Revision$";
  * parv[0] = sender prefix
  */
 static void
-mr_motd (struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+mr_motd(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
 {
 	/* allow unregistered clients to see the motd, but exit them */
-	SendMessageFile (source_p, &ConfigFileEntry.motd);
-	exit_client (client_p, source_p, source_p, "Client Exit after MOTD");
+	SendMessageFile(source_p, &ConfigFileEntry.motd);
+	exit_client(client_p, source_p, source_p, "Client Exit after MOTD");
 }
 
 /*
@@ -86,14 +86,14 @@ mr_motd (struct Client *client_p, struct Client *source_p, int parc, char *parv[
 **      parv[1] = servername
 */
 static void
-m_motd (struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+m_motd(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
 {
 	static time_t last_used = 0;
 
 	if((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
 	{
 		/* safe enough to give this on a local connect only */
-		sendto_one (source_p, form_str (RPL_LOAD2HI), me.name, source_p->name);
+		sendto_one(source_p, form_str(RPL_LOAD2HI), me.name, source_p->name);
 		return;
 	}
 	else
@@ -102,13 +102,13 @@ m_motd (struct Client *client_p, struct Client *source_p, int parc, char *parv[]
 	/* This is safe enough to use during non hidden server mode */
 	if(!ConfigServerHide.disable_remote && !ConfigServerHide.hide_servers)
 	{
-		if(hunt_server (client_p, source_p, ":%s MOTD :%s", 1, parc, parv) != HUNTED_ISME)
+		if(hunt_server(client_p, source_p, ":%s MOTD :%s", 1, parc, parv) != HUNTED_ISME)
 			return;
 	}
 
-	motd_spy (source_p);
+	motd_spy(source_p);
 
-	SendMessageFile (source_p, &ConfigFileEntry.motd);
+	SendMessageFile(source_p, &ConfigFileEntry.motd);
 }
 
 /*
@@ -117,17 +117,17 @@ m_motd (struct Client *client_p, struct Client *source_p, int parc, char *parv[]
 **      parv[1] = servername
 */
 static void
-mo_motd (struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+mo_motd(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
 {
-	if(!IsClient (source_p))
+	if(!IsClient(source_p))
 		return;
 
-	if(hunt_server (client_p, source_p, ":%s MOTD :%s", 1, parc, parv) != HUNTED_ISME)
+	if(hunt_server(client_p, source_p, ":%s MOTD :%s", 1, parc, parv) != HUNTED_ISME)
 		return;
 
-	motd_spy (source_p);
+	motd_spy(source_p);
 
-	SendMessageFile (source_p, &ConfigFileEntry.motd);
+	SendMessageFile(source_p, &ConfigFileEntry.motd);
 }
 
 /* motd_spy()
@@ -137,11 +137,11 @@ mo_motd (struct Client *client_p, struct Client *source_p, int parc, char *parv[
  * side effects - hook doing_motd is called
  */
 static void
-motd_spy (struct Client *source_p)
+motd_spy(struct Client *source_p)
 {
 	struct hook_spy_data data;
 
 	data.source_p = source_p;
 
-	hook_call_event ("doing_motd", &data);
+	hook_call_event("doing_motd", &data);
 }

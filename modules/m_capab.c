@@ -34,7 +34,7 @@
 #include "parse.h"
 #include "modules.h"
 
-static void mr_capab (struct Client *, struct Client *, int, char **);
+static void mr_capab(struct Client *, struct Client *, int, char **);
 
 struct Message capab_msgtab = {
 	"CAPAB", 0, 0, 0, 0, MFLG_SLOW | MFLG_UNREG, 0,
@@ -42,15 +42,15 @@ struct Message capab_msgtab = {
 };
 #ifndef STATIC_MODULES
 void
-_modinit (void)
+_modinit(void)
 {
-	mod_add_cmd (&capab_msgtab);
+	mod_add_cmd(&capab_msgtab);
 }
 
 void
-_moddeinit (void)
+_moddeinit(void)
 {
-	mod_del_cmd (&capab_msgtab);
+	mod_del_cmd(&capab_msgtab);
 }
 
 const char *_version = "$Revision$";
@@ -63,7 +63,7 @@ const char *_version = "$Revision$";
  *
  */
 static void
-mr_capab (struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+mr_capab(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
 {
 	struct Capability *cap;
 	int i;
@@ -80,7 +80,7 @@ mr_capab (struct Client *client_p, struct Client *source_p, int parc, char *parv
 
 	if(client_p->localClient->caps)
 	{
-		exit_client (client_p, client_p, client_p, "CAPAB received twice");
+		exit_client(client_p, client_p, client_p, "CAPAB received twice");
 		return;
 	}
 	else
@@ -88,10 +88,10 @@ mr_capab (struct Client *client_p, struct Client *source_p, int parc, char *parv
 
 	for (i = 1; i < parc; i++)
 	{
-		for (s = strtoken (&p, parv[i], " "); s; s = strtoken (&p, NULL, " "))
+		for (s = strtoken(&p, parv[i], " "); s; s = strtoken(&p, NULL, " "))
 		{
 #ifdef HAVE_LIBCRYPTO
-			if((strncmp (s, "ENC:", 4) == 0))
+			if((strncmp(s, "ENC:", 4) == 0))
 			{
 				/* Skip the "ENC:" portion */
 				s += 4;
@@ -101,7 +101,7 @@ mr_capab (struct Client *client_p, struct Client *source_p, int parc, char *parv
 				 */
 				for (ecap = CipherTable; ecap->name; ecap++)
 				{
-					if((!irccmp (ecap->name, s)) && (ecap->cap & CAP_ENC_MASK))
+					if((!irccmp(ecap->name, s)) && (ecap->cap & CAP_ENC_MASK))
 					{
 						cipher = ecap->cap;
 						break;
@@ -110,14 +110,14 @@ mr_capab (struct Client *client_p, struct Client *source_p, int parc, char *parv
 				/* Since the name and capabilities matched, use it. */
 				if(cipher != 0)
 				{
-					SetCapable (client_p, CAP_ENC);
+					SetCapable(client_p, CAP_ENC);
 					client_p->localClient->enc_caps |= cipher;
 				}
 				else
 				{
 					/* cipher is still zero; we didn't find a matching entry. */
-					exit_client (client_p, client_p, client_p,
-						     "Cipher selected is not available here.");
+					exit_client(client_p, client_p, client_p,
+						    "Cipher selected is not available here.");
 					return;
 				}
 			}
@@ -125,7 +125,7 @@ mr_capab (struct Client *client_p, struct Client *source_p, int parc, char *parv
 #endif
 				for (cap = captab; cap->name; cap++)
 				{
-					if(!irccmp (cap->name, s))
+					if(!irccmp(cap->name, s))
 					{
 						client_p->localClient->caps |= cap->cap;
 						break;

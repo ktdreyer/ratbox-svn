@@ -45,8 +45,8 @@
 #include "sprintf_irc.h"
 #include "packet.h"
 
-static void m_join (struct Client *, struct Client *, int, char **);
-static void ms_join (struct Client *, struct Client *, int, char **);
+static void m_join(struct Client *, struct Client *, int, char **);
+static void ms_join(struct Client *, struct Client *, int, char **);
 
 struct Message join_msgtab = {
 	"JOIN", 0, 0, 2, 0, MFLG_SLOW, 0,
@@ -56,21 +56,21 @@ struct Message join_msgtab = {
 #ifndef STATIC_MODULES
 
 void
-_modinit (void)
+_modinit(void)
 {
-	mod_add_cmd (&join_msgtab);
+	mod_add_cmd(&join_msgtab);
 }
 
 void
-_moddeinit (void)
+_moddeinit(void)
 {
-	mod_del_cmd (&join_msgtab);
+	mod_del_cmd(&join_msgtab);
 }
 const char *_version = "$Revision$";
 
 #endif
-static void do_join_0 (struct Client *client_p, struct Client *source_p);
-void check_spambot_warning (struct Client *source_p, const char *name);
+static void do_join_0(struct Client *client_p, struct Client *source_p);
+void check_spambot_warning(struct Client *source_p, const char *name);
 
 
 /*
@@ -80,7 +80,7 @@ void check_spambot_warning (struct Client *source_p, const char *name);
  *      parv[2] = channel password (key)
  */
 static void
-m_join (struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+m_join(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
 {
 	struct Channel *chptr = NULL;
 	char *name, *key = NULL;
@@ -90,23 +90,23 @@ m_join (struct Client *client_p, struct Client *source_p, int parc, char *parv[]
 
 	if(*parv[1] == '\0')
 	{
-		sendto_one (source_p, form_str (ERR_NEEDMOREPARAMS), me.name, parv[0], "JOIN");
+		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS), me.name, parv[0], "JOIN");
 		return;
 	}
 
 	if(parc > 2)
 	{
-		key = strtoken (&p2, parv[2], ",");
+		key = strtoken(&p2, parv[2], ",");
 	}
 
-	for (name = strtoken (&p, parv[1], ","); name;
-	     key = (key) ? strtoken (&p2, NULL, ",") : NULL, name = strtoken (&p, NULL, ","))
+	for (name = strtoken(&p, parv[1], ","); name;
+	     key = (key) ? strtoken(&p2, NULL, ",") : NULL, name = strtoken(&p, NULL, ","))
 	{
 
-		if(!check_channel_name (name))
+		if(!check_channel_name(name))
 		{
-			sendto_one (source_p, form_str (ERR_BADCHANNAME),
-				    me.name, source_p->name, (unsigned char *) name);
+			sendto_one(source_p, form_str(ERR_BADCHANNAME),
+				   me.name, source_p->name, (unsigned char *) name);
 			continue;
 		}
 
@@ -118,61 +118,61 @@ m_join (struct Client *client_p, struct Client *source_p, int parc, char *parv[]
 		 ** config file .. it's abused a lot more than it's
 		 ** used these days :/ --is
 		 */
-		if(*name == '0' && !atoi (name))
+		if(*name == '0' && !atoi(name))
 		{
 			if(source_p->user->channel.head == NULL)
 				continue;
 
-			do_join_0 (&me, source_p);
+			do_join_0(&me, source_p);
 			continue;
 		}
 
 		/* check it begins with # or & */
-		else if(!IsChannelName (name))
+		else if(!IsChannelName(name))
 		{
-			sendto_one (source_p, form_str (ERR_NOSUCHCHANNEL),
-				    me.name, source_p->name, name);
+			sendto_one(source_p, form_str(ERR_NOSUCHCHANNEL),
+				   me.name, source_p->name, name);
 			continue;
 		}
 
 		if(ConfigServerHide.disable_local_channels && (*name == '&'))
 		{
-			sendto_one (source_p, form_str (ERR_NOSUCHCHANNEL),
-				    me.name, source_p->name, name);
+			sendto_one(source_p, form_str(ERR_NOSUCHCHANNEL),
+				   me.name, source_p->name, name);
 			continue;
 		}
 
 		/* check the length */
-		if(strlen (name) > CHANNELLEN)
+		if(strlen(name) > CHANNELLEN)
 		{
-			sendto_one (source_p, form_str (ERR_BADCHANNAME),
-				    me.name, source_p->name, name);
+			sendto_one(source_p, form_str(ERR_BADCHANNAME),
+				   me.name, source_p->name, name);
 			continue;
 		}
 
 		/* see if its resv'd */
-		if(find_channel_resv (name) && (!IsOper (source_p) || !ConfigChannel.no_oper_resvs))
+		if(find_channel_resv(name) && (!IsOper(source_p) || !ConfigChannel.no_oper_resvs))
 		{
-			sendto_one (source_p, form_str (ERR_UNAVAILRESOURCE),
-				    me.name, source_p->name, name);
-			sendto_realops_flags (UMODE_SPY, L_ALL,
-					      "User %s (%s@%s) is attempting to join locally juped channel %s",
-					      source_p->name, source_p->username, source_p->host,
-					      name);
+			sendto_one(source_p, form_str(ERR_UNAVAILRESOURCE),
+				   me.name, source_p->name, name);
+			sendto_realops_flags(UMODE_SPY, L_ALL,
+					     "User %s (%s@%s) is attempting to join locally juped channel %s",
+					     source_p->name, source_p->username, source_p->host,
+					     name);
 			continue;
 		}
 
 		/* look for the channel */
-		if((chptr = hash_find_channel (name)) != NULL)
+		if((chptr = hash_find_channel(name)) != NULL)
 		{
-			if(IsMember (source_p, chptr))
+			if(IsMember(source_p, chptr))
 				return;
 
-			if(splitmode && !IsOper (source_p) && (*name != '&') &&
+			if(splitmode && !IsOper(source_p) && (*name != '&') &&
 			   ConfigChannel.no_join_on_split)
 			{
-				sendto_one (source_p, form_str (ERR_UNAVAILRESOURCE),
-					    me.name, source_p->name, name);
+				sendto_one(source_p, form_str(ERR_UNAVAILRESOURCE),
+					   me.name, source_p->name, name);
 				continue;
 			}
 
@@ -183,11 +183,11 @@ m_join (struct Client *client_p, struct Client *source_p, int parc, char *parv[]
 		}
 		else
 		{
-			if(splitmode && !IsOper (source_p) && (*name != '&') &&
+			if(splitmode && !IsOper(source_p) && (*name != '&') &&
 			   (ConfigChannel.no_create_on_split || ConfigChannel.no_join_on_split))
 			{
-				sendto_one (source_p, form_str (ERR_UNAVAILRESOURCE),
-					    me.name, source_p->name, name);
+				sendto_one(source_p, form_str(ERR_UNAVAILRESOURCE),
+					   me.name, source_p->name, name);
 				continue;
 			}
 
@@ -195,11 +195,10 @@ m_join (struct Client *client_p, struct Client *source_p, int parc, char *parv[]
 		}
 
 		if((source_p->user->joined >= ConfigChannel.max_chans_per_user) &&
-		   (!IsOper (source_p) || (source_p->user->joined >=
-					   ConfigChannel.max_chans_per_user * 3)))
+		   (!IsOper(source_p) || (source_p->user->joined >=
+					  ConfigChannel.max_chans_per_user * 3)))
 		{
-			sendto_one (source_p, form_str (ERR_TOOMANYCHANNELS),
-				    me.name, parv[0], name);
+			sendto_one(source_p, form_str(ERR_TOOMANYCHANNELS), me.name, parv[0], name);
 			if(successful_join_count)
 				source_p->localClient->last_join_time = CurrentTime;
 			return;
@@ -210,39 +209,38 @@ m_join (struct Client *client_p, struct Client *source_p, int parc, char *parv[]
 
 		if(chptr == NULL)	/* If I already have a chptr, no point doing this */
 		{
-			chptr = get_or_create_channel (source_p, name, NULL);
+			chptr = get_or_create_channel(source_p, name, NULL);
 		}
 
 		if(chptr == NULL)
 		{
-			sendto_one (source_p, form_str (ERR_UNAVAILRESOURCE),
-				    me.name, parv[0], name);
+			sendto_one(source_p, form_str(ERR_UNAVAILRESOURCE), me.name, parv[0], name);
 			if(successful_join_count > 0)
 				successful_join_count--;
 			continue;
 		}
 
-		if(!IsOper (source_p))
-			check_spambot_warning (source_p, name);
+		if(!IsOper(source_p))
+			check_spambot_warning(source_p, name);
 
 		/* can_join checks for +i key, bans etc */
-		if((i = can_join (source_p, chptr, key)))
+		if((i = can_join(source_p, chptr, key)))
 		{
-			sendto_one (source_p, form_str (i), me.name, parv[0], name);
+			sendto_one(source_p, form_str(i), me.name, parv[0], name);
 			if(successful_join_count > 0)
 				successful_join_count--;
 			continue;
 		}
 
 		/* add the user to the channel */
-		add_user_to_channel (chptr, source_p, flags);
+		add_user_to_channel(chptr, source_p, flags);
 
 		/* we send the user their join here, because we could have to
 		 * send a mode out next.
 		 */
-		sendto_channel_local (ALL_MEMBERS, chptr, ":%s!%s@%s JOIN :%s",
-				      source_p->name,
-				      source_p->username, source_p->host, chptr->chname);
+		sendto_channel_local(ALL_MEMBERS, chptr, ":%s!%s@%s JOIN :%s",
+				     source_p->name,
+				     source_p->username, source_p->host, chptr->chname);
 
 		/* if theyre joining opped (ie, new chan or joining one thats
 		 * persisting) then set timestamp to current, set +nt and
@@ -257,54 +255,54 @@ m_join (struct Client *client_p, struct Client *source_p, int parc, char *parv[]
 			chptr->mode.mode |= MODE_TOPICLIMIT;
 			chptr->mode.mode |= MODE_NOPRIVMSGS;
 
-			sendto_channel_local (ONLY_CHANOPS, chptr, ":%s MODE %s +nt",
-					      me.name, chptr->chname);
+			sendto_channel_local(ONLY_CHANOPS, chptr, ":%s MODE %s +nt",
+					     me.name, chptr->chname);
 
 			if(*chptr->chname == '#')
 			{
-				channel_modes (chptr, source_p, mbuf, pbuf);
+				channel_modes(chptr, source_p, mbuf, pbuf);
 
-				strlcat (mbuf, " ", sizeof (mbuf));
+				strlcat(mbuf, " ", sizeof(mbuf));
 
 				if(pbuf[0] != '\0')
-					strlcat (mbuf, pbuf, sizeof (mbuf));
+					strlcat(mbuf, pbuf, sizeof(mbuf));
 
 				/* note: mbuf here will have a trailing space.  we add one above,
 				 * and channel_modes() will leave a trailing space on pbuf if
 				 * its used --fl
 				 */
-				sendto_server (client_p, chptr, NOCAPS, NOCAPS,
-					       ":%s SJOIN %lu %s %s:@%s",
-					       me.name, (unsigned long) chptr->channelts,
-					       chptr->chname, mbuf, parv[0]);
+				sendto_server(client_p, chptr, NOCAPS, NOCAPS,
+					      ":%s SJOIN %lu %s %s:@%s",
+					      me.name, (unsigned long) chptr->channelts,
+					      chptr->chname, mbuf, parv[0]);
 			}
 
 			/* drop our +beI modes */
-			free_channel_list (&chptr->banlist);
-			free_channel_list (&chptr->exceptlist);
-			free_channel_list (&chptr->invexlist);
+			free_channel_list(&chptr->banlist);
+			free_channel_list(&chptr->exceptlist);
+			free_channel_list(&chptr->invexlist);
 		}
 		else
 		{
-			sendto_server (client_p, chptr, NOCAPS, NOCAPS,
-				       ":%s SJOIN %lu %s + :%s",
-				       me.name, (unsigned long) chptr->channelts,
-				       chptr->chname, parv[0]);
+			sendto_server(client_p, chptr, NOCAPS, NOCAPS,
+				      ":%s SJOIN %lu %s + :%s",
+				      me.name, (unsigned long) chptr->channelts,
+				      chptr->chname, parv[0]);
 		}
 
-		del_invite (chptr, source_p);
+		del_invite(chptr, source_p);
 
 		if(chptr->topic != NULL)
 		{
-			sendto_one (source_p, form_str (RPL_TOPIC), me.name,
-				    parv[0], chptr->chname, chptr->topic);
+			sendto_one(source_p, form_str(RPL_TOPIC), me.name,
+				   parv[0], chptr->chname, chptr->topic);
 
-			sendto_one (source_p, form_str (RPL_TOPICWHOTIME),
-				    me.name, parv[0], chptr->chname,
-				    chptr->topic_info, chptr->topic_time);
+			sendto_one(source_p, form_str(RPL_TOPICWHOTIME),
+				   me.name, parv[0], chptr->chname,
+				   chptr->topic_info, chptr->topic_time);
 		}
 
-		channel_member_names (source_p, chptr, chptr->chname, 1);
+		channel_member_names(source_p, chptr, chptr->chname, 1);
 
 		if(successful_join_count)
 			source_p->localClient->last_join_time = CurrentTime;
@@ -324,7 +322,7 @@ m_join (struct Client *client_p, struct Client *source_p, int parc, char *parv[]
  */
 
 static void
-ms_join (struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+ms_join(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
 {
 	char *name;
 	int new_ts;
@@ -336,18 +334,18 @@ ms_join (struct Client *client_p, struct Client *source_p, int parc, char *parv[
 
 	if((name[0] == '0') && (name[1] == '\0'))
 	{
-		do_join_0 (client_p, source_p);
+		do_join_0(client_p, source_p);
 	}
 	else
 	{
 		if(parc > 2)
 		{
-			new_ts = atoi (parv[2]);
+			new_ts = atoi(parv[2]);
 		}
 		else
 		{
-			ts_warn ("User on %s remotely JOINing new channel with no TS",
-				 source_p->user->server);
+			ts_warn("User on %s remotely JOINing new channel with no TS",
+				source_p->user->server);
 		}
 	}
 }
@@ -364,27 +362,27 @@ ms_join (struct Client *client_p, struct Client *source_p, int parc, char *parv[
  */
 
 static void
-do_join_0 (struct Client *client_p, struct Client *source_p)
+do_join_0(struct Client *client_p, struct Client *source_p)
 {
 	struct Channel *chptr = NULL;
 	dlink_node *lp;
 
 	/* Finish the flood grace period... */
-	if(MyClient (source_p) && !IsFloodDone (source_p))
-		flood_endgrace (source_p);
+	if(MyClient(source_p) && !IsFloodDone(source_p))
+		flood_endgrace(source_p);
 
 
-	sendto_server (client_p, NULL, NOCAPS, NOCAPS, ":%s JOIN 0", source_p->name);
+	sendto_server(client_p, NULL, NOCAPS, NOCAPS, ":%s JOIN 0", source_p->name);
 
-	if(source_p->user->channel.head && MyConnect (source_p) && !IsOper (source_p))
-		check_spambot_warning (source_p, NULL);
+	if(source_p->user->channel.head && MyConnect(source_p) && !IsOper(source_p))
+		check_spambot_warning(source_p, NULL);
 
 	while ((lp = source_p->user->channel.head))
 	{
 		chptr = lp->data;
-		sendto_channel_local (ALL_MEMBERS, chptr, ":%s!%s@%s PART %s",
-				      source_p->name,
-				      source_p->username, source_p->host, chptr->chname);
-		remove_user_from_channel (chptr, source_p);
+		sendto_channel_local(ALL_MEMBERS, chptr, ":%s!%s@%s PART %s",
+				     source_p->name,
+				     source_p->username, source_p->host, chptr->chname);
+		remove_user_from_channel(chptr, source_p);
 	}
 }

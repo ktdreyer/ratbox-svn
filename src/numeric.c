@@ -43,13 +43,13 @@
  * side effects	- NONE
  */
 const char *
-form_str (int numeric)
+form_str(int numeric)
 {
 	const char *num_ptr;
 
-	assert (-1 < numeric);
-	assert (numeric < ERR_LAST_ERR_MSG);
-	assert (0 != replies[numeric]);
+	assert(-1 < numeric);
+	assert(numeric < ERR_LAST_ERR_MSG);
+	assert(0 != replies[numeric]);
 
 	if(numeric > ERR_LAST_ERR_MSG)
 		numeric = ERR_LAST_ERR_MSG;

@@ -45,8 +45,8 @@
 #include "modules.h"
 #include "s_serv.h"
 
-static void mo_ungline (struct Client *, struct Client *, int, char **);
-static int remove_temp_gline (char *, char *);
+static void mo_ungline(struct Client *, struct Client *, int, char **);
+static int remove_temp_gline(char *, char *);
 
 struct Message gline_msgtab = {
 	"UNGLINE", 0, 0, 2, 0, MFLG_SLOW, 0,
@@ -55,15 +55,15 @@ struct Message gline_msgtab = {
 
 #ifndef STATIC_MODULES
 void
-_modinit (void)
+_modinit(void)
 {
-	mod_add_cmd (&gline_msgtab);
+	mod_add_cmd(&gline_msgtab);
 }
 
 void
-_moddeinit (void)
+_moddeinit(void)
 {
-	mod_del_cmd (&gline_msgtab);
+	mod_del_cmd(&gline_msgtab);
 }
 const char *_version = "$Revision$";
 #endif
@@ -75,24 +75,24 @@ const char *_version = "$Revision$";
  */
 
 static void
-mo_ungline (struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+mo_ungline(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
 {
 	char *user, *host;
 	char splat[] = "*";
 
 	if(!ConfigFileEntry.glines)
 	{
-		sendto_one (source_p, ":%s NOTICE %s :UNGLINE disabled", me.name, parv[0]);
+		sendto_one(source_p, ":%s NOTICE %s :UNGLINE disabled", me.name, parv[0]);
 		return;
 	}
 
-	if(!IsOperUnkline (source_p) || !IsOperGline (source_p))
+	if(!IsOperUnkline(source_p) || !IsOperGline(source_p))
 	{
-		sendto_one (source_p, ":%s NOTICE %s :You need unkline = yes;", me.name, parv[0]);
+		sendto_one(source_p, ":%s NOTICE %s :You need unkline = yes;", me.name, parv[0]);
 		return;
 	}
 
-	if((host = strchr (parv[1], '@')) || *parv[1] == '*')
+	if((host = strchr(parv[1], '@')) || *parv[1] == '*')
 	{
 		/* Explicit user@host mask given */
 
@@ -109,24 +109,24 @@ mo_ungline (struct Client *client_p, struct Client *source_p, int parc, char *pa
 	}
 	else
 	{
-		sendto_one (source_p, ":%s NOTICE %s :Invalid parameters", me.name, parv[0]);
+		sendto_one(source_p, ":%s NOTICE %s :Invalid parameters", me.name, parv[0]);
 		return;
 	}
 
-	if(remove_temp_gline (user, host))
+	if(remove_temp_gline(user, host))
 	{
-		sendto_one (source_p, ":%s NOTICE %s :Un-glined [%s@%s]",
-			    me.name, parv[0], user, host);
-		sendto_realops_flags (UMODE_ALL, L_ALL,
-				      "%s has removed the G-Line for: [%s@%s]",
-				      get_oper_name (source_p), user, host);
-		ilog (L_NOTICE, "%s removed G-Line for [%s@%s]",
-		      get_oper_name (source_p), user, host);
+		sendto_one(source_p, ":%s NOTICE %s :Un-glined [%s@%s]",
+			   me.name, parv[0], user, host);
+		sendto_realops_flags(UMODE_ALL, L_ALL,
+				     "%s has removed the G-Line for: [%s@%s]",
+				     get_oper_name(source_p), user, host);
+		ilog(L_NOTICE, "%s removed G-Line for [%s@%s]",
+		     get_oper_name(source_p), user, host);
 	}
 	else
 	{
-		sendto_one (source_p, ":%s NOTICE %s :No G-Line for %s@%s",
-			    me.name, parv[0], user, host);
+		sendto_one(source_p, ":%s NOTICE %s :No G-Line for %s@%s",
+			   me.name, parv[0], user, host);
 	}
 }
 
@@ -138,29 +138,29 @@ mo_ungline (struct Client *client_p, struct Client *source_p, int parc, char *pa
  * side effects - tries to ungline anything that matches
  */
 static int
-remove_temp_gline (char *user, char *host)
+remove_temp_gline(char *user, char *host)
 {
 	struct ConfItem *aconf;
 	dlink_node *ptr;
 	struct irc_inaddr addr, caddr;
 	int bits, cbits;
 
-	parse_netmask (host, &addr, &bits);
+	parse_netmask(host, &addr, &bits);
 
-	DLINK_FOREACH (ptr, glines.head)
+	DLINK_FOREACH(ptr, glines.head)
 	{
 		aconf = (struct ConfItem *) ptr->data;
 
-		parse_netmask (aconf->host, &caddr, &cbits);
+		parse_netmask(aconf->host, &caddr, &cbits);
 
-		if(user && irccmp (user, aconf->user))
+		if(user && irccmp(user, aconf->user))
 			continue;
 
-		if(!irccmp(aconf->host, host) && bits == cbits && 
-		   comp_with_mask (&IN_ADDR (addr), &IN_ADDR (caddr), bits))
+		if(!irccmp(aconf->host, host) && bits == cbits &&
+		   comp_with_mask(&IN_ADDR(addr), &IN_ADDR(caddr), bits))
 		{
-			dlinkDestroy (ptr, &glines);
-			delete_one_address_conf (aconf);
+			dlinkDestroy(ptr, &glines);
+			delete_one_address_conf(aconf);
 			return YES;
 		}
 	}

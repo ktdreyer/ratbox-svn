@@ -46,14 +46,14 @@
 #include "modules.h"
 #include "hook.h"
 
-static int do_whois (struct Client *client_p, struct Client *source_p, int parc, char *parv[]);
-static int single_whois (struct Client *source_p, struct Client *target_p, int wilds, int glob);
-static void whois_person (struct Client *source_p, struct Client *target_p, int glob);
-static int global_whois (struct Client *source_p, char *nick, int wilds, int glob);
+static int do_whois(struct Client *client_p, struct Client *source_p, int parc, char *parv[]);
+static int single_whois(struct Client *source_p, struct Client *target_p, int wilds, int glob);
+static void whois_person(struct Client *source_p, struct Client *target_p, int glob);
+static int global_whois(struct Client *source_p, char *nick, int wilds, int glob);
 
-static void m_whois (struct Client *, struct Client *, int, char **);
-static void ms_whois (struct Client *, struct Client *, int, char **);
-static void mo_whois (struct Client *, struct Client *, int, char **);
+static void m_whois(struct Client *, struct Client *, int, char **);
+static void ms_whois(struct Client *, struct Client *, int, char **);
+static void mo_whois(struct Client *, struct Client *, int, char **);
 
 struct Message whois_msgtab = {
 	"WHOIS", 0, 0, 0, 0, MFLG_SLOW, 0L,
@@ -62,19 +62,19 @@ struct Message whois_msgtab = {
 
 #ifndef STATIC_MODULES
 void
-_modinit (void)
+_modinit(void)
 {
-	hook_add_event ("doing_whois_local");
-	hook_add_event ("doing_whois_global");
-	mod_add_cmd (&whois_msgtab);
+	hook_add_event("doing_whois_local");
+	hook_add_event("doing_whois_global");
+	mod_add_cmd(&whois_msgtab);
 }
 
 void
-_moddeinit (void)
+_moddeinit(void)
 {
-	hook_del_event ("doing_whois_local");
-	hook_del_event ("doing_whois_global");
-	mod_del_cmd (&whois_msgtab);
+	hook_del_event("doing_whois_local");
+	hook_del_event("doing_whois_global");
+	mod_del_cmd(&whois_msgtab);
 }
 
 const char *_version = "$Revision$";
@@ -85,13 +85,13 @@ const char *_version = "$Revision$";
 **      parv[1] = nickname masklist
 */
 static void
-m_whois (struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+m_whois(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
 {
 	static time_t last_used = 0;
 
-	if(parc < 2 || BadPtr (parv[1]))
+	if(parc < 2 || BadPtr(parv[1]))
 	{
-		sendto_one (source_p, form_str (ERR_NONICKNAMEGIVEN), me.name, parv[0]);
+		sendto_one(source_p, form_str(ERR_NONICKNAMEGIVEN), me.name, parv[0]);
 		return;
 	}
 
@@ -100,9 +100,9 @@ m_whois (struct Client *client_p, struct Client *source_p, int parc, char *parv[
 		/* seeing as this is going across servers, we should limit it */
 		if((last_used + ConfigFileEntry.pace_wait_simple) > CurrentTime)
 		{
-			if(MyClient (source_p))
-				sendto_one (source_p, form_str (RPL_LOAD2HI), me.name,
-					    source_p->name);
+			if(MyClient(source_p))
+				sendto_one(source_p, form_str(RPL_LOAD2HI), me.name,
+					   source_p->name);
 			return;
 		}
 		else
@@ -115,7 +115,7 @@ m_whois (struct Client *client_p, struct Client *source_p, int parc, char *parv[
 		if(ConfigServerHide.disable_remote)
 			parv[1] = parv[2];
 
-		if(hunt_server (client_p, source_p, ":%s WHOIS %s :%s", 1, parc, parv) !=
+		if(hunt_server(client_p, source_p, ":%s WHOIS %s :%s", 1, parc, parv) !=
 		   HUNTED_ISME)
 		{
 			return;
@@ -123,7 +123,7 @@ m_whois (struct Client *client_p, struct Client *source_p, int parc, char *parv[
 		parv[1] = parv[2];
 
 	}
-	do_whois (client_p, source_p, parc, parv);
+	do_whois(client_p, source_p, parc, parv);
 }
 
 /*
@@ -132,17 +132,17 @@ m_whois (struct Client *client_p, struct Client *source_p, int parc, char *parv[
 **      parv[1] = nickname masklist
 */
 static void
-mo_whois (struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+mo_whois(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
 {
-	if(parc < 2 || BadPtr (parv[1]))
+	if(parc < 2 || BadPtr(parv[1]))
 	{
-		sendto_one (source_p, form_str (ERR_NONICKNAMEGIVEN), me.name, parv[0]);
+		sendto_one(source_p, form_str(ERR_NONICKNAMEGIVEN), me.name, parv[0]);
 		return;
 	}
 
 	if(parc > 2)
 	{
-		if(hunt_server (client_p, source_p, ":%s WHOIS %s :%s", 1, parc, parv) !=
+		if(hunt_server(client_p, source_p, ":%s WHOIS %s :%s", 1, parc, parv) !=
 		   HUNTED_ISME)
 		{
 			return;
@@ -150,7 +150,7 @@ mo_whois (struct Client *client_p, struct Client *source_p, int parc, char *parv
 		parv[1] = parv[2];
 	}
 
-	do_whois (client_p, source_p, parc, parv);
+	do_whois(client_p, source_p, parc, parv);
 }
 
 
@@ -161,7 +161,7 @@ mo_whois (struct Client *client_p, struct Client *source_p, int parc, char *parv
  * side effects -
  */
 static int
-do_whois (struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+do_whois(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
 {
 	struct Client *target_p;
 	char *nick;
@@ -178,26 +178,26 @@ do_whois (struct Client *client_p, struct Client *source_p, int parc, char *parv
 		glob = 1;
 
 	nick = parv[1];
-	if((p = strchr (parv[1], ',')))
+	if((p = strchr(parv[1], ',')))
 		*p = '\0';
 
-	(void) collapse (nick);
-	wilds = (strchr (nick, '?') || strchr (nick, '*'));
+	(void) collapse(nick);
+	wilds = (strchr(nick, '?') || strchr(nick, '*'));
 
 	if(!wilds)
 	{
-		if((target_p = find_client (nick)) != NULL)
+		if((target_p = find_client(nick)) != NULL)
 		{
 			/* im being asked to reply to a client that isnt mine..
 			 * I cant answer authoritively, so better make it non-detailed
 			 */
-			if(!MyClient (target_p))
+			if(!MyClient(target_p))
 				glob = 0;
 
 
-			if(IsPerson (target_p))
+			if(IsPerson(target_p))
 			{
-				(void) single_whois (source_p, target_p, wilds, glob);
+				(void) single_whois(source_p, target_p, wilds, glob);
 				found = YES;
 			}
 		}
@@ -206,13 +206,13 @@ do_whois (struct Client *client_p, struct Client *source_p, int parc, char *parv
 	{
 
 		/* Oh-oh wilds is true so have to do it the hard expensive way */
-		found = global_whois (source_p, nick, wilds, glob);
+		found = global_whois(source_p, nick, wilds, glob);
 	}
 
 	if(!found)
-		sendto_one (source_p, form_str (ERR_NOSUCHNICK), me.name, parv[0], nick);
+		sendto_one(source_p, form_str(ERR_NOSUCHNICK), me.name, parv[0], nick);
 
-	sendto_one (source_p, form_str (RPL_ENDOFWHOIS), me.name, parv[0], parv[1]);
+	sendto_one(source_p, form_str(RPL_ENDOFWHOIS), me.name, parv[0], parv[1]);
 
 	return 0;
 }
@@ -228,20 +228,20 @@ do_whois (struct Client *client_p, struct Client *source_p, int parc, char *parv
  * 		  writing results to source_p
  */
 static int
-global_whois (struct Client *source_p, char *nick, int wilds, int glob)
+global_whois(struct Client *source_p, char *nick, int wilds, int glob)
 {
 	struct Client *target_p;
 	dlink_node *ptr;
 	int found = NO;
 
-	DLINK_FOREACH (ptr, global_client_list.head)
+	DLINK_FOREACH(ptr, global_client_list.head)
 	{
 		target_p = (struct Client *) ptr->data;
-		if(!match (nick, target_p->name))
+		if(!match(nick, target_p->name))
 		{
 			continue;
 		}
-		if(IsServer (target_p))
+		if(IsServer(target_p))
 			continue;
 		/*
 		 * 'Rules' established for sending a WHOIS reply:
@@ -256,10 +256,10 @@ global_whois (struct Client *source_p, char *nick, int wilds, int glob)
 		 *   the target user(s) are on;
 		 */
 
-		if(!IsRegistered (target_p))
+		if(!IsRegistered(target_p))
 			continue;
 
-		if(single_whois (source_p, target_p, wilds, glob))
+		if(single_whois(source_p, target_p, wilds, glob))
 			found = 1;
 	}
 
@@ -277,7 +277,7 @@ global_whois (struct Client *source_p, char *nick, int wilds, int glob)
  * 		  writing results to source_p
  */
 static int
-single_whois (struct Client *source_p, struct Client *target_p, int wilds, int glob)
+single_whois(struct Client *source_p, struct Client *target_p, int wilds, int glob)
 {
 	dlink_node *ptr;
 	struct Channel *chptr;
@@ -294,30 +294,30 @@ single_whois (struct Client *source_p, struct Client *target_p, int wilds, int g
 
 	if(target_p->user == NULL)
 	{
-		sendto_one (source_p, form_str (RPL_WHOISUSER), me.name,
-			    source_p->name, name,
-			    target_p->username, target_p->host, target_p->info);
-		sendto_one (source_p, form_str (RPL_WHOISSERVER),
-			    me.name, source_p->name, name, "<Unknown>", "*Not On This Net*");
+		sendto_one(source_p, form_str(RPL_WHOISUSER), me.name,
+			   source_p->name, name,
+			   target_p->username, target_p->host, target_p->info);
+		sendto_one(source_p, form_str(RPL_WHOISSERVER),
+			   me.name, source_p->name, name, "<Unknown>", "*Not On This Net*");
 		return 0;
 	}
 
-	invis = IsInvisible (target_p);
+	invis = IsInvisible(target_p);
 	member = (target_p->user->channel.head) ? 1 : 0;
 	showperson = (wilds && !invis && !member) || !wilds;
 
-	DLINK_FOREACH (ptr, target_p->user->channel.head)
+	DLINK_FOREACH(ptr, target_p->user->channel.head)
 	{
 		chptr = ptr->data;
-		member = IsMember (source_p, chptr);
+		member = IsMember(source_p, chptr);
 		if(invis && !member)
 			continue;
-		if(member || (!invis && PubChannel (chptr)))
+		if(member || (!invis && PubChannel(chptr)))
 		{
 			showperson = 1;
 			break;
 		}
-		if(!invis && HiddenChannel (chptr) && !SecretChannel (chptr))
+		if(!invis && HiddenChannel(chptr) && !SecretChannel(chptr))
 		{
 			showperson = 1;
 			break;
@@ -325,7 +325,7 @@ single_whois (struct Client *source_p, struct Client *target_p, int wilds, int g
 	}
 
 	if(showperson)
-		whois_person (source_p, target_p, glob);
+		whois_person(source_p, target_p, glob);
 
 	return showperson;
 }
@@ -339,7 +339,7 @@ single_whois (struct Client *source_p, struct Client *target_p, int wilds, int g
  * Side Effects	- 
  */
 static void
-whois_person (struct Client *source_p, struct Client *target_p, int glob)
+whois_person(struct Client *source_p, struct Client *target_p, int glob)
 {
 	char buf[BUFSIZE];
 	char *chname;
@@ -354,37 +354,37 @@ whois_person (struct Client *source_p, struct Client *target_p, int glob)
 	int reply_to_send = NO;
 	struct hook_mfunc_data hd;
 
-	a2client_p = find_server (target_p->user->server);
+	a2client_p = find_server(target_p->user->server);
 
-	sendto_one (source_p, form_str (RPL_WHOISUSER), me.name,
-		    source_p->name, target_p->name,
-		    target_p->username, target_p->host, target_p->info);
+	sendto_one(source_p, form_str(RPL_WHOISUSER), me.name,
+		   source_p->name, target_p->name,
+		   target_p->username, target_p->host, target_p->info);
 	server_name = (char *) target_p->user->server;
 
-	ircsprintf (buf, form_str (RPL_WHOISCHANNELS), me.name, source_p->name, target_p->name, "");
+	ircsprintf(buf, form_str(RPL_WHOISCHANNELS), me.name, source_p->name, target_p->name, "");
 
-	mlen = strlen (buf);
+	mlen = strlen(buf);
 	cur_len = mlen;
 	t = buf + mlen;
 
-	DLINK_FOREACH (lp, target_p->user->channel.head)
+	DLINK_FOREACH(lp, target_p->user->channel.head)
 	{
 		chptr = lp->data;
 		chname = chptr->chname;
 
-		if(ShowChannel (source_p, chptr))
+		if(ShowChannel(source_p, chptr))
 		{
 
-			if((cur_len + strlen (chname) + 2) > (BUFSIZE - 4))
+			if((cur_len + strlen(chname) + 2) > (BUFSIZE - 4))
 			{
-				sendto_one (source_p, "%s", buf);
+				sendto_one(source_p, "%s", buf);
 				cur_len = mlen;
 				t = buf + mlen;
 			}
 
-			ircsprintf (t, "%s%s ", channel_chanop_or_voice (chptr, target_p), chname);
+			ircsprintf(t, "%s%s ", channel_chanop_or_voice(chptr, target_p), chname);
 
-			tlen = strlen (t);
+			tlen = strlen(t);
 			t += tlen;
 			cur_len += tlen;
 			reply_to_send = YES;
@@ -393,39 +393,39 @@ whois_person (struct Client *source_p, struct Client *target_p, int glob)
 	}
 
 	if(reply_to_send)
-		sendto_one (source_p, "%s", buf);
+		sendto_one(source_p, "%s", buf);
 
-	if((IsOper (source_p) || !ConfigServerHide.hide_servers) || target_p == source_p)
-		sendto_one (source_p, form_str (RPL_WHOISSERVER),
-			    me.name, source_p->name, target_p->name, server_name,
-			    a2client_p ? a2client_p->info : "*Not On This Net*");
+	if((IsOper(source_p) || !ConfigServerHide.hide_servers) || target_p == source_p)
+		sendto_one(source_p, form_str(RPL_WHOISSERVER),
+			   me.name, source_p->name, target_p->name, server_name,
+			   a2client_p ? a2client_p->info : "*Not On This Net*");
 	else
-		sendto_one (source_p, form_str (RPL_WHOISSERVER),
-			    me.name, source_p->name, target_p->name,
-			    ServerInfo.network_name, ServerInfo.network_desc);
+		sendto_one(source_p, form_str(RPL_WHOISSERVER),
+			   me.name, source_p->name, target_p->name,
+			   ServerInfo.network_name, ServerInfo.network_desc);
 
 	if(target_p->user->away)
-		sendto_one (source_p, form_str (RPL_AWAY), me.name,
-			    source_p->name, target_p->name, target_p->user->away);
+		sendto_one(source_p, form_str(RPL_AWAY), me.name,
+			   source_p->name, target_p->name, target_p->user->away);
 
-	if(IsOper (target_p))
+	if(IsOper(target_p))
 	{
-		sendto_one (source_p, form_str (RPL_WHOISOPERATOR),
-			    me.name, source_p->name, target_p->name);
+		sendto_one(source_p, form_str(RPL_WHOISOPERATOR),
+			   me.name, source_p->name, target_p->name);
 	}
 
-	if(MyClient (target_p) && ((glob == 1) || IsOper (source_p) ||
-				   !ConfigServerHide.hide_servers || (target_p == source_p)))
+	if(MyClient(target_p) && ((glob == 1) || IsOper(source_p) ||
+				  !ConfigServerHide.hide_servers || (target_p == source_p)))
 	{
-		if(ConfigFileEntry.use_whois_actually && show_ip (source_p, target_p))
-			sendto_one (source_p, form_str (RPL_WHOISACTUALLY),
-				    me.name, source_p->name, target_p->name,
-				    target_p->username, target_p->host,
-				    target_p->localClient->sockhost);
+		if(ConfigFileEntry.use_whois_actually && show_ip(source_p, target_p))
+			sendto_one(source_p, form_str(RPL_WHOISACTUALLY),
+				   me.name, source_p->name, target_p->name,
+				   target_p->username, target_p->host,
+				   target_p->localClient->sockhost);
 
-		sendto_one (source_p, form_str (RPL_WHOISIDLE),
-			    me.name, source_p->name, target_p->name,
-			    CurrentTime - target_p->user->last, target_p->firsttime);
+		sendto_one(source_p, form_str(RPL_WHOISIDLE),
+			   me.name, source_p->name, target_p->name,
+			   CurrentTime - target_p->user->last, target_p->firsttime);
 	}
 
 	hd.client_p = target_p;
@@ -433,10 +433,10 @@ whois_person (struct Client *source_p, struct Client *target_p, int glob)
 
 /* although we should fill in parc and parv, we don't ..
 	 be careful of this when writing whois hooks */
-	if(MyClient (source_p))
-		hook_call_event ("doing_whois_local", &hd);
+	if(MyClient(source_p))
+		hook_call_event("doing_whois_local", &hd);
 	else
-		hook_call_event ("doing_whois_global", &hd);
+		hook_call_event("doing_whois_global", &hd);
 
 	return;
 }
@@ -451,16 +451,16 @@ whois_person (struct Client *source_p, struct Client *target_p, int glob)
  * stuck heavy comments in it.. it looks ugly.. but at least you
  * know what it does.. --fl_ */
 static void
-ms_whois (struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+ms_whois(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
 {
 	/* its a misconfigured server */
-	if(parc < 2 || BadPtr (parv[1]))
+	if(parc < 2 || BadPtr(parv[1]))
 	{
-		sendto_one (source_p, form_str (ERR_NONICKNAMEGIVEN), me.name, parv[0]);
+		sendto_one(source_p, form_str(ERR_NONICKNAMEGIVEN), me.name, parv[0]);
 		return;
 	}
 
-	if(!IsClient (source_p))
+	if(!IsClient(source_p))
 		return;
 
 	/* its a client doing a remote whois:
@@ -475,19 +475,18 @@ ms_whois (struct Client *client_p, struct Client *source_p, int parc, char *parv
 		struct Client *target_p;
 
 		/* check if parv[1] exists */
-		if((target_p = find_client (parv[1])) == NULL)
+		if((target_p = find_client(parv[1])) == NULL)
 		{
-			sendto_one (source_p, form_str (ERR_NOSUCHSERVER), me.name,
-				    parv[0], parv[1]);
+			sendto_one(source_p, form_str(ERR_NOSUCHSERVER), me.name, parv[0], parv[1]);
 			return;
 		}
 
 		/* if parv[1] isnt my client, or me, someone else is supposed
 		 * to be handling the request.. so send it to them 
 		 */
-		if(!MyClient (target_p) && !IsMe (target_p))
+		if(!MyClient(target_p) && !IsMe(target_p))
 		{
-			sendto_one (target_p->from, ":%s WHOIS %s :%s", parv[0], parv[1], parv[2]);
+			sendto_one(target_p->from, ":%s WHOIS %s :%s", parv[0], parv[1], parv[2]);
 			return;
 		}
 
@@ -496,7 +495,7 @@ ms_whois (struct Client *client_p, struct Client *source_p, int parc, char *parv
 		 * to whois, so make parv[1] = parv[2] so do_whois is ok -- fl_
 		 */
 		parv[1] = parv[2];
-		do_whois (client_p, source_p, parc, parv);
+		do_whois(client_p, source_p, parc, parv);
 		return;
 	}
 

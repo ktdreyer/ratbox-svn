@@ -50,15 +50,15 @@ struct cluster
 #define CLUSTER_UNKLINE 0x0002
 #define CLUSTER_LOCOPS  0x0004
 
-extern struct cluster *make_cluster (void);
-extern void free_cluster (struct cluster *clptr);
-extern void clear_clusters (void);
+extern struct cluster *make_cluster(void);
+extern void free_cluster(struct cluster *clptr);
+extern void clear_clusters(void);
 
-extern int find_cluster (const char *name, int type);
+extern int find_cluster(const char *name, int type);
 
-extern void cluster_kline (struct Client *source_p, int tkline_time,
-			   const char *user, const char *host, const char *reason);
-extern void cluster_unkline (struct Client *source_p, const char *user, const char *host);
-extern void cluster_locops (struct Client *source_p, const char *message);
+extern void cluster_kline(struct Client *source_p, int tkline_time,
+			  const char *user, const char *host, const char *reason);
+extern void cluster_unkline(struct Client *source_p, const char *user, const char *host);
+extern void cluster_locops(struct Client *source_p, const char *message);
 
 #endif

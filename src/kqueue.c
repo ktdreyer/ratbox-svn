@@ -68,7 +68,7 @@
 } while(0)
 #endif
 
-static void kq_update_events (fde_t *, short, PF *);
+static void kq_update_events(fde_t *, short, PF *);
 static int kq;
 static struct timespec zero_timespec;
 
@@ -81,7 +81,7 @@ static int kqoff;		/* offset into the buffer */
 /* Private functions */
 
 void
-kq_update_events (fde_t * F, short filter, PF * handler)
+kq_update_events(fde_t * F, short filter, PF * handler)
 {
 	PF *cur_handler;
 	int kep_flags;
@@ -118,18 +118,17 @@ kq_update_events (fde_t * F, short filter, PF * handler)
 			kep_flags = EV_DELETE;
 		}
 
-		EV_SET (kep, (uintptr_t) F->fd, filter, kep_flags, 0, 0, (void *) F);
+		EV_SET(kep, (uintptr_t) F->fd, filter, kep_flags, 0, 0, (void *) F);
 
 		if(kqoff == kqmax)
 		{
 			int ret;
 
-			ret = kevent (kq, kqlst, kqoff, NULL, 0, &zero_timespec);
+			ret = kevent(kq, kqlst, kqoff, NULL, 0, &zero_timespec);
 			/* jdc -- someone needs to do error checking... */
 			if(ret == -1)
 			{
-				ilog (L_ERROR,
-				      "kq_update_events(): kevent(): %s", strerror (errno));
+				ilog(L_ERROR, "kq_update_events(): kevent(): %s", strerror(errno));
 				return;
 			}
 			kqoff = 0;
@@ -154,16 +153,16 @@ kq_update_events (fde_t * F, short filter, PF * handler)
  * the network loop code.
  */
 void
-init_netio (void)
+init_netio(void)
 {
-	kq = kqueue ();
+	kq = kqueue();
 	if(kq < 0)
 	{
-		ilog (L_CRIT, "init_netio: Couldn't open kqueue fd!\n");
-		exit (115);	/* Whee! */
+		ilog(L_CRIT, "init_netio: Couldn't open kqueue fd!\n");
+		exit(115);	/* Whee! */
 	}
-	kqmax = getdtablesize ();
-	kqlst = MyMalloc (sizeof (struct kevent) * kqmax);
+	kqmax = getdtablesize();
+	kqlst = MyMalloc(sizeof(struct kevent) * kqmax);
 	zero_timespec.tv_sec = 0;
 	zero_timespec.tv_nsec = 0;
 }
@@ -175,25 +174,25 @@ init_netio (void)
  * and deregister interest in a pending IO state for a given FD.
  */
 void
-comm_setselect (int fd, fdlist_t list, unsigned int type, PF * handler,
-		void *client_data, time_t timeout)
+comm_setselect(int fd, fdlist_t list, unsigned int type, PF * handler,
+	       void *client_data, time_t timeout)
 {
 	fde_t *F = &fd_table[fd];
-	assert (fd >= 0);
-	assert (F->flags.open);
+	assert(fd >= 0);
+	assert(F->flags.open);
 
 	/* Update the list, even though we're not using it .. */
 	F->list = list;
 
 	if(type & COMM_SELECT_READ)
 	{
-		kq_update_events (F, EVFILT_READ, handler);
+		kq_update_events(F, EVFILT_READ, handler);
 		F->read_handler = handler;
 		F->read_data = client_data;
 	}
 	if(type & COMM_SELECT_WRITE)
 	{
-		kq_update_events (F, EVFILT_WRITE, handler);
+		kq_update_events(F, EVFILT_WRITE, handler);
 		F->write_handler = handler;
 		F->write_data = client_data;
 	}
@@ -218,7 +217,7 @@ comm_setselect (int fd, fdlist_t list, unsigned int type, PF * handler,
  */
 
 int
-comm_select (unsigned long delay)
+comm_select(unsigned long delay)
 {
 	int num, i;
 	static struct kevent ke[KE_LENGTH];
@@ -235,18 +234,18 @@ comm_select (unsigned long delay)
 		poll_time.tv_nsec = delay * 1000000;
 		for (;;)
 		{
-			num = kevent (kq, kqlst, kqoff, ke, KE_LENGTH, &poll_time);
+			num = kevent(kq, kqlst, kqoff, ke, KE_LENGTH, &poll_time);
 			kqoff = 0;
 			if(num >= 0)
 				break;
-			if(ignoreErrno (errno))
+			if(ignoreErrno(errno))
 				break;
-			set_time ();
+			set_time();
 			return COMM_ERROR;
 			/* NOTREACHED */
 		}
 
-		set_time ();
+		set_time();
 		if(num == 0)
 			continue;
 		callbacks_called += num;
@@ -269,13 +268,13 @@ comm_select (unsigned long delay)
 				if((hdl = F->read_handler) != NULL)
 				{
 					F->read_handler = NULL;
-					hdl (F->fd, F->read_data);
+					hdl(F->fd, F->read_data);
 				}
 			case EVFILT_WRITE:
 				if((hdl = F->write_handler) != NULL)
 				{
 					F->write_handler = NULL;
-					hdl (F->fd, F->write_data);
+					hdl(F->fd, F->write_data);
 				}
 			default:
 				/* Bad! -- adrian */

@@ -41,7 +41,7 @@
 #include "modules.h"
 
 
-static void mo_testline (struct Client *, struct Client *, int, char **);
+static void mo_testline(struct Client *, struct Client *, int, char **);
 
 struct Message testline_msgtab = {
 	"TESTLINE", 0, 0, 0, 0, MFLG_SLOW, 0,
@@ -50,15 +50,15 @@ struct Message testline_msgtab = {
 
 #ifndef STATIC_MODULES
 void
-_modinit (void)
+_modinit(void)
 {
-	mod_add_cmd (&testline_msgtab);
+	mod_add_cmd(&testline_msgtab);
 }
 
 void
-_moddeinit (void)
+_moddeinit(void)
 {
-	mod_del_cmd (&testline_msgtab);
+	mod_del_cmd(&testline_msgtab);
 }
 
 const char *_version = "$Revision$";
@@ -79,7 +79,7 @@ const char *_version = "$Revision$";
  */
 
 static void
-mo_testline (struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+mo_testline(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
 {
 #warning fix mo_testline
 #ifdef XXX_FIXME_XXX
@@ -92,74 +92,74 @@ mo_testline (struct Client *client_p, struct Client *source_p, int parc, char *p
 	if(parc > 1)
 	{
 		given_name = parv[1];
-		if(!(p = (char *) strchr (given_name, '@')))
+		if(!(p = (char *) strchr(given_name, '@')))
 		{
-			if(parse_netmask (given_name, &ip, &host_mask))
+			if(parse_netmask(given_name, &ip, &host_mask))
 			{
-				aconf = find_dline (&ip);
+				aconf = find_dline(&ip);
 				if(aconf)
 				{
-					get_printable_conf (aconf, &name, &host, &pass, &user,
-							    &port, &classname);
+					get_printable_conf(aconf, &name, &host, &pass, &user,
+							   &port, &classname);
 					if(aconf->status & CONF_EXEMPTDLINE)
 					{
-						sendto_one (source_p,
-							    ":%s NOTICE %s :Exempt D-line host [%s] pass [%s]",
-							    me.name, parv[0], host, pass);
+						sendto_one(source_p,
+							   ":%s NOTICE %s :Exempt D-line host [%s] pass [%s]",
+							   me.name, parv[0], host, pass);
 					}
 					else
 					{
-						sendto_one (source_p,
-							    ":%s NOTICE %s :D-line host [%s] pass [%s]",
-							    me.name, parv[0], host, pass);
+						sendto_one(source_p,
+							   ":%s NOTICE %s :D-line host [%s] pass [%s]",
+							   me.name, parv[0], host, pass);
 					}
 				}
 				else
-					sendto_one (source_p, ":%s NOTICE %s :No D-line found",
-						    me.name, parv[0]);
+					sendto_one(source_p, ":%s NOTICE %s :No D-line found",
+						   me.name, parv[0]);
 			}
 			else
 			{
-				sendto_one (source_p, ":%s NOTICE %s :usage: user@host|ip",
-					    me.name, parv[0]);
+				sendto_one(source_p, ":%s NOTICE %s :usage: user@host|ip",
+					   me.name, parv[0]);
 			}
 			return;
 		}
 		*p = '\0';
 		p++;
 		given_host = p;
-		if(parse_netmask (given_host, &ip, &host_mask))
-			aconf = find_address_conf (given_host, given_name, &ip);
+		if(parse_netmask(given_host, &ip, &host_mask))
+			aconf = find_address_conf(given_host, given_name, &ip);
 		else
-			aconf = find_address_conf (given_host, given_name, NULL);
+			aconf = find_address_conf(given_host, given_name, NULL);
 
 		if(aconf)
 		{
-			get_printable_conf (aconf, &name, &host, &pass, &user, &port, &classname);
+			get_printable_conf(aconf, &name, &host, &pass, &user, &port, &classname);
 
 			if(aconf->status & CONF_KILL)
 			{
-				sendto_one (source_p,
-					    ":%s NOTICE %s :%c-line name [%s] host [%s] pass [%s]",
-					    me.name, parv[0],
-					    (aconf->flags & CONF_FLAGS_TEMPORARY) ? 'k' : 'K',
-					    user, host, pass);
+				sendto_one(source_p,
+					   ":%s NOTICE %s :%c-line name [%s] host [%s] pass [%s]",
+					   me.name, parv[0],
+					   (aconf->flags & CONF_FLAGS_TEMPORARY) ? 'k' : 'K',
+					   user, host, pass);
 			}
 			else if(aconf->status & CONF_CLIENT)
 			{
-				sendto_one (source_p,
-					    ":%s NOTICE %s :I-line mask [%s] prefix [%s] name [%s] host [%s] port [%d] class [%s]",
-					    me.name, parv[0],
-					    name,
-					    show_iline_prefix (source_p, aconf, user),
-					    user, host, port, classname);
+				sendto_one(source_p,
+					   ":%s NOTICE %s :I-line mask [%s] prefix [%s] name [%s] host [%s] port [%d] class [%s]",
+					   me.name, parv[0],
+					   name,
+					   show_iline_prefix(source_p, aconf, user),
+					   user, host, port, classname);
 
 			}
 		}
 		else
-			sendto_one (source_p, ":%s NOTICE %s :No aconf found", me.name, parv[0]);
+			sendto_one(source_p, ":%s NOTICE %s :No aconf found", me.name, parv[0]);
 	}
 	else
-		sendto_one (source_p, ":%s NOTICE %s :usage: user@host|ip", me.name, parv[0]);
+		sendto_one(source_p, ":%s NOTICE %s :usage: user@host|ip", me.name, parv[0]);
 #endif
 }

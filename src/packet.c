@@ -40,14 +40,14 @@
 #include "send.h"
 
 static char readBuf[READBUF_SIZE];
-static void client_dopacket (struct Client *client_p, char *buffer, size_t length);
+static void client_dopacket(struct Client *client_p, char *buffer, size_t length);
 
 
 /*
  * parse_client_queued - parse client queued messages
  */
 static void
-parse_client_queued (struct Client *client_p)
+parse_client_queued(struct Client *client_p)
 {
 	int dolen = 0;
 	int checkflood = 1;
@@ -55,8 +55,8 @@ parse_client_queued (struct Client *client_p)
 
 	if(!MyConnect(client_p))
 		return;
-	
-	if(IsUnknown (client_p))
+
+	if(IsUnknown(client_p))
 	{
 		int i = 0;
 
@@ -68,55 +68,55 @@ parse_client_queued (struct Client *client_p)
 
 			if(!MyConnect(client_p))
 				return;
-			
-			dolen = linebuf_get (&client_p->localClient->
-					     buf_recvq, readBuf, READBUF_SIZE,
-					     LINEBUF_COMPLETE, LINEBUF_PARSED);
+
+			dolen = linebuf_get(&client_p->localClient->
+					    buf_recvq, readBuf, READBUF_SIZE,
+					    LINEBUF_COMPLETE, LINEBUF_PARSED);
 
 			if(dolen <= 0)
 				break;
 
-			if(!IsDead (client_p))
+			if(!IsDead(client_p))
 			{
-				client_dopacket (client_p, readBuf, dolen);
+				client_dopacket(client_p, readBuf, dolen);
 				i++;
 
 				/* if theyve dropped out of the unknown state, break and move
 				 * to the parsing for their appropriate status.  --fl
 				 */
-				if(!IsUnknown (client_p))
+				if(!IsUnknown(client_p))
 					break;
 
 			}
-			else if(MyConnect (client_p))
+			else if(MyConnect(client_p))
 			{
-				linebuf_donebuf (&client_p->localClient->buf_recvq);
-				linebuf_donebuf (&client_p->localClient->buf_sendq);
+				linebuf_donebuf(&client_p->localClient->buf_recvq);
+				linebuf_donebuf(&client_p->localClient->buf_sendq);
 				return;
 			}
 		}
 	}
 
-	if(IsAnyServer (client_p) || IsExemptFlood (client_p))
+	if(IsAnyServer(client_p) || IsExemptFlood(client_p))
 	{
 		while ((dolen =
-			linebuf_get (&client_p->localClient->buf_recvq,
-				     readBuf, READBUF_SIZE, LINEBUF_COMPLETE, LINEBUF_PARSED)) > 0)
+			linebuf_get(&client_p->localClient->buf_recvq,
+				    readBuf, READBUF_SIZE, LINEBUF_COMPLETE, LINEBUF_PARSED)) > 0)
 		{
-			if(!IsDead (client_p))
-				client_dopacket (client_p, readBuf, dolen);
-			else if(MyConnect (client_p))
+			if(!IsDead(client_p))
+				client_dopacket(client_p, readBuf, dolen);
+			else if(MyConnect(client_p))
 			{
-				linebuf_donebuf (&client_p->localClient->buf_recvq);
-				linebuf_donebuf (&client_p->localClient->buf_sendq);
+				linebuf_donebuf(&client_p->localClient->buf_recvq);
+				linebuf_donebuf(&client_p->localClient->buf_sendq);
 				return;
 			}
 		}
 	}
-	else if(IsClient (client_p))
+	else if(IsClient(client_p))
 	{
 
-		if(IsOper (client_p) && ConfigFileEntry.no_oper_flood)
+		if(IsOper(client_p) && ConfigFileEntry.no_oper_flood)
 			checkflood = 0;
 		/*
 		 * Handle flood protection here - if we exceed our flood limit on
@@ -152,17 +152,17 @@ parse_client_queued (struct Client *client_p)
 
 			if(!MyConnect(client_p))
 				return;
-				
-				dolen = linebuf_get (&client_p->localClient->
-					     buf_recvq, readBuf, READBUF_SIZE,
-					     LINEBUF_COMPLETE, LINEBUF_PARSED);
+
+			dolen = linebuf_get(&client_p->localClient->
+					    buf_recvq, readBuf, READBUF_SIZE,
+					    LINEBUF_COMPLETE, LINEBUF_PARSED);
 
 			if(!dolen)
 				break;
 
 			if(!MyConnect(client_p))
-				return;			
-			client_dopacket (client_p, readBuf, dolen);
+				return;
+			client_dopacket(client_p, readBuf, dolen);
 			lclient_p->sent_parsed++;
 		}
 	}
@@ -173,9 +173,9 @@ parse_client_queued (struct Client *client_p)
  * marks the end of the clients grace period
  */
 void
-flood_endgrace (struct Client *client_p)
+flood_endgrace(struct Client *client_p)
 {
-	SetFloodDone (client_p);
+	SetFloodDone(client_p);
 
 	/* Drop their flood limit back down */
 	client_p->localClient->allow_read = MAX_FLOOD;
@@ -193,7 +193,7 @@ flood_endgrace (struct Client *client_p)
  * once a second on any given client. We then attempt to flush some data.
  */
 void
-flood_recalc (int fd, void *data)
+flood_recalc(int fd, void *data)
 {
 	struct Client *client_p = data;
 	struct LocalUser *lclient_p = client_p->localClient;
@@ -205,7 +205,7 @@ flood_recalc (int fd, void *data)
 	/* allow a bursting client their allocation per second, allow
 	 * a client whos flooding an extra 2 per second
 	 */
-	if(IsFloodDone (client_p))
+	if(IsFloodDone(client_p))
 		lclient_p->sent_parsed -= 2;
 	else
 		lclient_p->sent_parsed = 0;
@@ -216,13 +216,13 @@ flood_recalc (int fd, void *data)
 	if(--lclient_p->actually_read < 0)
 		lclient_p->actually_read = 0;
 
-	parse_client_queued (client_p);
+	parse_client_queued(client_p);
 
 	/* And now, try flushing .. */
-	if(!IsDead (client_p))
+	if(!IsDead(client_p))
 	{
 		/* and finally, reset the flood check */
-		comm_setflush (fd, 1000, flood_recalc, client_p);
+		comm_setflush(fd, 1000, flood_recalc, client_p);
 	}
 }
 
@@ -231,7 +231,7 @@ flood_recalc (int fd, void *data)
  *                    link and process it.
  */
 void
-read_ctrl_packet (int fd, void *data)
+read_ctrl_packet(int fd, void *data)
 {
 	struct Client *server = data;
 	struct LocalUser *lserver = server->localClient;
@@ -245,11 +245,11 @@ read_ctrl_packet (int fd, void *data)
 #endif
 
 
-	assert (lserver != NULL);
+	assert(lserver != NULL);
 
 	reply = &lserver->slinkrpl;
 
-	if(IsDead (server))
+	if(IsDead(server))
 	{
 		return;
 	}
@@ -260,13 +260,13 @@ read_ctrl_packet (int fd, void *data)
 		reply->readdata = 0;
 		reply->data = NULL;
 
-		length = recv (fd, tmp, 1, 0);
+		length = recv(fd, tmp, 1, 0);
 
 		if(length <= 0)
 		{
-			if((length == -1) && ignoreErrno (errno))
+			if((length == -1) && ignoreErrno(errno))
 				goto nodata;
-			error_exit_client (server, length);
+			error_exit_client(server, length);
 			return;
 		}
 
@@ -281,17 +281,17 @@ read_ctrl_packet (int fd, void *data)
 
 	/* we should be able to trust a local slink process...
 	 * and if it sends an invalid command, that's a bug.. */
-	assert (replydef->handler);
+	assert(replydef->handler);
 
 	if((replydef->flags & SLINKRPL_FLAG_DATA) && (reply->gotdatalen < 2))
 	{
 		/* we need a datalen u16 which we don't have yet... */
-		length = recv (fd, len, (2 - reply->gotdatalen), 0);
+		length = recv(fd, len, (2 - reply->gotdatalen), 0);
 		if(length <= 0)
 		{
-			if((length == -1) && ignoreErrno (errno))
+			if((length == -1) && ignoreErrno(errno))
 				goto nodata;
-			error_exit_client (server, length);
+			error_exit_client(server, length);
 			return;
 		}
 
@@ -307,7 +307,7 @@ read_ctrl_packet (int fd, void *data)
 			reply->datalen |= *len;
 			reply->gotdatalen++;
 			if(reply->datalen > 0)
-				reply->data = MyMalloc (reply->datalen);
+				reply->data = MyMalloc(reply->datalen);
 		}
 
 		if(reply->gotdatalen < 2)
@@ -316,13 +316,13 @@ read_ctrl_packet (int fd, void *data)
 
 	if(reply->readdata < reply->datalen)	/* try to get any remaining data */
 	{
-		length = recv (fd, (reply->data + reply->readdata),
-			       (reply->datalen - reply->readdata), 0);
+		length = recv(fd, (reply->data + reply->readdata),
+			      (reply->datalen - reply->readdata), 0);
 		if(length <= 0)
 		{
-			if((length == -1) && ignoreErrno (errno))
+			if((length == -1) && ignoreErrno(errno))
 				goto nodata;
-			error_exit_client (server, length);
+			error_exit_client(server, length);
 			return;
 		}
 
@@ -335,7 +335,7 @@ read_ctrl_packet (int fd, void *data)
 	hdata.connection = server;
 	hdata.len = reply->command;
 	hdata.data = NULL;
-	hook_call_event ("iorecvctrl", &hdata);
+	hook_call_event("iorecvctrl", &hdata);
 #endif
 
 	/* we now have the command and any data, pass it off to the handler */
@@ -343,22 +343,22 @@ read_ctrl_packet (int fd, void *data)
 
 	/* reset SlinkRpl */
 	if(reply->datalen > 0)
-		MyFree (reply->data);
+		MyFree(reply->data);
 	reply->command = 0;
 
-	if(IsDead (server))
+	if(IsDead(server))
 		return;
 
       nodata:
 	/* If we get here, we need to register for another COMM_SELECT_READ */
-	comm_setselect (fd, FDLIST_SERVER, COMM_SELECT_READ, read_ctrl_packet, server, 0);
+	comm_setselect(fd, FDLIST_SERVER, COMM_SELECT_READ, read_ctrl_packet, server, 0);
 }
 
 /*
  * read_packet - Read a 'packet' of data from a connection and process it.
  */
 void
-read_packet (int fd, void *data)
+read_packet(int fd, void *data)
 {
 	struct Client *client_p = data;
 	struct LocalUser *lclient_p = client_p->localClient;
@@ -369,16 +369,16 @@ read_packet (int fd, void *data)
 #ifndef NDEBUG
 	struct hook_io_data hdata;
 #endif
-	if(IsDead (client_p))
+	if(IsDead(client_p))
 		return;
-	
-	assert (lclient_p != NULL);
+
+	assert(lclient_p != NULL);
 	fd_r = client_p->localClient->fd;
 
 #ifndef HAVE_SOCKETPAIR
-	if(HasServlink (client_p))
+	if(HasServlink(client_p))
 	{
-		assert (client_p->localClient->fd_r > -1);
+		assert(client_p->localClient->fd_r > -1);
 		fd_r = client_p->localClient->fd_r;
 	}
 #endif
@@ -388,17 +388,17 @@ read_packet (int fd, void *data)
 	 * I personally think it makes the code too hairy to make sane.
 	 *     -- adrian
 	 */
-	length = recv (fd_r, readBuf, READBUF_SIZE, 0);
+	length = recv(fd_r, readBuf, READBUF_SIZE, 0);
 
 	if(length <= 0)
 	{
-		if((length == -1) && ignoreErrno (errno))
+		if((length == -1) && ignoreErrno(errno))
 		{
-			comm_setselect (fd_r, FDLIST_IDLECLIENT,
-					COMM_SELECT_READ, read_packet, client_p, 0);
+			comm_setselect(fd_r, FDLIST_IDLECLIENT,
+				       COMM_SELECT_READ, read_packet, client_p, 0);
 			return;
 		}
-		error_exit_client (client_p, length);
+		error_exit_client(client_p, length);
 		return;
 	}
 
@@ -406,7 +406,7 @@ read_packet (int fd, void *data)
 	hdata.connection = client_p;
 	hdata.data = readBuf;
 	hdata.len = length;
-	hook_call_event ("iorecv", &hdata);
+	hook_call_event("iorecv", &hdata);
 #endif
 
 	if(client_p->lasttime < CurrentTime)
@@ -420,70 +420,70 @@ read_packet (int fd, void *data)
 	 * it on the end of the receive queue and do it when its
 	 * turn comes around.
 	 */
-	if(IsHandshake (client_p) || IsUnknown (client_p))
+	if(IsHandshake(client_p) || IsUnknown(client_p))
 		binary = 1;
 
-	lbuf_len = linebuf_parse (&client_p->localClient->buf_recvq, readBuf, length, binary);
+	lbuf_len = linebuf_parse(&client_p->localClient->buf_recvq, readBuf, length, binary);
 	if(!MyConnect(client_p))
 		return;
 	if(lbuf_len < 0)
 	{
-		if(IsClient (client_p))
-			sendto_one (client_p,
-				    ":%s NOTICE %s :*** - You sent a NULL character in "
-				    "your message. Ignored.", me.name, client_p->name);
+		if(IsClient(client_p))
+			sendto_one(client_p,
+				   ":%s NOTICE %s :*** - You sent a NULL character in "
+				   "your message. Ignored.", me.name, client_p->name);
 		else
-			exit_client (client_p, client_p, client_p,
-				     "NULL character found in message");
+			exit_client(client_p, client_p, client_p,
+				    "NULL character found in message");
 		return;
 	}
 
 	lclient_p->actually_read += lbuf_len;
 
-	
+
 	/* Attempt to parse what we have */
-	parse_client_queued (client_p);
-	
+	parse_client_queued(client_p);
+
 	/* We got closed last time around */
 	if(!MyConnect(client_p))
 		return;
-	
+
 
 	/* Check to make sure we're not flooding */
-	if(IsPerson (client_p) &&
-	   (linebuf_alloclen (&client_p->localClient->buf_recvq) > ConfigFileEntry.client_flood))
+	if(IsPerson(client_p) &&
+	   (linebuf_alloclen(&client_p->localClient->buf_recvq) > ConfigFileEntry.client_flood))
 	{
-		if(!(ConfigFileEntry.no_oper_flood && IsOper (client_p)))
+		if(!(ConfigFileEntry.no_oper_flood && IsOper(client_p)))
 		{
-			exit_client (client_p, client_p, client_p, "Excess Flood");
+			exit_client(client_p, client_p, client_p, "Excess Flood");
 			return;
 		}
 	}
 
 	/* server fd may have changed */
-	
+
 	fd_r = client_p->localClient->fd;
 #ifndef HAVE_SOCKETPAIR
-	if(HasServlink (client_p))
+	if(HasServlink(client_p))
 	{
-		assert (client_p->localClient->fd_r > -1);
+		assert(client_p->localClient->fd_r > -1);
 		fd_r = client_p->localClient->fd_r;
 	}
 #endif
 
 
-	if(!IsDead (client_p) && MyConnect(client_p))
+	if(!IsDead(client_p) && MyConnect(client_p))
 	{
 		/* If we get here, we need to register for another COMM_SELECT_READ */
-		if(PARSE_AS_SERVER (client_p))
+		if(PARSE_AS_SERVER(client_p))
 		{
-			comm_setselect (fd_r, FDLIST_SERVER, COMM_SELECT_READ,
-					read_packet, client_p, 0);
+			comm_setselect(fd_r, FDLIST_SERVER, COMM_SELECT_READ,
+				       read_packet, client_p, 0);
 		}
 		else
 		{
-			comm_setselect (fd_r, FDLIST_IDLECLIENT,
-					COMM_SELECT_READ, read_packet, client_p, 0);
+			comm_setselect(fd_r, FDLIST_IDLECLIENT,
+				       COMM_SELECT_READ, read_packet, client_p, 0);
 		}
 	}
 
@@ -505,10 +505,10 @@ read_packet (int fd, void *data)
  *      necessary fields (buffer etc..)
  */
 void
-client_dopacket (struct Client *client_p, char *buffer, size_t length)
+client_dopacket(struct Client *client_p, char *buffer, size_t length)
 {
-	assert (client_p != NULL);
-	assert (buffer != NULL);
+	assert(client_p != NULL);
+	assert(buffer != NULL);
 
 	if(client_p == NULL || buffer == NULL)
 		return;
@@ -539,5 +539,5 @@ client_dopacket (struct Client *client_p, char *buffer, size_t length)
 		me.localClient->receiveB &= 0x03ff;
 	}
 
-	parse (client_p, buffer, buffer + length);
+	parse(client_p, buffer, buffer + length);
 }

@@ -57,27 +57,27 @@ struct module_path
 };
 
 /* add a path */
-void mod_add_path (const char *path);
-void mod_clear_paths (void);
+void mod_add_path(const char *path);
+void mod_clear_paths(void);
 
 /* load a module */
-extern void load_module (char *path);
+extern void load_module(char *path);
 
 /* load all modules */
-extern void load_all_modules (int warn);
+extern void load_all_modules(int warn);
 
 /* load core modules */
-extern void load_core_modules (int);
+extern void load_core_modules(int);
 
-extern void _modinit (void);
-extern void _moddeinit (void);
+extern void _modinit(void);
+extern void _moddeinit(void);
 
-extern int unload_one_module (char *, int);
-extern int load_one_module (char *, int);
-extern int load_a_module (char *, int, int);
-extern int findmodule_byname (char *);
-extern char *irc_basename (char *);
-extern void modules_init (void);
+extern int unload_one_module(char *, int);
+extern int load_one_module(char *, int);
+extern int load_a_module(char *, int, int);
+extern int findmodule_byname(char *);
+extern char *irc_basename(char *);
+extern void modules_init(void);
 
 #else /* STATIC_MODULES */
 
@@ -154,7 +154,7 @@ extern struct Message whois_msgtab;
 extern struct Message whowas_msgtab;
 extern struct Message get_msgtab;
 extern struct Message put_msgtab;
-extern void load_all_modules (int check);
+extern void load_all_modules(int check);
 
 #endif /* STATIC_MODULES */
 #endif /* INCLUDED_modules_h */

@@ -30,20 +30,20 @@
 #include "s_conf.h"
 
 
-void init_iplines (void);
-struct ConfItem * find_ipdline (struct irc_inaddr *addr );
-struct ConfItem * find_ipiline (struct irc_inaddr *addr );
-struct ConfItem * find_ipkline (struct irc_inaddr *addr );
-struct ConfItem * find_ipgline (struct irc_inaddr *addr );
-struct ConfItem * find_generic_line (int type, struct irc_inaddr *addr );
+void init_iplines(void);
+struct ConfItem *find_ipdline(struct irc_inaddr *addr);
+struct ConfItem *find_ipiline(struct irc_inaddr *addr);
+struct ConfItem *find_ipkline(struct irc_inaddr *addr);
+struct ConfItem *find_ipgline(struct irc_inaddr *addr);
+struct ConfItem *find_generic_line(int type, struct irc_inaddr *addr);
 int add_ipline(struct ConfItem *aconf, int type, struct irc_inaddr *addr, int cidr);
 void delete_ipline(struct ConfItem *aconf, int type);
 void clear_iplines(void);
-void report_dlines (struct Client *source_p );
-void report_elines (struct Client *source_p );
-void report_ipKlines (struct Client *source_p );
-void report_ipGlines (struct Client *source_p );
-void report_ipIlines (struct Client *source_p );
+void report_dlines(struct Client *source_p);
+void report_elines(struct Client *source_p);
+void report_ipKlines(struct Client *source_p);
+void report_ipGlines(struct Client *source_p);
+void report_ipIlines(struct Client *source_p);
 
 
 #endif /* INCLUDE_iplines_h */

@@ -36,18 +36,18 @@
 
 fde_t *fd_table = NULL;
 
-static void fdlist_update_biggest (int fd, int opening);
+static void fdlist_update_biggest(int fd, int opening);
 
 /* Highest FD and number of open FDs .. */
 int highest_fd = -1;		/* Its -1 because we haven't started yet -- adrian */
 int number_fd = 0;
 
 static void
-fdlist_update_biggest (int fd, int opening)
+fdlist_update_biggest(int fd, int opening)
 {
 	if(fd < highest_fd)
 		return;
-	assert (fd < MAXCONNECTIONS);
+	assert(fd < MAXCONNECTIONS);
 
 	if(fd > highest_fd)
 	{
@@ -55,7 +55,7 @@ fdlist_update_biggest (int fd, int opening)
 		 * assert that we are not closing a FD bigger than
 		 * our known biggest FD
 		 */
-		assert (opening);
+		assert(opening);
 		highest_fd = fd;
 		return;
 	}
@@ -64,42 +64,42 @@ fdlist_update_biggest (int fd, int opening)
 	 * assert that we are closing the biggest FD; we can't be
 	 * re-opening it
 	 */
-	assert (!opening);
+	assert(!opening);
 	while (highest_fd >= 0 && !fd_table[highest_fd].flags.open)
 		highest_fd--;
 }
 
 
 void
-fdlist_init (void)
+fdlist_init(void)
 {
 	static int initialized = 0;
 
 	if(!initialized)
 	{
 		/* Since we're doing this once .. */
-		fd_table = MyMalloc ((MAXCONNECTIONS + 1) * sizeof (fde_t));
+		fd_table = MyMalloc((MAXCONNECTIONS + 1) * sizeof(fde_t));
 		initialized = 1;
 	}
 }
 
 /* Called to open a given filedescriptor */
 void
-fd_open (int fd, unsigned int type, const char *desc)
+fd_open(int fd, unsigned int type, const char *desc)
 {
 	fde_t *F = &fd_table[fd];
-	assert (fd >= 0);
+	assert(fd >= 0);
 
 	if(F->flags.open)
 	{
 #ifdef NOTYET
-		debug (51, 1) ("WARNING: Closing open FD %4d\n", fd);
+		debug(51, 1) ("WARNING: Closing open FD %4d\n", fd);
 #endif
-		fd_close (fd);
+		fd_close(fd);
 	}
-	assert (!F->flags.open);
+	assert(!F->flags.open);
 #ifdef NOTYET
-	debug (51, 3) ("fd_open FD %d %s\n", fd, desc);
+	debug(51, 3) ("fd_open FD %d %s\n", fd, desc);
 #endif
 	F->fd = fd;
 	F->type = type;
@@ -109,41 +109,41 @@ fd_open (int fd, unsigned int type, const char *desc)
 	F->defer.n = 0;
 	F->defer.handler = NULL;
 #endif
-	fdlist_update_biggest (fd, 1);
+	fdlist_update_biggest(fd, 1);
 	F->comm_index = -1;
 	F->list = FDLIST_NONE;
 	if(desc)
-		strncpy (F->desc, desc, FD_DESC_SZ);
+		strncpy(F->desc, desc, FD_DESC_SZ);
 	number_fd++;
 }
 
 
 /* Called to close a given filedescriptor */
 void
-fd_close (int fd)
+fd_close(int fd)
 {
 	fde_t *F = &fd_table[fd];
-	assert (F->flags.open);
+	assert(F->flags.open);
 
 	/* All disk fd's MUST go through file_close() ! */
-	assert (F->type != FD_FILE);
+	assert(F->type != FD_FILE);
 	if(F->type == FD_FILE)
 	{
-		assert (F->read_handler == NULL);
-		assert (F->write_handler == NULL);
+		assert(F->read_handler == NULL);
+		assert(F->write_handler == NULL);
 	}
 #ifdef NOTYET
-	debug (51, 3) ("fd_close FD %d %s\n", fd, F->desc);
+	debug(51, 3) ("fd_close FD %d %s\n", fd, F->desc);
 #endif
-	comm_setselect (fd, FDLIST_NONE, COMM_SELECT_WRITE | COMM_SELECT_READ, NULL, NULL, 0);
+	comm_setselect(fd, FDLIST_NONE, COMM_SELECT_WRITE | COMM_SELECT_READ, NULL, NULL, 0);
 
 	F->flags.open = 0;
-	fdlist_update_biggest (fd, 0);
+	fdlist_update_biggest(fd, 0);
 	number_fd--;
-	memset (F, '\0', sizeof (fde_t));
+	memset(F, '\0', sizeof(fde_t));
 	F->timeout = 0;
 	/* Unlike squid, we're actually closing the FD here! -- adrian */
-	close (fd);
+	close(fd);
 }
 
 
@@ -151,7 +151,7 @@ fd_close (int fd)
  * fd_dump() - dump the list of active filedescriptors
  */
 void
-fd_dump (struct Client *source_p)
+fd_dump(struct Client *source_p)
 {
 	int i;
 
@@ -160,8 +160,8 @@ fd_dump (struct Client *source_p)
 		if(!fd_table[i].flags.open)
 			continue;
 
-		sendto_one (source_p, ":%s %d %s :fd %-3d desc '%s'",
-			    me.name, RPL_STATSDEBUG, source_p->name, i, fd_table[i].desc);
+		sendto_one(source_p, ":%s %d %s :fd %-3d desc '%s'",
+			   me.name, RPL_STATSDEBUG, source_p->name, i, fd_table[i].desc);
 	}
 }
 
@@ -172,15 +172,15 @@ fd_dump (struct Client *source_p)
  *       calling.
  */
 void
-fd_note (int fd, const char *format, ...)
+fd_note(int fd, const char *format, ...)
 {
 	va_list args;
 
 	if(format)
 	{
-		va_start (args, format);
-		vsnprintf (fd_table[fd].desc, FD_DESC_SZ, format, args);
-		va_end (args);
+		va_start(args, format);
+		vsnprintf(fd_table[fd].desc, FD_DESC_SZ, format, args);
+		va_end(args);
 	}
 	else
 		fd_table[fd].desc[0] = '\0';

@@ -78,11 +78,11 @@ fdlist_t;
 typedef struct _fde fde_t;
 
 /* Callback for completed IO events */
-typedef void PF (int, void *);
+typedef void PF(int, void *);
 
 /* Callback for completed connections */
 /* int fd, int status, void * */
-typedef void CNCB (int, int, void *);
+typedef void CNCB(int, int, void *);
 
 extern int highest_fd;
 extern int number_fd;
@@ -143,14 +143,14 @@ struct _fde
 
 extern fde_t *fd_table;
 
-void fdlist_init (void);
+void fdlist_init(void);
 
-extern void fd_open (int, unsigned int, const char *);
-extern void fd_close (int);
-extern void fd_dump (struct Client *source_p);
+extern void fd_open(int, unsigned int, const char *);
+extern void fd_close(int);
+extern void fd_dump(struct Client *source_p);
 #ifndef __GNUC__
-extern void fd_note (int fd, const char *format, ...);
+extern void fd_note(int fd, const char *format, ...);
 #else
-extern void fd_note (int fd, const char *format, ...) __attribute__ ((format (printf, 2, 3)));
+extern void fd_note(int fd, const char *format, ...) __attribute__ ((format(printf, 2, 3)));
 #endif
 #endif /* INCLUDED_fdlist_h */

@@ -42,15 +42,15 @@ struct DNSQuery
 	void (*callback) (void *vptr, adns_answer * reply);
 };
 
-void init_resolver (void);
-void restart_resolver (void);
-void timeout_adns (void *);
-void dns_writeable (int fd, void *ptr);
-void dns_readable (int fd, void *ptr);
-void dns_do_callbacks (void);
-void dns_select (void);
-void adns_gethost (const char *name, int aftype, struct DNSQuery *req);
-void adns_getaddr (struct irc_inaddr *addr, int aftype, struct DNSQuery *req, int arpa_type);
-void delete_adns_queries (struct DNSQuery *q);
-void report_adns_servers (struct Client *);
+void init_resolver(void);
+void restart_resolver(void);
+void timeout_adns(void *);
+void dns_writeable(int fd, void *ptr);
+void dns_readable(int fd, void *ptr);
+void dns_do_callbacks(void);
+void dns_select(void);
+void adns_gethost(const char *name, int aftype, struct DNSQuery *req);
+void adns_getaddr(struct irc_inaddr *addr, int aftype, struct DNSQuery *req, int arpa_type);
+void delete_adns_queries(struct DNSQuery *q);
+void report_adns_servers(struct Client *);
 #endif

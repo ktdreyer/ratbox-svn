@@ -41,7 +41,7 @@
 #include "class.h"
 #include "client.h"
 #include "common.h"
-#include "patricia.h" 
+#include "patricia.h"
 
 struct Client;
 struct DNSReply;
@@ -81,7 +81,7 @@ struct ConfItem
 	struct Class *c_class;	/* Class of connection */
 	struct DNSQuery *dns_query;
 	int aftype;
-	patricia_node_t *pnode; /* Our patricia node */
+	patricia_node_t *pnode;	/* Our patricia node */
 #ifdef HAVE_LIBCRYPTO
 	char *rsa_public_key_file;
 	RSA *rsa_public_key;
@@ -320,7 +320,7 @@ struct admin_info
 /* bleh. have to become global. */
 extern int scount;
 
-extern void init_conf (void);
+extern void init_conf(void);
 
 /* All variables are GLOBAL */
 extern struct ConfItem *ConfigItemList;	/* conf list head */
@@ -348,45 +348,45 @@ extern dlink_list tdline_hour;
 extern dlink_list tdline_day;
 extern dlink_list tdline_week;
 
-extern struct ConfItem *make_conf (void);
-extern void free_conf (struct ConfItem *);
+extern struct ConfItem *make_conf(void);
+extern void free_conf(struct ConfItem *);
 
 extern dlink_list xline_list;
-extern struct xline *make_xline (const char *, const char *, int);
-extern void free_xline (struct xline *);
-extern struct xline *find_xline (char *);
+extern struct xline *make_xline(const char *, const char *, int);
+extern void free_xline(struct xline *);
+extern struct xline *find_xline(char *);
 
 extern dlink_list shared_list;
-extern struct shared *make_shared (void);
-extern void free_shared (struct shared *);
-extern int find_shared (const char *username, const char *host, const char *servername, int type);
+extern struct shared *make_shared(void);
+extern void free_shared(struct shared *);
+extern int find_shared(const char *username, const char *host, const char *servername, int type);
 
-extern void read_conf_files (int cold);
+extern void read_conf_files(int cold);
 
-extern int attach_conf (struct Client *, struct ConfItem *);
-extern int attach_connect_block (struct Client *client, const char *name, const char *host);
-extern int check_client (struct Client *client_p, struct Client *source_p, char *);
+extern int attach_conf(struct Client *, struct ConfItem *);
+extern int attach_connect_block(struct Client *client, const char *name, const char *host);
+extern int check_client(struct Client *client_p, struct Client *source_p, char *);
 
-extern int detach_conf (struct Client *);
+extern int detach_conf(struct Client *);
 
-extern struct ConfItem *find_conf_exact (const char *name, const char *user,
-					 const char *host, int statmask);
-extern struct ConfItem *find_conf_by_name (const char *name, int status);
-extern struct ConfItem *find_conf_by_host (const char *host, int status);
-extern struct ConfItem *find_kill (struct Client *);
-extern int conf_connect_allowed (struct irc_inaddr *addr);
-extern char *oper_flags_as_string (int);
-extern char *oper_privs_as_string (struct Client *, int);
+extern struct ConfItem *find_conf_exact(const char *name, const char *user,
+					const char *host, int statmask);
+extern struct ConfItem *find_conf_by_name(const char *name, int status);
+extern struct ConfItem *find_conf_by_host(const char *host, int status);
+extern struct ConfItem *find_kill(struct Client *);
+extern int conf_connect_allowed(struct irc_inaddr *addr);
+extern char *oper_flags_as_string(int);
+extern char *oper_privs_as_string(struct Client *, int);
 
-extern struct ConfItem *find_tkline (const char *, const char *, struct irc_inaddr *);
-extern char *show_iline_prefix (struct Client *, struct ConfItem *, char *);
-extern void get_printable_conf (struct ConfItem *,
-				char **, char **, char **, char **, int *, char **);
-extern void report_configured_links (struct Client *client_p, int mask);
+extern struct ConfItem *find_tkline(const char *, const char *, struct irc_inaddr *);
+extern char *show_iline_prefix(struct Client *, struct ConfItem *, char *);
+extern void get_printable_conf(struct ConfItem *,
+			       char **, char **, char **, char **, int *, char **);
+extern void report_configured_links(struct Client *client_p, int mask);
 
-extern void yyerror (const char *);
-extern int conf_yy_fatal_error (const char *);
-extern int conf_fbgets (char *, int, FBFILE *);
+extern void yyerror(const char *);
+extern int conf_yy_fatal_error(const char *);
+extern int conf_fbgets(char *, int, FBFILE *);
 
 typedef enum
 {
@@ -397,43 +397,43 @@ typedef enum
 }
 KlineType;
 
-extern void write_confitem (KlineType, struct Client *, char *, char *,
-			    const char *, const char *, const char *, int);
-extern void add_temp_kline (struct ConfItem *);
-extern void add_temp_dline (struct ConfItem *);
-extern void report_temp_klines (struct Client *);
-extern void show_temp_klines (struct Client *, dlink_list *);
+extern void write_confitem(KlineType, struct Client *, char *, char *,
+			   const char *, const char *, const char *, int);
+extern void add_temp_kline(struct ConfItem *);
+extern void add_temp_dline(struct ConfItem *);
+extern void report_temp_klines(struct Client *);
+extern void show_temp_klines(struct Client *, dlink_list *);
 
-extern void cleanup_temps_min (void *);
-extern void cleanup_temps_hour (void *);
-extern void cleanup_temps_day (void *);
-extern void cleanup_temps_week (void *);
+extern void cleanup_temps_min(void *);
+extern void cleanup_temps_hour(void *);
+extern void cleanup_temps_day(void *);
+extern void cleanup_temps_week(void *);
 
 
-extern const char *get_conf_name (KlineType);
-extern int rehash (int);
+extern const char *get_conf_name(KlineType);
+extern int rehash(int);
 
-extern int conf_add_server (struct ConfItem *, int);
-extern void conf_add_class_to_conf (struct ConfItem *);
-extern void conf_add_me (struct ConfItem *);
-extern void conf_add_class (struct ConfItem *, int);
-extern void conf_add_d_conf (struct ConfItem *);
-extern void conf_add_fields (struct ConfItem *, const char *, const char *,
-			     const char *, const char *, const char *);
-extern void conf_add_conf (struct ConfItem *);
-extern void flush_expired_ips (void *);
+extern int conf_add_server(struct ConfItem *, int);
+extern void conf_add_class_to_conf(struct ConfItem *);
+extern void conf_add_me(struct ConfItem *);
+extern void conf_add_class(struct ConfItem *, int);
+extern void conf_add_d_conf(struct ConfItem *);
+extern void conf_add_fields(struct ConfItem *, const char *, const char *,
+			    const char *, const char *, const char *);
+extern void conf_add_conf(struct ConfItem *);
+extern void flush_expired_ips(void *);
 
 
 /* XXX consider moving these into kdparse.h */
-extern void parse_k_file (FBFILE * fb);
-extern void parse_d_file (FBFILE * fb);
-extern void parse_x_file (FBFILE * fb);
-extern void parse_resv_file (FBFILE *);
-extern char *getfield (char *newline);
+extern void parse_k_file(FBFILE * fb);
+extern void parse_d_file(FBFILE * fb);
+extern void parse_x_file(FBFILE * fb);
+extern void parse_resv_file(FBFILE *);
+extern char *getfield(char *newline);
 
-extern char *get_oper_name (struct Client *client_p);
+extern char *get_oper_name(struct Client *client_p);
 
-extern int yylex (void);
+extern int yylex(void);
 
 extern unsigned long cidr_to_bitmask[];
 

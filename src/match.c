@@ -39,7 +39,7 @@
 #define MATCH_MAX_CALLS 512	/* ACK! This dies when it's less that this
 				   and we have long lines to parse */
 int
-match (const char *mask, const char *name)
+match(const char *mask, const char *name)
 {
 	const unsigned char *m = (const unsigned char *) mask;
 	const unsigned char *n = (const unsigned char *) name;
@@ -48,8 +48,8 @@ match (const char *mask, const char *name)
 	int wild = 0;
 	int calls = 0;
 
-	assert (mask != NULL);
-	assert (name != NULL);
+	assert(mask != NULL);
+	assert(name != NULL);
 
 	if(!mask || !name)
 		return 0;
@@ -92,7 +92,7 @@ match (const char *mask, const char *name)
 				m++;
 			return (*m == 0);
 		}
-		if(ToLower (*m) != ToLower (*n) && *m != '?')
+		if(ToLower(*m) != ToLower(*n) && *m != '?')
 		{
 			if(!wild)
 				return 0;
@@ -116,7 +116,7 @@ match (const char *mask, const char *name)
  * as '*' and '?'
  */
 int
-match_esc (const char *mask, const char *name)
+match_esc(const char *mask, const char *name)
 {
 	const unsigned char *m = (const unsigned char *) mask;
 	const unsigned char *n = (const unsigned char *) name;
@@ -126,8 +126,8 @@ match_esc (const char *mask, const char *name)
 	int calls = 0;
 	int quote = 0;
 
-	assert (mask != NULL);
-	assert (name != NULL);
+	assert(mask != NULL);
+	assert(name != NULL);
 
 	if(!mask || !name)
 		return 0;
@@ -192,7 +192,7 @@ match_esc (const char *mask, const char *name)
 				m++;
 			return (*m == 0);
 		}
-		if(ToLower (*m) != ToLower (*n) && !(!quote && *m == '?'))
+		if(ToLower(*m) != ToLower(*n) && !(!quote && *m == '?'))
 		{
 			if(!wild)
 				return 0;
@@ -211,9 +211,9 @@ match_esc (const char *mask, const char *name)
 }
 
 inline int
-comp_with_mask (void *addr, void *dest, u_int mask)
+comp_with_mask(void *addr, void *dest, u_int mask)
 {
-	if(memcmp (addr, dest, mask / 8) == 0)
+	if(memcmp(addr, dest, mask / 8) == 0)
 	{
 		int n = mask / 8;
 		int m = ((-1) << (8 - (mask % 8)));
@@ -233,7 +233,7 @@ comp_with_mask (void *addr, void *dest, u_int mask)
  */
 
 int
-match_cidr (const char *s1, const char *s2)
+match_cidr(const char *s1, const char *s2)
 {
 	struct irc_inaddr ipaddr, maskaddr;
 	char mask[BUFSIZE];
@@ -243,45 +243,44 @@ match_cidr (const char *s1, const char *s2)
 	char *len;
 	int cidrlen, aftype;
 
-	strcpy (mask, s1);
-	strcpy (address, s2);
+	strcpy(mask, s1);
+	strcpy(address, s2);
 
-	ipmask = strrchr (mask, '@');
+	ipmask = strrchr(mask, '@');
 	if(ipmask == NULL)
 		return 0;
 
 	*ipmask++ = '\0';
 
-	ip = strrchr (address, '@');
+	ip = strrchr(address, '@');
 	if(ip == NULL)
 		return 0;
 	*ip++ = '\0';
 
 
-	len = strrchr (ipmask, '/');
+	len = strrchr(ipmask, '/');
 	if(len == NULL)
 		return 0;
 
 	*len++ = '\0';
 
-	cidrlen = atoi (len);
+	cidrlen = atoi(len);
 	if(cidrlen == 0)
 		return 0;
 
 #ifdef IPV6
-	if(strchr (ip, ':') && strchr (ipmask, ':'))
+	if(strchr(ip, ':') && strchr(ipmask, ':'))
 		aftype = AF_INET6;
 	else
 #endif
-	if(!strchr (ip, ':') && !strchr (ipmask, ':'))
+	if(!strchr(ip, ':') && !strchr(ipmask, ':'))
 		aftype = AF_INET;
 	else
 		return 0;
 
-	inetpton (aftype, ip, &ipaddr);
-	inetpton (aftype, ipmask, &maskaddr);
-	if(comp_with_mask (&IN_ADDR (ipaddr), &IN_ADDR (maskaddr), cidrlen)
-	   && match (mask, address))
+	inetpton(aftype, ip, &ipaddr);
+	inetpton(aftype, ipmask, &maskaddr);
+	if(comp_with_mask(&IN_ADDR(ipaddr), &IN_ADDR(maskaddr), cidrlen) && match(mask, address))
 		return 1;
 	else
 		return 0;
@@ -292,7 +291,7 @@ match_cidr (const char *s1, const char *s2)
  * collapses a string containing multiple *'s.
  */
 char *
-collapse (char *pattern)
+collapse(char *pattern)
 {
 	char *p = pattern, *po = pattern;
 	char c;
@@ -325,7 +324,7 @@ collapse (char *pattern)
  * The collapse() function with support for escaping characters
  */
 char *
-collapse_esc (char *pattern)
+collapse_esc(char *pattern)
 {
 	char *p = pattern, *po = pattern;
 	char c;
@@ -365,16 +364,16 @@ collapse_esc (char *pattern)
  *              >0, if s1 lexicographically greater than s2
  */
 int
-irccmp (const char *s1, const char *s2)
+irccmp(const char *s1, const char *s2)
 {
 	const unsigned char *str1 = (const unsigned char *) s1;
 	const unsigned char *str2 = (const unsigned char *) s2;
 	int res;
 
-	assert (s1 != NULL);
-	assert (s2 != NULL);
+	assert(s1 != NULL);
+	assert(s2 != NULL);
 
-	while ((res = ToUpper (*str1) - ToUpper (*str2)) == 0)
+	while ((res = ToUpper(*str1) - ToUpper(*str2)) == 0)
 	{
 		if(*str1 == '\0')
 			return 0;
@@ -385,15 +384,15 @@ irccmp (const char *s1, const char *s2)
 }
 
 int
-ircncmp (const char *s1, const char *s2, int n)
+ircncmp(const char *s1, const char *s2, int n)
 {
 	const unsigned char *str1 = (const unsigned char *) s1;
 	const unsigned char *str2 = (const unsigned char *) s2;
 	int res;
-	assert (s1 != NULL);
-	assert (s2 != NULL);
+	assert(s1 != NULL);
+	assert(s2 != NULL);
 
-	while ((res = ToUpper (*str1) - ToUpper (*str2)) == 0)
+	while ((res = ToUpper(*str1) - ToUpper(*str2)) == 0)
 	{
 		str1++;
 		str2++;

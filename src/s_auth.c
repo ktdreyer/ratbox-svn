@@ -129,20 +129,20 @@ static CNCB auth_connect_callback;
  * Initialise the auth code
  */
 void
-init_auth (void)
+init_auth(void)
 {
-	memset (&auth_client_list, 0, sizeof (auth_client_list));
-	memset (&auth_poll_list, 0, sizeof (auth_poll_list));
-	eventAddIsh ("timeout_auth_queries_event", timeout_auth_queries_event, NULL, 1);
+	memset(&auth_client_list, 0, sizeof(auth_client_list));
+	memset(&auth_poll_list, 0, sizeof(auth_poll_list));
+	eventAddIsh("timeout_auth_queries_event", timeout_auth_queries_event, NULL, 1);
 }
 
 /*
  * make_auth_request - allocate a new auth request
  */
 static struct AuthRequest *
-make_auth_request (struct Client *client)
+make_auth_request(struct Client *client)
 {
-	struct AuthRequest *request = (struct AuthRequest *) MyMalloc (sizeof (struct AuthRequest));
+	struct AuthRequest *request = (struct AuthRequest *) MyMalloc(sizeof(struct AuthRequest));
 	request->fd = -1;
 	request->client = client;
 	request->timeout = CurrentTime + ConfigFileEntry.connect_timeout;
@@ -153,27 +153,27 @@ make_auth_request (struct Client *client)
  * free_auth_request - cleanup auth request allocations
  */
 static void
-free_auth_request (struct AuthRequest *request)
+free_auth_request(struct AuthRequest *request)
 {
-	MyFree (request);
+	MyFree(request);
 }
 
 /*
  * unlink_auth_request - remove auth request from a list
  */
 static void
-unlink_auth_request (struct AuthRequest *request, dlink_list * list)
+unlink_auth_request(struct AuthRequest *request, dlink_list * list)
 {
-	dlinkFindDestroy (list, request);
+	dlinkFindDestroy(list, request);
 }
 
 /*
  * link_auth_request - add auth request to a list
  */
 static void
-link_auth_request (struct AuthRequest *request, dlink_list * list)
+link_auth_request(struct AuthRequest *request, dlink_list * list)
 {
-	dlinkAddAlloc (request, list);
+	dlinkAddAlloc(request, list);
 }
 
 /*
@@ -182,7 +182,7 @@ link_auth_request (struct AuthRequest *request, dlink_list * list)
  * the main io processing loop
  */
 static void
-release_auth_client (struct Client *client)
+release_auth_client(struct Client *client)
 {
 	if(client->localClient->fd > highest_fd)
 		highest_fd = client->localClient->fd;
@@ -193,9 +193,9 @@ release_auth_client (struct Client *client)
 	 *     -- adrian
 	 */
 	client->localClient->allow_read = MAX_FLOOD;
-	comm_setflush (client->localClient->fd, 1000, flood_recalc, client);
-	add_client_to_list (client);
-	read_packet (client->localClient->fd, client);
+	comm_setflush(client->localClient->fd, 1000, flood_recalc, client);
+	add_client_to_list(client);
+	read_packet(client->localClient->fd, client);
 }
 
 /*
@@ -206,20 +206,20 @@ release_auth_client (struct Client *client)
  * of success of failure
  */
 static void
-auth_dns_callback (void *vptr, adns_answer * reply)
+auth_dns_callback(void *vptr, adns_answer * reply)
 {
 
 	struct AuthRequest *auth = (struct AuthRequest *) vptr;
-	ClearDNSPending (auth);
+	ClearDNSPending(auth);
 	if(reply && (reply->status == adns_s_ok))
 	{
-		if(strlen (*reply->rrs.str) <= HOSTLEN)
+		if(strlen(*reply->rrs.str) <= HOSTLEN)
 		{
-			strlcpy (auth->client->host, *reply->rrs.str, sizeof (auth->client->host));
-			sendheader (auth->client, REPORT_FIN_DNS);
+			strlcpy(auth->client->host, *reply->rrs.str, sizeof(auth->client->host));
+			sendheader(auth->client, REPORT_FIN_DNS);
 		}
 		else
-			sendheader (auth->client, REPORT_HOST_TOOLONG);
+			sendheader(auth->client, REPORT_HOST_TOOLONG);
 	}
 	else
 	{
@@ -229,27 +229,27 @@ auth_dns_callback (void *vptr, adns_answer * reply)
 		{
 			struct Client *client = auth->client;
 			auth->ip6_int = 1;
-			MyFree (reply);
-			adns_getaddr (&client->localClient->ip,
-				      client->localClient->aftype,
-				      client->localClient->dns_query, 1);
-			SetDNSPending (auth);
+			MyFree(reply);
+			adns_getaddr(&client->localClient->ip,
+				     client->localClient->aftype,
+				     client->localClient->dns_query, 1);
+			SetDNSPending(auth);
 			return;
 		}
 #endif
-		sendheader (auth->client, REPORT_FAIL_DNS);
+		sendheader(auth->client, REPORT_FAIL_DNS);
 	}
 
-	MyFree (reply);
-	MyFree (auth->client->localClient->dns_query);
+	MyFree(reply);
+	MyFree(auth->client->localClient->dns_query);
 
 	auth->client->localClient->dns_query = NULL;
-	if(!IsDoingAuth (auth))
+	if(!IsDoingAuth(auth))
 	{
 		struct Client *client_p = auth->client;
-		unlink_auth_request (auth, &auth_poll_list);
-		free_auth_request (auth);
-		release_auth_client (client_p);
+		unlink_auth_request(auth, &auth_poll_list);
+		free_auth_request(auth);
+		release_auth_client(client_p);
 	}
 
 }
@@ -258,21 +258,21 @@ auth_dns_callback (void *vptr, adns_answer * reply)
  * authsenderr - handle auth send errors
  */
 static void
-auth_error (struct AuthRequest *auth)
+auth_error(struct AuthRequest *auth)
 {
 	++ServerStats->is_abad;
 
-	fd_close (auth->fd);
+	fd_close(auth->fd);
 	auth->fd = -1;
 
-	ClearAuth (auth);
-	sendheader (auth->client, REPORT_FAIL_ID);
+	ClearAuth(auth);
+	sendheader(auth->client, REPORT_FAIL_ID);
 
-	if(!IsDNSPending (auth))
+	if(!IsDNSPending(auth))
 	{
-		unlink_auth_request (auth, &auth_poll_list);
-		release_auth_client (auth->client);
-		free_auth_request (auth);
+		unlink_auth_request(auth, &auth_poll_list);
+		release_auth_client(auth->client);
+		free_auth_request(auth);
 	}
 }
 
@@ -285,37 +285,36 @@ auth_error (struct AuthRequest *auth)
  * of "unknown".
  */
 static int
-start_auth_query (struct AuthRequest *auth)
+start_auth_query(struct AuthRequest *auth)
 {
 /*  struct sockaddr_in sock; */
 	struct irc_sockaddr localaddr;
-	socklen_t locallen = sizeof (struct irc_sockaddr);
+	socklen_t locallen = sizeof(struct irc_sockaddr);
 	int fd;
 
-	if((fd = comm_open (DEF_FAM, SOCK_STREAM, 0, "ident")) == -1)
+	if((fd = comm_open(DEF_FAM, SOCK_STREAM, 0, "ident")) == -1)
 	{
-		report_error (L_ALL, "creating auth stream socket %s:%s",
-			      get_client_name (auth->client, SHOW_IP), errno);
-		ilog (L_ERROR, "Unable to create auth socket for %s:%m",
-		      log_client_name (auth->client, SHOW_IP));
+		report_error(L_ALL, "creating auth stream socket %s:%s",
+			     get_client_name(auth->client, SHOW_IP), errno);
+		ilog(L_ERROR, "Unable to create auth socket for %s:%m",
+		     log_client_name(auth->client, SHOW_IP));
 		++ServerStats->is_abad;
 		return 0;
 	}
 	if((MAXCONNECTIONS - 10) < fd)
 	{
-		sendto_realops_flags (UMODE_ALL, L_ALL,
-				      "Can't allocate fd for auth on %s",
-				      get_client_name (auth->client, SHOW_IP));
-		fd_close (fd);
+		sendto_realops_flags(UMODE_ALL, L_ALL,
+				     "Can't allocate fd for auth on %s",
+				     get_client_name(auth->client, SHOW_IP));
+		fd_close(fd);
 		return 0;
 	}
 
-	sendheader (auth->client, REPORT_DO_ID);
-	if(!set_non_blocking (fd))
+	sendheader(auth->client, REPORT_DO_ID);
+	if(!set_non_blocking(fd))
 	{
-		report_error (L_ALL, NONB_ERROR_MSG,
-			      get_client_name (auth->client, SHOW_IP), errno);
-		fd_close (fd);
+		report_error(L_ALL, NONB_ERROR_MSG, get_client_name(auth->client, SHOW_IP), errno);
+		fd_close(fd);
 		return 0;
 	}
 
@@ -326,17 +325,17 @@ start_auth_query (struct AuthRequest *auth)
 	 * since the ident request must originate from that same address--
 	 * and machines with multiple IP addresses are common now
 	 */
-	memset (&localaddr, 0, locallen);
-	getsockname (auth->client->localClient->fd,
-		     (struct sockaddr *) &SOCKADDR (localaddr), &locallen);
-	S_PORT (localaddr) = htons (0);
+	memset(&localaddr, 0, locallen);
+	getsockname(auth->client->localClient->fd,
+		    (struct sockaddr *) &SOCKADDR(localaddr), &locallen);
+	S_PORT(localaddr) = htons(0);
 
 	auth->fd = fd;
-	SetAuthConnect (auth);
+	SetAuthConnect(auth);
 
-	comm_connect_tcp (fd, auth->client->localClient->sockhost, 113,
-			  (struct sockaddr *) &SOCKADDR (localaddr), locallen,
-			  auth_connect_callback, auth, DEF_FAM, GlobalSetOptions.ident_timeout);
+	comm_connect_tcp(fd, auth->client->localClient->sockhost, 113,
+			 (struct sockaddr *) &SOCKADDR(localaddr), locallen,
+			 auth_connect_callback, auth, DEF_FAM, GlobalSetOptions.ident_timeout);
 	return 1;		/* We suceed here for now */
 }
 
@@ -348,7 +347,7 @@ start_auth_query (struct AuthRequest *auth)
  * Side effects  -
  */
 static char *
-GetValidIdent (char *buf)
+GetValidIdent(char *buf)
 {
 	int remp = 0;
 	int locp = 0;
@@ -361,19 +360,19 @@ GetValidIdent (char *buf)
 	/* All this to get rid of a sscanf() fun. */
 	remotePortString = buf;
 
-	colon1Ptr = strchr (remotePortString, ':');
+	colon1Ptr = strchr(remotePortString, ':');
 	if(!colon1Ptr)
 		return 0;
 
 	*colon1Ptr = '\0';
 	colon1Ptr++;
-	colon2Ptr = strchr (colon1Ptr, ':');
+	colon2Ptr = strchr(colon1Ptr, ':');
 	if(!colon2Ptr)
 		return 0;
 
 	*colon2Ptr = '\0';
 	colon2Ptr++;
-	commaPtr = strchr (remotePortString, ',');
+	commaPtr = strchr(remotePortString, ',');
 
 	if(!commaPtr)
 		return 0;
@@ -381,19 +380,19 @@ GetValidIdent (char *buf)
 	*commaPtr = '\0';
 	commaPtr++;
 
-	remp = atoi (remotePortString);
+	remp = atoi(remotePortString);
 	if(!remp)
 		return 0;
 
-	locp = atoi (commaPtr);
+	locp = atoi(commaPtr);
 	if(!locp)
 		return 0;
 
 	/* look for USERID bordered by first pair of colons */
-	if(!strstr (colon1Ptr, "USERID"))
+	if(!strstr(colon1Ptr, "USERID"))
 		return 0;
 
-	colon3Ptr = strchr (colon2Ptr, ':');
+	colon3Ptr = strchr(colon2Ptr, ':');
 	if(!colon3Ptr)
 		return 0;
 
@@ -406,29 +405,29 @@ GetValidIdent (char *buf)
  * start_auth - starts auth (identd) and dns queries for a client
  */
 void
-start_auth (struct Client *client)
+start_auth(struct Client *client)
 {
 	struct AuthRequest *auth = 0;
-	assert (0 != client);
+	assert(0 != client);
 	if(client == NULL)
 		return;
-	auth = make_auth_request (client);
+	auth = make_auth_request(client);
 
-	client->localClient->dns_query = MyMalloc (sizeof (struct DNSQuery));
+	client->localClient->dns_query = MyMalloc(sizeof(struct DNSQuery));
 	client->localClient->dns_query->ptr = auth;
 	client->localClient->dns_query->callback = auth_dns_callback;
 
-	sendheader (client, REPORT_DO_DNS);
+	sendheader(client, REPORT_DO_DNS);
 
 	/* No DNS cache now, remember? -- adrian */
-	adns_getaddr (&client->localClient->ip, client->localClient->aftype,
-		      client->localClient->dns_query, 0);
-	SetDNSPending (auth);
+	adns_getaddr(&client->localClient->ip, client->localClient->aftype,
+		     client->localClient->dns_query, 0);
+	SetDNSPending(auth);
 
 	if(ConfigFileEntry.disable_auth == 0)
-		start_auth_query (auth);
+		start_auth_query(auth);
 
-	link_auth_request (auth, &auth_poll_list);
+	link_auth_request(auth, &auth_poll_list);
 }
 
 /*
@@ -436,36 +435,35 @@ start_auth (struct Client *client)
  * allow clients through if requests failed
  */
 static void
-timeout_auth_queries_event (void *notused)
+timeout_auth_queries_event(void *notused)
 {
 	dlink_node *ptr;
 	dlink_node *next_ptr;
 	struct AuthRequest *auth;
 
-	DLINK_FOREACH_SAFE (ptr, next_ptr, auth_poll_list.head)
+	DLINK_FOREACH_SAFE(ptr, next_ptr, auth_poll_list.head)
 	{
 		auth = ptr->data;
 
 		if(auth->timeout < CurrentTime)
 		{
 			if(auth->fd >= 0)
-				fd_close (auth->fd);
+				fd_close(auth->fd);
 
-			if(IsDoingAuth (auth))
-				sendheader (auth->client, REPORT_FAIL_ID);
-			if(IsDNSPending (auth))
+			if(IsDoingAuth(auth))
+				sendheader(auth->client, REPORT_FAIL_ID);
+			if(IsDNSPending(auth))
 			{
-				delete_adns_queries (auth->client->localClient->dns_query);
+				delete_adns_queries(auth->client->localClient->dns_query);
 				auth->client->localClient->dns_query->query = NULL;
-				sendheader (auth->client, REPORT_FAIL_DNS);
+				sendheader(auth->client, REPORT_FAIL_DNS);
 			}
-			ilog (L_INFO, "DNS/AUTH timeout %s",
-			      log_client_name (auth->client, SHOW_IP));
+			ilog(L_INFO, "DNS/AUTH timeout %s", log_client_name(auth->client, SHOW_IP));
 
 			auth->client->since = CurrentTime;
-			dlinkDestroy (ptr, &auth_poll_list);
-			release_auth_client (auth->client);
-			free_auth_request (auth);
+			dlinkDestroy(ptr, &auth_poll_list);
+			release_auth_client(auth->client);
+			free_auth_request(auth);
 		}
 	}
 }
@@ -482,45 +480,45 @@ timeout_auth_queries_event (void *notused)
  * problems arise. -avalon
  */
 static void
-auth_connect_callback (int fd, int error, void *data)
+auth_connect_callback(int fd, int error, void *data)
 {
 	struct AuthRequest *auth = data;
 	struct sockaddr_in us;
 	struct sockaddr_in them;
 	char authbuf[32];
-	socklen_t ulen = sizeof (struct sockaddr_in);
-	socklen_t tlen = sizeof (struct sockaddr_in);
+	socklen_t ulen = sizeof(struct sockaddr_in);
+	socklen_t tlen = sizeof(struct sockaddr_in);
 
 	/* Check the error */
 	if(error != COMM_OK)
 	{
 		/* We had an error during connection :( */
-		auth_error (auth);
+		auth_error(auth);
 		return;
 	}
 
 	if(getsockname
 	   (auth->client->localClient->fd, (struct sockaddr *) &us,
 	    (socklen_t *) & ulen)
-	   || getpeername (auth->client->localClient->fd,
-			   (struct sockaddr *) &them, (socklen_t *) & tlen))
+	   || getpeername(auth->client->localClient->fd,
+			  (struct sockaddr *) &them, (socklen_t *) & tlen))
 	{
-		ilog (L_INFO, "auth get{sock,peer}name error for %s:%m",
-		      log_client_name (auth->client, SHOW_IP));
-		auth_error (auth);
+		ilog(L_INFO, "auth get{sock,peer}name error for %s:%m",
+		     log_client_name(auth->client, SHOW_IP));
+		auth_error(auth);
 		return;
 	}
-	ircsprintf (authbuf, "%u , %u\r\n",
-		    (unsigned int) ntohs (them.sin_port), (unsigned int) ntohs (us.sin_port));
+	ircsprintf(authbuf, "%u , %u\r\n",
+		   (unsigned int) ntohs(them.sin_port), (unsigned int) ntohs(us.sin_port));
 
-	if(send (auth->fd, authbuf, strlen (authbuf), 0) == -1)
+	if(send(auth->fd, authbuf, strlen(authbuf), 0) == -1)
 	{
-		auth_error (auth);
+		auth_error(auth);
 		return;
 	}
-	ClearAuthConnect (auth);
-	SetAuthPending (auth);
-	read_auth_reply (auth->fd, auth);
+	ClearAuthConnect(auth);
+	SetAuthPending(auth);
+	read_auth_reply(auth->fd, auth);
 }
 
 
@@ -533,7 +531,7 @@ auth_connect_callback (int fd, int error, void *data)
 #define AUTH_BUFSIZ 128
 
 static void
-read_auth_reply (int fd, void *data)
+read_auth_reply(int fd, void *data)
 {
 	struct AuthRequest *auth = data;
 	char *s = NULL;
@@ -542,11 +540,11 @@ read_auth_reply (int fd, void *data)
 	int count;
 	char buf[AUTH_BUFSIZ + 1];	/* buffer to read auth reply into */
 
-	len = recv (auth->fd, buf, AUTH_BUFSIZ, 0);
+	len = recv(auth->fd, buf, AUTH_BUFSIZ, 0);
 
-	if(len < 0 && ignoreErrno (errno))
+	if(len < 0 && ignoreErrno(errno))
 	{
-		comm_setselect (fd, FDLIST_IDLECLIENT, COMM_SELECT_READ, read_auth_reply, auth, 0);
+		comm_setselect(fd, FDLIST_IDLECLIENT, COMM_SELECT_READ, read_auth_reply, auth, 0);
 		return;
 	}
 
@@ -554,7 +552,7 @@ read_auth_reply (int fd, void *data)
 	{
 		buf[len] = '\0';
 
-		if((s = GetValidIdent (buf)))
+		if((s = GetValidIdent(buf)))
 		{
 			t = auth->client->username;
 
@@ -567,7 +565,7 @@ read_auth_reply (int fd, void *data)
 				{
 					break;
 				}
-				if(!IsSpace (*s) && *s != ':' && *s != '[')
+				if(!IsSpace(*s) && *s != ':' && *s != '[')
 				{
 					*t++ = *s;
 					count--;
@@ -577,28 +575,28 @@ read_auth_reply (int fd, void *data)
 		}
 	}
 
-	fd_close (auth->fd);
+	fd_close(auth->fd);
 	auth->fd = -1;
-	ClearAuth (auth);
+	ClearAuth(auth);
 
 	if(s == NULL)
 	{
 		++ServerStats->is_abad;
-		strcpy (auth->client->username, "unknown");
-		sendheader (auth->client, REPORT_FAIL_ID);
+		strcpy(auth->client->username, "unknown");
+		sendheader(auth->client, REPORT_FAIL_ID);
 	}
 	else
 	{
-		sendheader (auth->client, REPORT_FIN_ID);
+		sendheader(auth->client, REPORT_FIN_ID);
 		++ServerStats->is_asuc;
-		SetGotId (auth->client);
+		SetGotId(auth->client);
 	}
 
-	if(!IsDNSPending (auth))
+	if(!IsDNSPending(auth))
 	{
-		unlink_auth_request (auth, &auth_poll_list);
-		release_auth_client (auth->client);
-		free_auth_request (auth);
+		unlink_auth_request(auth, &auth_poll_list);
+		release_auth_client(auth->client);
+		free_auth_request(auth);
 	}
 }
 
@@ -610,10 +608,10 @@ read_auth_reply (int fd, void *data)
  */
 
 void
-remove_auth_request (struct AuthRequest *auth)
+remove_auth_request(struct AuthRequest *auth)
 {
-	unlink_auth_request (auth, &auth_client_list);
-	free_auth_request (auth);
+	unlink_auth_request(auth, &auth_client_list);
+	free_auth_request(auth);
 }				/* remove_auth_request() */
 
 
@@ -622,34 +620,34 @@ remove_auth_request (struct AuthRequest *auth)
  *
  */
 void
-delete_identd_queries (struct Client *target_p)
+delete_identd_queries(struct Client *target_p)
 {
 	dlink_node *ptr;
 	dlink_node *next_ptr;
 	struct AuthRequest *auth;
-	DLINK_FOREACH_SAFE (ptr, next_ptr, auth_poll_list.head)
+	DLINK_FOREACH_SAFE(ptr, next_ptr, auth_poll_list.head)
 	{
 		auth = ptr->data;
 
 		if(auth->client == target_p)
 		{
 			if(auth->fd >= 0)
-				fd_close (auth->fd);
-			dlinkDestroy (ptr, &auth_poll_list);
-			free_auth_request (auth);
+				fd_close(auth->fd);
+			dlinkDestroy(ptr, &auth_poll_list);
+			free_auth_request(auth);
 		}
 	}
 
-	DLINK_FOREACH_SAFE (ptr, next_ptr, auth_client_list.head)
+	DLINK_FOREACH_SAFE(ptr, next_ptr, auth_client_list.head)
 	{
 		auth = ptr->data;
 
 		if(auth->client == target_p)
 		{
 			if(auth->fd >= 0)
-				fd_close (auth->fd);
-			dlinkDestroy (ptr, &auth_client_list);
-			free_auth_request (auth);
+				fd_close(auth->fd);
+			dlinkDestroy(ptr, &auth_client_list);
+			free_auth_request(auth);
 		}
 	}
 }

@@ -543,45 +543,45 @@ struct LocalUser
 #define SHOW_IP 1
 #define MASK_IP 2
 
-extern void check_banned_lines (void);
-extern void check_klines (void);
-extern void check_glines (void);
-extern void check_dlines (void);
+extern void check_banned_lines(void);
+extern void check_klines(void);
+extern void check_glines(void);
+extern void check_dlines(void);
 
-extern const char *get_client_name (struct Client *client, int show_ip);
-extern const char *log_client_name (struct Client *, int);
-extern void init_client (void);
-extern struct Client *make_client (struct Client *from);
-extern void free_client (struct Client *client);
+extern const char *get_client_name(struct Client *client, int show_ip);
+extern const char *log_client_name(struct Client *, int);
+extern void init_client(void);
+extern struct Client *make_client(struct Client *from);
+extern void free_client(struct Client *client);
 /*
  * extern void           add_client_to_list(struct Client* client);
  * This used to be a function..but now it is a macro
  */
 #define add_client_to_list(client) dlinkAddTail(client, &client->node, &global_client_list)
 
-extern void remove_client_from_list (struct Client *);
-extern int exit_client (struct Client *, struct Client *, struct Client *, const char *);
+extern void remove_client_from_list(struct Client *);
+extern int exit_client(struct Client *, struct Client *, struct Client *, const char *);
 
 
-extern void count_local_client_memory (size_t * count, size_t * memory);
-extern void count_remote_client_memory (size_t * count, size_t * memory);
+extern void count_local_client_memory(size_t * count, size_t * memory);
+extern void count_remote_client_memory(size_t * count, size_t * memory);
 
-extern struct Client *find_chasing (struct Client *, char *, int *);
-extern struct Client *find_person (char *);
-extern struct Client *next_client (struct Client *, const char *);
-extern int accept_message (struct Client *source, struct Client *target);
-extern void del_from_accept (struct Client *source, struct Client *target);
-extern void del_all_accepts (struct Client *client_p);
+extern struct Client *find_chasing(struct Client *, char *, int *);
+extern struct Client *find_person(char *);
+extern struct Client *next_client(struct Client *, const char *);
+extern int accept_message(struct Client *source, struct Client *target);
+extern void del_from_accept(struct Client *source, struct Client *target);
+extern void del_all_accepts(struct Client *client_p);
 
-extern int set_initial_nick (struct Client *client_p, struct Client *source_p, char *nick);
-extern int change_local_nick (struct Client *client_p, struct Client *source_p, char *nick);
-extern void dead_link (struct Client *client_p);
-extern int show_ip (struct Client *source_p, struct Client *target_p);
+extern int set_initial_nick(struct Client *client_p, struct Client *source_p, char *nick);
+extern int change_local_nick(struct Client *client_p, struct Client *source_p, char *nick);
+extern void dead_link(struct Client *client_p);
+extern int show_ip(struct Client *source_p, struct Client *target_p);
 
-extern void initUser (void);
-extern void free_user (struct User *, struct Client *);
+extern void initUser(void);
+extern void free_user(struct User *, struct Client *);
 extern void free_local_client(struct Client *);
-extern struct User *make_user (struct Client *);
-extern struct Server *make_server (struct Client *);
+extern struct User *make_user(struct Client *);
+extern struct Server *make_server(struct Client *);
 
 #endif /* INCLUDED_client_h */

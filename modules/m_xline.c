@@ -52,8 +52,8 @@
 #include "modules.h"
 #include "s_conf.h"
 
-static void mo_xline (struct Client *client_p, struct Client *source_p, int parc, char *parv[]);
-static void mo_unxline (struct Client *client_p, struct Client *source_p, int parc, char *parv[]);
+static void mo_xline(struct Client *client_p, struct Client *source_p, int parc, char *parv[]);
+static void mo_unxline(struct Client *client_p, struct Client *source_p, int parc, char *parv[]);
 
 struct Message xline_msgtab = {
 	"XLINE", 0, 0, 3, 0, MFLG_SLOW, 0,
@@ -66,17 +66,17 @@ struct Message unxline_msgtab = {
 };
 
 void
-_modinit (void)
+_modinit(void)
 {
-	mod_add_cmd (&xline_msgtab);
-	mod_add_cmd (&unxline_msgtab);
+	mod_add_cmd(&xline_msgtab);
+	mod_add_cmd(&unxline_msgtab);
 }
 
 void
-_moddeinit (void)
+_moddeinit(void)
 {
-	mod_del_cmd (&xline_msgtab);
-	mod_del_cmd (&unxline_msgtab);
+	mod_del_cmd(&xline_msgtab);
+	mod_del_cmd(&unxline_msgtab);
 }
 
 const char *_version = "$Revision$";
@@ -88,7 +88,7 @@ const char *_version = "$Revision$";
  * parv[3] - reason
  */
 void
-mo_xline (struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+mo_xline(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
 {
 	char buffer[BUFSIZE * 2];
 	FBFILE *out;
@@ -97,69 +97,68 @@ mo_xline (struct Client *client_p, struct Client *source_p, int parc, char *parv
 	const char *reason;
 	int xtype = 1;
 
-	if(!IsOperXline (source_p))
+	if(!IsOperXline(source_p))
 	{
-		sendto_one (source_p, ":%s NOTICE %s :You need xline = yes;",
-			    me.name, source_p->name);
+		sendto_one(source_p, ":%s NOTICE %s :You need xline = yes;",
+			   me.name, source_p->name);
 		return;
 	}
 
-	xconf = find_xline (parv[1]);
+	xconf = find_xline(parv[1]);
 	if(xconf != NULL)
 	{
-		sendto_one (source_p, ":%s NOTICE %s :[%s] already X-lined by [%s] - %s",
-			    me.name, source_p->name, parv[1], xconf->gecos, xconf->reason);
+		sendto_one(source_p, ":%s NOTICE %s :[%s] already X-lined by [%s] - %s",
+			   me.name, source_p->name, parv[1], xconf->gecos, xconf->reason);
 		return;
 	}
 
 	if(parc > 3)
 	{
-		xtype = atoi (parv[2]);
+		xtype = atoi(parv[2]);
 		reason = parv[3];
 	}
 	else
 	{
-		if(IsDigit (*parv[2]))
+		if(IsDigit(*parv[2]))
 		{
-			xtype = atoi (parv[2]);
+			xtype = atoi(parv[2]);
 			reason = "No Reason";
 		}
 		else
 			reason = parv[2];
 	}
 
-	xconf = make_xline (parv[1], reason, xtype);
-	collapse (xconf->gecos);
+	xconf = make_xline(parv[1], reason, xtype);
+	collapse(xconf->gecos);
 
 	filename = ConfigFileEntry.xlinefile;
 
-	if((out = fbopen (filename, "a")) == NULL)
+	if((out = fbopen(filename, "a")) == NULL)
 	{
-		sendto_realops_flags (UMODE_ALL, L_ALL, "*** Problem opening %s ", filename);
+		sendto_realops_flags(UMODE_ALL, L_ALL, "*** Problem opening %s ", filename);
 		return;
 	}
 
-	ircsprintf (buffer, "\"%s\",\"%d\",\"%s\",\"%s\",%lu\n",
-		    xconf->gecos, xconf->type, xconf->reason,
-		    get_oper_name (source_p), CurrentTime);
+	ircsprintf(buffer, "\"%s\",\"%d\",\"%s\",\"%s\",%lu\n",
+		   xconf->gecos, xconf->type, xconf->reason, get_oper_name(source_p), CurrentTime);
 
-	if(fbputs (buffer, out) == -1)
+	if(fbputs(buffer, out) == -1)
 	{
-		sendto_realops_flags (UMODE_ALL, L_ALL, "*** Problem writing to %s", filename);
-		fbclose (out);
+		sendto_realops_flags(UMODE_ALL, L_ALL, "*** Problem writing to %s", filename);
+		fbclose(out);
 		return;
 	}
 
-	fbclose (out);
+	fbclose(out);
 
-	sendto_realops_flags (UMODE_ALL, L_ALL, "%s added X-line for [%s] [%s]",
-			      get_oper_name (source_p), xconf->gecos, xconf->reason);
-	sendto_one (source_p, ":%s NOTICE %s :Added X-line for [%s] [%s]",
-		    me.name, source_p->name, xconf->gecos, xconf->reason);
-	ilog (L_TRACE, "%s added X-line for [%s] [%s]",
-	      get_oper_name (source_p), xconf->gecos, xconf->reason);
+	sendto_realops_flags(UMODE_ALL, L_ALL, "%s added X-line for [%s] [%s]",
+			     get_oper_name(source_p), xconf->gecos, xconf->reason);
+	sendto_one(source_p, ":%s NOTICE %s :Added X-line for [%s] [%s]",
+		   me.name, source_p->name, xconf->gecos, xconf->reason);
+	ilog(L_TRACE, "%s added X-line for [%s] [%s]",
+	     get_oper_name(source_p), xconf->gecos, xconf->reason);
 
-	dlinkAddAlloc (xconf, &xline_list);
+	dlinkAddAlloc(xconf, &xline_list);
 }
 
 /* mo_unxline()
@@ -167,7 +166,7 @@ mo_xline (struct Client *client_p, struct Client *source_p, int parc, char *parv
  * parv[1] - thing to unxline
  */
 static void
-mo_unxline (struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+mo_unxline(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
 {
 	FBFILE *in, *out;
 	char buf[BUFSIZE];
@@ -180,104 +179,104 @@ mo_unxline (struct Client *client_p, struct Client *source_p, int parc, char *pa
 	int error_on_write = 0;
 	int found_xline = 0;
 
-	if(!IsOperXline (source_p))
+	if(!IsOperXline(source_p))
 	{
-		sendto_one (source_p, ":%s NOTICE %s :You need xline = yes;",
-			    me.name, source_p->name);
+		sendto_one(source_p, ":%s NOTICE %s :You need xline = yes;",
+			   me.name, source_p->name);
 		return;
 	}
 
-	if(BadPtr (parv[1]))
+	if(BadPtr(parv[1]))
 	{
-		sendto_one (source_p, form_str (ERR_NEEDMOREPARAMS),
-			    me.name, source_p->name, "UNXLINE");
+		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
+			   me.name, source_p->name, "UNXLINE");
 		return;
 	}
 
 	filename = ConfigFileEntry.xlinefile;
-	ircsprintf (temppath, "%s.tmp", ConfigFileEntry.xlinefile);
+	ircsprintf(temppath, "%s.tmp", ConfigFileEntry.xlinefile);
 
-	if((in = fbopen (filename, "r")) == NULL)
+	if((in = fbopen(filename, "r")) == NULL)
 	{
-		sendto_one (source_p, ":%s NOTICE %s :Cannot open %s",
-			    me.name, source_p->name, filename);
+		sendto_one(source_p, ":%s NOTICE %s :Cannot open %s",
+			   me.name, source_p->name, filename);
 		return;
 	}
 
-	oldumask = umask (0);
+	oldumask = umask(0);
 
-	if((out = fbopen (temppath, "w")) == NULL)
+	if((out = fbopen(temppath, "w")) == NULL)
 	{
-		sendto_one (source_p, ":%s NOTICE %s :Cannot open %s",
-			    me.name, source_p->name, temppath);
-		fbclose (in);
-		umask (oldumask);
+		sendto_one(source_p, ":%s NOTICE %s :Cannot open %s",
+			   me.name, source_p->name, temppath);
+		fbclose(in);
+		umask(oldumask);
 		return;
 	}
 
-	umask (oldumask);
+	umask(oldumask);
 
-	while (fbgets (buf, sizeof (buf), in))
+	while (fbgets(buf, sizeof(buf), in))
 	{
 		if(error_on_write)
 		{
 			if(temppath != NULL)
-				(void) unlink (temppath);
+				(void) unlink(temppath);
 
 			break;
 		}
 
-		strlcpy (buff, buf, sizeof (buff));
+		strlcpy(buff, buf, sizeof(buff));
 
-		if((p = strchr (buff, '\n')) != NULL)
+		if((p = strchr(buff, '\n')) != NULL)
 			*p = '\0';
 
 		if((*buff == '\0') || (*buff == '#'))
 		{
-			error_on_write = (fbputs (buf, out) < 0) ? YES : NO;
+			error_on_write = (fbputs(buf, out) < 0) ? YES : NO;
 			continue;
 		}
 
-		if((gecos = getfield (buff)) == NULL)
+		if((gecos = getfield(buff)) == NULL)
 		{
-			error_on_write = (fbputs (buf, out) < 0) ? YES : NO;
+			error_on_write = (fbputs(buf, out) < 0) ? YES : NO;
 			continue;
 		}
 
 		/* matching.. */
-		if(irccmp (gecos, parv[1]) == 0)
+		if(irccmp(gecos, parv[1]) == 0)
 			found_xline++;
 		else
-			error_on_write = (fbputs (buf, out) < 0) ? YES : NO;
+			error_on_write = (fbputs(buf, out) < 0) ? YES : NO;
 	}
 
-	fbclose (in);
-	fbclose (out);
+	fbclose(in);
+	fbclose(out);
 
 	if(error_on_write)
 	{
-		sendto_one (source_p,
-			    ":%s NOTICE %s :Couldn't write temp xline file, aborted",
-			    me.name, source_p->name);
+		sendto_one(source_p,
+			   ":%s NOTICE %s :Couldn't write temp xline file, aborted",
+			   me.name, source_p->name);
 		return;
 	}
 	else
 	{
-		(void) rename (temppath, filename);
-		rehash (0);
+		(void) rename(temppath, filename);
+		rehash(0);
 	}
 
 	if(found_xline == 0)
 	{
-		sendto_one (source_p, ":%s NOTICE %s :No XLINE for %s",
-			    me.name, source_p->name, parv[1]);
+		sendto_one(source_p, ":%s NOTICE %s :No XLINE for %s",
+			   me.name, source_p->name, parv[1]);
 		return;
 	}
 
-	sendto_one (source_p, ":%s NOTICE %s :XLINE for [%s] is removed",
-		    me.name, source_p->name, parv[1]);
-	sendto_realops_flags (UMODE_ALL, L_ALL,
-			      "%s has removed the XLINE for: [%s]",
-			      get_oper_name (source_p), parv[1]);
-	ilog (L_NOTICE, "%s has removed the XLINE for [%s]", get_oper_name (source_p), parv[1]);
+	sendto_one(source_p, ":%s NOTICE %s :XLINE for [%s] is removed",
+		   me.name, source_p->name, parv[1]);
+	sendto_realops_flags(UMODE_ALL, L_ALL,
+			     "%s has removed the XLINE for: [%s]",
+			     get_oper_name(source_p), parv[1]);
+	ilog(L_NOTICE, "%s has removed the XLINE for [%s]", get_oper_name(source_p), parv[1]);
 }

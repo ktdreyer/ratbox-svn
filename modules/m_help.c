@@ -38,11 +38,11 @@
 #include "parse.h"
 #include "modules.h"
 
-static void m_help (struct Client *, struct Client *, int, char **);
-static void mo_help (struct Client *, struct Client *, int, char **);
-static void mo_uhelp (struct Client *, struct Client *, int, char **);
-static void dohelp (struct Client *, const char *, const char *, const char *);
-static void sendhelpfile (struct Client *, const char *, const char *, const char *);
+static void m_help(struct Client *, struct Client *, int, char **);
+static void mo_help(struct Client *, struct Client *, int, char **);
+static void mo_uhelp(struct Client *, struct Client *, int, char **);
+static void dohelp(struct Client *, const char *, const char *, const char *);
+static void sendhelpfile(struct Client *, const char *, const char *, const char *);
 
 struct Message help_msgtab = {
 	"HELP", 0, 0, 0, 0, MFLG_SLOW, 0,
@@ -56,17 +56,17 @@ struct Message uhelp_msgtab = {
 #ifndef STATIC_MODULES
 
 void
-_modinit (void)
+_modinit(void)
 {
-	mod_add_cmd (&help_msgtab);
-	mod_add_cmd (&uhelp_msgtab);
+	mod_add_cmd(&help_msgtab);
+	mod_add_cmd(&uhelp_msgtab);
 }
 
 void
-_moddeinit (void)
+_moddeinit(void)
 {
-	mod_del_cmd (&help_msgtab);
-	mod_del_cmd (&uhelp_msgtab);
+	mod_del_cmd(&help_msgtab);
+	mod_del_cmd(&uhelp_msgtab);
 }
 
 const char *_version = "$Revision$";
@@ -76,7 +76,7 @@ const char *_version = "$Revision$";
  *      parv[0] = sender prefix
  */
 static void
-m_help (struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+m_help(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
 {
 	static time_t last_used = 0;
 
@@ -86,7 +86,7 @@ m_help (struct Client *client_p, struct Client *source_p, int parc, char *parv[]
 		if((last_used + ConfigFileEntry.pace_wait_simple) > CurrentTime)
 		{
 			/* safe enough to give this on a local connect only */
-			sendto_one (source_p, form_str (RPL_LOAD2HI), me.name, parv[0]);
+			sendto_one(source_p, form_str(RPL_LOAD2HI), me.name, parv[0]);
 			return;
 		}
 		else
@@ -95,13 +95,13 @@ m_help (struct Client *client_p, struct Client *source_p, int parc, char *parv[]
 		}
 
 		if(parc > 1)
-			dohelp (source_p, UHPATH, parv[1], parv[0]);
+			dohelp(source_p, UHPATH, parv[1], parv[0]);
 		else
-			dohelp (source_p, UHPATH, NULL, parv[0]);
+			dohelp(source_p, UHPATH, NULL, parv[0]);
 	}
 	else
 	{
-		list_commands (source_p);
+		list_commands(source_p);
 	}
 }
 
@@ -110,12 +110,12 @@ m_help (struct Client *client_p, struct Client *source_p, int parc, char *parv[]
  *      parv[0] = sender prefix
  */
 static void
-mo_help (struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+mo_help(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
 {
 	if(parc > 1)
-		dohelp (source_p, HPATH, parv[1], parv[0]);
+		dohelp(source_p, HPATH, parv[1], parv[0]);
 	else
-		dohelp (source_p, HPATH, NULL, parv[0]);
+		dohelp(source_p, HPATH, NULL, parv[0]);
 }
 
 /*
@@ -125,16 +125,16 @@ mo_help (struct Client *client_p, struct Client *source_p, int parc, char *parv[
  */
 
 static void
-mo_uhelp (struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+mo_uhelp(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
 {
 	if(parc > 1)
-		dohelp (source_p, UHPATH, parv[1], parv[0]);
+		dohelp(source_p, UHPATH, parv[1], parv[0]);
 	else
-		dohelp (source_p, UHPATH, NULL, parv[0]);
+		dohelp(source_p, UHPATH, NULL, parv[0]);
 }
 
 static void
-dohelp (struct Client *source_p, const char *hpath, const char *topic, const char *nick)
+dohelp(struct Client *source_p, const char *hpath, const char *topic, const char *nick)
 {
 	char path[MAXPATHLEN + 1];
 	char ntopic[25];
@@ -144,71 +144,71 @@ dohelp (struct Client *source_p, const char *hpath, const char *topic, const cha
 	if(topic != NULL)
 	{
 		/* convert to lower case */
-		for (i = 0; topic[i] != '\0' && i < sizeof (ntopic) - 1; i++)
+		for (i = 0; topic[i] != '\0' && i < sizeof(ntopic) - 1; i++)
 		{
-			ntopic[i] = ToLower (topic[i]);
+			ntopic[i] = ToLower(topic[i]);
 		}
 	}
 	else
-		strcpy (ntopic, "index");	/* list available help topics */
+		strcpy(ntopic, "index");	/* list available help topics */
 
-	if(strchr (topic, '/'))
+	if(strchr(topic, '/'))
 	{
-		sendto_one (source_p, form_str (ERR_HELPNOTFOUND), me.name, nick, ntopic);
+		sendto_one(source_p, form_str(ERR_HELPNOTFOUND), me.name, nick, ntopic);
 		return;
 	}
 
-	if(strlen (hpath) + strlen (topic) + 1 > MAXPATHLEN)
+	if(strlen(hpath) + strlen(topic) + 1 > MAXPATHLEN)
 	{
-		sendto_one (source_p, form_str (ERR_HELPNOTFOUND), me.name, nick, ntopic);
+		sendto_one(source_p, form_str(ERR_HELPNOTFOUND), me.name, nick, ntopic);
 		return;
 	}
 
-	sprintf (path, "%s/%s", hpath, ntopic);
+	sprintf(path, "%s/%s", hpath, ntopic);
 
-	if(stat (path, &sb) < 0)
+	if(stat(path, &sb) < 0)
 	{
-		ilog (L_NOTICE, "help file %s not found", path);
-		sendto_one (source_p, form_str (ERR_HELPNOTFOUND), me.name, nick, ntopic);
+		ilog(L_NOTICE, "help file %s not found", path);
+		sendto_one(source_p, form_str(ERR_HELPNOTFOUND), me.name, nick, ntopic);
 		return;
 	}
 
-	if(!S_ISREG (sb.st_mode))
+	if(!S_ISREG(sb.st_mode))
 	{
-		ilog (L_NOTICE, "help file %s not found", path);
-		sendto_one (source_p, form_str (ERR_HELPNOTFOUND), me.name, nick, ntopic);
+		ilog(L_NOTICE, "help file %s not found", path);
+		sendto_one(source_p, form_str(ERR_HELPNOTFOUND), me.name, nick, ntopic);
 		return;
 	}
 
-	sendhelpfile (source_p, path, ntopic, nick);
+	sendhelpfile(source_p, path, ntopic, nick);
 	return;
 }
 
 static void
-sendhelpfile (struct Client *source_p, const char *path, const char *topic, const char *nick)
+sendhelpfile(struct Client *source_p, const char *path, const char *topic, const char *nick)
 {
 	FBFILE *file;
 	char line[HELPLEN];
 
-	if((file = fbopen (path, "r")) == NULL)
+	if((file = fbopen(path, "r")) == NULL)
 	{
-		sendto_one (source_p, form_str (ERR_HELPNOTFOUND), me.name, nick, topic);
+		sendto_one(source_p, form_str(ERR_HELPNOTFOUND), me.name, nick, topic);
 		return;
 	}
 
-	if(fbgets (line, sizeof (line), file) == NULL)
+	if(fbgets(line, sizeof(line), file) == NULL)
 	{
-		sendto_one (source_p, form_str (ERR_HELPNOTFOUND), me.name, nick, topic);
+		sendto_one(source_p, form_str(ERR_HELPNOTFOUND), me.name, nick, topic);
 		return;
 	}
 
-	sendto_one (source_p, form_str (RPL_HELPSTART), me.name, nick, topic, line);
+	sendto_one(source_p, form_str(RPL_HELPSTART), me.name, nick, topic, line);
 
-	while (fbgets (line, sizeof (line), file))
+	while (fbgets(line, sizeof(line), file))
 	{
-		sendto_one (source_p, form_str (RPL_HELPTXT), me.name, nick, topic, line);
+		sendto_one(source_p, form_str(RPL_HELPTXT), me.name, nick, topic, line);
 	}
 
-	sendto_one (source_p, form_str (RPL_ENDOFHELP), me.name, nick, topic);
+	sendto_one(source_p, form_str(RPL_ENDOFHELP), me.name, nick, topic);
 	return;
 }

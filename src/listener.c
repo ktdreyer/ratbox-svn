@@ -55,14 +55,14 @@ static PF accept_connection;
 static struct Listener *ListenerPollList = NULL;
 
 static struct Listener *
-make_listener (int port, struct irc_inaddr *addr)
+make_listener(int port, struct irc_inaddr *addr)
 {
-	struct Listener *listener = (struct Listener *) MyMalloc (sizeof (struct Listener));
-	assert (0 != listener);
+	struct Listener *listener = (struct Listener *) MyMalloc(sizeof(struct Listener));
+	assert(0 != listener);
 
 	listener->name = me.name;
 	listener->fd = -1;
-	copy_s_addr (IN_ADDR (listener->addr), PIN_ADDR (addr));
+	copy_s_addr(IN_ADDR(listener->addr), PIN_ADDR(addr));
 
 	listener->port = port;
 
@@ -71,9 +71,9 @@ make_listener (int port, struct irc_inaddr *addr)
 }
 
 void
-free_listener (struct Listener *listener)
+free_listener(struct Listener *listener)
 {
-	assert (NULL != listener);
+	assert(NULL != listener);
 	if(listener == NULL)
 		return;
 	/*
@@ -95,7 +95,7 @@ free_listener (struct Listener *listener)
 	}
 
 	/* free */
-	MyFree (listener);
+	MyFree(listener);
 }
 
 #define PORTNAMELEN 6		/* ":31337" */
@@ -105,13 +105,13 @@ free_listener (struct Listener *listener)
  * returns "host.foo.org:6667" for a given listener
  */
 const char *
-get_listener_name (const struct Listener *listener)
+get_listener_name(const struct Listener *listener)
 {
 	static char buf[HOSTLEN + HOSTLEN + PORTNAMELEN + 4];
-	assert (NULL != listener);
+	assert(NULL != listener);
 	if(listener == NULL)
 		return NULL;
-	ircsprintf (buf, "%s[%s/%u]", me.name, listener->name, listener->port);
+	ircsprintf(buf, "%s[%s/%u]", me.name, listener->name, listener->port);
 	return buf;
 }
 
@@ -122,19 +122,19 @@ get_listener_name (const struct Listener *listener)
  * side effects - show ports
  */
 void
-show_ports (struct Client *source_p)
+show_ports(struct Client *source_p)
 {
 	struct Listener *listener = 0;
 
 	for (listener = ListenerPollList; listener; listener = listener->next)
 	{
-		sendto_one (source_p, form_str (RPL_STATSPLINE),
-			    me.name,
-			    source_p->name,
-			    'P',
-			    listener->port,
-			    IsOperAdmin (source_p) ? listener->name : me.name,
-			    listener->ref_count, (listener->active) ? "active" : "disabled");
+		sendto_one(source_p, form_str(RPL_STATSPLINE),
+			   me.name,
+			   source_p->name,
+			   'P',
+			   listener->port,
+			   IsOperAdmin(source_p) ? listener->name : me.name,
+			   listener->ref_count, (listener->active) ? "active" : "disabled");
 	}
 }
 
@@ -152,7 +152,7 @@ show_ports (struct Client *source_p)
 #endif
 
 static int
-inetport (struct Listener *listener)
+inetport(struct Listener *listener)
 {
 	struct irc_sockaddr lsin;
 	int fd;
@@ -161,43 +161,43 @@ inetport (struct Listener *listener)
 	/*
 	 * At first, open a new socket
 	 */
-	fd = comm_open (DEF_FAM, SOCK_STREAM, 0, "Listener socket");
+	fd = comm_open(DEF_FAM, SOCK_STREAM, 0, "Listener socket");
 
 #ifdef IPV6
-	if(!IN6_ARE_ADDR_EQUAL ((struct in6_addr *) &listener->addr, &in6addr_any))
+	if(!IN6_ARE_ADDR_EQUAL((struct in6_addr *) &listener->addr, &in6addr_any))
 	{
 #else
 	if(INADDR_ANY != listener->addr.sins.sin.s_addr)
 	{
 #endif
-		inetntop (DEF_FAM, &IN_ADDR (listener->addr), listener->vhost, HOSTLEN);
+		inetntop(DEF_FAM, &IN_ADDR(listener->addr), listener->vhost, HOSTLEN);
 		listener->name = listener->vhost;
 	}
 
 	if(fd == -1)
 	{
-		report_error (L_ALL, "opening listener socket %s:%s",
-			      get_listener_name (listener), errno);
+		report_error(L_ALL, "opening listener socket %s:%s",
+			     get_listener_name(listener), errno);
 		return 0;
 	}
 	else if((HARD_FDLIMIT - 10) < fd)
 	{
-		report_error (L_ALL,
-			      "no more connections left for listener %s:%s",
-			      get_listener_name (listener), errno);
-		fd_close (fd);
+		report_error(L_ALL,
+			     "no more connections left for listener %s:%s",
+			     get_listener_name(listener), errno);
+		fd_close(fd);
 		return 0;
 	}
 	/*
 	 * XXX - we don't want to do all this crap for a listener
 	 * set_sock_opts(listener);
 	 */
-	if(setsockopt (fd, SOL_SOCKET, SO_REUSEADDR, (char *) &opt, sizeof (opt)))
+	if(setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, (char *) &opt, sizeof(opt)))
 	{
-		report_error (L_ALL,
-			      "setting SO_REUSEADDR for listener %s:%s",
-			      get_listener_name (listener), errno);
-		fd_close (fd);
+		report_error(L_ALL,
+			     "setting SO_REUSEADDR for listener %s:%s",
+			     get_listener_name(listener), errno);
+		fd_close(fd);
 		return 0;
 	}
 
@@ -205,44 +205,43 @@ inetport (struct Listener *listener)
 	 * Bind a port to listen for new connections if port is non-null,
 	 * else assume it is already open and try get something from it.
 	 */
-	memset (&lsin, 0, sizeof (struct irc_sockaddr));
-	S_FAM (lsin) = DEF_FAM;
-	copy_s_addr (S_ADDR (lsin), IN_ADDR (listener->addr));
-	S_PORT (lsin) = htons (listener->port);
+	memset(&lsin, 0, sizeof(struct irc_sockaddr));
+	S_FAM(lsin) = DEF_FAM;
+	copy_s_addr(S_ADDR(lsin), IN_ADDR(listener->addr));
+	S_PORT(lsin) = htons(listener->port);
 
 
-	if(bind (fd, (struct sockaddr *) &SOCKADDR (lsin), sizeof (struct irc_sockaddr)))
+	if(bind(fd, (struct sockaddr *) &SOCKADDR(lsin), sizeof(struct irc_sockaddr)))
 	{
-		report_error (L_ALL, "binding listener socket %s:%s",
-			      get_listener_name (listener), errno);
-		fd_close (fd);
+		report_error(L_ALL, "binding listener socket %s:%s",
+			     get_listener_name(listener), errno);
+		fd_close(fd);
 		return 0;
 	}
 
-	if(listen (fd, HYBRID_SOMAXCONN))
+	if(listen(fd, HYBRID_SOMAXCONN))
 	{
-		report_error (L_ALL, "listen failed for %s:%s",
-			      get_listener_name (listener), errno);
-		fd_close (fd);
+		report_error(L_ALL, "listen failed for %s:%s", get_listener_name(listener), errno);
+		fd_close(fd);
 		return 0;
 	}
 
 	/*
 	 * XXX - this should always work, performance will suck if it doesn't
 	 */
-	if(!set_non_blocking (fd))
-		report_error (L_ALL, NONB_ERROR_MSG, get_listener_name (listener), errno);
+	if(!set_non_blocking(fd))
+		report_error(L_ALL, NONB_ERROR_MSG, get_listener_name(listener), errno);
 
 	listener->fd = fd;
 
 	/* Listen completion events are READ events .. */
 
-	accept_connection (fd, listener);
+	accept_connection(fd, listener);
 	return 1;
 }
 
 static struct Listener *
-find_listener (int port, struct irc_inaddr *addr)
+find_listener(int port, struct irc_inaddr *addr)
 {
 	struct Listener *listener = NULL;
 	struct Listener *last_closed = NULL;
@@ -251,8 +250,7 @@ find_listener (int port, struct irc_inaddr *addr)
 	{
 
 		if((port == listener->port) &&
-		   (!memcmp (&PIN_ADDR (addr),
-			     &IN_ADDR (listener->addr), sizeof (struct irc_inaddr))))
+		   (!memcmp(&PIN_ADDR(addr), &IN_ADDR(listener->addr), sizeof(struct irc_inaddr))))
 		{
 			/* Try to return an open listener, otherwise reuse a closed one */
 			if(listener->fd == -1)
@@ -272,7 +270,7 @@ find_listener (int port, struct irc_inaddr *addr)
  * the format "255.255.255.255"
  */
 void
-add_listener (int port, const char *vhost_ip)
+add_listener(int port, const char *vhost_ip)
 {
 	struct Listener *listener;
 	struct irc_inaddr vaddr;
@@ -284,49 +282,49 @@ add_listener (int port, const char *vhost_ip)
 		return;
 
 #ifdef IPV6
-	copy_s_addr (IN_ADDR (vaddr), &in6addr_any);
+	copy_s_addr(IN_ADDR(vaddr), &in6addr_any);
 #else
-	copy_s_addr (IN_ADDR (vaddr), INADDR_ANY);
+	copy_s_addr(IN_ADDR(vaddr), INADDR_ANY);
 #endif
 
 	if(vhost_ip)
 	{
-		if(inetpton (DEF_FAM, vhost_ip, &IN_ADDR (vaddr)) <= 0)
+		if(inetpton(DEF_FAM, vhost_ip, &IN_ADDR(vaddr)) <= 0)
 			return;
 	}
 
-	if((listener = find_listener (port, &vaddr)))
+	if((listener = find_listener(port, &vaddr)))
 	{
 		if(listener->fd > -1)
 			return;
 	}
 	else
 	{
-		listener = make_listener (port, &vaddr);
+		listener = make_listener(port, &vaddr);
 		listener->next = ListenerPollList;
 		ListenerPollList = listener;
 	}
 
 	listener->fd = -1;
 
-	if(inetport (listener))
+	if(inetport(listener))
 		listener->active = 1;
 	else
-		close_listener (listener);
+		close_listener(listener);
 }
 
 /*
  * close_listener - close a single listener
  */
 void
-close_listener (struct Listener *listener)
+close_listener(struct Listener *listener)
 {
-	assert (listener != NULL);
+	assert(listener != NULL);
 	if(listener == NULL)
 		return;
 	if(listener->fd >= 0)
 	{
-		fd_close (listener->fd);
+		fd_close(listener->fd);
 		listener->fd = -1;
 	}
 
@@ -335,14 +333,14 @@ close_listener (struct Listener *listener)
 	if(listener->ref_count)
 		return;
 
-	free_listener (listener);
+	free_listener(listener);
 }
 
 /*
  * close_listeners - close and free all listeners that are not being used
  */
 void
-close_listeners ()
+close_listeners()
 {
 	struct Listener *listener;
 	struct Listener *listener_next = 0;
@@ -352,14 +350,14 @@ close_listeners ()
 	for (listener = ListenerPollList; listener; listener = listener_next)
 	{
 		listener_next = listener->next;
-		close_listener (listener);
+		close_listener(listener);
 	}
 }
 
 #define DLINE_WARNING "ERROR :You have been D-lined.\r\n"
 
 static void
-accept_connection (int pfd, void *data)
+accept_connection(int pfd, void *data)
 {
 	static time_t last_oper_notice = 0;
 
@@ -369,7 +367,7 @@ accept_connection (int pfd, void *data)
 	int pe;
 	struct Listener *listener = data;
 
-	assert (listener != NULL);
+	assert(listener != NULL);
 	if(listener == NULL)
 		return;
 	/*
@@ -384,16 +382,15 @@ accept_connection (int pfd, void *data)
 	 * be accepted until some old is closed first.
 	 */
 
-	fd = comm_accept (listener->fd, &sai);
+	fd = comm_accept(listener->fd, &sai);
 
-	copy_s_addr (IN_ADDR (addr), S_ADDR (sai));
+	copy_s_addr(IN_ADDR(addr), S_ADDR(sai));
 
 #ifdef IPV6
-	if((IN6_IS_ADDR_V4MAPPED (&IN_ADDR2 (addr))) || (IN6_IS_ADDR_V4COMPAT (&IN_ADDR2 (addr))))
+	if((IN6_IS_ADDR_V4MAPPED(&IN_ADDR2(addr))) || (IN6_IS_ADDR_V4COMPAT(&IN_ADDR2(addr))))
 	{
-#if 0 /* This memmove isn't really necessary */
-		memmove (&addr.sins.sin.s_addr, addr.sins.sin6.s6_addr + 12,
-			 sizeof (struct in_addr));
+#if 0				/* This memmove isn't really necessary */
+		memmove(&addr.sins.sin.s_addr, addr.sins.sin6.s6_addr + 12, sizeof(struct in_addr));
 #endif
 		sai.sins.sin.sin_family = AF_INET;
 	}
@@ -402,8 +399,8 @@ accept_connection (int pfd, void *data)
 	if(fd < 0)
 	{
 		/* Re-register a new IO request for the next accept .. */
-		comm_setselect (listener->fd, FDLIST_SERVICE,
-				COMM_SELECT_READ, accept_connection, listener, 0);
+		comm_setselect(listener->fd, FDLIST_SERVICE,
+			       COMM_SELECT_READ, accept_connection, listener, 0);
 		return;
 	}
 	/*
@@ -417,23 +414,23 @@ accept_connection (int pfd, void *data)
 		 */
 		if((last_oper_notice + 20) <= CurrentTime)
 		{
-			sendto_realops_flags (UMODE_ALL, L_ALL,
-					      "All connections in use. (%s)",
-					      get_listener_name (listener));
+			sendto_realops_flags(UMODE_ALL, L_ALL,
+					     "All connections in use. (%s)",
+					     get_listener_name(listener));
 			last_oper_notice = CurrentTime;
 		}
 
-		send (fd, "ERROR :All connections in use\r\n", 32, 0);
-		fd_close (fd);
+		send(fd, "ERROR :All connections in use\r\n", 32, 0);
+		fd_close(fd);
 		/* Re-register a new IO request for the next accept .. */
-		comm_setselect (listener->fd, FDLIST_SERVICE,
-				COMM_SELECT_READ, accept_connection, listener, 0);
+		comm_setselect(listener->fd, FDLIST_SERVICE,
+			       COMM_SELECT_READ, accept_connection, listener, 0);
 		return;
 	}
 
 	/* Do an initial check we aren't connecting too fast or with too many
 	 * from this IP... */
-	if((pe = conf_connect_allowed (&addr)) != 0)
+	if((pe = conf_connect_allowed(&addr)) != 0)
 	{
 		ServerStats->is_ref++;
 
@@ -441,23 +438,23 @@ accept_connection (int pfd, void *data)
 		switch (pe)
 		{
 		case BANNED_CLIENT:
-			send (fd, DLINE_WARNING, sizeof (DLINE_WARNING) - 1, 0);
+			send(fd, DLINE_WARNING, sizeof(DLINE_WARNING) - 1, 0);
 			break;
 		}
 
-		fd_close (fd);
+		fd_close(fd);
 
 		/* Re-register a new IO request for the next accept .. */
-		comm_setselect (listener->fd, FDLIST_SERVICE,
-				COMM_SELECT_READ, accept_connection, listener, 0);
+		comm_setselect(listener->fd, FDLIST_SERVICE,
+			       COMM_SELECT_READ, accept_connection, listener, 0);
 		return;
 	}
 
 	ServerStats->is_ac++;
 
-	add_connection (listener, fd);
+	add_connection(listener, fd);
 
 	/* Re-register a new IO request for the next accept .. */
-	comm_setselect (listener->fd, FDLIST_SERVICE, COMM_SELECT_READ,
-			accept_connection, listener, 0);
+	comm_setselect(listener->fd, FDLIST_SERVICE, COMM_SELECT_READ,
+		       accept_connection, listener, 0);
 }

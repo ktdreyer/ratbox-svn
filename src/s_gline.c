@@ -50,8 +50,8 @@
 
 dlink_list glines;
 
-static void expire_glines (void);
-static void expire_pending_glines (void);
+static void expire_glines(void);
+static void expire_pending_glines(void);
 
 /* add_gline
  *
@@ -60,10 +60,10 @@ static void expire_pending_glines (void);
  * Side effects - links in given struct ConfItem into gline link list
  */
 void
-add_gline (struct ConfItem *aconf)
+add_gline(struct ConfItem *aconf)
 {
-	dlinkAddTailAlloc (aconf, &glines);
-	add_conf_by_address (aconf->host, CONF_GLINE, aconf->user, aconf);
+	dlinkAddTailAlloc(aconf, &glines);
+	add_conf_by_address(aconf->host, CONF_GLINE, aconf->user, aconf);
 }
 
 /*
@@ -74,16 +74,16 @@ add_gline (struct ConfItem *aconf)
  * side effects -
  */
 struct ConfItem *
-find_is_glined (const char *host, const char *user)
+find_is_glined(const char *host, const char *user)
 {
 	dlink_node *gline_node;
 	struct ConfItem *kill_ptr;
 
-	DLINK_FOREACH (gline_node, glines.head)
+	DLINK_FOREACH(gline_node, glines.head)
 	{
 		kill_ptr = gline_node->data;
-		if((kill_ptr->user && (!user || match (kill_ptr->user, user)))
-		   && (kill_ptr->host && (!host || match (kill_ptr->host, host))))
+		if((kill_ptr->user && (!user || match(kill_ptr->user, user)))
+		   && (kill_ptr->host && (!host || match(kill_ptr->host, host))))
 		{
 			return (kill_ptr);
 		}
@@ -101,10 +101,10 @@ find_is_glined (const char *host, const char *user)
  *                This is an event started off in ircd.c
  */
 void
-cleanup_glines ()
+cleanup_glines()
 {
-	expire_glines ();
-	expire_pending_glines ();
+	expire_glines();
+	expire_pending_glines();
 }
 
 /*
@@ -117,13 +117,13 @@ cleanup_glines ()
  * Go through the gline list, expire any needed.
  */
 static void
-expire_glines ()
+expire_glines()
 {
 	dlink_node *gline_node;
 	dlink_node *next_node;
 	struct ConfItem *kill_ptr;
 
-	DLINK_FOREACH_SAFE (gline_node, next_node, glines.head)
+	DLINK_FOREACH_SAFE(gline_node, next_node, glines.head)
 	{
 		kill_ptr = gline_node->data;
 
@@ -131,8 +131,8 @@ expire_glines ()
 		if(kill_ptr->hold > CurrentTime)
 			break;
 
-		dlinkDestroy (gline_node, &glines);
-		delete_one_address_conf (kill_ptr);
+		dlinkDestroy(gline_node, &glines);
+		delete_one_address_conf(kill_ptr);
 	}
 }
 
@@ -147,24 +147,24 @@ expire_glines ()
  * enough "votes" in the time period allowed
  */
 static void
-expire_pending_glines ()
+expire_pending_glines()
 {
 	dlink_node *pending_node;
 	dlink_node *next_node;
 	struct gline_pending *glp_ptr;
 
-	DLINK_FOREACH_SAFE (pending_node, next_node, pending_glines.head)
+	DLINK_FOREACH_SAFE(pending_node, next_node, pending_glines.head)
 	{
 		glp_ptr = pending_node->data;
 
 		if(((glp_ptr->last_gline_time + GLINE_PENDING_EXPIRE) <=
-		    CurrentTime) || find_is_glined (glp_ptr->host, glp_ptr->user))
+		    CurrentTime) || find_is_glined(glp_ptr->host, glp_ptr->user))
 
 		{
-			MyFree (glp_ptr->reason1);
-			MyFree (glp_ptr->reason2);
-			MyFree (glp_ptr);
-			dlinkDestroy (pending_node, &pending_glines);
+			MyFree(glp_ptr->reason1);
+			MyFree(glp_ptr->reason2);
+			MyFree(glp_ptr);
+			dlinkDestroy(pending_node, &pending_glines);
 		}
 	}
 }

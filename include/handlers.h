@@ -89,16 +89,16 @@
 struct Client;
 
 /* generic handlers */
-extern void ms_error (struct Client *, struct Client *, int, char **);
-extern void m_error (struct Client *, struct Client *, int, char **);
-extern void m_ignore (struct Client *, struct Client *, int, char **);
-extern void m_not_oper (struct Client *, struct Client *, int, char **);
-extern void m_registered (struct Client *, struct Client *, int, char **);
-extern void m_unregistered (struct Client *, struct Client *, int, char **);
-extern void m_unsupported (struct Client *, struct Client *, int, char **);
+extern void ms_error(struct Client *, struct Client *, int, char **);
+extern void m_error(struct Client *, struct Client *, int, char **);
+extern void m_ignore(struct Client *, struct Client *, int, char **);
+extern void m_not_oper(struct Client *, struct Client *, int, char **);
+extern void m_registered(struct Client *, struct Client *, int, char **);
+extern void m_unregistered(struct Client *, struct Client *, int, char **);
+extern void m_unsupported(struct Client *, struct Client *, int, char **);
 
 #ifdef FL_DEBUG
-extern void mo_hash (struct Client *, struct Client *, int, char **);
+extern void mo_hash(struct Client *, struct Client *, int, char **);
 #endif
 
 #endif /* INCLUDED_handlers_h */

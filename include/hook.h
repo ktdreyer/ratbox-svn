@@ -87,11 +87,11 @@ struct hook_burst_channel
 };
 
 
-int hook_add_event (const char *);
-int hook_add_hook (const char *, hookfn *);
-int hook_call_event (const char *, void *);
-int hook_del_event (const char *);
-int hook_del_hook (const char *event, hookfn * fn);
-void init_hooks (void);
+int hook_add_event(const char *);
+int hook_add_hook(const char *, hookfn *);
+int hook_call_event(const char *, void *);
+int hook_del_event(const char *);
+int hook_del_hook(const char *event, hookfn * fn);
+void init_hooks(void);
 
 #endif

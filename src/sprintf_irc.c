@@ -466,7 +466,7 @@ static char scratch_buffer[32];
  */
 
 int
-irc_vsprintf (struct Client *target_p, char *str, const char *format, va_list args)
+irc_vsprintf(struct Client *target_p, char *str, const char *format, va_list args)
 {
 	char c;
 	int bytes = 0;
@@ -479,7 +479,7 @@ irc_vsprintf (struct Client *target_p, char *str, const char *format, va_list ar
 
 			if(c == 's')
 			{
-				const char *p1 = va_arg (args, const char *);
+				const char *p1 = va_arg(args, const char *);
 				if((*str = *p1))
 				{
 					++bytes;
@@ -492,7 +492,7 @@ irc_vsprintf (struct Client *target_p, char *str, const char *format, va_list ar
 
 			if(c == 'c')
 			{
-				*str++ = (char) va_arg (args, int);
+				*str++ = (char) va_arg(args, int);
 				++bytes;
 
 				continue;
@@ -509,7 +509,7 @@ irc_vsprintf (struct Client *target_p, char *str, const char *format, va_list ar
 				const char *ap;
 
 				++format;
-				v1 = va_arg (args, unsigned long);
+				v1 = va_arg(args, unsigned long);
 				if(v1 == 0)
 				{
 					*str++ = '0';
@@ -549,7 +549,7 @@ irc_vsprintf (struct Client *target_p, char *str, const char *format, va_list ar
 			{
 				unsigned int v1;
 
-				v1 = va_arg (args, int);
+				v1 = va_arg(args, int);
 
 				*str++ = (v1 / 10) + '0';
 				*str++ = v1 % 10 + '0';
@@ -563,9 +563,9 @@ irc_vsprintf (struct Client *target_p, char *str, const char *format, va_list ar
 			{
 				unsigned int v1, v2;
 				const char *ap;
-				char *s = &scratch_buffer[sizeof (scratch_buffer) - 2];
+				char *s = &scratch_buffer[sizeof(scratch_buffer) - 2];
 
-				v1 = va_arg (args, int);
+				v1 = va_arg(args, int);
 				if((int) v1 <= 0)
 				{
 					if(v1 == 0)
@@ -604,9 +604,9 @@ irc_vsprintf (struct Client *target_p, char *str, const char *format, va_list ar
 			{
 				unsigned int v1, v2;
 				const char *ap;
-				char *s = &scratch_buffer[sizeof (scratch_buffer) - 2];
+				char *s = &scratch_buffer[sizeof(scratch_buffer) - 2];
 
-				v1 = va_arg (args, unsigned int);
+				v1 = va_arg(args, unsigned int);
 				if(v1 == 0)
 				{
 					*str++ = '0';
@@ -640,7 +640,7 @@ irc_vsprintf (struct Client *target_p, char *str, const char *format, va_list ar
 				int ret;
 
 				format -= 2;
-				ret = vsprintf (str, format, args);
+				ret = vsprintf(str, format, args);
 				str += ret;
 				bytes += ret;
 
@@ -658,32 +658,32 @@ irc_vsprintf (struct Client *target_p, char *str, const char *format, va_list ar
 }				/* vsprintf_irc() */
 
 int
-ircsprintf (char *str, const char *format, ...)
+ircsprintf(char *str, const char *format, ...)
 {
 	va_list args;
 	int bytes;
 
-	va_start (args, format);
+	va_start(args, format);
 
-	bytes = irc_vsprintf (NULL, str, format, args);
+	bytes = irc_vsprintf(NULL, str, format, args);
 
-	va_end (args);
+	va_end(args);
 
 	return (bytes);
 }				/* ircsprintf() */
 
 
 int
-irc_sprintf (struct Client *target_p, char *str, const char *format, ...)
+irc_sprintf(struct Client *target_p, char *str, const char *format, ...)
 {
 	va_list args;
 	int bytes;
 
-	va_start (args, format);
+	va_start(args, format);
 
-	bytes = irc_vsprintf (NULL, str, format, args);
+	bytes = irc_vsprintf(NULL, str, format, args);
 
-	va_end (args);
+	va_end(args);
 
 	return (bytes);
 }

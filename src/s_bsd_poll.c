@@ -65,7 +65,7 @@ static struct pollfd *pfds;
 static int used_count = 0;
 static fde_t **index_to_fde;
 
-static void poll_update_pollfds (int, short, PF *);
+static void poll_update_pollfds(int, short, PF *);
 
 /* XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX */
 /* Private functions */
@@ -74,7 +74,7 @@ static void poll_update_pollfds (int, short, PF *);
  * set and clear entries in the pollfds[] array.
  */
 static void
-poll_update_pollfds (int fd, short event, PF * handler)
+poll_update_pollfds(int fd, short event, PF * handler)
 {
 	fde_t *F = &fd_table[fd];
 	struct pollfd *pf;
@@ -133,10 +133,10 @@ poll_update_pollfds (int fd, short event, PF * handler)
  * the network loop code.
  */
 void
-init_netio (void)
+init_netio(void)
 {
-	pfds = MyMalloc (MAXCONNECTIONS * sizeof (struct pollfd));
-	index_to_fde = MyMalloc (MAXCONNECTIONS * sizeof (fde_t *));
+	pfds = MyMalloc(MAXCONNECTIONS * sizeof(struct pollfd));
+	index_to_fde = MyMalloc(MAXCONNECTIONS * sizeof(fde_t *));
 }
 
 /*
@@ -146,24 +146,24 @@ init_netio (void)
  * and deregister interest in a pending IO state for a given FD.
  */
 void
-comm_setselect (int fd, fdlist_t list, unsigned int type, PF * handler,
-		void *client_data, time_t timeout)
+comm_setselect(int fd, fdlist_t list, unsigned int type, PF * handler,
+	       void *client_data, time_t timeout)
 {
 	fde_t *F = &fd_table[fd];
-	assert (fd >= 0);
-	assert (F->flags.open);
+	assert(fd >= 0);
+	assert(F->flags.open);
 
 	if(type & COMM_SELECT_READ)
 	{
 		F->read_handler = handler;
 		F->read_data = client_data;
-		poll_update_pollfds (fd, POLLRDNORM, handler);
+		poll_update_pollfds(fd, POLLRDNORM, handler);
 	}
 	if(type & COMM_SELECT_WRITE)
 	{
 		F->write_handler = handler;
 		F->write_data = client_data;
-		poll_update_pollfds (fd, POLLWRNORM, handler);
+		poll_update_pollfds(fd, POLLWRNORM, handler);
 	}
 	if(timeout)
 		F->timeout = CurrentTime + (timeout / 1000);
@@ -183,7 +183,7 @@ comm_setselect (int fd, fdlist_t list, unsigned int type, PF * handler,
  * events.
  */
 int
-comm_select (unsigned long delay)
+comm_select(unsigned long delay)
 {
 	int num;
 	int fd;
@@ -194,19 +194,19 @@ comm_select (unsigned long delay)
 	for (;;)
 	{
 		/* XXX kill that +1 later ! -- adrian */
-		num = poll (pfds, used_count, delay);
+		num = poll(pfds, used_count, delay);
 		if(num >= 0)
 			break;
-		if(ignoreErrno (errno))
+		if(ignoreErrno(errno))
 			continue;
 		/* error! */
-		set_time ();
+		set_time();
 		return -1;
 		/* NOTREACHED */
 	}
 
 	/* update current time again, eww.. */
-	set_time ();
+	set_time();
 	callbacks_called += num;
 	if(num == 0)
 		return 0;
@@ -226,7 +226,7 @@ comm_select (unsigned long delay)
 			hdl = F->read_handler;
 			F->read_handler = NULL;
 			if(hdl)
-				hdl (fd, F->read_data);
+				hdl(fd, F->read_data);
 
 		}
 
@@ -237,14 +237,14 @@ comm_select (unsigned long delay)
 			hdl = F->write_handler;
 			F->write_handler = NULL;
 			if(hdl)
-				hdl (fd, F->write_data);
+				hdl(fd, F->write_data);
 
 		}
 
 		if(F->read_handler == NULL)
-			poll_update_pollfds (fd, POLLRDNORM, NULL);
+			poll_update_pollfds(fd, POLLRDNORM, NULL);
 		if(F->write_handler == NULL)
-			poll_update_pollfds (fd, POLLWRNORM, NULL);
+			poll_update_pollfds(fd, POLLWRNORM, NULL);
 
 	}
 	return 0;

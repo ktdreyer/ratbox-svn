@@ -54,45 +54,45 @@ typedef struct FileBuf FBFILE;
 /*
  * open a file and return a FBFILE*, see fopen(3)
  */
-extern FBFILE *fbopen (const char *filename, const char *mode);
+extern FBFILE *fbopen(const char *filename, const char *mode);
 /*
  * associate a file descriptor with a FBFILE*
  * if a FBFILE* is associated here it MUST be closed using fbclose
  * see fdopen(3)
  */
-extern FBFILE *fdbopen (int fd, const char *mode);
+extern FBFILE *fdbopen(int fd, const char *mode);
 /*
  * close a file opened with fbopen, see fclose(3)
  */
-extern void fbclose (FBFILE * fb);
+extern void fbclose(FBFILE * fb);
 /* 
  * return the next character from the file, EOF on end of file
  * see fgetc(3)
  */
-extern int fbgetc (FBFILE * fb);
+extern int fbgetc(FBFILE * fb);
 /*
  * return next string in a file up to and including the newline character
  * see fgets(3)
  */
-extern char *fbgets (char *buf, size_t len, FBFILE * fb);
+extern char *fbgets(char *buf, size_t len, FBFILE * fb);
 /*
  * ungets c to fb see ungetc(3)
  */
-extern void fbungetc (char c, FBFILE * fb);
+extern void fbungetc(char c, FBFILE * fb);
 /*
  * write a null terminated string to a file, see fputs(3)
  */
-extern int fbputs (const char *str, FBFILE * fb);
+extern int fbputs(const char *str, FBFILE * fb);
 /*
  * return the status of the file associated with fb, see fstat(3)
  */
-extern int fbstat (struct stat *sb, FBFILE * fb);
+extern int fbstat(struct stat *sb, FBFILE * fb);
 /*
  * popen a file.
  */
-extern FBFILE *fbpopen (const char *, const char *);
+extern FBFILE *fbpopen(const char *, const char *);
 
-extern int file_open (const char *filename, int mode, int fmode);
-extern void file_close (int fd);
+extern int file_open(const char *filename, int mode, int fmode);
+extern void file_close(int fd);
 
 #endif /* INCLUDED_fileio_h */

@@ -43,51 +43,51 @@
 dlink_list cluster_list;
 
 struct cluster *
-make_cluster (void)
+make_cluster(void)
 {
 	struct cluster *clptr;
 
-	clptr = (struct cluster *) MyMalloc (sizeof (struct cluster));
-	memset (clptr, 0, sizeof (struct cluster));
+	clptr = (struct cluster *) MyMalloc(sizeof(struct cluster));
+	memset(clptr, 0, sizeof(struct cluster));
 
 	return clptr;
 }
 
 void
-free_cluster (struct cluster *clptr)
+free_cluster(struct cluster *clptr)
 {
-	assert (clptr != NULL);
+	assert(clptr != NULL);
 	if(clptr == NULL)
 		return;
 
-	MyFree (clptr->name);
-	MyFree ((char *) clptr);
+	MyFree(clptr->name);
+	MyFree((char *) clptr);
 }
 
 void
-clear_clusters (void)
+clear_clusters(void)
 {
 	dlink_node *ptr;
 	dlink_node *next_ptr;
 
-	DLINK_FOREACH_SAFE (ptr, next_ptr, cluster_list.head)
+	DLINK_FOREACH_SAFE(ptr, next_ptr, cluster_list.head)
 	{
-		free_cluster (ptr->data);
-		dlinkDestroy (ptr, &cluster_list);
+		free_cluster(ptr->data);
+		dlinkDestroy(ptr, &cluster_list);
 	}
 }
 
 int
-find_cluster (const char *name, int type)
+find_cluster(const char *name, int type)
 {
 	struct cluster *clptr;
 	dlink_node *ptr;
 
-	DLINK_FOREACH (ptr, cluster_list.head)
+	DLINK_FOREACH(ptr, cluster_list.head)
 	{
 		clptr = ptr->data;
 
-		if(match (clptr->name, name) && clptr->type & type)
+		if(match(clptr->name, name) && clptr->type & type)
 			return 1;
 	}
 
@@ -95,51 +95,51 @@ find_cluster (const char *name, int type)
 }
 
 void
-cluster_kline (struct Client *source_p, int tkline_time, const char *user,
-	       const char *host, const char *reason)
+cluster_kline(struct Client *source_p, int tkline_time, const char *user,
+	      const char *host, const char *reason)
 {
 	struct cluster *clptr;
 	dlink_node *ptr;
 
-	DLINK_FOREACH (ptr, cluster_list.head)
+	DLINK_FOREACH(ptr, cluster_list.head)
 	{
 		clptr = ptr->data;
 
 		if(clptr->type & CLUSTER_KLINE)
-			sendto_match_servs (source_p, clptr->name, CAP_KLN,
-					    "KLINE %s %d %s %s :%s",
-					    clptr->name, tkline_time, user, host, reason);
+			sendto_match_servs(source_p, clptr->name, CAP_KLN,
+					   "KLINE %s %d %s %s :%s",
+					   clptr->name, tkline_time, user, host, reason);
 	}
 }
 
 void
-cluster_unkline (struct Client *source_p, const char *user, const char *host)
+cluster_unkline(struct Client *source_p, const char *user, const char *host)
 {
 	struct cluster *clptr;
 	dlink_node *ptr;
 
-	DLINK_FOREACH (ptr, cluster_list.head)
+	DLINK_FOREACH(ptr, cluster_list.head)
 	{
 		clptr = ptr->data;
 
 		if(clptr->type & CLUSTER_UNKLINE)
-			sendto_match_servs (source_p, clptr->name, CAP_UNKLN,
-					    "UNKLINE %s %s %s", clptr->name, user, host);
+			sendto_match_servs(source_p, clptr->name, CAP_UNKLN,
+					   "UNKLINE %s %s %s", clptr->name, user, host);
 	}
 }
 
 void
-cluster_locops (struct Client *source_p, const char *message)
+cluster_locops(struct Client *source_p, const char *message)
 {
 	struct cluster *clptr;
 	dlink_node *ptr;
 
-	DLINK_FOREACH (ptr, cluster_list.head)
+	DLINK_FOREACH(ptr, cluster_list.head)
 	{
 		clptr = ptr->data;
 
 		if(clptr->type & CLUSTER_LOCOPS)
-			sendto_match_servs (source_p, clptr->name,
-					    CAP_CLUSTER, "LOCOPS %s :%s", clptr->name, message);
+			sendto_match_servs(source_p, clptr->name,
+					   CAP_CLUSTER, "LOCOPS %s :%s", clptr->name, message);
 	}
 }

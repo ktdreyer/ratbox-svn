@@ -35,12 +35,12 @@
 /* Maximum mode changes allowed per client, per server is different */
 #define MAXMODEPARAMS   4
 
-extern void set_channel_mode (struct Client *, struct Client *,
-			      struct Channel *, int, char **, char *);
+extern void set_channel_mode(struct Client *, struct Client *,
+			     struct Channel *, int, char **, char *);
 
-extern void init_chcap_usage_counts (void);
-extern void set_chcap_usage_counts (struct Client *serv_p);
-extern void unset_chcap_usage_counts (struct Client *serv_p);
+extern void init_chcap_usage_counts(void);
+extern void set_chcap_usage_counts(struct Client *serv_p);
+extern void unset_chcap_usage_counts(struct Client *serv_p);
 
 /*
 ** Channel Related macros follow

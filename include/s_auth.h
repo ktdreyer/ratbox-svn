@@ -76,10 +76,10 @@ struct AuthRequest
 
 
 
-extern void start_auth (struct Client *);
-extern void send_auth_query (struct AuthRequest *req);
-extern void remove_auth_request (struct AuthRequest *req);
-extern void init_auth (void);
-extern void delete_identd_queries (struct Client *);
+extern void start_auth(struct Client *);
+extern void send_auth_query(struct AuthRequest *req);
+extern void remove_auth_request(struct AuthRequest *req);
+extern void init_auth(void);
+extern void delete_identd_queries(struct Client *);
 
 #endif /* INCLUDED_s_auth_h */

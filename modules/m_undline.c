@@ -45,7 +45,7 @@
 #include "s_serv.h"
 #include "cluster.h"
 
-static void mo_undline (struct Client *, struct Client *, int, char **);
+static void mo_undline(struct Client *, struct Client *, int, char **);
 
 struct Message undline_msgtab = {
 	"UNDLINE", 0, 0, 2, 0, MFLG_SLOW, 0,
@@ -54,21 +54,21 @@ struct Message undline_msgtab = {
 
 #ifndef STATIC_MODULES
 void
-_modinit (void)
+_modinit(void)
 {
-	mod_add_cmd (&undline_msgtab);
+	mod_add_cmd(&undline_msgtab);
 }
 
 void
-_moddeinit (void)
+_moddeinit(void)
 {
-	mod_del_cmd (&undline_msgtab);
+	mod_del_cmd(&undline_msgtab);
 }
 const char *_version = "$Revision$";
 #endif
 
-static int flush_write (struct Client *, FBFILE *, char *, char *);
-static int remove_temp_dline (char *);
+static int flush_write(struct Client *, FBFILE *, char *, char *);
+static int remove_temp_dline(char *);
 
 /* mo_undline()
  *
@@ -76,7 +76,7 @@ static int remove_temp_dline (char *);
  *      parv[1] = dline to remove
  */
 static void
-mo_undline (struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+mo_undline(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
 {
 	FBFILE *in;
 	FBFILE *out;
@@ -86,106 +86,105 @@ mo_undline (struct Client *client_p, struct Client *source_p, int parc, char *pa
 	int pairme = NO, error_on_write = NO;
 	mode_t oldumask;
 
-	ircsprintf (temppath, "%s.tmp", ConfigFileEntry.dlinefile);
+	ircsprintf(temppath, "%s.tmp", ConfigFileEntry.dlinefile);
 
-	if(!IsOperUnkline (source_p))
+	if(!IsOperUnkline(source_p))
 	{
-		sendto_one (source_p, ":%s NOTICE %s :You need unkline = yes;", me.name, parv[0]);
+		sendto_one(source_p, ":%s NOTICE %s :You need unkline = yes;", me.name, parv[0]);
 		return;
 	}
 
 	cidr = parv[1];
 
-	if(remove_temp_dline (cidr))
+	if(remove_temp_dline(cidr))
 	{
-		sendto_one (source_p,
-			    ":%s NOTICE %s :Un-dlined [%s] from temporary D-lines",
-			    me.name, parv[0], cidr);
-		sendto_realops_flags (UMODE_ALL, L_ALL,
-				      "%s has removed the temporary D-Line for: [%s]",
-				      get_oper_name (source_p), cidr);
-		ilog (L_NOTICE, "%s removed temporary D-Line for [%s]", parv[0], cidr);
+		sendto_one(source_p,
+			   ":%s NOTICE %s :Un-dlined [%s] from temporary D-lines",
+			   me.name, parv[0], cidr);
+		sendto_realops_flags(UMODE_ALL, L_ALL,
+				     "%s has removed the temporary D-Line for: [%s]",
+				     get_oper_name(source_p), cidr);
+		ilog(L_NOTICE, "%s removed temporary D-Line for [%s]", parv[0], cidr);
 		return;
 	}
 
-	filename = get_conf_name (DLINE_TYPE);
+	filename = get_conf_name(DLINE_TYPE);
 
-	if((in = fbopen (filename, "r")) == 0)
+	if((in = fbopen(filename, "r")) == 0)
 	{
-		sendto_one (source_p, ":%s NOTICE %s :Cannot open %s", me.name, parv[0], filename);
+		sendto_one(source_p, ":%s NOTICE %s :Cannot open %s", me.name, parv[0], filename);
 		return;
 	}
 
-	oldumask = umask (0);
-	if((out = fbopen (temppath, "w")) == 0)
+	oldumask = umask(0);
+	if((out = fbopen(temppath, "w")) == 0)
 	{
-		sendto_one (source_p, ":%s NOTICE %s :Cannot open %s", me.name, parv[0], temppath);
-		fbclose (in);
-		umask (oldumask);
+		sendto_one(source_p, ":%s NOTICE %s :Cannot open %s", me.name, parv[0], temppath);
+		fbclose(in);
+		umask(oldumask);
 		return;
 	}
 
-	umask (oldumask);
+	umask(oldumask);
 
-	while (fbgets (buf, sizeof (buf), in))
+	while (fbgets(buf, sizeof(buf), in))
 	{
-		strlcpy (buff, buf, sizeof (buff));
+		strlcpy(buff, buf, sizeof(buff));
 
-		if((p = strchr (buff, '\n')) != NULL)
+		if((p = strchr(buff, '\n')) != NULL)
 			*p = '\0';
 
 		if((*buff == '\0') || (*buff == '#'))
 		{
 			if(!error_on_write)
-				flush_write (source_p, out, buf, temppath);
+				flush_write(source_p, out, buf, temppath);
 			continue;
 		}
 
-		if((found_cidr = getfield (buff)) == NULL)
+		if((found_cidr = getfield(buff)) == NULL)
 		{
 			if(!error_on_write)
-				flush_write (source_p, out, buf, temppath);
+				flush_write(source_p, out, buf, temppath);
 			continue;
 		}
 
-		if(irccmp (found_cidr, cidr) == 0)
+		if(irccmp(found_cidr, cidr) == 0)
 		{
 			pairme++;
 		}
 		else
 		{
 			if(!error_on_write)
-				flush_write (source_p, out, buf, temppath);
+				flush_write(source_p, out, buf, temppath);
 			continue;
 		}
 	}
 
-	fbclose (in);
-	fbclose (out);
+	fbclose(in);
+	fbclose(out);
 
 	if(!error_on_write)
 	{
-		(void) rename (temppath, filename);
-		rehash (0);
+		(void) rename(temppath, filename);
+		rehash(0);
 	}
 	else
 	{
-		sendto_one (source_p,
-			    ":%s NOTICE %s :Couldn't write D-line file, aborted", me.name, parv[0]);
+		sendto_one(source_p,
+			   ":%s NOTICE %s :Couldn't write D-line file, aborted", me.name, parv[0]);
 		return;
 	}
 
 	if(!pairme)
 	{
-		sendto_one (source_p, ":%s NOTICE %s :No D-Line for %s", me.name, parv[0], cidr);
+		sendto_one(source_p, ":%s NOTICE %s :No D-Line for %s", me.name, parv[0], cidr);
 		return;
 	}
 
-	sendto_one (source_p, ":%s NOTICE %s :D-Line for [%s] is removed", me.name, parv[0], cidr);
-	sendto_realops_flags (UMODE_ALL, L_ALL,
-			      "%s has removed the D-Line for: [%s]",
-			      get_oper_name (source_p), cidr);
-	ilog (L_NOTICE, "%s removed D-Line for [%s]", get_oper_name (source_p), cidr);
+	sendto_one(source_p, ":%s NOTICE %s :D-Line for [%s] is removed", me.name, parv[0], cidr);
+	sendto_realops_flags(UMODE_ALL, L_ALL,
+			     "%s has removed the D-Line for: [%s]", get_oper_name(source_p), cidr);
+	ilog(L_NOTICE, "%s removed D-Line for [%s]", get_oper_name(source_p), cidr);
 }
 
 /*
@@ -209,17 +208,17 @@ mo_undline (struct Client *client_p, struct Client *source_p, int parc, char *pa
  */
 
 static int
-flush_write (struct Client *source_p, FBFILE * out, char *buf, char *temppath)
+flush_write(struct Client *source_p, FBFILE * out, char *buf, char *temppath)
 {
-	int error_on_write = (fbputs (buf, out) < 0) ? YES : NO;
+	int error_on_write = (fbputs(buf, out) < 0) ? YES : NO;
 
 	if(error_on_write)
 	{
-		sendto_one (source_p, ":%s NOTICE %s :Unable to write to %s",
-			    me.name, source_p->name, temppath);
-		fbclose (out);
+		sendto_one(source_p, ":%s NOTICE %s :Unable to write to %s",
+			   me.name, source_p->name, temppath);
+		fbclose(out);
 		if(temppath != NULL)
-			(void) unlink (temppath);
+			(void) unlink(temppath);
 	}
 	return (error_on_write);
 }
@@ -239,7 +238,7 @@ static dlink_list *tdline_list[] = {
  * side effects - tries to undline anything that matches
  */
 static int
-remove_temp_dline (char *host)
+remove_temp_dline(char *host)
 {
 	dlink_list *tdlist;
 	struct ConfItem *aconf;
@@ -248,22 +247,22 @@ remove_temp_dline (char *host)
 	int bits, cbits;
 	int i;
 
-	parse_netmask (host, &addr, &bits);
+	parse_netmask(host, &addr, &bits);
 
 	for (i = 0; tdline_list[i] != NULL; i++)
 	{
 		tdlist = tdline_list[i];
 
-		DLINK_FOREACH (ptr, tdlist->head)
+		DLINK_FOREACH(ptr, tdlist->head)
 		{
 			aconf = ptr->data;
 
-			parse_netmask (aconf->host, &caddr, &cbits);
+			parse_netmask(aconf->host, &caddr, &cbits);
 
-			if(comp_with_mask (&IN_ADDR (addr), &IN_ADDR (caddr), bits) && bits == cbits)	
+			if(comp_with_mask(&IN_ADDR(addr), &IN_ADDR(caddr), bits) && bits == cbits)
 			{
-				dlinkDestroy (ptr, tdlist);
-				delete_one_address_conf (aconf);
+				dlinkDestroy(ptr, tdlist);
+				delete_one_address_conf(aconf);
 				return YES;
 			}
 		}

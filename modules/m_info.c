@@ -43,14 +43,14 @@
 #include "parse.h"
 #include "modules.h"
 
-static void send_conf_options (struct Client *source_p);
-static void send_birthdate_online_time (struct Client *source_p);
-static void send_info_text (struct Client *source_p);
-static void info_spy (struct Client *);
+static void send_conf_options(struct Client *source_p);
+static void send_birthdate_online_time(struct Client *source_p);
+static void send_info_text(struct Client *source_p);
+static void info_spy(struct Client *);
 
-static void m_info (struct Client *, struct Client *, int, char **);
-static void ms_info (struct Client *, struct Client *, int, char **);
-static void mo_info (struct Client *, struct Client *, int, char **);
+static void m_info(struct Client *, struct Client *, int, char **);
+static void ms_info(struct Client *, struct Client *, int, char **);
+static void mo_info(struct Client *, struct Client *, int, char **);
 
 struct Message info_msgtab = {
 	"INFO", 0, 0, 0, 0, MFLG_SLOW, 0,
@@ -59,17 +59,17 @@ struct Message info_msgtab = {
 #ifndef STATIC_MODULES
 
 void
-_modinit (void)
+_modinit(void)
 {
-	hook_add_event ("doing_info");
-	mod_add_cmd (&info_msgtab);
+	hook_add_event("doing_info");
+	mod_add_cmd(&info_msgtab);
 }
 
 void
-_moddeinit (void)
+_moddeinit(void)
 {
-	hook_del_event ("doing_info");
-	mod_del_cmd (&info_msgtab);
+	hook_del_event("doing_info");
+	mod_del_cmd(&info_msgtab);
 }
 const char *_version = "$Revision$";
 #endif
@@ -453,14 +453,14 @@ static struct InfoStruct info_table[] = {
 */
 
 static void
-m_info (struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+m_info(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
 {
 	static time_t last_used = 0L;
 
 	if((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
 	{
 		/* safe enough to give this on a local connect only */
-		sendto_one (source_p, form_str (RPL_LOAD2HI), me.name, parv[0]);
+		sendto_one(source_p, form_str(RPL_LOAD2HI), me.name, parv[0]);
 		return;
 	}
 	else
@@ -470,18 +470,18 @@ m_info (struct Client *client_p, struct Client *source_p, int parc, char *parv[]
 
 	if(!ConfigServerHide.disable_remote)
 	{
-		if(hunt_server (client_p, source_p, ":%s INFO :%s", 1, parc, parv) != HUNTED_ISME)
+		if(hunt_server(client_p, source_p, ":%s INFO :%s", 1, parc, parv) != HUNTED_ISME)
 		{
 			return;
 		}
 	}
 
-	info_spy (source_p);
+	info_spy(source_p);
 
-	send_info_text (source_p);
-	send_birthdate_online_time (source_p);
+	send_info_text(source_p);
+	send_birthdate_online_time(source_p);
 
-	sendto_one (source_p, form_str (RPL_ENDOFINFO), me.name, parv[0]);
+	sendto_one(source_p, form_str(RPL_ENDOFINFO), me.name, parv[0]);
 
 }				/* m_info() */
 
@@ -491,17 +491,17 @@ m_info (struct Client *client_p, struct Client *source_p, int parc, char *parv[]
 **  parv[1] = servername
 */
 static void
-mo_info (struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+mo_info(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
 {
-	if(hunt_server (client_p, source_p, ":%s INFO :%s", 1, parc, parv) == HUNTED_ISME)
+	if(hunt_server(client_p, source_p, ":%s INFO :%s", 1, parc, parv) == HUNTED_ISME)
 	{
-		info_spy (source_p);
+		info_spy(source_p);
 
-		send_info_text (source_p);
-		send_conf_options (source_p);
-		send_birthdate_online_time (source_p);
+		send_info_text(source_p);
+		send_conf_options(source_p);
+		send_birthdate_online_time(source_p);
 
-		sendto_one (source_p, form_str (RPL_ENDOFINFO), me.name, parv[0]);
+		sendto_one(source_p, form_str(RPL_ENDOFINFO), me.name, parv[0]);
 	}
 }				/* mo_info() */
 
@@ -511,23 +511,23 @@ mo_info (struct Client *client_p, struct Client *source_p, int parc, char *parv[
 **  parv[1] = servername
 */
 static void
-ms_info (struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+ms_info(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
 {
-	if(!IsClient (source_p))
+	if(!IsClient(source_p))
 		return;
 
-	if(hunt_server (client_p, source_p, ":%s INFO :%s", 1, parc, parv) == HUNTED_ISME)
+	if(hunt_server(client_p, source_p, ":%s INFO :%s", 1, parc, parv) == HUNTED_ISME)
 	{
-		info_spy (source_p);
+		info_spy(source_p);
 
-		send_info_text (source_p);
+		send_info_text(source_p);
 
 		/* I dont see why remote opers need this, but.. */
-		if(IsOper (source_p))
-			send_conf_options (source_p);
+		if(IsOper(source_p))
+			send_conf_options(source_p);
 
-		send_birthdate_online_time (source_p);
-		sendto_one (source_p, form_str (RPL_ENDOFINFO), me.name, parv[0]);
+		send_birthdate_online_time(source_p);
+		sendto_one(source_p, form_str(RPL_ENDOFINFO), me.name, parv[0]);
 	}
 }				/* ms_info() */
 
@@ -540,16 +540,16 @@ ms_info (struct Client *client_p, struct Client *source_p, int parc, char *parv[
  * side effects	- info text is sent to client
  */
 static void
-send_info_text (struct Client *source_p)
+send_info_text(struct Client *source_p)
 {
 	const char **text = infotext;
 
 	while (*text)
 	{
-		sendto_one (source_p, form_str (RPL_INFO), me.name, source_p->name, *text++);
+		sendto_one(source_p, form_str(RPL_INFO), me.name, source_p->name, *text++);
 	}
 
-	sendto_one (source_p, form_str (RPL_INFO), me.name, source_p->name, "");
+	sendto_one(source_p, form_str(RPL_INFO), me.name, source_p->name, "");
 }
 
 /*
@@ -560,15 +560,15 @@ send_info_text (struct Client *source_p)
  * side effects	- birthdate and online time are sent
  */
 static void
-send_birthdate_online_time (struct Client *source_p)
+send_birthdate_online_time(struct Client *source_p)
 {
-	sendto_one (source_p,
-		    ":%s %d %s :Birth Date: %s, compile # %s",
-		    me.name, RPL_INFO, source_p->name, creation, generation);
+	sendto_one(source_p,
+		   ":%s %d %s :Birth Date: %s, compile # %s",
+		   me.name, RPL_INFO, source_p->name, creation, generation);
 
-	sendto_one (source_p,
-		    ":%s %d %s :On-line since %s",
-		    me.name, RPL_INFO, source_p->name, myctime (me.firsttime));
+	sendto_one(source_p,
+		   ":%s %d %s :On-line since %s",
+		   me.name, RPL_INFO, source_p->name, myctime(me.firsttime));
 }
 
 /*
@@ -579,7 +579,7 @@ send_birthdate_online_time (struct Client *source_p)
  * side effects	- send config options to client
  */
 static void
-send_conf_options (struct Client *source_p)
+send_conf_options(struct Client *source_p)
 {
 	Info *infoptr;
 	int i = 0;
@@ -592,21 +592,19 @@ send_conf_options (struct Client *source_p)
 	{
 		if(infoptr->intvalue)
 		{
-			sendto_one (source_p,
-				    ":%s %d %s :%-30s %-5d [%-30s]",
-				    me.name,
-				    RPL_INFO,
-				    source_p->name,
-				    infoptr->name, infoptr->intvalue, infoptr->desc);
+			sendto_one(source_p,
+				   ":%s %d %s :%-30s %-5d [%-30s]",
+				   me.name,
+				   RPL_INFO,
+				   source_p->name, infoptr->name, infoptr->intvalue, infoptr->desc);
 		}
 		else
 		{
-			sendto_one (source_p,
-				    ":%s %d %s :%-30s %-5s [%-30s]",
-				    me.name,
-				    RPL_INFO,
-				    source_p->name,
-				    infoptr->name, infoptr->strvalue, infoptr->desc);
+			sendto_one(source_p,
+				   ":%s %d %s :%-30s %-5s [%-30s]",
+				   me.name,
+				   RPL_INFO,
+				   source_p->name, infoptr->name, infoptr->strvalue, infoptr->desc);
 		}
 	}
 
@@ -624,14 +622,14 @@ send_conf_options (struct Client *source_p)
 			{
 				char *option = *((char **) info_table[i].option);
 
-				sendto_one (source_p,
-					    ":%s %d %s :%-30s %-5s [%-30s]",
-					    me.name,
-					    RPL_INFO,
-					    source_p->name,
-					    info_table[i].name,
-					    option ? option : "NONE",
-					    info_table[i].desc ? info_table[i].desc : "<none>");
+				sendto_one(source_p,
+					   ":%s %d %s :%-30s %-5s [%-30s]",
+					   me.name,
+					   RPL_INFO,
+					   source_p->name,
+					   info_table[i].name,
+					   option ? option : "NONE",
+					   info_table[i].desc ? info_table[i].desc : "<none>");
 
 				break;
 			}
@@ -642,14 +640,14 @@ send_conf_options (struct Client *source_p)
 			{
 				char *option = (char *) info_table[i].option;
 
-				sendto_one (source_p,
-					    ":%s %d %s :%-30s %-5s [%-30s]",
-					    me.name,
-					    RPL_INFO,
-					    source_p->name,
-					    info_table[i].name,
-					    option ? option : "NONE",
-					    info_table[i].desc ? info_table[i].desc : "<none>");
+				sendto_one(source_p,
+					   ":%s %d %s :%-30s %-5s [%-30s]",
+					   me.name,
+					   RPL_INFO,
+					   source_p->name,
+					   info_table[i].name,
+					   option ? option : "NONE",
+					   info_table[i].desc ? info_table[i].desc : "<none>");
 
 				break;
 			}
@@ -660,14 +658,14 @@ send_conf_options (struct Client *source_p)
 			{
 				int option = *((int *) info_table[i].option);
 
-				sendto_one (source_p,
-					    ":%s %d %s :%-30s %-5d [%-30s]",
-					    me.name,
-					    RPL_INFO,
-					    source_p->name,
-					    info_table[i].name,
-					    option,
-					    info_table[i].desc ? info_table[i].desc : "<none>");
+				sendto_one(source_p,
+					   ":%s %d %s :%-30s %-5d [%-30s]",
+					   me.name,
+					   RPL_INFO,
+					   source_p->name,
+					   info_table[i].name,
+					   option,
+					   info_table[i].desc ? info_table[i].desc : "<none>");
 
 				break;
 			}
@@ -679,14 +677,14 @@ send_conf_options (struct Client *source_p)
 			{
 				int option = *((int *) info_table[i].option);
 
-				sendto_one (source_p,
-					    ":%s %d %s :%-30s %-5s [%-30s]",
-					    me.name,
-					    RPL_INFO,
-					    source_p->name,
-					    info_table[i].name,
-					    option ? "ON" : "OFF",
-					    info_table[i].desc ? info_table[i].desc : "<none>");
+				sendto_one(source_p,
+					   ":%s %d %s :%-30s %-5s [%-30s]",
+					   me.name,
+					   RPL_INFO,
+					   source_p->name,
+					   info_table[i].name,
+					   option ? "ON" : "OFF",
+					   info_table[i].desc ? info_table[i].desc : "<none>");
 
 				break;
 			}
@@ -697,14 +695,14 @@ send_conf_options (struct Client *source_p)
 			{
 				int option = *((int *) info_table[i].option);
 
-				sendto_one (source_p,
-					    ":%s %d %s :%-30s %-5s [%-30s]",
-					    me.name,
-					    RPL_INFO,
-					    source_p->name,
-					    info_table[i].name,
-					    option ? "YES" : "NO",
-					    info_table[i].desc ? info_table[i].desc : "<none>");
+				sendto_one(source_p,
+					   ":%s %d %s :%-30s %-5s [%-30s]",
+					   me.name,
+					   RPL_INFO,
+					   source_p->name,
+					   info_table[i].name,
+					   option ? "YES" : "NO",
+					   info_table[i].desc ? info_table[i].desc : "<none>");
 
 				break;
 			}
@@ -718,15 +716,15 @@ send_conf_options (struct Client *source_p)
 
 #if 0
 	/* jdc -- Only send compile information to admins. */
-	if(IsOperAdmin (source_p))
+	if(IsOperAdmin(source_p))
 	{
-		sendto_one (source_p,
-			    ":%s %d %s :Compiled on [%s]",
-			    me.name, RPL_INFO, source_p->name, platform);
+		sendto_one(source_p,
+			   ":%s %d %s :Compiled on [%s]",
+			   me.name, RPL_INFO, source_p->name, platform);
 	}
 #endif
 
-	sendto_one (source_p, form_str (RPL_INFO), me.name, source_p->name, "");
+	sendto_one(source_p, form_str(RPL_INFO), me.name, source_p->name, "");
 }
 
 /* info_spy()
@@ -736,11 +734,11 @@ send_conf_options (struct Client *source_p)
  * side effects - hook doing_info is called
  */
 static void
-info_spy (struct Client *source_p)
+info_spy(struct Client *source_p)
 {
 	struct hook_spy_data data;
 
 	data.source_p = source_p;
 
-	hook_call_event ("doing_info", &data);
+	hook_call_event("doing_info", &data);
 }

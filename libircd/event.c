@@ -75,7 +75,7 @@ static time_t event_time_min = -1;
  * Side Effects: Adds the event to the event list.
  */
 void
-eventAdd (const char *name, EVH * func, void *arg, time_t when)
+eventAdd(const char *name, EVH * func, void *arg, time_t when)
 {
 	int i;
 
@@ -99,7 +99,7 @@ eventAdd (const char *name, EVH * func, void *arg, time_t when)
 	}
 
 	/* erk! couldnt add to event table */
-	sendto_realops_flags (UMODE_DEBUG, L_ALL, "Unable to add event [%s] to event table", name);
+	sendto_realops_flags(UMODE_DEBUG, L_ALL, "Unable to add event [%s] to event table", name);
 
 }
 
@@ -111,11 +111,11 @@ eventAdd (const char *name, EVH * func, void *arg, time_t when)
  * Side Effects: Removes the event from the event list
  */
 void
-eventDelete (EVH * func, void *arg)
+eventDelete(EVH * func, void *arg)
 {
 	int i;
 
-	i = eventFind (func, arg);
+	i = eventFind(func, arg);
 
 	if(i == -1)
 		return;
@@ -136,18 +136,18 @@ eventDelete (EVH * func, void *arg)
  *	         specified frequency.
  */
 void
-eventAddIsh (const char *name, EVH * func, void *arg, time_t delta_ish)
+eventAddIsh(const char *name, EVH * func, void *arg, time_t delta_ish)
 {
 	if(delta_ish >= 3.0)
 	{
 		const time_t two_third = (2 * delta_ish) / 3;
-		delta_ish = two_third + ((rand () % 1000) * two_third) / 1000;
+		delta_ish = two_third + ((rand() % 1000) * two_third) / 1000;
 		/*
 		 * XXX I hate the above magic, I don't even know if its right.
 		 * Grr. -- adrian
 		 */
 	}
-	eventAdd (name, func, arg, delta_ish);
+	eventAdd(name, func, arg, delta_ish);
 }
 
 /*
@@ -158,7 +158,7 @@ eventAddIsh (const char *name, EVH * func, void *arg, time_t delta_ish)
  * Side Effects: Runs pending events in the event list
  */
 void
-eventRun (void)
+eventRun(void)
 {
 	int i;
 
@@ -167,7 +167,7 @@ eventRun (void)
 		if(event_table[i].active && (event_table[i].when <= CurrentTime))
 		{
 			last_event_ran = event_table[i].name;
-			event_table[i].func (event_table[i].arg);
+			event_table[i].func(event_table[i].arg);
 			event_table[i].when = CurrentTime + event_table[i].frequency;
 			event_time_min = -1;
 		}
@@ -183,7 +183,7 @@ eventRun (void)
  * Side Effects: None
  */
 time_t
-eventNextTime (void)
+eventNextTime(void)
 {
 	int i;
 
@@ -208,10 +208,10 @@ eventNextTime (void)
  * Side Effects: Initializes the event system. 
  */
 void
-eventInit (void)
+eventInit(void)
 {
 	last_event_ran = NULL;
-	memset ((void *) event_table, 0, sizeof (event_table));
+	memset((void *) event_table, 0, sizeof(event_table));
 }
 
 /*
@@ -222,7 +222,7 @@ eventInit (void)
  * Side Effects: None
  */
 int
-eventFind (EVH * func, void *arg)
+eventFind(EVH * func, void *arg)
 {
 	int i;
 
@@ -244,25 +244,25 @@ eventFind (EVH * func, void *arg)
  * Side Effects: None
  */
 void
-show_events (struct Client *source_p)
+show_events(struct Client *source_p)
 {
 	int i;
 
 	if(last_event_ran)
-		sendto_one (source_p, ":%s %d %s :Last event to run: %s",
-			    me.name, RPL_STATSDEBUG, source_p->name, last_event_ran);
+		sendto_one(source_p, ":%s %d %s :Last event to run: %s",
+			   me.name, RPL_STATSDEBUG, source_p->name, last_event_ran);
 
-	sendto_one (source_p,
-		    ":%s %d %s :Operation                    Next Execution",
-		    me.name, RPL_STATSDEBUG, source_p->name);
+	sendto_one(source_p,
+		   ":%s %d %s :Operation                    Next Execution",
+		   me.name, RPL_STATSDEBUG, source_p->name);
 
 	for (i = 0; i < MAX_EVENTS; i++)
 	{
 		if(event_table[i].active)
 		{
-			sendto_one (source_p, ":%s %d %s :%-28s %-4d seconds",
-				    me.name, RPL_STATSDEBUG, source_p->name,
-				    event_table[i].name, (int) (event_table[i].when - CurrentTime));
+			sendto_one(source_p, ":%s %d %s :%-28s %-4d seconds",
+				   me.name, RPL_STATSDEBUG, source_p->name,
+				   event_table[i].name, (int) (event_table[i].when - CurrentTime));
 		}
 	}
 }
@@ -274,7 +274,7 @@ show_events (struct Client *source_p)
  * Side-effects: Sets back all events by "by" seconds.
  */
 void
-set_back_events (time_t by)
+set_back_events(time_t by)
 {
 	int i;
 

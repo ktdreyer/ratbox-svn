@@ -36,7 +36,7 @@
 #include "modules.h"
 #include "s_conf.h"
 
-static void mr_dumb_proxy (struct Client *, struct Client *, int, char **);
+static void mr_dumb_proxy(struct Client *, struct Client *, int, char **);
 
 struct Message post_msgtab = {
 	"POST", 0, 0, 0, 0, MFLG_SLOW | MFLG_UNREG, 0,
@@ -56,15 +56,15 @@ struct Message put_msgtab = {
 
 #ifndef STATIC_MODULES
 void
-_modinit (void)
+_modinit(void)
 {
-	mod_add_cmd (&post_msgtab);
+	mod_add_cmd(&post_msgtab);
 }
 
 void
-_moddeinit (void)
+_moddeinit(void)
 {
-	mod_del_cmd (&post_msgtab);
+	mod_del_cmd(&post_msgtab);
 }
 
 const char *_version = "$Revision$";
@@ -75,10 +75,10 @@ const char *_version = "$Revision$";
 **      parv[1] = comment
 */
 static void
-mr_dumb_proxy (struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+mr_dumb_proxy(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
 {
-	sendto_realops_flags (UMODE_REJ, L_ALL,
-			      "HTTP Proxy disconnected: [%s@%s]",
-			      client_p->username, client_p->host);
-	exit_client (client_p, source_p, source_p, "Client Exit");
+	sendto_realops_flags(UMODE_REJ, L_ALL,
+			     "HTTP Proxy disconnected: [%s@%s]",
+			     client_p->username, client_p->host);
+	exit_client(client_p, source_p, source_p, "Client Exit");
 }

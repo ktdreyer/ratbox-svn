@@ -41,7 +41,7 @@
 
 #include <string.h>
 
-static void m_ison (struct Client *, struct Client *, int, char **);
+static void m_ison(struct Client *, struct Client *, int, char **);
 
 struct Message ison_msgtab = {
 	"ISON", 0, 0, 1, 1, MFLG_SLOW, 0,
@@ -51,15 +51,15 @@ struct Message ison_msgtab = {
 #ifndef STATIC_MODULES
 
 void
-_modinit (void)
+_modinit(void)
 {
-	mod_add_cmd (&ison_msgtab);
+	mod_add_cmd(&ison_msgtab);
 }
 
 void
-_moddeinit (void)
+_moddeinit(void)
 {
-	mod_del_cmd (&ison_msgtab);
+	mod_del_cmd(&ison_msgtab);
 }
 const char *_version = "$Revision$";
 #endif
@@ -78,7 +78,7 @@ static char buf2[BUFSIZE];
  * ISON :nicklist
  */
 static void
-m_ison (struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+m_ison(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
 {
 	struct Client *target_p;
 	char *nick;
@@ -91,8 +91,8 @@ m_ison (struct Client *client_p, struct Client *source_p, int parc, char *parv[]
 	current_insert_point2 = buf2;
 	*buf2 = '\0';
 
-	ircsprintf (buf, form_str (RPL_ISON), me.name, parv[0]);
-	len = strlen (buf);
+	ircsprintf(buf, form_str(RPL_ISON), me.name, parv[0]);
+	len = strlen(buf);
 	current_insert_point = buf + len;
 
 	/* rfc1489 is ambigious about how to handle ISON
@@ -100,23 +100,22 @@ m_ison (struct Client *client_p, struct Client *source_p, int parc, char *parv[]
 	 */
 	for (i = 1; i < parc; i++)
 	{
-		for (nick = strtoken (&p, parv[i], " "); nick; nick = strtoken (&p, NULL, " "))
+		for (nick = strtoken(&p, parv[i], " "); nick; nick = strtoken(&p, NULL, " "))
 		{
-			target_p = find_person (nick);
+			target_p = find_person(nick);
 
-			if(target_p == NULL &&
-			   (IsOper (source_p) || !ConfigServerHide.hide_servers))
+			if(target_p == NULL && (IsOper(source_p) || !ConfigServerHide.hide_servers))
 			{
-				target_p = find_server (nick);
+				target_p = find_server(nick);
 			}
 
 			if(target_p != NULL)
 			{
-				len = strlen (target_p->name);
-				if((current_insert_point + (len + 5)) < (buf + sizeof (buf)))
+				len = strlen(target_p->name);
+				if((current_insert_point + (len + 5)) < (buf + sizeof(buf)))
 				{
-					memcpy ((void *) current_insert_point,
-						(void *) target_p->name, len);
+					memcpy((void *) current_insert_point,
+					       (void *) target_p->name, len);
 					current_insert_point += len;
 					*current_insert_point++ = ' ';
 				}
@@ -138,6 +137,6 @@ m_ison (struct Client *client_p, struct Client *source_p, int parc, char *parv[]
 	*current_insert_point = '\0';
 	*current_insert_point2 = '\0';
 
-	sendto_one (source_p, "%s", buf);
+	sendto_one(source_p, "%s", buf);
 
 }

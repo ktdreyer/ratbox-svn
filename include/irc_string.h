@@ -34,14 +34,14 @@
  * match_esc - compare with support for escaping chars
  * match_cidr - compares u!h@addr with u!h@addr/cidr
  */
-extern int match (const char *mask, const char *name);
-extern int match_esc (const char *mask, const char *name);
-extern int match_cidr (const char *mask, const char *name);
+extern int match(const char *mask, const char *name);
+extern int match_esc(const char *mask, const char *name);
+extern int match_cidr(const char *mask, const char *name);
 
 /*
  * comp_with_mask - compares to IP address
  */
-int comp_with_mask (void *addr, void *dest, u_int mask);
+int comp_with_mask(void *addr, void *dest, u_int mask);
 
 /*
  * collapse - collapse a string in place, converts multiple adjacent *'s 
@@ -50,70 +50,70 @@ int comp_with_mask (void *addr, void *dest, u_int mask);
  *
  * collapse_esc() - collapse with support for escaping chars
  */
-extern char *collapse (char *pattern);
-extern char *collapse_esc (char *pattern);
+extern char *collapse(char *pattern);
+extern char *collapse_esc(char *pattern);
 
 /*
  * irccmp - case insensitive comparison of s1 and s2
  */
-extern int irccmp (const char *s1, const char *s2);
+extern int irccmp(const char *s1, const char *s2);
 /*
  * ircncmp - counted case insensitive comparison of s1 and s2
  */
-extern int ircncmp (const char *s1, const char *s2, int n);
+extern int ircncmp(const char *s1, const char *s2, int n);
 /*
 ** canonize - reduce a string of duplicate list entries to contain
 ** only the unique items.
 */
 #ifdef NO_DUPE_MULTI_MESSAGES
-extern char *canonize (char *);
+extern char *canonize(char *);
 #endif
 /*
  * inetntoa - optimized inet_ntoa
  */
-const char *inetntoa (const char *in_addr);
+const char *inetntoa(const char *in_addr);
 
 /* 
  * inetntop() 
  * inetpton()
  * portable interfaces for inet_ntop() and inet_pton()
  */
-const char *inetntop (int af, const void *src, char *dst, unsigned int size);
-int inetpton (int af, const char *src, void *dst);
+const char *inetntop(int af, const void *src, char *dst, unsigned int size);
+int inetpton(int af, const char *src, void *dst);
 
 
 #ifndef HAVE_STRLCPY
-size_t strlcpy (char *dst, const char *src, size_t siz);
+size_t strlcpy(char *dst, const char *src, size_t siz);
 #endif
 
 #ifndef HAVE_STRLCAT
-size_t strlcat (char *dst, const char *src, size_t siz);
+size_t strlcat(char *dst, const char *src, size_t siz);
 #endif
 
 #ifndef HAVE_SNPRINTF
-int snprintf (char *str, size_t count, const char *fmt, ...);
+int snprintf(char *str, size_t count, const char *fmt, ...);
 #endif
 
 #ifndef HAVE_VSNPRINTF
-int vsnprintf (char *str, size_t count, const char *fmt, va_list args);
+int vsnprintf(char *str, size_t count, const char *fmt, va_list args);
 #endif
 
 /*
  * clean_string - cleanup control and high ascii characters
  * -Dianora
  */
-char *clean_string (char *dest, const unsigned char *src, size_t len);
+char *clean_string(char *dest, const unsigned char *src, size_t len);
 /*
  * strip_tabs - convert tabs to spaces
  * - jdc
  */
-char *strip_tabs (char *dest, const unsigned char *src, size_t len);
+char *strip_tabs(char *dest, const unsigned char *src, size_t len);
 
-const char *myctime (time_t);
+const char *myctime(time_t);
 
 #define EmptyString(x) (!(x) || (*(x) == '\0'))
 
-char *strtoken (char **save, char *str, const char *fs);
+char *strtoken(char **save, char *str, const char *fs);
 
 /*
  * deprecate

@@ -43,7 +43,7 @@
 #include "modules.h"
 #include "packet.h"
 
-static void m_invite (struct Client *, struct Client *, int, char **);
+static void m_invite(struct Client *, struct Client *, int, char **);
 
 struct Message invite_msgtab = {
 	"INVITE", 0, 0, 3, 0, MFLG_SLOW, 0,
@@ -52,15 +52,15 @@ struct Message invite_msgtab = {
 #ifndef STATIC_MODULES
 
 void
-_modinit (void)
+_modinit(void)
 {
-	mod_add_cmd (&invite_msgtab);
+	mod_add_cmd(&invite_msgtab);
 }
 
 void
-_moddeinit (void)
+_moddeinit(void)
 {
-	mod_del_cmd (&invite_msgtab);
+	mod_del_cmd(&invite_msgtab);
 }
 
 const char *_version = "$Revision$";
@@ -73,7 +73,7 @@ const char *_version = "$Revision$";
 **      parv[2] - channel number
 */
 static void
-m_invite (struct Client *client_p, struct Client *source_p, int parc, char *parv[])
+m_invite(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
 {
 	struct Client *target_p;
 	struct Channel *chptr;
@@ -81,34 +81,34 @@ m_invite (struct Client *client_p, struct Client *source_p, int parc, char *parv
 
 	if(*parv[2] == '\0')
 	{
-		sendto_one (source_p, form_str (ERR_NEEDMOREPARAMS), me.name, parv[0], "INVITE");
+		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS), me.name, parv[0], "INVITE");
 		return;
 	}
 
-	if(!IsClient (source_p))
+	if(!IsClient(source_p))
 		return;
 
-	if(MyClient (source_p) && !IsFloodDone (source_p))
-		flood_endgrace (source_p);
+	if(MyClient(source_p) && !IsFloodDone(source_p))
+		flood_endgrace(source_p);
 
-	if((target_p = find_person (parv[1])) == NULL)
+	if((target_p = find_person(parv[1])) == NULL)
 	{
-		sendto_one (source_p, form_str (ERR_NOSUCHNICK), me.name, parv[0], parv[1]);
-		return;
-	}
-
-	if(check_channel_name (parv[2]) == 0)
-	{
-		sendto_one (source_p, form_str (ERR_BADCHANNAME),
-			    me.name, parv[0], (unsigned char *) parv[2]);
+		sendto_one(source_p, form_str(ERR_NOSUCHNICK), me.name, parv[0], parv[1]);
 		return;
 	}
 
-	if(!IsChannelName (parv[2]))
+	if(check_channel_name(parv[2]) == 0)
 	{
-		if(MyClient (source_p))
-			sendto_one (source_p, form_str (ERR_NOSUCHCHANNEL),
-				    me.name, parv[0], parv[2]);
+		sendto_one(source_p, form_str(ERR_BADCHANNAME),
+			   me.name, parv[0], (unsigned char *) parv[2]);
+		return;
+	}
+
+	if(!IsChannelName(parv[2]))
+	{
+		if(MyClient(source_p))
+			sendto_one(source_p, form_str(ERR_NOSUCHCHANNEL),
+				   me.name, parv[0], parv[2]);
 		return;
 	}
 
@@ -120,48 +120,48 @@ m_invite (struct Client *client_p, struct Client *source_p, int parc, char *parv
 	 * always be true if parse() and such is working correctly --is
 	 */
 
-	if(!MyConnect (target_p) && (parv[2][0] == '&'))
+	if(!MyConnect(target_p) && (parv[2][0] == '&'))
 	{
 		if(ConfigServerHide.hide_servers == 0)
-			sendto_one (source_p, form_str (ERR_USERNOTONSERV),
-				    me.name, parv[0], parv[1]);
+			sendto_one(source_p, form_str(ERR_USERNOTONSERV),
+				   me.name, parv[0], parv[1]);
 		return;
 	}
 
-	if((chptr = hash_find_channel (parv[2])) == NULL)
+	if((chptr = hash_find_channel(parv[2])) == NULL)
 	{
-		if(MyClient (source_p))
-			sendto_one (source_p, form_str (ERR_NOSUCHCHANNEL),
-				    me.name, parv[0], parv[2]);
+		if(MyClient(source_p))
+			sendto_one(source_p, form_str(ERR_NOSUCHCHANNEL),
+				   me.name, parv[0], parv[2]);
 		return;
 	}
 
 	/* By this point, chptr is non NULL */
 
 
-	if(MyClient (source_p) && !IsMember (source_p, chptr))
+	if(MyClient(source_p) && !IsMember(source_p, chptr))
 	{
-		sendto_one (source_p, form_str (ERR_NOTONCHANNEL), me.name, parv[0], parv[2]);
+		sendto_one(source_p, form_str(ERR_NOTONCHANNEL), me.name, parv[0], parv[2]);
 		return;
 	}
 
-	if(IsMember (target_p, chptr))
+	if(IsMember(target_p, chptr))
 	{
-		if(MyClient (source_p))
-			sendto_one (source_p, form_str (ERR_USERONCHANNEL),
-				    me.name, parv[0], parv[1], parv[2]);
+		if(MyClient(source_p))
+			sendto_one(source_p, form_str(ERR_USERONCHANNEL),
+				   me.name, parv[0], parv[1], parv[2]);
 		return;
 	}
 
-	chop = is_chan_op (chptr, source_p);
+	chop = is_chan_op(chptr, source_p);
 
 	if(chptr && (chptr->mode.mode & MODE_INVITEONLY))
 	{
 		if(!chop)
 		{
-			if(MyClient (source_p))
-				sendto_one (source_p, form_str (ERR_CHANOPRIVSNEEDED),
-					    me.name, parv[0], parv[2]);
+			if(MyClient(source_p))
+				sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED),
+					   me.name, parv[0], parv[2]);
 			return;
 		}
 	}
@@ -169,46 +169,46 @@ m_invite (struct Client *client_p, struct Client *source_p, int parc, char *parv
 		/* Don't save invite even if from an op otherwise... */
 		chop = 0;
 
-	if(MyConnect (source_p))
+	if(MyConnect(source_p))
 	{
-		sendto_one (source_p, form_str (RPL_INVITING), me.name, parv[0],
-			    target_p->name, parv[2]);
+		sendto_one(source_p, form_str(RPL_INVITING), me.name, parv[0],
+			   target_p->name, parv[2]);
 		if(target_p->user->away)
-			sendto_one (source_p, form_str (RPL_AWAY), me.name, parv[0],
-				    target_p->name, target_p->user->away);
+			sendto_one(source_p, form_str(RPL_AWAY), me.name, parv[0],
+				   target_p->name, target_p->user->away);
 	}
 
-	if(MyConnect (target_p))
+	if(MyConnect(target_p))
 	{
 		if(chop)
-			add_invite (chptr, target_p);
-		sendto_one (target_p, ":%s!%s@%s INVITE %s :%s", source_p->name,
-			    source_p->username, source_p->host, target_p->name, chptr->chname);
+			add_invite(chptr, target_p);
+		sendto_one(target_p, ":%s!%s@%s INVITE %s :%s", source_p->name,
+			   source_p->username, source_p->host, target_p->name, chptr->chname);
 	}
 
 	/* if the channel is +pi, broadcast everywhere thats CAP_PARA, send to
 	 * target if target isnt CAP_PARA capable, else just send to target
 	 */
-	if(ParanoidChannel (chptr))
+	if(ParanoidChannel(chptr))
 	{
-		sendto_channel_remote (source_p, client_p,
-				       ONLY_CHANOPS, CAP_PARA, NOCAPS,
-				       chptr, ":%s INVITE %s :%s", parv[0],
-				       target_p->name, chptr->chname);
-
-		if(!MyConnect (target_p) && (target_p->from != client_p) &&
-		   !IsCapable (target_p->from, CAP_PARA))
-			sendto_one (target_p->from, ":%s INVITE %s :%s", parv[0],
-				    target_p->name, chptr->chname);
-
-		sendto_channel_local (ONLY_CHANOPS, chptr,
-				      ":%s NOTICE %s :%s is inviting %s to %s.",
-				      me.name, chptr->chname, source_p->name,
+		sendto_channel_remote(source_p, client_p,
+				      ONLY_CHANOPS, CAP_PARA, NOCAPS,
+				      chptr, ":%s INVITE %s :%s", parv[0],
 				      target_p->name, chptr->chname);
+
+		if(!MyConnect(target_p) && (target_p->from != client_p) &&
+		   !IsCapable(target_p->from, CAP_PARA))
+			sendto_one(target_p->from, ":%s INVITE %s :%s", parv[0],
+				   target_p->name, chptr->chname);
+
+		sendto_channel_local(ONLY_CHANOPS, chptr,
+				     ":%s NOTICE %s :%s is inviting %s to %s.",
+				     me.name, chptr->chname, source_p->name,
+				     target_p->name, chptr->chname);
 	}
-	else if(!MyConnect (target_p) && (target_p->from != client_p))
+	else if(!MyConnect(target_p) && (target_p->from != client_p))
 	{
-		sendto_one (target_p->from, ":%s INVITE %s :%s", parv[0],
-			    target_p->name, chptr->chname);
+		sendto_one(target_p->from, ":%s INVITE %s :%s", parv[0],
+			   target_p->name, chptr->chname);
 	}
 }
