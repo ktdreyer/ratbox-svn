@@ -234,6 +234,7 @@ static void send_conf_options(struct Client *sptr)
     }
 
    /* now ircd.conf options */
+   /* This DESPERATELY needs tabularized... */
 
    sendto_one(sptr,
               ":%s %d %s :%-30s %-5s [%-30s]",
@@ -393,6 +394,31 @@ static void send_conf_options(struct Client *sptr)
               "kline_with_connection_closed",
               ConfigFileEntry.kline_with_connection_closed ? "YES" : "NO",
               "Signoff reason: Connection closed");
+  sendto_one(sptr,
+              ":%s %d %s :%-30s %-5s [%-30s]",
+              me.name, RPL_INFO, sptr->name, "non_redundant_klines",
+              ConfigFileEntry.non_redundant_klines ? "YES" : "NO",
+              "Check for and Disallow Redundant K-lines");
+  sendto_one(sptr,
+              ":%s %d %s :%-30s %-5s [%-30s]",
+              me.name, RPL_INFO, sptr->name, "warn_no_nline",
+              ConfigFileEntry.warn_no_nline ? "YES" : "NO",
+              "Show Notices of Servers Connecting Without an N: line");
+  sendto_one(sptr,
+              ":%s %d %s :%-30s %-5s [%-30s]",
+              me.name, RPL_INFO, sptr->name, "e_lines_oper_only",
+              ConfigFileEntry.e_lines_oper_only ? "YES" : "NO",
+              "Only Allow Operators to see the kline_exempt flag in STATS i");
+  sendto_one(sptr,
+              ":%s %d %s :%-30s %-5s [%-30s]",
+              me.name, RPL_INFO, sptr->name, "f_lines_oper_only",
+              ConfigFileEntry.f_lines_oper_only ? "YES" : "NO",
+              "Only Allow Operators to see the exceed_limit flag in STATS i");
+  sendto_one(sptr,
+              ":%s %d %s :%-30s %-5s [%-30s]",
+              me.name, RPL_INFO, sptr->name, "o_lines_oper_only",
+              ConfigFileEntry.o_lines_oper_only ? "YES" : "NO",
+              "Only Allow Operators to see STATS o");
 
   sendto_one(sptr,
 	     ":%s %d %s :Compiled on [%s]",
