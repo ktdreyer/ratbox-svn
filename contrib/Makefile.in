@@ -35,6 +35,7 @@ SRCS =                          \
   m_map.c			\
   m_mkpasswd.c                  \
   m_ojoin.c			\
+  m_owhois.c			\
   m_opme.c			\
   m_tburst.c			\
   spy_admin_notice.c		\
