@@ -409,7 +409,7 @@ remove_temp_match_list(char *host, char *user, dlink_list *temp_list)
   int nm_t, cnm_t, bits, cbits;
   nm_t = parse_netmask(host, &addr, &bits);
 
-  for(ptr = temp_list->head; ptr; ptr = ptr->next)
+  DLINK_FOREACH(ptr, temp_list->head)
     {
       aconf = (struct ConfItem*)ptr->data;
 

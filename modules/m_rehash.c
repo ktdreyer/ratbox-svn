@@ -168,7 +168,7 @@ clear_temps(dlink_list *tlist)
   dlink_node *next_ptr;
   struct ConfItem *aconf;
 
-  for(ptr = tlist->head; ptr; ptr = next_ptr)
+  DLINK_FOREACH_SAFE(ptr, next_ptr, tlist->head)
   {
     next_ptr = ptr->next;
     aconf = ptr->data;

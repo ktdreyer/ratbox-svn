@@ -466,7 +466,7 @@ static void ms_server(struct Client *client_p, struct Client *source_p,
    * need to send different names to different servers
    * (domain name matching)
    */
-  for (ptr = serv_list.head; ptr; ptr = ptr->next)
+  DLINK_FOREACH(ptr, serv_list.head)
     {
       bclient_p = ptr->data;
 
@@ -610,7 +610,7 @@ struct Client *server_exists(char *servername)
   struct Client *target_p;
   dlink_node *ptr;
 
-  for(ptr = global_serv_list.head; ptr; ptr = ptr->next)
+  DLINK_FOREACH(ptr, global_serv_list.head)
   {
     target_p = ptr->data;
 

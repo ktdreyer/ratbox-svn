@@ -247,7 +247,7 @@ static void list_accepts(struct Client *source_p)
   *nicks = '\0';
   len2= strlen(source_p->name) + 10;
 
-  for(ptr = source_p->allow_list.head; ptr; ptr = ptr->next)
+  DLINK_FOREACH(ptr, source_p->allow_list.head)
   {
     target_p = ptr->data;
 

@@ -100,7 +100,7 @@ static void mo_restart(struct Client *client_p,
     }
   }
   
-  for(ptr = lclient_list.head; ptr; ptr = ptr->next)
+  DLINK_FOREACH(ptr, lclient_list.head)
   {
     target_p = ptr->data;
 
@@ -110,7 +110,7 @@ static void mo_restart(struct Client *client_p,
 	       get_client_name(source_p, HIDE_IP));
   }
 
-  for(ptr = serv_list.head; ptr; ptr = ptr->next)
+  DLINK_FOREACH(ptr, serv_list.head)
   {
     target_p = ptr->data;
 

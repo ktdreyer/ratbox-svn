@@ -177,7 +177,7 @@ static void m_who(struct Client *client_p,
 
 
       isinvis = IsInvisible(target_p);
-      for (lp = target_p->user->channel.head; lp; lp = lp->next)
+      DLINK_FOREACH(lp, target_p->user->channel.head)
 	{
 	  chptr = lp->data;
 	  chname = chptr->chname;
@@ -244,7 +244,7 @@ static void who_common_channel(struct Client *source_p,dlink_list chain,
   dlink_node *clp;
  struct Client *target_p;
 
-  for (clp = chain.head; clp; clp = clp->next)
+  DLINK_FOREACH(clp, chain.head)
    {
      target_p = clp->data;
 
@@ -296,7 +296,8 @@ static void who_global(struct Client *source_p,char *mask, int server_oper)
   int   maxmatches = 500;
 
   /* first, list all matching INvisible clients on common channels */
-  for (lp = source_p->user->channel.head; lp; lp = lp->next)
+  
+  DLINK_FOREACH(lp, source_p->user->channel.head)
   {
      chptr = lp->data;
      who_common_channel(source_p,chptr->chanops,mask,server_oper,&maxmatches);
@@ -498,7 +499,7 @@ static void do_who_list(struct Client *source_p, struct Channel *chptr,
 #else /* ANONOPS */
     dlink_node *ptr;
 
-    for(ptr = peons_list->head; ptr; ptr = ptr->next)
+    DLINK_FOREACH(ptr, peons_list->head)
     {
       target_p = ptr->data;
 
@@ -506,7 +507,7 @@ static void do_who_list(struct Client *source_p, struct Channel *chptr,
         do_who(source_p, target_p, chname, "");
     }
 
-    for(ptr = voiced_list->head; ptr; ptr = ptr->next)
+    DLINK_FOREACH(ptr, voiced_list->head)
     {
       target_p = ptr->data;
       
@@ -515,7 +516,7 @@ static void do_who_list(struct Client *source_p, struct Channel *chptr,
     }
 
 #ifdef REQUIRE_OANDV
-    for(ptr = chanops_voiced_list->head; ptr; ptr = ptr->next)
+    DLINK_FOREACH(ptr, chanops_voiced_list->head)
     {
       target_p = ptr->data;
 
@@ -524,7 +525,7 @@ static void do_who_list(struct Client *source_p, struct Channel *chptr,
     }
 #endif
 
-    for(ptr = chanops_list->head; ptr; ptr = ptr->next)
+    DLINK_FOREACH(ptr, chanops_list->head)
     {
       target_p = ptr->data;
 

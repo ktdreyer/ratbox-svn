@@ -579,7 +579,7 @@ nextnick:
     return;
 
   /* relay the SJOIN to other servers */
-  for(m = serv_list.head; m; m = m->next)
+  DLINK_FOREACH(m, serv_list.head)
     {
       target_p = m->data;
 

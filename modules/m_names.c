@@ -174,7 +174,7 @@ static void names_non_public_non_secret(struct Client *source_p)
        * they are on a channel source_p is on since they have already
        * been shown earlier. -avalon
        */
-      for( lp = c2ptr->user->channel.head; lp; lp = lp->next )
+      DLINK_FOREACH(lp, c2ptr->user->channel.head)
         {
           ch3ptr = lp->data;
 

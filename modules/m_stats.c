@@ -400,8 +400,7 @@ static void stats_glines(struct Client *source_p)
       sendto_one(source_p, ":%s NOTICE %s :Pending G-lines",
                  me.name, source_p->name);
 
-    for(pending_node = pending_glines.head; pending_node; 
-        pending_node = pending_node->next)
+    DLINK_FOREACH(pending_node, pending_glines.head)
     {
       glp_ptr = pending_node->data;
       
@@ -432,7 +431,7 @@ static void stats_glines(struct Client *source_p)
       sendto_one(source_p, ":%s NOTICE %s :End of Pending G-lines",
                  me.name, source_p->name);
 
-    for(gline_node = glines.head; gline_node; gline_node = gline_node->next)
+    DLINK_FOREACH(gline_node, glines.head)
     {
       kill_ptr = gline_node->data;
 
@@ -623,7 +622,7 @@ static void stats_operedup(struct Client *source_p)
   dlink_node *ptr;
   int j=0;
 
-  for(oper_ptr = oper_list.head; oper_ptr; oper_ptr = oper_ptr->next)
+  DLINK_FOREACH(oper_ptr, oper_list.head)
   {
     target_p = oper_ptr->data;
 
@@ -710,7 +709,7 @@ static void stats_servers(struct Client *source_p)
   dlink_node *ptr;
   int j=0;
   
-  for(ptr = serv_list.head; ptr; ptr = ptr->next)
+  DLINK_FOREACH(ptr, serv_list.head)
   {
     target_p = ptr->data;
 
@@ -748,7 +747,7 @@ static void stats_ziplinks(struct Client *source_p)
   struct Client *target_p;
   int sent_data = 0;
 
-  for(ptr = serv_list.head; ptr; ptr = ptr->next)
+  DLINK_FOREACH(ptr, serv_list.head)
   {
     target_p = ptr->data;
     if (IsCapable(target_p, CAP_ZIP))
@@ -786,7 +785,7 @@ static void stats_servlinks(struct Client *source_p)
 
   sendK = receiveK = 0;
 
-  for(ptr = serv_list.head; ptr; ptr = ptr->next)
+  DLINK_FOREACH(ptr, serv_list.head)
   {
     target_p = ptr->data;
 
@@ -901,7 +900,7 @@ static void stats_L_list(struct Client *source_p,char *name, int doall, int wild
    * are invisible not being visible to 'foreigners' who use
    * a wild card based search to list it.
    */
-  for(ptr = list->head;ptr;ptr = ptr->next)
+  DLINK_FOREACH(ptr, list->head)
     {
       target_p = ptr->data;
 

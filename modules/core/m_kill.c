@@ -303,7 +303,7 @@ static void relay_kill(struct Client *one, struct Client *source_p,
   
 
 
-  for( ptr = serv_list.head; ptr; ptr = ptr->next )
+  DLINK_FOREACH(ptr, serv_list.head)
   {
     client_p = (struct Client *) ptr->data;
     
