@@ -198,6 +198,7 @@ struct config_file_entry
 
   int           hub;
   unsigned char compression_level;
+  int		dot_in_ip6_addr;
   int           dots_in_ident;
   int           failed_oper_notice;
   int           anti_nick_flood;

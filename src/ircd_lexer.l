@@ -127,6 +127,7 @@ description	{ return DESCRIPTION; }
 die		{ return DIE; }
 disable_remote_commands	{ return DISABLE_REMOTE_COMMANDS; }
 disable_vchans  { return DISABLE_VCHANS; }
+dot_in_ip6_addr { return DOT_IN_IP6_ADDR; }
 dots_in_ident   { return DOTS_IN_IDENT; }
 egdpool_path        { return EGDPOOL_PATH; }
 email		{ return EMAIL; }

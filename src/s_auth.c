@@ -30,6 +30,7 @@
 #include "tools.h"
 #include "list.h"
 #include "s_auth.h"
+#include "s_conf.h"
 #include "client.h"
 #include "common.h"
 #include "event.h"
@@ -217,13 +218,23 @@ static void auth_dns_callback(void* vptr, adns_answer* reply)
         }
       else
         {
-          strcpy(auth->client->host, auth->client->localClient->sockhost);
+          if(auth->client->localClient->aftype == AF_INET6 && ConfigFileEntry.dot_in_ip6_addr)
+	  {
+            strcpy(auth->client->host, auth->client->localClient->sockhost);
+            strlcat(auth->client->host, ".", HOSTLEN);
+          } else
+            strcpy(auth->client->host, auth->client->localClient->sockhost);
           sendheader(auth->client, REPORT_HOST_TOOLONG);
         }
     }
   else
     {
-      strcpy(auth->client->host, auth->client->localClient->sockhost);
+      if(auth->client->localClient->aftype == AF_INET6 && ConfigFileEntry.dot_in_ip6_addr)
+      {
+        strcpy(auth->client->host, auth->client->localClient->sockhost);
+        strlcat(auth->client->host, ".", HOSTLEN);
+      } else
+        strcpy(auth->client->host, auth->client->localClient->sockhost); 
       sendheader(auth->client, REPORT_FAIL_DNS);
     }
 
