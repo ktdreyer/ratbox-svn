@@ -1,3 +1,8 @@
+*** 20010428_9 by a1kmm
+- Added some more asserts to fd code to try and catch fl_'s core at an
+  earlier and more useful stage.
+
+
 *** 20010428_8 by fl_
 - dont warn ops that halfops are trying to kick them, we dont do it for
   voices/peons, so why start now?
