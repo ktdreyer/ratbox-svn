@@ -143,7 +143,7 @@ send_message(struct Client *to, char *msg, int len)
                 return 0;
         }
 
-        if (IsDead(to))
+        if (to->fd < 0)
                 return 0; /* This socket has already been marked as dead */
 
         if (DBufLength(&to->sendQ) > get_sendq(to))

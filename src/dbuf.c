@@ -168,7 +168,7 @@ int dbuf_put(struct DBuf* dyn, const char* buf, size_t length)
    */
   dyn->length += length;
 
-  for ( ; length > 0; h = &(d->next)) {
+  for ( ; length > 0; h = &(db->next)) {
     if (0 == (db = *h)) {
       if (0 == (db = dbuf_alloc()))
         return dbuf_malloc_error(dyn);

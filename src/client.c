@@ -198,6 +198,13 @@ void _free_client(struct Client* cptr)
     if (cptr->dns_reply)
       --cptr->dns_reply->ref_count;
 
+    zip_free(cptr);
+
+    DBufClear(&cptr->sendQ);
+    DBufClear(&cptr->recvQ);
+
+    memset(cptr->passwd, 0, sizeof(cptr->passwd));
+
     result = BlockHeapFree(localClientFreeList, cptr);
   }
   else

@@ -685,36 +685,22 @@ void close_connection(struct Client *cptr)
   else
     ServerStats->is_ni++;
   
-  if (cptr->dns_reply) {
-    --cptr->dns_reply->ref_count;
-    cptr->dns_reply = 0;
+  if (cptr->fd >= 0) {
+    flush_connections(cptr);
+    local[cptr->fd] = NULL;
+    fdlist_delete(cptr->fd, FDL_ALL);
+    close(cptr->fd);
+    cptr->fd = -1;
   }
-  if (cptr->fd >= 0)
-    {
-      flush_connections(cptr);
-      local[cptr->fd] = NULL;
-        /*
-         * the connection might have zip data (even if
-         * FLAGS2_ZIP is not set)
-         */
-      if (IsServer(cptr))
-        zip_free(cptr);
-      fdlist_delete(cptr->fd, FDL_ALL);
-      close(cptr->fd);
-      cptr->fd = -1;
-      DBufClear(&cptr->sendQ);
-      DBufClear(&cptr->recvQ);
-      memset(cptr->passwd, 0, sizeof(cptr->passwd));
-      /*
-       * clean up extra sockets from P-lines which have been discarded.
-       */
-      if (cptr->listener) {
-        assert(0 < cptr->listener->ref_count);
-        if (0 == --cptr->listener->ref_count && !cptr->listener->active) 
-          close_listener(cptr->listener);
-        cptr->listener = 0;
-      }
-    }
+  /*
+   * clean up extra sockets from P-lines which have been discarded.
+   */
+  if (cptr->listener) {
+    assert(0 < cptr->listener->ref_count);
+    if (0 == --cptr->listener->ref_count && !cptr->listener->active) 
+      close_listener(cptr->listener);
+    cptr->listener = 0;
+  }
 
   for (; highest_fd > 0; --highest_fd) {
     if (local[highest_fd])
