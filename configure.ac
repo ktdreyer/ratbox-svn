@@ -633,6 +633,85 @@ AC_ARG_ENABLE(epoll, AC_HELP_STRING([--enable-epoll],[Force sys_epoll usage (Lin
   fi
 ],)
 
+AC_ARG_ENABLE(epoll, AC_HELP_STRING([--enable-epoll],[Force sys_epoll usage (Linux only).]),
+[ if test $enableval = yes; then
+        SELECT_TYPE_EXPLICIT="epoll"
+  else
+        use_epoll=no
+  fi
+],)
+
+dnl **********************************************************************
+dnl Check for --with-confdir
+dnl **********************************************************************
+
+AC_MSG_CHECKING([whether to modify confdir])
+AC_ARG_WITH(confdir, 
+AC_HELP_STRING([--with-confdir=DIR],
+	       [Directory to install config files.]),
+	       [ confdir=`echo $withval | sed 's/\/$//'`
+		 AC_MSG_RESULT(yes)
+		 AC_DEFINE_DIR(ETC_DIR, "$confdir", [Prefix where config files are installed.])
+		 AC_SUBST_DIR([confdir]) ],
+	       [ confdir='${prefix}/etc'
+		 AC_MSG_RESULT(no)
+	         AC_DEFINE_DIR(ETC_DIR, "$confdir", [Prefix where config files are installed.])
+	  	 AC_SUBST_DIR([confdir])]
+)
+
+dnl **********************************************************************
+dnl Check for --with-logdir
+dnl **********************************************************************
+
+AC_MSG_CHECKING([whether to modify logdir])
+AC_ARG_WITH(logdir, 
+AC_HELP_STRING([--with-logdir=DIR],
+	       [Directory where to write logfiles.]),
+	       [ logdir=`echo $withval | sed 's/\/$//'`
+		 AC_MSG_RESULT(yes)
+		 AC_DEFINE_DIR(LOG_DIR, "$logdir", [Prefix where to write logfiles.])
+		 AC_SUBST_DIR([logdir]) ],
+	       [ logdir='${prefix}/logs'
+		 AC_MSG_RESULT(no)
+	         AC_DEFINE_DIR(LOG_DIR, "$logdir", [Prefix where to write logfiles.])
+	  	 AC_SUBST_DIR([logdir])]
+)
+
+dnl **********************************************************************
+dnl Check for --with-helpdir
+dnl **********************************************************************
+
+AC_MSG_CHECKING([whether to modify helpdir])
+AC_ARG_WITH(helpdir, 
+AC_HELP_STRING([--with-helpdir=DIR],
+	       [Directory to install help files.]),
+	       [ helpdir=`echo $withval | sed 's/\/$//'`
+		 AC_MSG_RESULT(yes)
+		 AC_DEFINE_DIR(HELP_DIR, "$helpdir", [Prefix where help files are installed.])
+		 AC_SUBST_DIR([helpdir]) ],
+	       [ helpdir='${prefix}/help'
+		 AC_MSG_RESULT(no)
+	         AC_DEFINE_DIR(HELP_DIR, "$helpdir", [Prefix where help file are installed.])
+	  	 AC_SUBST_DIR([helpdir])]
+)
+
+dnl **********************************************************************
+dnl Check for --with-moduledir
+dnl **********************************************************************
+
+AC_MSG_CHECKING([whether to modify moduledir])
+AC_ARG_WITH(moduledir, 
+AC_HELP_STRING([--with-moduledir=DIR],
+	       [Directory to install modules.]),
+	       [ moduledir=`echo $withval | sed 's/\/$//'`
+		 AC_MSG_RESULT(yes)
+		 AC_DEFINE_DIR(MODULE_DIR, "$moduledir", [Prefix where modules are installed.])
+		 AC_SUBST_DIR([moduledir]) ],
+	       [ moduledir='${prefix}/modules'
+		 AC_MSG_RESULT(no)
+	         AC_DEFINE_DIR(MODULE_DIR, "$moduledir", [Prefix where modules are installed.])
+	  	 AC_SUBST_DIR([moduledir])]
+)
 
 if test ! -z "$SELECT_TYPE_EXPLICIT"; then
 	SELECT_TYPE="$SELECT_TYPE_EXPLICIT";

@@ -311,7 +311,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT MKDEP MAKEDEPEND STDOUT CPP EGREP SET_MAKE INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA RM CP MV LN SED AR LD RANLIB TOUCH YACC LEX LEXLIB LEX_OUTPUT_ROOT CRYPT_C CRYPT_LIB VICONF ALLOCA ENCSPEED ZLIB_LD SELECT_TYPE MODULES_LIBS MOD_TARGET SSL_SRCS_ENABLE SSL_INCLUDES SSL_LIBS PICFLAGS IRC_CFLAGS SEDOBJ LIBOBJS LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT MKDEP MAKEDEPEND STDOUT CPP EGREP SET_MAKE INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA RM CP MV LN SED AR LD RANLIB TOUCH YACC LEX LEXLIB LEX_OUTPUT_ROOT CRYPT_C CRYPT_LIB VICONF ALLOCA ENCSPEED ZLIB_LD ETC_DIR confdir LOG_DIR logdir HELP_DIR helpdir MODULE_DIR moduledir SELECT_TYPE MODULES_LIBS MOD_TARGET SSL_SRCS_ENABLE SSL_INCLUDES SSL_LIBS PICFLAGS IRC_CFLAGS SEDOBJ LIBOBJS LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -866,6 +866,10 @@ Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
   --with-zlib-path=DIR    Path to libz.so for ziplinks support.
+  --with-confdir=DIR      Directory to install config files.
+  --with-logdir=DIR       Directory where to write logfiles.
+  --with-helpdir=DIR      Directory to install help files.
+  --with-moduledir=DIR    Directory to install modules.
   --with-nicklen=LENGTH   Set the nick length to LENGTH (default 9)
   --with-topiclen=NUMBER  Set the max topic length to NUMBER (default 120, max
                           390)
@@ -7476,6 +7480,260 @@ if test "${enable_epoll+set}" = set; then
 
 fi;
 
+# Check whether --enable-epoll or --disable-epoll was given.
+if test "${enable_epoll+set}" = set; then
+  enableval="$enable_epoll"
+   if test $enableval = yes; then
+        SELECT_TYPE_EXPLICIT="epoll"
+  else
+        use_epoll=no
+  fi
+
+fi;
+
+
+echo "$as_me:$LINENO: checking whether to modify confdir" >&5
+echo $ECHO_N "checking whether to modify confdir... $ECHO_C" >&6
+
+# Check whether --with-confdir or --without-confdir was given.
+if test "${with_confdir+set}" = set; then
+  withval="$with_confdir"
+   confdir=`echo $withval | sed 's/\/$//'`
+		 echo "$as_me:$LINENO: result: yes" >&5
+echo "${ECHO_T}yes" >&6
+
+  test "x$prefix" = xNONE && prefix="$ac_default_prefix"
+  test "x$exec_prefix" = xNONE && exec_prefix='${prefix}'
+  ac_define_dir=`eval echo $"$confdir"`
+  ac_define_dir=`eval echo $ac_define_dir`
+  ETC_DIR="$ac_define_dir"
+
+
+cat >>confdefs.h <<_ACEOF
+#define ETC_DIR "$ac_define_dir"
+_ACEOF
+
+
+
+
+        confdir=`(
+            test "x$prefix" = xNONE && prefix="$ac_default_prefix"
+            test "x$exec_prefix" = xNONE && exec_prefix="${prefix}"
+            eval echo \""$confdir"\"
+        )`
+
+
+else
+   confdir='${prefix}/etc'
+		 echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
+
+  test "x$prefix" = xNONE && prefix="$ac_default_prefix"
+  test "x$exec_prefix" = xNONE && exec_prefix='${prefix}'
+  ac_define_dir=`eval echo $"$confdir"`
+  ac_define_dir=`eval echo $ac_define_dir`
+  ETC_DIR="$ac_define_dir"
+
+
+cat >>confdefs.h <<_ACEOF
+#define ETC_DIR "$ac_define_dir"
+_ACEOF
+
+
+
+
+        confdir=`(
+            test "x$prefix" = xNONE && prefix="$ac_default_prefix"
+            test "x$exec_prefix" = xNONE && exec_prefix="${prefix}"
+            eval echo \""$confdir"\"
+        )`
+
+
+
+fi;
+
+
+echo "$as_me:$LINENO: checking whether to modify logdir" >&5
+echo $ECHO_N "checking whether to modify logdir... $ECHO_C" >&6
+
+# Check whether --with-logdir or --without-logdir was given.
+if test "${with_logdir+set}" = set; then
+  withval="$with_logdir"
+   logdir=`echo $withval | sed 's/\/$//'`
+		 echo "$as_me:$LINENO: result: yes" >&5
+echo "${ECHO_T}yes" >&6
+
+  test "x$prefix" = xNONE && prefix="$ac_default_prefix"
+  test "x$exec_prefix" = xNONE && exec_prefix='${prefix}'
+  ac_define_dir=`eval echo $"$logdir"`
+  ac_define_dir=`eval echo $ac_define_dir`
+  LOG_DIR="$ac_define_dir"
+
+
+cat >>confdefs.h <<_ACEOF
+#define LOG_DIR "$ac_define_dir"
+_ACEOF
+
+
+
+
+        logdir=`(
+            test "x$prefix" = xNONE && prefix="$ac_default_prefix"
+            test "x$exec_prefix" = xNONE && exec_prefix="${prefix}"
+            eval echo \""$logdir"\"
+        )`
+
+
+else
+   logdir='${prefix}/logs'
+		 echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
+
+  test "x$prefix" = xNONE && prefix="$ac_default_prefix"
+  test "x$exec_prefix" = xNONE && exec_prefix='${prefix}'
+  ac_define_dir=`eval echo $"$logdir"`
+  ac_define_dir=`eval echo $ac_define_dir`
+  LOG_DIR="$ac_define_dir"
+
+
+cat >>confdefs.h <<_ACEOF
+#define LOG_DIR "$ac_define_dir"
+_ACEOF
+
+
+
+
+        logdir=`(
+            test "x$prefix" = xNONE && prefix="$ac_default_prefix"
+            test "x$exec_prefix" = xNONE && exec_prefix="${prefix}"
+            eval echo \""$logdir"\"
+        )`
+
+
+
+fi;
+
+
+echo "$as_me:$LINENO: checking whether to modify helpdir" >&5
+echo $ECHO_N "checking whether to modify helpdir... $ECHO_C" >&6
+
+# Check whether --with-helpdir or --without-helpdir was given.
+if test "${with_helpdir+set}" = set; then
+  withval="$with_helpdir"
+   helpdir=`echo $withval | sed 's/\/$//'`
+		 echo "$as_me:$LINENO: result: yes" >&5
+echo "${ECHO_T}yes" >&6
+
+  test "x$prefix" = xNONE && prefix="$ac_default_prefix"
+  test "x$exec_prefix" = xNONE && exec_prefix='${prefix}'
+  ac_define_dir=`eval echo $"$helpdir"`
+  ac_define_dir=`eval echo $ac_define_dir`
+  HELP_DIR="$ac_define_dir"
+
+
+cat >>confdefs.h <<_ACEOF
+#define HELP_DIR "$ac_define_dir"
+_ACEOF
+
+
+
+
+        helpdir=`(
+            test "x$prefix" = xNONE && prefix="$ac_default_prefix"
+            test "x$exec_prefix" = xNONE && exec_prefix="${prefix}"
+            eval echo \""$helpdir"\"
+        )`
+
+
+else
+   helpdir='${prefix}/help'
+		 echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
+
+  test "x$prefix" = xNONE && prefix="$ac_default_prefix"
+  test "x$exec_prefix" = xNONE && exec_prefix='${prefix}'
+  ac_define_dir=`eval echo $"$helpdir"`
+  ac_define_dir=`eval echo $ac_define_dir`
+  HELP_DIR="$ac_define_dir"
+
+
+cat >>confdefs.h <<_ACEOF
+#define HELP_DIR "$ac_define_dir"
+_ACEOF
+
+
+
+
+        helpdir=`(
+            test "x$prefix" = xNONE && prefix="$ac_default_prefix"
+            test "x$exec_prefix" = xNONE && exec_prefix="${prefix}"
+            eval echo \""$helpdir"\"
+        )`
+
+
+
+fi;
+
+
+echo "$as_me:$LINENO: checking whether to modify moduledir" >&5
+echo $ECHO_N "checking whether to modify moduledir... $ECHO_C" >&6
+
+# Check whether --with-moduledir or --without-moduledir was given.
+if test "${with_moduledir+set}" = set; then
+  withval="$with_moduledir"
+   moduledir=`echo $withval | sed 's/\/$//'`
+		 echo "$as_me:$LINENO: result: yes" >&5
+echo "${ECHO_T}yes" >&6
+
+  test "x$prefix" = xNONE && prefix="$ac_default_prefix"
+  test "x$exec_prefix" = xNONE && exec_prefix='${prefix}'
+  ac_define_dir=`eval echo $"$moduledir"`
+  ac_define_dir=`eval echo $ac_define_dir`
+  MODULE_DIR="$ac_define_dir"
+
+
+cat >>confdefs.h <<_ACEOF
+#define MODULE_DIR "$ac_define_dir"
+_ACEOF
+
+
+
+
+        moduledir=`(
+            test "x$prefix" = xNONE && prefix="$ac_default_prefix"
+            test "x$exec_prefix" = xNONE && exec_prefix="${prefix}"
+            eval echo \""$moduledir"\"
+        )`
+
+
+else
+   moduledir='${prefix}/modules'
+		 echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
+
+  test "x$prefix" = xNONE && prefix="$ac_default_prefix"
+  test "x$exec_prefix" = xNONE && exec_prefix='${prefix}'
+  ac_define_dir=`eval echo $"$moduledir"`
+  ac_define_dir=`eval echo $ac_define_dir`
+  MODULE_DIR="$ac_define_dir"
+
+
+cat >>confdefs.h <<_ACEOF
+#define MODULE_DIR "$ac_define_dir"
+_ACEOF
+
+
+
+
+        moduledir=`(
+            test "x$prefix" = xNONE && prefix="$ac_default_prefix"
+            test "x$exec_prefix" = xNONE && exec_prefix="${prefix}"
+            eval echo \""$moduledir"\"
+        )`
+
+
+
+fi;
 
 if test ! -z "$SELECT_TYPE_EXPLICIT"; then
 	SELECT_TYPE="$SELECT_TYPE_EXPLICIT";
@@ -10858,6 +11116,14 @@ s,@VICONF@,$VICONF,;t t
 s,@ALLOCA@,$ALLOCA,;t t
 s,@ENCSPEED@,$ENCSPEED,;t t
 s,@ZLIB_LD@,$ZLIB_LD,;t t
+s,@ETC_DIR@,$ETC_DIR,;t t
+s,@confdir@,$confdir,;t t
+s,@LOG_DIR@,$LOG_DIR,;t t
+s,@logdir@,$logdir,;t t
+s,@HELP_DIR@,$HELP_DIR,;t t
+s,@helpdir@,$helpdir,;t t
+s,@MODULE_DIR@,$MODULE_DIR,;t t
+s,@moduledir@,$moduledir,;t t
 s,@SELECT_TYPE@,$SELECT_TYPE,;t t
 s,@MODULES_LIBS@,$MODULES_LIBS,;t t
 s,@MOD_TARGET@,$MOD_TARGET,;t t

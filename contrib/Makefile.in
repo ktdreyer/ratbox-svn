@@ -16,7 +16,7 @@ INSTALL_PROGRAM	= @INSTALL_PROGRAM@
 INSTALL_DATA	= @INSTALL_DATA@
 INSTALL_SUID    = @INSTALL_PROGRAM@ -o root -m 4755
 SHELL		= /bin/sh
-AUTOMODULEDIR	= @prefix@/modules
+AUTOMODULEDIR	= @moduledir@/contrib
 
 SSL_LIBS	= @SSL_LIBS@
 SSL_INCLUDES	= @SSL_INCLUDES@
@@ -53,9 +53,12 @@ build: all
 all: $(OBJS)
 
 install: all
-	@echo "Installing modules into $(AUTOMODULEDIR) .."
+	-@if test ! -d $(DESTDIR)$(AUTOMODULEDIR); then \
+                mkdir $(DESTDIR)$(AUTOMODULEDIR); \
+        fi
+	@echo "Installing modules into $(DESTDIR)$(AUTOMODULEDIR) .."
 	@for file in $(OBJS); do \
-		$(INSTALL_DATA) $$file $(AUTOMODULEDIR); \
+		$(INSTALL_DATA) $$file $(DESTDIR)$(AUTOMODULEDIR); \
 	done
 
 .SUFFIXES: .so
