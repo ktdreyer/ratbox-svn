@@ -564,7 +564,8 @@ static int attach_iline(struct Client *cptr, struct ConfItem *aconf)
   ip_found->count++;
 
   /* only check it if its non zero */
-  if (ConfConFreq(aconf) && ip_found->count > ConfConFreq(aconf))
+  if ( aconf->c_class /* This should never non NULL *grin* */ &&
+       ConfConFreq(aconf) && ip_found->count > ConfConFreq(aconf))
     {
       if(!IsConfFlined(aconf))
         return TOO_MANY; /* Already at maximum allowed ip#'s */
