@@ -1,3 +1,47 @@
+androsyn    2005/01/29 19:59:17 EST	(20050130_0)
+
+  Modified files:
+    adns                 adns.h 
+    include              commio.h s_conf.h watch.h 
+    modules              m_dline.c m_kline.c m_resv.c m_stats.c 
+                         m_watch.c m_xline.c 
+    modules/core         m_nick.c 
+    src                  balloc.c cache.c client.c commio.c 
+                         epoll.c ircd.c ircd_lexer.l kdparse.c 
+                         listener.c s_auth.c s_conf.c s_log.c 
+                         s_serv.c watch.c 
+  Log:
+  Do the fb* to f* mangle and then fix watch to prevent stupid crap
+  
+  Revision  Changes    Path
+  1.18      +0 -2      ircd-ratbox/adns/adns.h
+  1.14      +6 -37     ircd-ratbox/include/commio.h
+  7.309     +6 -6      ircd-ratbox/include/s_conf.h
+  7.3       +2 -2      ircd-ratbox/include/watch.h
+  1.158     +3 -3      ircd-ratbox/modules/core/m_nick.c
+  1.46      +13 -13    ircd-ratbox/modules/m_dline.c
+  1.198     +12 -12    ircd-ratbox/modules/m_kline.c
+  1.72      +11 -11    ircd-ratbox/modules/m_resv.c
+  1.241     +3 -3      ircd-ratbox/modules/m_stats.c
+  1.6       +60 -21    ircd-ratbox/modules/m_watch.c
+  1.66      +16 -16    ircd-ratbox/modules/m_xline.c
+  7.85      +1 -1      ircd-ratbox/src/balloc.c
+  1.24      +5 -5      ircd-ratbox/src/cache.c
+  7.488     +4 -4      ircd-ratbox/src/client.c
+  1.25      +10 -280   ircd-ratbox/src/commio.c
+  1.33      +1 -1      ircd-ratbox/src/epoll.c
+  7.368     +4 -4      ircd-ratbox/src/ircd.c
+  1.167     +6 -6      ircd-ratbox/src/ircd_lexer.l
+  7.42      +8 -8      ircd-ratbox/src/kdparse.c
+  7.125     +8 -8      ircd-ratbox/src/listener.c
+  7.192     +6 -6      ircd-ratbox/src/s_auth.c
+  7.502     +21 -21    ircd-ratbox/src/s_conf.c
+  7.78      +20 -20    ircd-ratbox/src/s_log.c
+  7.425     +8 -8      ircd-ratbox/src/s_serv.c
+  1.6       +22 -15    ircd-ratbox/src/watch.c
+
+
+
 androsyn    2005/01/29 12:18:38 EST	(20050129_0)
 
   Modified files:
