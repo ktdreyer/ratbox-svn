@@ -452,7 +452,7 @@ void error_exit_client(struct Client* client_p, int error)
       else
 	{
           report_error("Lost connection to %s:%s", 
-		get_client_name(client_p, SHOW_IP), current_error);
+		get_client_name(client_p, MASK_IP), current_error);
 	}
 
       sendto_realops_flags(FLAGS_ALL,

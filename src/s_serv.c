@@ -1039,9 +1039,13 @@ int server_estab(struct Client *client_p)
     {
       if (fork_server(client_p) < 0 )
       {
-        sendto_realops_flags(FLAGS_ALL, "Warning: fork failed for server "
+        sendto_realops_flags(FLAGS_ADMIN,
+	      "Warning: fork failed for server %s -- check servlink_path (%s)",
+	      get_client_name(client_p, HIDE_IP),
+	      ConfigFileEntry.servlink_path);
+        sendto_realops_flags(FLAGS_NOTADMIN, "Warning: fork failed for server "
           "%s -- check servlink_path (%s)",
-           get_client_name(client_p, HIDE_IP),
+           get_client_name(client_p, MASK_IP),
            ConfigFileEntry.servlink_path);
         return exit_client(client_p, client_p, client_p, "Fork failed");
       }
@@ -1984,13 +1988,16 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
      */
     if ((client_p = find_server(aconf->name)))
       { 
+        sendto_realops_flags(FLAGS_ADMIN,
+	      "Server %s already present from %s",
+	      aconf->name, get_client_name(client_p, SHOW_IP));
         sendto_realops_flags(FLAGS_ALL,
 			     "Server %s already present from %s",
-			     aconf->name, get_client_name(client_p, SHOW_IP));
+			     aconf->name, get_client_name(client_p, MASK_IP));
         if (by && IsPerson(by) && !MyClient(by))
 	  sendto_one(by, ":%s NOTICE %s :Server %s already present from %s",
 		     me.name, by->name, aconf->name,
-		     get_client_name(client_p, SHOW_IP));
+		     get_client_name(client_p, MASK_IP));
         return 0;
       }
     
@@ -2156,9 +2163,11 @@ serv_connect_callback(int fd, int status, void *data)
     aconf = find_conf_name(&client_p->localClient->confs,
 			    client_p->name, CONF_SERVER); 
     if (!aconf)
-      { 
-        sendto_realops_flags(FLAGS_ALL,
-		     "Lost C-Line for %s", get_client_name(client_p, HIDE_IP));
+      {
+        sendto_realops_flags(FLAGS_ADMIN,
+	             "Lost C-Line for %s", get_client_name(client_p, HIDE_IP));
+        sendto_realops_flags(FLAGS_NOTADMIN,
+		     "Lost C-Line for %s", get_client_name(client_p, MASK_IP));
         exit_client(client_p, client_p, &me, "Lost C-line");
         return;
       }

@@ -85,7 +85,6 @@ struct Client;
 
 /* generic handlers */
 extern void ms_error(struct Client *,struct Client *,int,char **);
-extern void mr_error(struct Client *,struct Client *,int,char **);
 extern void m_error(struct Client *,struct Client *,int,char **);
 extern void m_ignore(struct Client*, struct Client*, int, char**);
 extern void m_not_oper(struct Client*, struct Client*, int, char**);

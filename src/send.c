@@ -126,9 +126,12 @@ dead_link(struct Client *to, char *notice)
   linebuf_donebuf(&to->localClient->buf_recvq);
   linebuf_donebuf(&to->localClient->buf_sendq);
   if (!IsPerson(to) && !IsUnknown(to) && !(to->flags & FLAGS_CLOSING))
-    sendto_realops_flags(FLAGS_ALL,
-                         notice, get_client_name(to, HIDE_IP));
-
+    {
+      sendto_realops_flags(FLAGS_ADMIN,
+           notice, get_client_name(to, HIDE_IP));
+    sendto_realops_flags(FLAGS_NOTADMIN,
+                         notice, get_client_name(to, MASK_IP));
+    }
   Debug((DEBUG_ERROR, notice, get_client_name(to, HIDE_IP)));
   return (-1);
 } /* dead_link() */
