@@ -1046,9 +1046,12 @@ static void exit_one_client(struct Client *client_p,
 
 
   /* Flush their sendq once and for all */
-  linebuf_donebuf(&client_p->localClient->buf_recvq);
-  linebuf_donebuf(&client_p->localClient->buf_sendq);
-
+  if(MyConnect(source_p))
+  {
+    linebuf_donebuf(&source_p->localClient->buf_recvq);
+    linebuf_donebuf(&source_p->localClient->buf_sendq);
+  }
+  
   /* Check to see if the client isn't already on the dead list */
   assert(dlinkFind(&dead_list, source_p) == NULL);
       
