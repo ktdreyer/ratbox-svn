@@ -502,9 +502,9 @@ msg_channel_flags(int p_or_n, char *command, struct Client *client_p,
       source_p->user->last = CurrentTime;
   }
 
-  sendto_channel_local(type, chptr, ":%s!%s@%s %s %c%s :%s",
-                       source_p->name, source_p->username,
-                       source_p->host, command, c, chptr->chname, text);
+  sendto_channel_local_butone(source_p, type, chptr, ":%s!%s@%s %s %c%s :%s",
+                              source_p->name, source_p->username,
+                              source_p->host, command, c, chptr->chname, text);
 
   if (chptr->chname[0] == '&')
     return;
