@@ -1,3 +1,19 @@
+db          2002/06/16 13:23:55 EDT	(20020616_3)
+
+  Modified files:
+    src                  balloc.c 
+  Log:
+  - fixed a number of style problems. We want function names to begin
+    at first char.
+    we want to be consistent with if (foo) { oneline; } etc.
+    and we want to be consistent with return needing () or not.
+  - fixed bug with elemsize causing odd address SIGBUS failures esp. on solaris.
+  
+  Revision  Changes    Path
+  7.36      +66 -32    ircd-hybrid-7/src/balloc.c
+
+
+
 leeh        2002/06/16 12:31:30 EDT	(20020616_2)
 
   Modified files:
