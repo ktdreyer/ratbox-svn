@@ -1,3 +1,16 @@
+androsyn    2002/10/30 00:17:01 UTC	(20021030_0)
+
+  Modified files:
+    src                  s_auth.c s_bsd.c 
+  Log:
+  Hopefully this fixes the weird NULL host bug..
+  
+  Revision  Changes    Path
+  7.114     +3 -34     ircd-ratbox/src/s_auth.c
+  7.179     +14 -2     ircd-ratbox/src/s_bsd.c
+
+
+
 androsyn    2002/10/29 23:51:55 UTC	(20021029_2)
 
   Modified files:
