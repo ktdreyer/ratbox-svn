@@ -40,9 +40,7 @@ static char *getfield(char *newline);
 /*
  * oldParseOneLine
  * Inputs       - pointer to line to parse
- *              - pointer to conf item to add
- * Output       - pointer to aconf if aconf to be added
- *                to link list or NULL if not
+ * Output       - NONE
  * Side Effects - Parse one old style conf line.
  *
  * Ok, a bit of justification here:
@@ -55,8 +53,9 @@ static char *getfield(char *newline);
  *
  */
 
-void oldParseOneLine(char* line,struct ConfItem* aconf)
+void oldParseOneLine(char* line)
 {
+  struct ConfItem *aconf;
   char conf_letter;
   char* tmp;
   char* user_field=(char *)NULL;
@@ -97,7 +96,7 @@ void oldParseOneLine(char* line,struct ConfItem* aconf)
       /* NOTREACHED */
     }
 
-  aconf->flags = 0;
+  aconf = make_conf();
 
   switch( conf_letter )
     {

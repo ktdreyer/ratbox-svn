@@ -968,8 +968,15 @@ connect_entry:  CONNECT
        && yy_aconf->spasswd)
       {
         ++scount;
-        conf_add_server(yy_aconf, scount);
-        conf_add_conf(yy_aconf);
+        if( conf_add_server(yy_aconf, scount) >= 0 )
+	  {
+	    conf_add_conf(yy_aconf);
+	  }
+	else
+	  {
+	    free_conf(yy_aconf);
+	    yy_aconf = NULL;
+	  }
       }
     else
       {
@@ -1034,15 +1041,14 @@ connect_item:   connect_name | connect_host | connect_send_password |
 
 connect_name:   NAME '=' QSTRING ';'
   {
-    if(yy_aconf->name)
+    if(yy_aconf->name != NULL)
       {
-	sendto_realops_flags(FLAGS_ALL,"*** Multiple connect accept entry");
+	sendto_realops_flags(FLAGS_ALL,"*** Multiple connect name entry");
+	log(L_WARN, "Multiple connect name entry %s", yy_aconf->name);
       }
-    else
-      {
-	MyFree(yy_aconf->name);
-	DupString(yy_aconf->name, yylval.string);
-      }
+
+    MyFree(yy_aconf->name);
+    DupString(yy_aconf->name, yylval.string);
   };
 
 connect_host:   HOST '=' QSTRING ';' 

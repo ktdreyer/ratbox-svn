@@ -200,10 +200,12 @@ void free_conf(struct ConfItem* aconf)
   if (aconf->passwd)
     memset(aconf->passwd, 0, strlen(aconf->passwd));
   MyFree(aconf->passwd);
+  if (aconf->spasswd)
+    memset(aconf->spasswd, 0, strlen(aconf->spasswd));
+  MyFree(aconf->spasswd);
   MyFree(aconf->name);
   MyFree(aconf->className);
   MyFree(aconf->user);
-  MyFree(aconf->spasswd);
   MyFree((char*) aconf);
 }
 
@@ -751,7 +753,7 @@ void remove_one_ip(struct irc_inaddr *ip_in)
 /*
  * hash_ip()
  * 
- * input        - unsigned long ip address
+ * input        - pointer to an irc_inaddr
  * output       - integer value used as index into hash table
  * side effects - hopefully, none
  */
@@ -1429,12 +1431,8 @@ static void read_kd_lines(FBFILE* file)
 {
   char             line[BUFSIZE];
   char*            p;
-  struct ConfItem* aconf;
 
   scount = 0;
-
-  class0 = find_class("default");       /* which one is the default class ? */
-  aconf = NULL;
 
   while (fbgets(line, sizeof(line), file))
     {
@@ -1444,11 +1442,8 @@ static void read_kd_lines(FBFILE* file)
       if (!*line || line[0] == '#')
         continue;
 
-      aconf = make_conf();
-
-      /* Could we test if it's conf line at all?        -Vesa */
       if (line[1] == ':')
-        oldParseOneLine(line,aconf);
+        oldParseOneLine(line);
     }
 
 }
@@ -1474,7 +1469,7 @@ void conf_add_conf(struct ConfItem *aconf)
 	 aconf->c_class ? ConfClassType(aconf): 0 ));
 
   aconf->next = ConfigItemList;
-   ConfigItemList = aconf;
+  ConfigItemList = aconf;
 }
 
 /*
@@ -2484,32 +2479,32 @@ void conf_delist_old_conf(struct ConfItem *aconf)
  * output       - NONE
  * side effects - Add a C or N line
  */
-struct ConfItem *conf_add_server(struct ConfItem *aconf, int lcount)
+int conf_add_server(struct ConfItem *aconf, int lcount)
 {
   conf_add_class_to_conf(aconf);
 
-  if (lcount > MAXCONFLINKS || !aconf->host || !aconf->user)
+  if (lcount > MAXCONFLINKS || !aconf->host || !aconf->name)
     {
       sendto_realops_flags(FLAGS_ALL,"Bad C/N line");
-      free_conf(aconf);
-      return NULL;
+      log(L_WARN, "Bad C/N line");
+      return -1;
     }
 
   if (BadPtr(aconf->passwd))
     {
       sendto_realops_flags(FLAGS_ALL,"Bad C/N line host %s", aconf->host);
-      free_conf(aconf);
-      return NULL;
+      log(L_WARN, "Bad C/N line host %s",aconf->name);
+      return -1;
     }
           
   if( SplitUserHost(aconf) < 0 )
     {
       sendto_realops_flags(FLAGS_ALL,"Bad C/N line host %s", aconf->host);
-      free_conf(aconf);
-      return NULL;
+      log(L_WARN, "Bad C/N line name %s",aconf->name);
+      return -1;
     }
   lookup_confhost(aconf);
-  return aconf;
+  return 0;
 }
 
 /*
@@ -2554,7 +2549,7 @@ void conf_add_d_conf(struct ConfItem *aconf)
   unsigned long    ip;
   unsigned long    ip_mask;
 
-  if (aconf->host) /* && (aconf->status & CONF_DLINE)) */
+  if (aconf->host)
     {
       DupString(aconf->user,aconf->host);
       (void)is_address(aconf->host,&ip,&ip_mask);

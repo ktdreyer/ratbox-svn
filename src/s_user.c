@@ -1237,6 +1237,12 @@ static void user_welcome(struct Client *sptr)
     }
   else  
     SendMessageFile(sptr, &ConfigFileEntry.motd);
+
+  if (IsRestricted(sptr))
+    {
+      sendto_one(sptr,form_str(ERR_RESTRICTED),
+		 me.name, sptr->name);
+    }
 }
 
 /*

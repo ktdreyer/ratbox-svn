@@ -729,9 +729,6 @@ int server_estab(struct Client *cptr)
   static char       inpath_ip[HOSTLEN * 2 + USERLEN + 5];
   char 		    serv_desc[HOSTLEN + 15];
   char*             host;
-#if 0
-  char*             encr;
-#endif
   dlink_node        *m;
   dlink_node        *ptr;
 
@@ -816,24 +813,6 @@ int server_estab(struct Client *cptr)
       sendto_one(cptr, "SERVER %s 1 :%s",
                  my_name_for_link(me.name, aconf), 
                  (me.info[0]) ? (me.info) : "IRCers United");
-    }
-  else
-    {
-      Debug((DEBUG_INFO, "Check Usernames [%s]vs[%s]",
-             aconf->user, cptr->username));
-      if (!match(aconf->user, cptr->username))
-        {
-          ServerStats->is_ref++;
-          sendto_realops_flags(FLAGS_ALL,
-			       "Username mismatch [%s]v[%s] : %s",
-			       aconf->user, cptr->username,
-			       get_client_name(cptr, TRUE));
-          log(L_NOTICE, "Username mismatch [%s]v[%s] : %s",
-              aconf->user, cptr->username,
-              get_client_name(cptr, TRUE));
-          sendto_one(cptr, "ERROR :No Username Match");
-          return exit_client(cptr, cptr, cptr, "Bad User");
-        }
     }
 
   sendto_one(cptr,"SVINFO %d %d 0 :%lu", TS_CURRENT, TS_MIN, CurrentTime);

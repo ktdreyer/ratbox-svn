@@ -348,7 +348,7 @@ extern const char* form_str(int);
 #define ERR_NOPRIVILEGES     481
 #define ERR_CHANOPRIVSNEEDED 482
 #define ERR_CANTKILLSERVER   483
-#define ERR_DESYNC           484
+#define ERR_RESTRICTED       484
 #define ERR_BANNEDNICK       485
 
 #define ERR_NOOPERHOST       491
