@@ -1,3 +1,16 @@
+davidt      2001/12/29 12:24:46 EST	(20011229_2)
+
+  Modified files:
+    src                  ircd.c 
+  Log:
+  - Produce srandom seed slightly differently
+    (XOR tv_sec with tv_usec and pid)
+  
+  Revision  Changes    Path
+  7.208     +1 -1      ircd-hybrid-7/src/ircd.c
+
+
+
 androsyn    2001/12/29 03:23:12 EST	(20011229_1)
 
   Modified files:
