@@ -1,3 +1,16 @@
+leeh        2004/03/08 07:49:27 EST	(20040308_3)
+
+  Modified files:
+    src                  client.c 
+  Log:
+  - fix the default quit message on kline, when kline_with_reason isnt
+    specified to be "Connection closed" rather than "K-Lined"
+  
+  Revision  Changes    Path
+  7.438     +4 -1      ircd-ratbox/src/client.c
+
+
+
 leeh        2004/03/08 07:37:47 EST	(20040308_2)
 
   Modified files:
