@@ -1,3 +1,17 @@
+leeh        2002/05/11 17:07:28 EDT	(20020511_2)
+
+  Modified files:
+    autoconf             configure.in 
+    include              setup.h.in 
+  Log:
+  - fixes.  can somebody please rebuild configure with autoconf2.1x?
+  
+  Revision  Changes    Path
+  7.134     +12 -10    ircd-hybrid-7/autoconf/configure.in
+  7.53      +3 -0      ircd-hybrid-7/include/setup.h.in
+
+
+
 leeh        2002/05/11 16:43:10 EDT	(20020511_1)
 
   Modified files:
