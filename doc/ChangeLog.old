@@ -1,3 +1,12 @@
+*** 20001101_3 by adrian
+
+
+Make the auth read is now done through comm_setselect(), rather than
+through read_message(). This means that all read_message() does now
+is handle completion of auth and server connect()s, which is next to go.
+
+
+
 *** 20001101_2 by adrian
 
 
