@@ -40,7 +40,8 @@ Channel Modes:
 +n - noexternal - Users must be in the channel to send text to it
 +o - chanop     - Full operator status
 +p - private    - Private is obsolete, this now restricts KNOCK, and can be
-                  set at the same time as +s.
+                  set at the same time as +s.  This will also prevents 
+		  halfops from setting +/-h.
 +s - secret     - The channel does not show up on NAMES or LIST or in the 
                   WHOIS channel list unless you are a member of the channel
 +t - topic      - Only chanops can change the topic

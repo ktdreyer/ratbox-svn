@@ -210,10 +210,10 @@ m_invite(struct Client *client_p,
                chptr->chname);
   }
 
-  /* if the channel is +p, broadcast everywhere thats CAP_PARA, send to
+  /* if the channel is +pi, broadcast everywhere thats CAP_PARA, send to
    * target if target isnt CAP_PARA capable, else just send to target
    */
-  if(vchan->mode.mode & MODE_PRIVATE)
+  if(ParanoidChannel(vchan))
   {
     sendto_channel_remote(source_p, client_p,
   		  	  ONLY_CHANOPS_HALFOPS, CAP_PARA, NOCAPS,

@@ -120,6 +120,9 @@ extern void unset_chcap_usage_counts(struct Client *serv_p);
 #define HiddenChannel(x)        ((x) && ((x)->mode.mode & MODE_PRIVATE))
 #define PubChannel(x)           ((!x) || ((x)->mode.mode &\
                                  (MODE_PRIVATE | MODE_SECRET)) == 0)
+#define ParanoidChannel(x)	((x) && ((x)->mode.mode &\
+			        (MODE_PRIVATE|MODE_INVITEONLY))==\
+		                (MODE_PRIVATE|MODE_INVITEONLY))
 
 struct ChModeChange
 {
