@@ -1,3 +1,15 @@
+androsyn    2002/08/19 01:56:38 EDT	(20020819_1)
+
+  Modified files:
+    src                  s_conf.c 
+  Log:
+  Lets try a slightly less retarded ipv6 hash function..thank you come again
+  
+  Revision  Changes    Path
+  7.337     +6 -8      ircd-ratbox/src/s_conf.c
+
+
+
 androsyn    2002/08/19 01:21:04 EDT	(20020819_0)
 
   Modified files:
