@@ -589,8 +589,8 @@ static void PrintOutServers(FILE* out)
       if(p->name && p->c_passwd && p->n_passwd && p->host)
 	{
 	  fprintf(out,"\tconnect {\n");
-	  fprintf(out,"\t\thost=\"%s\";\n", p->name);
-	  fprintf(out,"\t\tname=\"%s\";\n", p->host);
+	  fprintf(out,"\t\thost=\"%s\";\n", p->host);
+	  fprintf(out,"\t\tname=\"%s\";\n", p->name);
 	  fprintf(out,"\t\tsend_password=\"%s\";\n", p->c_passwd);
 	  fprintf(out,"\t\taccept_password=\"%s\";\n", p->n_passwd);
 	  fprintf(out,"\t\tport=%d;\n", p->port );
