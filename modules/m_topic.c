@@ -69,7 +69,6 @@ int     m_topic(struct Client *cptr,
 {
   struct Channel *chptr = NullChn;
   struct Channel *vchan;
-  char  *chname;
   char  *topic = NULL;
   char  *name;
   char  *p = NULL;
@@ -88,7 +87,6 @@ int     m_topic(struct Client *cptr,
           return 0;
         }
 
-      chname = chptr->chname;
       if (HasVchans(chptr))
 	{
 	  vchan = map_vchan(chptr,sptr);
@@ -136,26 +134,26 @@ int     m_topic(struct Client *cptr,
 	      chptr->topic_time = CurrentTime;
 	      
 	      sendto_match_servs(chptr, cptr,":%s TOPIC %s :%s",
-				 parv[0], chptr->chname,
+				 parv[0], name,
 				 chptr->topic);
 	      if(GlobalSetOptions.hide_chanops)
 		{
 		  sendto_channel_butserv(ONLY_CHANOPS,
 					 chptr, sptr, ":%s TOPIC %s :%s",
 					 parv[0],
-					 chname, chptr->topic);
+					 name, chptr->topic);
 		}
 	      else
 		{
 		  sendto_channel_butserv(ALL_MEMBERS,
 					 chptr, sptr, ":%s TOPIC %s :%s",
 					 parv[0],
-					 chname, chptr->topic);
+					 name, chptr->topic);
 		}
 	    }
 	  else
             sendto_one(sptr, form_str(ERR_CHANOPRIVSNEEDED),
-                       me.name, parv[0], chptr->chname);
+                       me.name, parv[0], name);
 	}
       else  /* only asking  for topic  */
 	{
@@ -167,14 +165,14 @@ int     m_topic(struct Client *cptr,
 	    }
           if (chptr->topic[0] == '\0')
 	    sendto_one(sptr, form_str(RPL_NOTOPIC),
-		       me.name, parv[0], chptr->chname);
+		       me.name, parv[0], name);
           else
 	    {
               sendto_one(sptr, form_str(RPL_TOPIC),
                          me.name, parv[0],
-                         chptr->chname, chptr->topic);
+                         name, chptr->topic);
               sendto_one(sptr, form_str(RPL_TOPICWHOTIME),
-                         me.name, parv[0], chname,
+                         me.name, parv[0], name,
                          chptr->topic_info,
                          chptr->topic_time);
 	    }
