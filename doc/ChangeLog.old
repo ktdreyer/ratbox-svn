@@ -1,3 +1,16 @@
+leeh        2002/04/30 10:29:17 EDT	(20020430_5)
+
+  Modified files:
+    src                  ircd_parser.y 
+  Log:
+  - added code for silly people who dont know that cryptlinks need rsa
+    keys, and normal confs need passwords :P
+  
+  Revision  Changes    Path
+  1.246     +23 -5     ircd-hybrid-7/src/ircd_parser.y
+
+
+
 leeh        2002/04/30 08:45:03 EDT	(20020430_4)
 
   Modified files:
