@@ -46,19 +46,23 @@
 
 static int mr_server(struct Client *, struct Client *, int, const char **);
 static int ms_server(struct Client *, struct Client *, int, const char **);
-
-static int set_server_gecos(struct Client *, const char *);
+static int ms_sid(struct Client *, struct Client *, int, const char **);
 
 struct Message server_msgtab = {
 	"SERVER", 0, 0, 4, 0, MFLG_SLOW | MFLG_UNREG, 0,
 	{mr_server, m_registered, ms_server, m_registered}
 };
+struct Message sid_msgtab = {
+	"SID", 0, 0, 6, 0, MFLG_SLOW, 0,
+	{m_ignore, m_registered, ms_sid, m_registered}
+};
 
-mapi_clist_av1 server_clist[] = { &server_msgtab, NULL };
+mapi_clist_av1 server_clist[] = { &server_msgtab, &sid_msgtab, NULL };
 DECLARE_MODULE_AV1(server, NULL, NULL, server_clist, NULL, NULL, "$Revision$");
 
 int bogus_host(const char *host);
 struct Client *server_exists(const char *);
+static int set_server_gecos(struct Client *, const char *);
 
 /*
  * mr_server - SERVER message handler
@@ -477,6 +481,170 @@ ms_server(struct Client *client_p, struct Client *source_p, int parc, const char
 	return 0;
 }
 
+static int
+ms_sid(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
+{
+	struct Client *target_p;
+	struct ConfItem *aconf;
+	int hop;
+	int hlined = 0;
+	int llined = 0;
+
+	hop = atoi(parv[2]);
+
+	/* collision on the name? */
+	if((target_p = server_exists(parv[1])) != NULL)
+	{
+		sendto_one(client_p, "ERROR :Server %s already exists", parv[1]);
+		sendto_realops_flags(UMODE_ALL, L_ADMIN,
+				     "Link %s cancelled, server %s already exists",
+				     get_client_name(client_p, SHOW_IP), parv[1]);
+		sendto_realops_flags(UMODE_ALL, L_OPER,
+				     "Link %s cancelled, server %s already exists",
+				     client_p->name, parv[1]);
+		exit_client(NULL, client_p, &me, "Server Exists");
+		return 0;
+	}
+
+	/* collision on the SID? */
+	if((target_p = find_id(parv[3])) != NULL)
+	{
+		sendto_one(client_p, "ERROR :SID %s already exists", parv[3]);
+		sendto_realops_flags(UMODE_ALL, L_ADMIN,
+				     "Link %s cancelled, SID %s already exists",
+				     get_client_name(client_p, SHOW_IP), parv[3]);
+		sendto_realops_flags(UMODE_ALL, L_OPER,
+				     "Link %s cancelled, SID %s already exists",
+				     client_p->name, parv[3]);
+		exit_client(NULL, client_p, &me, "Server Exists");
+		return 0;
+	}
+
+	if(bogus_host(parv[1]) || strlen(parv[1]) > HOSTLEN)
+	{
+		sendto_one(client_p, "ERROR :Invalid servername");
+		sendto_realops_flags(UMODE_ALL, L_ADMIN,
+				     "Link %s cancelled, servername %s invalid",
+				     get_client_name(client_p, SHOW_IP), parv[1]);
+		sendto_realops_flags(UMODE_ALL, L_OPER,
+				     "Link %s cancelled, servername %s invalid",
+				     client_p->name, parv[1]);
+		exit_client(NULL, client_p, &me, "Bogus server name");
+		return 0;
+	}
+
+	if(!IsDigit(parv[3][0]) || !IsIdChar(parv[3][1]) || 
+	   !IsIdChar(parv[3][2]) || parv[3][3] != '\0')
+	{
+		sendto_one(client_p, "ERROR :Invalid SID");
+		sendto_realops_flags(UMODE_ALL, L_ADMIN,
+				     "Link %s cancelled, SID %s invalid",
+				     get_client_name(client_p, SHOW_IP), parv[3]);
+		sendto_realops_flags(UMODE_ALL, L_OPER,
+				     "Link %s cancelled, SID %s invalid",
+				     client_p->name, parv[3]);
+		exit_client(NULL, client_p, &me, "Bogus SID");
+		return 0;
+	}
+
+	if(EmptyString(parv[5]))
+	{
+		sendto_one(client_p, "ERROR :No server info specified for %s", 
+			   parv[1]);
+		sendto_realops_flags(UMODE_ALL, L_ADMIN,
+				     "Link %s cancelled, serverinfo invalid",
+				     get_client_name(client_p, SHOW_IP));
+		sendto_realops_flags(UMODE_ALL, L_OPER,
+				      "Link %s cancelled, serverinfo invalid",
+				      client_p->name);
+		exit_client(NULL, client_p, &me, "Bogus server name");
+		return 0;
+	}
+
+	/* for the directly connected server:
+	 * H: allows it to introduce a server matching that mask
+	 * L: disallows it introducing a server matching that mask
+	 */
+	for(aconf = ConfigItemList; aconf; aconf = aconf->next)
+	{
+		if((aconf->status & (CONF_LEAF | CONF_HUB)) == 0)
+			continue;
+
+		if(match(aconf->name, client_p->name))
+		{
+			if(match(aconf->host, parv[1]))
+			{
+				if(aconf->status == CONF_HUB)
+					hlined++;
+				else
+					llined++;
+			}
+		}
+	}
+
+	/* no matching hub_mask */
+	if(!hlined)
+	{
+		sendto_one(client_p, "ERROR :No matching hub_mask");
+		sendto_realops_flags(UMODE_ALL, L_ADMIN,
+				     "Non-Hub link %s introduced %s.",
+				     get_client_name(client_p, SHOW_IP), parv[1]);
+		sendto_realops_flags(UMODE_ALL, L_OPER,
+				     "Non-Hub link %s introduced %s.",
+				     client_p->name, parv[1]);
+		exit_client(NULL, client_p, &me, "No matching hub_mask.");
+		return 0;
+	}
+
+	/* matching leaf_mask */
+	if(llined)
+	{
+		sendto_one(client_p, "ERROR :Matching leaf_mask");
+		sendto_realops_flags(UMODE_ALL, L_ADMIN,
+				     "Link %s introduced leafed server %s.",
+				     get_client_name(client_p, SHOW_IP), parv[1]);
+		sendto_realops_flags(UMODE_ALL, L_OPER,
+				     "Link %s introduced leafed server %s.",
+				     client_p->name, parv[1]);
+		exit_client(NULL, client_p, &me, "Leafed Server.");
+		return 0;
+	}
+
+	/* ok, alls good */
+	target_p = make_client(client_p);
+	make_server(target_p);
+
+	strlcpy(target_p->name, parv[1], sizeof(target_p->name));
+	target_p->hopcount = atoi(parv[2]) + 1;
+	strcpy(target_p->id, parv[3]);
+	target_p->serv->tsver = atoi(parv[4]);
+	set_server_gecos(target_p, parv[5]);
+
+	target_p->servptr = source_p;
+	SetServer(target_p);
+
+	dlinkAddTail(target_p, &target_p->node, &global_client_list);
+	dlinkAddAlloc(target_p, &global_serv_list);
+	add_to_client_hash(target_p->name, target_p);
+	add_to_id_hash(target_p->id, target_p);
+	dlinkAdd(target_p, &target_p->lnode, &target_p->servptr->serv->servers);
+
+	sendto_server(client_p, NULL, CAP_TS6, NOCAPS,
+		      ":%s SID %s %d %s %d :%s%s",
+		      source_p->id, target_p->name, target_p->hopcount,
+		      target_p->id, target_p->serv->tsver, 
+		      IsHidden(target_p) ? "(H) " : "", target_p->info);
+	sendto_server(client_p, NULL, NOCAPS, CAP_TS6,
+		      ":%s SERVER %s %d :%s%s",
+		      source_p->name, target_p->name, target_p->hopcount,
+		      IsHidden(target_p) ? "(H) " : "", target_p->info);
+
+	sendto_realops_flags(UMODE_EXTERNAL, L_ALL,
+			     "Server %s being introduced by %s",
+			     target_p->name, source_p->name);
+	return 0;
+}
+	
 /* set_server_gecos()
  *
  * input	- pointer to client

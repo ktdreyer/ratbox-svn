@@ -518,88 +518,6 @@ register_local_user(struct Client *client_p, struct Client *source_p, const char
 }
 
 /*
- * register_remote_user
- *
- * inputs
- * output
- * side effects	- This function is called when a remote client
- *		  is introduced by a server.
- */
-int
-register_remote_user(struct Client *client_p, struct Client *source_p, const char *nick, const char *username)
-{
-	struct User *user = source_p->user;
-	struct Client *target_p;
-
-	s_assert(NULL != source_p);
-	s_assert(source_p->username != username);
-
-	if(source_p == NULL)
-		return -1;
-
-	user->last = CurrentTime;
-
-	strlcpy(source_p->username, username, sizeof(source_p->username));
-
-	SetClient(source_p);
-
-	/* Increment our total user count here */
-	if(++Count.total > Count.max_tot)
-		Count.max_tot = Count.total;
-
-	add_to_hostname_hash(source_p->host, source_p);
-
-	source_p->servptr = find_server(user->server);
-
-	if(source_p->servptr == NULL)
-	{
-		sendto_realops_flags(UMODE_ALL, L_ALL,
-				     "Ghost killed: %s on invalid server %s",
-				     source_p->name, source_p->user->server);
-
-		kill_client(client_p, source_p, "%s (Server doesn't exist)", me.name);
-
-		source_p->flags |= FLAGS_KILLED;
-		return exit_client(NULL, source_p, &me, "Ghosted Client");
-	}
-
-	dlinkAdd(source_p, &source_p->lnode, &source_p->servptr->serv->users);
-	if((target_p = find_server(user->server)) && target_p->from != source_p->from)
-	{
-		sendto_realops_flags(UMODE_DEBUG, L_ALL,
-				     "Bad User [%s] :%s USER %s@%s %s, != %s[%s]",
-				     client_p->name, nick,
-				     source_p->username, source_p->host,
-				     user->server, target_p->name, target_p->from->name);
-		kill_client(client_p, source_p,
-			    "%s (NICK from wrong direction (%s != %s))",
-			    me.name, user->server, target_p->from->name);
-
-		source_p->flags |= FLAGS_KILLED;
-		return exit_client(source_p, source_p, &me, "USER server wrong direction");
-
-	}
-	/*
-	 * Super GhostDetect:
-	 * If we can't find the server the user is supposed to be on,
-	 * then simply blow the user away.        -Taner
-	 */
-	if(!target_p)
-	{
-		kill_client(client_p, source_p, "%s GHOST (no server found)", me.name);
-		sendto_realops_flags(UMODE_ALL, L_ALL,
-				     "No server %s for user %s[%s@%s] from %s",
-				     user->server, source_p->name,
-				     source_p->username, source_p->host, source_p->from->name);
-		source_p->flags |= FLAGS_KILLED;
-		return exit_client(source_p, source_p, &me, "Ghosted Client");
-	}
-
-	return (introduce_client(client_p, source_p, user, nick));
-}
-
-
-/*
  * introduce_clients
  *
  * inputs	-
@@ -608,7 +526,7 @@ register_remote_user(struct Client *client_p, struct Client *source_p, const cha
  *		  of the net, either from a local client connect or
  *		  from a remote connect.
  */
-static int
+int
 introduce_client(struct Client *client_p, struct Client *source_p, struct User *user, const char *nick)
 {
 	dlink_node *ptr;
@@ -874,44 +792,6 @@ do_local_user(const char *nick, struct Client *client_p, struct Client *source_p
 	}
 
 	return 0;
-}
-
-/*
- * do_remote_user
- *
- * inputs	-
- * output	-
- * side effects -
- */
-int
-do_remote_user(const char *nick, struct Client *client_p, struct Client *source_p,
-	       const char *username, const char *host, const char *server, 
-	       const char *realname, const char *id)
-{
-	unsigned int oflags;
-	struct User *user;
-
-	s_assert(NULL != source_p);
-	s_assert(source_p->username != username);
-
-	if(source_p == NULL)
-		return 0;
-	user = make_user(source_p);
-
-	oflags = source_p->flags;
-
-	/*
-	 * coming from another server, take the servers word for it
-	 */
-	user->server = find_or_add(server);
-	strlcpy(source_p->host, host, sizeof(source_p->host));
-	strlcpy(source_p->info, realname, sizeof(source_p->info));
-#ifdef BROKEN_TS6
-	if(id)
-		strlcpy(source_p->user->id, id, sizeof(source_p->user->id));
-#endif
-
-	return register_remote_user(client_p, source_p, source_p->name, username);
 }
 
 /*

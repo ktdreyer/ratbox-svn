@@ -46,47 +46,42 @@
 #include "modules.h"
 #include "common.h"
 #include "packet.h"
-
+#include "scache.h"
 
 static int mr_nick(struct Client *, struct Client *, int, const char **);
 static int m_nick(struct Client *, struct Client *, int, const char **);
 static int ms_nick(struct Client *, struct Client *, int, const char **);
-
-static int ms_client(struct Client *, struct Client *, int, const char **);
-
-static int nick_from_server(struct Client *, struct Client *, int, const char **, time_t, const char *);
-static int client_from_server(struct Client *, struct Client *, int, const char **, time_t, const char *);
-
-static int check_clean_nick(struct Client *, struct Client *, const char *, const char *, const char *);
-static int check_clean_user(struct Client *, const char *, const char *, const char *);
-static int check_clean_host(struct Client *, const char *, const char *, const char *);
-
-static int clean_nick_name(const char *);
-static int clean_user_name(const char *);
-static int clean_host_name(const char *);
-
-static int perform_nick_collides(struct Client *, struct Client *,
-				 struct Client *, int, const char **, time_t, const char *);
-
+static int ms_uid(struct Client *, struct Client *, int, const char **);
 
 struct Message nick_msgtab = {
 	"NICK", 0, 0, 1, 0, MFLG_SLOW, 0,
 	{mr_nick, m_nick, ms_nick, m_nick}
 };
-
-struct Message client_msgtab = {
-	"CLIENT", 0, 0, 10, 0, MFLG_SLOW, 0,
-	{m_ignore, m_ignore, ms_client, m_ignore}
+struct Message uid_msgtab = {
+	"UID", 0, 0, 10, 0, MFLG_SLOW, 0,
+	{m_ignore, m_ignore, ms_uid, m_ignore}
 };
 
 mapi_clist_av1 nick_clist[] = {
-	&nick_msgtab, &client_msgtab, NULL
+	&nick_msgtab, &uid_msgtab, NULL
 };
 DECLARE_MODULE_AV1(nick, NULL, NULL, nick_clist, NULL, NULL, "$Revision$");
 
-/*
- * mr_nick()
- *
+static int nick_from_server(struct Client *, struct Client *, int, const char **, time_t, const char *);
+
+static int clean_nick(const char *);
+static int clean_username(const char *);
+static int clean_host(const char *);
+
+static int register_client(struct Client *client_p, struct Client *server, 
+			   const char *nick, const char *username, const char *host,
+			   const char *sockhost, const char *servername, const char *realname,
+			   const char *id, const char *umode, int hopcount, time_t newts);
+
+static int perform_nick_collides(struct Client *, struct Client *,
+				 struct Client *, int, const char **, time_t, const char *);
+
+/* mr_nick()
  *       parv[0] = sender prefix
  *       parv[1] = nickname
  */
@@ -97,30 +92,25 @@ mr_nick(struct Client *client_p, struct Client *source_p, int parc, const char *
 	char nick[NICKLEN];
 	char *s;
 
-	if(parc < 2 || EmptyString(parv[1]))
+	if(parc < 2 || EmptyString(parv[1]) || (parv[1][0] == '~'))
 	{
 		sendto_one(source_p, form_str(ERR_NONICKNAMEGIVEN),
 			   me.name, EmptyString(parv[0]) ? "*" : parv[0]);
 		return 0;
 	}
 
-	/* Terminate the nick at the first ~ */
+	/* due to the scandinavian origins, (~ being uppercase of ^) and ~
+	 * being disallowed as a nick char, we need to chop the first ~
+	 * instead of just erroring.
+	 */
 	if((s = strchr(parv[1], '~')))
 		*s = '\0';
-
-	/* and if the first ~ was the first letter.. */
-	if(EmptyString(parv[1]))
-	{
-		sendto_one(source_p, form_str(ERR_ERRONEUSNICKNAME),
-			   me.name, EmptyString(parv[0]) ? "*" : parv[0], parv[1]);
-		return 0;
-	}
 
 	/* copy the nick and terminate it */
 	strlcpy(nick, parv[1], sizeof(nick));
 
 	/* check the nickname is ok */
-	if(!clean_nick_name(nick))
+	if(!clean_nick(nick))
 	{
 		sendto_one(source_p, form_str(ERR_ERRONEUSNICKNAME),
 			   me.name, EmptyString(parv[0]) ? "*" : parv[0], parv[1]);
@@ -136,58 +126,59 @@ mr_nick(struct Client *client_p, struct Client *source_p, int parc, const char *
 	}
 
 	if((target_p = find_client(nick)) == NULL)
-	{
 		set_initial_nick(client_p, source_p, nick);
-		return 0;
-	}
 	else if(source_p == target_p)
-	{
 		strcpy(source_p->name, nick);
-		return 0;
-	}
 	else
-	{
 		sendto_one(source_p, form_str(ERR_NICKNAMEINUSE), me.name, "*", nick);
-	}
 
 	return 0;
 }
 
-/*
- * m_nick()
- *
+/* m_nick()
  *     parv[0] = sender prefix
  *     parv[1] = nickname
  */
 static int
 m_nick(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
-	char nick[NICKLEN];
 	struct Client *target_p;
+	char nick[NICKLEN];
+	char *s;
 
-	if(parc < 2 || EmptyString(parv[1]))
+	if(parc < 2 || EmptyString(parv[1]) || (parv[1][0] == '~'))
 	{
-		sendto_one(source_p, form_str(ERR_NONICKNAMEGIVEN), me.name, parv[0]);
+		sendto_one(source_p, form_str(ERR_NONICKNAMEGIVEN),
+			   me.name, parv[0]);
 		return 0;
 	}
+
+	/* due to the scandinavian origins, (~ being uppercase of ^) and ~
+	 * being disallowed as a nick char, we need to chop the first ~
+	 * instead of just erroring.
+	 */
+	if((s = strchr(parv[1], '~')))
+		*s = '\0';
 
 	/* mark end of grace period, to prevent nickflooding */
 	if(!IsFloodDone(source_p))
 		flood_endgrace(source_p);
 
-	/* terminate nick to NICKLEN */
+	/* terminate nick to NICKLEN, we dont want clean_nick() to error! */
 	strlcpy(nick, parv[1], sizeof(nick));
 
 	/* check the nickname is ok */
-	if(!clean_nick_name(nick))
+	if(!clean_nick(nick))
 	{
-		sendto_one(source_p, form_str(ERR_ERRONEUSNICKNAME), me.name, parv[0], nick);
+		sendto_one(source_p, form_str(ERR_ERRONEUSNICKNAME),
+			   me.name, parv[0], nick);
 		return 0;
 	}
 
 	if(find_nick_resv(nick))
 	{
-		sendto_one(source_p, form_str(ERR_UNAVAILRESOURCE), me.name, parv[0], nick);
+		sendto_one(source_p, form_str(ERR_UNAVAILRESOURCE),
+			   me.name, parv[0], nick);
 		return 0;
 	}
 
@@ -196,55 +187,32 @@ m_nick(struct Client *client_p, struct Client *source_p, int parc, const char *p
 		/* If(target_p == source_p) the client is changing nicks between
 		 * equivalent nicknames ie: [nick] -> {nick}
 		 */
-
 		if(target_p == source_p)
 		{
 			/* check the nick isnt exactly the same */
 			if(strcmp(target_p->name, nick))
-			{
 				change_local_nick(client_p, source_p, nick);
-				return 0;
-			}
-			else
-			{
-				/* client is doing :old NICK old
-				 * ignore it..
-				 */
-				return 0;
-			}
+
 		}
 
-		/* if the client that has the nick isnt registered yet (nick but no
-		 * user) then drop the unregged client
-		 */
-		if(IsUnknown(target_p))
+		/* drop unregged client */
+		else if(IsUnknown(target_p))
 		{
-			/* the old code had an if(MyConnect(target_p)) here.. but I cant see
-			 * how that can happen, m_nick() is local only --fl_
-			 */
-
 			exit_client(NULL, target_p, &me, "Overridden");
 			change_local_nick(client_p, source_p, nick);
-			return 0;
 		}
 		else
-		{
 			sendto_one(source_p, form_str(ERR_NICKNAMEINUSE), me.name, parv[0], nick);
-			return 0;
-		}
 
-	}
-	else
-	{
-		change_local_nick(client_p, source_p, nick);
 		return 0;
 	}
+	else
+		change_local_nick(client_p, source_p, nick);
 
 	return 0;
 }
 
-/*
- * ms_nick()
+/* ms_nick()
  *      
  * server -> server nick change
  *    parv[0] = sender prefix
@@ -298,23 +266,49 @@ ms_nick(struct Client *client_p, struct Client *source_p, int parc, const char *
 		return 0;
 	}
 
-	/* fix the length of the nick */
-	strlcpy(nick, parv[1], sizeof(nick));
+	/* if nicks empty, erroneous, or too long, kill */
+	if(EmptyString(parv[1]) || !clean_nick(parv[1]))
+	{
+		ServerStats->is_kill++;
+		sendto_realops_flags(UMODE_DEBUG, L_ALL,
+				     "Bad Nick: %s From: %s(via %s)",
+				     parv[1], parc == 9 ? parv[7] : 
+				      source_p->user->server,
+				     client_p->name);
+		sendto_one(client_p, ":%s KILL %s :%s (Bad Nickname)",
+			   me.name, parv[1], me.name);
 
-	if(check_clean_nick(client_p, source_p, nick, parv[1],
-			    (parc == 9 ? parv[7] : (char *)source_p->user->server)))
-		return 0;
-
+		/* bad nick change, issue kill for the old nick to the rest
+		 * of the network.
+		 */
+		if(parc != 9)
+		{
+			kill_client_serv_butone(client_p, source_p,
+						"%s (Bad Nickname)", me.name);
+			source_p->flags |= FLAGS_KILLED;
+			exit_client(client_p, source_p, &me, "Bad Nickname");
+		}
+	}
+			      
 	if(parc == 9)
 	{
-		if(check_clean_user(client_p, nick, parv[5], parv[7]) ||
-		   check_clean_host(client_p, nick, parv[6], parv[7]))
-			return 0;
+		/* invalid username or host? */
+		if(!clean_username(parv[5]) || !clean_host(parv[6]))
+		{
+			ServerStats->is_kill++;
+			sendto_realops_flags(UMODE_DEBUG, L_ALL,
+					     "Bad user@host: %s@%s From: %s(via %s)",
+					     parv[5], parv[6], parv[7],
+					     client_p->name);
+			sendto_one(client_p, ":%s KILL %s :%s (Bad user@host)",
+				   me.name, nick, me.name);
+		}
 
 		/* check the length of the clients gecos */
 		if(strlen(parv[8]) > REALLEN)
 		{
 			char *s = LOCAL_COPY(parv[8]);
+			/* why exactly do we care? --fl */
 			sendto_realops_flags(UMODE_ALL, L_ALL,
 					     "Long realname from server %s for %s", parv[7],
 					     parv[1]);
@@ -323,301 +317,191 @@ ms_nick(struct Client *client_p, struct Client *source_p, int parc, const char *
 			parv[8] = s;
 		}
 
-		if(IsServer(source_p))
-			newts = atol(parv[3]);
+		newts = atol(parv[3]);
 	}
 	else
-	{
-		if(!IsServer(source_p))
-			newts = atol(parv[2]);
-	}
+		newts = atol(parv[2]);
+
+	target_p = find_client(nick);
 
 	/* if the nick doesnt exist, allow it and process like normal */
-	if(!(target_p = find_client(nick)))
+	if(target_p == NULL)
 	{
 		nick_from_server(client_p, source_p, parc, parv, newts, nick);
-		return 0;
 	}
-
-	/* we're not living in the past anymore, an unknown client is local only. */
-	if(IsUnknown(target_p))
+	else if(IsUnknown(target_p))
 	{
 		exit_client(NULL, target_p, &me, "Overridden");
 		nick_from_server(client_p, source_p, parc, parv, newts, nick);
-		return 0;
 	}
-
-	if(target_p == source_p)
+	else if(target_p == source_p)
 	{
+		/* client changing case of nick */
 		if(strcmp(target_p->name, nick))
-		{
-			/* client changing case of nick */
 			nick_from_server(client_p, source_p, parc, parv, newts, nick);
-			return 0;
-		}
-		else
-			/* client not changing nicks at all */
-			return 0;
 	}
-
-	perform_nick_collides(source_p, client_p, target_p, parc, parv, newts, nick);
+	/* we've got a collision! */
+	else
+		perform_nick_collides(source_p, client_p, target_p, parc, parv, newts, nick);
 
 	return 0;
 }
 
-/*
- * ms_client()
+/* ms_uid()
+ *     parv[1] - nickname
+ *     parv[2] - hops
+ *     parv[3] - TS
+ *     parv[4] - umodes
+ *     parv[5] - username
+ *     parv[6] - hostname
+ *     parv[7] - IP
+ *     parv[8] - UID
+ *     parv[9] - gecos
  */
 static int
-ms_client(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
+ms_uid(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	struct Client *target_p;
 	char nick[NICKLEN];
 	time_t newts = 0;
-	const char *id;
-	const char *name;
-
-	id = parv[8];
-	name = parv[9];
-
-	/* parse the nickname */
-	strlcpy(nick, parv[1], sizeof(nick));
-
-	/* check the nicknames, usernames and hostnames are ok */
-	if(check_clean_nick(client_p, source_p, nick, parv[1], parv[7]) ||
-	   check_clean_user(client_p, nick, parv[5], parv[7]) ||
-	   check_clean_host(client_p, nick, parv[6], parv[7]))
-		return 0;
-
-	/* check length of clients gecos */
-	if(strlen(name) > REALLEN)
-	{
-		char *s = LOCAL_COPY(name);
-		sendto_realops_flags(UMODE_ALL, L_ALL, "Long realname from server %s for %s",
-				     parv[0], parv[1]);
-		s[REALLEN] = '\0';
-		name = parv[9] = s;
-	}
 
 	newts = atol(parv[3]);
 
-	/* if there is an ID collision, kill our client, and kill theirs.
-	 * this may generate 401's, but it ensures that both clients always
-	 * go, even if the other server refuses to do the right thing.
-	 */
-	if((target_p = find_id(id)))
+	/* if nicks erroneous, or too long, kill */
+	if(!clean_nick(parv[1]))
 	{
-		sendto_realops_flags(UMODE_ALL, L_ALL,
-				     "ID collision on %s(%s <- %s)(both killed)",
-				     target_p->name, target_p->from->name, client_p->name);
-
-		kill_client_serv_butone(NULL, target_p, "%s (ID collision)", me.name);
-
 		ServerStats->is_kill++;
-
-		target_p->flags |= FLAGS_KILLED;
-		exit_client(client_p, target_p, &me, "ID Collision");
-		return 0;
+		sendto_realops_flags(UMODE_DEBUG, L_ALL,
+				     "Bad Nick: %s From: %s(via %s)",
+				     parv[1], parc == 9 ? parv[7] : 
+				      source_p->user->server,
+				     client_p->name);
+		sendto_one(client_p, ":%s KILL %s :%s (Bad Nickname)",
+			   me.name, parv[8], me.name);
 	}
 
-	if(!(target_p = find_client(nick)))
+	if(!clean_username(parv[5]) || !clean_host(parv[6]))
 	{
-		client_from_server(client_p, source_p, parc, parv, newts, nick);
-		return 0;
+		ServerStats->is_kill++;
+		sendto_realops_flags(UMODE_DEBUG, L_ALL,
+				     "Bad user@host: %s@%s From: %s(via %s)",
+				     parv[5], parv[6], source_p->name,
+				     client_p->name);
+		sendto_one(client_p, ":%s KILL %s :%s (Bad user@host)",
+			   me.name, parv[8], me.name);
 	}
 
+	/* check length of clients gecos */
+	if(strlen(parv[9]) > REALLEN)
+	{
+		char *s = LOCAL_COPY(parv[9]);
+		sendto_realops_flags(UMODE_ALL, L_ALL, "Long realname from server %s for %s",
+				     parv[0], parv[1]);
+		s[REALLEN] = '\0';
+		parv[9] = s;
+	}
 
-	if(IsUnknown(target_p))
+	target_p = find_client(nick);
+	
+	if(target_p == NULL)
+	{
+		register_client(client_p, source_p, nick, parv[5], parv[6],
+				parv[7], source_p->name, parv[9], parv[8],
+				parv[4], atoi(parv[2]), newts);
+	}
+	else if(IsUnknown(target_p))
 	{
 		exit_client(NULL, target_p, &me, "Overridden");
-		client_from_server(client_p, source_p, parc, parv, newts, nick);
-		return 0;
+		register_client(client_p, source_p, nick, parv[5], parv[6],
+				parv[7], source_p->name, parv[9], parv[8],
+				parv[4], atoi(parv[2]), newts);
 	}
-
-	perform_nick_collides(source_p, client_p, target_p, parc, parv, newts, nick);
+	/* we've got a collision! */
+	else
+		perform_nick_collides(source_p, client_p, target_p, parc, parv, newts, nick);
 
 	return 0;
 }
 
-
-/* 
- * check_clean_nick()
- * 
- * input	- pointer to source
- *		- nickname
- *		- truncated nickname
- *		- origin of client
- * output	- none
- * side effects - if nickname is erroneous, or a different length to
- *                truncated nickname, return 1
- */
-static int
-check_clean_nick(struct Client *client_p, struct Client *source_p,
-		 const char *nick, const char *newnick, const char *server)
-{
-	/* the old code did some wacky stuff here, if the nick is invalid, kill it
-	 * and dont bother messing at all
-	 */
-
-	/*
-	 * Zero length nicks are bad too..this shouldn't happen but..
-	 */
-
-	if(EmptyString(nick) || !clean_nick_name(nick) || strcmp(nick, newnick))
-	{
-		ServerStats->is_kill++;
-		sendto_realops_flags(UMODE_DEBUG, L_ALL,
-				     "Bad Nick: %s From: %s(via %s)", nick, server, client_p->name);
-
-		sendto_one(client_p, ":%s KILL %s :%s (Bad Nickname)", me.name, newnick, me.name);
-
-		/* bad nick change */
-		if(source_p != client_p)
-		{
-			kill_client_serv_butone(client_p, source_p, "%s (Bad Nickname)", me.name);
-			source_p->flags |= FLAGS_KILLED;
-			exit_client(client_p, source_p, &me, "Bad Nickname");
-		}
-
-		return 1;
-	}
-
-	return 0;
-}
-
-/* check_clean_user()
- * 
- * input	- pointer to client sending data
- *              - nickname
- *              - username to check
- *		- origin of NICK
- * output	- none
- * side effects - if username is erroneous, return 1
- */
-static int
-check_clean_user(struct Client *client_p, const char *nick, const char *user, const char *server)
-{
-	if(strlen(user) > USERLEN)
-	{
-		ServerStats->is_kill++;
-		sendto_realops_flags(UMODE_DEBUG, L_ALL,
-				     "Long Username: %s Nickname: %s From: %s(via %s)",
-				     user, nick, server, client_p->name);
-
-		sendto_one(client_p, ":%s KILL %s :%s (Bad Username)", me.name, nick, me.name);
-
-		return 1;
-	}
-
-	if(!clean_user_name(user))
-		sendto_realops_flags(UMODE_DEBUG, L_ALL,
-				     "Bad Username: %s Nickname: %s From: %s(via %s)",
-				     user, nick, server, client_p->name);
-
-	return 0;
-}
-
-/* check_clean_host()
- * 
- * input	- pointer to client sending us data
- *              - nickname
- *              - hostname to check
- *		- source name
- * output	- none
- * side effects - if hostname is erroneous, return 1
- */
-static int
-check_clean_host(struct Client *client_p, const char *nick, const char *host, const char *server)
-{
-	if(strlen(host) > HOSTLEN)
-	{
-		ServerStats->is_kill++;
-		sendto_realops_flags(UMODE_DEBUG, L_ALL,
-				     "Long Hostname: %s Nickname: %s From: %s(via %s)",
-				     host, nick, server, client_p->name);
-
-		sendto_one(client_p, ":%s KILL %s :%s (Bad Hostname)", me.name, nick, me.name);
-
-		return 1;
-	}
-
-	if(!clean_host_name(host))
-		sendto_realops_flags(UMODE_DEBUG, L_ALL,
-				     "Bad Hostname: %s Nickname: %s From: %s(via %s)",
-				     host, nick, server, client_p->name);
-
-	return 0;
-}
-
-/* clean_nick_name()
+/* clean_nick()
  *
- * input	- nickname
- * output	- none
- * side effects - walks through the nickname, returning 0 if erroneous
+ * input	- nickname to check
+ * output	- 0 if erroneous, else 1
+ * side effects - 
  */
 static int
-clean_nick_name(const char *nick)
+clean_nick(const char *nick)
 {
-	s_assert(nick);
-	if(nick == NULL)
-		return 0;
+	int len = 0;
 
 	/* nicks cant start with a digit or -, and must have a length */
-	if(*nick == '-' || IsDigit(*nick) || !*nick)
+	if(*nick == '-' || IsDigit(*nick) || *nick == '\0')
 		return 0;
 
 	for (; *nick; nick++)
 	{
+		len++;
 		if(!IsNickChar(*nick))
 			return 0;
 	}
 
+	/* nicklen is +1 */
+	if(len >= NICKLEN)
+		return 0;
+
 	return 1;
 }
 
-/* clean_user_name()
+/* clean_username()
  *
- * input	- username
- * output	- none
- * side effects - walks through the username, returning 0 if erroneous
+ * input	- username to check
+ * output	- 0 if erroneous, else 0
+ * side effects -
  */
 static int
-clean_user_name(const char *user)
+clean_username(const char *username)
 {
-	s_assert(user);
-	if(user == NULL)
-		return 0;
+	int len = 0;
 
-	for (; *user; user++)
+	for (; *username; username++)
 	{
-		if(!IsUserChar(*user))
-			return 0;
+		len++;
 
+		if(!IsUserChar(*username))
+			return 0;
 	}
 
+	if(len > USERLEN)
+		return 0;
+
 	return 1;
 }
 
-/* clean_host_name()
- * input	- hostname
- * output	- none
- * side effects - walks through the hostname, returning 0 if erroneous
+/* clean_host()
+ *
+ * input	- host to check
+ * output	- 0 if erroneous, else 0
+ * side effects -
  */
 static int
-clean_host_name(const char *host)
+clean_host(const char *host)
 {
-	s_assert(host);
-	if(host == NULL)
-		return 0;
+	int len = 0;
+
 	for (; *host; host++)
 	{
+		len++;
+
 		if(!IsHostChar(*host))
 			return 0;
 	}
 
+	if(len > HOSTLEN)
+		return 0;
+
 	return 1;
 }
-
+		
 
 /*
  * nick_from_server()
@@ -626,72 +510,31 @@ static int
 nick_from_server(struct Client *client_p, struct Client *source_p, int parc,
 		 const char *parv[], time_t newts, const char *nick)
 {
+	/* new client */
 	if(IsServer(source_p))
 	{
-		/* A server introducing a new client, change source */
-		source_p = make_client(client_p);
-		dlinkAddTail(source_p, &source_p->node, &global_client_list);
-
-		if(parc > 2)
-			source_p->hopcount = atoi(parv[2]);
-		if(newts)
-			source_p->tsinfo = newts;
-		else
-		{
-			newts = source_p->tsinfo = CurrentTime;
-			s_assert(0);
-		}
-
-		/* copy the nick in place */
-		(void) strcpy(source_p->name, nick);
-		add_to_client_hash(nick, source_p);
-
-		if(parc > 8)
-		{
-			int flag;
-			const char *m;
-
-			/* parse usermodes */
-			m = &parv[4][1];
-			while (*m)
-			{
-				flag = user_modes_from_c_to_bitmask[(unsigned char) *m];
-				if(!(source_p->umodes & UMODE_INVISIBLE)
-				   && (flag & UMODE_INVISIBLE))
-					Count.invisi++;
-				if(!(source_p->umodes & UMODE_OPER) && (flag & UMODE_OPER))
-					Count.oper++;
-
-				source_p->umodes |= flag & SEND_UMODES;
-				m++;
-			}
-
-			return do_remote_user(nick, client_p, source_p, parv[5], parv[6],
-					      parv[7], parv[8], NULL);
-		}
+		return register_client(client_p, NULL, nick, parv[5], parv[6],
+				       NULL, parv[7], parv[8], NULL, parv[4],
+				       atoi(parv[2]), newts);
 	}
-	else if(source_p->name[0])
+
+	/* client changing their nick */
+	if(irccmp(parv[0], nick))
+		source_p->tsinfo = newts ? newts : CurrentTime;
+
+	sendto_common_channels_local(source_p, ":%s!%s@%s NICK :%s",
+				     source_p->name, source_p->username,
+				     source_p->host, nick);
+
+	if(source_p->user)
 	{
-		/* client changing their nick */
-		if(irccmp(parv[0], nick))
-			source_p->tsinfo = newts ? newts : CurrentTime;
-
-		sendto_common_channels_local(source_p, ":%s!%s@%s NICK :%s",
-					     source_p->name, source_p->username, source_p->host,
-					     nick);
-
-		if(source_p->user)
-		{
-			add_history(source_p, 1);
-			sendto_server(client_p, NULL, NOCAPS, NOCAPS,
-				      ":%s NICK %s :%lu",
-				      parv[0], nick, (unsigned long) source_p->tsinfo);
-		}
+		add_history(source_p, 1);
+		sendto_server(client_p, NULL, NOCAPS, NOCAPS,
+			      ":%s NICK %s :%lu",
+			      parv[0], nick, (unsigned long) source_p->tsinfo);
 	}
 
-	/* set the new nick name */
-	if(source_p->name[0])
-		del_from_client_hash(source_p->name, source_p);
+	del_from_client_hash(source_p->name, source_p);
 
 	strcpy(source_p->name, nick);
 	add_to_client_hash(nick, source_p);
@@ -700,51 +543,6 @@ nick_from_server(struct Client *client_p, struct Client *source_p, int parc,
 	del_all_accepts(source_p);
 
 	return 0;
-}
-
-
-/*
- * client_from_server()
- */
-static int
-client_from_server(struct Client *client_p, struct Client *source_p, int parc,
-		   const char *parv[], time_t newts, const char *nick)
-{
-	const char *name;
-	const char *id;
-	int flag;
-	const char *m;
-
-	id = parv[8];
-	name = parv[9];
-
-	source_p = make_client(client_p);
-	dlinkAddTail(source_p, &source_p->node, &global_client_list);
-
-	source_p->hopcount = atoi(parv[2]);
-	source_p->tsinfo = newts;
-
-	/* copy the nick in place */
-	(void) strcpy(source_p->name, nick);
-	add_to_client_hash(nick, source_p);
-	add_to_id_hash(id, source_p);
-
-	/* parse usermodes */
-	m = &parv[4][1];
-	while (*m)
-	{
-		flag = user_modes_from_c_to_bitmask[(unsigned char) *m];
-		if(flag & UMODE_INVISIBLE)
-			Count.invisi++;
-		if(flag & UMODE_OPER)
-			Count.oper++;
-
-		source_p->umodes |= flag & SEND_UMODES;
-		m++;
-
-	}
-
-	return do_remote_user(nick, client_p, source_p, parv[5], parv[6], parv[7], name, id);
 }
 
 static int
@@ -815,11 +613,13 @@ perform_nick_collides(struct Client *source_p, struct Client *client_p,
 				(void) exit_client(client_p, target_p, &me, "Nick collision");
 
 				if(parc == 9)
-					nick_from_server(client_p, source_p, parc, parv, newts,
-							 nick);
+					register_client(client_p, NULL, nick, parv[5], parv[6],
+							NULL, parv[7], parv[8], NULL, parv[4],
+							atoi(parv[2]), newts);
 				else if(parc == 10)
-					client_from_server(client_p, source_p, parc, parv, newts,
-							   nick);
+					register_client(client_p, source_p, nick, parv[5], parv[6],
+							parv[7], source_p->name, parv[9], parv[8],
+							parv[4], atoi(parv[2]), newts);
 
 				return 0;
 			}
@@ -908,12 +708,6 @@ perform_nick_collides(struct Client *source_p, struct Client *client_p,
 		}
 	}
 
-	/*
-	   if(HasID(source_p))
-	   client_from_server(client_p,source_p,parc,parv,newts,nick);
-	   else
-	 */
-
 	/* we should only ever call nick_from_server() here, as
 	 * this is a client changing nick, not a new client
 	 */
@@ -921,3 +715,104 @@ perform_nick_collides(struct Client *source_p, struct Client *client_p,
 
 	return 0;
 }
+
+static int
+register_client(struct Client *client_p, struct Client *server, 
+		const char *nick, const char *username, const char *host,
+		const char *sockhost, const char *servername, const char *realname,
+		const char *id,	const char *umode, int hopcount, time_t newts)
+{
+	struct Client *source_p;
+	struct User *user;
+	const char *m;
+	int flag;
+
+	source_p = make_client(client_p);
+	user = make_user(source_p);
+	dlinkAddTail(source_p, &source_p->node, &global_client_list);
+
+	source_p->hopcount = hopcount;
+	source_p->tsinfo = newts;
+
+	strcpy(source_p->name, nick);
+	strlcpy(source_p->username, username, sizeof(source_p->username));
+	strlcpy(source_p->host, host, sizeof(source_p->host));
+	strlcpy(source_p->info, realname, sizeof(source_p->info));
+
+	if(sockhost != NULL)
+		strlcpy(source_p->sockhost, sockhost,
+			sizeof(source_p->sockhost));
+
+	user->server = find_or_add(servername);
+	user->last = CurrentTime;
+
+	add_to_client_hash(nick, source_p);
+	add_to_hostname_hash(source_p->host, source_p);
+
+	if(id != NULL)
+	{
+		strlcpy(source_p->id, id, sizeof(source_p->id));
+		add_to_id_hash(source_p->id, source_p);
+	}
+
+	m = &umode[1];
+	while(*m)
+	{
+		flag = user_modes_from_c_to_bitmask[(unsigned char) *m];
+
+		/* increment +i count if theyre invis */
+		if(!(source_p->umodes & UMODE_INVISIBLE) &&
+		   (flag & UMODE_INVISIBLE))
+			Count.invisi++;
+
+		/* increment opered count if theyre opered */
+		if(!(source_p->umodes & UMODE_OPER) && (flag & UMODE_OPER))
+			Count.oper++;
+
+		source_p->umodes |= (flag & SEND_UMODES);
+		m++;
+	}
+
+	SetClient(source_p);
+
+	if(++Count.total > Count.max_tot)
+		Count.max_tot = Count.total;
+	
+	if(server != NULL)
+		source_p->servptr = server;
+	else
+		source_p->servptr = find_server(user->server);
+
+	if(source_p->servptr == NULL)
+	{
+		sendto_realops_flags(UMODE_ALL, L_ALL,
+				     "Ghost killed: %s on invalid server %s",
+				     source_p->name, user->server);
+		kill_client(client_p, source_p, "%s (Server doesn't exist)", me.name);
+		source_p->flags |= FLAGS_KILLED;
+		return exit_client(NULL, source_p, &me, "Ghosted Client");
+	}
+
+	dlinkAdd(source_p, &source_p->lnode, &source_p->servptr->serv->users);
+
+	/* fake direction */
+	if(source_p->servptr->from != source_p->from)
+	{
+		struct Client *target_p = source_p->servptr->from;
+
+		sendto_realops_flags(UMODE_DEBUG, L_ALL,
+				     "Bad User [%s] :%s USER %s@%s %s, != %s[%s]",
+				     client_p->name, source_p->name,
+				     source_p->username, source_p->host,
+				     user->server, target_p->name,
+				     target_p->from->name);
+		kill_client(client_p, source_p,
+			    "%s (NICK from wrong direction (%s != %s))",
+			    me.name, user->server, target_p->from->name);
+		source_p->flags |= FLAGS_KILLED;
+		return exit_client(source_p, source_p, &me, "USER server wrong direction");
+	}
+
+	return (introduce_client(client_p, source_p, user, nick));
+}
+
