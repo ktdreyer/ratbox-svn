@@ -1,3 +1,7 @@
+*** 20010214_3 by a1kmm
+- Use memset instead of bzero in an attempt to reduce the number of deprecated function calls.
+
+
 *** 20010214_2 by toot
 . added some CVS Id tags where they were lacking
 . removed 'd' from MYINFO.. no more denys
