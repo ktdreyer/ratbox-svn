@@ -1,3 +1,8 @@
+*** 20011108_2 by leeh
+- removed m_client.c, it was only there while we established m_nick.c was
+  ok..
+
+
 *** 20011108_1 by bill
 - made MODLIST parameter wild-card matching
 
