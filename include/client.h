@@ -310,6 +310,7 @@ struct LocalUser
   int allow_read;	/* how many we're allowed to read in this second */
   int actually_read;    /* how many we've actually read in this second */
   int sent_parsed;      /* how many messages we've parsed in this second */
+  time_t last_knock;    /* time of last knock */
 };
 
 /*

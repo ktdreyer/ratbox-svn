@@ -294,6 +294,11 @@ extern const char* form_str(int);
 #define RPL_KNOCK	     710
 #define RPL_KNOCKDLVR	     711
 
+#define ERR_TOOMANYKNOCK     712
+#define ERR_CHANOPEN         713
+#define ERR_KNOCKONCHAN      714
+#define ERR_KNOCKDISABLED    714
+
 #define ERR_LAST_ERR_MSG     999
 
 #endif /* INCLUDED_numeric_h */

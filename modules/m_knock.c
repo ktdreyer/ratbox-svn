@@ -96,7 +96,7 @@ static void m_knock(struct Client *client_p,
 
   if (ConfigChannel.use_knock == 0)
     {
-      sendto_one(source_p, ":%s NOTICE %s :*** KNOCK disabled",
+      sendto_one(source_p, form_str(ERR_KNOCKDISABLED),
 		 me.name, source_p->name);
       return;
     }
@@ -119,17 +119,39 @@ static void m_knock(struct Client *client_p,
    * -davidt
    */
 
-  if((chptr->last_knock + ConfigChannel.knock_delay) > CurrentTime)
+  if((source_p->localClient->last_knock + ConfigChannel.knock_delay) > CurrentTime)
     {
-      sendto_one(source_p, ":%s NOTICE %s :*** Notice -- Wait %d seconds before another knock to %s",
-                 me.name, source_p->name,
-                 (int)(ConfigChannel.knock_delay - (CurrentTime - chptr->last_knock)),
-                 parv[1]);
+      sendto_one(source_p, form_str(ERR_TOOMANYKNOCK),
+                 me.name, source_p->name, parv[1], "user");
       return;
     }
+  else if((chptr->last_knock +
+         ConfigChannel.knock_delay_channel) > CurrentTime)
+  {
+    sendto_one(source_p, form_str(ERR_TOOMANYKNOCK),
+               me.name, source_p->name, parv[1], "channel");
+    return;
+  }
+  
+  send_knock(client_p, source_p, chptr, parv[1]);
+}
+
+#if 0
+static void ms_knock(struct Client *client_p,
+                     struct Client *source_p,
+		     int parc,
+		     char *parv[])
+{
+  struct Channel *chptr;
+
+  chptr = parse_knock_args(client_p, source_p, parc, parv);
+
+  if (chptr == NULL)
+    return;
 
   send_knock(client_p, source_p, chptr, parv[1]);
 }
+#endif
 
 /*
  * parse_knock_args
@@ -173,8 +195,8 @@ static struct Channel *parse_knock_args(struct Client *client_p,
       /* They specified a vchan basename */
       if(on_sub_vchan(chptr,source_p))
         {
-          sendto_one(source_p,":%s NOTICE %s :*** Notice -- You are on channel already!",
-                     me.name, source_p->name);
+          sendto_one(source_p, form_str(ERR_KNOCKONCHAN),
+                     me.name, source_p->name, name);
           return NULL;
         }
       if (key && key[0] == '!')
@@ -189,7 +211,7 @@ static struct Channel *parse_knock_args(struct Client *client_p,
           /* Find a matching vchan */
           if ((vchan_chptr = find_vchan(chptr, key)))
             {
-              chptr = vchan_chptr;
+	      chptr = vchan_chptr;
             }
           else
             {
@@ -217,8 +239,8 @@ static struct Channel *parse_knock_args(struct Client *client_p,
       /* Normal channel, just be sure they aren't on it */
       if (IsMember(source_p, chptr))
         {
-          sendto_one(source_p,":%s NOTICE %s :*** Notice -- You are on channel already!",
-                     me.name, source_p->name);
+          sendto_one(source_p, form_str(ERR_KNOCKONCHAN),
+                     me.name, source_p->name, name);
           return NULL;
         }
     }
@@ -228,9 +250,8 @@ static struct Channel *parse_knock_args(struct Client *client_p,
        (chptr->mode.limit && chptr->users >= chptr->mode.limit )
        ))
     {
-      sendto_one(source_p,":%s NOTICE %s :*** Notice -- Channel is open!",
-                 me.name,
-                 source_p->name);
+      sendto_one(source_p, form_str(ERR_CHANOPEN),
+                 me.name, source_p->name, name);
       return NULL;
     }
 
@@ -260,12 +281,15 @@ static struct Channel *parse_knock_args(struct Client *client_p,
 static void send_knock(struct Client *client_p, struct Client *source_p,
                        struct Channel *chptr, char *name)
 {
-  char message[NICKLEN*2+CHANNELLEN+USERLEN+HOSTLEN+30];
-
   chptr->last_knock = CurrentTime;
 
-  sendto_one(source_p, form_str(RPL_KNOCKDLVR),
-             me.name, source_p->name);
+  if(MyClient(source_p))
+  {
+    source_p->localClient->last_knock = CurrentTime;
+
+    sendto_one(source_p, form_str(RPL_KNOCKDLVR),
+               me.name, source_p->name, name);
+  }
 
   /* using &me and me.name won't deliver to clients not on this server
    * so, the notice will have to appear from the "knocker" ick.
@@ -280,9 +304,6 @@ static void send_knock(struct Client *client_p, struct Client *source_p,
 
   if(source_p->user != NULL)
     {
-      ircsprintf(message,"KNOCK: %s (%s [%s@%s] has asked for an invite)",
-                 name, source_p->name, source_p->username, source_p->host);
-
       sendto_channel_local(ONLY_CHANOPS_HALFOPS,
 			   chptr,
 			   form_str(RPL_KNOCK),
@@ -291,16 +312,11 @@ static void send_knock(struct Client *client_p, struct Client *source_p,
 			   source_p->name,
 			   source_p->username,
 			   source_p->host);
-
-      /* XXX for future enhancement. 
-       * negotiate a KNOCK CAPAB, send a KNOCK to remote servers
-       * instead of individual privmsgs if a server can "understand" it.
-       */
-
-      sendto_channel_remote(source_p,
-			    ONLY_CHANOPS_HALFOPS,
-			    chptr,
-			    message);
+#if 0
+      sendto_server(NULL, client_p, NULL, CAP_KNOCK, NOCAPS, NOFLAGS,
+                    ":%s KNOCK %s",
+		    source_p->name, name);
+#endif		    
     }
 
   return;

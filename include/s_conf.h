@@ -249,6 +249,7 @@ struct config_channel_entry
   int           use_knock;
   int           use_vchans;
   int           knock_delay;
+  int		knock_delay_channel;
   int           vchans_oper_only;
   int           maxbans;
   int           max_chans_per_user;

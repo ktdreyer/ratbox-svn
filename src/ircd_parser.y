@@ -161,6 +161,7 @@ int   class_redirport_var;
 %token  KLINE_WITH_CONNECTION_CLOSED
 %token  KLINE_WITH_REASON
 %token  KNOCK_DELAY
+%token  KNOCK_DELAY_CHANNEL
 %token  LAZYLINK
 %token  LEAF_MASK
 %token  LINKS_DELAY
@@ -2458,6 +2459,7 @@ channel_item:       channel_use_except |
 		    channel_vchans_oper_only |
                     channel_maxbans |
                     channel_knock_delay |
+		    channel_knock_delay_channel |
                     channel_max_chans_per_user |
                     channel_quiet_on_ban |
 		    channel_persist_time |
@@ -2542,6 +2544,11 @@ channel_vchans_oper_only: VCHANS_OPER_ONLY '=' TYES ';'
 channel_knock_delay: KNOCK_DELAY '=' timespec ';'
    {
      ConfigChannel.knock_delay = $3;
+   } ;
+
+channel_knock_delay_channel: KNOCK_DELAY_CHANNEL '=' timespec ';'
+   {
+     ConfigChannel.knock_delay_channel = $3;
    } ;
 
 channel_max_chans_per_user:  MAX_CHANS_PER_USER '=' NUMBER ';'

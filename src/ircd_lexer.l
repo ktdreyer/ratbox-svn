@@ -258,6 +258,7 @@ stats_P_oper_only	{ return STATS_P_OPER_ONLY; }
 whois_wait              { return WHOIS_WAIT; }
 pace_wait               { return PACE_WAIT; }
 knock_delay             { return KNOCK_DELAY; }
+knock_delay_channel	{ return KNOCK_DELAY_CHANNEL; }
 iauth_server            { return IAUTH_SERVER; }
 iauth_port		{ return IAUTH_PORT; }
 glines                  { return GLINES; }
