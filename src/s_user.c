@@ -1159,12 +1159,6 @@ send_umode_out(struct Client *client_p,
 
       if((target_p != client_p) && (target_p != source_p) && (*buf))
         {
-          /* XXX - is this right? */
-#if 0
-          if((!(ServerInfo.hub && IsCapable(target_p, CAP_LL)))
-             || (target_p->localClient->serverMask &
-                 source_p->lazyLinkClientExists))
-#endif
             sendto_one(target_p, ":%s MODE %s :%s",
                        source_p->name, source_p->name, buf);
         }
