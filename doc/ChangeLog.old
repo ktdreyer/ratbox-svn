@@ -1,3 +1,16 @@
+androsyn    2002/08/07 13:59:21 EDT	(20020807_5)
+
+  Modified files:
+    modules              m_join.c 
+  Log:
+  Patch from adx, basically don't send any message about a user being in too
+  many channels if they attempt to rejoin one they are already on.
+  
+  Revision  Changes    Path
+  1.89      +5 -8      ircd-hybrid-7/modules/m_join.c
+
+
+
 bill        2002/08/07 12:53:02 EDT	(20020807_4)
 
   Modified files:
