@@ -1,3 +1,8 @@
+*** 20010208_2 by toot
+should use irccmp rather than strcmp when checking
+vchan_id
+
+
 *** 20010208_1 by toot
 wasn't checking vchan_id for root channels..
 
