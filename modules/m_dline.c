@@ -154,10 +154,10 @@ mo_dline(struct Client *client_p, struct Client *source_p,
 	if(ConfigFileEntry.non_redundant_klines)
 	{
 		const char *creason;
-		int t = AF_INET, tx;
-		tx = parse_netmask(dlhost, &daddr, NULL);
+		int t = AF_INET, ty, b;
+		ty = parse_netmask(dlhost, &daddr, &b);
 #ifdef IPV6
-        	if(tx == HM_IPV6)
+        	if(ty == HM_IPV6)
                 	t = AF_INET6;
                 else
 #endif
@@ -165,16 +165,21 @@ mo_dline(struct Client *client_p, struct Client *source_p,
                                   		
 		if((aconf = find_dline(&daddr, t)) != NULL)
 		{
-			creason = aconf->passwd ? aconf->passwd : "<No Reason>";
-			if(IsConfExemptKline(aconf))
-				sendto_one(source_p,
-					   ":%s NOTICE %s :[%s] is (E)d-lined by [%s] - %s",
-					   me.name, parv[0], dlhost, aconf->host, creason);
-			else
-				sendto_one(source_p,
-					   ":%s NOTICE %s :[%s] already D-lined by [%s] - %s",
-					   me.name, parv[0], dlhost, aconf->host, creason);
-			return 0;
+			int bx;
+			parse_netmask(aconf->host, NULL, &bx);
+			if(b >= bx)
+			{
+				creason = aconf->passwd ? aconf->passwd : "<No Reason>";
+				if(IsConfExemptKline(aconf))
+					sendto_one(source_p,
+						   ":%s NOTICE %s :[%s] is (E)d-lined by [%s] - %s",
+						   me.name, parv[0], dlhost, aconf->host, creason);
+				else
+					sendto_one(source_p,
+						   ":%s NOTICE %s :[%s] already D-lined by [%s] - %s",
+						   me.name, parv[0], dlhost, aconf->host, creason);
+				return 0;
+			}
 		}
 	}
 
