@@ -1,3 +1,8 @@
+*** 20010507_1 by toot
+removed show_failed_oper_id cause it was redundant.. failed_oper_notice does
+the same thing
+
+
 *** 20010506_1 by androsyn
 Seems I broke the modules install process..this fixes it now..
 
