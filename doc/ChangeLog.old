@@ -1,3 +1,9 @@
+*** 20001204_3 by db
+- fixed stupid in channel.c where a non op could generate a mode -o
+  message on channel, but it didnt' do anything. Mis-placed if...
+
+
+
 *** 20001204_2 by db
 - added half ops.. BitchX freaks with it, but epic is fine.
   figures. anyway, we can #ifdef this out in production if we want.
