@@ -334,23 +334,20 @@ register_local_user(struct Client *client_p, struct Client *source_p, const char
 			   me.name, source_p->name);
 
 #ifdef IPV6
-		if(source_p->localClient->sockhost[0] == ':')
+		if(source_p->sockhost[0] == ':')
 		{
 			source_p->host[0] = '0';
 			source_p->host[1] = '\0';
-			strlcat(source_p->host, source_p->localClient->sockhost, sizeof(source_p->host));
+			strlcat(source_p->host, source_p->sockhost, sizeof(source_p->host));
 		        if(ConfigFileEntry.dot_in_ip6_addr == 1)
 		  	{
 		   		strlcat(source_p->host, ".", sizeof(source_p->host));
 			}
 		} else
 #endif
-			strlcpy(source_p->host, source_p->localClient->sockhost, sizeof(source_p->host));
+			strlcpy(source_p->host, source_p->sockhost, sizeof(source_p->host));
  	}
  
- 	ptr = source_p->localClient->confs.head;
-
-	}
 
 	aconf = source_p->localClient->att_conf;
 
