@@ -1,3 +1,21 @@
+*** 20000405_1 by db
+- committing some quick hacks for verifying block allocator
+  is not leaking.
+  These should be #ifdef'ed perhaps in future.
+  when an oper does /stats $
+  four files will be written to DPATH
+  which will contain hex values of allocated memory for each client
+
+  local_block_allocator_client_list.txt from block allocator
+  local_client_list.txt                 from link list
+
+  remote_block_allocator_client_list.txt from block allocator
+  remote_client_list.txt                 from link list
+
+  code external to the ircd is needed to verify consistency
+
+
+
 *** 20000404_2 by db
 - clean ups to parser
 
