@@ -1,3 +1,15 @@
+androsyn    2002/12/16 06:48:37 UTC	(20021216_6)
+
+  Modified files:
+    src                  client.c 
+  Log:
+  Cleanup some buglets
+  
+  Revision  Changes    Path
+  7.352     +8 -1      ircd-ratbox/src/client.c
+
+
+
 androsyn    2002/12/16 06:32:02 UTC	(20021216_5)
 
   Modified files:
