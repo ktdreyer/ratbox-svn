@@ -1,3 +1,20 @@
+leeh        2003/07/27 15:26:55 EDT	(20030727_0)
+
+  Modified files:
+    src                  s_newconf.c 
+  Log:
+  - fixed the xline hash to take account of the fact that xlines can have
+    escaped wildcards in
+  Submitted by:
+  Reviewed by:
+  Approved by:
+  Obtained from:
+  
+  Revision  Changes    Path
+  7.14      +70 -3     ircd-ratbox/src/s_newconf.c
+
+
+
 leeh        2003/07/26 14:20:56 EDT	(20030726_2)
 
   Modified files:
