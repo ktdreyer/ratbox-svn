@@ -1,3 +1,9 @@
+*** 20011203_2 by androsyn
+Minor changes to support a hook on bursting channels and add a field to keep
+track of the ts winner...
+
+
+
 *** 20011203_1 by wcampbel
 Update of the NOTICE and PRIVMSG help files for opers to include
 opers@server as a target
