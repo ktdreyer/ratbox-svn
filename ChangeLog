@@ -1,3 +1,19 @@
+leeh        2003/08/11 16:51:58 EDT	(20030811_9)
+
+  Modified files:
+    include              client.h 
+    src                  client.c ircd.c s_user.c 
+  Log:
+  - added the uid generation code
+  
+  Revision  Changes    Path
+  7.213     +3 -0      ircd-ratbox/include/client.h
+  7.398     +49 -1     ircd-ratbox/src/client.c
+  7.306     +1 -0      ircd-ratbox/src/ircd.c
+  7.280     +12 -24    ircd-ratbox/src/s_user.c
+
+
+
 androsyn    2003/08/11 15:39:18 EDT	(20030811_8)
 
   Modified files:
