@@ -97,6 +97,8 @@ static void add_new_majority_gline(const char *, const char *, const char *,
                                    const char *, const char *, const char *,
                                    const char *);
 
+static int check_wild_gline(char *, char *);
+
 static void ms_gline(struct Client*, struct Client*, int, char**);
 static void mo_gline(struct Client*, struct Client*, int, char**);
 
@@ -207,50 +209,14 @@ static void mo_gline(struct Client *client_p,
        * be disallowed.
        * -wnder
        */
-			
-      nonwild = 0;
-      p = user;
-      while ((tmpch = *p++))
+
+      /* Not enough non-wild characters were found, assume they are trying to gline *@*. */
+      if (check_wild_gline(user, host))
 	{
-	  if (!IsKWildChar(tmpch))
-	    {
-	      /*
-	       * If we find enough non-wild characters, we can
-	       * break - no point in searching further.
-	       */
-	      if (++nonwild >= NONWILDCHARS)
-		break;
-	    }
-	}
-			
-      if (nonwild < NONWILDCHARS)
-	{
-	  /*
-	   * The user portion did not contain enough non-wild
-	   * characters, try the host.
-	   */
-	  p = host;
-	  while ((tmpch = *p++))
-	    {
-	      if (!IsKWildChar(tmpch))
-		if (++nonwild >= NONWILDCHARS)
-		  break;
-	    }
-	}
-	  
-      if (nonwild < NONWILDCHARS)
-	{
-	  /*
-	   * Not enough non-wild characters were found, assume
-	   * they are trying to gline *@*.
-	   */
 	  if (MyClient(source_p))
 	    sendto_one(source_p,
 		       ":%s NOTICE %s :Please include at least %d non-wildcard characters with the user@host",
-		       me.name,
-		       parv[0],
-		       NONWILDCHARS);
-	  
+		       me.name, parv[0], NONWILDCHARS);
 	  return;
 	}
 			
@@ -317,8 +283,8 @@ static void ms_gline(struct Client *client_p,
   const char *oper_user = NULL;        /* username of oper requesting GLINE */
   const char *oper_host = NULL;        /* hostname of oper requesting GLINE */
   const char *oper_server = NULL;      /* server of oper requesting GLINE */
-  const char *user = NULL;
-  const char *host = NULL;             /* user and host of GLINE "victim" */
+  char *user = NULL;
+  char *host = NULL;             /* user and host of GLINE "victim" */
   const char *reason = NULL;           /* reason for "victims" demise */
 
 
@@ -362,6 +328,15 @@ static void ms_gline(struct Client *client_p,
 
   if (ConfigFileEntry.glines)
     {
+     if (check_wild_gline(user, host))
+        {
+          sendto_realops_flags(FLAGS_ALL, 
+                       "%s!%s@%s on %s is requesting a gline without %d non-wildcard characters for [%s@%s] [%s]",
+                       oper_nick, oper_user, oper_host, oper_server, NONWILDCHARS,
+                       user, host, reason);
+          return;
+        }
+
       log_gline_request(oper_nick,oper_user,oper_host,oper_server,
 			user,host,reason);
 
@@ -385,6 +360,58 @@ static void ms_gline(struct Client *client_p,
 			   host,
 			   reason);
     }
+}
+
+/*
+ * check_wild_gline
+ *
+ * inputs       - user, host of gline
+ * output       - 1 if not enough non-wildchar char's, 0 if ok
+ * side effects - NONE
+ */
+
+static int
+check_wild_gline(char *user, char *host)
+{
+  char *p;
+  char tmpch;
+  int nonwild;
+
+  nonwild = 0;
+  p = user;
+
+  while ((tmpch = *p++))
+    {
+       if (!IsKWildChar(tmpch))
+         {
+            /*
+             * If we find enough non-wild characters, we can
+             * break - no point in searching further.
+             */
+            if (++nonwild >= NONWILDCHARS)
+              break;
+         }
+    }
+
+   if (nonwild < NONWILDCHARS)
+    {
+       /*
+        * The user portion did not contain enough non-wild
+        * characters, try the host.
+        */
+       p = host;
+       while ((tmpch = *p++))
+         {
+           if (!IsKWildChar(tmpch))
+             if (++nonwild >= NONWILDCHARS)
+               break;
+         }
+     }
+
+    if (nonwild < NONWILDCHARS)
+       return 1;
+    else
+       return 0;
 }
 
 /*
