@@ -921,11 +921,22 @@ patricia_remove(patricia_tree_t * patricia, patricia_node_t * node)
 }
 
 patricia_node_t *
-make_and_lookup_ip(patricia_tree_t * tree, int family, void *in, int bitlen)
+make_and_lookup_ip(patricia_tree_t * tree, struct sockaddr_storage *in, int bitlen)
 {
 	prefix_t *prefix;
 	patricia_node_t *node;
-	prefix = New_Prefix(family, in, bitlen);
+	void *ipptr = NULL;
+#ifdef IPV6
+	if(in->ss_family == AF_INET6)
+	{
+		ipptr = &((struct sockaddr_in6 *)in)->sin6_addr;	
+	} else
+#endif
+	{
+		ipptr = &((struct sockaddr_in *)in)->sin_addr;
+	}
+	
+	prefix = New_Prefix(in->ss_family, ipptr, bitlen);
 	if(prefix == NULL)
 		return NULL;
 
@@ -999,20 +1010,30 @@ lookup_then_remove(patricia_tree_t * tree, char *string)
 #endif
 
 patricia_node_t *
-match_ip(patricia_tree_t * tree, struct irc_inaddr *ip)
+match_ip(patricia_tree_t * tree, struct sockaddr_storage *ip)
 {
 	prefix_t *prefix;
 	patricia_node_t *node;
+	void *ipptr;
 	unsigned int len;
 	int family;
 #ifndef IPV6
 	len = 32;
 	family = AF_INET;
 #else
-	len = 128;
-	family = AF_INET6;
+	if(ip->ss_family == AF_INET6)
+	{
+		len = 128;
+		family = AF_INET6;
+		ipptr = &((struct sockaddr_in6 *)&ip)->sin6_addr;
+	} else {
+		len = 32;
+		family = AF_INET;
+		ipptr = &((struct sockaddr_in *)&ip)->sin_addr;
+	}
 #endif
-	if((prefix = New_Prefix(family, PIN_ADDR(&ip), len)) != NULL)
+	
+	if((prefix = New_Prefix(family, ipptr, len)) != NULL)
 	{
 		node = patricia_search_best(tree, prefix);
 		Deref_Prefix(prefix);

@@ -319,7 +319,7 @@ report_this_status(struct Client *source_p, struct Client *target_p,
 	if(!MyConnect(target_p))
 		return 0;
 
-	inetntop(target_p->localClient->aftype, &IN_ADDR(target_p->localClient->ip), ip, HOSTIPLEN);
+	inetntop_sock(&target_p->localClient->ip, ip, sizeof(ip));
 	name = get_client_name(target_p, HIDE_IP);
 	class_name = get_client_class(target_p);
 

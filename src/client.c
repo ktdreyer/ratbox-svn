@@ -449,7 +449,7 @@ check_banned_lines(void)
 			continue;
 
 		/* if there is a returned struct ConfItem then kill it */
-		if((aconf = find_dline(&client_p->localClient->ip, client_p->localClient->aftype)))
+		if((aconf = find_dline(&client_p->localClient->ip, client_p->localClient->ip.ss_family)))
 		{
 			if(aconf->status & CONF_EXEMPTDLINE)
 				continue;
@@ -520,7 +520,7 @@ check_banned_lines(void)
 	{
 		client_p = ptr->data;
 
-		if((aconf = find_dline(&client_p->localClient->ip,client_p->localClient->aftype)))
+		if((aconf = find_dline(&client_p->localClient->ip,client_p->localClient->ip.ss_family)))
 		{
 			if(aconf->status & CONF_EXEMPTDLINE)
 				continue;
@@ -642,7 +642,7 @@ check_dlines(void)
 		if(IsMe(client_p))
 			continue;
 
-		if((aconf = find_dline(&client_p->localClient->ip,client_p->localClient->aftype)) != NULL)
+		if((aconf = find_dline(&client_p->localClient->ip,client_p->localClient->ip.ss_family)) != NULL)
 		{
 			if(aconf->status & CONF_EXEMPTDLINE)
 				continue;
@@ -661,7 +661,7 @@ check_dlines(void)
 	{
 		client_p = ptr->data;
 
-		if((aconf = find_dline(&client_p->localClient->ip,client_p->localClient->aftype)) != NULL)
+		if((aconf = find_dline(&client_p->localClient->ip,client_p->localClient->ip.ss_family)) != NULL)
 		{
 			if(aconf->status & CONF_EXEMPTDLINE)
 				continue;

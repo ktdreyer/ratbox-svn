@@ -406,7 +406,7 @@ remove_temp_kline(char *user, char *host)
 	dlink_list *tklist;
 	struct ConfItem *aconf;
 	dlink_node *ptr;
-	struct irc_inaddr addr, caddr;
+	struct sockaddr_storage addr, caddr;
 	int bits, cbits;
 	int i;
 
@@ -426,8 +426,8 @@ remove_temp_kline(char *user, char *host)
 				continue;
 
 			if(!irccmp(aconf->host, host) || (bits == cbits
-							  && comp_with_mask(&IN_ADDR(addr),
-									    &IN_ADDR(caddr), bits)))
+							  && comp_with_mask_sock(&addr,
+									    &caddr, bits)))
 			{
 				dlinkDestroy(ptr, tklist);
 				delete_one_address_conf(aconf->host, aconf);

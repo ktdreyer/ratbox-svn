@@ -405,6 +405,25 @@ inet_ntop6(const unsigned char *src, char *dst, unsigned int size)
 }
 #endif
 
+
+const char *
+inetntop_sock(struct sockaddr_storage *src, char *dst, unsigned int size)
+{
+	switch(src->ss_family)
+	{
+		case AF_INET:
+			return(inetntop(AF_INET, &((struct sockaddr_in *)src)->sin_addr, dst, size));
+			break;
+#ifdef IPV6	
+		case AF_INET6:
+			return(inetntop(AF_INET6, &((struct sockaddr_in6 *)src)->sin6_addr, dst, size));
+			break;
+#endif
+		default:
+			return NULL;
+			break;
+	}
+}
 /* char *
  * inetntop(af, src, dst, size)
  *	convert a network format address to presentation format.

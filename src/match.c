@@ -225,6 +225,30 @@ comp_with_mask(void *addr, void *dest, u_int mask)
 	return (0);
 }
 
+int
+comp_with_mask_sock(struct sockaddr_storage *addr, struct sockaddr_storage *dest, u_int mask)
+{
+	void *iaddr = NULL;
+	void *idest = NULL;
+	
+	if(addr->ss_family == AF_INET)
+	{
+		iaddr = &((struct sockaddr_in *)addr)->sin_addr;
+		idest = &((struct sockaddr_in *)dest)->sin_addr;
+	} 
+#ifdef IPV6
+	else
+	{
+		iaddr = &((struct sockaddr_in6 *)addr)->sin6_addr;
+		idest = &((struct sockaddr_in6 *)dest)->sin6_addr;
+	
+	} 
+#endif
+
+	return(comp_with_mask(iaddr, idest, mask));
+}
+
+
 
 /* match_cidr()
  *
@@ -235,12 +259,13 @@ comp_with_mask(void *addr, void *dest, u_int mask)
 int
 match_cidr(const char *s1, const char *s2)
 {
-	struct irc_inaddr ipaddr, maskaddr;
+	struct sockaddr_storage ipaddr, maskaddr;
 	char mask[BUFSIZE];
 	char address[NICKLEN + USERLEN + HOSTLEN + 6];
 	char *ipmask;
 	char *ip;
 	char *len;
+	void *ipptr, *maskptr;
 	int cidrlen, aftype;
 
 	strcpy(mask, s1);
@@ -270,17 +295,25 @@ match_cidr(const char *s1, const char *s2)
 
 #ifdef IPV6
 	if(strchr(ip, ':') && strchr(ipmask, ':'))
+	{
 		aftype = AF_INET6;
+		ipptr = &((struct sockaddr_in6 *)&ipaddr)->sin6_addr;
+		maskptr = &((struct sockaddr_in6 *)&maskaddr)->sin6_addr;
+	}
 	else
 #endif
 	if(!strchr(ip, ':') && !strchr(ipmask, ':'))
+	{
 		aftype = AF_INET;
+		ipptr = &((struct sockaddr_in *)&ipaddr)->sin_addr;
+		maskptr = &((struct sockaddr_in *)&maskaddr)->sin_addr;
+	}
 	else
 		return 0;
 
-	inetpton(aftype, ip, &ipaddr);
-	inetpton(aftype, ipmask, &maskaddr);
-	if(comp_with_mask(&IN_ADDR(ipaddr), &IN_ADDR(maskaddr), cidrlen) && match(mask, address))
+	inetpton(aftype, ip, &ipptr);
+	inetpton(aftype, ipmask, &maskptr);
+	if(comp_with_mask(ipptr, maskptr, cidrlen) && match(mask, address))
 		return 1;
 	else
 		return 0;

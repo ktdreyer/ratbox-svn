@@ -224,14 +224,14 @@ auth_dns_callback(void *vptr, adns_answer * reply)
 	else
 	{
 #ifdef IPV6
-		if(auth->client->localClient->aftype == AF_INET6
+		if(auth->client->localClient->ip.ss_family == AF_INET6
 		   && ConfigFileEntry.fallback_to_ip6_int == 1 && auth->ip6_int == 0)
 		{
 			struct Client *client = auth->client;
 			auth->ip6_int = 1;
 			MyFree(reply);
 			adns_getaddr(&client->localClient->ip,
-				     client->localClient->aftype,
+				     client->localClient->ip.ss_family,
 				     client->localClient->dns_query, 1);
 			SetDNSPending(auth);
 			return;
@@ -287,12 +287,13 @@ auth_error(struct AuthRequest *auth)
 static int
 start_auth_query(struct AuthRequest *auth)
 {
-/*  struct sockaddr_in sock; */
-	struct irc_sockaddr localaddr;
-	socklen_t locallen = sizeof(struct irc_sockaddr);
+	struct sockaddr_storage localaddr;
+	socklen_t locallen = sizeof(struct sockaddr_storage);
 	int fd;
-
-	if((fd = comm_open(DEF_FAM, SOCK_STREAM, 0, "ident")) == -1)
+	int family;
+	
+	family = auth->client->localClient->ip.ss_family;
+	if((fd = comm_open(family, SOCK_STREAM, 0, "ident")) == -1)
 	{
 		report_error(L_ALL, "creating auth stream socket %s:%s",
 			     get_client_name(auth->client, SHOW_IP), errno);
@@ -327,14 +328,13 @@ start_auth_query(struct AuthRequest *auth)
 	 */
 	memset(&localaddr, 0, locallen);
 	getsockname(auth->client->localClient->fd,
-		    (struct sockaddr *) &SOCKADDR(localaddr), &locallen);
-	S_PORT(localaddr) = htons(0);
-
+		    (struct sockaddr *) &localaddr, &locallen);
+	
 	auth->fd = fd;
 	SetAuthConnect(auth);
 
 	comm_connect_tcp(fd, auth->client->localClient->sockhost, 113,
-			 (struct sockaddr *) &SOCKADDR(localaddr), locallen,
+			 (struct sockaddr *) &localaddr, locallen,
 			 auth_connect_callback, auth, DEF_FAM, GlobalSetOptions.ident_timeout);
 	return 1;		/* We suceed here for now */
 }
@@ -420,7 +420,7 @@ start_auth(struct Client *client)
 	sendheader(client, REPORT_DO_DNS);
 
 	/* No DNS cache now, remember? -- adrian */
-	adns_getaddr(&client->localClient->ip, client->localClient->aftype,
+	adns_getaddr(&client->localClient->ip, client->localClient->ip.ss_family,
 		     client->localClient->dns_query, 0);
 	SetDNSPending(auth);
 

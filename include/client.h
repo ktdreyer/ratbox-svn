@@ -212,9 +212,7 @@ struct LocalUser
 	struct Listener *listener;	/* listener accepted from */
 	struct ConfItem *att_conf;	/* attached conf */
 
-	struct irc_inaddr ip;
-	unsigned short port;	/* and the remote port# too :-) */
-	int aftype;		/* Makes life easier for DNS res in IPV6 */
+	struct sockaddr_storage ip;
 	struct DNSQuery *dns_query;	/* result returned from resolver query */
 	unsigned long serverMask;	/* Only used for Lazy Links */
 	time_t last_nick_change;

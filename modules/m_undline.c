@@ -243,7 +243,7 @@ remove_temp_dline(char *host)
 	dlink_list *tdlist;
 	struct ConfItem *aconf;
 	dlink_node *ptr;
-	struct irc_inaddr addr, caddr;
+	struct sockaddr_storage addr, caddr;
 	int bits, cbits;
 	int i;
 
@@ -259,7 +259,7 @@ remove_temp_dline(char *host)
 
 			parse_netmask(aconf->host, &caddr, &cbits);
 
-			if(comp_with_mask(&IN_ADDR(addr), &IN_ADDR(caddr), bits) && bits == cbits)
+			if(comp_with_mask_sock(&addr, &caddr, bits) && bits == cbits)
 			{
 				dlinkDestroy(ptr, tdlist);
 				delete_one_address_conf(aconf->host, aconf);

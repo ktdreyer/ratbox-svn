@@ -42,6 +42,7 @@ extern int match_cidr(const char *mask, const char *name);
  * comp_with_mask - compares to IP address
  */
 int comp_with_mask(void *addr, void *dest, u_int mask);
+int comp_with_mask_sock(struct sockaddr_storage *addr, struct sockaddr_storage *dest, u_int mask);
 
 /*
  * collapse - collapse a string in place, converts multiple adjacent *'s 
@@ -80,6 +81,7 @@ const char *inetntoa(const char *in_addr);
  */
 const char *inetntop(int af, const void *src, char *dst, unsigned int size);
 int inetpton(int af, const char *src, void *dst);
+const char *inetntop_sock(struct sockaddr_storage *src, char *dst, unsigned int size);
 
 
 #ifndef HAVE_STRLCPY

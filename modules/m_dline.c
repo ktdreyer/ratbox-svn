@@ -95,7 +95,7 @@ mo_dline(struct Client *client_p, struct Client *source_p, int parc, char *parv[
 	char *dlhost, *oper_reason;
 	const char *reason = "<No Reason>";
 	struct Client *target_p;
-	struct irc_inaddr daddr;
+	struct sockaddr_storage daddr;
 	char cidr_form_host[HOSTLEN + 1];
 	struct ConfItem *aconf;
 	int bits;
@@ -160,11 +160,10 @@ mo_dline(struct Client *client_p, struct Client *source_p, int parc, char *parv[
 		}
 
 
-		inetntop(target_p->localClient->aftype, &target_p->localClient->ip, cidr_form_host,
-			 sizeof(cidr_form_host));
+		inetntop_sock(&target_p->localClient->ip, cidr_form_host, sizeof(cidr_form_host));
+		
 #ifdef IPV6
-		if(!(IN6_IS_ADDR_V4MAPPED(&IN_ADDR2(target_p->localClient->ip))) ||
-		   (IN6_IS_ADDR_V4COMPAT(&IN_ADDR2(target_p->localClient->ip))))
+		if(target_p->localClient->ip.ss_family == AF_INET6)
 		{
 			strlcat(cidr_form_host, "/64", sizeof(cidr_form_host));
 			bits = 64;

@@ -55,16 +55,14 @@ static PF accept_connection;
 static struct Listener *ListenerPollList = NULL;
 
 static struct Listener *
-make_listener(int port, struct irc_inaddr *addr)
+make_listener(struct sockaddr_storage *addr)
 {
 	struct Listener *listener = (struct Listener *) MyMalloc(sizeof(struct Listener));
 	assert(0 != listener);
 
 	listener->name = me.name;
 	listener->fd = -1;
-	copy_s_addr(IN_ADDR(listener->addr), PIN_ADDR(addr));
-
-	listener->port = port;
+	memcpy(&listener->addr, addr, sizeof(struct sockaddr_storage));
 
 	listener->next = NULL;
 	return listener;
@@ -108,10 +106,18 @@ const char *
 get_listener_name(const struct Listener *listener)
 {
 	static char buf[HOSTLEN + HOSTLEN + PORTNAMELEN + 4];
+	int port = 0;
+#ifdef IPV6
+	if(listener->addr.ss_family == AF_INET6)
+		port = ((struct sockaddr_in6 *)&listener->addr)->sin6_port;
+	else
+#else
+		port = ((struct sockaddr_in *)&listener->addr)->sin_port;	
+#endif	
 	assert(NULL != listener);
 	if(listener == NULL)
 		return NULL;
-	ircsprintf(buf, "%s[%s/%u]", me.name, listener->name, listener->port);
+	ircsprintf(buf, "%s[%s/%u]", me.name, listener->name, port);
 	return buf;
 }
 
@@ -132,7 +138,12 @@ show_ports(struct Client *source_p)
 			   me.name,
 			   source_p->name,
 			   'P',
-			   listener->port,
+#ifdef IPV6
+			   listener->addr.ss_family == AF_INET ? ((struct sockaddr_in *)&listener->addr)->sin_port :
+			   	 ((struct sockaddr_in6 *)&listener->addr)->sin6_port,
+#else
+			   ((struct sockaddr_in *)&listener->addr)->sin_port,
+#endif
 			   IsOperAdmin(source_p) ? listener->name : me.name,
 			   listener->ref_count, (listener->active) ? "active" : "disabled");
 	}
@@ -154,25 +165,35 @@ show_ports(struct Client *source_p)
 static int
 inetport(struct Listener *listener)
 {
-	struct irc_sockaddr lsin;
 	int fd;
 	int opt = 1;
 
 	/*
 	 * At first, open a new socket
 	 */
-	fd = comm_open(DEF_FAM, SOCK_STREAM, 0, "Listener socket");
+	
+	fd = comm_open(listener->addr.ss_family, SOCK_STREAM, 0, "Listener socket");
 
 #ifdef IPV6
-	if(!IN6_ARE_ADDR_EQUAL((struct in6_addr *) &listener->addr, &in6addr_any))
+	if(listener->addr.ss_family == AF_INET6)
 	{
-#else
-	if(INADDR_ANY != listener->addr.sins.sin.s_addr)
-	{
+		struct sockaddr_in6 *in6 = (struct sockaddr_in6 *)&listener->addr;
+		if(!IN6_ARE_ADDR_EQUAL(&in6->sin6_addr, &in6addr_any))
+		{
+			inetntop(AF_INET6, &in6->sin6_addr, listener->vhost, HOSTLEN);
+			listener->name = listener->vhost;
+		}
+	} else
 #endif
-		inetntop(DEF_FAM, &IN_ADDR(listener->addr), listener->vhost, HOSTLEN);
-		listener->name = listener->vhost;
+	{
+		struct sockaddr_in *in = (struct sockaddr_in *)&listener->addr;
+		if(in->sin_addr.s_addr != INADDR_ANY)
+		{
+			inetntop(AF_INET, &in->sin_addr, listener->vhost, HOSTLEN);
+			listener->name = listener->vhost;
+		}	
 	}
+
 
 	if(fd == -1)
 	{
@@ -205,13 +226,8 @@ inetport(struct Listener *listener)
 	 * Bind a port to listen for new connections if port is non-null,
 	 * else assume it is already open and try get something from it.
 	 */
-	memset(&lsin, 0, sizeof(struct irc_sockaddr));
-	S_FAM(lsin) = DEF_FAM;
-	copy_s_addr(S_ADDR(lsin), IN_ADDR(listener->addr));
-	S_PORT(lsin) = htons(listener->port);
 
-
-	if(bind(fd, (struct sockaddr *) &SOCKADDR(lsin), sizeof(struct irc_sockaddr)))
+	if(bind(fd, (struct sockaddr *) &listener->addr, sizeof(struct sockaddr_storage)))
 	{
 		report_error(L_ALL, "binding listener socket %s:%s",
 			     get_listener_name(listener), errno);
@@ -241,23 +257,52 @@ inetport(struct Listener *listener)
 }
 
 static struct Listener *
-find_listener(int port, struct irc_inaddr *addr)
+find_listener(struct sockaddr_storage *addr)
 {
 	struct Listener *listener = NULL;
 	struct Listener *last_closed = NULL;
 
 	for (listener = ListenerPollList; listener; listener = listener->next)
 	{
-
-		if((port == listener->port) &&
-		   (!memcmp(&PIN_ADDR(addr), &IN_ADDR(listener->addr), sizeof(struct irc_inaddr))))
+		if(addr->ss_family != listener->addr.ss_family)
+			continue;
+		
+		switch(addr->ss_family)
 		{
-			/* Try to return an open listener, otherwise reuse a closed one */
-			if(listener->fd == -1)
-				last_closed = listener;
-			else
-				return listener;
+			case AF_INET:
+			{
+				struct sockaddr_in *in4 = (struct sockaddr_in *)addr;
+				struct sockaddr_in *lin4 = (struct sockaddr_in *)&listener->addr;
+				if(in4->sin_addr.s_addr == lin4->sin_addr.s_addr && 
+					in4->sin_port == lin4->sin_port )
+				{
+					if(listener->fd == -1)
+						last_closed = listener;
+					else
+						return(listener);
+				}
+				break;
+			}
+#ifdef IPV6
+			case AF_INET6:
+			{
+				struct sockaddr_in6 *in6 = (struct sockaddr_in6 *)addr;
+				struct sockaddr_in6 *lin6 =(struct sockaddr_in6 *)&listener->addr;
+				if(IN6_ARE_ADDR_EQUAL(&in6->sin6_addr, &lin6->sin6_addr) &&
+				  in6->sin6_port == lin6->sin6_port)
+				{
+					if(listener->fd == -1)
+						last_closed = listener;
+					else
+						return(listener);
+				}
+				break;
+				
+			}
+			default:
+				break;
 		}
+#endif
 	}
 	return last_closed;
 }
@@ -270,10 +315,10 @@ find_listener(int port, struct irc_inaddr *addr)
  * the format "255.255.255.255"
  */
 void
-add_listener(int port, const char *vhost_ip)
+add_listener(int port, const char *vhost_ip, int family)
 {
 	struct Listener *listener;
-	struct irc_inaddr vaddr;
+	struct sockaddr_storage vaddr;
 
 	/*
 	 * if no port in conf line, don't bother
@@ -281,26 +326,56 @@ add_listener(int port, const char *vhost_ip)
 	if(port == 0)
 		return;
 
-#ifdef IPV6
-	copy_s_addr(IN_ADDR(vaddr), &in6addr_any);
-#else
-	copy_s_addr(IN_ADDR(vaddr), INADDR_ANY);
-#endif
+	vaddr.ss_family = family;
 
-	if(vhost_ip)
+	if(vhost_ip != NULL)
 	{
-		if(inetpton(DEF_FAM, vhost_ip, &IN_ADDR(vaddr)) <= 0)
-			return;
+		if(family == AF_INET)
+		{
+			if(inetpton(family, vhost_ip, &((struct sockaddr_in *)&vaddr)->sin_addr) <= 0)
+				return;
+		} else
+		{
+			if(inetpton(family, vhost_ip, &((struct sockaddr_in6 *)&vaddr)->sin6_addr) <= 0)
+				return;
+		
+		}
+	} else
+	{
+		switch(family)
+		{
+			case AF_INET:
+				((struct sockaddr_in *)&vaddr)->sin_addr.s_addr = INADDR_ANY;
+				break;
+#ifdef IPV6
+			case AF_INET6:
+				memcpy(&((struct sockaddr_in6 *)&vaddr)->sin6_addr, &in6addr_any, sizeof(struct in6_addr));
+				break;
+			default:
+				return;
+#endif
+		} 
+	}
+	switch(family)
+	{
+		case AF_INET:
+			((struct sockaddr_in *)&vaddr)->sin_port = port;
+			break;
+		case AF_INET6:
+			((struct sockaddr_in6 *)&vaddr)->sin6_port = port;
+			break;
+		default:
+			break;
 	}
 
-	if((listener = find_listener(port, &vaddr)))
+	if((listener = find_listener(&vaddr)))
 	{
 		if(listener->fd > -1)
 			return;
 	}
 	else
 	{
-		listener = make_listener(port, &vaddr);
+		listener = make_listener(&vaddr);
 		listener->next = ListenerPollList;
 		ListenerPollList = listener;
 	}
@@ -361,8 +436,7 @@ accept_connection(int pfd, void *data)
 {
 	static time_t last_oper_notice = 0;
 
-	struct irc_sockaddr sai;
-	struct irc_inaddr addr;
+	struct sockaddr_storage sai;
 	int fd;
 	int pe;
 	struct Listener *listener = data;
@@ -384,15 +458,6 @@ accept_connection(int pfd, void *data)
 
 	fd = comm_accept(listener->fd, &sai);
 
-	copy_s_addr(IN_ADDR(addr), S_ADDR(sai));
-
-#ifdef IPV6
-	if((IN6_IS_ADDR_V4MAPPED(&IN_ADDR2(addr))) || (IN6_IS_ADDR_V4COMPAT(&IN_ADDR2(addr))))
-	{
-		memmove(&addr.sins.sin.s_addr, addr.sins.sin6.s6_addr + 12, sizeof(struct in_addr));
-		sai.sins.sin.sin_family = AF_INET;
-	}
-#endif
 
 	if(fd < 0)
 	{
@@ -428,7 +493,7 @@ accept_connection(int pfd, void *data)
 
 	/* Do an initial check we aren't connecting too fast or with too many
 	 * from this IP... */
-	if((pe = conf_connect_allowed(&addr, sai.sins.sin.sin_family)) != 0)
+	if((pe = conf_connect_allowed(&sai, sai.ss_family)) != 0)
 	{
 		ServerStats->is_ref++;
 

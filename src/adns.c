@@ -251,26 +251,18 @@ adns_gethost(const char *name, int aftype, struct DNSQuery *req)
  *               resolve an IP address to a domain name.
  */
 void
-adns_getaddr(struct irc_inaddr *addr, int aftype, struct DNSQuery *req, int arpa_type)
+adns_getaddr(struct sockaddr_storage *addr, int aftype, struct DNSQuery *req, int arpa_type)
 {
-	struct irc_sockaddr ipn;
-
-	memset(&ipn, 0, sizeof(struct irc_sockaddr));
 	assert(dns_state->nservers > 0);
 
 #ifdef IPV6
-	if(aftype == AF_INET6)
+	if(addr->ss_family == AF_INET6)
 	{
-		ipn.sins.sin6.sin6_family = AF_INET6;
-		ipn.sins.sin6.sin6_port = 0;
-		memcpy(&ipn.sins.sin6.sin6_addr.s6_addr,
-		       &addr->sins.sin6.s6_addr, sizeof(struct in6_addr));
-
 		if(!arpa_type)
 		{
 			adns_submit_reverse(dns_state,
-					    (struct sockaddr *) &ipn.sins.
-					    sin6, adns_r_ptr_ip6,
+					    (struct sockaddr *) addr,
+					    adns_r_ptr_ip6,
 					    adns_qf_owner |
 					    adns_qf_cname_loose |
 					    adns_qf_quoteok_anshost, req, &req->query);
@@ -278,8 +270,8 @@ adns_getaddr(struct irc_inaddr *addr, int aftype, struct DNSQuery *req, int arpa
 		else
 		{
 			adns_submit_reverse(dns_state,
-					    (struct sockaddr *) &ipn.sins.
-					    sin6, adns_r_ptr_ip6_old,
+					    (struct sockaddr *) addr,
+					    adns_r_ptr_ip6_old,
 					    adns_qf_owner |
 					    adns_qf_cname_loose |
 					    adns_qf_quoteok_anshost, req, &req->query);
@@ -287,23 +279,12 @@ adns_getaddr(struct irc_inaddr *addr, int aftype, struct DNSQuery *req, int arpa
 		}
 	}
 	else
+#endif
 	{
-		ipn.sins.sin.sin_family = AF_INET;
-		ipn.sins.sin.sin_port = 0;
-		ipn.sins.sin.sin_addr.s_addr = addr->sins.sin.s_addr;
 		adns_submit_reverse(dns_state,
-				    (struct sockaddr *) &ipn.sins.sin,
+				    (struct sockaddr *) addr,
 				    adns_r_ptr,
 				    adns_qf_owner | adns_qf_cname_loose |
 				    adns_qf_quoteok_anshost, req, &req->query);
 	}
-#else
-	ipn.sins.sin.sin_family = AF_INET;
-	ipn.sins.sin.sin_port = 0;
-	ipn.sins.sin.sin_addr.s_addr = addr->sins.sin.s_addr;
-	adns_submit_reverse(dns_state, (struct sockaddr *) &ipn.sins.sin,
-			    adns_r_ptr,
-			    adns_qf_owner | adns_qf_cname_loose |
-			    adns_qf_quoteok_anshost, req, &req->query);
-#endif
 }

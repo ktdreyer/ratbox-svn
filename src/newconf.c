@@ -228,7 +228,7 @@ conf_set_serverinfo_network_desc(void *data)
 static void
 conf_set_serverinfo_vhost(void *data)
 {
-	if(inetpton(DEF_FAM, (char *) data, &IN_ADDR(ServerInfo.ip)) <= 0)
+	if(inetpton(AF_INET, (char *) data, &((struct sockaddr_in *)&ServerInfo.ip)->sin_addr) <= 0)
 	{
 		conf_report_error("Invalid netmask for server IPv4 vhost (%s)", (char *) data);
 		return;
@@ -241,7 +241,7 @@ static void
 conf_set_serverinfo_vhost6(void *data)
 {
 #ifdef IPV6
-	if(inetpton(DEF_FAM, (char *) data, &IN_ADDR(ServerInfo.ip6)) <= 0)
+	if(inetpton(AF_INET6, (char *) data, &((struct sockaddr_in6 *)&ServerInfo.ip6)->sin6_addr) <= 0)
 	{
 		conf_report_error("Invalid netmask for server IPv6 vhost (%s)", (char *) data);
 		return;
@@ -1003,7 +1003,7 @@ static void
 conf_set_listen_port(void *data)
 {
 	conf_parm_t *args = data;
-
+	int family = AF_INET;
 	for (; args; args = args->next)
 	{
 		if((args->type & CF_MTYPE) != CF_INT)
@@ -1012,8 +1012,14 @@ conf_set_listen_port(void *data)
 				("listener::port argument is not an integer " "-- ignoring.");
 			continue;
 		}
-
-		add_listener(args->v.number, listener_address);
+#ifdef IPV6
+		if(strchr(listener_address, ':'))
+			family = AF_INET6;
+		else
+#else
+		family = AF_INET;
+#endif
+		add_listener(args->v.number, listener_address, family);
 	}
 }
 

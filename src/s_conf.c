@@ -123,10 +123,20 @@ conf_dns_callback(void *vptr, adns_answer * reply)
 	if(reply && reply->status == adns_s_ok)
 	{
 #ifdef IPV6
-		copy_s_addr(IN_ADDR(aconf->ipnum), reply->rrs.addr->addr.inet6.sin6_addr.s6_addr);
-#else
-		copy_s_addr(IN_ADDR(aconf->ipnum), reply->rrs.addr->addr.inet.sin_addr.s_addr);
+		if(reply->type ==  adns_r_addr6)
+		{
+			struct sockaddr_in6 *in6 = (struct sockaddr_in6 *)&aconf->ipnum;
+			in6->sin6_family = AF_INET6;
+			in6->sin6_port = 0;
+			memcpy(&in6->sin6_addr, &reply->rrs.addr->addr.inet6.sin6_addr, sizeof(struct in6_addr));
+		} else
 #endif
+		{
+			struct sockaddr_in *in = (struct sockaddr_in *)&aconf->ipnum;
+			in->sin_family = AF_INET;
+			in->sin_port = 0;
+			in->sin_addr.s_addr = reply->rrs.addr->addr.inet.sin_addr.s_addr;
+		}		
 		MyFree(reply);
 	}
 
@@ -420,24 +430,31 @@ check_client(struct Client *client_p, struct Client *source_p, char *username)
 	case NOT_AUTHORIZED:
 		{
 			static char ipaddr[HOSTIPLEN];
+			int port = -1;
+#ifdef IPV6
+			if(source_p->localClient->ip.ss_family == AF_INET6)
+				port = ((struct sockaddr_in6 *)&source_p->localClient->listener)->sin6_port;
+			else
+#endif
+				port = ((struct sockaddr_in *)&source_p->localClient->listener)->sin_port;
+			
 			ServerStats->is_ref++;
 			/* jdc - lists server name & port connections are on */
 			/*       a purely cosmetical change */
-			inetntop(source_p->localClient->aftype,
-				 &IN_ADDR(source_p->localClient->ip), ipaddr, HOSTIPLEN);
+			inetntop_sock(&source_p->localClient->ip, ipaddr, HOSTIPLEN);
 			sendto_realops_flags(UMODE_UNAUTH, L_ALL,
 					     "Unauthorised client connection from %s [%s] on [%s/%u].",
 					     get_client_name(source_p,
 							     SHOW_IP),
 					     ipaddr,
 					     source_p->localClient->
-					     listener->name, source_p->localClient->listener->port);
+					     listener->name, port);
 
 			ilog(L_INFO,
 			     "Unauthorised client connection from %s on [%s/%u].",
 			     log_client_name(source_p, SHOW_IP),
 			     source_p->localClient->listener->name,
-			     source_p->localClient->listener->port);
+			     port);
 
 			exit_client(client_p, source_p, &me,
 				    "You are not authorised to use this server");
@@ -472,13 +489,13 @@ verify_access(struct Client *client_p, const char *username)
 	if(IsGotId(client_p))
 	{
 		aconf = find_address_conf(client_p->host, client_p->username,
-					  &client_p->localClient->ip,client_p->localClient->aftype);
+					  &client_p->localClient->ip,client_p->localClient->ip.ss_family);
 	}
 	else
 	{
 		strlcpy(non_ident, "~", sizeof(non_ident));
 		strlcat(non_ident, username, sizeof(non_ident));
-		aconf = find_address_conf(client_p->host, non_ident, &client_p->localClient->ip,client_p->localClient->aftype);
+		aconf = find_address_conf(client_p->host, non_ident, &client_p->localClient->ip,client_p->localClient->ip.ss_family);
 	}
 
 	if(aconf != NULL)
@@ -561,12 +578,10 @@ add_ip_limit(struct Client *client_p, struct ConfItem *aconf)
 	if(ConfCidrAmount(aconf) == 0 || ConfCidrBitlen(aconf) == 0)
 		return -1;
 
-	pnode = match_ip(ConfIpLimits(aconf), (void *) &IN_ADDR(client_p->localClient->ip));
+	pnode = match_ip(ConfIpLimits(aconf), &client_p->localClient->ip);
 
 	if(pnode == NULL)
-		pnode = make_and_lookup_ip(ConfIpLimits(aconf), DEF_FAM,
-					   &IN_ADDR(client_p->localClient->
-						    ip), ConfCidrBitlen(aconf));
+		pnode = make_and_lookup_ip(ConfIpLimits(aconf), &client_p->localClient->ip, ConfCidrBitlen(aconf));
 
 	assert(pnode != NULL);
 
@@ -596,7 +611,7 @@ remove_ip_limit(struct Client *client_p, struct ConfItem *aconf)
 	if(ConfCidrAmount(aconf) == 0 || ConfCidrBitlen(aconf) == 0)
 		return;
 
-	pnode = match_ip(ConfIpLimits(aconf), (void *) &IN_ADDR(client_p->localClient->ip));
+	pnode = match_ip(ConfIpLimits(aconf), &client_p->localClient->ip);
 	if(pnode == NULL)
 		return;
 
@@ -823,7 +838,7 @@ struct ConfItem *
 find_conf_exact(const char *name, const char *user, const char *host, int statmask)
 {
 	struct ConfItem *tmp;
-	struct irc_inaddr ip, cip;
+	struct sockaddr_storage ip, cip;
 	char addr[HOSTLEN + 1];
 	int bits, cbits;
 
@@ -842,7 +857,9 @@ find_conf_exact(const char *name, const char *user, const char *host, int statma
 		strlcpy(addr, tmp->host, sizeof(addr));
 		if(parse_netmask(addr, &ip, &bits) && parse_netmask(host, &cip, &cbits))
 		{
-			if(!comp_with_mask(&IN_ADDR(ip), &IN_ADDR(cip), bits))
+			if(ip.ss_family != cip.ss_family)
+				continue;
+			if(!comp_with_mask_sock(&ip, &cip, bits))
 				continue;
 
 		}
@@ -1205,10 +1222,24 @@ lookup_confhost(struct ConfItem *aconf)
 	 ** Do name lookup now on hostnames given and store the
 	 ** ip numbers in conf structure.
 	 */
-	if(inetpton(DEF_FAM, aconf->host, &IN_ADDR(aconf->ipnum)) <= 0)
+#ifdef IPV6
+	if(strchr(aconf->host, ':') != NULL)
 	{
-		conf_dns_lookup(aconf);
+		if(inetpton(AF_INET6, aconf->host, &((struct sockaddr_in6 *)&aconf->ipnum)->sin6_addr) > 0)
+		{
+			return;
+		}
 	}
+#endif
+	if(strchr(aconf->host, '.') != NULL)
+	{
+		if(inetpton(AF_INET, aconf->host, &((struct sockaddr_in *)&aconf->ipnum)->sin_addr) > 0)
+		{
+			return;
+		}
+	}
+	conf_dns_lookup(aconf);
+
 }
 
 /*
@@ -1220,7 +1251,7 @@ lookup_confhost(struct ConfItem *aconf)
  * side effects	- none
  */
 int
-conf_connect_allowed(struct irc_inaddr *addr, int aftype)
+conf_connect_allowed(struct sockaddr_storage *addr, int aftype)
 {
 	struct ConfItem *aconf = find_dline(addr, aftype);
 
@@ -1250,7 +1281,7 @@ find_kill(struct Client *client_p)
 	if(client_p == NULL)
 		return (NULL);
 
-	aconf = find_address_conf(client_p->host, client_p->username, &client_p->localClient->ip,client_p->localClient->aftype);
+	aconf = find_address_conf(client_p->host, client_p->username, &client_p->localClient->ip,client_p->localClient->ip.ss_family);
 	if(aconf == NULL)
 		return (aconf);
 	if((aconf->status & CONF_KILL) || (aconf->status & CONF_GLINE))

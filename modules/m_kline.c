@@ -779,7 +779,7 @@ static int
 already_placed_kline(struct Client *source_p, const char *luser, const char *lhost, int tkline)
 {
 	const char *reason;
-	struct irc_inaddr iphost, *piphost;
+	struct sockaddr_storage iphost, *piphost;
 	struct ConfItem *aconf;
         int t;
 	if(ConfigFileEntry.non_redundant_klines)

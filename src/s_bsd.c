@@ -366,9 +366,7 @@ void
 add_connection(struct Listener *listener, int fd)
 {
 	struct Client *new_client;
-
-	socklen_t len = sizeof(struct irc_sockaddr);
-	struct irc_sockaddr irn;
+	socklen_t len = sizeof(struct sockaddr_storage);
 	assert(NULL != listener);
 
 	/* 
@@ -376,7 +374,7 @@ add_connection(struct Listener *listener, int fd)
 	 * the client has already been checked out in accept_connection
 	 */
 	new_client = make_client(NULL);
-	if(getpeername(fd, (struct sockaddr *) &SOCKADDR(irn), (socklen_t *) & len))
+	if(getpeername(fd, (struct sockaddr *)&new_client->localClient->ip, (socklen_t *) & len))
 	{
 		report_error(L_ALL, "Failed in adding new connection %s :%s",
 			     get_listener_name(listener), errno);
@@ -389,29 +387,15 @@ add_connection(struct Listener *listener, int fd)
 	 * copy address to 'sockhost' as a string, copy it to host too
 	 * so we have something valid to put into error messages...
 	 */
-	new_client->localClient->port = ntohs(S_PORT(irn));
-	copy_s_addr(IN_ADDR(new_client->localClient->ip), S_ADDR(irn));
-	inetntop(DEF_FAM, &IN_ADDR(new_client->localClient->ip),
-		 new_client->localClient->sockhost, HOSTIPLEN);
-#ifdef IPV6
-	if((!IN6_IS_ADDR_V4MAPPED(&IN_ADDR2(new_client->localClient->ip)))
-	   && (!IN6_IS_ADDR_V4COMPAT(&IN_ADDR2(new_client->localClient->ip))))
-		new_client->localClient->aftype = AF_INET6;
-	else
-	{
-		memmove(&new_client->localClient->ip.sins.sin.s_addr,
-			&IN_ADDR(new_client->localClient->ip)[12], sizeof(struct in_addr));
-		new_client->localClient->aftype = AF_INET;
-	}
-#else
-	new_client->localClient->aftype = AF_INET;
-#endif
+	inetntop_sock(&new_client->localClient->ip, new_client->localClient->sockhost, 
+		sizeof(*new_client->localClient->sockhost));
+
 	*new_client->host = '\0';
 #ifdef IPV6
 	if(*new_client->localClient->sockhost == ':')
 		strlcat(new_client->host, "0", HOSTLEN + 1);
 
-	if(new_client->localClient->aftype == AF_INET6 && ConfigFileEntry.dot_in_ip6_addr == 1)
+	if(new_client->localClient->ip.ss_family == AF_INET6 && ConfigFileEntry.dot_in_ip6_addr == 1)
 	{
 		strlcat(new_client->host, new_client->localClient->sockhost, HOSTLEN + 1);
 		strlcat(new_client->host, ".", HOSTLEN + 1);
@@ -629,13 +613,28 @@ comm_connect_tcp(int fd, const char *host, u_short port,
 		 struct sockaddr *clocal, int socklen, CNCB * callback,
 		 void *data, int aftype, int timeout)
 {
+	void *ipptr = NULL;
 	fd_table[fd].flags.called_connect = 1;
 	assert(callback);
 	fd_table[fd].connect.callback = callback;
 	fd_table[fd].connect.data = data;
 
-	S_FAM(fd_table[fd].connect.hostaddr) = DEF_FAM;
-	S_PORT(fd_table[fd].connect.hostaddr) = htons(port);
+#ifdef IPV6
+	if(aftype == AF_INET6)
+	{
+		struct sockaddr_in6 *in6 = (struct sockaddr_in6 *)&fd_table[fd].connect.hostaddr;
+		in6->sin6_port = htons(port);
+		in6->sin6_family = AF_INET6;
+		ipptr = &in6->sin6_addr;
+	} else
+#endif
+	{
+		struct sockaddr_in *in = (struct sockaddr_in *)&fd_table[fd].connect.hostaddr;
+		in->sin_port = htons(port);
+		in->sin_family = AF_INET;
+		ipptr = &in->sin_addr;
+	}
+
 	/* Note that we're using a passed sockaddr here. This is because
 	 * generally you'll be bind()ing to a sockaddr grabbed from
 	 * getsockname(), so this makes things easier.
@@ -654,7 +653,7 @@ comm_connect_tcp(int fd, const char *host, u_short port,
 	/* Next, if we have been given an IP, get the addr and skip the
 	 * DNS check (and head direct to comm_connect_tryconnect().
 	 */
-	if(inetpton(DEF_FAM, host, S_ADDR(&fd_table[fd].connect.hostaddr)) <= 0)
+	if(inetpton(aftype, host, ipptr) <= 0)
 	{
 		/* Send the DNS request, for the next level */
 		fd_table[fd].dns_query = MyMalloc(sizeof(struct DNSQuery));
@@ -745,21 +744,16 @@ comm_connect_dns_callback(void *vptr, adns_answer * reply)
 #ifdef IPV6
 	if(reply->rrs.addr->addr.sa.sa_family == AF_INET6)
 	{
-		copy_s_addr(S_ADDR(F->connect.hostaddr),
-			    reply->rrs.addr->addr.inet6.sin6_addr.s6_addr);
+		struct sockaddr_in6 *in6 = (struct sockaddr_in6 *)&F->connect.hostaddr;
+		memcpy(&in6->sin6_addr, &reply->rrs.addr->addr.inet6.sin6_addr, sizeof(struct in6_addr));
 	}
 	else
-	{
-		/* IPv4 mapped address */
-		/* This is lazy... */
-		memset(&F->connect.hostaddr.sins.sin6.sin6_addr.s6_addr, 0x0000, 10);
-		memset(&F->connect.hostaddr.sins.sin6.sin6_addr.s6_addr[10], 0xffff, 2);
-		memcpy(&F->connect.hostaddr.sins.sin6.sin6_addr.s6_addr[12],
-		       &reply->rrs.addr->addr.inet.sin_addr.s_addr, 4);
-	}
-#else
-	F->connect.hostaddr.sins.sin.sin_addr.s_addr = reply->rrs.addr->addr.inet.sin_addr.s_addr;
 #endif
+	{
+		struct sockaddr_in *in = (struct sockaddr_in *)&F->connect.hostaddr;
+		in->sin_addr.s_addr = reply->rrs.addr->addr.inet.sin_addr.s_addr;
+	}
+
 	/* Now, call the tryconnect() routine to try a connect() */
 	MyFree(reply);
 	comm_connect_tryconnect(F->fd, NULL);
@@ -783,8 +777,8 @@ comm_connect_tryconnect(int fd, void *notused)
 		return;
 	/* Try the connect() */
 	retval = connect(fd,
-			 (struct sockaddr *) &SOCKADDR(fd_table[fd].connect.
-						       hostaddr), sizeof(struct irc_sockaddr));
+			 (struct sockaddr *) &fd_table[fd].connect.hostaddr, 
+						       sizeof(struct sockaddr_storage));
 	/* Error? */
 	if(retval < 0)
 	{
@@ -891,10 +885,10 @@ comm_open(int family, int sock_type, int proto, const char *note)
  * comm_open() does.
  */
 int
-comm_accept(int fd, struct irc_sockaddr *pn)
+comm_accept(int fd, struct sockaddr_storage *pn)
 {
 	int newfd;
-	socklen_t addrlen = sizeof(struct irc_sockaddr);
+	socklen_t addrlen = sizeof(struct sockaddr_storage);
 	if(number_fd >= MASTER_MAX)
 	{
 		errno = ENFILE;
@@ -906,7 +900,7 @@ comm_accept(int fd, struct irc_sockaddr *pn)
 	 * reserved fd limit, but we can deal with that when comm_open()
 	 * also does it. XXX -- adrian
 	 */
-	newfd = accept(fd, (struct sockaddr *) &PSOCKADDR(pn), (socklen_t *) & addrlen);
+	newfd = accept(fd, (struct sockaddr *) pn, (socklen_t *) & addrlen);
 	if(newfd < 0)
 		return -1;
 

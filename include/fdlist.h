@@ -128,8 +128,8 @@ struct _fde
 	struct
 	{
 		/* We don't need the host here ? */
-		struct irc_sockaddr S;
-		struct irc_sockaddr hostaddr;
+		struct sockaddr_storage S;
+		struct sockaddr_storage hostaddr;
 		CNCB *callback;
 		void *data;
 		/* We'd also add the retry count here when we get to that -- adrian */

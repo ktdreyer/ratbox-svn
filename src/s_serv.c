@@ -686,11 +686,24 @@ check_server(const char *name, struct Client *client_p, int cryptlink)
 	if(aconf != NULL)
 	{
 #ifdef IPV6
-		if(IN6_IS_ADDR_UNSPECIFIED((struct in6_addr *) &IN_ADDR(aconf->ipnum)))
-#else
-		if(IN_ADDR(aconf->ipnum) == INADDR_NONE)
+		if(client_p->localClient->ip.ss_family == AF_INET6)
+		{
+			if(IN6_IS_ADDR_UNSPECIFIED(&((struct sockaddr_in6 *)&aconf->ipnum)->sin6_addr))
+			{
+				memcpy(&((struct sockaddr_in6 *)&aconf->ipnum)->sin6_addr, 
+					&((struct sockaddr_in6 *)&client_p->localClient->ip)->sin6_addr, 
+					sizeof(struct in6_addr)); 
+			} 
+		} else
 #endif
-			copy_s_addr(IN_ADDR(aconf->ipnum), IN_ADDR(client_p->localClient->ip));
+		{
+			if(((struct sockaddr_in *)&aconf->ipnum)->sin_addr.s_addr == INADDR_NONE)
+			{
+				((struct sockaddr_in *)&aconf->ipnum)->sin_addr.s_addr = 
+					((struct sockaddr_in *)&client_p->localClient->ip)->sin_addr.s_addr;
+			}
+
+		}
 	}
 	return 0;
 }
@@ -1657,6 +1670,7 @@ int
 serv_connect(struct ConfItem *aconf, struct Client *by)
 {
 	struct Client *client_p;
+	struct sockaddr_storage myipnum; 
 	int fd;
 	char buf[HOSTIPLEN];
 	/* Make sure aconf is useful */
@@ -1665,7 +1679,7 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
 		return 0;
 
 	/* log */
-	inetntop(DEF_FAM, &IN_ADDR(aconf->ipnum), buf, HOSTIPLEN);
+	inetntop_sock(&aconf->ipnum, buf, HOSTIPLEN);
 	ilog(L_NOTICE, "Connect to %s[%s] @%s", aconf->user, aconf->host, buf);
 
 	/*
@@ -1689,7 +1703,7 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
 	}
 
 	/* create a socket for the server connection */
-	if((fd = comm_open(DEF_FAM, SOCK_STREAM, 0, NULL)) < 0)
+	if((fd = comm_open(aconf->ipnum.ss_family, SOCK_STREAM, 0, NULL)) < 0)
 	{
 		/* Eek, failure to create the socket */
 		report_error(L_ALL, "opening stream socket to %s: %s", aconf->name, errno);
@@ -1705,7 +1719,7 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
 	/* Copy in the server, hostname, fd */
 	strlcpy(client_p->name, aconf->name, sizeof(client_p->name));
 	strlcpy(client_p->host, aconf->host, sizeof(client_p->host));
-	inetntop(DEF_FAM, &IN_ADDR(aconf->ipnum), client_p->localClient->sockhost, HOSTIPLEN);
+	strlcpy(client_p->localClient->sockhost, buf, HOSTIPLEN);
 	client_p->localClient->fd = fd;
 
 	/*
@@ -1781,69 +1795,45 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
 	client_p->serv->up = me.name;
 	SetConnecting(client_p);
 	add_client_to_list(client_p);
-	/* from def_fam */
-	client_p->localClient->aftype = aconf->aftype;
 
-	/* Now, initiate the connection */
-	/* XXX assume that a non 0 type means a specific bind address 
-	 * for this connect.
-	 */
-	if((aconf->aftype == AF_INET) && aconf->my_ipnum.sins.sin.s_addr)
+
+	if(aconf->aftype == AF_INET && ((struct sockaddr_in *)&aconf->my_ipnum)->sin_addr.s_addr != 0)
 	{
-		struct irc_sockaddr ipn;
-		memset(&ipn, 0, sizeof(struct irc_sockaddr));
-		S_FAM(ipn) = DEF_FAM;
-		S_PORT(ipn) = 0;
-
-		copy_s_addr(S_ADDR(ipn), IN_ADDR(aconf->my_ipnum));
-
-		comm_connect_tcp(client_p->localClient->fd, aconf->host,
-				 aconf->port,
-				 (struct sockaddr *) &SOCKADDR(ipn),
-				 sizeof(struct irc_sockaddr),
-				 serv_connect_callback, client_p,
-				 aconf->aftype, ConfigFileEntry.connect_timeout);
-	}
-	else if((aconf->aftype == AF_INET) && ServerInfo.specific_ipv4_vhost)
+		memcpy(&myipnum, &aconf->my_ipnum, sizeof(myipnum));
+		((struct sockaddr_in *)&myipnum)->sin_port = 0;
+		myipnum.ss_family = aconf->my_ipnum.ss_family;
+				
+	} else if(aconf->aftype == AF_INET && ServerInfo.specific_ipv4_vhost)
 	{
-		struct irc_sockaddr ipn;
-		memset(&ipn, 0, sizeof(struct irc_sockaddr));
-		S_FAM(ipn) = DEF_FAM;
-		S_PORT(ipn) = 0;
-
-		copy_s_addr(S_ADDR(ipn), IN_ADDR(ServerInfo.ip));
-
-		comm_connect_tcp(client_p->localClient->fd, aconf->host,
-				 aconf->port,
-				 (struct sockaddr *) &SOCKADDR(ipn),
-				 sizeof(struct irc_sockaddr),
-				 serv_connect_callback, client_p,
-				 aconf->aftype, ConfigFileEntry.connect_timeout);
+		memcpy(&myipnum, &ServerInfo.ip, sizeof(myipnum));
+		((struct sockaddr_in *)&myipnum)->sin_port = 0;
+		myipnum.ss_family = aconf->my_ipnum.ss_family;
 	}
+	
 #ifdef IPV6
 	else if((aconf->aftype == AF_INET6) && ServerInfo.specific_ipv6_vhost)
 	{
-		struct irc_sockaddr ipn;
-		memset(&ipn, 0, sizeof(struct irc_sockaddr));
-		S_FAM(ipn) = AF_INET6;
-		S_PORT(ipn) = 0;
-
-		copy_s_addr(S_ADDR(ipn), IN_ADDR(ServerInfo.ip6));
-
-		comm_connect_tcp(client_p->localClient->fd, aconf->host,
-				 aconf->port,
-				 (struct sockaddr *) &SOCKADDR(ipn),
-				 sizeof(struct irc_sockaddr),
-				 serv_connect_callback, client_p,
-				 aconf->aftype, ConfigFileEntry.connect_timeout);
+		memcpy(&myipnum, &ServerInfo.ip6, sizeof(myipnum));
+		((struct sockaddr_in6 *)&myipnum)->sin6_port = 0;
+		myipnum.ss_family = AF_INET6;
 	}
 #endif
-	else
-	{
+	else {
 		comm_connect_tcp(client_p->localClient->fd, aconf->host,
-				 aconf->port, NULL, 0, serv_connect_callback,
-				 client_p, aconf->aftype, ConfigFileEntry.connect_timeout);
+			 aconf->port,
+			 NULL,
+			 0,
+			 serv_connect_callback, client_p,
+			 aconf->aftype, ConfigFileEntry.connect_timeout);
+	
 	}
+
+	comm_connect_tcp(client_p->localClient->fd, aconf->host,
+			 aconf->port,
+			 (struct sockaddr *) &myipnum,
+			 sizeof(struct sockaddr_storage),
+			 serv_connect_callback, client_p,
+			 myipnum.ss_family, ConfigFileEntry.connect_timeout);
 
 	return 1;
 }
@@ -1871,7 +1861,21 @@ serv_connect_callback(int fd, int status, void *data)
 		return;
 
 	/* Next, for backward purposes, record the ip of the server */
-	copy_s_addr(IN_ADDR(client_p->localClient->ip), S_ADDR(fd_table[fd].connect.hostaddr));
+#ifdef IPV6
+	if(fd_table[fd].connect.hostaddr.ss_family == AF_INET6)
+	{
+		struct sockaddr_in6 *lip = (struct sockaddr_in6 *)&client_p->localClient->ip;
+		struct sockaddr_in6 *hip = (struct sockaddr_in6 *)&fd_table[fd].connect.hostaddr;	
+		memcpy(&lip->sin6_addr, &hip->sin6_addr, sizeof(struct in6_addr));
+	} else
+#else
+	{
+		struct sockaddr_in *lip = (struct sockaddr_in *)&client_p->localClient->ip;
+		struct sockaddr_in *hip = (struct sockaddr_in *)&fd_table[fd].connect.hostaddr;	
+		lip->sin_addr.s_addr = hip->sin_addr.s_addr;
+	}	
+#endif	
+	
 	/* Check the status */
 	if(status != COMM_OK)
 	{

@@ -90,7 +90,7 @@ typedef struct _patricia_tree_t
 patricia_tree_t;
 
 
-patricia_node_t *match_ip(patricia_tree_t * tree, struct irc_inaddr *ip);
+patricia_node_t *match_ip(patricia_tree_t * tree, struct sockaddr_storage *ip);
 patricia_node_t *match_string(patricia_tree_t * tree, const char *string);
 patricia_node_t *match_exact_string(patricia_tree_t * tree, const char *string);
 patricia_node_t *patricia_search_exact(patricia_tree_t * patricia, prefix_t * prefix);
@@ -111,7 +111,7 @@ void init_patricia(void);
 prefix_t *ascii2prefix(int family, char *string);
 #endif
 patricia_node_t *make_and_lookup(patricia_tree_t * tree, char *string);
-patricia_node_t *make_and_lookup_ip(patricia_tree_t * tree, int family, void *in, int bitlen);
+patricia_node_t *make_and_lookup_ip(patricia_tree_t * tree, struct sockaddr_storage *, int bitlen);
 
 
 #define PATRICIA_MAXBITS 128
