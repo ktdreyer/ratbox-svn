@@ -16,7 +16,7 @@ to setup up and run as possible using configure etc.
 Finally speed enhancements and other enhancements have been made to this ircd,
 and continue to be made to this ircd. 
 
- That is not to say that there are still not bugs, There are always bugs.
+  That is not to say that there are still not bugs, There are always bugs.
 But we review each others work on this project, and are open
 to bug reports.
 
@@ -41,6 +41,7 @@ comstud, Chris Behrens <cbehrens@concentric.net>
 David-T, David Taylor <davidt@yadt.co.uk>
 desrt, Ryan Lortie <desertangel@mindless.com>
 echo, Adam J. Durana <adam@caca.com>
+einride, anon <einride@einride.net>
 fl_, Lee Hardy <leeh@shagged.org>
 FlashMan, Craig A. Huegen <chuegen@quadrunner.com>
 Hwy101, Walter Campbell <wcampbel@botbay.net>

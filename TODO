@@ -127,7 +127,7 @@ Little things to be done given enough time and initiative
 .  Bring back CIDR support in operator blocks
    user="wcampbel@144.26.*"; # works - even if the hostname resolves
    user="wcampbel@144.26.0.0/16"; # Does not work
-.  RESTART needs to stop coring
+.  RESTART needs to stop coring (DONE)
 .  CAPAB needs added for half-ops (DONE)
 .  LINKS when server-hide is set ON breaks some clients (DONE)
 .  GETTEXT not being detected without
@@ -145,3 +145,15 @@ Little things to be done given enough time and initiative
 .  Have a few more things /quote SET'table
 .  Have a command (maybe a STATS or in INFO) to show all ircd.conf derived
    options
+.  More documentation on the gettext stuff, enough for a layman to use
+.  Extra \r\n sent to the log file by ts_warn needs to go
+.  Hyb7-ize Riedel's great oper document
+.  Get rid of the old useless test stuff, save about 100k untarred
+.  Fix tools/fixklines.c and tools/klineParse.c for the new kline.conf
+   format.
+.  Update tools/mkconf as well.
+.  Document the openssl CHALLENGE support more.
+.  Create some make release or something for rsa_respond
+.  Fix convertconf more
+.  Do we still need start_ircd.c and ircd_start.c?
+
