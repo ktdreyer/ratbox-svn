@@ -1,3 +1,7 @@
+*** 20010506_1 by androsyn
+Seems I broke the modules install process..this fixes it now..
+
+
 *** 20010505_6 by androsyn
 Try setting the delay rate for the poll idleclient to 0 like the rest of the poll() stuff is...
 
