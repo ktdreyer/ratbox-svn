@@ -325,7 +325,7 @@ find_address_conf(const char *host, const char *user, struct sockaddr_storage *i
 		return kconf;
 
 	/* if theres a spoof, check it against klines.. */
-	if(!EmptyString(iconf->name))
+	if(IsConfDoSpoofIp(iconf))
 	{
 		char *p = strchr(iconf->name, '@');
 

@@ -59,7 +59,6 @@ Misc
 ----
 - support for message translation has been removed.  If you want these, you
   modify messages.tab and distribute that.
-- by popular request, HTM notification is back
 - most of server hiding is gone, only thing that is left is flattened links
 - flattened links cache is now stored in memory instead of a file
 - nick delay.  any client which splits will have their nick 'locked', until

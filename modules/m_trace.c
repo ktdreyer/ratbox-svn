@@ -266,16 +266,17 @@ m_trace(struct Client *client_p, struct Client *source_p, int parc, const char *
 					 link_s[target_p->localClient->fd]);
 	}
 
-	/* This section is to report the unknowns */
-	/* should this be done to remote opers? --fl */
-	DLINK_FOREACH(ptr, unknown_list.head)
+	if(MyConnect(source_p))
 	{
-		target_p = ptr->data;
+		DLINK_FOREACH(ptr, unknown_list.head)
+		{
+			target_p = ptr->data;
 
-		if(!doall && wilds && !match(tname, target_p->name))
-			continue;
+			if(!doall && wilds && !match(tname, target_p->name))
+				continue;
 
-		cnt = report_this_status(source_p, target_p, dow, 0, 0);
+			cnt = report_this_status(source_p, target_p, dow, 0, 0);
+		}
 	}
 
 	/*

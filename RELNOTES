@@ -14,6 +14,10 @@ it is important you read this file before upgrading.
 - fix the configure tests for darwin
 - fix the hostname hash
 - fix PING/PONG
+- HTM is gone - it didnt work properly
+- TRACE no longer lists unknowns to remote opers
+- fixed kline checking on spoofs, need to test bitmask rather than
+  aconf->name
 
 -- ircd-ratbox-2.0b3
 - fix ipv6 on openbsd
