@@ -1,3 +1,15 @@
+androsyn    2005/03/28 03:44:07 UTC	(20050328_5)
+
+  Modified files:
+    src                  dns.c 
+  Log:
+  fix a fd leak when we refork the resolver
+  
+  Revision  Changes    Path
+  7.3       +2 -1      ircd-ratbox/src/dns.c
+
+
+
 androsyn    2005/03/28 03:15:28 UTC	(20050328_4)
 
   Modified files:
