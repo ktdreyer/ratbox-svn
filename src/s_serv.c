@@ -697,6 +697,15 @@ serv_connect_callback(int fd, int status, void *data)
 	if(client_p == NULL)
 		return;
 
+	/* while we were waiting for the callback, its possible this already
+	 * linked in --fl
+	 */
+	if(find_server(NULL, client_p->name) != NULL)
+	{
+		exit_client(client_p, client_p, &me, "Server Exists");
+		return;
+	}
+
 	/* Next, for backward purposes, record the ip of the server */
 #ifdef IPV6
 	if(fd_table[fd].connect.hostaddr.ss_family == AF_INET6)

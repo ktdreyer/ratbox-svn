@@ -1229,9 +1229,6 @@ exit_generic_client(struct Client *client_p, struct Client *source_p, struct Cli
 	del_from_hostname_hash(source_p->host, source_p);
 	del_from_client_hash(source_p->name, source_p);
 	remove_client_from_list(source_p);
-	
-	SetDead(source_p);
-	dlinkAddAlloc(source_p, &dead_list);
 }
 
 /* 
@@ -1256,6 +1253,9 @@ exit_remote_client(struct Client *client_p, struct Client *source_p, struct Clie
 	}
 
 	exit_generic_client(client_p, source_p, from, comment);
+
+	SetDead(source_p);
+	dlinkAddAlloc(source_p, &dead_list);
 	return(CLIENT_EXITED);
 }
 
@@ -1430,6 +1430,8 @@ exit_local_client(struct Client *client_p, struct Client *source_p, struct Clien
 {
 	unsigned long on_for;
 
+	exit_generic_client(client_p, source_p, from, comment);
+
 	s_assert(IsPerson(source_p));
 	client_flush_input(source_p);
 	dlinkDelete(&source_p->localClient->tnode, &lclient_list);
@@ -1465,7 +1467,9 @@ exit_local_client(struct Client *client_p, struct Client *source_p, struct Clien
 		sendto_server(client_p, NULL, NOCAPS, CAP_TS6,
 			      ":%s QUIT :%s", source_p->name, comment);
 	}
-	exit_generic_client(client_p, source_p, from, comment);
+
+	SetDead(source_p);
+	dlinkAddAlloc(source_p, &dead_list);
 	return(CLIENT_EXITED);
 }
 
@@ -1591,7 +1595,7 @@ count_remote_client_memory(size_t * count, size_t * remote_client_memory_used)
 int
 accept_message(struct Client *source, struct Client *target)
 {
-	if(dlinkFind(source, &target->localClient->allow_list) != NULL)
+	if((source == target) || dlinkFind(source, &target->localClient->allow_list) != NULL)
 		return 1;
 
 	return 0;

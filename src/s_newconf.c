@@ -997,8 +997,8 @@ expire_temp_rxlines(void *unused)
 						"Temporary RESV for [%s] expired",
 						aconf->name);
 
+			dlinkDelete(ptr, &resvTable[i]);
 			free_conf(aconf);
-			dlinkDestroy(ptr, &resvTable[i]);
 		}
 	}
 	HASH_WALK_END
