@@ -100,7 +100,7 @@ static int newblock(BlockHeap *bh)
 /* Returns:                                                                 */
 /*   Pointer to new BlockHeap, or NULL if unsuccessful                      */
 /* ************************************************************************ */
-BlockHeap * _BlockHeapCreate (size_t elemsize,
+BlockHeap * BlockHeapCreate (size_t elemsize,
                      int elemsperblock)
 {
    BlockHeap *bh;
@@ -331,7 +331,7 @@ int _BlockHeapFree(BlockHeap *bh, void *ptr)
 /* Returns:                                                                 */
 /*   0 if successful, 1 if bh == NULL                                       */
 /* ************************************************************************ */
-int _BlockHeapGarbageCollect(BlockHeap *bh)
+int BlockHeapGarbageCollect(BlockHeap *bh)
 {
    Block *walker, *last;
 
@@ -395,7 +395,7 @@ int _BlockHeapGarbageCollect(BlockHeap *bh)
 /* Returns:                                                                 */
 /*   0 if successful, 1 if bh == NULL                                       */
 /* ************************************************************************ */
-int _BlockHeapDestroy(BlockHeap *bh)
+int BlockHeapDestroy(BlockHeap *bh)
 {
    Block *walker, *next;
 
@@ -429,7 +429,7 @@ int _BlockHeapDestroy(BlockHeap *bh)
 /*   TotalAllocated                                                         */
 /* ************************************************************************ */
 
-void _BlockHeapCountMemory(BlockHeap *bh,int *TotalUsed,int *TotalAllocated)
+void BlockHeapCountMemory(BlockHeap *bh,int *TotalUsed,int *TotalAllocated)
 {
   Block *walker;
 
