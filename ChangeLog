@@ -1,3 +1,19 @@
+androsyn    2003/02/12 19:50:32 UTC	(20030212_1)
+
+  Modified files:
+    src                  hostmask.c newconf.c s_conf.c 
+  Log:
+  Fix a handful of bugs related to parse_netmask that didn't get backed out
+  when I brough hostmask.c back.  Also rewrote parse_netmask() not to be so
+  hideous
+  
+  Revision  Changes    Path
+  7.85      +27 -191   ircd-ratbox/src/hostmask.c
+  7.75      +2 -2      ircd-ratbox/src/newconf.c
+  7.399     +2 -2      ircd-ratbox/src/s_conf.c
+
+
+
 androsyn    2003/02/12 19:26:02 UTC	(20030212_0)
 
   Modified files:
