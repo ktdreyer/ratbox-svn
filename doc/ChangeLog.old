@@ -1,3 +1,14 @@
+*** 20001031_4 by adrian
+
+
+A temporary hack to make sure we're reading data once a server
+connection has completed. It will go away when I finish this
+replacement comm_connect_tcp() code.
+
+Server connections *should* work now. They seem to work for me :)
+
+
+
 *** 20001031_3 by adrian
 
 
