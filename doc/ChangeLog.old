@@ -1,3 +1,20 @@
+db          2002/03/17 13:10:35 EST	(20020317_0)
+
+  Modified files:
+    src                  ircd_signal.c 
+  Log:
+  jv and I FINALLY figured out why detaching from a running ircd on
+  FreeBSD will crash.  Ignoring the SIGTRAP seems to work.  Everyone
+  please try it on whatever platforms you have and make sure that it
+  doesn't have some negative side effects.
+  
+  - approved db
+  
+  Revision  Changes    Path
+  7.9       +3 -1      ircd-hybrid-7/src/ircd_signal.c
+
+
+
 db          2002/03/14 12:44:15 EST	(20020314_1)
 
   Modified files:
