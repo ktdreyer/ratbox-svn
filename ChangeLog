@@ -1,3 +1,26 @@
+leeh        2004/03/02 14:58:47 EST	(20040302_10)
+
+  Modified files:
+    doc                  example.conf example.efnet.conf 
+    include              s_conf.h 
+    modules              m_info.c 
+    src                  client.c newconf.c s_conf.c 
+  Log:
+  - alzs patch to add kline_reason = "foo"; to ircd.conf, removing
+    kline_with_connection_closed.  If this is specified, this is the quit
+    reason sent to channels on a kline/dline/gline.
+  
+  Revision  Changes    Path
+  7.235     +3 -3      ircd-ratbox/doc/example.conf
+  7.70      +3 -3      ircd-ratbox/doc/example.efnet.conf
+  7.270     +2 -2      ircd-ratbox/include/s_conf.h
+  1.102     +5 -5      ircd-ratbox/modules/m_info.c
+  7.430     +7 -14     ircd-ratbox/src/client.c
+  7.137     +6 -4      ircd-ratbox/src/newconf.c
+  7.450     +0 -1      ircd-ratbox/src/s_conf.c
+
+
+
 androsyn    2004/03/02 14:41:22 EST	(20040302_9)
 
   Modified files:
