@@ -1,3 +1,16 @@
+androsyn    2002/12/16 08:44:53 UTC	(20021216_19)
+
+  Modified files:
+    src                  balloc.c 
+  Log:
+  okay i've changed my mind on the garbage collection delaying..i think it
+  sucks now :P
+  
+  Revision  Changes    Path
+  7.54      +1 -2      ircd-ratbox/src/balloc.c
+
+
+
 androsyn    2002/12/16 08:43:03 UTC	(20021216_18)
 
   Modified files:
