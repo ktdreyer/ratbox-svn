@@ -1,3 +1,19 @@
+androsyn    2002/11/28 21:13:02 UTC	(20021128_6)
+
+  Modified files:
+    .                    configure 
+    autoconf             configure.in 
+    include              setup.h.in 
+  Log:
+  Remove the efence check..i don't think anybody ever used it
+  
+  Revision  Changes    Path
+  7.163     +0 -28     ircd-ratbox/autoconf/configure.in
+  7.170     +200 -278  ircd-ratbox/configure
+  7.63      +0 -3      ircd-ratbox/include/setup.h.in
+
+
+
 androsyn    2002/11/28 21:11:31 UTC	(20021128_5)
 
   Modified files:
