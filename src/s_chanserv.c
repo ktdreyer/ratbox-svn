@@ -13,6 +13,7 @@
 #include "client.h"
 #include "channel.h"
 #include "rserv.h"
+#include "ucommand.h"
 #include "log.h"
 #include "io.h"
 #include "s_chanserv.h"
@@ -38,6 +39,9 @@ static BlockHeap *member_reg_heap;
 static BlockHeap *ban_reg_heap;
 
 static dlink_list channel_reg_table[MAX_CHANNEL_TABLE];
+
+static void u_chanserv_cregister(struct connection_entry *, char *parv[], int parc);
+static void u_chanserv_cdrop(struct connection_entry *, char *parv[], int parc);
 
 static int s_chanserv_cregister(struct client *, char *parv[], int parc);
 static int s_chanserv_cdrop(struct client *, char *parv[], int parc);
@@ -85,9 +89,16 @@ static struct service_command chanserv_command[] =
 	{ "\0",		NULL,			0, NULL, 0, 0L, 0, 0, 0 }
 };
 
+static struct ucommand_handler chanserv_ucommand[] =
+{
+	{ "cregister",	u_chanserv_cregister,	CONF_OPER_CS_REGISTER,	3, NULL },
+	{ "cdrop",	u_chanserv_cdrop,	CONF_OPER_CS_ADMIN,	2, NULL },
+	{ "\0",		NULL,			0,			0, NULL }
+};
+
 static struct service_handler chanserv_service = {
 	"CHANSERV", "CHANSERV", "chanserv", "services.chanserv", "Channel Service", 0,
-	30, 50, chanserv_command, NULL, NULL
+	30, 50, chanserv_command, chanserv_ucommand, NULL
 };
 
 static void load_channel_db(void);
@@ -397,6 +408,60 @@ write_ban_db_entry(struct ban_reg *reg_p, const char *chname)
 	loc_sqlite_exec(NULL, "INSERT INTO bans VALUES(%Q, %Q, %Q, %Q, %d, %lu)",
 			chname, reg_p->mask, reg_p->reason, reg_p->username,
 			reg_p->level, reg_p->hold);
+}
+
+static void
+u_chanserv_cregister(struct connection_entry *conn_p, char *parv[], int parc)
+{
+	struct chan_reg *reg_p;
+	struct user_reg *ureg_p;
+	struct member_reg *mreg_p;
+
+	if((reg_p = find_channel_reg(NULL, parv[1])))
+	{
+		sendto_one(conn_p, "Channel %s is already registered", parv[1]);
+		return;
+	}
+
+	if((ureg_p = find_user_reg_nick(NULL, parv[2])) == NULL)
+	{
+		if(*parv[2] == '=')
+			sendto_one(conn_p, "Nickname %s is not logged in", parv[2]);
+		else
+			sendto_one(conn_p, "Username %s is not registered", parv[2]);
+
+		return;
+	}
+
+	reg_p = BlockHeapAlloc(channel_reg_heap);
+	reg_p->name = my_strdup(parv[0]);
+	reg_p->reg_time = reg_p->last_time = CURRENT_TIME;
+
+	add_channel_reg(reg_p);
+
+	mreg_p = make_member_reg(ureg_p, reg_p, conn_p->name, 200);
+
+	write_channel_db_entry(reg_p);
+	write_member_db_entry(mreg_p);
+
+	sendto_one(conn_p, "Channel %s registered to %s",
+			reg_p->name, ureg_p->name);
+}
+
+static void
+u_chanserv_cdrop(struct connection_entry *conn_p, char *parv[], int parc)
+{
+	struct chan_reg *reg_p;
+
+	if((reg_p = find_channel_reg(NULL, parv[1])) == NULL)
+	{
+		sendto_one(conn_p, "Channel %s is not registered", parv[1]);
+		return;
+	}
+
+	free_channel_reg(reg_p);
+
+	sendto_one(conn_p, "Channel %s registration dropped", parv[1]);
 }
 
 static int
