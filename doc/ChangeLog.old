@@ -1,3 +1,11 @@
+*** 20010125_11 by fl_
+- removed a fixed bug from bugs..
+- till someone decides what the hell we're doing with stats p and shide,
+  we show users the reply..  I dont like the idea of noticing all opers..
+  frankly, itd get annoying, and the MOTD usually gives oper nicks/chans
+  anyway, so..
+
+
 *** 20010125_10 by fl_
 - opers shouldnt see IPs of servers connecting.. show them MASK_IP
   instead
