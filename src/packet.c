@@ -165,7 +165,7 @@ read_ctrl_packet(int fd, void *data)
   struct SlinkRplDef *replydef;
 
   assert(lserver != NULL);
-  reply = &server->localClient->slinkrpl;
+  reply = &lserver->slinkrpl;
 
   /* if the server died, kill it off now -davidt */
   if(IsDead(server))

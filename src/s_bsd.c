@@ -90,7 +90,9 @@ static PF comm_connect_tryconnect;
 void close_all_connections(void)
 {
   int i;
+#ifndef NDEBUG
   int fd;
+#endif
 
 #ifndef VMS
   for (i = 0; i < MAXCONNECTIONS; ++i)

@@ -423,6 +423,67 @@ linebuf_attach(buf_head_t *bufhead, buf_head_t *new)
 }
 
 /*
+ * linebuf_putmsg
+ *
+ * Similar to linebuf_put, but designed for use by send.c.
+ *
+ * prefixfmt is used as a format for the varargs, and is inserted first.
+ * Then format/va_args is appended to the buffer.
+ */
+void
+linebuf_putmsg(buf_head_t *bufhead, const char *format, va_list va_args,
+               const char *prefixfmt, ...)
+{
+  buf_line_t *bufline;
+  int len = 0;
+  va_list prefix_args;
+  
+  /* make sure the previous line is terminated */
+  if (bufhead->list.tail)
+    {
+      bufline = bufhead->list.tail->data;
+      assert(bufline->terminated);
+    }
+
+  /* Create a new line */
+  bufline = linebuf_new_line(bufhead);
+
+  if (prefixfmt)
+  {
+    va_start(prefix_args, prefixfmt);
+    len = vsnprintf(bufline->buf, BUF_DATA_SIZE, prefixfmt, prefix_args);
+    va_end(prefix_args);
+  }
+
+  if (va_args)
+  {
+    len = vsnprintf((bufline->buf + len), (BUF_DATA_SIZE - len), format,
+                    va_args);
+  }
+  
+  /* Truncate the data if required */
+  if (len > BUF_DATA_SIZE)
+  {
+    len = BUF_DATA_SIZE;
+    bufline->overflow = 1;
+  }
+
+  /* Chop trailing CRLF's .. */
+  assert(bufline->buf[len] == '\0');
+
+  len--; /* change len to index of last char */
+  while ((bufline->buf[len] == '\r') || (bufline->buf[len] == '\n'))
+    len--;
+
+  bufline->buf[len++] = '\r';
+  bufline->buf[len++] = '\n';
+  bufline->buf[len++] = '\0'; /* this restores len to correct length */
+
+  bufline->len  = len;
+  bufhead->len += len;
+}
+
+/*
  * linebuf_put
  *
  * put some *unparsed* data in a buffer. This is used when linebufs are
