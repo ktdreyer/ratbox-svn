@@ -1,3 +1,36 @@
+androsyn    2002/08/08 04:12:05 EDT	(20020808_1)
+
+  Modified files:
+    include              config.h 
+    modules              m_invite.c m_join.c m_list.c m_lljoin.c 
+                         m_names.c m_topic.c m_who.c m_whois.c 
+    modules/core         m_kick.c m_message.c m_mode.c m_part.c 
+                         m_sjoin.c 
+  Removed files:
+    modules              m_cjoin.c 
+  Log:
+  Remove vchans from everything else except m_knock.c.  Somebody else is going
+  to want to look at that one :P
+  
+  Revision  Changes    Path
+  7.142     +0 -1      ircd-ratbox/include/config.h
+  1.47      +1 -15     ircd-ratbox/modules/core/m_kick.c
+  1.100     +12 -36    ircd-ratbox/modules/core/m_message.c
+  1.56      +3 -53     ircd-ratbox/modules/core/m_mode.c
+  1.57      +4 -25     ircd-ratbox/modules/core/m_part.c
+  1.141     +9 -94     ircd-ratbox/modules/core/m_sjoin.c
+  1.55      +0 -222    ircd-ratbox/modules/m_cjoin.c (dead)
+  1.48      +12 -34    ircd-ratbox/modules/m_invite.c
+  1.91      +9 -75     ircd-ratbox/modules/m_join.c
+  1.44      +4 -57     ircd-ratbox/modules/m_list.c
+  1.58      +30 -127   ircd-ratbox/modules/m_lljoin.c
+  1.44      +4 -57     ircd-ratbox/modules/m_names.c
+  1.55      +8 -26     ircd-ratbox/modules/m_topic.c
+  1.62      +6 -53     ircd-ratbox/modules/m_who.c
+  1.79      +1 -14     ircd-ratbox/modules/m_whois.c
+
+
+
 androsyn    2002/08/07 20:48:36 EDT	(20020808_0)
 
   Modified files:
