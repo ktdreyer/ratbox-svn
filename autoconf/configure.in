@@ -130,6 +130,7 @@ AC_CHECK_LIB([sqlite], [main], [], [
 
 	if test -e "$SQLITE_DIR/lib/libsqlite.so"; then
 		LDFLAGS="$LDFLAGS -L$SQLITE_DIR/lib/"
+		LIBS="$LIBS -lsqlite"
 		AC_MSG_RESULT(yes)
 	else
 		AC_MSG_RESULT(no)
@@ -138,7 +139,6 @@ AC_CHECK_LIB([sqlite], [main], [], [
 	fi
 ])
 
-LIBS="$LIBS -lsqlite"
 
 AC_SUBST(SQLITE_INCLUDES)
 

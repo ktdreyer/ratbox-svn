@@ -1991,6 +1991,7 @@ echo "configure:1991: checking for main in -lsqlite in given path" >&5
 
 	if test -e "$SQLITE_DIR/lib/libsqlite.so"; then
 		LDFLAGS="$LDFLAGS -L$SQLITE_DIR/lib/"
+		LIBS="$LIBS -lsqlite"
 		echo "$ac_t""yes" 1>&6
 	else
 		echo "$ac_t""no" 1>&6
@@ -2001,7 +2002,6 @@ echo "configure:1991: checking for main in -lsqlite in given path" >&5
 fi
 
 
-LIBS="$LIBS -lsqlite"
 
 
 

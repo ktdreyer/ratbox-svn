@@ -26,4 +26,6 @@ void loc_sqlite_exec(db_callback cb, const char *format, ...);
 
 char *rebuild_params(const char **, int, int);
 
+int valid_servername(const char *);
+
 #endif

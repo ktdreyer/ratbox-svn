@@ -1,0 +1,29 @@
+ratbox-services
+---------------
+
+ratbox-services is a services daemon for use with ircd-ratbox.  It provides
+channel/username registration services, as well as a jupe service, an oper 
+service, an operbot and a list service.
+
+
+Installation
+------------
+Installation instructions are contained in INSTALL.
+
+
+Support
+-------
+Support is available via IRC on #ratbox@EFNet or via email to
+ircd-ratbox@lists.ratbox.org.
+
+
+Bugs
+----
+If you encounter a bug with ratbox-services, please report it via email.  If
+ratbox-services cores, please keep a copy of the corefile and the binary
+safe, and load it into gdb:
+gdb /path/to/ratbox-services /path/to/ratbox-services.core
+
+Once at a gdb prompt, type "bt" and email the output.
+
+# $Id$ 

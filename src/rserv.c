@@ -352,3 +352,26 @@ rebuild_params(const char **parv, int parc, int start)
 
 	return buf;
 }
+
+int
+valid_servername(const char *name)
+{
+	int dots = 0;
+
+	if(IsDigit(*name))
+		return 0;
+
+	for(; *name; name++)
+	{
+		if(!IsServChar(*name))
+			return 0;
+		else if(*name == '.')
+			dots++;
+	}
+
+	if(!dots)
+		return 0;
+
+	return 1;
+}
+

@@ -152,7 +152,6 @@ e_jupeserv_expire(void *unused)
 	struct server_jupe *jupe_p;
 	dlink_node *ptr, *next_ptr;
 
-
 	DLINK_FOREACH_SAFE(ptr, next_ptr, pending_jupes.head)
 	{
 		jupe_p = ptr->data;
@@ -222,6 +221,12 @@ u_jupeserv_jupe(struct connection_entry *conn_p, char *parv[], int parc)
 	struct server_jupe *jupe_p;
 	const char *reason;
 
+	if(!valid_servername(parv[1]) || match(parv[1], MYNAME))
+	{
+		sendto_one(conn_p, "Servername %s is invalid", parv[1]);
+		return;
+	}
+
 	if((jupe_p = find_jupe(parv[1], &active_jupes)))
 	{
 		sendto_one(conn_p, "Server %s is already juped", jupe_p->name);
@@ -286,6 +291,13 @@ s_jupeserv_jupe(struct client *client_p, char *parv[], int parc)
 {
 	struct server_jupe *jupe_p;
 	const char *reason;
+
+	if(!valid_servername(parv[0]) || match(parv[0], MYNAME))
+	{
+		service_error(jupeserv_p, client_p, "Servername %s is invalid",
+				parv[0]);
+		return 0;
+	}
 
 	if((jupe_p = find_jupe(parv[0], &active_jupes)))
 	{
@@ -361,6 +373,13 @@ s_jupeserv_calljupe(struct client *client_p, char *parv[], int parc)
 {
 	struct server_jupe *jupe_p;
 	dlink_node *ptr;
+
+	if(!valid_servername(parv[0]) || match(parv[0], MYNAME))
+	{
+		service_error(jupeserv_p, client_p, "Servername %s is invalid",
+				parv[0]);
+		return 0;
+	}
 
 	if(!config_file.jupe_score || !config_file.oper_score)
 	{

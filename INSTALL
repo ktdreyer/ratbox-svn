@@ -6,7 +6,40 @@ ratbox-services installation guide
 1. Decide which services you dont want compiled in.  By default all 
    will be compiled in, as they can be disabled in the config file.
 
-2. Run the configure script.  By default it will attempt to install to
+2. Ensure you have a grammar/lexical parser installed.  Bison and flex are
+   recommended, though yacc and lex should do.
+
+3. Install sqlite.  You may either do this via your OS using a tool like
+   apt-get, or via packages.  You can usually tell if it is installed by
+   running the command: sqlite -help
+
+   SQLite downloads are available from http://www.sqlite.org/download.html
+   Replace 'x' here with the current version number!  (Note: I only say 2.x
+   here, because thats what apt on debian gives me and is what I know works)
+
+   To install from RPM:
+      1. Download sqlite-devel-2.8.x.i386.rpm
+                  sqlite-2.8.x.i386.rpm
+      2. rpm -?? sqlite-devel-2.8.x.i386.rpm sqlite-2.8.x.i386.rpm
+
+   To install from source:
+      1. Download sqlite-2.8.x.tar.gz
+      2. tar -zxf sqlite-2.8.x.tar.gz
+      3. cd sqlite
+      
+      If you have root access:
+        4a. ./configure --prefix=/usr/local
+        4b. make
+        4c. su to root user
+        4d. cd /path/to/source/sqlite
+        4e. make install
+
+      If you do not have root access:
+        5a. ./configure --prefix=/home/yourusername/sqlite
+        5b. make
+        5c. make install
+
+4. Run the configure script.  By default it will attempt to install to
    /usr/local/ratbox-services.  If you want it in this directory, then
    as root you must first:
    	mkdir /usr/local/ratbox-services
@@ -17,16 +50,23 @@ ratbox-services installation guide
    --prefix option:
    	./configure --prefix=/home/user/services
 
-   If there are services you dont want compiled in, like the operbot:
-   	./configure --prefix=/home/user/services --disable-operbot
+   If there are services you dont want compiled in, like the operbot,
+   include the relevant option:
+   	./configure --disable-operbot
+
+   If SQLite is installed but configure doesnt find it:
+        ./configure --with-sqlite=PATH
+   configure will search PATH/include and PATH/lib for the needed SQLite
+   parts.  eg, if you installed sqlite (as above) to /home/youruser/sqlite:
+        ./configure --with-sqlite=/home/youruser/sqlite
 
    See ./configure --help for more information.
 
-3. Run make
+5. Run make
 
-4. Run make install
+6. Run make install
 
-5. Change to the directory it installed to, edit example.conf and save it
+7. Change to the directory it installed to, edit example.conf and save it
    as services.conf.
 
-6. Run ./ratbox-services
+8. Run ./ratbox-services

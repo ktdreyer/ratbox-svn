@@ -415,7 +415,15 @@ static void
 conf_set_serverinfo_name(void *data)
 {
 	if(config_file.name == NULL)
+	{
+		if(!valid_servername((const char *) data))
+		{
+			conf_report_error("Ignoring serverinfo::name -- invalid servername");
+			return;
+		}
+		
 	        config_file.name = my_strdup(data);
+	}
 }
 
 static int
