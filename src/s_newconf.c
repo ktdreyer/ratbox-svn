@@ -3,7 +3,7 @@
  * s_newconf.c - code for dealing with conf stuff
  *
  * Copyright (C) 2004 Lee Hardy <lee@leeh.co.uk>
- * Copyright (C) 2004-2005 ircd-ratbox development team
+ * Copyright (C) 2004 ircd-ratbox development team
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -33,10 +33,11 @@
  */
 
 #include "stdinc.h"
-#include "tools.h"
-#include "struct.h"
+#include "ircd_defs.h"
+#include "common.h"
 #include "s_conf.h"
 #include "s_newconf.h"
+#include "tools.h"
 #include "client.h"
 #include "memory.h"
 #include "s_serv.h"
@@ -47,13 +48,6 @@
 #include "balloc.h"
 #include "event.h"
 #include "sprintf_irc.h"
-#include "irc_string.h"
-#include "patricia.h"
-#include "ircd.h"
-#include "class.h"
-#include "adns.h"
-#include "res.h"
-#include "s_gline.h"
 
 dlink_list shared_conf_list;
 dlink_list cluster_conf_list;
@@ -62,7 +56,6 @@ dlink_list hubleaf_conf_list;
 dlink_list server_conf_list;
 dlink_list xline_conf_list;
 dlink_list resv_conf_list;	/* nicks only! */
-dlink_list glines;
 static dlink_list nd_list;	/* nick delay */
 dlink_list tgchange_list;
 
@@ -72,7 +65,6 @@ static BlockHeap *nd_heap = NULL;
 
 static void expire_temp_rxlines(void *unused);
 static void expire_nd_entries(void *unused);
-static void expire_glines(void *unused);
 
 void
 init_s_newconf(void)
@@ -81,7 +73,6 @@ init_s_newconf(void)
 	nd_heap = BlockHeapCreate(sizeof(struct nd_entry), ND_HEAP_SIZE);
 	eventAddIsh("expire_nd_entries", expire_nd_entries, NULL, 30);
 	eventAddIsh("expire_temp_rxlines", expire_temp_rxlines, NULL, 60);
-	eventAddIsh("expire_glines", expire_glines, NULL, CLEANUP_GLINES_TIME);
 }
 
 void
@@ -252,25 +243,6 @@ cluster_generic(struct Client *source_p, const char *command,
 		sendto_match_servs(source_p, shared_p->server, CAP_ENCAP, cap,
 				"ENCAP %s %s %s",
 				shared_p->server, command, buffer);
-	}
-}
-
-static void
-expire_glines(void *unused)
-{
-	struct ConfItem *aconf;
-	dlink_node *ptr, *next_ptr;
-
-	DLINK_FOREACH_SAFE(ptr, next_ptr, glines.head)
-	{
-		aconf = ptr->data;
-
-		/* if gline_time changes, these could end up out of order */
-		if(aconf->hold > CurrentTime)
-			continue;
-
-		delete_one_address_conf(aconf->host, aconf);
-		dlinkDestroy(ptr, &glines);
 	}
 }
 

@@ -11,7 +11,6 @@
 #include <string.h>
 #include <limits.h>
 #include <signal.h>
-#include "setup.h"
 #include "config.h"
 
 

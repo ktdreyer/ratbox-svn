@@ -20,10 +20,10 @@
 
 
 #include "stdinc.h"
-#include "tools.h"
+#include "config.h"
+#include "ircd_defs.h"
 #include "patricia.h"
 #include "balloc.h"
-#include "irc_string.h"
 
 static BlockHeap *prefix_heap;
 static BlockHeap *node_heap;

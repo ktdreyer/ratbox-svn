@@ -37,7 +37,6 @@
 #include <arpa/inet.h>
 
 #include "internal.h"
-#include "sprintf_irc.h"
 
 #define LOG_BUFSIZE 512
 

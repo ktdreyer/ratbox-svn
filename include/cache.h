@@ -2,6 +2,9 @@
 #ifndef INCLUDED_CACHE_H
 #define INCLUDED_CACHE_H
 
+#include "client.h"
+#include "tools.h"
+
 #define HELP_MAX	100
 
 #define CACHELINELEN	81

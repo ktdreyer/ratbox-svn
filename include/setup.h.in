@@ -45,12 +45,6 @@
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #undef HAVE_DLFCN_H
 
-/* Define to 1 if you have the `dlfunc' function. */
-#undef HAVE_DLFUNC
-
-/* Define if the dlopen function is available. */
-#undef HAVE_DLOPEN
-
 /* Define if your system supports the epoll system calls */
 #undef HAVE_EPOLL
 
@@ -75,9 +69,6 @@
 /* Define to 1 if zlib (-lz) is available. */
 #undef HAVE_LIBZ
 
-/* Define to 1 if you have the <mach-o/dyld.h> header file. */
-#undef HAVE_MACH_O_DYLD_H
-
 /* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H
 
@@ -92,9 +83,6 @@
 
 /* Define to 1 if you have the `select' function. */
 #undef HAVE_SELECT
-
-/* Define if the shl_load function is available. */
-#undef HAVE_SHL_LOAD
 
 /* Define to 1 if you have the `socketpair' function. */
 #undef HAVE_SOCKETPAIR
@@ -210,6 +198,9 @@
 /* Define to 1 if your system has no in6addr_any. */
 #undef NO_IN6ADDR_ANY
 
+/* Name of package */
+#undef PACKAGE
+
 /* Define to the address where bug reports for this package should be sent. */
 #undef PACKAGE_BUGREPORT
 
@@ -230,9 +221,6 @@
 
 /* This is the type of IO loop we are using */
 #undef SELECT_TYPE
-
-/* Suffix for shared libraries on this platform. */
-#undef SHARED_SUFFIX
 
 /* Define to 1 if sockaddr has a 'sa_len' member. */
 #undef SOCKADDR_IN_HAS_LEN
@@ -257,10 +245,6 @@
 /* Define to 1 if string.h may be included along with strings.h */
 #undef STRING_WITH_STRINGS
 
-/* String containing extra underscores prepended to symbols loaded from
-   modules. */
-#undef SYMBOL_PREFIX
-
 /* Maximum topic length (<=390) */
 #undef TOPICLEN
 
@@ -272,6 +256,9 @@
 
 /* Define this to enable IO Debug hooks. */
 #undef USE_IODEBUG_HOOKS
+
+/* Version number of package */
+#undef VERSION
 
 /* Define to 1 if your processor stores words with the most significant byte
    first (like Motorola and SPARC, unlike Intel and VAX). */
@@ -285,9 +272,6 @@
 #ifndef _GNU_SOURCE
 # undef _GNU_SOURCE
 #endif
-
-/* This is needed to use strtok_r on Solaris. */
-#undef __EXTENSIONS__
 
 /* If system does not define in_port_t, define it to what it should be. */
 #undef in_port_t

@@ -4,7 +4,7 @@
  *
  * Copyright (C) 1990 Jarkko Oikarinen and University of Oulu, Co Center 
  * Copyright (C) 1996-2002 Hybrid Development Team 
- * Copyright (C) 2002-2005 ircd-ratbox development team 
+ * Copyright (C) 2002-2004 ircd-ratbox development team 
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -26,9 +26,9 @@
 
 #include "stdinc.h"
 #include "tools.h"
-#include "struct.h"
 #include "channel.h"
 #include "client.h"
+#include "common.h"
 #include "hash.h"
 #include "hook.h"
 #include "irc_string.h"
@@ -534,6 +534,70 @@ is_banned(struct Channel *chptr, struct Client *who, struct membership *msptr,
 	}
 
 	return ((actualBan ? CHFL_BAN : 0));
+}
+
+/* can_join()
+ *
+ * input	- client to check, channel to check for, key
+ * output	- reason for not being able to join, else 0
+ * side effects -
+ */
+int
+can_join(struct Client *source_p, struct Channel *chptr, char *key)
+{
+	dlink_node *lp;
+	dlink_node *ptr;
+	struct Ban *invex = NULL;
+	char src_host[NICKLEN + USERLEN + HOSTLEN + 6];
+	char src_iphost[NICKLEN + USERLEN + HOSTLEN + 6];
+
+	s_assert(source_p->localClient != NULL);
+
+	ircsprintf(src_host, "%s!%s@%s", 
+		   source_p->name, source_p->username, source_p->host);
+	ircsprintf(src_iphost, "%s!%s@%s",
+		   source_p->name, source_p->username, source_p->sockhost);
+
+	if((is_banned(chptr, source_p, NULL, src_host, src_iphost)) == CHFL_BAN)
+		return (ERR_BANNEDFROMCHAN);
+
+	if(chptr->mode.mode & MODE_INVITEONLY)
+	{
+		DLINK_FOREACH(lp, source_p->user->invited.head)
+		{
+			if(lp->data == chptr)
+				break;
+		}
+		if(lp == NULL)
+		{
+			if(!ConfigChannel.use_invex)
+				return (ERR_INVITEONLYCHAN);
+			DLINK_FOREACH(ptr, chptr->invexlist.head)
+			{
+				invex = ptr->data;
+				if(match(invex->banstr, src_host)
+				   || match(invex->banstr, src_iphost)
+				   || match_cidr(invex->banstr, src_iphost))
+					break;
+			}
+			if(ptr == NULL)
+				return (ERR_INVITEONLYCHAN);
+		}
+	}
+
+	if(*chptr->mode.key && (EmptyString(key) || irccmp(chptr->mode.key, key)))
+		return (ERR_BADCHANNELKEY);
+
+	if(chptr->mode.limit && 
+	   dlink_list_length(&chptr->members) >= (unsigned long)chptr->mode.limit)
+		return (ERR_CHANNELISFULL);
+
+#ifdef ENABLE_SERVICES
+	if(chptr->mode.mode & MODE_REGONLY && EmptyString(source_p->user->suser))
+		return ERR_NEEDREGGEDNICK;
+#endif
+
+	return 0;
 }
 
 /* can_send()

@@ -4,7 +4,7 @@
  *
  *  Copyright (C) 2001-2002 Aaron Sethman <androsyn@ratbox.org> 
  *  Copyright (C) 2001-2002 Hybrid Development Team
- *  Copyright (C) 2002-2005 ircd-ratbox development team
+ *  Copyright (C) 2002-2004 ircd-ratbox development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -25,9 +25,8 @@
  */
 
 #include "stdinc.h"
-#include "tools.h"
-#include "struct.h"
-#include "adns.h"
+#include "setup.h"
+
 #include "res.h"
 #include "send.h"
 #include "s_conf.h"
@@ -35,10 +34,9 @@
 #include "s_log.h"
 #include "event.h"
 #include "client.h"
+#include "ircd_defs.h"
 #include "numeric.h"
 #include "../adns/internal.h"
-#include "ircd.h"
-#include "irc_string.h"
 #define ADNS_MAXFD 2
 
 adns_state dns_state;

@@ -1,7 +1,7 @@
 /* modules/m_testline.c
  * 
  *  Copyright (C) 2004 Lee Hardy <lee@leeh.co.uk>
- *  Copyright (C) 2004-2005 ircd-ratbox development team
+ *  Copyright (C) 2004 ircd-ratbox development team
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -31,17 +31,15 @@
  */
 #include "stdinc.h"
 #include "tools.h"
-#include "struct.h"
 #include "send.h"
+#include "client.h"
 #include "modules.h"
-#include "parse.h"
+#include "msg.h"
 #include "hostmask.h"
 #include "numeric.h"
 #include "s_conf.h"
 #include "s_newconf.h"
 #include "sprintf_irc.h"
-#include "irc_string.h"
-#include "ircd.h"
 
 static int mo_testline(struct Client *, struct Client *, int, const char **);
 static int mo_testgecos(struct Client *, struct Client *, int, const char **);

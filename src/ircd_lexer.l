@@ -35,12 +35,14 @@
 #define WE_ARE_MEMORY_C
 
 #include "stdinc.h"
-#include "tools.h"
+#include "ircd_defs.h"
+#include "common.h"
+#include "config.h"
 #include "s_log.h"
 #include "s_conf.h"
 #include "newconf.h"
 
-#include "y.tab.h"
+#include "ircd_parser.h"
 
 int yylex(void);
 

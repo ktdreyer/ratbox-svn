@@ -29,6 +29,8 @@
  *  $Id$
  */
 
+#include "internal.h"
+
 #include <stdlib.h>
 #include <unistd.h>
 #include <errno.h>
@@ -36,7 +38,6 @@
 #include <sys/time.h>
 
 #include "internal.h"
-#include "sprintf_irc.h"
 
 static adns_query query_alloc(adns_state ads, const typeinfo *typei,
 			      adns_queryflags flags, struct timeval now) {

@@ -4,7 +4,7 @@
  *
  *  Copyright (C) 1990 Jarkko Oikarinen and University of Oulu, Co Center
  *  Copyright (C) 1996-2002 Hybrid Development Team
- *  Copyright (C) 2002-2005 ircd-ratbox development team
+ *  Copyright (C) 2002-2004 ircd-ratbox development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -36,6 +36,8 @@
 #ifndef INCLUDED_ircd_defs_h
 #define INCLUDED_ircd_defs_h
 
+#include "config.h"
+
 /* For those unfamiliar with GNU format attributes, a is the 1 based
  * argument number of the format string, and b is the 1 based argument
  * number of the variadic ... */
@@ -44,6 +46,10 @@
 #else
 #define AFP(a,b)
 #endif
+
+
+#include "s_log.h"
+#include "send.h"
 
 #ifdef SOFT_ASSERT
 #ifdef __GNUC__
@@ -85,13 +91,6 @@
 #define KILLLEN         90
 #define CHANNELLEN      200
 #define LOC_CHANNELLEN	50
-#define IDLEN		10
-
-#ifdef IPV6
-#define HOSTIPLEN	53	/* sizeof("ffff:ffff:ffff:ffff:ffff:ffff:255.255.255.255.ipv6") */
-#else
-#define HOSTIPLEN       16	/* Length of dotted quad form of IP        */
-#endif
 
 /* reason length of klines, parts, quits etc */
 #define REASONLEN	120

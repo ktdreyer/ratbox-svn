@@ -3,7 +3,7 @@
  *  reject.c: reject users with prejudice
  *
  *  Copyright (C) 2003 Aaron Sethman <androsyn@ratbox.org>
- *  Copyright (C) 2003-2005 ircd-ratbox development team
+ *  Copyright (C) 2003-2004 ircd-ratbox development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -24,8 +24,7 @@
  */
 
 #include "stdinc.h"
-#include "tools.h"
-#include "struct.h"
+#include "config.h"
 #include "patricia.h"
 #include "client.h"
 #include "s_conf.h"
@@ -33,11 +32,7 @@
 #include "tools.h"
 #include "reject.h"
 #include "s_stats.h"
-#include "ircd.h"
-#include "commio.h"
-#include "memory.h"
-#include "send.h"
-#include "parse.h"
+#include "msg.h"
 
 static patricia_tree_t *reject_tree;
 dlink_list delay_exit;
@@ -158,7 +153,7 @@ check_reject(struct Client *client_p)
 		rdata->time = CurrentTime;
 		if(rdata->count > ConfigFileEntry.reject_after_count)
 		{
-			ServerStats.is_rej++;
+			ServerStats->is_rej++;
 			SetReject(client_p);
 			comm_setselect(client_p->localClient->fd, FDLIST_NONE, COMM_SELECT_WRITE | COMM_SELECT_READ, NULL, NULL, 0);
 			SetClosing(client_p);

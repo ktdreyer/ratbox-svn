@@ -4,7 +4,7 @@
  *
  *  Copyright (C) 1990 Jarkko Oikarinen and University of Oulu, Co Center
  *  Copyright (C) 1996-2002 Hybrid Development Team
- *  Copyright (C) 2002-2005 ircd-ratbox development team
+ *  Copyright (C) 2002-2004 ircd-ratbox development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -25,9 +25,8 @@
  */
 
 #include "stdinc.h"
-#include "tools.h"
-#include "struct.h"
-#include "hook.h"
+
+
 #include "modules.h"
 #include "s_log.h"
 #include "ircd.h"
@@ -37,27 +36,17 @@
 #include "s_newconf.h"
 #include "numeric.h"
 #include "parse.h"
+#include "ircd_defs.h"
 #include "irc_string.h"
 #include "memory.h"
+#include "tools.h"
 #include "sprintf_irc.h"
+#include "ltdl.h"
 
-
-
-/* -TimeMr14C:
- * I have moved the dl* function definitions and
- * the two functions (load_a_module / unload_a_module) to the
- * file dynlink.c 
- * And also made the necessary changes to those functions
- * to comply with shl_load and friends.
- * In this file, to keep consistency with the makefile, 
- * I added the ability to load *.sl files, too.
- * 27/02/2002
- */
 
 #ifndef STATIC_MODULES
-
 struct module **modlist = NULL;
-
+static char unknown_ver[] = "<unknown>";
 static const char *core_module_table[] = {
 	"m_die",
 	"m_join",
@@ -69,6 +58,7 @@ static const char *core_module_table[] = {
 	"m_part",
 	"m_quit",
 	"m_server",
+	"m_sjoin",
 	"m_squit",
 	NULL
 };
@@ -84,6 +74,7 @@ static int mo_modlist(struct Client *, struct Client *, int, const char **);
 static int mo_modreload(struct Client *, struct Client *, int, const char **);
 static int mo_modunload(struct Client *, struct Client *, int, const char **);
 static int mo_modrestart(struct Client *, struct Client *, int, const char **);
+static void increase_modlist(void);
 
 struct Message modload_msgtab = {
 	"MODLOAD", 0, 0, 0, MFLG_SLOW,
@@ -115,6 +106,12 @@ extern struct Message error_msgtab;
 void
 modules_init(void)
 {
+	if(lt_dlinit())
+	{
+		ilog(L_MAIN, "lt_dlinit failed");
+		exit(0);
+	}
+
 	mod_add_cmd(&modload_msgtab);
 	mod_add_cmd(&modunload_msgtab);
 	mod_add_cmd(&modreload_msgtab);
@@ -227,6 +224,50 @@ findmodule_byname(const char *name)
 	return -1;
 }
 
+static char found_suffix[4];
+static int suffix_len = 0;
+
+static
+void find_module_suffix(void)
+{
+	struct dirent *ldirent;
+	DIR *dir;
+	int len;
+	if(strlen(found_suffix) > 0)
+		return;
+
+
+	dir = opendir(AUTOMODPATH);
+
+	if(dir == NULL)
+	{
+		ilog(L_MAIN, "Could not determine module suffix from %s: %s", AUTOMODPATH, strerror(errno));
+		abort();
+	} else 
+	if((dir = opendir(MODPATH)) == NULL)   {
+		ilog(L_MAIN, "Could not determine module suffix from %s: %s", MODPATH, strerror(errno));
+		abort();
+	}
+	
+	while ((ldirent = readdir(dir)) != NULL)
+	{
+		len = strlen(ldirent->d_name);
+		if((len > 3) && !strcmp(ldirent->d_name+len-3, ".so"))
+			strcpy(found_suffix, ".so");
+		else
+		if((len > 3) && !strcmp(ldirent->d_name+len-3, ".sl"))
+			strcpy(found_suffix, ".sl");
+		else
+		if((len > 4) && !strcmp(ldirent->d_name+len-4, ".dll"))
+			strcpy(found_suffix, ".dll");
+		
+		if(strlen(found_suffix) > 0)
+			return;
+	}
+	ilog(L_MAIN, "Cound not determine module suffix at all...");
+	abort();
+}
+
 /* load_all_modules()
  *
  * input        -
@@ -240,13 +281,12 @@ load_all_modules(int warn)
 	struct dirent *ldirent = NULL;
 	char module_fq_name[PATH_MAX + 1];
 	int len;
-
 	modules_init();
 
 	modlist = (struct module **) MyMalloc(sizeof(struct module) * (MODS_INCREMENT));
 
+	find_module_suffix();
 	max_mods = MODS_INCREMENT;
-
 	system_module_dir = opendir(AUTOMODPATH);
 
 	if(system_module_dir == NULL)
@@ -258,12 +298,12 @@ load_all_modules(int warn)
 	while ((ldirent = readdir(system_module_dir)) != NULL)
 	{
         	len = strlen(ldirent->d_name);
-		if((len > 3) && !strcmp(ldirent->d_name+len-3, SHARED_SUFFIX))
+
+		if((len > suffix_len) && !strcmp(ldirent->d_name+len-3, found_suffix))
                 {
 		 	(void) ircsnprintf(module_fq_name, sizeof(module_fq_name), "%s/%s", AUTOMODPATH, ldirent->d_name);
 		 	(void) load_a_module(module_fq_name, warn, 0);
-                }
-
+                } 
 	}
 	(void) closedir(system_module_dir);
 }
@@ -280,17 +320,18 @@ load_core_modules(int warn)
 	char module_name[MAXPATHLEN];
 	int i;
 
-
 	for (i = 0; core_module_table[i]; i++)
 	{
-		ircsnprintf(module_name, sizeof(module_name), "%s/%s%s", MODPATH,
-			    core_module_table[i], SHARED_SUFFIX);
 
+		ircsnprintf(module_name, sizeof(module_name), "%s/%s%s", MODPATH,
+			    core_module_table[i], found_suffix);
+
+		
 		if(load_a_module(module_name, warn, 1) == -1)
 		{
 			ilog(L_MAIN,
 			     "Error loading core module %s%s: terminating ircd",
-			     core_module_table[i], SHARED_SUFFIX);
+			     core_module_table[i], found_suffix);
 			exit(0);
 		}
 	}
@@ -530,163 +571,6 @@ mo_modrestart(struct Client *client_p, struct Client *source_p, int parc, const 
 }
 
 
-
-#ifndef RTLD_NOW
-#define RTLD_NOW RTLD_LAZY	/* openbsd deficiency */
-#endif
-
-static void increase_modlist(void);
-
-#define MODS_INCREMENT 10
-
-static char unknown_ver[] = "<unknown>";
-
-/* This file contains the core functions to use dynamic libraries.
- * -TimeMr14C
- */
-
-
-#ifdef HAVE_MACH_O_DYLD_H
-/*
-** jmallett's dl*(3) shims for NSModule(3) systems.
-*/
-#include <mach-o/dyld.h>
-
-#ifndef HAVE_DLOPEN
-#ifndef	RTLD_LAZY
-#define RTLD_LAZY 2185		/* built-in dl*(3) don't care */
-#endif
-
-void undefinedErrorHandler(const char *);
-NSModule multipleErrorHandler(NSSymbol, NSModule, NSModule);
-void linkEditErrorHandler(NSLinkEditErrors, int, const char *, const char *);
-char *dlerror(void);
-void *dlopen(char *, int);
-int dlclose(void *);
-void *dlsym(void *, char *);
-
-static int firstLoad = TRUE;
-static int myDlError;
-static char *myErrorTable[] = { "Loading file as object failed\n",
-	"Loading file as object succeeded\n",
-	"Not a valid shared object\n",
-	"Architecture of object invalid on this architecture\n",
-	"Invalid or corrupt image\n",
-	"Could not access object\n",
-	"NSCreateObjectFileImageFromFile failed\n",
-	NULL
-};
-
-void
-undefinedErrorHandler(const char *symbolName)
-{
-	sendto_realops_flags(UMODE_ALL, L_ALL, "Undefined symbol: %s", symbolName);
-	ilog(L_MAIN, "Undefined symbol: %s", symbolName);
-	return;
-}
-
-NSModule
-multipleErrorHandler(NSSymbol s, NSModule old, NSModule new)
-{
-	/* XXX
-	 ** This results in substantial leaking of memory... Should free one
-	 ** module, maybe?
-	 */
-	sendto_realops_flags(UMODE_ALL, L_ALL,
-			     "Symbol `%s' found in `%s' and `%s'",
-			     NSNameOfSymbol(s), NSNameOfModule(old), NSNameOfModule(new));
-	ilog(L_MAIN, "Symbol `%s' found in `%s' and `%s'",
-	     NSNameOfSymbol(s), NSNameOfModule(old), NSNameOfModule(new));
-	/* We return which module should be considered valid, I believe */
-	return new;
-}
-
-void
-linkEditErrorHandler(NSLinkEditErrors errorClass, int errnum,
-		     const char *fileName, const char *errorString)
-{
-	sendto_realops_flags(UMODE_ALL, L_ALL,
-			     "Link editor error: %s for %s", errorString, fileName);
-	ilog(L_MAIN, "Link editor error: %s for %s", errorString, fileName);
-	return;
-}
-
-char *
-dlerror(void)
-{
-	return myDlError == NSObjectFileImageSuccess ? NULL : myErrorTable[myDlError % 7];
-}
-
-void *
-dlopen(char *filename, int unused)
-{
-	NSObjectFileImage myImage;
-	NSModule myModule;
-
-	if(firstLoad)
-	{
-		/*
-		 ** If we are loading our first symbol (huzzah!) we should go ahead
-		 ** and install link editor error handling!
-		 */
-		NSLinkEditErrorHandlers linkEditorErrorHandlers;
-
-		linkEditorErrorHandlers.undefined = undefinedErrorHandler;
-		linkEditorErrorHandlers.multiple = multipleErrorHandler;
-		linkEditorErrorHandlers.linkEdit = linkEditErrorHandler;
-		NSInstallLinkEditErrorHandlers(&linkEditorErrorHandlers);
-		firstLoad = FALSE;
-	}
-	myDlError = NSCreateObjectFileImageFromFile(filename, &myImage);
-	if(myDlError != NSObjectFileImageSuccess)
-	{
-		return NULL;
-	}
-	myModule = NSLinkModule(myImage, filename, NSLINKMODULE_OPTION_PRIVATE);
-	return (void *) myModule;
-}
-
-int
-dlclose(void *myModule)
-{
-	NSUnLinkModule(myModule, FALSE);
-	return 0;
-}
-
-void *
-dlsym(void *myModule, char *mySymbolName)
-{
-	NSSymbol mySymbol;
-
-	mySymbol = NSLookupSymbolInModule((NSModule) myModule, mySymbolName);
-	return NSAddressOfSymbol(mySymbol);
-}
-#endif
-#endif
-
-
-/*
- * HPUX dl compat functions
- */
-#if defined(HAVE_SHL_LOAD) && !defined(HAVE_DLOPEN)
-#define RTLD_LAZY BIND_DEFERRED
-#define RTLD_GLOBAL DYNAMIC_PATH
-#define dlopen(file,mode) (void *)shl_load((file), (mode), (long) 0)
-#define dlclose(handle) shl_unload((shl_t)(handle))
-#define dlsym(handle,name) hpux_dlsym(handle,name)
-#define dlerror() strerror(errno)
-
-static void *
-hpux_dlsym(void *handle, char *name)
-{
-	void *sym_addr;
-	if(!shl_findsym((shl_t *) & handle, name, TYPE_UNDEFINED, &sym_addr))
-		return sym_addr;
-	return NULL;
-}
-
-#endif
-
 /* unload_one_module()
  *
  * inputs	- name of module to unload
@@ -732,7 +616,7 @@ unload_one_module(const char *name, int warn)
 			{
 				mapi_hfn_list_av1 *m;
 				for (m = mheader->mapi_hfn_list; m->hapi_name; ++m)
-					remove_hook(m->hapi_name, m->hookfn);
+					remove_hook(m->hapi_name, m->fn);
 			}
 
 			if(mheader->mapi_unregister)
@@ -748,7 +632,7 @@ unload_one_module(const char *name, int warn)
 		break;
 	}
 
-	dlclose(modlist[modindex]->address);
+	lt_dlclose(modlist[modindex]->address);
 
 	MyFree(modlist[modindex]->name);
 	memcpy(&modlist[modindex], &modlist[modindex + 1],
@@ -777,7 +661,7 @@ unload_one_module(const char *name, int warn)
 int
 load_a_module(const char *path, int warn, int core)
 {
-	void *tmpptr = NULL;
+	lt_dlhandle tmpptr = NULL;
 
 	char *mod_basename;
 	const char *ver;
@@ -786,11 +670,11 @@ load_a_module(const char *path, int warn, int core)
 
 	mod_basename = irc_basename(path);
 
-	tmpptr = dlopen(path, RTLD_NOW);
+	tmpptr = lt_dlopen(path);
 
 	if(tmpptr == NULL)
 	{
-		const char *err = dlerror();
+		const char *err = lt_dlerror();
 
 		sendto_realops_flags(UMODE_ALL, L_ALL,
 				     "Error loading module %s: %s", mod_basename, err);
@@ -806,7 +690,7 @@ load_a_module(const char *path, int warn, int core)
 	 * as a single int in order to determine the API version.
 	 *      -larne.
 	 */
-	mapi_version = (int *) (uintptr_t) dlsym(tmpptr, "_mheader");
+	mapi_version = (int *) (uintptr_t) lt_dlsym(tmpptr, "_mheader");
 	if((mapi_version == NULL
 	    && (mapi_version = (int *) (uintptr_t) dlsym(tmpptr, "__mheader")) == NULL)
 	   || MAPI_MAGIC(*mapi_version) != MAPI_MAGIC_HDR)
@@ -815,7 +699,7 @@ load_a_module(const char *path, int warn, int core)
 				     "Data format error: module %s has no MAPI header.",
 				     mod_basename);
 		ilog(L_MAIN, "Data format error: module %s has no MAPI header.", mod_basename);
-		(void) dlclose(tmpptr);
+		lt_dlclose(tmpptr);
 		MyFree(mod_basename);
 		return -1;
 	}
@@ -832,7 +716,7 @@ load_a_module(const char *path, int warn, int core)
 				sendto_realops_flags(UMODE_ALL, L_ALL,
 						     "Module %s indicated failure during load.",
 						     mod_basename);
-				dlclose(tmpptr);
+				lt_dlclose(tmpptr);
 				MyFree(mod_basename);
 				return -1;
 			}
@@ -854,7 +738,7 @@ load_a_module(const char *path, int warn, int core)
 			{
 				mapi_hfn_list_av1 *m;
 				for (m = mheader->mapi_hfn_list; m->hapi_name; ++m)
-					add_hook(m->hapi_name, m->hookfn);
+					add_hook(m->hapi_name, m->fn);
 			}
 
 			ver = mheader->mapi_module_version;
@@ -867,7 +751,7 @@ load_a_module(const char *path, int warn, int core)
 		sendto_realops_flags(UMODE_ALL, L_ALL,
 				     "Module %s has unknown/unsupported MAPI version %d.",
 				     mod_basename, *mapi_version);
-		dlclose(tmpptr);
+		lt_dlclose(tmpptr); 
 		MyFree(mod_basename);
 		return -1;
 	}

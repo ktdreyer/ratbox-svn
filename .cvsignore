@@ -6,3 +6,6 @@ Makefile
 lint.out
 rsa_respond.tar.gz
 .depend
+.deps
+stamp*.in
+.libs
