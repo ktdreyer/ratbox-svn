@@ -1,3 +1,7 @@
+*** 19990908_2 by lusky
+fixes to userhost, changed to -5 style
+
+
 *** 19990908_1 by wnder
 IAuth changes:
  * put dns and ident back into s_auth.c
