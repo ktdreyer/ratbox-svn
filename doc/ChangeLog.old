@@ -1,3 +1,7 @@
+*** 20010101_25 by toot
+'already registered' should be a numeric, not a notice
+
+
 *** 20010101_24 by davidt
 Oops.  cjoin should also work on non-lazylinks now :)
 
