@@ -1,3 +1,15 @@
+ejb         2003/02/04 13:55:34 UTC	(20030204_10)
+
+  Modified files:
+    src                  dynlink.c 
+  Log:
+  - remove cmdtab entries when unloading a module.
+  
+  Revision  Changes    Path
+  7.12      +7 -0      ircd-ratbox/src/dynlink.c
+
+
+
 ejb         2003/02/04 13:45:21 UTC	(20030204_9)
 
   Modified files:
