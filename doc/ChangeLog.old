@@ -1,3 +1,8 @@
+*** 20011016_1 by db
+- zero out config structs in case they are full of garbage
+
+
+
 *** 20011015_1 by davidt
 - Improved binary code for linebuf_get/parse, hoepfully this will fix the
   compression/encryption problems.
