@@ -1,3 +1,23 @@
+leeh        2003/08/09 12:05:42 EDT	(20030809_5)
+
+  Modified files:
+    include              hash.h s_stats.h 
+    modules              m_stats.c 
+    src                  hash.c s_stats.c 
+  Log:
+  - removed send_usage(), moved code to m_stats.c
+  - removed get_*_hash_table_size(), its simple enough to calculate in
+    s_stats.c
+  
+  Revision  Changes    Path
+  7.39      +0 -4      ircd-ratbox/include/hash.h
+  7.15      +0 -1      ircd-ratbox/include/s_stats.h
+  1.173     +60 -2     ircd-ratbox/modules/m_stats.c
+  7.81      +0 -18     ircd-ratbox/src/hash.c
+  7.29      +2 -79     ircd-ratbox/src/s_stats.c
+
+
+
 leeh        2003/08/09 11:21:08 EDT	(20030809_4)
 
   Modified files:
