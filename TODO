@@ -1,3 +1,6 @@
+NOTE: If a todo matches a bug/enhancement listed on http://bugs.efnow.net
+then the bug number should appear in brackets (ie (#15)) - madmax
+
 - add example *::* and NOMATCH::* I: lines to example.conf
 - add more stderr debugging (ircd -s)... one for every place we syslog()
 - make wrapper function for res_init() to do spare_fd crap
@@ -30,7 +33,24 @@ fl's TODO
   bearing in mind it can be +a/-a, and set by a server/user, which gives 4
   combinations
 
-------------------------------------------------------------------------------
+-----------------------------------------------------------------------------
+madmax's TODO / New Years Resolutions
+
+\ Quit smoking - DONE
+- Get Laid in 2001
+- Do more exercise
+- Fix /links *mask* for non-opers/server_hide output (#4)
+- Make /links from file server_hide only (#6)
+- Fix remote whois so 'works' but only returns idle time for opers (#1)
+- Make stats p just notice opers, rather than return a list, when
+  server_hide is on (#13)
+- Idle time should never be sent if local whois for nonops on shide, but a 
+  remote whois should show idle time, with a forced delay if local (#12)
+- Split up server_hide into parts (#17)
+- Client UIDs (ts4 style?) for cookies (later for persistent nicks)
+- vchans_oper_only (#18)
+- Definable server region or 'global' (open I) for /links output (#20)
+-----------------------------------------------------------------------------
 
 Adrian's TODO list
 
