@@ -1,3 +1,23 @@
+leeh        2002/08/13 20:11:15 EDT	(20020814_0)
+
+  Modified files:
+    contrib              m_olist.c 
+    include              newconf.h 
+    src                  newconf.c 
+  Log:
+  - added the ability to remove conf options as well
+  - did this in olist.
+  
+    ill add support for multiple modules trying to add the same conf option
+    tomorrow..
+  
+  Revision  Changes    Path
+  1.2       +17 -1     ircd-ratbox/contrib/m_olist.c
+  7.6       +15 -0     ircd-ratbox/include/newconf.h
+  7.17      +55 -12    ircd-ratbox/src/newconf.c
+
+
+
 androsyn    2002/08/13 14:40:26 EDT	(20020813_12)
 
   Modified files:
