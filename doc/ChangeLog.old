@@ -1,3 +1,9 @@
+*** 19990803_1 by db
+- oops. USE_ALLOW_OP was never defined. use NO_CHANOPS_WHEN_SPLIT instead
+  This one has to go into the -6 tree before release as well.
+
+
+
 *** 19990802_9 by tomh
 missed a log thing in m_kill somehow
 
