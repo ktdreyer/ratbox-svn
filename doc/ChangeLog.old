@@ -1,3 +1,15 @@
+*** 20011020_1 by davidt
+- Back out memset of ConfigChannel and ConfigFileEntry, since CVS has
+  been broken due to it for ages.  We need to zero it before we read the
+  config files, but we have to initialize the /SET options after reading
+  the conf files, so this is the wrong function.
+  Also zeroing ConfigFileEntry won't work too well since we store the
+  config/kline/etc filenames in there.
+  This might take a while to fix, which is why I'm backing out the change
+  so people can upgrade.
+  
+
+
 *** 20011019_1 by wcampbel
 Documentation fixes
 
