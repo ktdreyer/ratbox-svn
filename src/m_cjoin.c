@@ -25,6 +25,7 @@
 
 #include "handlers.h"
 #include "channel.h"
+#include "vchannel.h"
 #include "client.h"
 #include "common.h"   /* bleah */
 #include "hash.h"
@@ -211,7 +212,9 @@ int     m_cjoin(struct Client *cptr,
   */
 
   add_user_to_channel(vchan_chptr, sptr, CHFL_CHANOP);
-  
+
+  add_vchan_to_client_cache(sptr,chptr,vchan_chptr);
+
   /*
   **  Set timestamp
   **  XXXXX and chan_id..
@@ -241,7 +244,8 @@ int     m_cjoin(struct Client *cptr,
 		     me.name, vchan_chptr->chname);
 
   del_invite(sptr, vchan_chptr);
-  (void)m_names(vchan_cptr, sptr, 2, parv);
+  parv[1] = vchan_chptr->chname;
+  (void)m_names(cptr, sptr, 2, parv);
 
   return 0;
 }

@@ -30,6 +30,7 @@ lex.yy.c:	ircd_lexer.l
 SRCS =                          \
   blalloc.c                     \
   channel.c                     \
+  vchannel.c                    \
   class.c                       \
   client.c                      \
   dbuf.c                        \

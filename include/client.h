@@ -107,6 +107,15 @@ struct Server
   struct Client*   users;       /* Users on this server */
 };
 
+/* entry for base_chan pointer and the corresponding vchan
+ * client is actually on
+ */
+struct Vchan_map
+{
+  struct Channel *base_chan;
+  struct Channel *vchan;
+};
+
 struct Client
 {
   struct Client*    next;
@@ -257,6 +266,12 @@ struct Client
    */
   char              passwd[PASSWDLEN + 1];
   int               caps;       /* capabilities bit-field */
+
+/* cache table of mappings between top level chan and sub vchan client
+ * is on. client cannot have any more than MAXCHANNELSPERUSER vchans
+ */
+
+  struct	    Vchan_map vchan_map[MAXCHANNELSPERUSER];
 };
 
 /*
