@@ -90,15 +90,12 @@ void
 load_module(char *path)
 {
   void *tmpptr;
-  char *mod_basename;
-  char *s;
+  char *mod_basename, *s;
   void (*initfunc)(void) = NULL;
 
-  mod_basename = malloc(strlen(path) + 1);
-  strcpy(mod_basename, path);
-  s = strrchr(mod_basename, '/');
+  mod_basename = path;
 
-  if (s)
+  if ((s = strrchr(mod_basename, '/')))
     mod_basename = s + 1;
 
   errno = 0;
@@ -108,7 +105,6 @@ load_module(char *path)
     const char *err = dlerror();
     sendto_realops("Error loading module %s: %s", path, err);
     log(L_WARN, "Error loading module %s: %s", path, err);
-    free(mod_basename);
     return;
   }
 
@@ -117,7 +113,6 @@ load_module(char *path)
     sendto_realops("Module %s has no _init() function", mod_basename);
     log(L_WARN, "Module %s has no _init() function", mod_basename);
     dlclose(tmpptr);
-    free(mod_basename);
     return;
   }
 
@@ -132,5 +127,4 @@ load_module(char *path)
 
   sendto_realops("Module %s loaded at 0x%x", mod_basename, tmpptr);
   log(L_WARN, "Module %s loaded at 0x%x", mod_basename, tmpptr);
-  free(mod_basename);
 }
