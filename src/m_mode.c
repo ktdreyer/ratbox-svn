@@ -120,7 +120,11 @@ int m_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 	  if(!chptr)
 	  {
 	      /* LazyLinks */
-	      if ( !ConfigFileEntry.hub && IsCapable( serv_cptr_list, CAP_LL) )
+	      if (serv_cptr_list != NULL) {
+		/* this was segfaulting if we had no servers linked.
+	         *  -pro
+		 */
+	       if ( !ConfigFileEntry.hub && IsCapable( serv_cptr_list, CAP_LL) )
 		  {
 			  /* cache the channel if it exists on uplink */
 			  /* nasty possibility of a DoS here... ?
@@ -136,12 +140,13 @@ int m_mode(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 						  sptr->name, parv[1] );
 			  return 0;
 		  }
-	      else
+	       else
 		  {
 			  sendto_one(sptr, form_str(ERR_BADCHANNAME),
 						 me.name, parv[0], (unsigned char *)parv[1]);
 			  return 0;
 		  }
+	      }
 	  }
   }
   else
