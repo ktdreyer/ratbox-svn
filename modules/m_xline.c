@@ -187,7 +187,7 @@ mo_unxline(struct Client *client_p, struct Client *source_p, int parc, char *par
 		return;
 	}
 
-	if(BadPtr(parv[1]))
+	if(EmptyString(parv[1]))
 	{
 		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
 			   me.name, source_p->name, "UNXLINE");

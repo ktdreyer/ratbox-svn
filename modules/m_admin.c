@@ -77,7 +77,7 @@ mr_admin(struct Client *client_p, struct Client *source_p, int parc, char *parv[
 	if((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
 	{
 		sendto_one(source_p, form_str(RPL_LOAD2HI), me.name,
-			   BadPtr(parv[0]) ? "*" : parv[0]);
+			   EmptyString(parv[0]) ? "*" : parv[0]);
 		return;
 	}
 	else
@@ -146,7 +146,7 @@ do_admin(struct Client *source_p)
 	if(IsPerson(source_p))
 		admin_spy(source_p);
 
-	nick = BadPtr(source_p->name) ? "*" : source_p->name;
+	nick = EmptyString(source_p->name) ? "*" : source_p->name;
 
 	sendto_one(source_p, form_str(RPL_ADMINME), me.name, nick, me.name);
 	if(AdminInfo.name != NULL)

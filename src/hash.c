@@ -730,7 +730,7 @@ get_or_create_channel(struct Client *client_p, char *chname, int *isnew)
 	unsigned int hashv;
 	int len;
 
-	if(BadPtr(chname))
+	if(EmptyString(chname))
 		return NULL;
 
 	len = strlen(chname);

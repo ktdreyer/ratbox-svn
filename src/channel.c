@@ -909,7 +909,7 @@ can_join(struct Client *source_p, struct Channel *chptr, char *key)
 		}
 	}
 
-	if(*chptr->mode.key && (BadPtr(key) || irccmp(chptr->mode.key, key)))
+	if(*chptr->mode.key && (EmptyString(key) || irccmp(chptr->mode.key, key)))
 		return (ERR_BADCHANNELKEY);
 
 	if(chptr->mode.limit && chptr->users >= chptr->mode.limit)

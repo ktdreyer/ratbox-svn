@@ -111,10 +111,10 @@ mr_nick(struct Client *client_p, struct Client *source_p, int parc, char *parv[]
 	char nick[NICKLEN];
 	char *s;
 
-	if(parc < 2 || BadPtr(parv[1]))
+	if(parc < 2 || EmptyString(parv[1]))
 	{
 		sendto_one(source_p, form_str(ERR_NONICKNAMEGIVEN),
-			   me.name, BadPtr(parv[0]) ? "*" : parv[0]);
+			   me.name, EmptyString(parv[0]) ? "*" : parv[0]);
 		return;
 	}
 
@@ -123,10 +123,10 @@ mr_nick(struct Client *client_p, struct Client *source_p, int parc, char *parv[]
 		*s = '\0';
 
 	/* and if the first ~ was the first letter.. */
-	if(BadPtr(parv[1]))
+	if(EmptyString(parv[1]))
 	{
 		sendto_one(source_p, form_str(ERR_ERRONEUSNICKNAME),
-			   me.name, BadPtr(parv[0]) ? "*" : parv[0], parv[1]);
+			   me.name, EmptyString(parv[0]) ? "*" : parv[0], parv[1]);
 		return;
 	}
 
@@ -137,7 +137,7 @@ mr_nick(struct Client *client_p, struct Client *source_p, int parc, char *parv[]
 	if(!clean_nick_name(nick))
 	{
 		sendto_one(source_p, form_str(ERR_ERRONEUSNICKNAME),
-			   me.name, BadPtr(parv[0]) ? "*" : parv[0], parv[1]);
+			   me.name, EmptyString(parv[0]) ? "*" : parv[0], parv[1]);
 		return;
 	}
 
@@ -145,7 +145,7 @@ mr_nick(struct Client *client_p, struct Client *source_p, int parc, char *parv[]
 	if(find_nick_resv(nick))
 	{
 		sendto_one(source_p, form_str(ERR_UNAVAILRESOURCE),
-			   me.name, BadPtr(parv[0]) ? "*" : parv[0], nick);
+			   me.name, EmptyString(parv[0]) ? "*" : parv[0], nick);
 		return;
 	}
 
@@ -177,7 +177,7 @@ m_nick(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
 	char nick[NICKLEN];
 	struct Client *target_p;
 
-	if(parc < 2 || BadPtr(parv[1]))
+	if(parc < 2 || EmptyString(parv[1]))
 	{
 		sendto_one(source_p, form_str(ERR_NONICKNAMEGIVEN), me.name, parv[0]);
 		return;
@@ -279,7 +279,7 @@ ms_nick(struct Client *client_p, struct Client *source_p, int parc, char *parv[]
 	char nick[NICKLEN];
 	time_t newts = 0;
 
-	if(parc < 2 || BadPtr(parv[1]))
+	if(parc < 2 || EmptyString(parv[1]))
 	{
 		sendto_one(source_p, form_str(ERR_NONICKNAMEGIVEN), me.name, parv[0]);
 		return;

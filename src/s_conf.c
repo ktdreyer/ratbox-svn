@@ -1194,7 +1194,7 @@ SplitUserHost(struct ConfItem *aconf)
 static void
 lookup_confhost(struct ConfItem *aconf)
 {
-	if(BadPtr(aconf->host) || BadPtr(aconf->name))
+	if(EmptyString(aconf->host) || EmptyString(aconf->name))
 	{
 		ilog(L_ERROR, "Host/server name error: (%s) (%s)", aconf->host, aconf->name);
 		return;
@@ -1628,11 +1628,11 @@ get_printable_conf(struct ConfItem *aconf, char **name, char **host,
 	static char null[] = "<NULL>";
 	static char zero[] = "default";
 
-	*name = BadPtr(aconf->name) ? null : aconf->name;
-	*host = BadPtr(aconf->host) ? null : aconf->host;
-	*pass = BadPtr(aconf->passwd) ? null : aconf->passwd;
-	*user = BadPtr(aconf->user) ? null : aconf->user;
-	*classname = BadPtr(aconf->className) ? zero : aconf->className;
+	*name = EmptyString(aconf->name) ? null : aconf->name;
+	*host = EmptyString(aconf->host) ? null : aconf->host;
+	*pass = EmptyString(aconf->passwd) ? null : aconf->passwd;
+	*user = EmptyString(aconf->user) ? null : aconf->user;
+	*classname = EmptyString(aconf->className) ? zero : aconf->className;
 	*port = (int) aconf->port;
 }
 
@@ -1971,7 +1971,7 @@ write_confitem(KlineType type, struct Client *source_p, char *user,
 
 	if(type == KLINE_TYPE)
 	{
-		if(BadPtr(oper_reason))
+		if(EmptyString(oper_reason))
 		{
 			sendto_realops_flags(UMODE_ALL, L_ALL,
 					     "%s added K-Line for [%s@%s] [%s]",
@@ -1994,7 +1994,7 @@ write_confitem(KlineType type, struct Client *source_p, char *user,
 	}
 	else if(type == DLINE_TYPE)
 	{
-		if(BadPtr(oper_reason))
+		if(EmptyString(oper_reason))
 		{
 			sendto_realops_flags(UMODE_ALL, L_ALL,
 					     "%s added D-Line for [%s] [%s]",
@@ -2126,7 +2126,7 @@ conf_add_server(struct ConfItem *aconf, int lcount)
 		return (-1);
 	}
 
-	if(BadPtr(aconf->passwd) && !(aconf->flags & CONF_FLAGS_CRYPTLINK))
+	if(EmptyString(aconf->passwd) && !(aconf->flags & CONF_FLAGS_CRYPTLINK))
 	{
 		sendto_realops_flags(UMODE_ALL, L_ALL, "Bad connect block, name %s", aconf->name);
 		ilog(L_WARN, "Bad connect block, host %s", aconf->name);

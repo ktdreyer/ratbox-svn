@@ -425,7 +425,7 @@ hunt_server(struct Client *client_p, struct Client *source_p,
 	/*
 	 * Assume it's me, if no server
 	 */
-	if(parc <= server || BadPtr(parv[server]) ||
+	if(parc <= server || EmptyString(parv[server]) ||
 	   match(me.name, parv[server]) || match(parv[server], me.name))
 		return (HUNTED_ISME);
 	/*
@@ -804,7 +804,7 @@ sendnick_TS(struct Client *client_p, struct Client *target_p)
 			   target_p->user->server, target_p->info);
 
 
-	if(ConfigFileEntry.burst_away && !BadPtr(target_p->user->away))
+	if(ConfigFileEntry.burst_away && !EmptyString(target_p->user->away))
 		sendto_one(client_p, ":%s AWAY :%s",
 			   ID_or_name(target_p, client_p), target_p->user->away);
 }

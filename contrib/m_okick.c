@@ -91,7 +91,7 @@ static void m_okick(struct Client *client_p,
   if(MyClient(source_p) && !IsFloodDone(source_p))
     flood_endgrace(source_p);
 
-  comment = (BadPtr(parv[3])) ? parv[2] : parv[3];
+  comment = (EmptyString(parv[3])) ? parv[2] : parv[3];
   if (strlen(comment) > (size_t) TOPICLEN)
     comment[TOPICLEN] = '\0';
 

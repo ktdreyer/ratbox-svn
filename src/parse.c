@@ -374,7 +374,7 @@ handle_command(struct Message *mptr, struct Client *client_p,
 		if(!IsServer(client_p))
 		{
 			sendto_one(client_p, form_str(ERR_NEEDMOREPARAMS),
-				   me.name, BadPtr(hpara[0]) ? "*" : hpara[0], mptr->cmd);
+				   me.name, EmptyString(hpara[0]) ? "*" : hpara[0], mptr->cmd);
 			if(MyClient(client_p))
 				return (1);
 			else

@@ -88,7 +88,7 @@ m_locops(struct Client *client_p, struct Client *source_p, int parc, char *parv[
 static void
 ms_locops(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
 {
-	if(parc != 3 || BadPtr(parv[2]))
+	if(parc != 3 || EmptyString(parv[2]))
 		return;
 
 	/* parv[0]  parv[1]      parv[2]

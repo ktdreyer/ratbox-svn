@@ -760,9 +760,9 @@ stats_shared(struct Client *source_p)
 
 		sendto_one(source_p, form_str(RPL_STATSULINE),
 			   me.name, source_p->name,
-			   BadPtr(uconf->servername) ? "*" : uconf->servername,
-			   BadPtr(uconf->username) ? "*" : uconf->username,
-			   BadPtr(uconf->host) ? "*" : uconf->host, buf);
+			   EmptyString(uconf->servername) ? "*" : uconf->servername,
+			   EmptyString(uconf->username) ? "*" : uconf->username,
+			   EmptyString(uconf->host) ? "*" : uconf->host, buf);
 	}
 }
 

@@ -259,7 +259,7 @@ mo_dline(struct Client *client_p, struct Client *source_p, int parc, char *parv[
 		aconf->hold = CurrentTime + tdline_time;
 		add_temp_dline(aconf);
 
-		if(BadPtr(oper_reason))
+		if(EmptyString(oper_reason))
 		{
 			sendto_realops_flags(UMODE_ALL, L_ALL,
 					     "%s added temporary %d min. D-Line for [%s] [%s]",

@@ -81,7 +81,7 @@ mr_user(struct Client *client_p, struct Client *source_p, int parc, char *parv[]
 	if(*parv[4] == '\0')
 	{
 		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
-			   me.name, BadPtr(parv[0]) ? "*" : parv[0], "USER");
+			   me.name, EmptyString(parv[0]) ? "*" : parv[0], "USER");
 		return;
 	}
 

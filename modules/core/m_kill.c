@@ -91,7 +91,7 @@ mo_kill(struct Client *client_p, struct Client *source_p, int parc, char *parv[]
 		return;
 	}
 
-	if(!BadPtr(parv[2]))
+	if(!EmptyString(parv[2]))
 	{
 		if(strlen(parv[2]) > (size_t) KILLLEN)
 			parv[2][KILLLEN] = '\0';
@@ -190,7 +190,7 @@ ms_kill(struct Client *client_p, struct Client *source_p, int parc, char *parv[]
 
 	user = parv[1];
 
-	if(BadPtr(parv[2]))
+	if(EmptyString(parv[2]))
 	{
 		reason = default_reason;
 

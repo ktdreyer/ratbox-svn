@@ -89,7 +89,7 @@ m_whois(struct Client *client_p, struct Client *source_p, int parc, char *parv[]
 {
 	static time_t last_used = 0;
 
-	if(parc < 2 || BadPtr(parv[1]))
+	if(parc < 2 || EmptyString(parv[1]))
 	{
 		sendto_one(source_p, form_str(ERR_NONICKNAMEGIVEN), me.name, parv[0]);
 		return;
@@ -134,7 +134,7 @@ m_whois(struct Client *client_p, struct Client *source_p, int parc, char *parv[]
 static void
 mo_whois(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
 {
-	if(parc < 2 || BadPtr(parv[1]))
+	if(parc < 2 || EmptyString(parv[1]))
 	{
 		sendto_one(source_p, form_str(ERR_NONICKNAMEGIVEN), me.name, parv[0]);
 		return;
@@ -454,7 +454,7 @@ static void
 ms_whois(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
 {
 	/* its a misconfigured server */
-	if(parc < 2 || BadPtr(parv[1]))
+	if(parc < 2 || EmptyString(parv[1]))
 	{
 		sendto_one(source_p, form_str(ERR_NONICKNAMEGIVEN), me.name, parv[0]);
 		return;

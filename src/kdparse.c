@@ -61,15 +61,15 @@ parse_k_file(FBFILE * file)
 			continue;
 
 		user_field = getfield(line);
-		if(BadPtr(user_field))
+		if(EmptyString(user_field))
 			continue;
 
 		host_field = getfield(NULL);
-		if(BadPtr(host_field))
+		if(EmptyString(host_field))
 			continue;
 
 		reason_field = getfield(NULL);
-		if(BadPtr(reason_field))
+		if(EmptyString(reason_field))
 			continue;
 
 		aconf = make_conf();
@@ -106,11 +106,11 @@ parse_d_file(FBFILE * file)
 			continue;
 
 		host_field = getfield(line);
-		if(BadPtr(host_field))
+		if(EmptyString(host_field))
 			continue;
 
 		reason_field = getfield(NULL);
-		if(BadPtr(reason_field))
+		if(EmptyString(reason_field))
 			continue;
 
 		aconf = make_conf();
@@ -139,15 +139,15 @@ parse_x_file(FBFILE * file)
 			continue;
 
 		host_field = getfield(line);
-		if(BadPtr(host_field))
+		if(EmptyString(host_field))
 			continue;
 
 		port_field = getfield(NULL);
-		if(BadPtr(port_field))
+		if(EmptyString(port_field))
 			continue;
 
 		reason_field = getfield(NULL);
-		if(BadPtr(reason_field))
+		if(EmptyString(reason_field))
 			continue;
 
 		xconf = make_xline(host_field, reason_field, atoi(port_field));
@@ -172,11 +172,11 @@ parse_resv_file(FBFILE * file)
 			continue;
 
 		host_field = getfield(line);
-		if(BadPtr(host_field))
+		if(EmptyString(host_field))
 			continue;
 
 		reason_field = getfield(NULL);
-		if(BadPtr(reason_field))
+		if(EmptyString(reason_field))
 			continue;
 
 		if(IsChannelName(host_field))

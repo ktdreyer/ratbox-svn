@@ -77,7 +77,7 @@ SendMessageFile(struct Client *source_p, MessageFile * motdToPrint)
 	switch (motdType)
 	{
 	case USER_MOTD:
-		nick = BadPtr(source_p->name) ? "*" : source_p->name;
+		nick = EmptyString(source_p->name) ? "*" : source_p->name;
 
 		if(motdToPrint->contentsOfFile == NULL)
 		{

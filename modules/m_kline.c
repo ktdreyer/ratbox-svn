@@ -408,7 +408,7 @@ apply_tkline(struct Client *source_p, struct ConfItem *aconf,
 	add_temp_kline(aconf);
 
 	/* no oper reason.. */
-	if(BadPtr(oper_reason))
+	if(EmptyString(oper_reason))
 	{
 		sendto_realops_flags(UMODE_ALL, L_ALL,
 				     "%s added temporary %d min. K-Line for [%s@%s] [%s]",

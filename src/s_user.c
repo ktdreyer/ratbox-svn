@@ -381,13 +381,13 @@ register_local_user(struct Client *client_p, struct Client *source_p, char *nick
 	}
 
 	/* password check */
-	if(!BadPtr(aconf->passwd))
+	if(!EmptyString(aconf->passwd))
 	{
 		const char *encr;
 
 		if(IsConfEncrypted(aconf))
 		{
-			if(!BadPtr(source_p->localClient->passwd))
+			if(!EmptyString(source_p->localClient->passwd))
 				encr = crypt(source_p->localClient->passwd, aconf->passwd);
 			else
 				encr = "";
@@ -1245,7 +1245,7 @@ check_X_line(struct Client *client_p, struct Client *source_p)
 
 	if((xconf = find_xline(source_p->info)))
 	{
-		if(!BadPtr(xconf->reason))
+		if(!EmptyString(xconf->reason))
 			reason = xconf->reason;
 		else
 			reason = "No Reason";

@@ -90,10 +90,10 @@ make_xline(const char *gecos, const char *reason, int type)
 	xconf = BlockHeapAlloc(xline_heap);
 	memset(xconf, 0, sizeof(struct xline));
 
-	if(!BadPtr(gecos))
+	if(!EmptyString(gecos))
 		DupString(xconf->gecos, gecos);
 
-	if(!BadPtr(reason))
+	if(!EmptyString(reason))
 		DupString(xconf->reason, reason);
 
 	xconf->type = type;
@@ -241,11 +241,11 @@ find_shared(const char *username, const char *host, const char *servername, int 
 		if((uconf->flags & flags) == 0)
 			continue;
 
-		if((BadPtr(uconf->servername)
+		if((EmptyString(uconf->servername)
 		    || match(uconf->servername, servername))
-		   && (BadPtr(uconf->username)
+		   && (EmptyString(uconf->username)
 		       || match(uconf->username, username))
-		   && (BadPtr(uconf->host) || match(uconf->host, host)))
+		   && (EmptyString(uconf->host) || match(uconf->host, host)))
 			return YES;
 	}
 

@@ -198,7 +198,7 @@ add_conf_by_address(const char *address, int type, const char *username, struct 
 	if(parse_netmask(address, &addr, &bits))
 	{
 		/* An IP/cidr mask */
-		if((type & CONF_DLINE || type & CONF_EXEMPTDLINE) || BadPtr(username) ||
+		if((type & CONF_DLINE || type & CONF_EXEMPTDLINE) || EmptyString(username) ||
 		   (*username == '*' && *(username + 1) == '\0'))
 		{
 			add_ipline(aconf, type, &addr, bits);

@@ -87,7 +87,7 @@ m_names(struct Client *client_p, struct Client *source_p, int parc, char *parv[]
 	char *s;
 	char *para = parc > 1 ? parv[1] : NULL;
 
-	if(!BadPtr(para))
+	if(!EmptyString(para))
 	{
 		if((s = strchr(para, ',')))
 			*s = '\0';

@@ -96,7 +96,7 @@ static void mo_olist(struct Client *client_p,
   }
 
   /* If no arg, do all channels *whee*, else just one channel */
-  if (parc < 2 || BadPtr(parv[1]))
+  if (parc < 2 || EmptyString(parv[1]))
     {
       list_all_channels(source_p);
     }

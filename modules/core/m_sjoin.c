@@ -486,10 +486,10 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, char *parv[
 		sendto_channel_local(ALL_MEMBERS, chptr,
 				     ":%s MODE %s %s %s %s %s %s",
 				     me.name, chptr->chname, modebuf,
-				     BadPtr(para[0]) ? "" : para[0],
-				     BadPtr(para[1]) ? "" : para[1],
-				     BadPtr(para[2]) ? "" : para[2],
-				     BadPtr(para[3]) ? "" : para[3]);
+				     EmptyString(para[0]) ? "" : para[0],
+				     EmptyString(para[1]) ? "" : para[1],
+				     EmptyString(para[2]) ? "" : para[2],
+				     EmptyString(para[3]) ? "" : para[3]);
 	}
 
 	if(!people)
@@ -699,10 +699,10 @@ remove_a_mode(struct Channel *chptr, struct Client *source_p, dlink_list * list,
 		sendto_channel_local(ALL_MEMBERS, chptr,
 				     ":%s MODE %s %s %s %s %s %s",
 				     me.name, chptr->chname, lmodebuf,
-				     BadPtr(lpara[0]) ? "" : lpara[0],
-				     BadPtr(lpara[1]) ? "" : lpara[1],
-				     BadPtr(lpara[2]) ? "" : lpara[2],
-				     BadPtr(lpara[3]) ? "" : lpara[3]);
+				     EmptyString(lpara[0]) ? "" : lpara[0],
+				     EmptyString(lpara[1]) ? "" : lpara[1],
+				     EmptyString(lpara[2]) ? "" : lpara[2],
+				     EmptyString(lpara[3]) ? "" : lpara[3]);
 
 	}
 }

@@ -1935,7 +1935,7 @@ conf_begin_gecos(struct TopConf *tc)
 static int
 conf_end_gecos(struct TopConf *tc)
 {
-	if(!BadPtr(yy_xconf->gecos))
+	if(!EmptyString(yy_xconf->gecos))
 	{
 		dlinkAddAlloc(yy_xconf, &xline_list);
 	}
@@ -1990,7 +1990,7 @@ conf_begin_cluster(struct TopConf *tc)
 static int
 conf_end_cluster(struct TopConf *tc)
 {
-	if(!BadPtr(yy_cconf->name))
+	if(!EmptyString(yy_cconf->name))
 	{
 		dlinkAddAlloc(yy_cconf, &cluster_list);
 	}

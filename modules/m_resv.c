@@ -79,7 +79,7 @@ const char *_version = "$Revision$";
 static void
 mo_resv(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
 {
-	if(BadPtr(parv[1]) || BadPtr(parv[2]))
+	if(EmptyString(parv[1]) || EmptyString(parv[2]))
 	{
 		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS), me.name, source_p->name, "RESV");
 		return;
@@ -151,7 +151,7 @@ mo_unresv(struct Client *client_p, struct Client *source_p, int parc, char *parv
 	int error_on_write = 0;
 	int found_resv = 0;
 
-	if(BadPtr(parv[1]))
+	if(EmptyString(parv[1]))
 	{
 		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS), me.name, source_p->name, "RESV");
 		return;

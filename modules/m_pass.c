@@ -74,7 +74,7 @@ mr_pass(struct Client *client_p, struct Client *source_p, int parc, char *parv[]
 	if(EmptyString(password))
 	{
 		sendto_one(client_p, form_str(ERR_NEEDMOREPARAMS),
-			   me.name, BadPtr(parv[0]) ? "*" : parv[0], "PASS");
+			   me.name, EmptyString(parv[0]) ? "*" : parv[0], "PASS");
 		return;
 	}
 

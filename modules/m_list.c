@@ -95,7 +95,7 @@ m_list(struct Client *client_p, struct Client *source_p, int parc, char *parv[])
 
 
 	/* If no arg, do all channels *whee*, else just one channel */
-	if(parc < 2 || BadPtr(parv[1]))
+	if(parc < 2 || EmptyString(parv[1]))
 	{
 		list_all_channels(source_p);
 	}
@@ -116,7 +116,7 @@ mo_list(struct Client *client_p, struct Client *source_p, int parc, char *parv[]
 {
 
 	/* If no arg, do all channels *whee*, else just one channel */
-	if(parc < 2 || BadPtr(parv[1]))
+	if(parc < 2 || EmptyString(parv[1]))
 	{
 		list_all_channels(source_p);
 	}
