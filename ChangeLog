@@ -1,3 +1,22 @@
+androsyn    2002/11/28 21:11:31 UTC	(20021128_5)
+
+  Modified files:
+    .                    configure 
+    autoconf             configure.in 
+    include              balloc.h setup.h.in 
+    src                  balloc.c 
+  Log:
+  Remove the NOBALLOC code, it was stupid anyways..
+  
+  Revision  Changes    Path
+  7.162     +0 -21     ircd-ratbox/autoconf/configure.in
+  7.169     +204 -232  ircd-ratbox/configure
+  1.14      +0 -14     ircd-ratbox/include/balloc.h
+  7.62      +0 -3      ircd-ratbox/include/setup.h.in
+  7.46      +0 -2      ircd-ratbox/src/balloc.c
+
+
+
 androsyn    2002/11/28 21:07:16 UTC	(20021128_4)
 
   Modified files:
