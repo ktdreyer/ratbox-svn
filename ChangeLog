@@ -1,3 +1,24 @@
+leeh        2005/04/05 12:18:40 UTC	(20050405_1)
+
+  Modified files:
+    doc                  monitor.txt 
+    include              ircd_defs.h 
+    modules              m_resv.c m_xline.c 
+    modules/core         m_nick.c 
+  Log:
+  - fix propagation of unxline/unresv
+  - make sockhost always v6 sized
+  - update monitor documentation
+  
+  Revision  Changes    Path
+  1.4       +1 -1      ircd-ratbox/doc/monitor.txt
+  7.62      +1 -4      ircd-ratbox/include/ircd_defs.h
+  1.174     +2 -13     ircd-ratbox/modules/core/m_nick.c
+  1.82      +2 -2      ircd-ratbox/modules/m_resv.c
+  1.78      +2 -2      ircd-ratbox/modules/m_xline.c
+
+
+
 leeh        2005/04/05 01:22:59 UTC	(20050405_0)
 
   Modified files:
