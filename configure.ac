@@ -79,7 +79,7 @@ esac
 
 fi
 
-AC_MSG_CHECKING([uname -s for Cygwin, Solaris or HPUX])
+AC_MSG_CHECKING([uname -s for Cygwin, Solaris, AIX or HPUX])
 OSNAME=`uname -s`
 case "$OSNAME" in
         HP-UX*)
@@ -103,7 +103,7 @@ case "$OSNAME" in
 		AC_DEFINE(__EXTENSIONS__, 1, [This is needed to use strtok_r on Solaris.])
 	;;
 	AIX*)
-		AC_MSG_RESULT(AIX - We're sorry you poor bastard..really we are)
+		AC_MSG_RESULT(AIX - Sorry you poor bastard..really we are)
 		IRC_CFLAGS="$IRC_CFLAGS -Wl,-brtl"
 	*)
 		AC_MSG_RESULT(no)

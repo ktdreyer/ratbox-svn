@@ -2343,8 +2343,8 @@ esac
 
 fi
 
-echo "$as_me:$LINENO: checking uname -s for Cygwin, Solaris or HPUX" >&5
-echo $ECHO_N "checking uname -s for Cygwin, Solaris or HPUX... $ECHO_C" >&6
+echo "$as_me:$LINENO: checking uname -s for Cygwin, Solaris, AIX or HPUX" >&5
+echo $ECHO_N "checking uname -s for Cygwin, Solaris, AIX or HPUX... $ECHO_C" >&6
 OSNAME=`uname -s`
 case "$OSNAME" in
         HP-UX*)
@@ -2374,8 +2374,8 @@ _ACEOF
 
 	;;
 	AIX*)
-		echo "$as_me:$LINENO: result: AIX - We're sorry you poor bastard..really we are" >&5
-echo "${ECHO_T}AIX - We're sorry you poor bastard..really we are" >&6
+		echo "$as_me:$LINENO: result: AIX - Sorry you poor bastard..really we are" >&5
+echo "${ECHO_T}AIX - Sorry you poor bastard..really we are" >&6
 		IRC_CFLAGS="$IRC_CFLAGS -Wl,-brtl"
 	*)
 		echo "$as_me:$LINENO: result: no" >&5
