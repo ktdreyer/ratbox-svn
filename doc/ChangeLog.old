@@ -1,3 +1,8 @@
+*** 20011113_3 by leeh
+- allow stats ? for non-opers on the condition flatten_links is disabled,
+  dont give them capab info tho..
+
+
 *** 20011113_2 by leeh
 - sending nothing in reply to a trace is bad, send RPL_ENDOFTRACE, I dont
   see why we cant actually send a limited trace (servers/opers) 
