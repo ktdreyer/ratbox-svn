@@ -1,3 +1,8 @@
+*** 20001230_3 by db
+- committing madmax's links patch before it gets lost 
+
+
+
 *** 20001230_2 by lusky
 - more cleanups, /src now compiles without warnings on fbsd3.4
 
