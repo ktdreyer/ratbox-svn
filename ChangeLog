@@ -1,3 +1,17 @@
+leeh        2002/11/25 22:04:26 UTC	(20021125_9)
+
+  Modified files:
+    modules              m_cryptlink.c 
+    src                  s_serv.c 
+  Log:
+  - some aconf == NULL sanity checks
+  
+  Revision  Changes    Path
+  1.41      +4 -4      ircd-ratbox/modules/m_cryptlink.c
+  7.303     +2 -2      ircd-ratbox/src/s_serv.c
+
+
+
 leeh        2002/11/25 21:52:15 UTC	(20021125_8)
 
   Modified files:
