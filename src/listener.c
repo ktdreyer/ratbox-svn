@@ -359,10 +359,10 @@ add_listener(int port, const char *vhost_ip, int family)
 	switch(family)
 	{
 		case AF_INET:
-			((struct sockaddr_in *)&vaddr)->sin_port = port;
+			((struct sockaddr_in *)&vaddr)->sin_port = htons(port);
 			break;
 		case AF_INET6:
-			((struct sockaddr_in6 *)&vaddr)->sin6_port = port;
+			((struct sockaddr_in6 *)&vaddr)->sin6_port = htons(port);
 			break;
 		default:
 			break;
