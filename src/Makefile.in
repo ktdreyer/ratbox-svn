@@ -39,7 +39,6 @@ SRCS = 			\
         newconf.c       \
 	rserv.c		\
 	s_alis.c	\
-	s_hoststat.c	\
 	s_operbot.c	\
 	scommand.c	\
 	service.c	\

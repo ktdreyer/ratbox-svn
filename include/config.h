@@ -21,11 +21,6 @@
  */
 #define ALIS_SERVICE
 
-/* HOSTSTAT_SERVICE
- * Controls whether the Host Statistics service is enabled
- */
-#define HOSTSTAT_SERVICE
-
 /* OPERBOT_SERVICE
  * Controls whether the oper bot service is enabled
  */
@@ -46,13 +41,6 @@
  * Enables/disables the jupe service.
  */
 #define JUPE_SERVICE
-
-/* EXTENDED_HOSTHASH
- * Extends the host hash to keep entries around so they can be seen even if
- * a host has no current clients, and track maximums.
- * Only useful if HOSTSTAT_SERVICE is enabled.
- */
-#define EXTENDED_HOSTHASH
 
 /*              ---------------------------             */
 /*              END OF CONFIGURABLE OPTIONS             */
@@ -86,10 +74,6 @@
 #define HEAP_USER_REG	256
 #define HEAP_CHAN_REG	128
 #define HEAP_MEMBER_REG	256
-
-#ifndef HOSTSTAT_SERVICE
-#undef EXTENDED_HOSTHASH
-#endif
 
 #if defined(CHANNEL_SERVICE) && !defined(USER_SERVICE)
 # error CHANNEL_SERVICE requires USER_SERVICE

@@ -16,8 +16,6 @@
 
 #define MAX_NAME_HASH 65536
 
-extern dlink_list host_table[MAX_NAME_HASH];
-
 extern dlink_list user_list;
 extern dlink_list server_list;
 extern dlink_list exited_list;
@@ -52,9 +50,7 @@ struct user
 	int umode;			/* usermodes this client has */
 	time_t tsinfo;
 
-#ifdef USER_SERVICE
-	struct user_reg *user_reg;
-#endif
+	void *user_reg;
 
 	dlink_list channels;
 
@@ -98,33 +94,6 @@ struct service
         void (*stats)(struct connection_entry *, char *parv[], int parc);
 };
 
-struct uhost_entry
-{
-	char *username;
-	dlink_node node;
-	dlink_list users;
-};
-
-struct host_entry
-{
-#ifdef EXTENDED_HOSTHASH
-	char host[HOSTLEN+1];
-	int max_clients;
-	time_t maxc_time;
-	int max_unique;
-	time_t maxu_time;
-
-	time_t last_used;	/* last time a client was online */
-#else
-	char *host;
-#endif
-
-	dlink_node hashptr;
-
-	dlink_list users;
-	dlink_list uhosts;
-};
-
 #define IsServer(x) ((x)->server != NULL)
 #define IsUser(x) ((x)->user != NULL)
 #define IsService(x) ((x)->service != NULL)
@@ -153,8 +122,6 @@ extern struct client *find_client(const char *name);
 extern struct client *find_user(const char *name);
 extern struct client *find_server(const char *name);
 extern struct client *find_service(const char *name);
-
-extern struct host_entry *find_host(const char *host);
 
 extern void exit_client(struct client *target_p);
 extern void free_client(struct client *target_p);
