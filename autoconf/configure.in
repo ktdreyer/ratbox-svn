@@ -217,6 +217,7 @@ if test "X$cf_enable_openssl" != "Xno"; then
     AC_TRY_RUN(
     [
 #include <openssl/opensslv.h>
+#include <stdlib.h>
 int main(void) {
   if ( (OPENSSL_VERSION_NUMBER & 0x00906000) == 0x00906000)
   {
@@ -474,6 +475,7 @@ else
 cat << EOF > conftest.c
 	#include <$nlist_h>
 	#include <stdio.h>
+  #include <stdlib.h>
 	void _modinit(void);
 	int main(int argc, char *argv[[]]) {
         	int i;
