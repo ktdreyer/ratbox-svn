@@ -348,9 +348,20 @@ linebuf_copy_binary(buf_head_t *bufhead, buf_line_t *bufline,
     remaining--;
   }
 
-  if (*ch == '\r' || *ch == '\n' || !remaining)
+  /*
+   * If we've reached '\r' or '\n', or filled up the linebuf,
+   * terminate it
+   */
+  if (*ch == '\r' || *ch == '\n' ||
+      (clen >= (BUF_DATA_SIZE - bufline->len - 1)))
   {
     bufline->terminated = 1;
+
+    /*
+     * Whilst we have remaining data (and space in the linebuf)
+     * eat any '\r's or '\n's, but leave them in the linebuf,
+     * incase it's important ziplinks data
+     */
     while (remaining && (*ch == '\r' || *ch == '\n'))
     {
       *bufch++ = *ch++;
@@ -361,6 +372,7 @@ linebuf_copy_binary(buf_head_t *bufhead, buf_line_t *bufline,
 
   *bufch = '\0';
 
+  /* Tell linebuf_get that it might need to clean up the buffer */
   bufline->binary = 1;
   bufline->len += clen;
   bufhead->len += clen;
