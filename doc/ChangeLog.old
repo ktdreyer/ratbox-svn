@@ -1,3 +1,8 @@
+*** 20010307_3 by androsyn
+Stuff to get ziplinks support in the config files at least...Adds a 
+compressed = YES/NO option to connect {} blocks.
+
+
 *** 20010307_2 by toot
 removed a couple of pointless checks; IsInvisible() on a server
 or unknown :P
