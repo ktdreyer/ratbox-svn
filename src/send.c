@@ -151,7 +151,7 @@ _send_linebuf(struct Client *to, buf_head_t * linebuf)
 		return 0;
 	}
 
-	if(IsDead(to))
+	if(!MyConnect(to))
 		return 0;
 
 	if(linebuf_len(&to->localClient->buf_sendq) > get_sendq(to))
@@ -264,7 +264,7 @@ send_queued_write(int fd, void *data)
 	 ** Once socket is marked dead, we cannot start writing to it,
 	 ** even if the error is removed...
 	 */
-	if(IsDead(to))
+	if(!MyConnect(to))
 		return;
 
 	/* Next, lets try to write some data */
@@ -333,7 +333,7 @@ send_queued_slink_write(int fd, void *data)
 	 ** Once socket is marked dead, we cannot start writing to it,
 	 ** even if the error is removed...
 	 */
-	if(IsDead(to))
+	if(!MyConnect(to))
 		return;
 
 	/* Next, lets try to write some data */
@@ -393,7 +393,7 @@ sendto_one(struct Client *to, const char *pattern, ...)
 	va_list args;
 	buf_head_t linebuf;
 
-	if(IsDead(to))
+	if(!MyConnect(to))
 		return;		/* This socket has already been marked as dead */
 
 	/* send remote if to->from non NULL */
@@ -428,7 +428,7 @@ sendto_one_prefix(struct Client *to, struct Client *prefix, const char *pattern,
 	struct Client *to_sendto;
 	buf_head_t linebuf;
 
-	if(IsDead(to))
+	if(!MyConnect(to))
 		return;		/* This socket has already been marked as dead */
 
 	/* send remote if to->from non NULL */
@@ -542,7 +542,7 @@ sendto_list_anywhere(struct Client *one, struct Client *from,
 		if(target_p->from == one)
 			continue;
 
-		if(MyConnect(target_p) && IsRegisteredUser(target_p) && !IsDead(target_p))
+		if(MyConnect(target_p) && IsRegisteredUser(target_p))
 		{
 			if(target_p->serial != current_serial)
 			{
@@ -833,15 +833,14 @@ sendto_list_local(dlink_list * list, buf_head_t * linebuf_ptr)
 		if((target_p = ptr->data) == NULL)
 			continue;
 
-		if(!MyConnect(target_p) || IsDead(target_p))
+		if(!MyConnect(target_p))
 			continue;
 
 		if(target_p->serial == current_serial)
 			continue;
 
 		target_p->serial = current_serial;
-		if(!IsDead(target_p))
-			send_linebuf(target_p, linebuf_ptr);
+		send_linebuf(target_p, linebuf_ptr);
 	}
 }				/* sendto_list_local() */
 
@@ -870,7 +869,7 @@ sendto_list_local_butone(struct Client *one, dlink_list * list, buf_head_t * lin
 		if((target_p = ptr->data) == NULL)
 			continue;
 
-		if(!MyConnect(target_p) || IsDead(target_p))
+		if(!MyConnect(target_p))
 			continue;
 
 		if(target_p == one)
@@ -1076,11 +1075,12 @@ sendto_anywhere(struct Client *to, struct Client *from, const char *pattern, ...
 	va_list args;
 	buf_head_t linebuf;
 
+	if(!MyConnect(to))
+		return;
+
 	linebuf_newbuf(&linebuf);
 	va_start(args, pattern);
 
-	if(IsDead(to))
-		return;
 
 	if(MyClient(to))
 	{

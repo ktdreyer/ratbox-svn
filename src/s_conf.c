@@ -842,7 +842,6 @@ find_conf_exact(const char *name, const char *user, const char *host, int statma
 		strlcpy(addr, tmp->host, sizeof(addr));
 		if(parse_netmask(addr, &ip, &bits) && parse_netmask(host, &cip, &cbits))
 		{
-			MyFree(addr);
 			if(!comp_with_mask(&IN_ADDR(ip), &IN_ADDR(cip), bits))
 				continue;
 

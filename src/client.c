@@ -1053,8 +1053,6 @@ exit_one_client(struct Client *client_p,
 	assert(dlinkFind(&dead_list, source_p) == NULL);
 
 
-	SetDead(source_p);
-
 	/* add to dead client dlist */
 
 	dlinkAddAlloc(source_p, &dead_list);
@@ -1205,7 +1203,6 @@ qs_client(struct Client *source_p, const char *comment)
 	assert(dlinkFind(&dead_list, source_p) == NULL);
 
 	/* this stops them being sent things like channel messages */
-	SetDead(source_p);
 	dlinkAddAlloc(source_p, &dead_list);
 }
 
@@ -1289,7 +1286,7 @@ void
 dead_link(struct Client *client_p)
 {
 	struct abort_client *abt;
-	if(IsClosing(client_p) || IsDead(client_p) || IsMe(client_p))
+	if(!MyConnect(client_p)|| IsMe(client_p))
 		return;
 
 	abt = MyMalloc(sizeof(struct abort_client));
@@ -1303,7 +1300,6 @@ dead_link(struct Client *client_p)
 	}
 
 	Debug((DEBUG_ERROR, "Closing link to %s: %s", get_client_name(client_p, HIDE_IP), notice));
-	SetDead(client_p);	/* You are dead my friend */
 	dlinkAdd(abt, &abt->node, &abort_list);
 }
 
@@ -1344,14 +1340,6 @@ exit_client(struct Client *client_p,	/* The local client originating the
 	char comment1[HOSTLEN + HOSTLEN + 2];
 	if(MyConnect(source_p))
 	{
-		/* DO NOT REMOVE. exit_client can be called twice after a failed
-		 * read/write.
-		 */
-		if(IsClosing(source_p))
-			return 0;
-
-		SetClosing(source_p);
-
 		delete_adns_queries(source_p->localClient->dns_query);
 		delete_identd_queries(source_p);
 		client_flush_input(source_p);

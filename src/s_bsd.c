@@ -254,8 +254,14 @@ close_connection(struct Client *client_p)
 {
 	struct ConfItem *aconf;
 	assert(NULL != client_p);
+
 	if(client_p == NULL)
 		return;
+
+	assert(MyConnect(client_p));
+	if(!MyConnect(client_p))
+		return;
+	
 	if(IsServer(client_p))
 	{
 		ServerStats->is_sv++;
@@ -322,8 +328,7 @@ close_connection(struct Client *client_p)
 	if(-1 < client_p->localClient->fd)
 	{
 		/* attempt to flush any pending dbufs. Evil, but .. -- adrian */
-		if(!IsDead(client_p))
-			send_queued_write(client_p->localClient->fd, client_p);
+		send_queued_write(client_p->localClient->fd, client_p);
 		fd_close(client_p->localClient->fd);
 		client_p->localClient->fd = -1;
 	}
@@ -494,7 +499,6 @@ error_exit_client(struct Client *client_p, int error)
 	}
 	fd_close(client_p->localClient->fd);
 	client_p->localClient->fd = -1;
-
 	exit_client(client_p, client_p, &me, errmsg);
 }
 

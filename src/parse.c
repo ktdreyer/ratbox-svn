@@ -135,9 +135,9 @@ parse(struct Client *client_p, char *pbuffer, char *bufend)
 
 	Debug((DEBUG_DEBUG, "Parsing %s:", pbuffer));
 
-	assert(!IsDead(client_p));
+	assert(MyConnect(client_p));
 	assert(client_p->localClient->fd >= 0);
-	if(IsDead(client_p) || !MyConnect(client_p))
+	if(!MyConnect(client_p))
 		return;
 
 	assert((bufend - pbuffer) < 512);

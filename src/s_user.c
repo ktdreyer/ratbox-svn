@@ -448,7 +448,7 @@ register_local_user(struct Client *client_p, struct Client *source_p, char *nick
 	if((status = check_X_line(client_p, source_p)) < 0)
 		return status;
 
-	if(IsDead(client_p))
+	if(!MyConnect(client_p))
 		return CLIENT_EXITED;
 
 	if(source_p->user->id[0] == '\0')
@@ -470,7 +470,7 @@ register_local_user(struct Client *client_p, struct Client *source_p, char *nick
 			     ipaddr, get_client_class(source_p), source_p->info);
 
 	/* If they have died in send_* don't do anything. */
-	if(IsDead(source_p))
+	if(!MyConnect(source_p))
 		return CLIENT_EXITED;
 
 	add_to_hostname_hash_table(source_p->host, source_p);

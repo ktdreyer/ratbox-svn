@@ -982,7 +982,7 @@ server_estab(struct Client *client_p)
 
 	client_p->servptr = &me;
 
-	if(IsDead(client_p))
+	if(!MyConnect(client_p))
 		return CLIENT_EXITED;
 
 	SetServer(client_p);
@@ -1945,7 +1945,7 @@ serv_connect_callback(int fd, int status, void *data)
 	 * If we've been marked dead because a send failed, just exit
 	 * here now and save everyone the trouble of us ever existing.
 	 */
-	if(IsDead(client_p))
+	if(!MyConnect(client_p))
 	{
 		sendto_realops_flags(UMODE_ALL, L_ADMIN,
 				     "%s[%s] went dead during handshake",
@@ -2040,7 +2040,7 @@ cryptlink_init(struct Client *client_p, struct ConfItem *aconf, int fd)
 	 * If we've been marked dead because a send failed, just exit
 	 * here now and save everyone the trouble of us ever existing.
 	 */
-	if(IsDead(client_p))
+	if(!MyConnect(client_p))
 	{
 		cryptlink_error(client_p, "SERV",
 				"Went dead during handshake", "Went dead during handshake");

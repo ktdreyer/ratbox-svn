@@ -66,9 +66,6 @@ parse_client_queued(struct Client *client_p)
 			if(i >= MAX_FLOOD)
 				break;
 
-			if(!MyConnect(client_p))
-				return;
-
 			dolen = linebuf_get(&client_p->localClient->
 					    buf_recvq, readBuf, READBUF_SIZE,
 					    LINEBUF_COMPLETE, LINEBUF_PARSED);
@@ -76,42 +73,28 @@ parse_client_queued(struct Client *client_p)
 			if(dolen <= 0)
 				break;
 
-			if(!IsDead(client_p))
-			{
-				client_dopacket(client_p, readBuf, dolen);
-				i++;
+			client_dopacket(client_p, readBuf, dolen);
+			i++;
 
-				/* if theyve dropped out of the unknown state, break and move
-				 * to the parsing for their appropriate status.  --fl
-				 */
-				if(!IsUnknown(client_p))
-					break;
-
-			}
-			else if(MyConnect(client_p))
-			{
-				linebuf_donebuf(&client_p->localClient->buf_recvq);
-				linebuf_donebuf(&client_p->localClient->buf_sendq);
+			/* He's dead cap'n */
+			if(!MyConnect(client_p))
 				return;
-			}
+			/* if theyve dropped out of the unknown state, break and move
+			 * to the parsing for their appropriate status.  --fl
+			 */
+			if(!IsUnknown(client_p))
+				break;
+
 		}
 	}
 
 	if(IsAnyServer(client_p) || IsExemptFlood(client_p))
 	{
-		while (MyConnect(client_p) && (dolen =
-					       linebuf_get(&client_p->localClient->buf_recvq,
-							   readBuf, READBUF_SIZE, LINEBUF_COMPLETE,
-							   LINEBUF_PARSED)) > 0)
+		while ((dolen = linebuf_get(&client_p->localClient->buf_recvq,
+					   readBuf, READBUF_SIZE, LINEBUF_COMPLETE,
+					   LINEBUF_PARSED)) > 0)
 		{
-			if(!IsDead(client_p))
-				client_dopacket(client_p, readBuf, dolen);
-			else if(MyConnect(client_p))
-			{
-				linebuf_donebuf(&client_p->localClient->buf_recvq);
-				linebuf_donebuf(&client_p->localClient->buf_sendq);
-				return;
-			}
+			client_dopacket(client_p, readBuf, dolen);
 		}
 	}
 	else if(IsClient(client_p))
@@ -151,9 +134,6 @@ parse_client_queued(struct Client *client_p)
 			else if(lclient_p->sent_parsed >= (4 * lclient_p->allow_read))
 				break;
 
-			if(!MyConnect(client_p))
-				return;
-
 			dolen = linebuf_get(&client_p->localClient->
 					    buf_recvq, readBuf, READBUF_SIZE,
 					    LINEBUF_COMPLETE, LINEBUF_PARSED);
@@ -161,8 +141,6 @@ parse_client_queued(struct Client *client_p)
 			if(!dolen)
 				break;
 
-			if(!MyConnect(client_p))
-				return;
 			client_dopacket(client_p, readBuf, dolen);
 			lclient_p->sent_parsed++;
 		}
@@ -219,12 +197,8 @@ flood_recalc(int fd, void *data)
 
 	parse_client_queued(client_p);
 
-	/* And now, try flushing .. */
-	if(!IsDead(client_p))
-	{
-		/* and finally, reset the flood check */
-		comm_setflush(fd, 1000, flood_recalc, client_p);
-	}
+	/* and finally, reset the flood check */
+	comm_setflush(fd, 1000, flood_recalc, client_p);
 }
 
 /*
@@ -247,13 +221,12 @@ read_ctrl_packet(int fd, void *data)
 
 
 	assert(lserver != NULL);
+	if(!MyConnect(server))
+		return;
+
 
 	reply = &lserver->slinkrpl;
 
-	if(IsDead(server))
-	{
-		return;
-	}
 
 	if(!reply->command)
 	{
@@ -347,7 +320,7 @@ read_ctrl_packet(int fd, void *data)
 		MyFree(reply->data);
 	reply->command = 0;
 
-	if(IsDead(server))
+	if(!MyConnect(server))
 		return;
 
       nodata:
@@ -370,10 +343,9 @@ read_packet(int fd, void *data)
 #ifndef NDEBUG
 	struct hook_io_data hdata;
 #endif
-	if(IsDead(client_p))
+	if(!MyConnect(client_p))
 		return;
 
-	assert(lclient_p != NULL);
 	fd_r = client_p->localClient->fd;
 
 #ifndef HAVE_SOCKETPAIR
@@ -425,8 +397,6 @@ read_packet(int fd, void *data)
 		binary = 1;
 
 	lbuf_len = linebuf_parse(&client_p->localClient->buf_recvq, readBuf, length, binary);
-	if(!MyConnect(client_p))
-		return;
 	if(lbuf_len < 0)
 	{
 		if(IsClient(client_p))
@@ -445,11 +415,9 @@ read_packet(int fd, void *data)
 	/* Attempt to parse what we have */
 	parse_client_queued(client_p);
 
-	/* We got closed last time around */
 	if(!MyConnect(client_p))
 		return;
-
-
+		
 	/* Check to make sure we're not flooding */
 	if(IsPerson(client_p) &&
 	   (linebuf_alloclen(&client_p->localClient->buf_recvq) > ConfigFileEntry.client_flood))
@@ -473,21 +441,17 @@ read_packet(int fd, void *data)
 #endif
 
 
-	if(!IsDead(client_p) && MyConnect(client_p))
+	/* If we get here, we need to register for another COMM_SELECT_READ */
+	if(PARSE_AS_SERVER(client_p))
 	{
-		/* If we get here, we need to register for another COMM_SELECT_READ */
-		if(PARSE_AS_SERVER(client_p))
-		{
-			comm_setselect(fd_r, FDLIST_SERVER, COMM_SELECT_READ,
-				       read_packet, client_p, 0);
-		}
-		else
-		{
-			comm_setselect(fd_r, FDLIST_IDLECLIENT,
-				       COMM_SELECT_READ, read_packet, client_p, 0);
-		}
+		comm_setselect(fd_r, FDLIST_SERVER, COMM_SELECT_READ,
+			      read_packet, client_p, 0);
 	}
-
+	else
+	{
+		comm_setselect(fd_r, FDLIST_IDLECLIENT,
+			       COMM_SELECT_READ, read_packet, client_p, 0);
+	}
 }
 
 
