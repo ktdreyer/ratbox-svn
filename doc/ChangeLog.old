@@ -1,3 +1,21 @@
+leeh        2002/01/09 11:19:18 EST	(20020109_3)
+
+  Modified files:
+    include              hostmask.h 
+    modules              m_stats.c 
+    src                  hostmask.c 
+  Log:
+  - made stats k/K use find_conf_by_address instead of find_address_conf
+    saves us looping twice, once for an auth, once for a kline..
+  - hence removed the extra parm to report_Klines
+  
+  Revision  Changes    Path
+  1.19      +1 -1      ircd-hybrid-7/include/hostmask.h
+  1.105     +58 -5     ircd-hybrid-7/modules/m_stats.c
+  7.62      +1 -14     ircd-hybrid-7/src/hostmask.c
+
+
+
 jmallett    2002/01/09 07:27:14 EST	(20020109_2)
 
   Modified files:
