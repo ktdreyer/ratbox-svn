@@ -417,9 +417,6 @@ static void ms_server(struct Client *client_p, struct Client *source_p,
     }
   
 
-  target_p = make_client(client_p);
-  make_server(target_p);
-  target_p->hopcount = hop;
 
   if(strlen(name) > HOSTLEN)
   {
@@ -433,6 +430,10 @@ static void ms_server(struct Client *client_p, struct Client *source_p,
     exit_client(NULL, client_p, &me, "Invalid servername introduced.");
     return;
   }
+
+  target_p = make_client(client_p);
+  make_server(target_p);
+  target_p->hopcount = hop;
 
   strlcpy(target_p->name, name, sizeof(target_p->name));
   
