@@ -6,7 +6,8 @@ default: all
 SRCS = \
   ircd-swedish.po \
   ircd-croatian.po \
-  ircd-german.po
+  ircd-german.po \
+  ircd-danish.po
 
 OBJS = ${SRCS:.po=.mo}
 

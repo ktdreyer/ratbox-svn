@@ -13,7 +13,7 @@ german - maintained by dmalloc - Darian Lanx <bio@gmx.net>
 norwegian - in progress
 macedonian - in progress
 slovakian - in progress
-danish - in progress
+danish - maintained by Xride - Soren Straarup Andersen <xride@eit.ihk-edu.dk>
 spanish - anyone?
 
 All of the files are installed into the prefix directory, under messages.
