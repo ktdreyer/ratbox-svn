@@ -88,7 +88,6 @@ struct server_info ServerInfo;
 struct admin_info AdminInfo;
 
 struct Counter Count;
-struct ServerState_t server_state;
 
 struct timeval SystemTime;
 int ServerRunning;		/* GLOBAL - server execution state */
@@ -117,6 +116,7 @@ int debuglevel = -1;		/* Server debug level */
 const char *debugmode = "";	/*  -"-    -"-   -"-  */
 time_t nextconnect = 1;		/* time for next try_connections call */
 int kline_queued = 0;
+int server_state_foreground = 0;
 
 /* Set to zero because it should be initialized later using
  * initialize_server_capabs
@@ -170,7 +170,8 @@ print_startup(int pid)
 	printf("ircd: version %s\n", ircd_version);
 	printf("ircd: pid %d\n", pid);
 	printf("ircd: running in %s mode from %s\n",
-	       !server_state.foreground ? "background" : "foreground", ConfigFileEntry.dpath);
+	       !server_state_foreground ? "background" : "foreground",
+	        ConfigFileEntry.dpath);
 }
 
 /*
@@ -255,7 +256,7 @@ struct lgetopt myopts[] = {
 	 STRING, "File to use for ircd.log"},
 	{"pidfile", &pidFileName,
 	 STRING, "File to use for process ID"},
-	{"foreground", &server_state.foreground,
+	{"foreground", &server_state_foreground,
 	 YESNO, "Run in foreground (don't detach)"},
 	{"version", &printVersion,
 	 YESNO, "Print version and exit"},
@@ -621,8 +622,6 @@ main(int argc, char *argv[])
 	dlinkAddTail(&me, &me.node, &global_client_list);
 
 	memset((void *) &Count, 0, sizeof(Count));
-	memset((void *) &server_state, 0, sizeof(server_state));
-
 	memset((void *) &ServerInfo, 0, sizeof(ServerInfo));
 	memset((void *) &AdminInfo, 0, sizeof(AdminInfo));
 
@@ -655,10 +654,10 @@ main(int argc, char *argv[])
 	}
 
 #ifdef __CYGWIN__
-	server_state.foreground = 1;
+	server_state_foreground = 1;
 #endif
 
-	if(!server_state.foreground)
+	if(!server_state_foreground)
 	{
 		make_daemon();
 	}
@@ -679,7 +678,7 @@ main(int argc, char *argv[])
 	eventInit();
 	init_sys();
 
-	if(!server_state.foreground)
+	if(!server_state_foreground)
 	{
 		close_all_connections();
 	}

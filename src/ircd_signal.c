@@ -112,7 +112,7 @@ sigint_handler(int sig)
 {
 	static int restarting = 0;
 
-	if(server_state.foreground)
+	if(server_state_foreground)
 	{
 		ilog(L_WARN, "Server exiting on SIGINT");
 		exit(0);

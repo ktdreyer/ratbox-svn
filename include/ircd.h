@@ -64,13 +64,6 @@ struct Counter
 
 extern struct SetOptions GlobalSetOptions;	/* defined in ircd.c */
 
-struct ServerState_t
-{
-	int foreground;
-};
-
-extern struct ServerState_t server_state;
-
 extern const char *debugmode;
 extern int debuglevel;
 extern int debugtty;
@@ -87,6 +80,7 @@ extern int cold_start;
 extern int dorehash;
 extern int doremotd;
 extern int kline_queued;
+extern int server_state_foreground;
 
 extern struct Client me;
 extern dlink_list global_client_list;
