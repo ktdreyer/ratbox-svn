@@ -1,3 +1,8 @@
+*** 20001013_1 by bill
+
+Added null chptr checking to set_channel_modes()
+
+
 *** 20001012_2 by db
 - fixed bug in sub1_from_channel for vchans
 
