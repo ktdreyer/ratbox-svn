@@ -123,10 +123,8 @@
 
 /* HIDE_SERVERS_IPS
  *
- * If this is undefined, opers will be unable to see servers ips and will be
- * shown a masked ip, admins will be shown the real ip.
- *
- * If this is defined, nobody can see a servers ip.
+ * If this is undefined, anyone can see a servers ip.  If it is defined,
+ * noone can.
  */
 #define  HIDE_SERVERS_IPS
 
