@@ -1053,7 +1053,6 @@ int server_estab(struct Client *client_p)
       inpath_ip, show_capabilities(client_p));
 
   client_p->serv->sconf = aconf;
-  client_p->flags2 |= FLAGS2_CBURST;
 
   if (HasServlink(client_p))
     {
@@ -1468,7 +1467,6 @@ static void server_burst(struct Client *client_p)
   */
 
   burst_all(client_p);
-  client_p->flags2 &= ~FLAGS2_CBURST;
 
   /* EOB stuff is now in burst_all */
 

@@ -423,10 +423,9 @@ struct LocalUser
 #define FLAGS2_NOLIMIT          0x008000
 #define FLAGS2_IDLE_LINED       0x010000
 #define FLAGS2_RESTRICTED       0x020000
-#define FLAGS2_CBURST           0x040000
-#define FLAGS2_PING_COOKIE      0x080000
-#define FLAGS2_IP_SPOOFING      0x100000
-#define FLAGS2_FLOODDONE        0x200000
+#define FLAGS2_PING_COOKIE      0x040000
+#define FLAGS2_IP_SPOOFING      0x080000
+#define FLAGS2_FLOODDONE        0x100000
 
 #define SEND_UMODES  (UMODE_INVISIBLE | UMODE_OPER | UMODE_WALLOP | \
                       UMODE_ADMIN)
@@ -539,7 +538,6 @@ struct LocalUser
 
 #define IsFloodDone(x)          ((x)->flags2 & FLAGS2_FLOODDONE)
 #define SetFloodDone(x)         ((x)->flags2 |= FLAGS2_FLOODDONE)
-#define CBurst(x)               ((x)->flags2 & FLAGS2_CBURST)
 
 /*
  * definitions for get_client_name
