@@ -1202,6 +1202,8 @@ exit_aborted_clients(void *unused)
   	 	 	                     "Closing link to %s: %s",
    	 	 	                     get_server_name(abt->client, HIDE_IP), abt->notice);
 
+		/* its no longer on abort list */
+		ClearAborted(abt->client);
  	 	exit_client(abt->client, abt->client, &me, abt->notice);
  	 	MyFree(abt);
  	}
@@ -1231,6 +1233,7 @@ dead_link(struct Client *client_p)
     	abt->client = client_p;
 	s_assert(dlinkFind(&abort_list, client_p) == NULL);
 	SetIOError(client_p);
+	SetAborted(client_p);
 	dlinkAdd(abt, &abt->node, &abort_list);
 }
 
@@ -1567,6 +1570,25 @@ exit_client(struct Client *client_p,	/* The local client originating the
 {
 	if(IsDead(source_p) || IsClosing(source_p))
 		return -1;
+
+	/* marked as being on abort list.. need to remove it! */
+	if(IsAborted(source_p))
+	{
+		struct abort_client *abt;
+		dlink_node *ptr;
+
+		DLINK_FOREACH(ptr, abort_list.head)
+		{
+			abt = ptr->data;
+
+			if(abt->client == source_p)
+			{
+				dlinkDelete(ptr, &abort_list);
+				MyFree(abt);
+				break;
+			}
+		}
+	}
 
 	/* note, this HAS to be here, when we exit a client we attempt to
 	 * send them data, if this generates a write error we must *not* add

@@ -349,6 +349,7 @@ struct exit_client_hook
 #define FLAGS_EOB          0x80000	/* EOB */
 #define FLAGS_MYCONNECT	   0x100000	/* MyConnect */
 #define FLAGS_IOERROR      0x200000	/* IO error */
+#define FLAGS_ABORTED	   0x400000	/* is on the abort_list */
 /* umodes, settable flags */
 
 #define UMODE_SERVNOTICE   0x0001	/* server notices such as kill */
@@ -431,6 +432,9 @@ struct exit_client_hook
 #define SetClosing(x)		((x)->flags |= FLAGS_CLOSING)
 #define IsIOError(x)		((x)->flags & FLAGS_IOERROR)
 #define SetIOError(x)		((x)->flags |= FLAGS_IOERROR)
+#define IsAborted(x)		((x)->flags & FLAGS_ABORTED)
+#define SetAborted(x)		((x)->flags |= FLAGS_ABORTED)
+#define ClearAborted(x)		((x)->flags &= ~FLAGS_ABORTED)
 #define IsAnyDead(x)		(IsIOError(x) || IsDead(x) || IsClosing(x))
 #define IsIODead(x)		(IsIOError(x) || IsDead(x))
 
