@@ -1,3 +1,7 @@
+*** 20001230_25 by fl_
+- reverted back to old behaviour of only chanops seeing +e/+I
+
+
 *** 20001230_24 by lusky
 - more solaris fixes, should now build and install cleanly
 
