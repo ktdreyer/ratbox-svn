@@ -1693,57 +1693,50 @@ int
 set_initial_nick(struct Client *client_p, struct Client *source_p,
                  char *nick)
 {
-  char buf[USERLEN + 1];
-  char nickbuf[NICKLEN + 10];
-  /* Client setting NICK the first time */
-
-  /* This had to be copied here to avoid problems.. */
-  strcpy(source_p->name, nick);
-  source_p->tsinfo = CurrentTime;
-  if (source_p->user)
-    {
-      strncpy_irc(buf, source_p->username, USERLEN);
-      buf[USERLEN] = '\0';
-      /*
-      ** USER already received, now we have NICK.
-      ** *NOTE* For servers "NICK" *must* precede the
-      ** user message (giving USER before NICK is possible
-      ** only for local client connection!). register_user
-      ** may reject the client and call exit_client for it
-      ** --must test this and exit m_nick too!!!
-      */
-#ifdef USE_IAUTH
-      /*
-       * Send the client to the iauth module for verification
-       */
-      BeginAuthorization(source_p);
-#else
-      if (register_local_user(client_p, source_p, nick, buf) == CLIENT_EXITED)
-	return CLIENT_EXITED;
-#endif
-    }
-
-  /*
-  **  Finally set new nick name.
+ char buf[USERLEN + 1];
+ char nickbuf[NICKLEN + 10];
+ /* Client setting NICK the first time */
+  
+ /* This had to be copied here to avoid problems.. */
+ source_p->tsinfo = CurrentTime;
+ if (source_p->name[0])
+  del_from_client_hash_table(source_p->name, source_p);
+ strcpy(source_p->name, nick);
+ add_to_client_hash_table(nick, source_p);
+ /*
+  * .. and update the new nick in the fd note.
   */
-  if (source_p->name[0])
-    del_from_client_hash_table(source_p->name, source_p);
-  strcpy(source_p->name, nick);
-  add_to_client_hash_table(nick, source_p);
+ strcpy(nickbuf, "Nick: ");
+ /* nick better be the right length! -- adrian */
+ strncat(nickbuf, nick, NICKLEN);
+ fd_note(client_p->fd, nickbuf);
+  
+ /* They have the nick they want now.. */
+ *client_p->llname = '\0';
 
+ if (source_p->user)
+ {
+  strncpy_irc(buf, source_p->username, USERLEN);
+  buf[USERLEN] = '\0';
   /*
-   * .. and update the new nick in the fd note.
+   * USER already received, now we have NICK.
+   * *NOTE* For servers "NICK" *must* precede the
+   * user message (giving USER before NICK is possible
+   * only for local client connection!). register_user
+   * may reject the client and call exit_client for it
+   * --must test this and exit m_nick too!!!
    */
-
-  strcpy(nickbuf, "Nick: ");
-  /* nick better be the right length! -- adrian */
-  strncat(nickbuf, nick, NICKLEN);
-  fd_note(client_p->fd, nickbuf);
-
-  /* They have the nick they want now.. */
-  *client_p->llname = '\0';
-
-  return 0;
+#ifdef USE_IAUTH
+  /*
+   * Send the client to the iauth module for verification
+   */
+  BeginAuthorization(source_p);
+#else
+  if (register_local_user(client_p, source_p, nick, buf) == CLIENT_EXITED)
+   return CLIENT_EXITED;
+#endif
+ }
+ return 0;
 }
 
 /*
