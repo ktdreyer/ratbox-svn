@@ -1,3 +1,18 @@
+androsyn    2003/02/05 22:48:40 UTC	(20030205_3)
+
+  Modified files:
+    include              client.h 
+    src                  s_auth.c 
+  Log:
+  Make sendheader use sendto_one instead of send().  Also make MyConnect
+  checks see if client_p != NULL along with client_p->localClient != NULL
+  
+  Revision  Changes    Path
+  7.196     +1 -1      ircd-ratbox/include/client.h
+  7.130     +37 -39    ircd-ratbox/src/s_auth.c
+
+
+
 leeh        2003/02/05 19:57:25 UTC	(20030205_2)
 
   Modified files:
