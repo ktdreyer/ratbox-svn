@@ -1,3 +1,18 @@
+androsyn    2004/06/02 22:16:37 EDT	(20040603_0)
+
+  Modified files:
+    .                    configure.ac 
+    src                  ircd.c poll.c 
+  Log:
+  port the poll() sleep stuff from stable
+  
+  Revision  Changes    Path
+  7.37      +14 -2     ircd-ratbox/configure.ac
+  7.339     +1 -1      ircd-ratbox/src/ircd.c
+  7.77      +19 -1     ircd-ratbox/src/poll.c
+
+
+
 androsyn    2004/05/31 15:57:06 EDT	(20040531_5)
 
   Modified files:
