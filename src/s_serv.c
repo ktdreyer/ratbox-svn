@@ -1861,11 +1861,13 @@ serv_connect_callback(int fd, int status, void *data)
 	/* Admins get to see any IP, mere opers don't *sigh*
 	 */
         sendto_realops_flags(UMODE_ALL, L_ADMIN,
-			     "Error connecting to %s[%s]: %s", client_p->name,
-			     client_p->host, comm_errstr(status));
+			     "Error connecting to %s[%s]: %s (%s)",
+                             client_p->name, client_p->host,
+                             comm_errstr(status), strerror(errno));
 	sendto_realops_flags(UMODE_ALL, L_OPER,
-			     "Error connecting to %s: %s",
-			     client_p->name, comm_errstr(status));
+			     "Error connecting to %s: %s (%s)",
+			     client_p->name, comm_errstr(status),
+                             strerror(errno));
         exit_client(client_p, client_p, &me, comm_errstr(status));
         return;
       }
