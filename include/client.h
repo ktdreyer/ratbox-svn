@@ -402,6 +402,7 @@ struct exit_client_hook
 #define FLAGS2_EXEMPTFLOOD      0x0400000
 #define FLAGS2_NOLIMIT          0x0800000
 #define FLAGS2_IDLE_LINED       0x1000000
+#define FLAGS2_CLICAP		0x2000000
 #define FLAGS2_PING_COOKIE      0x4000000
 #define FLAGS2_IP_SPOOFING      0x8000000
 #define FLAGS2_FLOODDONE        0x10000000
@@ -421,6 +422,8 @@ struct exit_client_hook
 		      UMODE_DEAF)
 
 #define FLAGS_ID     (FLAGS_NEEDID | FLAGS_GOTID)
+
+#define CLICAP_NAMESOV		0x0001
 
 /*
  * flags macros.

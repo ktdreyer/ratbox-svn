@@ -314,6 +314,9 @@ register_local_user(struct Client *client_p, struct Client *source_p, const char
 		}
 	}
 
+	/* hasnt finished client cap negotiation */
+	if(source_p->flags2 & FLAGS2_CLICAP)
+		return -1;
 
 	client_p->localClient->last = CurrentTime;
 	/* Straight up the maximum rate of flooding... */

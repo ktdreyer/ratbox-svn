@@ -214,6 +214,8 @@ extern const char *form_str(int);
 #define ERR_TOOMANYTARGETS   407
 #define ERR_NOORIGIN         409
 
+#define ERR_INVALIDCAPCMD    410
+
 #define ERR_NORECIPIENT      411
 #define ERR_NOTEXTTOSEND     412
 #define ERR_NOTOPLEVEL       413
