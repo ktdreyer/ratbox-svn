@@ -459,6 +459,13 @@ int mo_undline (struct Client *cptr, struct Client *sptr,int parc,char *parv[])
       return 0;
     }
 
+  if ( parc < 2 )
+    {
+      sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
+                 me.name, parv[0], "UNDLINE");
+      return 0;
+    }
+
   cidr = parv[1];
 
   if (!is_address(cidr,&ip_host,&ip_mask))
