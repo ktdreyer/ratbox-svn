@@ -1,3 +1,18 @@
+leeh        2003/04/25 20:30:46 UTC	(20030425_1)
+
+  Modified files:
+    adns                 query.c types.c 
+    src                  irc_string.c 
+  Log:
+  - fixed up some more gcc3.3 errors
+  
+  Revision  Changes    Path
+  1.18      +1 -1      ircd-ratbox/adns/query.c
+  1.12      +2 -2      ircd-ratbox/adns/types.c
+  7.65      +1 -1      ircd-ratbox/src/irc_string.c
+
+
+
 androsyn    2003/04/25 12:42:31 UTC	(20030425_0)
 
   Modified files:
