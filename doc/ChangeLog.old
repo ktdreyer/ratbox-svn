@@ -1,3 +1,8 @@
+*** 20001208_10 by db
+- report throttling as top channel name if in vchan
+
+
+
 *** 20001208_9 by db
 - on /mode #channel show the root channel's TS if on a vchan
 
