@@ -1,3 +1,42 @@
+leeh        2004/01/24 07:00:58 EST	(20040124_0)
+
+  Modified files:
+    include              channel.h rserv.h s_chanserv.h 
+    src                  channel.c s_operbot.c 
+    src/s_chanserv       Makefile.in s_c_admin.c s_c_local.h 
+                         s_chanserv.c 
+  Added files:
+    help/chanserv        adduser deluser deop join op part 
+                         register 
+    src/s_chanserv       s_c_op.c 
+  Log:
+  - make part_service() take a const char *chname for now
+  - fix operbot OP to update its internal membership with the op
+  - added "JOIN"/"PART" to chanserv, in s_c_admin.c
+  - added "OP"/"DEOP" to chanserv, in s_c_op.c
+  - added help files for chanserv stuff
+  
+  Revision  Changes    Path
+  1.1       +5 -0      rserv/help/chanserv/adduser (new)
+  1.1       +4 -0      rserv/help/chanserv/deluser (new)
+  1.1       +5 -0      rserv/help/chanserv/deop (new)
+  1.1       +3 -0      rserv/help/chanserv/join (new)
+  1.1       +5 -0      rserv/help/chanserv/op (new)
+  1.1       +3 -0      rserv/help/chanserv/part (new)
+  1.1       +3 -0      rserv/help/chanserv/register (new)
+  1.10      +1 -1      rserv/include/channel.h
+  1.5       +2 -0      rserv/include/rserv.h
+  1.6       +1 -1      rserv/include/s_chanserv.h
+  1.22      +9 -1      rserv/src/channel.c
+  1.3       +2 -1      rserv/src/s_chanserv/Makefile.in
+  1.2       +28 -0     rserv/src/s_chanserv/s_c_admin.c
+  1.2       +7 -0      rserv/src/s_chanserv/s_c_local.h
+  1.1       +209 -0    rserv/src/s_chanserv/s_c_op.c (new)
+  1.5       +4 -0      rserv/src/s_chanserv/s_chanserv.c
+  1.6       +3 -3      rserv/src/s_operbot.c
+
+
+
 leeh        2004/01/23 18:36:18 EST	(20040123_1)
 
   Modified files:
