@@ -192,8 +192,6 @@ typedef struct
   int         kline_with_connection_closed;
   int         warn_no_nline;
   int         non_redundant_klines;
-  int         e_lines_oper_only;
-  int         f_lines_oper_only;
   int         o_lines_oper_only;
   int         pace_wait;
   int         whois_wait;

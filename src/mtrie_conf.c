@@ -1160,15 +1160,15 @@ char *show_iline_prefix(struct Client *sptr,struct ConfItem *aconf,char *name)
   if (IsConfDoSpoofIp(aconf))
     *prefix_ptr++ = '=';
 
-  if((ConfigFileEntry.e_lines_oper_only && IsOper(sptr)) || !ConfigFileEntry.e_lines_oper_only)
+  if(IsOper(sptr))
     if (IsConfElined(aconf))
       *prefix_ptr++ = '^';
 
-  if((ConfigFileEntry.f_lines_oper_only && IsOper(sptr)) || !ConfigFileEntry.f_lines_oper_only)
+  if(IsOper(sptr))
     if (IsConfFlined(aconf))
       *prefix_ptr++ = '>';
 
-  if((ConfigFileEntry.e_lines_oper_only && IsOper(sptr)) || !ConfigFileEntry.e_lines_oper_only)
+  if(IsOper(sptr)) 
     if (IsConfIdlelined(aconf))
       *prefix_ptr++ = '<';
 

@@ -406,16 +406,6 @@ static void send_conf_options(struct Client *sptr)
               "Show Notices of Servers Connecting Without an N: line");
   sendto_one(sptr,
               ":%s %d %s :%-30s %-5s [%-30s]",
-              me.name, RPL_INFO, sptr->name, "e_lines_oper_only",
-              ConfigFileEntry.e_lines_oper_only ? "YES" : "NO",
-              "Only Allow Operators to see the kline_exempt flag in STATS i");
-  sendto_one(sptr,
-              ":%s %d %s :%-30s %-5s [%-30s]",
-              me.name, RPL_INFO, sptr->name, "f_lines_oper_only",
-              ConfigFileEntry.f_lines_oper_only ? "YES" : "NO",
-              "Only Allow Operators to see the exceed_limit flag in STATS i");
-  sendto_one(sptr,
-              ":%s %d %s :%-30s %-5s [%-30s]",
               me.name, RPL_INFO, sptr->name, "o_lines_oper_only",
               ConfigFileEntry.o_lines_oper_only ? "YES" : "NO",
               "Only Allow Operators to see STATS o");

@@ -1445,7 +1445,6 @@ general_item:       general_failed_oper_notice | general_show_failed_oper_id |
                     general_kline_with_connection_closed |
                     general_warn_no_nline |
                     general_non_redundant_klines | general_dots_in_ident |
-                    general_e_lines_oper_only | general_f_lines_oper_only |
                     general_o_lines_oper_only |
                     general_pace_wait |
                     general_whois_wait | 
@@ -1576,26 +1575,6 @@ general_non_redundant_klines: NON_REDUNDANT_KLINES '=' TYES ';'
     NON_REDUNDANT_KLINES '=' TNO ';'
   {
     ConfigFileEntry.non_redundant_klines = 0;
-  } ;
-
-general_e_lines_oper_only: E_LINES_OPER_ONLY '=' TYES ';'
-  {
-    ConfigFileEntry.e_lines_oper_only = 1;
-  }
-    |
-    E_LINES_OPER_ONLY '=' TNO ';'
-  {
-    ConfigFileEntry.e_lines_oper_only = 0;
-  } ;
-
-general_f_lines_oper_only: F_LINES_OPER_ONLY '=' TYES ';'
-  {
-    ConfigFileEntry.f_lines_oper_only = 1;
-  }
-    |
-    F_LINES_OPER_ONLY '=' TNO ';'
-  {
-    ConfigFileEntry.f_lines_oper_only = 0;
   } ;
 
 general_o_lines_oper_only: O_LINES_OPER_ONLY '=' TYES ';'
