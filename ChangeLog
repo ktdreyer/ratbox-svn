@@ -1,3 +1,22 @@
+androsyn    2003/10/01 11:37:39 EDT	(20031001_0)
+
+  Modified files:
+    include              modules.h 
+    src                  adns.c commio.c epoll.c ircd.c linebuf.c 
+  Log:
+  Some more epoll fixups..still a bit of debugging code in there.  Also some
+  writev related changes
+  
+  Revision  Changes    Path
+  7.58      +1 -0      ircd-ratbox/include/modules.h
+  7.66      +0 -1      ircd-ratbox/src/adns.c
+  1.3       +0 -1      ircd-ratbox/src/commio.c
+  1.22      +51 -17    ircd-ratbox/src/epoll.c
+  7.317     +1 -1      ircd-ratbox/src/ircd.c
+  7.120     +2 -3      ircd-ratbox/src/linebuf.c
+
+
+
 androsyn    2003/09/30 15:12:54 EDT	(20030930_2)
 
   Modified files:
