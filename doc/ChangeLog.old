@@ -1,3 +1,24 @@
+a1kmm       2001/12/30 02:49:50 EST	(20011230_4)
+
+  Modified files:
+    include              channel.h 
+    modules              .depend m_sjoin.c 
+    src                  channel.c channel_mode.c send.c 
+  Log:
+  - Finished implementing +vo. It is turned on by the define REQUIRE_OANDV
+  - Fixed a minor bug in chm_voice which could cause desyncs.
+  - Fixed halfop privilege checks for simple modes and +-h.
+  
+  Revision  Changes    Path
+  7.98      +5 -1      ircd-hybrid-7/include/channel.h
+  1.4       +11 -10    ircd-hybrid-7/modules/.depend
+  1.123     +1 -3      ircd-hybrid-7/modules/m_sjoin.c
+  7.288     +36 -18    ircd-hybrid-7/src/channel.c
+  7.13      +129 -43   ircd-hybrid-7/src/channel_mode.c
+  7.170     +15 -0     ircd-hybrid-7/src/send.c
+
+
+
 db          2001/12/30 02:45:18 EST	(20011230_3)
 
   Modified files:
