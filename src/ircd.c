@@ -650,6 +650,7 @@ int main(int argc, char *argv[])
 
   init_sys(bootDaemon);
   init_log(logFileName);
+  init_netio();		/* This needs to be setup early ! -- adrian */
 
   initialize_message_files();
 
@@ -668,7 +669,6 @@ int main(int argc, char *argv[])
   initServerMask();
 
   init_resolver();
-  init_netio();
 
   init_auth();			/* Initialise the auth code */
 
