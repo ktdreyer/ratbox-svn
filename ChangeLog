@@ -1,3 +1,27 @@
+leeh        2003/08/13 20:24:30 EDT	(20030814_0)
+
+  Modified files:
+    include              client.h send.h 
+    src                  messages.tab s_serv.c s_user.c send.c 
+  Log:
+  - fixed get_id() to use target->from instead of target, id hope this is
+    never NULL
+  - added sendto_one_numeric(), used for sending a numeric to one client
+    where we dont know whether to use uid/nick
+  - fixed sendto_one_prefix()
+  - sendto_realops_flags() no longer addresses notices to each individual
+    oper, rather to a generic "*", ircu copes fine with this.
+  
+  Revision  Changes    Path
+  7.215     +1 -1      ircd-ratbox/include/client.h
+  7.75      +2 -0      ircd-ratbox/include/send.h
+  7.92      +1 -1      ircd-ratbox/src/messages.tab
+  7.349     +7 -4      ircd-ratbox/src/s_serv.c
+  7.285     +2 -2      ircd-ratbox/src/s_user.c
+  7.252     +57 -18    ircd-ratbox/src/send.c
+
+
+
 leeh        2003/08/13 12:35:41 EDT	(20030813_1)
 
   Modified files:
