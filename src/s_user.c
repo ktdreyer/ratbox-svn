@@ -303,7 +303,6 @@ int register_user(struct Client *cptr, struct Client *sptr,
 
   user->last = CurrentTime;
   parv[0] = sptr->name;
-  parv[1] = parv[2] = NULL;
 
   /* pointed out by Mortiis, never be too careful */
   if(strlen(username) > USERLEN)
