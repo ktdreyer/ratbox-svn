@@ -221,7 +221,7 @@ comm_setselect(int fd, fdlist_t list, unsigned int type, PF * handler,
     fde_t *F = &fd_table[fd];
     assert(fd >= 0);
     assert(F->flags.open);
-
+   
     if (type & COMM_SELECT_READ) {
         F->read_handler = handler;
         F->read_data = client_data;
@@ -230,7 +230,7 @@ comm_setselect(int fd, fdlist_t list, unsigned int type, PF * handler,
     if (type & COMM_SELECT_WRITE) {
         F->write_handler = handler;
         F->write_data = client_data;
-        poll_update_pollfds(fd, POLLWRNORM, handler);
+        poll_update_pollfds(fd, POLLWRNORM|POLLOUT, handler);
     }
     if (timeout)
         F->timeout = CurrentTime + (timeout / 1000);
@@ -265,7 +265,7 @@ comm_select(unsigned long delay)
   
  for (;;)
  {
-  if(!sigio_is_screwed && ++loop_count <= 5)
+  if(!sigio_is_screwed && ++loop_count <= 5 )
   {
   	if((sig = sigtimedwait(&our_sigset, &si, &timeout)) > 0)
   	{
@@ -276,16 +276,20 @@ comm_select(unsigned long delay)
   		}
   		fd = si.si_fd;
   		pollfd_list.pollfds[fd].revents |= si.si_band; 
-		fprintf(stderr, "Received event for %d\n", fd);
   		num++;	
   	} else {
   		break;
   	}
   } else
   {
+    if(sigio_is_screwed)
+    {
+    	signal(sigio_signal, SIG_IGN);
+    	signal(sigio_signal, SIG_DFL);
+	sigio_is_screwed = 0;
+    }
     num = poll(pollfd_list.pollfds, pollfd_list.maxindex + 1, 0);
     loop_count = 0;
-    sigio_is_screwed = 0;
     if (num >= 0)
       break;
     if (ignoreErrno(errno))
