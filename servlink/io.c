@@ -180,7 +180,7 @@ void process_recvq(struct ctrl_command *cmd)
 
   buf = data;
   blen = datalen;
-
+  ret = -1;
   if (datalen > READLEN)
     send_error("Error processing INJECT_RECVQ - buffer too long (%d > %d)",
                datalen, READLEN);
@@ -450,14 +450,14 @@ void read_data(void)
   int ret, ret2;
   unsigned char *buf = out_state.buf;
   int  blen;
-  
+  ret2 = -1;
   assert(!out_state.len);
-
+  
 #if defined(HAVE_LIBZ) || defined(HAVE_LIBCRYPTO)
   if (out_state.zip || out_state.crypt)
     buf = tmp_buf;
 #endif
-    
+     
   while ((ret = check_error(read(LOCAL_R.fd, buf, READLEN),
                            IO_READ, LOCAL_R.fd)))
   {
@@ -520,6 +520,7 @@ void read_data(void)
       buf = tmp_buf;
 #endif
   }
+
 }
 
 void write_net(void)
@@ -554,7 +555,7 @@ void read_net(void)
   int ret2;
   unsigned char *buf = in_state.buf;
   int  blen;
-
+  ret2 = -1;
   assert(!in_state.len);
 
 #if defined(HAVE_LIBCRYPTO) || defined(HAVE_LIBZ)
