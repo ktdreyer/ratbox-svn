@@ -52,12 +52,12 @@
 #include <errno.h>
 
 struct Message kline_msgtab = {
-  MSG_KLINE, 0, 1, MFLG_SLOW, 0,
+  MSG_KLINE, 0, 2, MFLG_SLOW, 0,
   {m_unregistered, m_not_oper, ms_kline, mo_kline}
 };
 
 struct Message dline_msgtab = {
-  MSG_DLINE, 0, 1, MFLG_SLOW, 0,
+  MSG_DLINE, 0, 2, MFLG_SLOW, 0,
   {m_unregistered, m_not_oper, m_error, mo_dline}
 };
 
@@ -132,13 +132,6 @@ int mo_kline(struct Client *cptr,
   if(!IsSetOperK(sptr))
     {
       sendto_one(sptr,":%s NOTICE %s :You have no K flag",me.name,parv[0]);
-      return 0;
-    }
-
-  if ( parc < 2 )
-    {
-      sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
-		 me.name, parv[0], "KLINE");
       return 0;
     }
 
@@ -518,13 +511,6 @@ int mo_dline(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   if(!IsSetOperK(sptr))
     {
       sendto_one(sptr,":%s NOTICE %s :You have no K flag",me.name,parv[0]);
-      return 0;
-    }
-
-  if ( parc < 2 )
-    {
-      sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
-                 me.name, parv[0], "DLINE");
       return 0;
     }
 

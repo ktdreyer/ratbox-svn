@@ -225,9 +225,10 @@ void show_opers(struct Client *cptr)
  */
 int show_lusers(struct Client *sptr) 
 {
-  if (GlobalSetOptions.hide_server)
-    sendto_one(sptr, ":%s %d %s :There are %d users",
-               me.name, RPL_LUSERCLIENT, sptr->name, Count.total);
+  if (GlobalSetOptions.hide_server && !IsAnyOper(sptr))
+    sendto_one(sptr, ":%s %d %s :There are %d users and %d invisible",
+               me.name, RPL_LUSERCLIENT, sptr->name,
+               (Count.total-Count.invisi), Count.invisi);
   else
     sendto_one(sptr, form_str(RPL_LUSERCLIENT), me.name, sptr->name,
                (Count.total-Count.invisi), Count.invisi, Count.server);
@@ -244,7 +245,7 @@ int show_lusers(struct Client *sptr)
     sendto_one(sptr, form_str(RPL_LUSERCHANNELS),
                me.name, sptr->name, Count.chan);
 
-  if(!GlobalSetOptions.hide_server)
+  if(!GlobalSetOptions.hide_server && !IsAnyOper(sptr))
     sendto_one(sptr, form_str(RPL_LUSERME),
                me.name, sptr->name, Count.local, Count.myserver);
 

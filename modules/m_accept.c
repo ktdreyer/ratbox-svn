@@ -33,7 +33,7 @@
 #include "msg.h"
 
 struct Message accept_msgtab = {
-  MSG_ACCEPT, 0, 0, MFLG_SLOW | MFLG_UNREG, 0, 
+  MSG_ACCEPT, 0, 2, MFLG_SLOW | MFLG_UNREG, 0, 
   {m_unregistered, m_accept, m_ignore, m_accept}
 };
 
@@ -61,13 +61,6 @@ int m_accept(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   char *nick;
   int  add=1;
   struct Client *source;
-
-  if (parc < 2)
-    {
-      sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
-		 me.name, parv[0], "ACCEPT");
-      return 0;
-    }
 
   nick = parv[1];
 

@@ -46,11 +46,11 @@
 #include <unistd.h>
 
 struct Message msgtabs[] = {
-  {MSG_UNKLINE, 0, 1, MFLG_SLOW, 0,
+  {MSG_UNKLINE, 0, 2, MFLG_SLOW, 0,
    {m_unregistered, m_not_oper, m_error, mo_unkline}},
-  {MSG_UNDLINE, 0, 1, MFLG_SLOW, 0,
+  {MSG_UNDLINE, 0, 2, MFLG_SLOW, 0,
    {m_unregistered, m_not_oper, m_error, mo_undline}}, 
-  {MSG_UNGLINE, 0, 1, MFLG_SLOW, 0,
+  {MSG_UNGLINE, 0, 2, MFLG_SLOW, 0,
    {m_unregistered, m_not_oper, m_error, mo_ungline}}
 };
 
@@ -113,13 +113,6 @@ int mo_unkline (struct Client *cptr,struct Client *sptr,int parc,char *parv[])
   if (!IsSetOperUnkline(sptr))
     {
       sendto_one(sptr,":%s NOTICE %s :You have no U flag",me.name,parv[0]);
-      return 0;
-    }
-
-  if ( parc < 2 )
-    {
-      sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
-                 me.name, parv[0], "UNKLINE");
       return 0;
     }
 
@@ -461,13 +454,6 @@ int mo_undline (struct Client *cptr, struct Client *sptr,int parc,char *parv[])
       return 0;
     }
 
-  if ( parc < 2 )
-    {
-      sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
-                 me.name, parv[0], "UNDLINE");
-      return 0;
-    }
-
   cidr = parv[1];
 
   if (!is_address(cidr,&ip_host,&ip_mask))
@@ -649,13 +635,6 @@ int mo_ungline (struct Client *cptr, struct Client *sptr,int parc,char *parv[])
     {
       sendto_one(sptr,":%s NOTICE %s :You have no U and G flags",
                  me.name,parv[0]);
-      return 0;
-    }
-
-  if ( parc < 2 )
-    {
-      sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
-                 me.name, parv[0], "UNGLINE");
       return 0;
     }
 

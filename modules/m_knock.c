@@ -44,7 +44,7 @@ void send_knock(struct Client *, struct Client *,
                 struct Channel *, char *);
 
 struct Message knock_msgtab = {
-  MSG_KNOCK, 0, 1, MFLG_SLOW, 0,
+  MSG_KNOCK, 0, 2, MFLG_SLOW, 0,
   {m_unregistered, m_knock, m_ignore, m_knock}
 };
 
@@ -141,13 +141,6 @@ struct Channel *parse_knock_args(struct Client *cptr,
 
   struct Channel      *chptr,*vchan_chptr;
   char *p, *name, *key;
-
-  if (parc < 2)
-    {
-      sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
-		me.name, parv[0], "KNOCK");
-      return NULL;
-    }
 
   name = parv[1];
   key = (parc > 2) ? parv[2] : NULL;

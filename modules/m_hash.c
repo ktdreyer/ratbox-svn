@@ -34,7 +34,7 @@
 #include "msg.h"
 
 struct Message hash_msgtab = {
-  MSG_HASH, 0, 1, MFLG_SLOW, 0,
+  MSG_HASH, 0, 2, MFLG_SLOW, 0,
   {m_unregistered, m_not_oper, mo_hash, mo_hash}
 };
 
@@ -82,12 +82,6 @@ static void report_hash_stats(struct Client* client, const char* name,
 int mo_hash(struct Client* cptr, struct Client* sptr, int parc, char* parv[])
 {
   struct HashStats stats;
-
-  if (parc < 2)
-    {
-      sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS), me.name, parv[0], "HASH");
-      return 0;
-    }
 
   if (0 == irccmp(parv[1], "iphash"))
     {

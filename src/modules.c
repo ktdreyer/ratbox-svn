@@ -110,12 +110,12 @@ int unload_one_module (char *name)
 }
 
 struct Message modload_msgtab = {
-  MSG_MODLOAD, 0, 0, MFLG_SLOW, 0,
+  MSG_MODLOAD, 0, 2, MFLG_SLOW, 0,
   {m_unregistered, m_ignore, m_ignore, mo_modload}
 };
 
 struct Message modunload_msgtab = {
-  MSG_MODUNLOAD, 0, 0, MFLG_SLOW, 0,
+  MSG_MODUNLOAD, 0, 2, MFLG_SLOW, 0,
   {m_unregistered, m_ignore, m_ignore, mo_modunload}
 };
 
@@ -272,13 +272,6 @@ mo_modload (struct Client *cptr, struct Client *sptr, int parc, char **parv)
 {
   char *m_bn;
 
-  if( parc < 2 )
-    {
-      sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
-		 me.name, sptr->name, "MODLOAD");
-      return 0;
-    }
-
   if (!IsSetOperAdmin(sptr))
     {
       sendto_one(sptr, ":%s NOTICE %s :You have no A flag", me.name, parv[0]);
@@ -304,13 +297,6 @@ int
 mo_modunload (struct Client *cptr, struct Client *sptr, int parc, char **parv)
 {
   char *m_bn;
-
-  if( parc < 2 )
-    {
-      sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
-		 me.name, sptr->name, "MODUNLOAD");
-      return 0;
-    }
 
   if (!IsSetOperAdmin (sptr))
     {

@@ -33,7 +33,7 @@
 #include <string.h>
 
 struct Message ison_msgtab = {
-  MSG_ISON, 0, 1, MFLG_SLOW, 0,
+  MSG_ISON, 0, 2, MFLG_SLOW, 0,
   {m_unregistered, m_ison, m_ignore, m_ison}
 };
 
@@ -71,13 +71,6 @@ int m_ison(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   int len;
   int i;
   int done = 0;
-
-  if (parc < 2)
-    {
-      sendto_one(sptr, form_str(ERR_NEEDMOREPARAMS),
-                 me.name, parv[0], "ISON");
-      return 0;
-    }
 
   ircsprintf(buf, form_str(RPL_ISON), me.name, parv[0]);
   len = strlen(buf);
