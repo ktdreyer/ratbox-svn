@@ -1,3 +1,7 @@
+*** 20001228_1 by lusky
+fixed scoklen_t check
+
+
 *** 20001227_38 by wcampbel
 1. Document some of the configure options (kqueue!!!)
 2. Bring INFO up to date (show if OPENSSL is enabled or not, STATS_NOTICE
