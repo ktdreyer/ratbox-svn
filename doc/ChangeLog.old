@@ -1,3 +1,8 @@
+*** 20010820_4 by db
+- changed temp in report_Klines to k_or_K
+
+
+
 *** 20010820_3 by db
 - re idented to conform with project standards. 
 - removed unnecessary strncat, replaced with strncpy()
