@@ -138,10 +138,12 @@ int mr_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 }
 
 /*
-** m_nick
-**      parv[0] = sender prefix
-**      parv[1] = nickname
-*/
+ * m_nick
+ *      parv[0] = sender prefix
+ *      parv[1] = nickname
+ *
+ * Any client seen here is guaranteed to be MyConnect()
+ */
 
 int m_nick(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 {
@@ -716,6 +718,7 @@ set_initial_nick(struct Client *cptr, struct Client *sptr,
                  char *nick)
 {
   char buf[USERLEN + 1];
+  char nickbuf[NICKLEN + 10];
   /* Client setting NICK the first time */
 
   /* This had to be copied here to avoid problems.. */
@@ -754,16 +757,12 @@ set_initial_nick(struct Client *cptr, struct Client *sptr,
 
   /*
    * .. and update the new nick in the fd note.
-   * XXX should use IsLocal() ! -- adrian
    */
-  if (sptr->fd > -1)
-    {
-      char nickbuf[NICKLEN + 10];
-      strcpy(nickbuf, "Nick: ");
-      /* XXX nick better be the right length! -- adrian */
-      strncat(nickbuf, nick, NICKLEN);
-      fd_note(cptr->fd, nickbuf);
-    }
+
+  strcpy(nickbuf, "Nick: ");
+  /* XXX nick better be the right length! -- adrian */
+  strncat(nickbuf, nick, NICKLEN);
+  fd_note(cptr->fd, nickbuf);
 
   return 0;
 }
@@ -779,6 +778,8 @@ set_initial_nick(struct Client *cptr, struct Client *sptr,
 int change_local_nick(struct Client *cptr, struct Client *sptr,
                        char *nick)
 {
+  char nickbuf[NICKLEN + 10];
+
   /*
   ** Client just changing his/her nick. If he/she is
   ** on a channel, send note of change to all clients
@@ -829,16 +830,11 @@ int change_local_nick(struct Client *cptr, struct Client *sptr,
 
   /*
    * .. and update the new nick in the fd note.
-   * XXX should use IsLocal() ! -- adrian
    */
-  if (sptr->fd > -1)
-    {
-      char nickbuf[NICKLEN + 10];
-      strcpy(nickbuf, "Nick: ");
-      /* XXX nick better be the right length! -- adrian */
-      strncat(nickbuf, nick, NICKLEN);
-      fd_note(cptr->fd, nickbuf);
-    }
+  strcpy(nickbuf, "Nick: ");
+  /* XXX nick better be the right length! -- adrian */
+  strncat(nickbuf, nick, NICKLEN);
+  fd_note(cptr->fd, nickbuf);
 
   return 1;
 }
@@ -858,9 +854,7 @@ int change_local_nick(struct Client *cptr, struct Client *sptr,
  *  or a Digit.
  *
  *  Note:
- *      '~'-character should be allowed, but
- *      a change should be global, some confusion would
- *      result if only few servers allowed it...
+ *      '~'-character should be NOT be allowed.
  */
 int clean_nick_name(char* nick)
 {
@@ -871,10 +865,11 @@ int clean_nick_name(char* nick)
   if (*nick == '-' || IsDigit(*nick)) /* first character in [0..9-] */
     return 0;
   
-  for ( ; ch < endp && *ch; ++ch) {
-    if (!IsNickChar(*ch))
-      break;
-  }
+  for ( ; ch < endp && *ch; ++ch)
+    {
+      if (!IsNickChar(*ch))
+	break;
+    }
   *ch = '\0';
 
   return (ch - nick);

@@ -1061,8 +1061,12 @@ burst_channel(struct Client *cptr, struct Channel *chptr)
   burst_ll_members(cptr,&chptr->peons);
   send_channel_modes(cptr, chptr);
   add_lazylinkchannel(cptr,chptr);
+
+  /* Can't do this until there is a ms_topic handler */
+#if 0
   sendto_one(cptr, ":%s TOPIC %s :%s",
 	     me.name, chptr->chname, chptr->topic);
+#endif
 
   if(IsVchanTop(chptr))
     {
@@ -1075,8 +1079,10 @@ burst_channel(struct Client *cptr, struct Channel *chptr)
 	  burst_ll_members(cptr,&vchan->peons);
 	  send_channel_modes(cptr, vchan);
 	  add_lazylinkchannel(cptr,vchan);
+#if 0
 	  sendto_one(cptr, ":%s TOPIC %s :%s",
 		     me.name, vchan->chname, vchan->topic);
+#endif
 	}
     }
 }
