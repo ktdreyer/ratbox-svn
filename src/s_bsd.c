@@ -841,7 +841,6 @@ comm_open(int family, int sock_type, int proto, const char *note)
    }
 #endif
   
-#endif
   /* Set the socket non-blocking, and other wonderful bits */
   if (!set_non_blocking(fd))
     {
