@@ -1,3 +1,8 @@
+*** 20000131_1 by db
+- improvements to connect section. allow multiple hub_masks etc.
+
+
+
 *** 20000124_3 by db
 - first work on logging section, 
   logging level can be set from new conf file format now.
