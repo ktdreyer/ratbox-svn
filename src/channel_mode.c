@@ -360,7 +360,10 @@ change_channel_membership(struct Channel *chptr,
     	if(ptr != NULL)
         {
           if(loclists[x] != loc_to_list)
-    	    dlinkMoveNode(ptr, loclists[x], loc_to_list);
+          {
+            dlinkDelete(ptr, loclists[x]);
+            dlinkAdd(who, ptr, loc_to_list);
+    	  }
           
           break;
     	} 
@@ -373,7 +376,10 @@ change_channel_membership(struct Channel *chptr,
     if(ptr != NULL)
     {
       if(lists[x] != to_list)
-        dlinkMoveNode(ptr, lists[x], to_list);
+      {
+        dlinkDelete(ptr, lists[x]);
+        dlinkAdd(who, ptr, to_list);
+      }
 
       break;
     }
