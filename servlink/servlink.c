@@ -102,6 +102,7 @@ main(int argc, char *argv[])
 				{
 					if(dup2(fds[i].fd, x) < 0)
 						exit(1);
+					close(fds[i].fd);
 					fds[i].fd = x;
 					break;
 				}
