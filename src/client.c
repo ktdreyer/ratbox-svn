@@ -1566,6 +1566,13 @@ void add_to_accept(struct Client *source, struct Client *target)
   dlink_node *m;
   int len;
 
+  /* Safety checks, neither of these tests should happen */
+  if (!IsPerson(source))
+    return;
+
+  if (!IsPerson(target))
+    return;
+
   /* XXX MAX_ALLOW should be in config file not hard coded */
   if ( (len = dlink_list_length(&target->allow_list)) >= 
        MAX_ALLOW)

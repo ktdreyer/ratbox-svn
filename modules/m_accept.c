@@ -87,6 +87,12 @@ static int m_accept(struct Client *cptr, struct Client *sptr,
       return 0;
     }
 
+  if (!IsPerson(source))
+    {
+      sendto_one(sptr, form_str(ERR_NOSUCHNICK), me.name, parv[0], nick);
+      return 0;
+    }
+
   if (add == 1)
     {
       if (accept_message(source, sptr)) {
