@@ -1,3 +1,23 @@
+androsyn    2002/06/10 21:49:26 EDT	(20020611_7)
+
+  Modified files:
+    contrib              m_clearchan.c m_force.c m_ojoin.c 
+                         m_tburst.c 
+    include              channel.h 
+    src                  channel.c 
+  Log:
+  Fix contrib related topic things
+  
+  Revision  Changes    Path
+  1.30      +2 -3      ircd-hybrid-7/contrib/m_clearchan.c
+  1.14      +2 -2      ircd-hybrid-7/contrib/m_force.c
+  1.11      +2 -2      ircd-hybrid-7/contrib/m_ojoin.c
+  1.10      +5 -5      ircd-hybrid-7/contrib/m_tburst.c
+  7.117     +3 -0      ircd-hybrid-7/include/channel.h
+  7.322     +2 -2      ircd-hybrid-7/src/channel.c
+
+
+
 androsyn    2002/06/10 21:42:36 EDT	(20020611_6)
 
   Modified files:
