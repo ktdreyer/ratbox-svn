@@ -127,7 +127,7 @@ void
 introduce_service(struct client *target_p)
 {
 	sendto_server("NICK %s 1 1 +i%s %s %s %s :%s",
-		      target_p->name, target_p->service->opered ? "o" : "",
+		      target_p->name, ServiceOpered(target_p) ? "o" : "",
 		      target_p->service->username,
 		      target_p->service->host, MYNAME, target_p->info);
 }
@@ -325,10 +325,8 @@ handle_service(struct client *service_p, struct client *client_p, char *text)
                                 if(cmd_table[i].helpfile == NULL ||
                                    (cmd_table[i].operonly && !is_oper(client_p)))
                                 {
-                                        sendto_server(":%s NOTICE %s :"
-                                                      "No help available on %s",
-                                                      MYNAME, client_p->name,
-                                                      p);
+                                        service_error(service_p, client_p,
+						"No help available on %s", p);
                                         return;
                                 }
 
@@ -337,9 +335,8 @@ handle_service(struct client *service_p, struct client *client_p, char *text)
                                 DLINK_FOREACH(ptr, fileptr->contents.head)
                                 {
                                         lineptr = ptr->data;
-                                        sendto_server(":%s NOTICE %s :%s",
-                                                      MYNAME, client_p->name,
-                                                      lineptr->data);
+					service_error(service_p, client_p, "%s",
+							lineptr->data);
                                 }
 
                                 service_p->service->flood += cmd_table[i].help_penalty;
@@ -349,8 +346,7 @@ handle_service(struct client *service_p, struct client *client_p, char *text)
                         }
                 }
 
-                sendto_server(":%s NOTICE %s :Unknown topic '%s'",
-                              MYNAME, client_p->name, p);
+		service_error(service_p, client_p, "Unknown topic '%s'", p);
                 return;
         }
 	else if(!strcasecmp(text, "OPERLOGIN") || !strcasecmp(text, "OLOGIN"))
@@ -360,14 +356,15 @@ handle_service(struct client *service_p, struct client *client_p, char *text)
 
 		if(client_p->user->oper)
 		{
-			service_error(service_p, client_p, "You are already logged in as an oper");
+			sendto_server(":%s NOTICE %s :You are already logged in as an oper",
+					MYNAME, client_p->name);
 			return;
 		}
 
 		if(parc < 2)
 		{
-			service_error(service_p, client_p, "Insufficient parameters to %s::OLOGIN",
-					service_p->name);
+			sendto_server(":%s NOTICE %s :Insufficient parameters to %s::OLOGIN",
+					MYNAME, client_p->name, service_p->name);
 			service_p->service->flood++;
 			return;
 		}
@@ -375,8 +372,8 @@ handle_service(struct client *service_p, struct client *client_p, char *text)
 		if((oper_p = find_conf_oper(client_p->user->username, client_p->user->host,
 						client_p->user->servername)) == NULL)
 		{
-			service_error(service_p, client_p, "No access to %s::OLOGIN",
-					ucase(service_p->name));
+			sendto_server(":%s NOTICE %s :No access to %s::OLOGIN",
+					MYNAME, client_p->name, ucase(service_p->name));
 			service_p->service->flood++;
 			return;
 		}
@@ -388,13 +385,15 @@ handle_service(struct client *service_p, struct client *client_p, char *text)
 
 		if(strcmp(crpass, oper_p->pass))
 		{
-			service_error(service_p, client_p, "Invalid password");
+			sendto_server(":%s NOTICE %s :Invalid password",
+					MYNAME, client_p->name);
 			return;
 		}
 
 		sendto_all(UMODE_AUTH, "%s (%s) has logged in [IRC]",
 				client_p->name, oper_p->name);
-		service_error(service_p, client_p, "Oper login successful");
+		sendto_server(":%s NOTICE %s :Oper login successful",
+				MYNAME, client_p->name);
 
 		client_p->user->oper = oper_p;
 		oper_p->refcount++;
@@ -404,7 +403,8 @@ handle_service(struct client *service_p, struct client *client_p, char *text)
 	{
 		if(client_p->user->oper == NULL)
 		{
-			service_error(service_p, client_p, "You are not logged in as an oper");
+			sendto_server(":%s NOTICE %s :You are not logged in as an oper",
+					MYNAME, client_p->name);
 			service_p->service->flood++;
 			return;
 		}
@@ -412,7 +412,8 @@ handle_service(struct client *service_p, struct client *client_p, char *text)
 		deallocate_conf_oper(client_p->user->oper);
 		client_p->user->oper = NULL;
 
-		service_error(service_p, client_p, "Oper logout successful");
+		sendto_server(":%s NOTICE %s :Oper logout successful",
+				MYNAME, client_p->name);
 		return;
 	}
 
@@ -426,9 +427,8 @@ handle_service(struct client *service_p, struct client *client_p, char *text)
 			    (!client_p->user->oper || 
 			     (client_p->user->oper->flags & cmd_table[i].operflags) == 0)))
                         {
-                                sendto_server(":%s NOTICE %s :No access to %s::%s",
-                                              MYNAME, client_p->name,
-					      service_p->name, cmd_table[i].cmd);
+				service_error(service_p, client_p, "No access to %s::%s",
+						service_p->name, cmd_table[i].cmd);
                                 service_p->service->flood++;
                                 return;
                         }
@@ -436,8 +436,7 @@ handle_service(struct client *service_p, struct client *client_p, char *text)
 #ifdef ENABLE_USERSERV
 			if(cmd_table[i].userreg && client_p->user->user_reg == NULL)
 			{
-				sendto_server(":%s NOTICE %s :You must be logged in for %s::%s",
-						MYNAME, client_p->name, 
+				service_error(service_p, client_p, "You must be logged in for %s::%s",
 						service_p->name, cmd_table[i].cmd);
 				return;
 			}
@@ -445,8 +444,7 @@ handle_service(struct client *service_p, struct client *client_p, char *text)
 
 			if(parc < cmd_table[i].minparc)
 			{
-				sendto_server(":%s NOTICE %s :Insufficient parameters to %s::%s",
-						MYNAME, client_p->name,
+				service_error(service_p, client_p, "Insufficient parameters to %s::%s",
 						service_p->name, cmd_table[i].cmd);
 				service_p->service->flood++;
 				return;
@@ -461,8 +459,7 @@ handle_service(struct client *service_p, struct client *client_p, char *text)
                 }
         }
 
-        sendto_server(":%s NOTICE %s :Unknown command.",
-                      MYNAME, client_p->name);
+        service_error(service_p, client_p, "Unknown command.");
         service_p->service->flood++;
 }
 
@@ -478,7 +475,8 @@ service_error(struct client *service_p, struct client *client_p,
 	va_end(args);
 
 	sendto_server(":%s NOTICE %s :%s",
-			MYNAME, client_p->name, buf);
+			ServiceMsgSelf(service_p) ? service_p->name : MYNAME, 
+			client_p->name, buf);
 }
 
 void

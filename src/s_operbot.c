@@ -50,7 +50,7 @@ static struct ucommand_handler operbot_ucommand[] =
 
 static struct service_handler operbot_service = {
 	"OPERBOT", "operbot", "operbot", "services.operbot",
-	"Oper invitation/op services", 1, 60, 80, 
+	"Oper invitation/op services", 60, 80, 
 	operbot_command, operbot_ucommand, NULL
 };
 

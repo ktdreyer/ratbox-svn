@@ -54,7 +54,7 @@ static struct ucommand_handler userserv_ucommand[] =
 };
 
 static struct service_handler userserv_service = {
-	"USERSERV", "USERSERV", "userserv", "services.userserv", "User Auth Services", 0,
+	"USERSERV", "USERSERV", "userserv", "services.userserv", "User Auth Services",
 	30, 50, userserv_command, userserv_ucommand, NULL
 };
 
@@ -130,8 +130,8 @@ find_user_reg(struct client *client_p, const char *username)
 	}
 
 	if(client_p != NULL)
-		sendto_server(":%s NOTICE %s :Username %s is not registered",
-				MYNAME, client_p->name, username);
+		service_error(userserv_p, client_p, "Username %s is not registered",
+				username);
 
 	return NULL;
 }
@@ -147,8 +147,8 @@ find_user_reg_nick(struct client *client_p, const char *name)
 		   target_p->user->user_reg == NULL)
 		{
 			if(client_p != NULL)
-				sendto_server(":%s NOTICE %s :Nickname %s is not logged in",
-						MYNAME, client_p->name, name+1);
+				service_error(userserv_p, client_p, "Nickname %s is not logged in",
+						name+1);
 			return NULL;
 		}
 

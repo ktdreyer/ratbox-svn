@@ -107,7 +107,7 @@ static struct ucommand_handler chanserv_ucommand[] =
 };
 
 static struct service_handler chanserv_service = {
-	"CHANSERV", "CHANSERV", "chanserv", "services.chanserv", "Channel Service", 0,
+	"CHANSERV", "CHANSERV", "chanserv", "services.chanserv", "Channel Service",
 	30, 50, chanserv_command, chanserv_ucommand, NULL
 };
 

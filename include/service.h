@@ -27,7 +27,6 @@ struct service_handler
 	const char *username;
 	const char *host;
 	const char *info;
-	int opered;
 
         int flood_max;
         int flood_max_ignore;

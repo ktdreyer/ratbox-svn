@@ -248,10 +248,8 @@ c_trace(struct client *client_p, const char *parv[], int parc)
                 service_p = ptr->data;
 
                 sendto_server(":%s %d %s %s service %s[%s@%s] (127.0.0.1) 0 0",
-                              MYNAME, 
-                              service_p->service->opered ? 204 : 205,
-                              parv[0], 
-                              service_p->service->opered ? "Oper" : "User",
+                              MYNAME, ServiceOpered(service_p) ? 204 : 205,
+                              parv[0], ServiceOpered(service_p) ? "Oper" : "User",
                               service_p->name, service_p->service->username,
                               service_p->service->host);
         }
@@ -317,7 +315,7 @@ c_whois(struct client *client_p, const char *parv[], int parc)
                               MYNAME, parv[0], target_p->name, MYNAME,
                               config_file.gecos);
 
-                if(target_p->service->opered)
+                if(ServiceOpered(target_p))
                         sendto_server(":%s 313 %s %s :is an IRC Operator",
                                       MYNAME, parv[0], target_p->name);
         }

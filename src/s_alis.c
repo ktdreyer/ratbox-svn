@@ -35,7 +35,7 @@ static struct service_command alis_command[] =
 };
 
 static struct service_handler alis_service = {
-	"ALIS", "ALIS", "alis", "services.alis", "Advanced List Service", 0,
+	"ALIS", "ALIS", "alis", "services.alis", "Advanced List Service",
         60, 80, alis_command, NULL, NULL
 };
 
@@ -216,27 +216,23 @@ print_channel(struct client *client_p, struct channel *chptr,
 	     struct alis_query *query)
 {
 	if(query->show_mode && query->show_topicwho)
-		sendto_server(":%s NOTICE %s :%-50s %-8s %3d :%s (%s)",
-				MYNAME, client_p->name, chptr->name,
-				chmode_to_string_simple(chptr),
-				dlink_list_length(&chptr->users),
-				chptr->topic, chptr->topicwho);
+		service_error(alis_p, client_p, "%-50s %-8s %3d :%s (%s)",
+			chptr->name, chmode_to_string_simple(chptr),
+			dlink_list_length(&chptr->users),
+			chptr->topic, chptr->topicwho);
 	else if(query->show_mode)
-		sendto_server(":%s NOTICE %s :%-50s %-8s %3d :%s",
-				MYNAME, client_p->name, chptr->name,
-				chmode_to_string_simple(chptr),
-				dlink_list_length(&chptr->users),
-				chptr->topic);
+		service_error(alis_p, client_p, "%-50s %-8s %3d :%s",
+			chptr->name, chmode_to_string_simple(chptr),
+			dlink_list_length(&chptr->users),
+			chptr->topic);
 	else if(query->show_topicwho)
-		sendto_server(":%s NOTICE %s :%-50s %3d :%s (%s)",
-				MYNAME, client_p->name, chptr->name,
-				dlink_list_length(&chptr->users),
-				chptr->topic, chptr->topicwho);
+		service_error(alis_p, client_p, "%-50s %3d :%s (%s)",
+			chptr->name, dlink_list_length(&chptr->users),
+			chptr->topic, chptr->topicwho);
 	else
-		sendto_server(":%s NOTICE %s :%-50s %3d :%s",
-				MYNAME, client_p->name, chptr->name,
-				dlink_list_length(&chptr->users),
-				chptr->topic);
+		service_error(alis_p, client_p, "%-50s %3d :%s",
+			chptr->name, dlink_list_length(&chptr->users),
+			chptr->topic);
 }
 
 static int
@@ -318,9 +314,9 @@ s_alis_list(struct client *client_p, char *parv[], int parc)
                         return 1;
         }
 
-        sendto_server(":%s NOTICE %s :Returning maximum of %d channel names "
-                        "matching '%s'",
-                        MYNAME, client_p->name, ALIS_MAX_MATCH, query.mask);
+        service_error(alis_p, client_p, 
+		"Returning maximum of %d channel names matching '%s'",
+		ALIS_MAX_MATCH, query.mask);
 
         /* hunting for one channel.. */
         if(strchr(query.mask, '*') == NULL)
@@ -335,8 +331,7 @@ s_alis_list(struct client *client_p, char *parv[], int parc)
                                 print_channel(client_p, chptr, &query);
                 }
 
-                sendto_server(":%s NOTICE %s :End of output.",
-                                MYNAME, client_p->name);
+                service_error(alis_p, client_p, "End of output");
                 return 1;
         }
 
@@ -350,13 +345,12 @@ s_alis_list(struct client *client_p, char *parv[], int parc)
 
                 if(--maxmatch == 0)
                 {
-                        sendto_server(":%s NOTICE %s :Maximum channel output reached.",
-                                        MYNAME, client_p->name);
+                        service_error(alis_p, client_p, "Maximum channel output reached");
                         break;
                 }
         }
 
-        sendto_server(":%s NOTICE %s :End of output.", MYNAME, client_p->name);
+        service_error(alis_p, client_p, "End of output");
         return 3;
 }
 

@@ -45,6 +45,12 @@ static struct mode_table privs_table[] = {
 	{ "\0",		0			}
 };
 
+static struct mode_table service_flags_table[] = {
+	{ "opered",	SERVICE_OPERED	},
+	{ "msg_self",	SERVICE_MSGSELF	},
+	{ "\0",		0		}
+};
+
 static const char *
 conf_strtype(int type)
 {
@@ -694,6 +700,14 @@ conf_set_service_realname(void *data)
 	yy_service->service->reintroduce = 1;
 }
 
+static void
+conf_set_service_flags(void *data)
+{
+	set_modes_from_table(&yy_service->service->flags, "flag",
+				service_flags_table, data);
+}
+
+
 static struct ConfEntry conf_serverinfo_table[] =
 {
 	{ "description",	CF_QSTRING, NULL, 0, &config_file.gecos		},
@@ -741,6 +755,7 @@ static struct ConfEntry conf_service_table[] =
 	{ "username",	CF_QSTRING, conf_set_service_username,	0, NULL },
 	{ "host",	CF_QSTRING, conf_set_service_host,	0, NULL },
 	{ "realname",	CF_QSTRING, conf_set_service_realname,	0, NULL },
+	{ "flags",	CF_STRING|CF_FLIST, conf_set_service_flags, 0, NULL },
 	{ "\0", 0, NULL, 0, NULL }
 };
 

@@ -74,7 +74,7 @@ struct service
 	char username[USERLEN+1];
 	char host[HOSTLEN+1];
 	char id[NICKLEN+1];
-	int opered;
+	int flags;
 
 	dlink_list channels;		/* the channels this service is in */
 
@@ -116,6 +116,12 @@ struct service
 #define ClientOper(x)	 ((x)->user && (x)->user->umode & CLIENT_OPER)
 #define is_oper(x)       ((x)->user && (x)->user->umode & CLIENT_OPER)
 #define ClientAdmin(x)	 ((x)->user && (x)->user->umode & CLIENT_ADMIN)
+
+#define SERVICE_OPERED	0x001
+#define SERVICE_MSGSELF	0x002
+
+#define ServiceOpered(x)	((x)->service && (x)->service->flags & SERVICE_OPERED)
+#define ServiceMsgSelf(x)	((x)->service && (x)->service->flags & SERVICE_MSGSELF)
 
 extern void init_client(void);
 

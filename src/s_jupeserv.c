@@ -66,7 +66,7 @@ static struct ucommand_handler jupeserv_ucommand[] =
 
 static struct service_handler jupe_service = {
 	"JUPESERV", "jupeserv", "jupeserv", "services.jupeserv",
-	"Jupe Services", 1, 60, 80,
+	"Jupe Services", 60, 80,
 	jupeserv_command, jupeserv_ucommand, NULL
 };
 
