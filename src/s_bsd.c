@@ -743,6 +743,7 @@ void add_connection(struct Listener* listener, int fd)
       close(fd);
       return;
     }
+#endif
 
   /* 
    * get the client socket name from the socket

@@ -437,6 +437,9 @@ int     m_sjoin(struct Client *cptr,
         {
           if (l->flags & MODE_CHANOP)
             {
+              if( chptr->opcount )
+                chptr->opcount--;
+
               if (what != -1)
                 {
                   *mbuf++ = '-';
