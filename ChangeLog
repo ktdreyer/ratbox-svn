@@ -1,3 +1,15 @@
+leeh        2003/11/05 15:33:09 EST	(20031105_0)
+
+  Modified files:
+    modules/core         m_kill.c 
+  Log:
+  - fix the kill wierdness
+  
+  Revision  Changes    Path
+  1.93      +15 -10    ircd-ratbox/modules/core/m_kill.c
+
+
+
 androsyn    2003/11/03 15:11:10 EST	(20031103_0)
 
   Modified files:
