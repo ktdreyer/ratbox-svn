@@ -736,6 +736,35 @@ AC_ARG_ENABLE(small-net,
   esac
 ])
 
+
+dnl Nicklen
+AC_ARG_WITH(nicklen,
+[  --with-nicklen=              Set the nick length. ],
+
+[
+  if test "$enableval" = "no"; then
+	ac_cv_nicklen="9+1"
+  else
+	ac_cv_nicklen="$withval+1"
+  fi
+])
+AC_MSG_RESULT("Setting NICKLEN to $ac_cv_nicklen")
+AC_DEFINE_UNQUOTED(NICKLEN, ${ac_cv_nicklen})
+
+dnl Max support clients
+AC_ARG_WITH(maxclients,
+[  --with-maxclients=           Set the maximum number of clients. ],
+
+[
+  if test "$withval" = "no"; then
+	ac_cv_maxclients="200"
+  else
+	ac_cv_maxclients="$withval"
+  fi
+])
+AC_MSG_RESULT("Setting MAX_CLIENTS to $ac_cv_maxclients")
+AC_DEFINE_UNQUOTED(MAX_CLIENTS, ${ac_cv_maxclients})
+
 dnl shared-modules
 AC_ARG_ENABLE(shared-modules,
 [  --enable-shared-modules      Enable shared modules.
@@ -909,10 +938,12 @@ EOF
 	fi
 fi
 
+
 dnl This needs to be near the end for it to work right...
 if test "$ac_cv_efence" = "yes"; then
 	AC_CHECK_LIB(efence,malloc)
 fi
+
 
 AC_SUBST(MODULES_DEFINE)
 AC_SUBST(MODULES_LIBS)
@@ -954,3 +985,5 @@ if test "X${cf_openssl_ciphers}" != "X"; then
   echo "${cf_openssl_ciphers}"
   echo ""
 fi
+
+AC_MSG_RESULT("Server is configured with NICKLEN=$ac_cv_nicklen and MAX_CLIENTS=$ac_cv_maxclients")

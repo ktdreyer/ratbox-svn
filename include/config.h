@@ -45,6 +45,9 @@
  * in as many environments as possible.  They can probably be increased
  * significantly, if you know what you are doing.
  *
+ * Note that HARD_FDLIMIT_ is modified with the maxclients setting in
+ * configure.  You should only touch this if you know what you are doing!!!
+ *
  * If you are using select for the IO loop, you may also need to increase
  * the value of FD_SETSIZE by editting the Makefile.  However, using
  * --enable-kqueue, --enable-devpoll, or --enable-poll if at all possible,
@@ -54,20 +57,19 @@
  * systems may require kernel patches, configuration tweaks, or ulimit
  * adjustments in order to exceed certain limits (e.g. 1024, 4096 fds).
  */
-#define HARD_FDLIMIT_    384
+#define HARD_FDLIMIT_    MAX_CLIENTS + 60 + 20
 
 /* XXX - MAX_BUFFER is mostly ignored. */
 /*
  * Maximum number of connections to allow.
  *
- * MAX_CLIENTS is the maximum number of clients to allow.
  * MAX_BUFFER  is the number of fds to reserve, e.g. for clients
  *             exempt from limit.
  *
  * 10 file descriptors are reserved for logging, DNS lookups, etc.,
  * so MAX_CLIENTS + MAX_BUFFER + 10 must not exceed HARD_FDLIMIT.
+ * NOTE: MAX_CLIENTS is set with configure now
  */
-#define MAX_CLIENTS     200
 #define MAX_BUFFER      60
 
 #ifdef VMS

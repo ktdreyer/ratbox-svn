@@ -86,6 +86,12 @@
 /* nanosleep */
 #undef HAVE_NANOSLEEP
 
+/* nicklen */
+#undef NICKLEN
+
+/* max_clients */
+#undef MAX_CLIENTS
+
 /* Define if you have the EVP_bf_cfb function.  */
 #undef HAVE_EVP_BF_CFB
 

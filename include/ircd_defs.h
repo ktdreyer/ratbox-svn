@@ -22,6 +22,11 @@
  *  $Id$
  */
 
+/*
+ * NOTE: NICKLEN does not live here anymore. Set it with configure
+ * Otherwise there are no user servicable part here. 
+ *
+ */
  /* ircd_defs.h - Global size definitions for record entries used
  * througout ircd. Please think 3 times before adding anything to this
  * file.
@@ -38,7 +43,6 @@
 #define HOSTLEN         63      /* Length of hostname.  Updated to         */
                                 /* comply with RFC1123                     */
 
-#define NICKLEN         10       /* Nicklen + 1 for the NUL character */
 #define USERLEN         10
 #define REALLEN         50
 #define TOPICLEN        120     /* old value 90, truncated on other servers */

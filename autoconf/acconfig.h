@@ -69,3 +69,10 @@
 
 /* nanosleep */
 #undef HAVE_NANOSLEEP
+
+/* nicklen */
+#undef NICKLEN
+
+/* max_clients */
+#undef MAX_CLIENTS
+
