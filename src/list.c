@@ -40,11 +40,10 @@
 #include <string.h>
 #include <stdlib.h>
 
-void initlists()
-{
-  init_client_heap();
-}
-        
+/* XXX assummed 32 bit ints */
+int links_count=0;
+int user_count=0;
+
 /*
  * make_user
  *
@@ -61,6 +60,8 @@ struct User* make_user(struct Client *client_p)
   if (!user)
     {
       user = (struct User *)MyMalloc(sizeof (struct User));
+
+      ++user_count;
 
       /* The commented out lines here are
        * for documentation purposes only
@@ -147,6 +148,8 @@ void _free_user(struct User* user, struct Client* client_p)
       }
 
       MyFree(user);
+      --user_count;
+      assert(user_count >= 0);
     }
 }
 
@@ -162,6 +165,7 @@ dlink_node *make_dlink_node()
   dlink_node *lp;
 
   lp = (dlink_node *)MyMalloc(sizeof(dlink_node));
+  ++links_count;
 
   lp->next = NULL;
   lp->prev = NULL;
@@ -179,21 +183,10 @@ dlink_node *make_dlink_node()
 void _free_dlink_node(dlink_node *ptr)
 {
   MyFree(ptr);
+  --links_count;
+  assert(links_count >= 0);
 }
 
-
-/*
- * Attempt to free up some block memory
- *
- * block_garbage_collect
- *
- * inputs          - NONE
- * output          - NONE
- * side effects    - memory is possibly freed up
- */
-void block_garbage_collect()
-{
-}
 
 /*
  * count_user_memory
@@ -203,9 +196,10 @@ void block_garbage_collect()
  * output	- NONE
  * side effects	- NONE
  */
-void count_user_memory(int *user_memory_used,
-                       int *user_memory_allocated )
+void count_user_memory(int *count,int *user_memory_used)
 {
+  *count = user_count;
+  *user_memory_used = user_count * sizeof(struct User);
 }
 
 /*
@@ -216,9 +210,10 @@ void count_user_memory(int *user_memory_used,
  * output	- NONE
  * side effects	- NONE
  */
-void count_links_memory(int *links_memory_used,
-                       int *links_memory_allocated )
+void count_links_memory(int *count,int *links_memory_used)
 {
+  *count = links_count;
+  *links_memory_used = links_count * sizeof(dlink_node);
 }
 
 

@@ -54,9 +54,9 @@
 #include "scache.h"
 #include "send.h"
 #include "whowas.h"
+#include "linebuf.h"
 #include "memory.h"
 
-extern  void    count_ip_hash(int *,u_long *);    /* defined in s_conf.c */
 
 /*
  * Option string.  Must be before #ifdef DEBUGMODE.
@@ -192,7 +192,6 @@ void count_memory(struct Client *source_p)
   int wwu = 0;          /* whowas users */
   int cl = 0;           /* classes */
   int co = 0;           /* conf lines */
-
   int usi = 0;          /* users invited */
   int usc = 0;          /* users in channels */
   int aw = 0;           /* aways set */
@@ -201,21 +200,14 @@ void count_memory(struct Client *source_p)
 
   u_long chm = 0;       /* memory used by channels */
   u_long chbm = 0;      /* memory used by channel bans */
-  u_long lcm = 0;       /* memory used by local clients */
-  u_long rcm = 0;       /* memory used by remote clients */
   u_long awm = 0;       /* memory used by aways */
   u_long wwm = 0;       /* whowas array memory used */
   u_long com = 0;       /* memory used by conf lines */
-  u_long rm = 0;        /* res memory used */
   u_long mem_servers_cached; /* memory used by scache */
   u_long mem_ips_stored; /* memory used by ip address hash */
 
-  size_t dbuf_allocated          = 0;
-#if 0
-  size_t dbuf_used               = 0;
-  size_t dbuf_alloc_count        = 0;
-  size_t dbuf_used_count         = 0;
-#endif
+  int linebuf_count =0;
+  u_long linebuf_memory_used = 0;
 
   size_t client_hash_table_size = 0;
   size_t channel_hash_table_size = 0;
@@ -223,17 +215,17 @@ void count_memory(struct Client *source_p)
   u_long totch = 0;
   u_long totww = 0;
 
+  int local_client_count = 0;
   u_long local_client_memory_used = 0;
-  u_long local_client_memory_allocated = 0;
 
+  int remote_client_count = 0;
   u_long remote_client_memory_used = 0;
-  u_long remote_client_memory_allocated = 0;
 
+  int    user_count = 0;
   u_long user_memory_used = 0;
-  u_long user_memory_allocated = 0;
 
+  int    links_count = 0;
   u_long links_memory_used = 0;
-  u_long links_memory_allocated = 0;
 
   u_long tot = 0;
 
@@ -266,12 +258,6 @@ void count_memory(struct Client *source_p)
             }
         }
     }
-
-/* XXX */
-#if 0
-  lcm = lc * CLIENT_LOCAL_SIZE;
-  rcm = rc * CLIENT_REMOTE_SIZE;
-#endif
 
   for (chptr = GlobalChannelList; chptr; chptr = chptr->nextch)
     {
@@ -318,20 +304,8 @@ void count_memory(struct Client *source_p)
   for (cltmp = ClassList; cltmp; cltmp = cltmp->next)
     cl++;
 
-  /*
-   * need to set dbuf_count here because we use a dbuf when we send
-   * the results. since sending the results results in a dbuf being used,
-   * the count would be wrong if we just used the globals
-   */
+  count_linebuf_memory(&linebuf_count, &linebuf_memory_used);
 
-#if 0
-  count_dbuf_memory(&dbuf_allocated, &dbuf_used);
-  dbuf_alloc_count = INITIAL_DBUFS + DBufAllocCount;
-  dbuf_used_count  = DBufUsedCount;
-#endif
-
-  sendto_one(source_p, ":%s %d %s :Client Local %u(%d) Remote %u(%d)",
-             me.name, RPL_STATSDEBUG, source_p->name, lc, (int)lcm, rc, (int)rcm);
   sendto_one(source_p, ":%s %d %s :Users %u(%u) Invites %u(%u)",
              me.name, RPL_STATSDEBUG, source_p->name,
 	     us, us*sizeof(struct User), usi,
@@ -341,9 +315,6 @@ void count_memory(struct Client *source_p)
              aw, (int)awm);
   sendto_one(source_p, ":%s %d %s :Attached confs %u(%u)",
              me.name, RPL_STATSDEBUG, source_p->name, lcc, lcc*sizeof(dlink_node));
-
-  totcl = lcm + rcm + us*sizeof(struct User) + usc*sizeof(dlink_node) + awm;
-  totcl += lcc*sizeof(dlink_node) + usi*sizeof(dlink_node);
 
   sendto_one(source_p, ":%s %d %s :Conflines %u(%d)",
              me.name, RPL_STATSDEBUG, source_p->name, co, (int)com);
@@ -376,16 +347,10 @@ void count_memory(struct Client *source_p)
              U_MAX, client_hash_table_size,
              CH_MAX, channel_hash_table_size);
 
-#if 0
-  sendto_one(source_p, ":%s %d %s :Dbuf blocks allocated %d(%d), used %d(%d) max allocated by malloc() %d",
+  sendto_one(source_p, ":%s %d %s :linebuf %d(%d)",
              me.name, RPL_STATSDEBUG, source_p->name,
-	     dbuf_alloc_count, dbuf_allocated,
-             dbuf_used_count, dbuf_used, DBufMaxAllocated );
-#endif
+	     linebuf_count, linebuf_memory_used);
 
-#if 0
-  rm = cres_mem(source_p);
-#endif
   count_scache(&number_servers_cached,&mem_servers_cached);
 
   sendto_one(source_p, ":%s %d %s :scache %u(%d)",
@@ -399,55 +364,50 @@ void count_memory(struct Client *source_p)
              number_ips_stored,
              (int)mem_ips_stored);
 
-  tot = totww + totch + totcl + com + cl*sizeof(struct Class) +
-    dbuf_allocated + rm;
+  tot = totww + totch + com + cl*sizeof(struct Class);
   tot += client_hash_table_size;
   tot += channel_hash_table_size;
 
   tot += mem_servers_cached;
-  sendto_one(source_p, ":%s %d %s :Total: ww %d ch %d cl %d co %d db %u",
+  sendto_one(source_p, ":%s %d %s :Total: ww %d ch %d cl %d co %d",
              me.name, RPL_STATSDEBUG, source_p->name, (int)totww, (int)totch,
-             (int)totcl, (int)com, dbuf_allocated);
+             (int)totcl, (int)com);
 
 
-  count_local_client_memory((int *)&local_client_memory_used,
-                            (int *)&local_client_memory_allocated);
-  tot += local_client_memory_allocated;
-  sendto_one(source_p, ":%s %d %s :Local client Memory in use: %d Local "
-                   "client Memory allocated: %d",
+  count_local_client_memory( &local_client_count,
+			     (int *)&local_client_memory_used );
+  tot += local_client_memory_used;
+  sendto_one(source_p, ":%s %d %s :Local client Memory in use: %d(%d)",
              me.name, RPL_STATSDEBUG, source_p->name,
-             (int)local_client_memory_used, (int)local_client_memory_allocated);
+	     local_client_count,
+             (int)local_client_memory_used);
 
 
-  count_remote_client_memory( (int *)&remote_client_memory_used,
-                              (int *)&remote_client_memory_allocated);
-  tot += remote_client_memory_allocated;
-  sendto_one(source_p, ":%s %d %s :Remote client Memory in use: %d Remote "
-                   "client Memory allocated: %d",
+  count_remote_client_memory( &remote_client_count,
+			      (int *)&remote_client_memory_used);
+  tot += remote_client_memory_used;
+  sendto_one(source_p, ":%s %d %s :Remote client Memory in use: %d(%d)",
              me.name, RPL_STATSDEBUG, source_p->name,
-             (int)remote_client_memory_used, (int)remote_client_memory_allocated);
+	     remote_client_count,
+             (int)remote_client_memory_used);
 
 
-  count_user_memory( (int *)&user_memory_used,
-                    (int *)&user_memory_allocated);
-  tot += user_memory_allocated;
-  sendto_one(source_p, ":%s %d %s :struct User Memory in use: %d struct User "
-                   "Memory allocated: %d",
+  count_user_memory( &user_count, (int *)&user_memory_used );
+  tot += user_memory_used;
+  sendto_one(source_p, ":%s %d %s :struct User Memory in use: %d(%d)",
              me.name, RPL_STATSDEBUG, source_p->name,
-             (int)user_memory_used,
-             (int)user_memory_allocated);
+	     user_count,
+             (int)user_memory_used);
 
-
-  count_links_memory( (int *)&links_memory_used,
-		      (int *)&links_memory_allocated);
-  sendto_one(source_p, ":%s %d %s :Links Memory in use: %d Links Memory "
-                   "allocated: %d",
+  count_links_memory( &links_count, (int *)&links_memory_used );
+  tot += links_memory_used;
+  sendto_one(source_p, ":%s %d %s :Links Memory in use: %d(%d)",
              me.name, RPL_STATSDEBUG, source_p->name,
-             (int)links_memory_used,
-             (int)links_memory_allocated);
+	     (int)links_count,
+             (int)links_memory_used);
 
   sendto_one(source_p, 
              ":%s %d %s :TOTAL: %d Available:  Current max RSS: %u",
              me.name, RPL_STATSDEBUG, source_p->name, (int)tot, get_maxrss());
-
 }
+

@@ -64,15 +64,21 @@ static void check_unknowns_list(dlink_list *list);
 
 static EVH check_pings;
 
+static int remote_client_count=0;
+static int local_client_count=0;
+
 /*
- * init_client_heap 
+ * init_client
  *
  * inputs	- NONE
  * output	- NONE
  * side effects	- initialize client free memory
  */
-void init_client_heap(void)
+void init_client(void)
 {
+  remote_client_count = 0;
+  local_client_count = 0;
+
   /*
    * start off the check ping event ..  -- adrian
    *
@@ -105,19 +111,17 @@ struct Client* make_client(struct Client* from)
       client_p->since = client_p->lasttime = client_p->firsttime = CurrentTime;
 
       localClient = (struct LocalUser *)MyMalloc(sizeof(struct LocalUser));
-
-      if (localClient == NULL)
-        outofmemory();
-
       client_p->localClient = localClient;
 
       /* as good a place as any... */
       m = make_dlink_node();
       dlinkAdd(client_p, m, &unknown_list);
+      ++local_client_count;
     }
   else
     { /* from is not NULL */
       client_p->from = from; /* 'from' of local client is self! */
+      ++remote_client_count;
     }
 
   client_p->status = STAT_UNKNOWN;
@@ -158,12 +162,18 @@ void _free_client(struct Client* client_p)
 #endif
 
       MyFree(client_p->localClient);
+      --local_client_count;
+      assert(local_client_count >= 0);
+    }
+  else
+    {
+      --remote_client_count;
     }
 
 #ifndef NDEBUG
-      mem_frob(client_p, sizeof(struct Client));
+  mem_frob(client_p, sizeof(struct Client));
 #endif
-      MyFree(client_p);
+  MyFree(client_p);
 }
 
 /*
@@ -1215,7 +1225,7 @@ static void remove_dependents(struct Client* client_p,
 int
 detach_client(struct Client *cptr, const char *reason)
 {
-#ifdef PERSISTANT_CLIENTS
+#ifdef PERSISTENT_CLIENTS
   if (cptr->user==NULL || !MyConnect(cptr) || !IsPersistant(cptr))
     return exit_client(NULL, cptr, &me, reason);
   if (IsPersisting(cptr))
@@ -1471,17 +1481,22 @@ const char* comment         /* Reason for the exit */
  */
 
 /* XXX one common Client list now */
-void count_local_client_memory(int *local_client_memory_used,
-                               int *local_client_memory_allocated )
+void count_local_client_memory(int *count,
+			       int *local_client_memory_used)
 {
+  *count = local_client_count;
+  *local_client_memory_used = local_client_count *
+    (sizeof(struct Client) + sizeof(struct LocalUser));
 }
 
 /*
  * Count up remote client memory
  */
-void count_remote_client_memory(int *remote_client_memory_used,
-                               int *remote_client_memory_allocated )
+void count_remote_client_memory(int *count,
+				int *remote_client_memory_used)
 {
+  *count = remote_client_count;
+  *remote_client_memory_used = remote_client_count * sizeof(struct Client);
 }
 
 

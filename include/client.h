@@ -524,8 +524,7 @@ struct LocalUser
 extern void           check_klines(void);
 extern const char*    get_client_name(struct Client* client, int show_ip);
 extern const char*    get_client_host(struct Client* client);
-extern void           init_client_heap(void);
-extern void           clean_client_heap(void);
+extern void           init_client(void);
 extern struct Client* make_client(struct Client* from);
 extern void           _free_client(struct Client* client);
 extern void           add_client_to_list(struct Client* client);
@@ -539,8 +538,8 @@ extern int            exit_client(struct Client*, struct Client*,
 extern int            detach_client(struct Client*, const char* comment);
 
 
-extern void     count_local_client_memory(int *, int *);
-extern void     count_remote_client_memory(int *, int *);
+extern void     count_local_client_memory(int *count, int *memory);
+extern void     count_remote_client_memory(int *count, int *memory);
 extern  int     check_registered (struct Client *);
 extern  int     check_registered_user (struct Client *);
 

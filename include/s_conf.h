@@ -262,7 +262,6 @@ extern void clear_ip_hash_table(void);
 extern void iphash_stats(struct Client *,struct Client *,int,char **,FBFILE*);
 extern void count_ip_hash(int *, u_long *);
 
-
 void remove_one_ip(struct irc_inaddr *ip);
 
 extern struct ConfItem* make_conf(void);

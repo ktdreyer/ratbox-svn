@@ -536,7 +536,7 @@ int main(int argc, char *argv[])
   clear_Dline_table();          /* d line tree */
   clear_hash_parse();
 
-  initlists();
+  init_client();
   initclass();
   initwhowas();
   init_stats();
@@ -546,7 +546,6 @@ int main(int argc, char *argv[])
   load_all_modules(1);
 
   initServerMask();
-
 
   init_auth();			/* Initialise the auth code */
 
