@@ -252,7 +252,7 @@ static int start_auth_query(struct AuthRequest* auth)
 {
   struct sockaddr_in sock;
   struct sockaddr_in localaddr;
-  int                locallen = sizeof(struct sockaddr_in);
+  size_t             locallen = sizeof(struct sockaddr_in);
   int                fd;
 
   if ((fd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
@@ -513,8 +513,8 @@ void send_auth_query(struct AuthRequest* auth)
   struct sockaddr_in us;
   struct sockaddr_in them;
   char            authbuf[32];
-  int             ulen = sizeof(struct sockaddr_in);
-  int             tlen = sizeof(struct sockaddr_in);
+  size_t          ulen = sizeof(struct sockaddr_in);
+  size_t          tlen = sizeof(struct sockaddr_in);
 
   if (getsockname(auth->client->fd, (struct sockaddr *)&us,   &ulen) ||
       getpeername(auth->client->fd, (struct sockaddr *)&them, &tlen)) {

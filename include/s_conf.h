@@ -229,8 +229,10 @@ extern struct ConfItem* find_conf_host(struct SLink* lp, const char* host,
                                        int statmask);
 extern struct ConfItem* find_conf_ip(struct SLink* lp, char* ip, char* name, 
                                      int);
-extern struct ConfItem* find_conf_by_name(const char* name, int status);
-extern struct ConfItem* find_conf_by_host(const char* host, int status);
+extern struct ConfItem* find_conf_by_name(const char* name, 
+                                          unsigned int status);
+extern struct ConfItem* find_conf_by_host(const char* host, 
+                                          unsinged int status);
 extern struct ConfItem* find_kill (struct Client *);
 extern int conf_connect_allowed(struct in_addr addr);
 extern char *oper_flags_as_string(int);

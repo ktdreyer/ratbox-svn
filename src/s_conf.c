@@ -249,7 +249,7 @@ void det_confs_butmask(struct Client* cptr, int mask)
  * rewrote to use a struct -Dianora
  */
 static struct LinkReport {
-  int conf_type;
+  unsigned int conf_type;
   int rpl_stats;
   int conf_char;
 } report_array[] = {
@@ -278,7 +278,8 @@ void report_configured_links(struct Client* sptr, int mask)
         for (p = &report_array[0]; p->conf_type; p++)
           if (p->conf_type == tmp->status)
             break;
-        if(p->conf_type == 0)return;
+        if (p->conf_type == 0)
+          return;
 
         get_printable_conf(tmp, &name, &host, &pass, &user, &port);
 
@@ -1246,7 +1247,7 @@ struct ConfItem *find_conf_ip(struct SLink* lp, char *ip, char *user,
 /*
  * find_conf_by_name - return a conf item that matches name and type
  */
-struct ConfItem* find_conf_by_name(const char* name, int status)
+struct ConfItem* find_conf_by_name(const char* name, unsigned int status)
 {
   struct ConfItem* conf;
   assert(0 != name);
@@ -1266,7 +1267,7 @@ struct ConfItem* find_conf_by_name(const char* name, int status)
 /*
  * find_conf_by_name - return a conf item that matches host and type
  */
-struct ConfItem* find_conf_by_host(const char* host, int status)
+struct ConfItem* find_conf_by_host(const char* host, unsigned int status)
 {
   struct ConfItem* conf;
   assert(0 != host);
@@ -2104,7 +2105,7 @@ static void initconf(FBFILE* file, int use_include)
             {
               if ((tmp = getfield(NULL)) == NULL)
                 break;
-              (int)aconf->hold = oper_flags_from_string(tmp);
+              aconf->hold = oper_flags_from_string(tmp);
             }
 
           break;
