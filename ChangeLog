@@ -1,3 +1,23 @@
+leeh        2004/08/12 20:27:02 EDT	(20040813_0)
+
+  Modified files:
+    include              client.h s_conf.h 
+    modules              m_info.c 
+    modules/core         m_message.c 
+    src                  newconf.c s_conf.c 
+  Log:
+  - commit my target_change anti-spam thing..
+  
+  Revision  Changes    Path
+  7.256     +5 -0      ircd-ratbox/include/client.h
+  7.292     +1 -0      ircd-ratbox/include/s_conf.h
+  1.149     +52 -1     ircd-ratbox/modules/core/m_message.c
+  1.114     +7 -1      ircd-ratbox/modules/m_info.c
+  7.170     +1 -0      ircd-ratbox/src/newconf.c
+  7.486     +1 -0      ircd-ratbox/src/s_conf.c
+
+
+
 leeh        2004/08/12 16:51:32 EDT	(20040812_0)
 
   Modified files:
