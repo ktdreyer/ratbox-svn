@@ -1,3 +1,23 @@
+androsyn    2004/03/01 19:05:40 EST	(20040302_0)
+
+  Modified files:
+    include              s_newconf.h s_serv.h 
+    servlink             Makefile.in control.c io.c servlink.c 
+                         servlink.h 
+  Log:
+  More cryptlinks fun
+  
+  Revision  Changes    Path
+  7.26      +0 -3      ircd-ratbox/include/s_newconf.h
+  7.90      +4 -10     ircd-ratbox/include/s_serv.h
+  1.17      +1 -3      ircd-ratbox/servlink/Makefile.in
+  1.11      +0 -273    ircd-ratbox/servlink/control.c
+  1.39      +9 -54     ircd-ratbox/servlink/io.c
+  1.32      +0 -9      ircd-ratbox/servlink/servlink.c
+  1.25      +0 -28     ircd-ratbox/servlink/servlink.h
+
+
+
 leeh        2004/03/01 18:58:33 EST	(20040301_17)
 
   Modified files:
