@@ -1,3 +1,9 @@
+*** 20010314_3 by fl_
+- moved oper_umodes (modes set on /oper) from config.h -> example.conf
+  with a check if there isnt one in the config..
+- mebbe we should allow this per oper block on hyb7.1?
+
+
 *** 20010314_2 by androsyn
 Fixed devpoll support so it would actually compile on Solaris.  I'm not sure
 if it works yet or not though.
