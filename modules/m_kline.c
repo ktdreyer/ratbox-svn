@@ -295,7 +295,7 @@ static void ms_kline(struct Client *client_p,
 
   if(valid_user_host(source_p, kuser, khost))
     {
-      sendto_realops_flags(FLAGS_ALL,
+      sendto_realops_flags(FLAGS_ALL, L_ALL,
              "*** %s!%s@%s on %s is requesting an Invalid K-Line for [%s@%s] [%s]",
              source_p->name, source_p->username, source_p->host, source_p->user->server,
              kuser, khost, kreason);
@@ -304,7 +304,7 @@ static void ms_kline(struct Client *client_p,
 
   if(valid_wild_card(kuser, khost))
     {
-       sendto_realops_flags(FLAGS_ALL, 
+       sendto_realops_flags(FLAGS_ALL, L_ALL, 
              "*** %s!%s@%s on %s is requesting a K-Line without %d wildcard chars for [%s@%s] [%s]",
              source_p->name, source_p->username, source_p->host, source_p->user->server,
              ConfigFileEntry.min_nonwildcard, kuser, khost, kreason);
@@ -318,7 +318,7 @@ static void ms_kline(struct Client *client_p,
 
   if(find_u_conf((char *)source_p->user->server, source_p->username, source_p->host))
     {
-      sendto_realops_flags(FLAGS_ALL,
+      sendto_realops_flags(FLAGS_ALL, L_ALL,
 			   "*** Received K-Line for [%s@%s] [%s], from %s!%s@%s on %s",
 			   kuser,
 			   khost,
@@ -383,7 +383,7 @@ static void apply_tkline(struct Client *source_p, struct ConfItem *aconf,
 {
  aconf->hold = CurrentTime + tkline_time;
  add_temp_kline(aconf);
- sendto_realops_flags(FLAGS_ALL,
+ sendto_realops_flags(FLAGS_ALL, L_ALL,
                       "%s added temporary %d min. K-Line for [%s@%s] [%s]",
                       source_p->name, tkline_time/60, aconf->user, aconf->host,
                       aconf->passwd);
@@ -967,7 +967,7 @@ already_placed_kline(struct Client *source_p, char *luser, char *lhost)
     * local opers and leave it at that
     */
    if (IsServer(source_p))
-    sendto_realops_flags(FLAGS_ALL, 
+    sendto_realops_flags(FLAGS_ALL, L_ALL, 
              "*** Remote K-Line [%s@%s] already K-Lined by [%s@%s] - %s",
              luser, lhost, aconf->user, aconf->host, reason);
    else

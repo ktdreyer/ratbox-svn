@@ -116,7 +116,8 @@ static void mo_trace(struct Client *client_p, struct Client *source_p,
     }
 
   if(MyClient(source_p))
-    sendto_realops_flags(FLAGS_SPY, "trace requested by %s (%s@%s) [%s]",
+    sendto_realops_flags(FLAGS_SPY, L_ADMIN,
+                       "trace requested by %s (%s@%s) [%s]",
                        source_p->name, source_p->username, source_p->host,
                        source_p->user->server);
 

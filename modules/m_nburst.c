@@ -101,7 +101,7 @@ static void ms_nburst(struct Client *client_p,
     return;
 
 #ifdef DEBUGLL
-  sendto_realops_flags(FLAGS_ALL, "NBURST called by %s for %s %s %s",
+  sendto_realops_flags(FLAGS_ALL, L_ALL, "NBURST called by %s for %s %s %s",
     client_p->name,
     nick,
     nick_new ? nick_new : "",

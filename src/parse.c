@@ -347,7 +347,7 @@ handle_command(struct Message *mptr, struct Client *client_p,
   if (i < mptr->parameters)
     {
       if(IsServer(client_p))
-         sendto_realops_flags(FLAGS_ALL, 
+         sendto_realops_flags(FLAGS_ALL, L_ALL, 
                 "Not enough parameters for command %s from servers %s! (%d < %d)",
                 mptr->cmd, client_p->name, i, mptr->parameters);
        sendto_one(client_p, form_str(ERR_NEEDMOREPARAMS),
@@ -556,19 +556,26 @@ static  int     cancel_clients(struct Client *client_p,
    */
   if (IsServer(source_p) || IsMe(source_p))
     {
-      sendto_realops_flags(FLAGS_DEBUG, "Message for %s[%s] from %s",
+      sendto_realops_flags(FLAGS_DEBUG, L_ADMIN,
+                         "Message for %s[%s] from %s",
                          source_p->name, source_p->from->name,
-                         get_client_name(client_p, MASK_IP));
+                         get_client_name(client_p, SHOW_IP));
+
+      sendto_realops_flags(FLAGS_DEBUG, L_OPER,
+                           "Message for %s[%s] from %s",
+			   source_p->name, source_p->from->name,
+			   get_client_name(client_p, MASK_IP));
+			   
       if (IsServer(client_p))
         {
-          sendto_realops_flags(FLAGS_DEBUG,
+          sendto_realops_flags(FLAGS_DEBUG, L_ALL,
                              "Not dropping server %s (%s) for Fake Direction",
                              client_p->name, source_p->name);
           return -1;
         }
 
       if (IsClient(client_p))
-        sendto_realops_flags(FLAGS_DEBUG,
+        sendto_realops_flags(FLAGS_DEBUG, L_ALL,
                            "Would have dropped client %s (%s@%s) [%s from %s]",
                            client_p->name, client_p->username, client_p->host,
                            client_p->user->server, client_p->from->name);
@@ -592,10 +599,18 @@ static  int     cancel_clients(struct Client *client_p,
     ** all servers must be TS these days --is
     */
 	   if (source_p->user)
-		   sendto_realops_flags(FLAGS_DEBUG,
+	   {
+	     sendto_realops_flags(FLAGS_DEBUG, L_ADMIN,
 			"Message for %s[%s@%s!%s] from %s (TS, ignored)",
 			source_p->name, source_p->username, source_p->host,
-			source_p->from->name, get_client_name(client_p, MASK_IP));
+			source_p->from->name, get_client_name(client_p, SHOW_IP));
+
+             sendto_realops_flags(FLAGS_DEBUG, L_OPER,
+	                "Message for %s[%s@%s!%s] from %s (TS, ignored)",
+			 source_p->name, source_p->username, source_p->host,
+			 source_p->from->name, get_client_name(client_p, MASK_IP));
+           }
+	   
 	   return 0;
    }
   return exit_client(client_p, client_p, &me, "Fake prefix");
@@ -617,7 +632,7 @@ static  void    remove_unknown(struct Client *client_p,
 
   if (IsClient(client_p))
     {
-      sendto_realops_flags(FLAGS_DEBUG,
+      sendto_realops_flags(FLAGS_DEBUG, L_ALL,
                  "Weirdness: Unknown client prefix (%s) from %s, Ignoring %s",
                          lbuffer,
                          get_client_name(client_p, HIDE_IP), lsender);
@@ -639,16 +654,20 @@ static  void    remove_unknown(struct Client *client_p,
    * 'no.dot.at.start' is a server   (SQUIT)
    */
   if ((lsender[0] == '.') || !strchr(lsender, '.'))
-    sendto_one(client_p, ":%s KILL %s :%s (%s(?) <- %s)",
-               me.name, lsender, me.name, lsender,
-               get_client_name(client_p, HIDE_IP));
+    sendto_one(client_p, ":%s KILL %s :%s (Unknown Client)",
+               me.name, lsender, me.name);
   else
     {
-      sendto_realops_flags(FLAGS_DEBUG,
+      sendto_realops_flags(FLAGS_DEBUG, L_ADMIN,
                            "Unknown prefix (%s) from %s, Squitting %s",
-                           lbuffer, get_client_name(client_p, MASK_IP), lsender);
+                           lbuffer, get_client_name(client_p, SHOW_IP), lsender);
+   
+      sendto_realops_flags(FLAGS_DEBUG, L_OPER,
+                           "Unknown prefix (%s) from %s, Squitting %s",
+			   lbuffer, client_p->name, lsender);
+			   
       sendto_one(client_p, ":%s SQUIT %s :(Unknown prefix (%s) from %s)",
-                 me.name, lsender, lbuffer, get_client_name(client_p, MASK_IP));
+                 me.name, lsender, lbuffer, client_p->name);
     }
 }
 
@@ -711,7 +730,7 @@ static void do_numeric(char numeric[],
            * We shouldn't get numerics sent to us,
            * any numerics we do get indicate a bug somewhere..
            */
-          sendto_realops_flags(FLAGS_SERVADMIN,
+          sendto_realops_flags(FLAGS_ALL, L_ADMIN,
                                "*** %s(via %s) sent a %s numeric to me: %s",
                                source_p->name, client_p->name, numeric, buffer);
           return;

@@ -82,7 +82,7 @@ static void ms_llnick(struct Client *client_p,
   
   if(!IsCapable(client_p,CAP_LL))
     {
-      sendto_realops_flags(FLAGS_ALL,
+      sendto_realops_flags(FLAGS_ALL, L_ALL,
 			   "*** LLNICK requested from non LL server %s",
 			   client_p->name);
       return;

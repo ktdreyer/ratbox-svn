@@ -77,6 +77,10 @@ extern void sendto_server(struct Client *one, struct Client *source_p,
 #define ONLY_CHANOPS_HALFOPS 3
 #define ONLY_CHANOPS 4
 
+#define L_ALL 	0
+#define L_OPER 	1
+#define L_ADMIN	2
+
 #ifndef __GNUC__
 extern  void sendto_channel_remote(struct Channel *, struct Client *client_p, 
 				   const char *, ...);
@@ -100,7 +104,7 @@ extern void sendto_match_nocap_servs(struct Channel *, struct Client *,
 extern  void sendto_match_butone(struct Client *, struct Client *, 
                                  char *, int, const char *, ...);
 
-extern  void sendto_realops_flags(int, const char *, ...);
+extern  void sendto_realops_flags(int, int, const char *, ...);
 
 extern  void sendto_wallops_flags(int, struct Client *, const char *, ...);
 
@@ -141,8 +145,8 @@ extern  void sendto_match_butone(struct Client *, struct Client *,
                                  char *, int, const char *, ...)
 	    __attribute__((format (printf, 5, 6)));
 
-extern  void sendto_realops_flags(int, const char *, ...)
-	    __attribute__((format (printf, 2, 3)));
+extern  void sendto_realops_flags(int, int, const char *, ...)
+	    __attribute__((format (printf, 3, 4)));
 
 extern  void sendto_wallops_flags(int, struct Client *, const char *, ...)
             __attribute__((format (printf, 3, 4)));

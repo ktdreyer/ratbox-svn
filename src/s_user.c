@@ -421,9 +421,10 @@ int register_local_user(struct Client *client_p, struct Client *source_p,
        &&
        !(IsExemptLimits(source_p)) )
     {
-      sendto_realops_flags(FLAGS_FULL,
+      sendto_realops_flags(FLAGS_FULL, L_ALL,
 			   "Too many clients, rejecting %s[%s].",
 			   nick, source_p->host);
+			   
       ServerStats->is_ref++;
       (void)exit_client(client_p, source_p, &me,
 			"Sorry, server is full - try later");
@@ -434,7 +435,8 @@ int register_local_user(struct Client *client_p, struct Client *source_p,
 
   if (!valid_username(source_p->username))
     {
-      sendto_realops_flags(FLAGS_REJ,"Invalid username: %s (%s@%s)",
+      sendto_realops_flags(FLAGS_REJ, L_ALL,
+                           "Invalid username: %s (%s@%s)",
 			   nick, source_p->username, source_p->host);
       ServerStats->is_ref++;
       ircsprintf(tmpstr2, "Invalid username [%s]", source_p->username);
@@ -459,13 +461,13 @@ int register_local_user(struct Client *client_p, struct Client *source_p,
 
   inetntop(source_p->localClient->aftype, &IN_ADDR(source_p->localClient->ip), 
   				ipaddr, HOSTIPLEN);
-  sendto_realops_flags(FLAGS_CCONN,
+  sendto_realops_flags(FLAGS_CCONN, L_ALL,
 		       "Client connecting: %s (%s@%s) [%s] {%s}",
 		       nick, source_p->username, source_p->host,
 		       ipaddr,
 		       get_client_class(source_p));
   
-  sendto_realops_flags(FLAGS_DRONE,
+  sendto_realops_flags(FLAGS_DRONE, L_ALL,
 		       "Cn: %s (%s@%s) [%s] [%s]",
 		       nick, source_p->username, source_p->host,
 		       ipaddr,
@@ -475,7 +477,8 @@ int register_local_user(struct Client *client_p, struct Client *source_p,
     {
       Count.max_loc = Count.local;
       if (!(Count.max_loc % 10))
-	sendto_realops_flags(FLAGS_ALL,"New Max Local Clients: %d",
+	sendto_realops_flags(FLAGS_ALL, L_ALL,
+	                     "New Max Local Clients: %d",
 			     Count.max_loc);
     }
 
@@ -537,11 +540,11 @@ int register_remote_user(struct Client *client_p, struct Client *source_p,
 
   if (source_p->servptr == NULL)
     {
-      sendto_realops_flags(FLAGS_ALL,"Ghost killed: %s on invalid server %s",
+      sendto_realops_flags(FLAGS_ALL, L_ALL,"Ghost killed: %s on invalid server %s",
 			   source_p->name, source_p->user->server);
 
-      kill_client(client_p, source_p, "%s (Ghosted %s doesn't exist)",
-		  me.name, user->server);
+      kill_client(client_p, source_p, "%s (Server doesn't exist)",
+		  me.name);
 
 #if 0
       sendto_one(client_p,":%s KILL %s :%s (Ghosted, %s doesn't exist)",
@@ -555,7 +558,7 @@ int register_remote_user(struct Client *client_p, struct Client *source_p,
 
   if ((target_p = find_server(user->server)) && target_p->from != source_p->from)
     {
-      sendto_realops_flags(FLAGS_DEBUG, 
+      sendto_realops_flags(FLAGS_DEBUG, L_ALL,
 			   "Bad User [%s] :%s USER %s@%s %s, != %s[%s]",
 			   client_p->name, nick, source_p->username,
 			   source_p->host, user->server,
@@ -586,7 +589,7 @@ int register_remote_user(struct Client *client_p, struct Client *source_p,
   if (!target_p)
     {
       kill_client(client_p, source_p,
-		  "%s GHOST (no server %s on the net)",		  
+		  "%s GHOST (no server found)",		  
 		  me.name, user->server);
 #if 0
       sendto_one(client_p,
@@ -594,7 +597,7 @@ int register_remote_user(struct Client *client_p, struct Client *source_p,
 		 me.name,
 		 source_p->name, me.name, user->server);
 #endif
-      sendto_realops_flags(FLAGS_ALL,"No server %s for user %s[%s@%s] from %s",
+      sendto_realops_flags(FLAGS_ALL, L_ALL, "No server %s for user %s[%s@%s] from %s",
 			   user->server, source_p->name, source_p->username,
 			   source_p->host, source_p->from->name);
       source_p->flags |= FLAGS_KILLED;
@@ -971,7 +974,7 @@ int user_mode(struct Client *client_p, struct Client *source_p, int parc, char *
   /* Dont know why these were commented out.. put them back using new sendto() funcs */
   if (IsServer(source_p))
     {
-       sendto_realops_flags(FLAGS_SERVADMIN, "*** Mode for User %s from %s",
+       sendto_realops_flags(FLAGS_ALL, L_ADMIN, "*** Mode for User %s from %s",
                             parv[1], source_p->name);
        return 0;
     }
@@ -1311,7 +1314,7 @@ static int check_X_line(struct Client *client_p, struct Client *source_p)
 	{
 	  if (aconf->port == 1)
 	    {
-	      sendto_realops_flags(FLAGS_REJ,
+	      sendto_realops_flags(FLAGS_REJ, L_ALL,
 				   "X-line Rejecting [%s] [%s], user %s",
 				   source_p->info,
 				   reason,
@@ -1322,7 +1325,7 @@ static int check_X_line(struct Client *client_p, struct Client *source_p)
 	  return (CLIENT_EXITED);
 	}
       else
-	sendto_realops_flags(FLAGS_REJ,
+	sendto_realops_flags(FLAGS_REJ, L_ALL,
 			     "X-line Warning [%s] [%s], user %s",
 			     source_p->info,
 			     reason,
@@ -1399,7 +1402,7 @@ int oper_up( struct Client *source_p,
   if (IsSetOperAdmin(source_p))
     source_p->umodes |= FLAGS_ADMIN;
 
-  sendto_realops_flags(FLAGS_ALL,
+  sendto_realops_flags(FLAGS_ALL, L_ALL,
 		       "%s (%s@%s) is now an operator", source_p->name,
 		       source_p->username, source_p->host);
   send_umode_out(source_p, source_p, old);

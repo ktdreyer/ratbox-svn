@@ -127,9 +127,9 @@ dead_link(struct Client *to, char *notice)
   linebuf_donebuf(&to->localClient->buf_sendq);
   if (!IsPerson(to) && !IsUnknown(to) && !(to->flags & FLAGS_CLOSING))
     {
-      sendto_realops_flags(FLAGS_SERVADMIN,
+      sendto_realops_flags(FLAGS_ALL, L_ADMIN,
            notice, get_client_name(to, HIDE_IP));
-    sendto_realops_flags(FLAGS_SERVOPER,
+    sendto_realops_flags(FLAGS_ALL, L_OPER,
                          notice, get_client_name(to, MASK_IP));
     }
   Debug((DEBUG_ERROR, notice, get_client_name(to, HIDE_IP)));
@@ -148,7 +148,7 @@ _send_linebuf(struct Client *to, buf_head_t *linebuf)
 #ifdef INVARIANTS
   if (IsMe(to))
     {
-      sendto_realops_flags(FLAGS_ALL, "Trying to send message to myself!");
+      sendto_realops_flags(FLAGS_ALL, L_ALL, "Trying to send message to myself!");
       return 0;
     }
 #endif
@@ -161,7 +161,7 @@ _send_linebuf(struct Client *to, buf_head_t *linebuf)
   if (linebuf_len(&to->localClient->buf_sendq) > get_sendq(to))
     {
       if (IsServer(to))
-        sendto_realops_flags(FLAGS_ALL,
+        sendto_realops_flags(FLAGS_ALL, L_ALL,
 			     "Max SendQ limit exceeded for %s: %u > %lu",
 			     get_client_name(to, HIDE_IP),
           linebuf_len(&to->localClient->buf_sendq), get_sendq(to));
@@ -226,13 +226,13 @@ send_linebuf_remote(struct Client *to, struct Client *from,
     {
       if (IsServer(from))
         {
-          sendto_realops_flags(FLAGS_ALL,
+          sendto_realops_flags(FLAGS_ALL, L_ALL,
 		      "Send message to %s[%s] dropped from %s(Fake Dir)",
 			      to->name, to->from->name, from->name);
           return;
         }
 
-      sendto_realops_flags(FLAGS_ALL,
+      sendto_realops_flags(FLAGS_ALL, L_ALL,
 			   "Ghosted: %s[%s@%s] from %s[%s@%s] (%s)",
 			   to->name, to->username, to->host,
 			   from->name, from->username, from->host,
@@ -420,7 +420,7 @@ sendto_one(struct Client *to, const char *pattern, ...)
     }
   else if (IsMe(to))
     {
-      sendto_realops_flags(FLAGS_ALL,
+      sendto_realops_flags(FLAGS_ALL, L_ALL,
 			   "Trying to send [%s] to myself!", sendbuf);
       return;
     }
@@ -472,7 +472,7 @@ sendto_one_prefix(struct Client *to, struct Client *prefix,
     }
   else if (IsMe(to))
     {
-      sendto_realops_flags(FLAGS_ALL,
+      sendto_realops_flags(FLAGS_ALL, L_ALL,
 			   "Trying to send [%s] to myself!", sendbuf);
       return;
     }
@@ -1054,13 +1054,14 @@ sendto_anywhere(struct Client *to, struct Client *from,
  * sendto_realops_flags
  *
  * inputs	- flag types of messages to show to real opers
+ *		- flag indicating opers/admins
  *		- var args input message
  * output	- NONE
  * side effects	- Send to *local* ops only but NOT +s nonopers.
  */
 
 void
-sendto_realops_flags(int flags, const char *pattern, ...)
+sendto_realops_flags(int flags, int level, const char *pattern, ...)
 
 {
   int len;
@@ -1078,14 +1079,15 @@ sendto_realops_flags(int flags, const char *pattern, ...)
   for (ptr = oper_list.head; ptr; ptr = ptr->next)
     {
       client_p = ptr->data;
-
-      if((flags == FLAGS_SERVADMIN) & !IsAdmin(client_p))
+      
+      /* If we're sending it to opers and theyre an admin, skip.
+       * If we're sending it to admins, and theyre not, skip.
+       */
+      if(((level == L_ADMIN) && !IsAdmin(client_p)) ||
+         ((level == L_OPER) && IsAdmin(client_p)))
         continue;
-      if((flags == FLAGS_SERVOPER) && IsAdmin(client_p)) 
-        continue;
 
-      if(client_p->umodes & flags || 
-      (((flags == FLAGS_SERVADMIN) || (flags == FLAGS_SERVOPER)) && SendServNotice(client_p)))
+      if(client_p->umodes & flags)
 	{
 	  len =ircsprintf(sendbuf, ":%s NOTICE %s :*** Notice -- %s",
 			  me.name,
@@ -1189,7 +1191,7 @@ ts_warn(const char *pattern, ...)
   (void)send_format(lbuf, pattern, args);
   va_end(args);
 
-  sendto_realops_flags(FLAGS_ALL,"%s",lbuf);
+  sendto_realops_flags(FLAGS_ALL, L_ALL,"%s",lbuf);
   ilog(L_CRIT, "%s", lbuf);
 } /* ts_warn() */
 

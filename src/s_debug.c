@@ -449,7 +449,7 @@ void count_memory(struct Client *source_p)
 
 /*  assert (users_counted == user_count); */
   if(users_counted != user_count)
-    sendto_realops_flags(FLAGS_ALL, "*** WARNING: Users counted: %d != User count: %d",
+    sendto_realops_flags(FLAGS_ALL, L_ALL, "*** WARNING: Users counted: %d != User count: %d",
                            users_counted, user_count);
   
 

@@ -287,7 +287,7 @@ set_time(void)
  if (newtime == -1)
  {
   ilog(L_ERROR, "Clock Failure (%d)", errno);
-  sendto_realops_flags(FLAGS_ALL,
+  sendto_realops_flags(FLAGS_ALL, L_ALL,
                        "Clock Failure (%d), TS can be corrupted", errno);
   restart("Clock Failure");
  }

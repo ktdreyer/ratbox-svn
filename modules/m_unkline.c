@@ -144,7 +144,7 @@ static void mo_unkline (struct Client *client_p,struct Client *source_p,
       sendto_one(source_p,
 		 ":%s NOTICE %s :Un-klined [%s@%s] from temporary k-lines",
 		 me.name, parv[0],user, host);
-      sendto_realops_flags(FLAGS_ALL,
+      sendto_realops_flags(FLAGS_ALL, L_ALL,
 			   "%s has removed the temporary K-Line for: [%s@%s]",
 			   get_oper_name(source_p), user, host);
       ilog(L_NOTICE, "%s removed temporary K-Line for [%s@%s]", parv[0], user,
@@ -240,7 +240,7 @@ static void mo_unkline (struct Client *client_p,struct Client *source_p,
 
   sendto_one(source_p, ":%s NOTICE %s :K-Line for [%s@%s] is removed", 
              me.name, source_p->name, user,host);
-  sendto_realops_flags(FLAGS_ALL,
+  sendto_realops_flags(FLAGS_ALL, L_ALL,
 		       "%s has removed the K-Line for: [%s@%s]",
 		       get_oper_name(source_p), user, host);
 
@@ -441,7 +441,7 @@ mo_undline (struct Client *client_p, struct Client *source_p,
 
   sendto_one(source_p, ":%s NOTICE %s :D-Line for [%s] is removed",
 	     me.name, parv[0], cidr);
-  sendto_realops_flags(FLAGS_ALL, "%s has removed the D-Line for: [%s]",
+  sendto_realops_flags(FLAGS_ALL, L_ALL, "%s has removed the D-Line for: [%s]",
 		       get_oper_name(source_p), cidr);
   ilog(L_NOTICE, "%s removed D-Line for [%s]", get_oper_name(source_p),
        cidr);
@@ -500,7 +500,7 @@ static void mo_ungline(struct Client *client_p, struct Client *source_p,
     {
       sendto_one(source_p, ":%s NOTICE %s :Un-glined [%s@%s]",
                  me.name, parv[0],user, host);
-      sendto_realops_flags(FLAGS_ALL,
+      sendto_realops_flags(FLAGS_ALL, L_ALL,
 			   "%s has removed the G-Line for: [%s@%s]",
 			   get_oper_name(source_p), user, host );
       ilog(L_NOTICE, "%s removed G-Line for [%s@%s]",

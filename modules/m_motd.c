@@ -88,7 +88,8 @@ static void m_motd(struct Client *client_p, struct Client *source_p,
 	return;
     }
 
-  sendto_realops_flags(FLAGS_SPY, "motd requested by %s (%s@%s) [%s]",
+  sendto_realops_flags(FLAGS_SPY, L_ADMIN,
+                     "motd requested by %s (%s@%s) [%s]",
                      source_p->name, source_p->username, source_p->host,
                      source_p->user->server);
 
@@ -109,7 +110,8 @@ static void mo_motd(struct Client *client_p, struct Client *source_p,
   if (hunt_server(client_p, source_p, ":%s MOTD :%s", 1,parc,parv)!=HUNTED_ISME)
     return;
 
-  sendto_realops_flags(FLAGS_SPY, "motd requested by %s (%s@%s) [%s]",
+  sendto_realops_flags(FLAGS_SPY, L_ADMIN,
+                     "motd requested by %s (%s@%s) [%s]",
                      source_p->name, source_p->username, source_p->host,
                      source_p->user->server);
 

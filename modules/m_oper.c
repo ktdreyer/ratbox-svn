@@ -106,7 +106,7 @@ static void m_oper(struct Client *client_p, struct Client *source_p,
       sendto_one(source_p, form_str(ERR_NOOPERHOST), me.name, source_p->name);
       if (ConfigFileEntry.failed_oper_notice)
         {
-          sendto_realops_flags(FLAGS_ALL,
+          sendto_realops_flags(FLAGS_ALL, L_ALL,
                                "Failed OPER attempt - host mismatch by %s (%s@%s)",
                                source_p->name, source_p->username, source_p->host);
         }
@@ -128,7 +128,7 @@ static void m_oper(struct Client *client_p, struct Client *source_p,
         {
           sendto_one(source_p,":%s NOTICE %s :Can't attach conf!",
                      me.name,source_p->name);
-          sendto_realops_flags(FLAGS_ALL,
+          sendto_realops_flags(FLAGS_ALL, L_ALL,
                                "Failed OPER attempt by %s (%s@%s) can't attach conf!",
                                source_p->name, source_p->username, source_p->host);
           /* 
@@ -152,7 +152,7 @@ static void m_oper(struct Client *client_p, struct Client *source_p,
       sendto_one(source_p,form_str(ERR_PASSWDMISMATCH),me.name, parv[0]);
       if (ConfigFileEntry.failed_oper_notice)
         {
-          sendto_realops_flags(FLAGS_ALL,
+          sendto_realops_flags(FLAGS_ALL, L_ALL,
                                "Failed OPER attempt by %s (%s@%s)",
                                source_p->name, source_p->username, source_p->host);
         }

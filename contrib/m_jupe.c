@@ -125,7 +125,7 @@ static void mo_jupe(struct Client *client_p, struct Client *source_p,
                 ":%s SERVER %s 1 :Juped: %s",
                 me.name, parv[1], parv[2]);
 
-  sendto_realops_flags(FLAGS_ALL,
+  sendto_realops_flags(FLAGS_ALL, L_ALL,
                        "Link with %s established: (JUPED) link",
 		       parv[1]);
 

@@ -227,7 +227,7 @@ int unload_one_module (char *name, int check)
   if(check == 1)
     {
       ilog (L_INFO, "Module %s unloaded", name);
-      sendto_realops_flags(FLAGS_ALL,"Module %s unloaded", name);
+      sendto_realops_flags(FLAGS_ALL, L_ALL,"Module %s unloaded", name);
     }
 
   return 0;
@@ -293,7 +293,8 @@ load_one_module (char *path)
 	return load_a_module(modpath, 1);
     }
 	
-  sendto_realops_flags (FLAGS_ALL, "Cannot locate module %s", path);
+  sendto_realops_flags(FLAGS_ALL, L_ALL,
+                       "Cannot locate module %s", path);
   ilog(L_WARN, "Cannot locate module %s", path);
   return -1;
 }
@@ -323,7 +324,7 @@ load_a_module (char *path, int check)
   {
       const char *err = dlerror();
 	  
-      sendto_realops_flags (FLAGS_ALL,
+      sendto_realops_flags(FLAGS_ALL, L_ALL,
                             "Error loading module %s: %s",
                             mod_basename, err);
       ilog (L_WARN, "Error loading module %s: %s", mod_basename, err);
@@ -335,7 +336,7 @@ load_a_module (char *path, int check)
   if (initfunc == NULL 
 		  && (initfunc = (void (*)(void))dlsym(tmpptr, "__modinit")) == NULL)
   {
-    sendto_realops_flags (FLAGS_ALL,
+    sendto_realops_flags(FLAGS_ALL, L_ALL,
                           "Module %s has no _modinit() function",
                           mod_basename);
     ilog (L_WARN, "Module %s has no _modinit() function", mod_basename);
@@ -363,7 +364,8 @@ load_a_module (char *path, int check)
 
   if(check == 1)
     {
-      sendto_realops_flags (FLAGS_ALL, "Module %s [version: %s] loaded at 0x%lx",
+      sendto_realops_flags(FLAGS_ALL, L_ALL,
+                        "Module %s [version: %s] loaded at 0x%lx",
                         mod_basename, ver, (unsigned long)tmpptr);
        ilog (L_WARN, "Module %s [version: %s] loaded at 0x%x",
             mod_basename, ver, tmpptr);
@@ -557,7 +559,8 @@ mo_modrestart (struct Client *client_p, struct Client *source_p, int parc, char 
 
   load_all_modules(0);
 
-  sendto_realops_flags (FLAGS_ALL, "Module Restart: %d modules unloaded, %d modules loaded",
+  sendto_realops_flags(FLAGS_ALL, L_ALL,
+              "Module Restart: %d modules unloaded, %d modules loaded",
 			modnum, num_mods);
   ilog(L_WARN, "Module Restart: %d modules unloaded, %d modules loaded",
       modnum, num_mods);

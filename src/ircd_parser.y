@@ -498,7 +498,7 @@ serverinfo_rsa_private_key_file: RSA_PRIVATE_KEY_FILE '=' QSTRING ';'
 
   if (file == NULL)
   {
-    sendto_realops_flags(FLAGS_ALL,
+    sendto_realops_flags(FLAGS_ALL, L_ALL,
       "Ignoring config file entry rsa_private_key -- file open failed"
       " (%s)", yylval.string);
     break;
@@ -508,14 +508,14 @@ serverinfo_rsa_private_key_file: RSA_PRIVATE_KEY_FILE '=' QSTRING ';'
                                                             NULL, 0, NULL);
   if (ServerInfo.rsa_private_key == NULL)
   {
-    sendto_realops_flags(FLAGS_ALL,
+    sendto_realops_flags(FLAGS_ALL, L_ALL,
       "Ignoring config file entry rsa_private_key -- couldn't extract key");
     break;
   }
 
   if (!RSA_check_key( ServerInfo.rsa_private_key ))
   {
-    sendto_realops_flags(FLAGS_ALL,
+    sendto_realops_flags(FLAGS_ALL, L_ALL,
       "Ignoring config file entry rsa_private_key -- invalid key");
     break;
   }
@@ -523,7 +523,7 @@ serverinfo_rsa_private_key_file: RSA_PRIVATE_KEY_FILE '=' QSTRING ';'
   /* require 2048 bit (256 byte) key */
   if ( RSA_size(ServerInfo.rsa_private_key) != 256 )
   {
-    sendto_realops_flags(FLAGS_ALL,
+    sendto_realops_flags(FLAGS_ALL, L_ALL,
       "Ignoring config file entry rsa_private_key -- not 2048 bit");
     break;
   }
@@ -604,7 +604,7 @@ serverinfo_hub:         HUB '=' TYES ';'
     /* Don't become a hub if we have a lazylink active. */
     if (!ServerInfo.hub && uplink && IsCapable(uplink, CAP_LL))
     {
-      sendto_realops_flags(FLAGS_ALL,
+      sendto_realops_flags(FLAGS_ALL, L_ALL,
         "Ignoring config file line hub = yes; due to active LazyLink (%s)",
         uplink->name);
     }
@@ -626,7 +626,7 @@ serverinfo_hub:         HUB '=' TYES ';'
         if(MyConnect((struct Client *)node->data) &&
            IsCapable((struct Client *)node->data,CAP_LL))
         {
-          sendto_realops_flags(FLAGS_ALL,
+          sendto_realops_flags(FLAGS_ALL, L_ALL,
             "Ignoring config file line hub = no; due to active LazyLink (%s)",
             ((struct Client *)node->data)->name);
           ServerInfo.hub = 1;
@@ -1378,7 +1378,7 @@ connect_entry:  CONNECT
       {
 #ifndef HAVE_LIBCRYPTO
         if (IsConfCryptLink(yy_aconf) && yy_aconf->name)
-          sendto_realops_flags(FLAGS_ALL,
+          sendto_realops_flags(FLAGS_ALL, L_ALL,
             "Ignoring connect block for %s -- no OpenSSL support",
             yy_aconf->name);
 #endif        
@@ -1447,7 +1447,7 @@ connect_name:   NAME '=' QSTRING ';'
   {
     if(yy_aconf->name != NULL)
       {
-	sendto_realops_flags(FLAGS_ALL,"*** Multiple connect name entry");
+	sendto_realops_flags(FLAGS_ALL, L_ALL,"*** Multiple connect name entry");
 	ilog(L_WARN, "Multiple connect name entry %s", yy_aconf->name);
       }
 
@@ -1541,7 +1541,7 @@ connect_rsa_public_key_file: RSA_PUBLIC_KEY_FILE '=' QSTRING ';'
 
     if (file == NULL)
     {
-      sendto_realops_flags(FLAGS_ALL,
+      sendto_realops_flags(FLAGS_ALL, L_ALL,
         "Ignoring rsa_public_key_file -- does %s exist?", yylval.string);
       break;
     }
@@ -1551,7 +1551,7 @@ connect_rsa_public_key_file: RSA_PUBLIC_KEY_FILE '=' QSTRING ';'
 
     if (yy_aconf->rsa_public_key == NULL)
     {
-      sendto_realops_flags(FLAGS_ALL,
+      sendto_realops_flags(FLAGS_ALL, L_ALL,
         "Ignoring rsa_public_key_file -- Key invalid; check key syntax.");
       break;
     }
@@ -1574,7 +1574,7 @@ connect_cryptlink:	CRYPTLINK '=' TYES ';'
 connect_compressed:       COMPRESSED '=' TYES ';'
   {
 #ifndef HAVE_LIBZ
-    sendto_realops_flags(FLAGS_ALL,
+    sendto_realops_flags(FLAGS_ALL, L_ALL,
       "Ignoring compressed = yes; -- no zlib support");
 #else
     yy_aconf->flags |= CONF_FLAGS_COMPRESSED;
@@ -1665,13 +1665,13 @@ connect_cipher_preference: CIPHER_PREFERENCE '=' QSTRING ';'
 
     if (!found)
     {
-      sendto_realops_flags(FLAGS_ALL, "Invalid cipher '%s' for %s",
+      sendto_realops_flags(FLAGS_ALL, L_ALL, "Invalid cipher '%s' for %s",
                            cipher_name, yy_aconf->name);
       ilog(L_ERROR, "Invalid cipher '%s' for %s",
                     cipher_name, yy_aconf->name);
     }
 #else
-      sendto_realops_flags(FLAGS_ALL,
+      sendto_realops_flags(FLAGS_ALL, L_ALL,
         "Ignoring 'cipher_preference' line for %s -- no OpenSSL support",
          yy_aconf->name);
       ilog(L_ERROR, "Ignoring 'cipher_preference' line for %s -- "
@@ -2236,11 +2236,11 @@ general_default_cipher_preference: DEFAULT_CIPHER_PREFERENCE '=' QSTRING ';'
 
     if (!found)
     {
-      sendto_realops_flags(FLAGS_ALL, "Invalid cipher '%s'", cipher_name);
+      sendto_realops_flags(FLAGS_ALL, L_ALL, "Invalid cipher '%s'", cipher_name);
       ilog(L_ERROR, "Invalid cipher '%s'", cipher_name);
     }
 #else
-    sendto_realops_flags(FLAGS_ALL, "Ignoring 'default_cipher_preference' "
+    sendto_realops_flags(FLAGS_ALL, L_ALL, "Ignoring 'default_cipher_preference' "
                                     "-- no OpenSSL support");
     ilog(L_ERROR, "Ignoring 'default_cipher_preference' "
                   "-- no OpenSSL support");
@@ -2251,14 +2251,14 @@ general_compression_level: COMPRESSION_LEVEL '=' expr ';'
   {
     ConfigFileEntry.compression_level = $3;
 #ifndef HAVE_LIBZ
-    sendto_realops_flags(FLAGS_ALL,
+    sendto_realops_flags(FLAGS_ALL, L_ALL,
       "Ignoring compression_level = %d; -- no zlib support",
        ConfigFileEntry.compression_level);
 #else
     if ((ConfigFileEntry.compression_level < 1) ||
         (ConfigFileEntry.compression_level > 9))
     {
-      sendto_realops_flags(FLAGS_ALL,
+      sendto_realops_flags(FLAGS_ALL, L_ALL,
         "Ignoring invalid compression level '%d', using default",
         ConfigFileEntry.compression_level);
       ConfigFileEntry.compression_level = 0;

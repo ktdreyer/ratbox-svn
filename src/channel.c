@@ -199,7 +199,7 @@ add_id(struct Client *client_p, struct Channel *chptr, char *banid, int type)
       list = &chptr->invexlist;
       break;
     default:
-      sendto_realops_flags(FLAGS_ALL,
+      sendto_realops_flags(FLAGS_ALL, L_ALL,
                            "add_id() called with unknown ban type %d!", type);
       return -1;
   }
@@ -269,7 +269,7 @@ del_id(struct Channel *chptr, char *banid, int type)
       list = &chptr->invexlist;
       break;
     default:
-      sendto_realops_flags(FLAGS_ALL,
+      sendto_realops_flags(FLAGS_ALL, L_ALL,
                            "del_id() called with unknown ban type %d!", type);
       return -1;
   }
@@ -4942,12 +4942,12 @@ check_spambot_warning(struct Client *source_p, const char *name)
     {
       /* Its already known as a possible spambot */
       if (name != NULL)
-        sendto_realops_flags(FLAGS_BOTS,
+        sendto_realops_flags(FLAGS_BOTS, L_ALL,
                              "User %s (%s@%s) trying to join %s is a possible spambot",
                              source_p->name, source_p->username,
                              source_p->host, name);
       else
-        sendto_realops_flags(FLAGS_BOTS,
+        sendto_realops_flags(FLAGS_BOTS, L_ALL,
                              "User %s (%s@%s) is a possible spambot",
                              source_p->name, source_p->username,
                              source_p->host);

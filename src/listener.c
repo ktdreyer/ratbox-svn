@@ -407,7 +407,7 @@ static void accept_connection(int pfd, void *data)
        */
       if((last_oper_notice + 20) <= CurrentTime)
 	{
-	  sendto_realops_flags(FLAGS_ALL,"All connections in use. (%s)", 
+	  sendto_realops_flags(FLAGS_ALL, L_ALL,"All connections in use. (%s)", 
 			       get_listener_name(listener));
 	  last_oper_notice = CurrentTime;
 	}

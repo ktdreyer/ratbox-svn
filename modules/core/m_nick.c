@@ -308,21 +308,21 @@ static void ms_nick(struct Client *client_p, struct Client *source_p,
   /* check the length of username hostname and realname */
   if(parc > 8 && strlen(parv[5]) > USERLEN)
   {
-    sendto_realops_flags(FLAGS_ALL, "Long username from server %s for %s",
+    sendto_realops_flags(FLAGS_ALL, L_ALL, "Long username from server %s for %s",
                          parv[0], parv[1]);
     parv[5][USERLEN] = '\0';
   }
 
   if(parc > 8 && strlen(parv[6]) > HOSTLEN)
   {
-    sendto_realops_flags(FLAGS_ALL, "Long hostname from server %s for %s",
+    sendto_realops_flags(FLAGS_ALL, L_ALL, "Long hostname from server %s for %s",
                          parv[0], parv[1]);
     parv[6][HOSTLEN] = '\0'; 
   }
 
   if(parc > 8 && strlen(parv[8]) > REALLEN)
   {
-    sendto_realops_flags(FLAGS_ALL, "Long realname from server %s for %s",
+    sendto_realops_flags(FLAGS_ALL, L_ALL, "Long realname from server %s for %s",
                          parv[0], parv[1]);
     parv[8][REALLEN] = '\0';			 
   }
@@ -393,21 +393,21 @@ static void ms_client(struct Client *client_p, struct Client *source_p,
   /* chop username, host and realname if we need to */
   if (strlen(parv[5]) > USERLEN)
   {
-    sendto_realops_flags(FLAGS_ALL, "Long username from server %s for %s",
+    sendto_realops_flags(FLAGS_ALL, L_ALL, "Long username from server %s for %s",
                          parv[0], parv[1]);
     parv[5][USERLEN] = '\0';			 
   }
 
   if (strlen(parv[6]) > HOSTLEN)
   {
-    sendto_realops_flags(FLAGS_ALL, "Long hostname from server %s for %s",
+    sendto_realops_flags(FLAGS_ALL, L_ALL, "Long hostname from server %s for %s",
                          parv[0], parv[1]);
     parv[6][HOSTLEN] = '\0';			 
   }
 
   if (strlen(name) > REALLEN)
   {
-    sendto_realops_flags(FLAGS_ALL, "Long realname from server %s for %s",
+    sendto_realops_flags(FLAGS_ALL, L_ALL, "Long realname from server %s for %s",
                          parv[0], parv[1]);
     name[REALLEN] = '\0';			 
   }
@@ -442,7 +442,8 @@ static int check_clean_nick(struct Client *client_p, struct Client *source_p,
   if(!clean_nick_name(nick) || strcmp(nick, newnick))
   {
     ServerStats->is_kill++;
-    sendto_realops_flags(FLAGS_DEBUG, "Bad Nick: %s From: %s %s",
+    sendto_realops_flags(FLAGS_DEBUG, L_ALL,
+                         "Bad Nick: %s From: %s %s",
                          nick, source_p->name, client_p->name);
 
     sendto_one(client_p, ":%s KILL %s :%s (Bad Nickname)",
@@ -615,7 +616,7 @@ perform_nick_collides(struct Client *source_p, struct Client *client_p,
     if(!newts || !target_p->tsinfo ||
        (newts == target_p->tsinfo))
     {
-      sendto_realops_flags(FLAGS_ALL,
+      sendto_realops_flags(FLAGS_ALL, L_ALL,
                            "Nick collision on %s(%s <- %s)(both killed)",
 			   target_p->name, target_p->from->name,
 			   client_p->name);
@@ -653,12 +654,12 @@ perform_nick_collides(struct Client *source_p, struct Client *client_p,
       else
       {
         if(sameuser)
-	  sendto_realops_flags(FLAGS_ALL,
+	  sendto_realops_flags(FLAGS_ALL, L_ALL,
 	                  "Nick collision on %s(%s <- %s)(older killed)",
 			  target_p->name, target_p->from->name,
 			  client_p->name);
         else
-	  sendto_realops_flags(FLAGS_ALL,
+	  sendto_realops_flags(FLAGS_ALL, L_ALL,
 	                  "Nick collision on %s(%s <- %s)(newer killed)",
 			  target_p->name, target_p->from->name,
 			  client_p->name);
@@ -691,7 +692,7 @@ perform_nick_collides(struct Client *source_p, struct Client *client_p,
   if(!newts || !target_p->tsinfo || (newts == target_p->tsinfo) ||
        !source_p->user)
     {
-      sendto_realops_flags(FLAGS_ALL,
+      sendto_realops_flags(FLAGS_ALL, L_ALL,
                  "Nick change collision from %s to %s(%s <- %s)(both killed)",
 		 source_p->name, target_p->name, target_p->from->name,
 		 client_p->name);
@@ -729,12 +730,12 @@ perform_nick_collides(struct Client *source_p, struct Client *client_p,
           (!sameuser && newts > target_p->tsinfo))
       {
         if(sameuser)
-	  sendto_realops_flags(FLAGS_ALL,
+	  sendto_realops_flags(FLAGS_ALL, L_ALL,
  	       "Nick change collision from %s to %s(%s <- %s)(older killed)",
 	       source_p->name, target_p->name, target_p->from->name,
 	       client_p->name);
         else
-	  sendto_realops_flags(FLAGS_ALL,
+	  sendto_realops_flags(FLAGS_ALL, L_ALL,
 	       "Nick change collision from %s to %s(%s <- %s)(newer killed)",
 	       source_p->name, target_p->name, target_p->from->name,
 	       client_p->name);
@@ -757,12 +758,12 @@ perform_nick_collides(struct Client *source_p, struct Client *client_p,
      else
      {
        if(sameuser)
-         sendto_realops_flags(FLAGS_ALL,
+         sendto_realops_flags(FLAGS_ALL, L_ALL,
 	                      "Nick collision on %s(%s <- %s)(older killed)",
 			      target_p->name, target_p->from->name,
 			      client_p->name);
        else
-         sendto_realops_flags(FLAGS_ALL,
+         sendto_realops_flags(FLAGS_ALL, L_ALL,
 	                      "Nick collision on %s(%s <- %s)(newer killed)",
 			      target_p->name, target_p->from->name,
 			      client_p->name);

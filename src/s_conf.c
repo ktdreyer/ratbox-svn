@@ -436,20 +436,26 @@ int check_client(struct Client *client_p, struct Client *source_p, char *usernam
       break;
 
     case TOO_MANY:
-      sendto_realops_flags(FLAGS_FULL, "%s for %s (%s).",
-			   "Too many on IP", get_client_host(source_p),
+      sendto_realops_flags(FLAGS_FULL, L_ALL, 
+                           "Too many on IP for %s (%s).",
+			   get_client_host(source_p),
 			   source_p->localClient->sockhost);
+			   
       ilog(L_INFO,"Too many connections on IP from %s.", get_client_host(source_p));
+      
       ServerStats->is_ref++;
       (void)exit_client(client_p, source_p, &me, 
 			"No more connections allowed on that IP" );
       break;
 
     case I_LINE_FULL:
-      sendto_realops_flags(FLAGS_FULL, "%s for %s (%s).",
-			   "I-line is full", get_client_host(source_p),
+      sendto_realops_flags(FLAGS_FULL, L_ALL,
+                           "I-line is full for %s (%s).",
+			   get_client_host(source_p),
 			   source_p->localClient->sockhost);
+			   
       ilog(L_INFO,"Too many connections from %s.", get_client_host(source_p));
+      
       ServerStats->is_ref++;
       (void)exit_client(client_p, source_p, &me, 
 		"No more connections allowed in your connection class" );
@@ -462,20 +468,18 @@ int check_client(struct Client *client_p, struct Client *source_p, char *usernam
       /* jdc - lists server name & port connections are on */
       /*       a purely cosmetical change */
       inetntop(source_p->localClient->aftype, &IN_ADDR(source_p->localClient->ip), ipaddr, HOSTIPLEN);
-      sendto_realops_flags(FLAGS_UNAUTH,
-			   "%s from %s [%s] on [%s/%u].",
-			   "Unauthorized client connection",
+      sendto_realops_flags(FLAGS_UNAUTH, L_ALL,
+			   "Unauthorised client connection from %s [%s] on [%s/%u].",
 			   get_client_host(source_p),
 			   ipaddr,
 			   source_p->localClient->listener->name,
-			   source_p->localClient->listener->port
-			   );
+			   source_p->localClient->listener->port);
+			   
       ilog(L_INFO,
 	  "Unauthorized client connection from %s on [%s/%u].",
 	  get_client_host(source_p),
 	  source_p->localClient->listener->name,
-	  source_p->localClient->listener->port
-	  );
+	  source_p->localClient->listener->port);
 	  
       (void)exit_client(client_p, source_p, &me,
 			"You are not authorized to use this server");
@@ -558,7 +562,7 @@ int attach_Iline(struct Client* client_p, const char* username)
 	    {
 	      if (IsConfSpoofNotice(aconf))
 		{
-		  sendto_realops_flags(FLAGS_SERVADMIN,
+		  sendto_realops_flags(FLAGS_ALL, L_ADMIN,
 				       "%s spoofing: %s as %s", client_p->name,
 				       client_p->host, aconf->name);
 		}
@@ -1318,7 +1322,7 @@ int rehash(struct Client *client_p,struct Client *source_p, int sig)
 {
   if (sig)
   {
-    sendto_realops_flags(FLAGS_ALL,"Got signal SIGHUP, reloading ircd conf. file");
+    sendto_realops_flags(FLAGS_ALL, L_ALL,"Got signal SIGHUP, reloading ircd conf. file");
   }
 
   restart_resolver();
@@ -1934,7 +1938,7 @@ void read_conf_files(int cold)
         }
       else
         {
-          sendto_realops_flags(FLAGS_ALL,
+          sendto_realops_flags(FLAGS_ALL, L_ALL,
 			       "Can't open file '%s' - aborting rehash!",
 			       filename );
           return;
@@ -1957,7 +1961,7 @@ void read_conf_files(int cold)
 	  if (cold)
 	    ilog(L_ERROR, "Failed reading kline file %s", filename);
 	  else
-	    sendto_realops_flags(FLAGS_ALL,
+	    sendto_realops_flags(FLAGS_ALL, L_ALL,
 				 "Can't open %s file klines could be missing!",
 				 kfilename);
 	}
@@ -1976,7 +1980,7 @@ void read_conf_files(int cold)
 	  if(cold)
 	    ilog(L_ERROR, "Failed reading dline file %s", dfilename);
 	  else
-	    sendto_realops_flags(FLAGS_ALL,
+	    sendto_realops_flags(FLAGS_ALL, L_ALL,
 				 "Can't open %s file dlines could be missing!",
 				 dfilename);
 	}
@@ -2161,7 +2165,7 @@ void WriteKlineOrDline( KlineType type,
 
   if(type == DLINE_TYPE)
     {
-      sendto_realops_flags(FLAGS_ALL,
+      sendto_realops_flags(FLAGS_ALL, L_ALL,
 			   "%s added D-Line for [%s] [%s]",
 			   get_oper_name(source_p), host, reason);
       sendto_one(source_p, ":%s NOTICE %s :Added D-Line [%s] to %s",
@@ -2170,7 +2174,7 @@ void WriteKlineOrDline( KlineType type,
     }
   else
     {
-      sendto_realops_flags(FLAGS_ALL,
+      sendto_realops_flags(FLAGS_ALL, L_ALL,
 			   "%s added K-Line for [%s@%s] [%s]",
 			   get_oper_name(source_p), user, host, reason);
       sendto_one(source_p, ":%s NOTICE %s :Added K-Line [%s@%s]",
@@ -2179,7 +2183,7 @@ void WriteKlineOrDline( KlineType type,
 
   if ( (out = fbopen(filename, "a")) == NULL )
     {
-      sendto_realops_flags(FLAGS_ALL,
+      sendto_realops_flags(FLAGS_ALL, L_ALL,
 			   "*** Problem opening %s ", filename);
       return;
     }
@@ -2203,7 +2207,7 @@ void WriteKlineOrDline( KlineType type,
 
   if (fbputs(buffer,out) == -1)
     {
-      sendto_realops_flags(FLAGS_ALL,"*** Problem writing to %s",filename);
+      sendto_realops_flags(FLAGS_ALL, L_ALL,"*** Problem writing to %s",filename);
       fbclose(out);
       return;
     }
@@ -2284,7 +2288,7 @@ void conf_add_class_to_conf(struct ConfItem *aconf)
 
   if(ClassPtr(aconf) == class0)
     {
-      sendto_realops_flags(FLAGS_ALL,
+      sendto_realops_flags(FLAGS_ALL, L_ALL,
 	   "Warning *** Defaulting to default class for missing class \"%s\"",
 			   aconf->className);
       MyFree(aconf->className);
@@ -2344,14 +2348,14 @@ int conf_add_server(struct ConfItem *aconf, int lcount)
 
   if (lcount > MAXCONFLINKS || !aconf->host || !aconf->name)
     {
-      sendto_realops_flags(FLAGS_ALL,"Bad connect block");
+      sendto_realops_flags(FLAGS_ALL, L_ALL,"Bad connect block");
       ilog(L_WARN, "Bad connect block");
       return -1;
     }
 
   if (BadPtr(aconf->passwd) && !(aconf->flags & CONF_FLAGS_CRYPTLINK))
     {
-      sendto_realops_flags(FLAGS_ALL,"Bad connect block, name %s",
+      sendto_realops_flags(FLAGS_ALL, L_ALL,"Bad connect block, name %s",
 			   aconf->name);
       ilog(L_WARN, "Bad connect block, host %s",aconf->name);
       return -1;
@@ -2359,7 +2363,7 @@ int conf_add_server(struct ConfItem *aconf, int lcount)
           
   if( SplitUserHost(aconf) < 0 )
     {
-      sendto_realops_flags(FLAGS_ALL,"Bad connect block, name %s",
+      sendto_realops_flags(FLAGS_ALL, L_ALL,"Bad connect block, name %s",
 			   aconf->name);
       ilog(L_WARN, "Bad connect block, name %s",aconf->name);
       return -1;
@@ -2481,7 +2485,7 @@ void yyerror(char *msg)
 
   strip_tabs(newlinebuf, (const unsigned char *)linebuf, strlen(linebuf));
 
-  sendto_realops_flags(FLAGS_ALL,"%d: %s on line: %s",
+  sendto_realops_flags(FLAGS_ALL, L_ALL,"%d: %s on line: %s",
 		       lineno + 1, msg, newlinebuf);
 
   ilog(L_WARN, "%d: %s on line: %s",
@@ -2503,7 +2507,7 @@ int conf_fbgets(char *lbuf,int max_size, FBFILE *fb)
 int conf_yy_fatal_error(char *msg)
 {
 #if 0
-  sendto_realops_flags(FLAGS_ALL,
+  sendto_realops_flags(FLAGS_ALL, L_ALL,
 		       "lexer barfed. lets leave it at that for now");
 #endif
   return 0;

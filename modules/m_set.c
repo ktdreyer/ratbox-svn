@@ -164,7 +164,7 @@ static void quote_autoconnall( struct Client *source_p, int newval)
 {
   if(newval >= 0)
   {
-    sendto_realops_flags(FLAGS_ALL,"%s has changed AUTOCONNALL to %i",
+    sendto_realops_flags(FLAGS_ALL, L_ALL,"%s has changed AUTOCONNALL to %i",
                          source_p->name, newval);
 
     GlobalSetOptions.autoconn = newval;
@@ -183,7 +183,7 @@ static void quote_floodcount( struct Client *source_p, int newval)
   if(newval >= 0)
   {
     GlobalSetOptions.floodcount = newval;
-    sendto_realops_flags(FLAGS_ALL,
+    sendto_realops_flags(FLAGS_ALL, L_ALL,
                          "%s has changed FLOODCOUNT to %i", source_p->name,
                          GlobalSetOptions.floodcount);
   }
@@ -201,14 +201,14 @@ static void quote_idletime( struct Client *source_p, int newval )
   {
     if (newval == 0)
     {
-      sendto_realops_flags(FLAGS_ALL,
+      sendto_realops_flags(FLAGS_ALL, L_ALL,
                            "%s has disabled idletime checking",
                            source_p->name);
       GlobalSetOptions.idletime = 0;
     }
     else
     {
-      sendto_realops_flags(FLAGS_ALL,
+      sendto_realops_flags(FLAGS_ALL, L_ALL,
                            "%s has changed IDLETIME to %i",
                            source_p->name, newval);
       GlobalSetOptions.idletime = (newval*60);
@@ -242,7 +242,7 @@ static void quote_log( struct Client *source_p, int newval )
 
     set_log_level(newval);
     log_level_as_string = get_log_level_as_string(newval);
-    sendto_realops_flags(FLAGS_ALL,"%s has changed LOG level to %i (%s)",
+    sendto_realops_flags(FLAGS_ALL, L_ALL,"%s has changed LOG level to %i (%s)",
                          source_p->name, newval, log_level_as_string);
   }
   else
@@ -276,7 +276,7 @@ static void quote_max( struct Client *source_p, int newval )
 
     GlobalSetOptions.maxclients = newval;
 
-    sendto_realops_flags(FLAGS_ALL,
+    sendto_realops_flags(FLAGS_ALL, L_ALL,
 	"%s!%s@%s set new MAXCLIENTS to %d (%d current)",
 	source_p->name, source_p->username, source_p->host,
 	GlobalSetOptions.maxclients, Count.local);
@@ -324,7 +324,7 @@ static void quote_spamnum( struct Client *source_p, int newval )
   {
     if (newval == 0)
     {
-      sendto_realops_flags(FLAGS_ALL,
+      sendto_realops_flags(FLAGS_ALL, L_ALL,
                            "%s has disabled ANTI_SPAMBOT", source_p->name);
       GlobalSetOptions.spam_num = newval;
       return;
@@ -337,7 +337,7 @@ static void quote_spamnum( struct Client *source_p, int newval )
     {
       GlobalSetOptions.spam_num = newval;
     }
-    sendto_realops_flags(FLAGS_ALL,"%s has changed SPAMNUM to %i",
+    sendto_realops_flags(FLAGS_ALL, L_ALL,"%s has changed SPAMNUM to %i",
 		source_p->name, GlobalSetOptions.spam_num);
   }
   else
@@ -361,7 +361,7 @@ static void quote_spamtime( struct Client *source_p, int newval )
     {
       GlobalSetOptions.spam_time = newval;
     }
-    sendto_realops_flags(FLAGS_ALL,"%s has changed SPAMTIME to %i",
+    sendto_realops_flags(FLAGS_ALL, L_ALL,"%s has changed SPAMTIME to %i",
 		source_p->name, GlobalSetOptions.spam_time);
   }
   else
@@ -381,7 +381,7 @@ static void quote_shide( struct Client *source_p, int newval )
     else
       GlobalSetOptions.hide_server = 0;
 
-    sendto_realops_flags(FLAGS_ALL,"%s has changed SHIDE to %i",
+    sendto_realops_flags(FLAGS_ALL, L_ALL,"%s has changed SHIDE to %i",
                          source_p->name, GlobalSetOptions.hide_server);
   }
   else

@@ -273,7 +273,7 @@ check_pings_list(dlink_list *list)
               aconf->port = 0;
               aconf->hold = CurrentTime + 60;
               add_temp_kline(aconf);
-              sendto_realops_flags(FLAGS_ALL,
+              sendto_realops_flags(FLAGS_ALL, L_ALL,
 			   "Idle time limit exceeded for %s - temp k-lining",
 				   get_client_name(client_p, HIDE_IP));
 
@@ -300,10 +300,10 @@ check_pings_list(dlink_list *list)
               if (IsServer(client_p) || IsConnecting(client_p) ||
                   IsHandshake(client_p))
                 {
-                  sendto_realops_flags(FLAGS_SERVADMIN,
+                  sendto_realops_flags(FLAGS_ALL, L_ADMIN,
 				       "No response from %s, closing link",
 				       get_client_name(client_p, HIDE_IP));
-                  sendto_realops_flags(FLAGS_SERVOPER,
+                  sendto_realops_flags(FLAGS_ALL, L_OPER,
                                        "No response from %s, closing link",
                                        get_client_name(client_p, MASK_IP));
                   ilog(L_NOTICE, "No response from %s, closing link",
@@ -397,7 +397,7 @@ check_klines(void)
    {
      if (aconf->status & CONF_EXEMPTDLINE)
        continue;
-     sendto_realops_flags(FLAGS_ALL,"DLINE active for %s",
+     sendto_realops_flags(FLAGS_ALL, L_ALL,"DLINE active for %s",
                         get_client_name(client_p, HIDE_IP));
      if (ConfigFileEntry.kline_with_connection_closed)
        reason = "Connection closed";
@@ -424,7 +424,7 @@ check_klines(void)
      {
        if (IsExemptKline(client_p))
        {
-         sendto_realops_flags(FLAGS_ALL,
+         sendto_realops_flags(FLAGS_ALL, L_ALL,
                        "GLINE over-ruled for %s, client is kline_exempt",
                        get_client_name(client_p, HIDE_IP));
          continue;
@@ -432,13 +432,13 @@ check_klines(void)
        
        if (IsExemptGline(client_p))
        {
-         sendto_realops_flags(FLAGS_ALL,
+         sendto_realops_flags(FLAGS_ALL, L_ALL,
                        "GLINE over-ruled for %s, client is gline_exempt",
          get_client_name(client_p, HIDE_IP));
          continue;
        }
        
-       sendto_realops_flags(FLAGS_ALL, "GLINE active for %s",
+       sendto_realops_flags(FLAGS_ALL, L_ALL, "GLINE active for %s",
                             get_client_name(client_p, HIDE_IP));
 			    
        if (ConfigFileEntry.kline_with_connection_closed)
@@ -468,13 +468,13 @@ check_klines(void)
         /* if there is a returned struct ConfItem.. then kill it */
         if (IsExemptKline(client_p))
         {
-           sendto_realops_flags(FLAGS_ALL,
+           sendto_realops_flags(FLAGS_ALL, L_ALL,
                    "KLINE over-ruled for %s, client is kline_exempt",
            get_client_name(client_p, HIDE_IP));
            continue;
         }
 
-        sendto_realops_flags(FLAGS_ALL, "KLINE active for %s",
+        sendto_realops_flags(FLAGS_ALL, L_ALL, "KLINE active for %s",
                             get_client_name(client_p, HIDE_IP));
         if (ConfigFileEntry.kline_with_connection_closed)
           reason = "Connection closed";
@@ -507,7 +507,8 @@ static void update_client_exit_stats(struct Client* client_p)
   if (IsServer(client_p))
     {
       --Count.server;
-      sendto_realops_flags(FLAGS_EXTERNAL, "Server %s split from %s",
+      sendto_realops_flags(FLAGS_EXTERNAL, L_ALL, 
+                           "Server %s split from %s",
                            client_p->name, client_p->servptr->name);
     }
   else if (IsClient(client_p))
@@ -947,7 +948,7 @@ free_exited_clients(void *unused)
   next = ptr->next;
   if (ptr->data == NULL)
   {
-   sendto_realops_flags(FLAGS_ALL,
+   sendto_realops_flags(FLAGS_ALL, L_ALL,
                         "Warning: null client on dead_list!");
    dlinkDelete(ptr, &dead_list);
    free_dlink_node(ptr);
@@ -994,7 +995,7 @@ static void exit_one_client(struct Client *client_p, struct
   */
   if (IsMe(source_p))
     {
-      sendto_realops_flags(FLAGS_ALL,
+      sendto_realops_flags(FLAGS_ALL, L_ALL,
 			   "ERROR: tried to exit me! : %s", comment);
       return;        /* ...must *never* exit self!! */
     }
@@ -1321,7 +1322,7 @@ const char* comment         /* Reason for the exit */
       source_p->flags |= FLAGS_CLOSING;
 
       if (IsPerson(source_p))
-        sendto_realops_flags(FLAGS_CCONN,
+        sendto_realops_flags(FLAGS_CCONN, L_ALL,
                              "Client exiting: %s (%s@%s) [%s] [%s]",
                              source_p->name, source_p->username, source_p->host,
                              comment, source_p->localClient->sockhost);
@@ -1380,7 +1381,7 @@ const char* comment         /* Reason for the exit */
 
       if (source_p->servptr == &me)
         {
-          sendto_realops_flags(FLAGS_ALL,
+          sendto_realops_flags(FLAGS_ALL, L_ALL,
 		       "%s was connected for %d seconds.  %d/%d sendK/recvK.",
 			       source_p->name, (int)(CurrentTime - source_p->firsttime),
 			       source_p->localClient->sendK,
@@ -1732,7 +1733,7 @@ int change_local_nick(struct Client *client_p, struct Client *source_p,
      !ConfigFileEntry.anti_nick_flood || 
      (IsOper(source_p) && ConfigFileEntry.no_oper_flood))
     {
-      sendto_realops_flags(FLAGS_NCHANGE,
+      sendto_realops_flags(FLAGS_NCHANGE, L_ALL,
 			   "Nick change: From %s to %s [%s@%s]",
 			   source_p->name, nick, source_p->username,
 			   source_p->host);

@@ -101,7 +101,7 @@ static void ms_lljoin(struct Client *client_p,
 
   if(uplink && !IsCapable(uplink,CAP_LL))
     {
-      sendto_realops_flags(FLAGS_ALL,
+      sendto_realops_flags(FLAGS_ALL, L_ALL,
 			   "*** LLJOIN requested from non LL server %s",
 			   client_p->name);
       return;
@@ -147,7 +147,7 @@ static void ms_lljoin(struct Client *client_p,
   {
     if(!chptr) /* Uhm, bad! */
     {
-      sendto_realops_flags(FLAGS_ALL,
+      sendto_realops_flags(FLAGS_ALL, L_ALL,
         "LLJOIN %s %s called by %s, but root chan doesn't exist!",
         chname, nick, client_p->name);
       return;

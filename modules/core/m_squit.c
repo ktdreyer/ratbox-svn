@@ -100,7 +100,7 @@ static void mo_squit(struct Client *client_p, struct Client *source_p,
     {
       if(MyConnect(found_squit->target_p))
 	{
-	  sendto_realops_flags(FLAGS_ALL,
+	  sendto_realops_flags(FLAGS_ALL, L_ALL,
 			       "Received SQUIT %s from %s (%s)",
 			       found_squit->target_p->name,
 			       get_client_name(source_p, HIDE_IP), comment);

@@ -366,7 +366,8 @@ static void m_info(struct Client *client_p, struct Client *source_p,
     }
   }
 
-  sendto_realops_flags(FLAGS_SPY, "info requested by %s (%s@%s) [%s]",
+  sendto_realops_flags(FLAGS_SPY, L_ADMIN,
+    "info requested by %s (%s@%s) [%s]",
     source_p->name, source_p->username, source_p->host,
     source_p->user->server);
 
@@ -388,7 +389,8 @@ static void mo_info(struct Client *client_p, struct Client *source_p,
 {
   if (hunt_server(client_p,source_p,":%s INFO :%s",1,parc,parv) == HUNTED_ISME)
   {
-    sendto_realops_flags(FLAGS_SPY, "info requested by %s (%s@%s) [%s]",
+    sendto_realops_flags(FLAGS_SPY, L_ADMIN,
+      "info requested by %s (%s@%s) [%s]",
       source_p->name, source_p->username, source_p->host,
       source_p->user->server);
 

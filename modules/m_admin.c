@@ -134,7 +134,7 @@ static void do_admin( struct Client *source_p )
   char *nick;
 
   if (IsPerson(source_p))
-    sendto_realops_flags(FLAGS_SPY,
+    sendto_realops_flags(FLAGS_SPY, L_ADMIN,
                          "ADMIN requested by %s (%s@%s) [%s]", source_p->name,
                          source_p->username, source_p->host, source_p->user->server);
 

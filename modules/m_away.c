@@ -81,9 +81,9 @@ static void m_away(struct Client *client_p,
   /* make sure the user exists */
   if (!(source_p->user))
     {
-      sendto_realops_flags(FLAGS_DEBUG,
-                           "Got AWAY from nil user, from %s (%s)\n",
-			   client_p->name,source_p->name);
+      sendto_realops_flags(FLAGS_DEBUG, L_ALL,
+                           "Got AWAY from nil user, from %s (%s)",
+			   client_p->name, source_p->name);
       return;
     }
   away = source_p->user->away;

@@ -148,21 +148,21 @@ static void ms_client(struct Client *client_p, struct Client *source_p,
   /* Okay, we should be safe to cut off the username... -A1kmm */
   if (strlen(parv[5]) > USERLEN)
     {
-     sendto_realops_flags(FLAGS_ALL, "Long username from server %s for %s",
+     sendto_realops_flags(FLAGS_ALL, L_ALL, "Long username from server %s for %s",
                 parv[0], parv[1]);
      parv[5][USERLEN] = 0;
     }
   /* Okay, we should be safe to cut off the hostname... -A1kmm */
   if (strlen(parv[6]) > HOSTLEN)
     {
-     sendto_realops_flags(FLAGS_ALL, "Long hostname from server %s for %s",
+     sendto_realops_flags(FLAGS_ALL, L_ALL, "Long hostname from server %s for %s",
                 parv[0], parv[1]);
      parv[6][HOSTLEN] = 0;
     }
   /* Okay, we should be safe to cut off the realname... -A1kmm */
   if (strlen(name) > REALLEN)
     {
-     sendto_realops_flags(FLAGS_ALL, "Long realname from server %s for %s",
+     sendto_realops_flags(FLAGS_ALL, L_ALL, "Long realname from server %s for %s",
                 parv[0], parv[1]);
      name[REALLEN] = 0;
     }
@@ -198,7 +198,7 @@ static void ms_client(struct Client *client_p, struct Client *source_p,
       {
         if (!target_p->user)
           {
-            sendto_realops_flags(FLAGS_ALL,
+            sendto_realops_flags(FLAGS_ALL, L_ALL,
                    "Nick Collision on %s(%s(NOUSER) <- %s!%s@%s)(TS:%s)",
                    target_p->name, target_p->from->name, parv[1], parv[5], parv[6],
                    client_p->name);
@@ -261,7 +261,7 @@ static void ms_client(struct Client *client_p, struct Client *source_p,
       if (!newts || !target_p->tsinfo
           || (newts == target_p->tsinfo))
 	  {
-          sendto_realops_flags(FLAGS_ALL,
+          sendto_realops_flags(FLAGS_ALL, L_ALL,
 			   "Nick collision on %s(%s <- %s)(both killed)",
 			   target_p->name, target_p->from->name,
 			   get_client_name(client_p, HIDE_IP));
@@ -304,12 +304,12 @@ static void ms_client(struct Client *client_p, struct Client *source_p,
           else
             {
               if (sameuser)
-                sendto_realops_flags(FLAGS_ALL,
+                sendto_realops_flags(FLAGS_ALL, L_ALL,
                        "Nick collision on %s(%s <- %s)(older killed)",
 		       target_p->name, target_p->from->name,
 		       get_client_name(client_p, HIDE_IP));
               else
-                sendto_realops_flags(FLAGS_ALL,
+                sendto_realops_flags(FLAGS_ALL, L_ALL,
 			     "Nick collision on %s(%s <- %s)(newer killed)",
 			     target_p->name, target_p->from->name,
 			     get_client_name(client_p, HIDE_IP));
@@ -344,7 +344,7 @@ static void ms_client(struct Client *client_p, struct Client *source_p,
   if ( !newts || !target_p->tsinfo || (newts == target_p->tsinfo) ||
       !source_p->user)
     {
-      sendto_realops_flags(FLAGS_ALL,
+      sendto_realops_flags(FLAGS_ALL, L_ALL,
 	   "Nick change collision from %s to %s(%s <- %s)(both killed)",
            source_p->name, target_p->name, target_p->from->name,
 	   get_client_name(client_p, HIDE_IP));
@@ -388,12 +388,12 @@ static void ms_client(struct Client *client_p, struct Client *source_p,
           (!sameuser && newts > target_p->tsinfo))
         {
           if (sameuser)
-            sendto_realops_flags(FLAGS_ALL,
+            sendto_realops_flags(FLAGS_ALL, L_ALL,
                  "Nick change collision from %s to %s(%s <- %s)(older killed)",
                  source_p->name, target_p->name, target_p->from->name,
                  get_client_name(client_p, HIDE_IP));
           else
-            sendto_realops_flags(FLAGS_ALL,
+            sendto_realops_flags(FLAGS_ALL, L_ALL,
                  "Nick change collision from %s to %s(%s <- %s)(newer killed)",
                  source_p->name, target_p->name, target_p->from->name,
                  get_client_name(client_p, HIDE_IP));
@@ -420,12 +420,12 @@ static void ms_client(struct Client *client_p, struct Client *source_p,
       else
         {
           if (sameuser)
-            sendto_realops_flags(FLAGS_ALL,
+            sendto_realops_flags(FLAGS_ALL, L_ALL,
                                "Nick collision on %s(%s <- %s)(older killed)",
                                target_p->name, target_p->from->name,
                                get_client_name(client_p, HIDE_IP));
           else
-            sendto_realops_flags(FLAGS_ALL,
+            sendto_realops_flags(FLAGS_ALL, L_ALL,
                          "Nick collision on %s(%s <- %s)(newer killed)",
                          target_p->name, target_p->from->name,
                          get_client_name(client_p, HIDE_IP));

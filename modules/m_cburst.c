@@ -98,7 +98,7 @@ static void ms_cburst(struct Client *client_p,
     key = "";
 
 #ifdef DEBUGLL
-  sendto_realops_flags(FLAGS_ALL, "CBURST called by %s for %s %s %s",
+  sendto_realops_flags(FLAGS_ALL, L_ALL, "CBURST called by %s for %s %s %s",
     client_p->name,
     name,
     nick ? nick : "",
@@ -132,7 +132,7 @@ static void ms_cburst(struct Client *client_p,
     }
   else
     {
-      sendto_realops_flags(FLAGS_ALL,
+      sendto_realops_flags(FLAGS_ALL, L_ALL,
 		   "*** CBURST request received from non LL capable server! [%s]",
 			   client_p->name);
     }

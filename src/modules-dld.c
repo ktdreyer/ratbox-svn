@@ -208,7 +208,7 @@ int unload_one_module (char *name, int check)
   if(check == 1)
     {
       ilog (L_INFO, "Module %s unloaded", name);
-      sendto_realops_flags(FLAGS_ALL,"Module %s unloaded", name);
+      sendto_realops_flags(FLAGS_ALL, L_ALL,"Module %s unloaded", name);
     }
 
   return 0;

@@ -414,15 +414,13 @@ struct LocalUser
 #define FLAGS_UNAUTH       0x8000 /* show unauth connects here */
 #define FLAGS_DRONE        0x10000 /* show drone connects */
 #define FLAGS_LOCOPS       0x20000 /* show locops */
-#define FLAGS_SERVADMIN	   0x100000 /* servnotices for admins only */
-#define FLAGS_SERVOPER	   0x200000 /* servnotices for non-admins only */
 
 /* user information flags, only settable by remote mode or local oper */
 #define FLAGS_OPER         0x40000 /* Operator */
 #define FLAGS_ADMIN        0x80000 /* Admin on server */
 
-
 #define FLAGS_ALL	   FLAGS_SERVNOTICE
+
 
 /* overflow flags */
 #define FLAGS2_EXEMPTGLINE  0x0001	/* client can't be G-lined */
