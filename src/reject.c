@@ -35,7 +35,7 @@
 #include "msg.h"
 
 static patricia_tree_t *reject_tree;
-static dlink_list delay_exit;
+dlink_list delay_exit;
 static dlink_list reject_list;
 
 struct reject_data
