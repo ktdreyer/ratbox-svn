@@ -1,3 +1,20 @@
+leeh        2004/03/06 15:03:31 EST	(20040306_5)
+
+  Modified files:
+    include              ircd_defs.h supported.h 
+    modules              m_join.c 
+  Log:
+  - added LOC_CHANNELLEN, max length of a channel a local user is allowed to
+    join, currently 50.
+  - added CHANNELLEN=%d to 005
+  
+  Revision  Changes    Path
+  7.48      +1 -0      ircd-ratbox/include/ircd_defs.h
+  1.35      +11 -10    ircd-ratbox/include/supported.h
+  1.146     +2 -3      ircd-ratbox/modules/m_join.c
+
+
+
 leeh        2004/03/06 14:43:33 EST	(20040306_4)
 
   Modified files:
