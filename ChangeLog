@@ -1,3 +1,18 @@
+androsyn    2004/03/10 14:16:39 EST	(20040310_1)
+
+  Modified files:
+    modules              Makefile.in 
+  Removed files:
+    modules              m_join.c 
+  Log:
+  Move m_join to core/
+  
+  Revision  Changes    Path
+  1.93      +1 -1      ircd-ratbox/modules/Makefile.in
+  1.148     +0 -705    ircd-ratbox/modules/m_join.c (dead)
+
+
+
 leeh        2004/03/10 12:41:53 EST	(20040310_0)
 
   Modified files:
