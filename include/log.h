@@ -1,3 +1,4 @@
+/* $Id$ */
 #ifndef INCLUDED_log_h
 #define INCLUDED_log_h
 

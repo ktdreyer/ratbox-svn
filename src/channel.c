@@ -16,10 +16,12 @@ static dlink_list channel_table[MAX_CHANNEL_TABLE];
 dlink_list channel_list;
 
 static void c_join(struct client *, char *parv[], int parc);
+static void c_kick(struct client *, char *parv[], int parc);
 static void c_part(struct client *, char *parv[], int parc);
 static void c_sjoin(struct client *, char *parv[], int parc);
 
 static struct scommand_handler join_command = { "JOIN", c_join, 0 };
+static struct scommand_handler kick_command = { "KICK", c_kick, 0 };
 static struct scommand_handler part_command = { "PART", c_part, 0 };
 static struct scommand_handler sjoin_command = { "SJOIN", c_sjoin, 0 };
 
@@ -27,6 +29,7 @@ void
 init_channel(void)
 {
 	add_scommand_handler(&join_command);
+	add_scommand_handler(&kick_command);
 	add_scommand_handler(&part_command);
 	add_scommand_handler(&sjoin_command);
 }
@@ -130,7 +133,7 @@ del_chmember(struct chmember *mptr)
 }
 
 struct chmember *
-get_chmember(struct channel *chptr, struct client *target_p)
+find_chmember(struct channel *chptr, struct client *target_p)
 {
 	struct chmember *mptr;
 	dlink_node *ptr;
@@ -168,11 +171,33 @@ c_join(struct client *client_p, char *parv[], int parc)
 }
 
 static void
+c_kick(struct client *client_p, char *parv[], int parc)
+{
+	struct client *target_p;
+	struct channel *chptr;
+	struct chmember *mptr;
+
+	if(parc < 3 || EmptyString(parv[2]))
+		return;
+
+	if((chptr = find_channel(parv[1])) == NULL)
+		return;
+
+	if((target_p = find_user(parv[2])) == NULL)
+		return;
+
+	if((mptr = find_chmember(chptr, target_p)) == NULL)
+		return;
+
+	del_chmember(mptr);
+}
+		
+
+static void
 c_part(struct client *client_p, char *parv[], int parc)
 {
 	struct chmember *mptr;
 	struct channel *chptr;
-	dlink_node *ptr;
 
 	if(parc < 2 || EmptyString(parv[1]))
 		return;
@@ -183,31 +208,56 @@ c_part(struct client *client_p, char *parv[], int parc)
 	if((chptr = find_channel(parv[1])) == NULL)
 		return;
 
-	DLINK_FOREACH(ptr, client_p->user->channels.head)
-	{
-		mptr = ptr->data;
+	if((mptr = find_chmember(chptr, client_p)) == NULL)
+		return;
 
-		if(mptr->chptr == chptr)
-		{
-			del_chmember(ptr->data);
-			break;
-		}
-	}
+	del_chmember(mptr);
 }
 
 static void
 remove_our_modes(struct channel *chptr)
 {
-	chptr->mode = 0;
-	chptr->key[0] = '\0';
-	chptr->limit = 0;
+	chptr->mode.mode = 0;
+	chptr->mode.key[0] = '\0';
+	chptr->mode.limit = 0;
 }
 
+const char *
+chmode_to_string(struct channel *chptr)
+{
+	static char buf[10];
+	char *p;
+
+	p = buf;
+
+	*p++ = '+';
+
+	if(chptr->mode.mode & MODE_INVITEONLY)
+		*p++ = 'i';
+	if(chptr->mode.mode & MODE_MODERATED)
+		*p++ = 'm';
+	if(chptr->mode.mode & MODE_NOEXTERNAL)
+		*p++ = 'n';
+	if(chptr->mode.mode & MODE_PRIVATE)
+		*p++ = 'p';
+	if(chptr->mode.mode & MODE_SECRET)
+		*p++ = 's';
+	if(chptr->mode.mode & MODE_TOPIC)
+		*p++ = 't';
+	if(chptr->mode.limit)
+		*p++ = 'l';
+	if(chptr->mode.key[0])
+		*p++ = 'k';
+
+	*p = '\0';
+	return buf;
+}
 static void
 c_sjoin(struct client *client_p, char *parv[], int parc)
 {
 	struct channel *chptr;
 	struct client *target_p;
+	struct chmode newmode;
 	char *p;
 	char *s;
 	time_t newts;
@@ -249,54 +299,64 @@ c_sjoin(struct client *client_p, char *parv[], int parc)
 		}
 	}
 
-	/* note, we assume here an sjoin where we dont keep the new modes is
-	 * NOT going to have a +lk in it.
-	 */
+	newmode.mode = 0;
+	newmode.key[0] = '\0';
+	newmode.limit = 0;
+
+	s = parv[3];
+
+	while(*s)
+	{
+		/* skips the leading '+' */
+		switch(*(s++))
+		{
+		case 'i':
+			newmode.mode |= MODE_INVITEONLY;
+			break;
+		case 'm':
+			newmode.mode |= MODE_MODERATED;
+			break;
+		case 'n':
+			newmode.mode |= MODE_NOEXTERNAL;
+			break;
+		case 'p':
+			newmode.mode |= MODE_PRIVATE;
+			break;
+		case 's':
+			newmode.mode |= MODE_SECRET;
+			break;
+		case 't':
+			newmode.mode |= MODE_TOPIC;
+			break;
+		case 'k':
+			strlcpy(newmode.key, parv[4+args], sizeof(newmode.key));
+			args++;
+			
+			if(parc < 5+args)
+				return;
+			break;
+		case 'l':
+			newmode.limit = atoi(parv[4+args]);
+			args++;
+
+			if(parc < 5+args)
+				return;
+			break;
+		default:
+			break;
+		}
+	}
+
 	if(keep_new_modes)
 	{
-		s = parv[3];
+		chptr->mode.mode |= newmode.mode;
 
-		while(*s)
-		{
-			/* skips the leading '+' */
-			switch(*(s++))
-			{
-			case 'i':
-				chptr->mode |= MODE_INVITEONLY;
-				break;
-			case 'm':
-				chptr->mode |= MODE_MODERATED;
-				break;
-			case 'n':
-				chptr->mode |= MODE_NOEXTERNAL;
-				break;
-			case 'p':
-				chptr->mode |= MODE_PRIVATE;
-				break;
-			case 's':
-				chptr->mode |= MODE_SECRET;
-				break;
-			case 't':
-				chptr->mode |= MODE_TOPIC;
-				break;
-			case 'k':
-				strlcpy(chptr->key, parv[4+args], sizeof(chptr->key));
-				args++;
-				
-				if(parc < 5+args)
-					return;
-				break;
-			case 'l':
-				chptr->mode = atoi(parv[4+args]);
-				args++;
+		if(!chptr->mode.limit || chptr->mode.limit < newmode.limit)
+			chptr->mode.limit = newmode.limit;
 
-				if(parc < 5+args)
-					return;
-				break;
-			default:
-				break;
-			}
-		}
+		if(!chptr->mode.key[0] || strcmp(chptr->mode.key, newmode.key) > 0)
+			strlcpy(chptr->mode.key, newmode.key,
+				sizeof(chptr->mode.key));
 	}
 
 	if(EmptyString(parv[4+args]))
@@ -304,6 +364,8 @@ c_sjoin(struct client *client_p, char *parv[], int parc)
 
 	for(s = parv[4+args]; !EmptyString(s); s = p)
 	{
+		flags = 0;
+
 		/* remove any leading spaces.. */
 		while(*s == ' ')
 			s++;

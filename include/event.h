@@ -1,3 +1,4 @@
+/* $Id$ */
 #ifndef INCLUDED_event_h
 #define INCLUDED_event_h
 

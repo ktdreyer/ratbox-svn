@@ -1,3 +1,4 @@
+/* $Id$ */
 #ifndef INCLUDED_channel_h
 #define INCLUDED_channel_h
 
@@ -8,6 +9,13 @@
 
 extern dlink_list channel_list;
 
+struct chmode
+{
+	unsigned int mode;
+	char key[KEYLEN+1];
+	int limit;
+};
+
 struct channel
 {
 	char name[CHANNELLEN+1];
@@ -15,9 +23,7 @@ struct channel
 
 	dlink_list users;		/* users in this channel */
 
-	unsigned int mode;
-	char key[KEYLEN+1];
-	int limit;
+	struct chmode mode;
 
 	dlink_node listptr;		/* node in channel_list */
 	dlink_node nameptr;		/* node in channel hash */
@@ -51,9 +57,11 @@ extern void del_channel(struct channel *chptr);
 extern void free_channel(struct channel *chptr);
 extern struct channel *find_channel(const char *name);
 
+extern const char *chmode_to_string(struct channel *chptr);
+
 extern void add_chmember(struct channel *chptr, struct client *target_p, int flags);
 extern void del_chmember(struct chmember *mptr);
-extern struct chmember *get_chmember(struct channel *chptr, struct client *target_p);
-#define is_member(chptr, target_p) ((get_chmember(chptr, target_p)) ? 1 : 0)
+extern struct chmember *find_chmember(struct channel *chptr, struct client *target_p);
+#define is_member(chptr, target_p) ((find_chmember(chptr, target_p)) ? 1 : 0)
 
 #endif

@@ -16,6 +16,7 @@ static dlink_list name_table[MAX_NAME_HASH];
 
 dlink_list user_list;
 dlink_list server_list;
+dlink_list service_list;
 dlink_list exited_list;
 
 static void c_kill(struct client *, char *parv[], int parc);
@@ -107,6 +108,17 @@ find_server(const char *name)
 	return NULL;
 }
 
+struct client *
+find_service(const char *name)
+{
+	struct client *target_p = find_client(name);
+
+	if(IsService(target_p))
+		return target_p;
+
+	return NULL;
+}
+
 static void
 exit_user(struct client *target_p)
 {
@@ -158,12 +170,15 @@ exit_server(struct client *target_p)
 void
 exit_client(struct client *target_p)
 {
-	slog("CLIENT: exit()'d %s", target_p->name);
-
 	if(IsServer(target_p))
 		exit_server(target_p);
-	else
+	else if(IsUser(target_p))
 		exit_user(target_p);
+	else if(IsService(target_p))
+	{
+		slog("EEK: Tried to exit one of my own services. damn.");
+		return;
+	}
 
 	del_client(target_p);
 }
@@ -171,7 +186,6 @@ exit_client(struct client *target_p)
 void
 free_client(struct client *target_p)
 {
-	slog("CLIENT: free()'d %s", target_p->name);
 	my_free(target_p->user);
 	my_free(target_p->server);
 	my_free(target_p);
@@ -252,17 +266,60 @@ c_nick(struct client *client_p, char *parv[], int parc)
 {
 	struct client *target_p;
 	struct client *uplink_p;
+	time_t newts;
 
 	if(parc != 3 && parc != 9)
+	{
+		slog("PROTO: NICK command received with invalid params");
 		return;
+	}
 
 	if(parc == 9)
 	{
 		target_p = find_client(parv[1]);
 		uplink_p = find_server(parv[7]);
+		newts = atol(parv[2]);
 
-		if(target_p != NULL || uplink_p == NULL)
+		if(uplink_p == NULL)
+		{
+			slog("PROTO: Ghost killed on invalid server %s", parv[7]);
 			return;
+		}
+
+		if(target_p != NULL)
+		{
+			if(IsServer(target_p))
+			{
+				slog("PROTO: NICK introduced a server %s", parv[1]);
+				return;
+			}
+			else if(IsUser(target_p))
+			{
+				if(target_p->user->tsinfo < newts)
+				{
+					slog("PROTO: NICK %s with higher TS introduced causing collision.",
+					     target_p->name);
+					return;
+				}
+
+				/* normal nick collision.. exit old */
+				exit_client(target_p);
+			}
+			else if(IsService(target_p))
+			{
+				/* ugh. anything with a ts this low is
+				 * either someone fucking about, or another
+				 * service.  we go byebye.
+				 */
+				if(newts <= 1)
+				{
+					sendto_server(":%s WALLOPS :Detected a services fight, im gone!");
+					die("service fight");
+				}
+
+				return;
+			}
+		}
 
 		target_p = my_malloc(sizeof(struct client));
 		target_p->user = my_malloc(sizeof(struct user));
@@ -275,7 +332,7 @@ c_nick(struct client *client_p, char *parv[], int parc)
 		strlcpy(target_p->user->host, parv[6], sizeof(target_p->user->host));
 
 		target_p->user->servername = uplink_p->name;
-		target_p->user->tsinfo = atol(parv[2]);
+		target_p->user->tsinfo = newts;
 		target_p->user->umode = string_to_umode(parv[4], 0);
 
 		add_client(target_p);
@@ -301,7 +358,10 @@ void
 c_quit(struct client *client_p, char *parv[], int parc)
 {
 	if(!IsUser(client_p))
+	{
+		slog("PROTO: QUIT received from server %s", client_p->name);
 		return;
+	}
 
 	exit_client(client_p);
 }
@@ -316,6 +376,9 @@ c_kill(struct client *client_p, char *parv[], int parc)
 
 	if((target_p = find_user(parv[1])) == NULL)
 		return;
+
+	if(IsService(target_p))
+		;
 
 	exit_client(target_p);
 }
@@ -367,11 +430,11 @@ c_squit(struct client *client_p, char *parv[], int parc)
 		return;
 	}
 
-	target_p = find_client(parv[1]);
+	target_p = find_server(parv[1]);
 
 	if(target_p == NULL)
 	{
-		slog("WIERD: squit for unknown server %s", parv[1]);
+		slog("PROTO: SQUIT for unknown server %s", parv[1]);
 		return;
 	}
 

@@ -1,3 +1,4 @@
+/* $Id$ */
 #ifndef INCLUDED_stdinc_h
 #define INCLUDED_stdinc_h
 

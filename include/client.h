@@ -1,3 +1,4 @@
+/* $Id$ */
 #define NICKLEN 9
 #define USERLEN 10
 #define HOSTLEN 63
@@ -7,6 +8,7 @@
 
 extern dlink_list user_list;
 extern dlink_list server_list;
+extern dlink_list service_list;
 extern dlink_list exited_list;
 
 struct client
@@ -17,6 +19,7 @@ struct client
 
 	struct server *server;
 	struct user *user;
+	struct service *service;
 	struct client *uplink;		/* server this is connected to */
 
 	dlink_node nameptr;		/* dlink_node in name_table */
@@ -46,8 +49,15 @@ struct server
 	int hops;
 };
 
+struct service
+{
+	char username[USERLEN+1];
+	char host[HOSTLEN+1];
+};
+
 #define IsServer(x) ((x)->server != NULL)
 #define IsUser(x) ((x)->user != NULL)
+#define IsService(x) ((x)->service != NULL)
 
 #define FLAGS_DEAD	0x0001
 

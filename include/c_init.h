@@ -1,3 +1,4 @@
+/* $Id$ */
 #ifndef INCLUDED_c_init_h
 #define INCLUDED_c_init_h
 

@@ -1,3 +1,4 @@
+/* $Id$ */
 #ifndef INCLUDED_tools_h
 #define INCLUDED_tools_h
 
