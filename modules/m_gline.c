@@ -158,6 +158,10 @@ static void mo_gline(struct Client *client_p,
 	    {
 	      user = parv[1];   /* here is user part */
 	      *(host++) = '\0'; /* and now here is host */
+
+              /* gline for "@host", use *@host */
+              if(*user == '\0')
+                user = "*";
 	    }
 	  else
 	    {
