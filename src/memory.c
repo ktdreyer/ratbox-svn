@@ -28,12 +28,13 @@
 #define WE_ARE_MEMORY_C
 
 #include "stdinc.h"
+#include "tools.h"
+#include "linebuf.h"
 #include "ircd.h"
 #include "irc_string.h"
 #include "memory.h"
 #include "client.h"
 #include "send.h"
-#include "tools.h"
 #include "s_log.h"
 #include "restart.h"
 

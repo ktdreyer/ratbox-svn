@@ -28,6 +28,7 @@
  */
 
 #include "internal.h"
+#include "sprintf_irc.h"
 
 int vbuf__append_quoted1035(vbuf *vb, const byte *buf, int len) {
   char qbuf[10];

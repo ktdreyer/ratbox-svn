@@ -25,16 +25,20 @@
  */
 
 #include "stdinc.h"
-
+#include "adns.h"
 #include "res.h"
+#include "tools.h"
 #include "send.h"
 #include "s_conf.h"
 #include "commio.h"
 #include "s_log.h"
 #include "event.h"
+#include "linebuf.h"
 #include "client.h"
 #include "numeric.h"
 #include "../adns/internal.h"
+#include "ircd.h"
+#include "irc_string.h"
 #define ADNS_MAXFD 2
 
 adns_state dns_state;

@@ -28,6 +28,7 @@
 #include "commio.h"
 #include "s_conf.h"
 #include "s_serv.h"
+#include "linebuf.h"
 #include "client.h"
 #include "ircd.h"
 #include "parse.h"

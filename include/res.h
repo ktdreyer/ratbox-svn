@@ -27,6 +27,8 @@
 #ifndef _RES_H_INCLUDED
 #define _RES_H_INCLUDED 1
 
+struct Client;
+
 struct DNSQuery
 {
 	void *ptr;

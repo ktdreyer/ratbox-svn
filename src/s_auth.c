@@ -35,22 +35,25 @@
  */
 #include "stdinc.h"
 #include "tools.h"
+#include "adns.h"
+#include "res.h"
 #include "s_auth.h"
 #include "s_conf.h"
+#include "linebuf.h"
 #include "client.h"
 #include "event.h"
 #include "irc_string.h"
 #include "sprintf_irc.h"
 #include "ircd.h"
 #include "numeric.h"
-#include "packet.h"
-#include "res.h"
 #include "commio.h"
+#include "packet.h"
 #include "s_log.h"
 #include "s_stats.h"
 #include "send.h"
 #include "memory.h"
 #include "hook.h"
+#include "balloc.h"
 
 /*
  * a bit different approach

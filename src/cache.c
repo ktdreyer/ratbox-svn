@@ -33,8 +33,9 @@
  */
 
 #include "stdinc.h"
-#include "s_conf.h"
 #include "tools.h"
+#include "s_conf.h"
+#include "linebuf.h"
 #include "client.h"
 #include "memory.h"
 #include "balloc.h"
@@ -42,6 +43,10 @@
 #include "hash.h"
 #include "cache.h"
 #include "sprintf_irc.h"
+#include "irc_string.h"
+#include "ircd.h"
+#include "numeric.h"
+#include "send.h"
 
 static BlockHeap *cachefile_heap = NULL;
 static BlockHeap *cacheline_heap = NULL;

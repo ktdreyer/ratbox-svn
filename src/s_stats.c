@@ -25,8 +25,11 @@
  */
 
 #include "stdinc.h"
+#include "tools.h"
 #include "s_stats.h"
+#include "linebuf.h"
 #include "client.h"
+#include "channel.h"
 #include "irc_string.h"
 #include "ircd.h"
 #include "numeric.h"
@@ -39,6 +42,7 @@
 #include "hash.h"
 #include "scache.h"
 #include "reject.h"
+#include "class.h"
 
 /*
  * stats stuff

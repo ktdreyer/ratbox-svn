@@ -21,6 +21,7 @@
  */
 
 #include "stdinc.h"
+#include "tools.h"
 #include "ircd_signal.h"
 #include "ircd.h"		/* dorehash */
 #include "restart.h"		/* server_reboot */
@@ -28,6 +29,7 @@
 #include "memory.h"
 #include "commio.h"
 #include "s_conf.h"
+#include "linebuf.h"
 #include "client.h"
 #include "send.h"
 

@@ -40,6 +40,8 @@
 #include <arpa/inet.h>
 
 #include "internal.h"
+#include "commio.h"
+#include "irc_string.h"
 
 static void readconfig(adns_state ads, const char *filename, int warnmissing);
 

@@ -28,15 +28,17 @@
 
 #include "stdinc.h"
 #include <sys/epoll.h>
-
+#include "tools.h"
 #include "commio.h"
 #include "class.h"
+#include "linebuf.h"
 #include "client.h"
 #include "irc_string.h"
 #include "ircd.h"
 #include "listener.h"
 #include "numeric.h"
 #include "packet.h"
+#include "adns.h"
 #include "res.h"
 #include "restart.h"
 #include "s_auth.h"

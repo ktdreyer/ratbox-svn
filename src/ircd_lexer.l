@@ -35,6 +35,7 @@
 #define WE_ARE_MEMORY_C
 
 #include "stdinc.h"
+#include "tools.h"
 #include "s_log.h"
 #include "s_conf.h"
 #include "newconf.h"

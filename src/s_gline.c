@@ -27,6 +27,7 @@
 #include "stdinc.h"
 #include "tools.h"
 #include "channel.h"
+#include "linebuf.h"
 #include "client.h"
 #include "irc_string.h"
 #include "ircd.h"

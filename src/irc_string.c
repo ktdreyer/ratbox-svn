@@ -28,6 +28,7 @@
 #include "sprintf_irc.h"
 #include "irc_string.h"
 #include "tools.h"
+#include "linebuf.h"
 #include "client.h"
 #include "memory.h"
 

@@ -25,7 +25,9 @@
  */
 
 #include "stdinc.h"
+#include "tools.h"
 #include "listener.h"
+#include "linebuf.h"
 #include "client.h"
 #include "irc_string.h"
 #include "sprintf_irc.h"
@@ -37,8 +39,11 @@
 #include "s_stats.h"
 #include "send.h"
 #include "memory.h"
+#include "adns.h"
+#include "res.h"
 #include "s_auth.h"
 #include "reject.h"
+#include "s_log.h"
 
 #ifndef INADDR_NONE
 #define INADDR_NONE ((unsigned int) 0xffffffff)

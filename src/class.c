@@ -28,6 +28,7 @@
 
 #include "tools.h"
 #include "class.h"
+#include "linebuf.h"
 #include "client.h"
 #include "ircd.h"
 #include "numeric.h"

@@ -29,6 +29,7 @@
 #include "s_user.h"
 #include "channel.h"
 #include "class.h"
+#include "linebuf.h"
 #include "client.h"
 #include "hash.h"
 #include "irc_string.h"
@@ -52,6 +53,7 @@
 #include "reject.h"
 #include "cache.h"
 #include "hook.h"
+#include "balloc.h"
 #include "monitor.h"
 
 static void report_and_set_user_flags(struct Client *, struct ConfItem *);

@@ -15,9 +15,14 @@
 #include <stdio.h>
 #define WE_ARE_MEMORY_C
 #include "stdinc.h"
+#include "tools.h"
+#include "linebuf.h"
 #include "client.h"
+#include "hook.h"
 #include "modules.h"
 #include "newconf.h"
+#include "memory.h"
+#include "irc_string.h"
 
 #define YY_NO_UNPUT
 

@@ -25,10 +25,7 @@
  */
 
 #include "stdinc.h"
-#include "s_conf.h"
 #include "numeric.h"
-#include "irc_string.h"
-#include "memory.h"
 
 #include "messages.tab"
 

@@ -25,11 +25,13 @@
  */
 
 #include "stdinc.h"
-
-
+#include "tools.h"
+#include "msg.h"
+#include "hook.h"
 #include "modules.h"
 #include "s_log.h"
 #include "ircd.h"
+#include "linebuf.h"
 #include "client.h"
 #include "send.h"
 #include "s_conf.h"
@@ -38,7 +40,6 @@
 #include "parse.h"
 #include "irc_string.h"
 #include "memory.h"
-#include "tools.h"
 #include "sprintf_irc.h"
 
 

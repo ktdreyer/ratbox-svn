@@ -33,9 +33,10 @@
  */
 
 #include "stdinc.h"
+#include "tools.h"
 #include "s_conf.h"
 #include "s_newconf.h"
-#include "tools.h"
+#include "linebuf.h"
 #include "client.h"
 #include "memory.h"
 #include "s_serv.h"
@@ -46,6 +47,12 @@
 #include "balloc.h"
 #include "event.h"
 #include "sprintf_irc.h"
+#include "irc_string.h"
+#include "patricia.h"
+#include "ircd.h"
+#include "class.h"
+#include "adns.h"
+#include "res.h"
 
 dlink_list shared_conf_list;
 dlink_list cluster_conf_list;

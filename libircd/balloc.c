@@ -58,6 +58,7 @@
  */
 
 #include "stdinc.h"
+#include "tools.h"
 
 #define WE_ARE_MEMORY_C
 #include "balloc.h"
@@ -68,6 +69,7 @@
 #include "irc_string.h"
 #include "tools.h"
 #include "s_log.h"
+#include "linebuf.h"
 #include "client.h"
 #include "event.h"
 

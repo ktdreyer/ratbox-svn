@@ -30,6 +30,7 @@
 #include "ircd.h"
 #include "send.h"
 #include "s_log.h"
+#include "linebuf.h"
 #include "client.h"		/* for FLAGS_ALL */
 #include "memory.h"
 

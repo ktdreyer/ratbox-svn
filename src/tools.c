@@ -35,6 +35,7 @@
 #define TOOLS_C
 #include "tools.h"
 #include "balloc.h"
+#include "memory.h"
 
 #ifndef NDEBUG
 /*

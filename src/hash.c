@@ -28,6 +28,7 @@
 #include "tools.h"
 #include "s_conf.h"
 #include "channel.h"
+#include "linebuf.h"
 #include "client.h"
 #include "hash.h"
 #include "irc_string.h"

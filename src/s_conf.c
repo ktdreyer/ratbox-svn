@@ -32,6 +32,7 @@
 #include "s_stats.h"
 #include "channel.h"
 #include "class.h"
+#include "linebuf.h"
 #include "client.h"
 #include "event.h"
 #include "hash.h"
@@ -40,6 +41,7 @@
 #include "ircd.h"
 #include "listener.h"
 #include "hostmask.h"
+#include "hook.h"
 #include "modules.h"
 #include "numeric.h"
 #include "commio.h"
@@ -51,6 +53,8 @@
 #include "patricia.h"
 #include "reject.h"
 #include "cache.h"
+#include "adns.h"
+#include "res.h"
 
 struct config_server_hide ConfigServerHide;
 

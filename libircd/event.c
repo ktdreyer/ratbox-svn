@@ -51,9 +51,10 @@
  */
 
 #include "stdinc.h"
-
+#include "tools.h"
 #include "ircd.h"
 #include "event.h"
+#include "linebuf.h"
 #include "client.h"
 #include "send.h"
 #include "memory.h"
