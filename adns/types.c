@@ -811,7 +811,7 @@ static adns_status pa_ptr6(const parseinfo *pai, int dmstart, int max, void *dat
 		x++;
 	}	
     }    
-    for (i=0; i<sizeof(expectdomain)/sizeof(*expectdomain); i++) {
+    for (i=0; (size_t)i<sizeof(expectdomain)/sizeof(*expectdomain); i++) {
         st= adns__findlabel_next(&fls,&lablen,&labstart); assert(!st);
         l= strlen(expectdomain[i]);
         if (lablen != l || memcmp(pai->qu->query_dgram + labstart, expectdomain[i], l))
@@ -890,7 +890,7 @@ static adns_status pa_ptr6_old(const parseinfo *pai, int dmstart, int max, void 
 		x++;
 	}	
     }    
-    for (i=0; i<sizeof(expectdomain)/sizeof(*expectdomain); i++) {
+    for (i=0; (size_t)i<sizeof(expectdomain)/sizeof(*expectdomain); i++) {
         st= adns__findlabel_next(&fls,&lablen,&labstart); assert(!st);
         l= strlen(expectdomain[i]);
         if (lablen != l || memcmp(pai->qu->query_dgram + labstart, expectdomain[i], l))

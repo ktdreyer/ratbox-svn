@@ -397,7 +397,7 @@ inet_ntop6(const unsigned char *src, char *dst, unsigned int size)
 	 * Check for overflow, copy, and we're done.
 	 */
 
-	if((tp - tmp) > size)
+	if((unsigned int)(tp - tmp) > size)
 	{
 		return (NULL);
 	}
