@@ -1,3 +1,7 @@
+*** 20010916_1 by davidt
+- Tidy up m_map.c slightly, and add missing RPL_MAPEND.
+
+
 *** 20010913_1 by habeeb
 Fix for Lee's patch to m_nick.c, ms_nick didn't check whether it was a new nick
 (parc = 9) or a nick change (parc = 3) and when a nick change happened it tried
