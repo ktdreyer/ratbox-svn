@@ -2505,7 +2505,7 @@ static  void    sub1_from_channel(struct Channel *chptr)
               MyFree((char*) chptr);
               Count.chan--; /* is this line needed for subchans? yes -db */
 
-              if (!HasVchans(root_chptr))
+              if (!HasVchans(root_chptr) && (root_chptr->users == 0))
                 {
                   chptr = root_chptr;
                   if (chptr->prevch)
