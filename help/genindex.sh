@@ -29,7 +29,7 @@ for i in $SUBDIRS; do
 
 			if [ "$admin" == "[ADMIN]" ]; then
 				admin=`echo "$arg2" | cut -d ' ' -f 2-`;
-				printf " %-11s - %s\n" $arg1 "$admin" >> $i/index-admin;
+				printf " %-13s - %s\n" $arg1 "$admin" >> $i/index-admin;
 			else
 				printf " %-11s - %s\n" $arg1 "$arg2" >> $i/index;
 			fi
