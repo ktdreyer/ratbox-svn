@@ -1,3 +1,30 @@
+leeh        2002/05/12 08:15:24 EDT	(20020512_0)
+
+  Modified files:
+    .                    README.PLATFORMS 
+    include              channel_mode.h config.h config.h.dist 
+    src                  channel_mode.c ircd_parser.y s_conf.c 
+                         s_debug.c send.c 
+  Log:
+  - updated README.PLATFORMS for NEXTSTEP
+  - added defines for ANONOPS and HALFOPS which will comment out most of the
+    actual code.  #ifdef EFNET will #undef these
+  
+    ill do vchans later.
+  
+  Revision  Changes    Path
+  7.13      +3 -0      ircd-hybrid-7/README.PLATFORMS
+  7.7       +5 -0      ircd-hybrid-7/include/channel_mode.h
+  7.133     +16 -0     ircd-hybrid-7/include/config.h
+  7.57      +16 -0     ircd-hybrid-7/include/config.h.dist
+  7.36      +121 -13   ircd-hybrid-7/src/channel_mode.c
+  1.247     +4 -0      ircd-hybrid-7/src/ircd_parser.y
+  7.302     +4 -0      ircd-hybrid-7/src/s_conf.c
+  7.65      +2 -0      ircd-hybrid-7/src/s_debug.c
+  7.187     +8 -0      ircd-hybrid-7/src/send.c
+
+
+
 leeh        2002/05/11 17:53:34 EDT	(20020511_3)
 
   Modified files:
