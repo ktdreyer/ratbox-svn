@@ -223,7 +223,7 @@ Fixed stuff that was breaking the compile of ircd.c on solaris.
 
 
 *** 20010606_2 by leeh
-- FLAGS_ALL -> FLAGS_NOTADMIN
+- FLAGS_ALL -> FLAGS_SERVOPER
 - m_error -> m_ignore
 
 
@@ -4120,7 +4120,7 @@ oops, fix core caused by previous change
 fix userhost for lazylinks
 
 *** 20010130_4 by fl_
-- added FLAGS_NOTADMIN and removed as many of the double notices as
+- added FLAGS_SERVOPER and removed as many of the double notices as
   I could.. I might have missed some though :)
 
 
@@ -4143,7 +4143,7 @@ long to a ptr however.
 
 
 *** 20010129_8 by jdc
-Typo fix (FLAGS_ADMINS --> FLAGS_ADMIN).
+Typo fix (FLAGS_SERVADMINS --> FLAGS_ADMIN).
 
 
 
