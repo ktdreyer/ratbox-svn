@@ -65,9 +65,11 @@ struct SetStruct
 {
   char  *name;
   int   (*handler)();
-  int   expects_two_args; /* 1 if it expects char *arg,int,
-			 * 0 if it expects only int
-			 */
+  int   wants_char; /* 1 if it expects (char *, [int]) */
+  int   wants_int;  /* 1 if it expects ([char *], int) */
+
+  /* eg:  0, 1 == only an int arg
+   * eg:  1, 1 == char and int args */
 };
 
 
@@ -78,27 +80,37 @@ int quote_floodtime(struct Client *, int);
 int quote_idletime(struct Client *, int);
 int quote_log(struct Client *, int);
 int quote_max(struct Client *, int);
+int quote_msglocale(struct Client *, char *);
 int quote_spamnum(struct Client *, int);
 int quote_spamtime(struct Client *, int);
 int quote_shide(struct Client *, int);
 int list_quote_commands(struct Client *);
 
 
+/* 
+ * If this ever needs to be expanded to more than one arg of each
+ * type, want_char/want_int could be the count of the arguments,
+ * instead of just a boolean flag...
+ *
+ * -davidt
+ */
+
 static struct SetStruct set_cmd_table[] =
 {
-  /* name		function	expects two args */
-  /* --------------------------------------------------- */
-  { "AUTOCONN",		quote_autoconn,		1 },
-  { "AUTOCONNALL",	quote_autoconnall,	0 },
-  { "FLOODCOUNT",	quote_floodcount,	0 },
-  { "IDLETIME",		quote_idletime,		0 },
-  { "LOG",		quote_log,		0 },
-  { "MAX",		quote_max,		0 },
-  { "SPAMNUM",		quote_spamnum,		0 },
-  { "SPAMTIME",		quote_spamtime,		0 },
-  { "SHIDE",		quote_shide,		0 },
-  /* ---------------------------------------------------- */
-  { (char *) 0,		(int (*)()) 0,		0 }
+  /* name		function        string arg  int arg */
+  /* -------------------------------------------------------- */
+  { "AUTOCONN",		quote_autoconn,		1,        1 },
+  { "AUTOCONNALL",	quote_autoconnall,	0,        1 },
+  { "FLOODCOUNT",	quote_floodcount,	0,        1 },
+  { "IDLETIME",		quote_idletime,		0,        1 },
+  { "LOG",		quote_log,		0,        1 },
+  { "MAX",		quote_max,		0,        1 },
+  { "MSGLOCALE",        quote_msglocale,        1,        0 },
+  { "SPAMNUM",		quote_spamnum,		0,        1 },
+  { "SPAMTIME",		quote_spamtime,		0,        1 },
+  { "SHIDE",		quote_shide,		0,        1 },
+  /* -------------------------------------------------------- */
+  { (char *) 0,		(int (*)()) 0,          0,        0 }
 };
 
 
@@ -288,6 +300,34 @@ int quote_max( struct Client *sptr, int newval )
   return(0);
 }
 
+/* SET MSGLOCALE */
+int quote_msglocale( struct Client *sptr, char *locale )
+{
+#ifdef USE_GETTEXT
+  if(locale)
+  {
+    setenv("LANGUAGE", locale, 1);
+    { /* XXX ick, this is what gettext.info _recommends_ */
+       extern int  _nl_msg_cat_cntr;
+       ++_nl_msg_cat_cntr;
+    }
+    sendto_one(sptr, ":%s NOTICE %s :Set MSGLOCALE to '%s'",
+               me.name, sptr->name,
+               getenv("LANGUAGE") ? getenv("LANGUAGE") : "<unset>");
+  }
+  else
+  {
+    sendto_one(sptr, ":%s NOTICE %s :MSGLOCALE is currently '%s'",
+               me.name, sptr->name,
+               (getenv("LANGUAGE")) ? getenv("LANGUAGE") : "<unset>");
+  }
+#else
+  sendto_one(sptr, ":%s NOTICE %s :No gettext() support available.",
+             me.name, sptr->name);
+#endif
+  return 0;
+}
+  
 /* SET SPAMNUM */
 int quote_spamnum( struct Client *sptr, int newval )
 {
@@ -371,9 +411,9 @@ int quote_shide( struct Client *sptr, int newval )
 int mo_set(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 {
   int newval;
-  int i;
+  int i, n;
   char *arg=NULL;
-  char *intarg;
+  char *intarg=NULL;
 
   if (parc > 1)
     {
@@ -390,18 +430,35 @@ int mo_set(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 	      /*
 	       * Command found; now execute the code
 	       */
-	      if (parc > 3)
-		{
-		  arg = parv[2];
-		  intarg = parv[3];
-		}
-	      else if(parc > 2)
-		{
-		  arg = NULL; /* not used */
-		  intarg = parv[2];
-		}
+              n = 2;
+              
+              if(set_cmd_table[i].wants_char)
+              {
+                arg = parv[n++];
+              }
 
-	      if(parc > 2)
+              if(set_cmd_table[i].wants_int)
+              {
+                intarg = parv[n++];
+              }
+
+              if( n-1 > parc )
+              {
+                if(parc >2)
+                  sendto_one(sptr,
+                             ":%s NOTICE %s :SET %s expects (\"%s%s\") args",
+                             me.name, sptr->name, set_cmd_table[i].name,
+                             (set_cmd_table[i].wants_char ? "string, " : ""),
+                             (set_cmd_table[i].wants_char ? "int" : "")
+                             );
+                else
+                {
+                  arg = NULL;
+                  intarg = NULL;
+                }
+              }
+              
+	      if(set_cmd_table[i].wants_int && (parc > 2))
 		{
 		  newval = atoi(intarg);
 		  if(newval < 0)
@@ -416,21 +473,22 @@ int mo_set(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 	      else
 		newval = -1;
 
-	      if(set_cmd_table[i].expects_two_args)
-		{
-		  if(parc > 3)
+	      if(set_cmd_table[i].wants_char)
+        	{
+                  if(set_cmd_table[i].wants_int)
 		    return(set_cmd_table[i].handler( sptr, arg, newval ));
-		  else
-		    {
-		      sendto_one(sptr,
-				 ":%s NOTICE %s :%s expects two args",
-				 me.name, sptr->name,
-				 set_cmd_table[i].name);
-		      return(0);
-		    }
+                  else
+                    return(set_cmd_table[i].handler( sptr, arg ));
 		}
 	      else
-		return(set_cmd_table[i].handler( sptr, newval ));
+                {
+		  if(set_cmd_table[i].wants_int)
+                    return(set_cmd_table[i].handler( sptr, newval ));
+                  else
+                    /* Just in case someone actually wants a
+                     * set function that takes no args.. *shrug* */
+                    return(set_cmd_table[i].handler( sptr ));
+                }
 	    }
 	}
       /*
