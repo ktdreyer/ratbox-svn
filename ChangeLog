@@ -1,3 +1,16 @@
+androsyn    2004/09/08 22:14:35 EDT	(20040909_3)
+
+  Modified files:
+    src                  commio.c 
+  Log:
+  Hack around Solaris' braindamaged stdio that doesn't like fds > 256 in 32bit
+  mode...
+  
+  Revision  Changes    Path
+  1.20      +25 -0     ircd-ratbox/src/commio.c
+
+
+
 androsyn    2004/09/08 21:02:20 EDT	(20040909_2)
 
   Modified files:
