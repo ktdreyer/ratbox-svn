@@ -1,3 +1,19 @@
+leeh        2002/04/26 09:26:30 EDT	(20020426_4)
+
+  Modified files:
+    contrib              README 
+  Added files:
+    contrib              remote-unkline.diff 
+  Log:
+  - added a patch to give support for remote-unklines.  too late to go in
+    src/, so here it is.
+  
+  Revision  Changes    Path
+  1.17      +34 -2     ircd-hybrid-7/contrib/README
+  1.1       +394 -0    ircd-hybrid-7/contrib/remote-unkline.diff (new)
+
+
+
 leeh        2002/04/26 08:30:38 EDT	(20020426_3)
 
   Modified files:
