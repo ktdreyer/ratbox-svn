@@ -1,3 +1,27 @@
+leeh        2002/09/13 22:20:51 UTC	(20020913_4)
+
+  Modified files:
+    .                    configure 
+    autoconf             configure.in 
+    contrib              m_clearchan.c 
+    doc                  Makefile.in 
+  Removed files:
+    doc                  dline.conf kline.conf 
+  Log:
+  - fix for duplicate declaration in clearchan
+  - updated doc/Makefile.in to touch the blank files instead of copying
+    across an empty one
+  
+  Revision  Changes    Path
+  7.153     +1 -0      ircd-ratbox/autoconf/configure.in
+  7.159     +234 -198  ircd-ratbox/configure
+  1.39      +1 -2      ircd-ratbox/contrib/m_clearchan.c
+  7.20      +9 -3      ircd-ratbox/doc/Makefile.in
+  7.2       +0 -0      ircd-ratbox/doc/dline.conf (dead)
+  7.4       +0 -0      ircd-ratbox/doc/kline.conf (dead)
+
+
+
 androsyn    2002/09/13 16:15:43 UTC	(20020913_3)
 
   Modified files:
