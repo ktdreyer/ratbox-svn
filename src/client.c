@@ -47,6 +47,7 @@
 #include "send.h"
 #include "whowas.h"
 #include "s_debug.h"
+#include "s_user.h"
 #include "hash.h"
 
 #include <assert.h>
