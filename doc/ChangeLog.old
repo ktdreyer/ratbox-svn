@@ -1,3 +1,7 @@
+*** 19990909_17 by tomh
+change int to size_t in accept_connection
+
+
 *** 19990909_16 by tomh
 non-ansi prototype for sync_channels
 
