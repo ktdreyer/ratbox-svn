@@ -1,3 +1,20 @@
+leeh        2003/12/07 21:52:49 EST	(20031208_1)
+
+  Modified files:
+    include              conf.h 
+    src                  command.c conf.c 
+  Log:
+  - added support for trace
+  - added A:<admin1>:<admin2>:<admin3> to conf file parser
+  - added support for admin
+  
+  Revision  Changes    Path
+  1.2       +5 -0      rserv/include/conf.h
+  1.2       +46 -3     rserv/src/command.c
+  1.2       +21 -4     rserv/src/conf.c
+
+
+
 leeh        2003/12/07 21:19:27 EST	(20031208_0)
 
   Added files:
