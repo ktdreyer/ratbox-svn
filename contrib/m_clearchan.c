@@ -35,7 +35,6 @@
 #include "msg.h"
 #include "parse.h"
 #include "modules.h"
-#include "vchannel.h"
 #include "list.h"
 
 
@@ -102,15 +101,6 @@ static void mo_clearchan(struct Client *client_p, struct Client *source_p,
   chptr= hash_find_channel(parv[1]);
   root_chptr = chptr;
 
-#ifdef VCHANS
-  if (chptr && parc > 2 && parv[2][0] == '!')
-    {
-      chptr = find_vchan(chptr, parv[2]);
-      if (root_chptr != chptr)
-        on_vchan++;
-    }
-#endif
-
   if( chptr == NULL )
     {
       sendto_one(source_p, form_str(ERR_NOSUCHCHANNEL),
@@ -175,11 +165,6 @@ static void mo_clearchan(struct Client *client_p, struct Client *source_p,
   if (chptr->channelts)
     chptr->channelts--;
   
-#ifdef VCHANS
-  if (on_vchan)
-    add_vchan_to_client_cache(source_p,root_chptr,chptr);
-#endif
-
   chptr->mode.mode =
     MODE_SECRET | MODE_TOPICLIMIT | MODE_INVITEONLY | MODE_NOPRIVMSGS;
   free_topic(chptr);

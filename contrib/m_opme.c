@@ -33,7 +33,6 @@
 #include "msg.h"
 #include "parse.h"
 #include "modules.h"
-#include "vchannel.h"
 
 
 static void mo_opme(struct Client *client_p, struct Client *source_p,
@@ -75,8 +74,7 @@ static int chan_is_opless(struct Channel *chptr)
 static void mo_opme(struct Client *client_p, struct Client *source_p,
                     int parc, char *parv[])
 {
-  struct Channel *chptr, *root_chptr;
-  int on_vchan = 0;
+  struct Channel *chptr;
   dlink_node *ptr;
   dlink_node *locptr;
   
@@ -91,16 +89,6 @@ static void mo_opme(struct Client *client_p, struct Client *source_p,
   /* XXX - we might not have CBURSTed this channel if we are a lazylink
    * yet. */
   chptr= hash_find_channel(parv[1]);
-  root_chptr = chptr;
-
-#ifdef VCHANS
-  if (chptr && parc > 2 && parv[2][0] == '!')
-    {
-      chptr = find_vchan(chptr, parv[2]);
-      if (root_chptr != chptr)
-		  on_vchan++;
-    }
-#endif
   
   if( chptr == NULL )
     {

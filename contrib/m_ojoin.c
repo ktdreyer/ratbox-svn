@@ -34,7 +34,6 @@
 #include "msg.h"
 #include "parse.h"
 #include "modules.h"
-#include "vchannel.h"
 #include "list.h"
 #include "channel_mode.h"
 
@@ -68,11 +67,8 @@ char *_version = "$Revision$";
 static void mo_ojoin(struct Client *client_p, struct Client *source_p,
                         int parc, char *parv[])
 {
-  struct Channel *chptr, *root_chptr;
+  struct Channel *chptr;
   int move_me = 0;
-#ifdef VCHANS
-  int on_vchan = 0;
-#endif
 
   /* admins only */
   if (!IsOperAdmin(source_p))
@@ -90,16 +86,7 @@ static void mo_ojoin(struct Client *client_p, struct Client *source_p,
     }
 
   chptr= hash_find_channel(parv[1]);
-  root_chptr = chptr;
 
-#ifdef VCHANS
-  if (chptr && parc > 2 && parv[2][0] == '!')
-    {
-      chptr = find_vchan(chptr, parv[2]);
-      if (root_chptr != chptr)
-        on_vchan++;
-    }
-#endif
 
   if( chptr == NULL )
     {
@@ -129,7 +116,7 @@ static void mo_ojoin(struct Client *client_p, struct Client *source_p,
                        source_p->name,
                        source_p->username,
                        source_p->host,
-                       root_chptr->chname);
+                       chptr->chname);
        sendto_channel_local(ALL_MEMBERS, chptr, ":%s MODE %s +o %s",
                        me.name, chptr->chname, source_p->name);
 
@@ -146,7 +133,7 @@ static void mo_ojoin(struct Client *client_p, struct Client *source_p,
                        source_p->name,
                        source_p->username,
                        source_p->host,
-                       root_chptr->chname);
+                       chptr->chname);
        sendto_channel_local(ALL_MEMBERS, chptr, ":%s MODE %s +h %s",
                        me.name, chptr->chname, source_p->name);
     }
@@ -162,7 +149,7 @@ static void mo_ojoin(struct Client *client_p, struct Client *source_p,
                        source_p->name,
                        source_p->username,
                        source_p->host,
-                       root_chptr->chname);
+                       chptr->chname);
        sendto_channel_local(ALL_MEMBERS, chptr, ":%s MODE %s +v %s",
                        me.name, chptr->chname, source_p->name);
     }
@@ -178,7 +165,7 @@ static void mo_ojoin(struct Client *client_p, struct Client *source_p,
                        source_p->name,
                        source_p->username,
                        source_p->host,
-                       root_chptr->chname);
+                       chptr->chname);
     }
 
   /* send the topic... */
@@ -190,12 +177,6 @@ static void mo_ojoin(struct Client *client_p, struct Client *source_p,
 	       source_p->name, chptr->chname, chptr->topic_info,
 	       chptr->topic_time);
   }
-
-  /* XXX - check this isn't too big above... */
-#ifdef VCHANS
-  if (on_vchan)
-    add_vchan_to_client_cache(source_p,root_chptr,chptr);
-#endif
 
   source_p->localClient->last_join_time = CurrentTime;
   channel_member_names(source_p, chptr, chptr->chname, 1);
