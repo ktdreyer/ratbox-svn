@@ -1,3 +1,19 @@
+androsyn    2003/02/13 23:46:07 UTC	(20030213_5)
+
+  Modified files:
+    include              channel.h 
+    src                  channel_mode.c s_debug.c 
+  Log:
+  Make struct Ban actually include the ban itself and who set it.  It wastes a
+  little bit of memory, but we avoid calling malloc() and friends on it.
+  
+  Revision  Changes    Path
+  7.135     +2 -2      ircd-ratbox/include/channel.h
+  7.97      +2 -7      ircd-ratbox/src/channel_mode.c
+  7.87      +0 -12     ircd-ratbox/src/s_debug.c
+
+
+
 androsyn    2003/02/13 21:56:19 UTC	(20030213_4)
 
   Modified files:
