@@ -161,7 +161,7 @@ static void m_oper(struct Client *client_p, struct Client *source_p,
   else
     {
       sendto_one(source_p,form_str(ERR_PASSWDMISMATCH),me.name, parv[0]);
-      log_foper(source_p, source_p->user->auth_oper);
+      log_foper(source_p, parv[1]);
 
       if (ConfigFileEntry.failed_oper_notice)
         {
