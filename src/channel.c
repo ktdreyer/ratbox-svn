@@ -1394,16 +1394,6 @@ void set_channel_mode(struct Client *cptr,
                          me.name, chptr->chname, who->name);
           }
 
-          if (MyClient(who))
-          {
-            if ((!target_was_op) && (whatt == MODE_ADD) &&
-                ((to_list == &chptr->chanops) ||
-                 (to_list == &chptr->halfops)))
-            else if (target_was_op && (whatt == MODE_DEL) &&
-                     ((to_list != &chptr->chanops) &&
-                      (to_list != &chptr->halfops)))
-          }
-          
           break;
 
         case 'k':
