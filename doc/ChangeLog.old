@@ -1,3 +1,7 @@
+*** 20010222_8 by wcampbel
+Fix configure to properly find and set the @RANLIB@ variable.
+
+
 *** 20010222_7 by fl_
 - dont flood limit remote clients..
   in doing this however.. we dont actually need to check if the client is
