@@ -1,3 +1,9 @@
+*** 20001119_2 by davidt
+modularised m_motd, so /MOTD works once again.
+motd.c still contains various file reading/sending commands, which are
+used elsewhere, although motd.c probably isn't the best name any more.
+
+
 *** 20001119_1 by davidt
 fixes for poll.  It seems to work, although there's probably a bug lurking
 in there somewhere...
