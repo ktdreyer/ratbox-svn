@@ -1065,7 +1065,7 @@ int server_estab(struct Client *client_p)
   add_client_to_llist(&(me.serv->servers), client_p);
 
   m = dlinkFind(&unknown_list, client_p);
-  assert(m == NULL);
+  assert(m != NULL);
   if(m != NULL)
     {
       dlinkDelete(m, &unknown_list);
