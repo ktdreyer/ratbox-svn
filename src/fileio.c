@@ -171,8 +171,6 @@ int fbgetc(FBFILE* fb)
   assert(fb);
   if(fb->pbptr)
     {
-      int c;
-      c = *fb->pbptr++;
       if( (fb->pbptr == (fb->pbuf+BUFSIZ)) ||
 	  (!*fb->pbptr) )
 	fb->pbptr = NULL;

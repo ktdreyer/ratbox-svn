@@ -64,7 +64,6 @@
  */
 struct ConfItem;
 struct Whowas;
-struct Zdata;
 struct DNSReply;
 struct Listener;
 struct Client;

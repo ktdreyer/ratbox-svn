@@ -134,15 +134,6 @@ extern void del_invite(struct Channel *chptr, struct Client *who);
 extern int list_continue(struct Client *sptr);
 extern void list_one_channel(struct Client *sptr,struct Channel *chptr);
 
-void channel_member_list(struct Client *sptr,
-			 dlink_list *list,
-			 struct Channel *chptr,
-			 char *name_of_channel,
-			 char *show_flag,
-			 char *buf,
-			 int mlen,
-			 int *cur_len,
-			 int *reply_to_send);
 
 /*
 ** Channel Related macros follow

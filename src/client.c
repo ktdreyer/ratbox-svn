@@ -75,7 +75,6 @@ BlockHeap*        localUserFreeList;
 static const char* const BH_FREE_ERROR_MESSAGE = \
         "client.c BlockHeapFree failed for cptr = %p";
 
-static void exit_marked_for_death_clients();
 static void check_pings_list(dlink_list *list);
 static void check_unknowns_list(dlink_list *list);
 
@@ -380,7 +379,6 @@ check_unknowns_list(dlink_list *list)
 {
   dlink_node *ptr;
   struct Client *cptr;
-  dlink_node *m;
 
   for(ptr = list->head; ptr; ptr = ptr->next)
     {
