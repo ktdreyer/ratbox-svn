@@ -27,12 +27,12 @@ char *_version = "1.0";
 int
 show_links(struct hook_links_data *data)
 {
-	if (!MyConnect(data->sptr))
+	if (!MyConnect(data->source_p))
 		return 0;
 	
 	sendto_realops_flags(FLAGS_SPY,
 						 "LINKS '%s' requested by %s (%s@%s) [%s]",
-						 data->mask, data->sptr->name, data->sptr->username,
-						 data->sptr->host, data->sptr->user->server);
+						 data->mask, data->source_p->name, data->source_p->username,
+						 data->source_p->host, data->source_p->user->server);
 	return 0;
 }

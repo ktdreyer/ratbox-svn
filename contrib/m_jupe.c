@@ -54,7 +54,7 @@
 #include <string.h>
 
 
-static void mo_jupe(struct Client *cptr, struct Client *sptr,
+static void mo_jupe(struct Client *client_p, struct Client *source_p,
 		 int parc, char *parv[]);
 static int bogus_host(char *host);
 
@@ -83,10 +83,10 @@ char *_version = "20010104";
 **      parv[1] = server we're juping
 **      parv[2] = reason for jupe
 */
-static void mo_jupe(struct Client *cptr, struct Client *sptr,
+static void mo_jupe(struct Client *client_p, struct Client *source_p,
                     int parc, char *parv[])
 {
-  struct Client *acptr;
+  struct Client *aclient_p;
   struct Client *ajupe;
   dlink_node *m;
   char reason[REALLEN];
@@ -94,36 +94,36 @@ static void mo_jupe(struct Client *cptr, struct Client *sptr,
   if(!ServerInfo.hub)
     return;
 
-  if(!IsSetOperAdmin(sptr))
+  if(!IsSetOperAdmin(source_p))
     {
-      sendto_one(sptr, ":%s NOTICE %s :You must be an admin to use this command",
+      sendto_one(source_p, ":%s NOTICE %s :You must be an admin to use this command",
                  me.name, parv[0]);
       return;
     }
 
   if (bogus_host(parv[1]))
     {
-      sendto_one(sptr, ":%s NOTICE %s :Invalid servername: %s",
+      sendto_one(source_p, ":%s NOTICE %s :Invalid servername: %s",
                  me.name, parv[0], parv[1]);
       return;
     }
     
   sendto_wallops_flags(FLAGS_WALLOP, &me, "JUPE for %s requested by %s!%s@%s: %s",
-			 parv[1], sptr->name, sptr->username,
-                         sptr->host, parv[2]);
-  sendto_ll_serv_butone(NULL, sptr, 1,
+			 parv[1], source_p->name, source_p->username,
+                         source_p->host, parv[2]);
+  sendto_ll_serv_butone(NULL, source_p, 1,
 			":%s WALLOPS :JUPE for %s requested by %s!%s@%s: %s",
-			parv[0], parv[1], sptr->name, 
-                        sptr->username, sptr->host, parv[2]);
+			parv[0], parv[1], source_p->name, 
+                        source_p->username, source_p->host, parv[2]);
   log(L_NOTICE, "JUPE for %s requested by %s!%s@%s: %s",
-                parv[1], sptr->name, sptr->username, sptr->host, parv[2]);
+                parv[1], source_p->name, source_p->username, source_p->host, parv[2]);
 
-  acptr= find_server(parv[1]);
+  aclient_p= find_server(parv[1]);
 
-  if(acptr)
+  if(aclient_p)
     {
-      if(MyConnect(acptr))
-	exit_client(cptr, acptr, &me, parv[2]);
+      if(MyConnect(aclient_p))
+	exit_client(client_p, aclient_p, &me, parv[2]);
       else
 	sendto_serv_butone(&me, ":%s SQUIT %s :Juped: %s",
 			   me.name, parv[1], parv[2]);          

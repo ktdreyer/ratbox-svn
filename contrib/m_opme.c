@@ -41,7 +41,7 @@
 
 #include <string.h>
 
-static void mo_opme(struct Client *cptr, struct Client *sptr,
+static void mo_opme(struct Client *client_p, struct Client *source_p,
                     int parc, char *parv[]);
 static int chan_is_opless(struct Channel *chptr);
 
@@ -77,7 +77,7 @@ static int chan_is_opless(struct Channel *chptr)
 **      parv[0] = sender prefix
 **      parv[1] = channel
 */
-static void mo_opme(struct Client *cptr, struct Client *sptr,
+static void mo_opme(struct Client *client_p, struct Client *source_p,
                     int parc, char *parv[])
 {
   struct Channel *chptr, *root_chptr;
@@ -85,9 +85,9 @@ static void mo_opme(struct Client *cptr, struct Client *sptr,
   dlink_node *ptr;
   
   /* admins only */
-  if (!IsSetOperAdmin(sptr))
+  if (!IsSetOperAdmin(source_p))
     {
-      sendto_one(sptr, ":%s NOTICE %s :You have no A flag", me.name, parv[0]);
+      sendto_one(source_p, ":%s NOTICE %s :You have no A flag", me.name, parv[0]);
       return;
     }
 
@@ -104,25 +104,25 @@ static void mo_opme(struct Client *cptr, struct Client *sptr,
   
   if( chptr == NULL )
     {
-      sendto_one(sptr, form_str(ERR_NOSUCHCHANNEL),
+      sendto_one(source_p, form_str(ERR_NOSUCHCHANNEL),
 		 me.name, parv[0], parv[1]);
       return;
     }
 
   if (!chan_is_opless(chptr))
   {
-    sendto_one(sptr, ":%s NOTICE %s :%s Channel is not opless",
+    sendto_one(source_p, ":%s NOTICE %s :%s Channel is not opless",
                me.name, parv[0], parv[1]);
     return;
   }
 
-  if ((ptr = find_user_link(&chptr->peons, sptr)))
+  if ((ptr = find_user_link(&chptr->peons, source_p)))
 	  dlinkDelete(ptr, &chptr->peons);
-  else if ((ptr = find_user_link(&chptr->voiced, sptr)))
+  else if ((ptr = find_user_link(&chptr->voiced, source_p)))
 	  dlinkDelete(ptr, &chptr->voiced);
-  else if ((ptr = find_user_link(&chptr->halfops, sptr)))
+  else if ((ptr = find_user_link(&chptr->halfops, source_p)))
 	  dlinkDelete(ptr, &chptr->halfops);
-  else if ((ptr = find_user_link(&chptr->chanops, sptr)))
+  else if ((ptr = find_user_link(&chptr->chanops, source_p)))
 	  dlinkDelete(ptr, &chptr->chanops);
   else
     {
@@ -130,45 +130,45 @@ static void mo_opme(struct Client *cptr, struct Client *sptr,
        return;      
     }
    
-  dlinkAdd(sptr, ptr, &chptr->chanops);
+  dlinkAdd(source_p, ptr, &chptr->chanops);
   
   if (!on_vchan)
     {
      sendto_wallops_flags(FLAGS_WALLOP, &me,
               "OPME called for [%s] by %s!%s@%s",
-              parv[1], sptr->name, sptr->username, sptr->host);
-     sendto_ll_serv_butone(NULL, sptr, 1,
+              parv[1], source_p->name, source_p->username, source_p->host);
+     sendto_ll_serv_butone(NULL, source_p, 1,
             ":%s WALLOPS :OPME called for [%s] by %s!%s@%s",
-              me.name, parv[1], sptr->name, sptr->username, sptr->host);
+              me.name, parv[1], source_p->name, source_p->username, source_p->host);
      log(L_NOTICE, "OPME called for [%s] by %s!%s@%s",
-                   parv[1], sptr->name, sptr->username, sptr->host);
+                   parv[1], source_p->name, source_p->username, source_p->host);
     }
   else
     {
      sendto_wallops_flags(FLAGS_WALLOP, &me,
                "OPME called for [%s %s] by %s!%s@%s",
-               parv[1], parv[2], sptr->name, sptr->username, sptr->host);
-     sendto_ll_serv_butone(NULL, sptr, 1,
+               parv[1], parv[2], source_p->name, source_p->username, source_p->host);
+     sendto_ll_serv_butone(NULL, source_p, 1,
             ":%s WALLOPS :OPME called for [%s %s] by %s!%s@%s",
-              me.name, parv[1], parv[2], sptr->name, sptr->username, sptr->host);
+              me.name, parv[1], parv[2], source_p->name, source_p->username, source_p->host);
      log(L_NOTICE, "OPME called for [%s %s] by %s!%s@%s",
-                   parv[1], parv[2], sptr->name, sptr->username, sptr->host);
+                   parv[1], parv[2], source_p->name, source_p->username, source_p->host);
     }
 
-  sendto_match_cap_servs(chptr, sptr, CAP_UID, ":%s PART %s",
-						 ID(sptr), parv[1]);
-  sendto_match_nocap_servs(chptr, sptr, CAP_UID, ":%s PART %s",
-						   sptr->name, parv[1]);
-  sendto_match_cap_servs(chptr, sptr, CAP_UID, ":%s SJOIN %ld %s + :@%s",
-						 me.name, chptr->channelts, parv[1], /* XXX ID(sptr) */ sptr->name);
-  sendto_match_nocap_servs(chptr, sptr, CAP_UID, ":%s SJOIN %ld %s + :@%s",
-					 me.name, chptr->channelts, parv[1], sptr->name);
+  sendto_match_cap_servs(chptr, source_p, CAP_UID, ":%s PART %s",
+						 ID(source_p), parv[1]);
+  sendto_match_nocap_servs(chptr, source_p, CAP_UID, ":%s PART %s",
+						   source_p->name, parv[1]);
+  sendto_match_cap_servs(chptr, source_p, CAP_UID, ":%s SJOIN %ld %s + :@%s",
+						 me.name, chptr->channelts, parv[1], /* XXX ID(source_p) */ source_p->name);
+  sendto_match_nocap_servs(chptr, source_p, CAP_UID, ":%s SJOIN %ld %s + :@%s",
+					 me.name, chptr->channelts, parv[1], source_p->name);
   sendto_channel_local(ALL_MEMBERS, chptr, ":%s MODE %s +o %s",
-					   me.name, parv[1], sptr->name);
+					   me.name, parv[1], source_p->name);
   
 /*
-  sendto_channel_remote(chptr, sptr, ":%s MODE %s +o %s",
-						 me.name, parv[1], sptr->name);
+  sendto_channel_remote(chptr, source_p, ":%s MODE %s +o %s",
+						 me.name, parv[1], source_p->name);
 */
 }
 

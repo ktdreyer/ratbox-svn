@@ -24,16 +24,16 @@ _moddeinit(void)
 char *_version = "1.0";
 
 /* show a whois notice
-   sptr does a /whois on cptr */
+   source_p does a /whois on client_p */
 int
 show_notice(struct hook_mfunc_data *data)
 {
-	if (MyConnect(data->sptr) && MyConnect(data->cptr) &&
-		IsOper(data->cptr) && (data->cptr != data->sptr) 
-		&& data->cptr->umodes & FLAGS_SPY) 
+	if (MyConnect(data->source_p) && MyConnect(data->client_p) &&
+		IsOper(data->client_p) && (data->client_p != data->source_p) 
+		&& data->client_p->umodes & FLAGS_SPY) 
 	{
-		sendto_one(data->cptr, ":%s NOTICE %s :*** Notice -- %s (%s@%s) is doing a /whois on you",
-				   me.name, data->cptr->name, data->sptr->name, data->sptr->username, data->sptr->host);
+		sendto_one(data->client_p, ":%s NOTICE %s :*** Notice -- %s (%s@%s) is doing a /whois on you",
+				   me.name, data->client_p->name, data->source_p->name, data->source_p->username, data->source_p->host);
 	}
 	return 0;
 }
