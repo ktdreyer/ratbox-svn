@@ -60,8 +60,6 @@
 
 #define CLIENT_BUFSIZE 512      /* must be at least 512 bytes */
 
-/* DUPFREEDEBUG */
-#define DUPFREEDEBUG 1
 
 /*
  * pre declare structs
@@ -216,10 +214,6 @@ struct Client
   
   struct LocalUser *localClient;
 
-#ifdef DUPFREEDEBUG
-  char          free_file[512];
-  unsigned long free_line;
-#endif
 };
 
 struct LocalUser
@@ -604,16 +598,8 @@ extern void           add_client_to_llist(struct Client** list,
                                           struct Client* client);
 extern void           del_client_from_llist(struct Client** list, 
                                             struct Client* client);
-#ifdef DUPFREEDEBUG
-#define exit_client(cptr,sptr,from,comment) \
-          _exit_client(cptr,sptr,from,comment,__FILE__,__LINE__)
-extern int            _exit_client(struct Client*, struct Client*,
-                                   struct Client*, const char *,
-                                   const char *, unsigned long);
-#else
 extern int            exit_client(struct Client*, struct Client*, 
                                   struct Client*, const char*);
-#endif
 
 
 extern void     count_local_client_memory(int *count, int *memory);
