@@ -1,3 +1,42 @@
+leeh        2003/08/17 08:24:33 EDT	(20030817_0)
+
+  Modified files:
+    include              send.h 
+    modules              m_connect.c m_gline.c m_invite.c 
+                         m_kline.c m_knock.c m_operwall.c m_ping.c 
+                         m_pong.c m_resv.c m_stats.c m_topic.c 
+                         m_wallops.c m_whois.c m_xline.c 
+    src                  ircd.c messages.tab parse.c s_serv.c 
+                         send.c 
+  Log:
+  - added sendto_one_notice(), used for sending a NOTICE to a client and
+    determining ID/name
+  - modules/ cleanups for TS6
+  
+  Revision  Changes    Path
+  7.77      +1 -0      ircd-ratbox/include/send.h
+  1.60      +16 -16    ircd-ratbox/modules/m_connect.c
+  1.127     +5 -3      ircd-ratbox/modules/m_gline.c
+  1.75      +3 -3      ircd-ratbox/modules/m_invite.c
+  1.164     +19 -23    ircd-ratbox/modules/m_kline.c
+  1.84      +9 -6      ircd-ratbox/modules/m_knock.c
+  1.49      +6 -7      ircd-ratbox/modules/m_operwall.c
+  1.48      +17 -15    ircd-ratbox/modules/m_ping.c
+  1.46      +7 -5      ircd-ratbox/modules/m_pong.c
+  1.42      +24 -31    ircd-ratbox/modules/m_resv.c
+  1.177     +119 -95   ircd-ratbox/modules/m_stats.c
+  1.82      +7 -3      ircd-ratbox/modules/m_topic.c
+  1.48      +6 -2      ircd-ratbox/modules/m_wallops.c
+  1.127     +5 -3      ircd-ratbox/modules/m_whois.c
+  1.32      +17 -22    ircd-ratbox/modules/m_xline.c
+  7.307     +1 -0      ircd-ratbox/src/ircd.c
+  7.96      +2 -3      ircd-ratbox/src/messages.tab
+  7.166     +2 -3      ircd-ratbox/src/parse.c
+  7.351     +4 -7      ircd-ratbox/src/s_serv.c
+  7.255     +42 -2     ircd-ratbox/src/send.c
+
+
+
 leeh        2003/08/16 10:08:22 EDT	(20030816_1)
 
   Removed files:
