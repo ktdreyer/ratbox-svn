@@ -1,3 +1,8 @@
+*** 20010313_4 by ejb
+- don't build m_error.c as a module, it has to be static for now. 
+
+
+
 *** 20010313_3 by fl_
 - ripped the flood bit out of config.h, also if they dont set a config
   option, we default to 8 in ircd.c, which is what was in config.h
