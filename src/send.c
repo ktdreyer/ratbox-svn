@@ -1010,14 +1010,14 @@ ts_warn(const char *pattern, ...)
 
 
 
-extern aConfItem *u_conf;
+extern struct ConfItem *u_conf;
 
 int
 sendto_slaves(struct Client *one, char *message, char *nick, int parc, char *parv[])
 
 {
   struct Client *acptr;
-  aConfItem *aconf;
+  struct ConfItem *aconf;
 
   for(acptr = serv_cptr_list; acptr; acptr = acptr->next_server_client)
     {
