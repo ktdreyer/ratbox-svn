@@ -1,3 +1,16 @@
+leeh        2002/01/01 10:53:47 EST	(20020101_2)
+
+  Modified files:
+    src                  ircd_lexer.l ircd_parser.y 
+  Log:
+  - renamed bind_address to vhost for consistency with serverinfo {};
+  
+  Revision  Changes    Path
+  1.133     +0 -1      ircd-hybrid-7/src/ircd_lexer.l
+  1.232     +2 -3      ircd-hybrid-7/src/ircd_parser.y
+
+
+
 a1kmm       2002/01/01 01:56:43 EST	(20020101_1)
 
   Modified files:
