@@ -1,3 +1,7 @@
+*** 20010125_8 by androsyn
+Fixes for ident when compiled for IPv6
+
+
 *** 20010125_7 by androsyn
 Fixed ircd from complaining about ':' in hostnames on connect.  I don't know
 if we want this to be on just for IPv6, but its on for IPv4 as well.
