@@ -206,10 +206,11 @@ auth_dns_callback(void *vptr, adns_answer * reply)
 			struct Client *client = auth->client;
 			auth->ip6_int = 1;
 			MyFree(reply);
-			adns_getaddr(&client->localClient->ip,
+			if(adns_getaddr(&client->localClient->ip,
 				     client->localClient->ip.ss_family,
-				     client->localClient->dns_query, 1);
-			SetDNSPending(auth);
+				     client->localClient->dns_query, 1) > 0)
+				
+				SetDNSPending(auth);
 			return;
 		}
 #endif
@@ -411,9 +412,9 @@ start_auth(struct Client *client)
 	sendheader(client, REPORT_DO_DNS);
 
 	/* No DNS cache now, remember? -- adrian */
-	SetDNSPending(auth);
-	adns_getaddr(&client->localClient->ip, client->localClient->ip.ss_family,
-		     client->localClient->dns_query, 0);
+	if(adns_getaddr(&client->localClient->ip, client->localClient->ip.ss_family,
+		     client->localClient->dns_query, 0) > 0)
+		SetDNSPending(auth);
 
 	if(ConfigFileEntry.disable_auth == 0)
 		start_auth_query(auth);
