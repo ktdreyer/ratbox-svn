@@ -168,7 +168,7 @@ free_channel_reg(struct chan_reg *reg_p)
 
 	unsigned int hashv = hash_channel(reg_p->name);
 
-	part_service(chanserv_p, chreg_p->name);
+	part_service(chanserv_p, reg_p->name);
 
 	loc_sqlite_exec(NULL, "DELETE FROM bans WHERE chname = %Q",
 			reg_p->name);
