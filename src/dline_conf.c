@@ -213,7 +213,7 @@ struct ConfItem *trim_Dlines(struct ConfItem *cl)
  * only K/I lines that are more specific than mask will be toasted.
  * -good
  */
-struct ConfItem *trim_ip_Klines(struct ConfItem *cl, int mask)
+struct ConfItem *trim_ip_Klines(struct ConfItem *cl, unsigned int mask)
 {
   struct ConfItem *temp;
   if (!cl) return NULL;
@@ -242,7 +242,7 @@ struct ConfItem *trim_ip_Klines(struct ConfItem *cl, int mask)
  * only K/I/E lines that are more specific than mask will be toasted.
  * -good
  */
-struct ConfItem *trim_ip_Elines(struct ConfItem *cl, int mask)
+struct ConfItem *trim_ip_Elines(struct ConfItem *cl, unsigned int mask)
 {
   struct ConfItem *temp;
   if (!cl) return NULL;
@@ -289,15 +289,14 @@ struct ip_subtree *destroy_ip_subtree(struct ip_subtree *head)
  * find_exception - match an IP against all unplaced d-line exceptions 
  * -good
  */
-struct ConfItem *find_exception(unsigned long ip)
+struct ConfItem* find_exception(unsigned long ip)
 {
-  struct ConfItem *scan=leftover;
+  struct ConfItem* scan=leftover;
   
-  while (scan)
-    {
-      if (scan->ip == (ip & scan->ip_mask)) exit;
-      scan=scan->next;
-    }
+  for (scan = leftover; scan; scan = scan->next) {
+    if (scan->ip == (ip & scan->ip_mask))
+      break;
+  }
   return scan;
 }
 
