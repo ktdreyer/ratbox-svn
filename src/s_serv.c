@@ -2048,14 +2048,6 @@ void cryptlink_init(struct Client *client_p,
   char randkey[CIPHERKEYLEN];
   int enc_len;
 
-  /* check compatability */
-  if (!IsCapable(client_p, CAP_ENC))
-  {
-    cryptlink_error(client_p,
-      "%s[%s]: CRYPTLINK failed - remote server has no ENC capab");
-    return;
-  }
-
   /* get key */
   if (!ServerInfo.rsa_private_key ||
       !RSA_check_key(ServerInfo.rsa_private_key) ||
