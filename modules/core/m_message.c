@@ -199,7 +199,8 @@ m_message(int p_or_n,
   }
 
   /* Finish the flood grace period... */
-  SetFloodDone(source_p);
+  if(MyClient(source_p) && !IsFloodDone(source_p))
+    flood_endgrace(source_p);
 
   if (build_target_list(p_or_n, command, client_p, source_p, parv[1],
                         parv[2]) < 0)

@@ -205,7 +205,8 @@ static void m_mode(struct Client *client_p, struct Client *source_p,
   else if((ptr = find_user_link(&chptr->deopped, source_p)) == NULL)
   {
     /* Finish the flood grace period... */
-    SetFloodDone(source_p);
+    if(MyClient(source_p) && !IsFloodDone(source_p))
+      flood_endgrace(source_p);
 
     set_channel_mode(client_p, source_p, chptr, parc - n, parv + n, 
                      root->chname);

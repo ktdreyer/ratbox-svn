@@ -319,7 +319,7 @@ int register_local_user(struct Client *client_p, struct Client *source_p,
  
   user->last = CurrentTime;
   /* Straight up the maximum rate of flooding... */
-  source_p->localClient->allow_read = MAX_FLOOD_PER_SEC_I;
+  source_p->localClient->allow_read = MAX_FLOOD_BURST;
 
 
   if( ( status = check_client(client_p, source_p, username )) < 0 )
@@ -471,7 +471,7 @@ int register_local_user(struct Client *client_p, struct Client *source_p,
   /* Increment our total user count here */
   if (++Count.total > Count.max_tot)
     Count.max_tot = Count.total;
-  source_p->localClient->allow_read = MAX_FLOOD_PER_SEC_I;
+  source_p->localClient->allow_read = MAX_FLOOD_BURST;
 
   Count.totalrestartcount++;
 

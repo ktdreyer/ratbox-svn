@@ -102,8 +102,8 @@ static void m_part(struct Client *client_p,
   name = strtoken( &p, parv[1], ",");
 
   /* Finish the flood grace period... */
-  SetFloodDone(source_p);
-  /* if its my client, and isn't an oper */
+  if(MyClient(source_p) && !IsFloodDone(source_p))
+    flood_endgrace(source_p);
 
   while(name)
   {

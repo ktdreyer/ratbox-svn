@@ -39,14 +39,20 @@
  * the network..
  *   -- adrian
  */
-#define MAX_FLOOD_PER_SEC               8
-/* And the initial rate of flooding after registration... -A1kmm. */
-#define MAX_FLOOD_PER_SEC_I            24
+/* MAX_FLOOD is the amount of lines in a 'burst' we allow from a client, 
+ * anything beyond MAX_FLOOD is limited to about one line per second.
+ *
+ * MAX_FLOOD_CONN is the amount of lines we allow from a client who has
+ * just connected.  this allows clients to rejoin multiple channels
+ * without being so heavily penalised they excess flood.
+ */
+#define MAX_FLOOD 4
+#define MAX_FLOOD_BURST 24
 
 extern PF  read_ctrl_packet;
 extern PF  read_packet;
 extern PF  flood_recalc;
-
+extern void flood_endgrace(struct Client *);
 
 #endif /* INCLUDED_packet_h */
 

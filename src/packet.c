@@ -54,7 +54,7 @@ parse_client_queued(struct Client *client_p)
   int dolen = 0, checkflood = 1;
   struct LocalUser *lclient_p = client_p->localClient;
 
-  if (IsServer(client_p))
+  if (IsServer(client_p) || !IsRegistered(client_p))
   {
     while ((dolen = linebuf_get(&client_p->localClient->buf_recvq,
                               readBuf, READBUF_SIZE, LINEBUF_COMPLETE,
@@ -76,12 +76,9 @@ parse_client_queued(struct Client *client_p)
   } 
   else 
   {
-    checkflood = 0;
 
-#if 0
     if (ConfigFileEntry.no_oper_flood && IsOper(client_p))
       checkflood = 0;
-#endif
     /*
      * Handle flood protection here - if we exceed our flood limit on
      * messages in this loop, we simply drop out of the loop prematurely.
@@ -89,6 +86,19 @@ parse_client_queued(struct Client *client_p)
      */
     for (;;)
     {
+      /* This flood protection works as follows:
+       *
+       * A client is given allow_read lines to send to the server.  Every
+       * time a line is parsed, sent_parsed is increased.  sent_parsed
+       * is decreased by 1 every time flood_recalc is called.
+       *
+       * Thus a client can 'burst' allow_read lines to the server, any
+       * excess lines will be parsed one per flood_recalc() call.
+       *
+       * Therefore a client will be penalised more if they keep flooding,
+       * as sent_parsed will always hover around the allow_read limit
+       * and no 'bursts' will be permitted.
+       */
       if (checkflood && (lclient_p->sent_parsed > lclient_p->allow_read))
         break;
        
@@ -104,6 +114,23 @@ parse_client_queued(struct Client *client_p)
   }
 }
 
+/* flood_endgrace()
+ *
+ * marks the end of the clients grace period
+ */
+void flood_endgrace(struct Client *client_p)
+{
+  SetFloodDone(client_p);
+
+  /* Drop their flood limit back down */
+  client_p->localClient->allow_read = MAX_FLOOD;
+
+  /* sent_parsed could be way over MAX_FLOOD but under MAX_FLOOD_BURST,
+   * so reset it.
+   */
+  client_p->localClient->sent_parsed = 0;
+}
+	    
 /*
  * flood_recalc
  *
@@ -115,22 +142,25 @@ flood_recalc(int fd, void *data)
 {
   struct Client *client_p = data;
   struct LocalUser *lclient_p = client_p->localClient;
-  int max_flood_per_sec = MAX_FLOOD_PER_SEC;
+#if 0
+  int max_flood_per_sec = MAX_FLOOD;
+#endif
  
   /* This can happen in the event that the client detached. */
   if (!lclient_p)
     return;
-    
+
+#if 0     
   /* If we're a server, skip to the end. Realising here that this call is
    * cheap and it means that if a op is downgraded they still get considered
    * for anti-flood protection ..
    */
-  if (!IsPrivileged(client_p))
+  if(!IsPrivileged(client_p))
   {
     /* Is the grace period still active? */
     if (client_p->user && !IsFloodDone(client_p))
-      max_flood_per_sec = MAX_FLOOD_PER_SEC_I;
-     
+      max_flood_per_sec = MAX_FLOOD_BURST;
+
     /* ok, we have to recalculate the number of messages we can receive
      * in this second, based upon what happened in the last second.
      * If we still exceed the flood limit, don't move the parsed limit.
@@ -146,17 +176,23 @@ flood_recalc(int fd, void *data)
     /* Drop the limit to avoid flooding .. */
     else
       lclient_p->allow_read--;
-      
+
     /* Enforce floor/ceiling restrictions */
     if (lclient_p->allow_read < 1)
       lclient_p->allow_read = 1;
     else if (lclient_p->allow_read > max_flood_per_sec)
      lclient_p->allow_read = max_flood_per_sec;
+    lclient_p->allow_read = max_flood_per_sec;
   }
+#endif
   
   /* Reset the sent-per-second count */
-  lclient_p->sent_parsed = 0;
-  lclient_p->actually_read = 0;
+  if(--lclient_p->sent_parsed < 0)
+    lclient_p->sent_parsed = 0;
+  
+  if(--lclient_p->actually_read < 0)
+    lclient_p->actually_read = 0;
+
   parse_client_queued(client_p);
   
   /* And now, try flushing .. */

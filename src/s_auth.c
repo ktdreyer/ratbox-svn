@@ -193,7 +193,7 @@ static void release_auth_client(struct Client* client)
    * us. This is what read_packet() does.
    *     -- adrian
    */
-  client->localClient->allow_read = MAX_FLOOD_PER_SEC;
+  client->localClient->allow_read = MAX_FLOOD;
   comm_setflush(client->localClient->fd, 1000, flood_recalc, client);
   add_client_to_list(client);
   read_packet(client->localClient->fd, client);

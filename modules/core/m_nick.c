@@ -44,6 +44,7 @@
 #include "parse.h"
 #include "modules.h"
 #include "common.h"
+#include "packet.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -207,7 +208,8 @@ static void mr_nick(struct Client *client_p, struct Client *source_p,
   }
 
   /* mark end of grace period, to prevent nickflooding */
-  SetFloodDone(source_p);
+  if(!IsFloodDone(source_p))
+    flood_endgrace(source_p);
 
   /* terminate nick to NICKLEN */
   strlcpy(nick, parv[1], NICKLEN);

@@ -33,6 +33,7 @@
 #include "modules.h"
 #include "s_conf.h"
 #include "s_serv.h"
+#include "packet.h"
 
 #include <stdlib.h>
 
@@ -78,6 +79,9 @@ static void m_away(struct Client *client_p,
                   char *parv[])
 {
   char  *away, *awy2 = parv[1];
+
+  if(MyClient(source_p) && !IsFloodDone(source_p))
+    flood_endgrace(source_p);
 
   /* make sure the user exists */
   if (!(source_p->user))

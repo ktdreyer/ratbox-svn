@@ -38,6 +38,7 @@
 #include "msg.h"
 #include "parse.h"
 #include "modules.h"
+#include "packet.h"
 
 #include <string.h>
 #include <stdlib.h>
@@ -81,6 +82,9 @@ static void m_topic(struct Client *client_p,
   
   if ((p = strchr(parv[1],',')))
     *p = '\0';
+
+  if(MyClient(source_p) && !IsFloodDone(source_p))
+    flood_endgrace(source_p);
 
   if (parv[1] && IsChannelName(parv[1]))
     {
