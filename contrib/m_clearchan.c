@@ -201,7 +201,7 @@ void kick_list(struct Client *client_p, struct Client *source_p, struct Channel 
 			   source_p->name, chname, who->name);
       sendto_channel_remote(chptr, &me,
 			    ":%s KICK %s %s :CLEARCHAN", source_p->name, chname, who->name);
-      remove_user_from_channel(chptr, who);
+      remove_user_from_channel(chptr, who, 0);
     }
 
   /* Join the user themselves to the channel down here, so they dont see a nicklist 
