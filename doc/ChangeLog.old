@@ -1,3 +1,8 @@
+*** 20001228_14 by bill
+
+- added hyb7 +h modes to hyb6 +o modes
+
+
 *** 20001228_13 by toot
 show a couple of ircd.conf options in the /version line
 G(glines) and H(hub) are there.. with room for more ;) 
