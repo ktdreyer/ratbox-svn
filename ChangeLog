@@ -1,3 +1,22 @@
+androsyn    2003/02/08 23:40:58 UTC	(20030208_13)
+
+  Modified files:
+    .                    configure 
+    autoconf             configure.in 
+    include              memory.h 
+  Log:
+  Make autoconf define _GNU_SOURCE for builds as this can help things a bit on
+  such systems :).  Also removed the macros that made strdup etc blow up.  I
+  think people have long since stopped using those in irc and besides it blows
+  up my DupString macro
+  
+  Revision  Changes    Path
+  7.170     +3 -1      ircd-ratbox/autoconf/configure.in
+  7.177     +217 -215  ircd-ratbox/configure
+  7.43      +0 -13     ircd-ratbox/include/memory.h
+
+
+
 androsyn    2003/02/08 23:14:35 UTC	(20030208_12)
 
   Modified files:
