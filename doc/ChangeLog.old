@@ -1,3 +1,8 @@
+*** 20010104_40 by wcampbel
+Moved m_hash.c from modules to contrib (it hasn't been installed for a while)
+Also updated .depend's and documented the 3 modules we have in contrib
+
+
 *** 20010104_39 by davidt
 where'd this little irc_strncpy go....
 
