@@ -1,3 +1,14 @@
+*** 20010218_1 by wcampbel
+1.  Update the TODO list
+2.  Massive update of the docs for the (hopefully soon) beta2 release.
+3.  Made the rsa_respond/Makefile consistent
+4.  Cleaned up make rsa_respond from the source root somewhat
+5.  make install in doc/ installs the manpage (now that it's reasonably
+    up to date) to man8 in the prefix.
+6.  Removed the last vestiges of CRYPT_LINK_PASSWORD
+7.  Last but not least, added vulture to the credits as a contributer
+
+
 *** 20010216_7 by androsyn
 Fixed /rehash dns finally.  Boy I'm awful lazy these days :P
 
