@@ -1,3 +1,7 @@
+*** 20010613_1 by androsyn
+Minor cleanups...
+
+
 *** 20010612_9 by androsyn
 Oops..i should have been checking to see if the connection was an AF_INET6
 
