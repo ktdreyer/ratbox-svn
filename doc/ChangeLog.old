@@ -1,3 +1,12 @@
+*** 20001230_10 by db
+- chptr->vchan_id will never be a NULL pointer so the test wasn't doing
+  anything at all. Its declared as 
+  char            vchan_id[NICKLEN*2];   /* use this for empty vchans */
+  not a char *; One could do if[chptr->vchan_id[0]) but then once set
+  vchan_id[0] would never be null either.
+
+
+
 *** 20001230_9 by toot
 added a paranoid check in pick_vchan_id
 
