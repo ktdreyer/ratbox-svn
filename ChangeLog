@@ -1,3 +1,31 @@
+leeh        2003/06/08 16:53:43 UTC	(20030608_0)
+
+  Modified files:
+    include              ircd_defs.h 
+    modules              m_dline.c m_gline.c m_kline.c m_undline.c 
+                         m_unkline.c m_who.c m_xline.c 
+    src                  channel.c s_user.c 
+  Log:
+  - stable sync:
+    - splitmode stuff
+    - xline fix for duplicate xlines
+    - overflow fixes
+    - make m_who.c use server_oper properly
+  
+  Revision  Changes    Path
+  7.41      +2 -0      ircd-ratbox/include/ircd_defs.h
+  1.16      +13 -8     ircd-ratbox/modules/m_dline.c
+  1.113     +18 -12    ircd-ratbox/modules/m_gline.c
+  1.155     +10 -6     ircd-ratbox/modules/m_kline.c
+  1.14      +2 -2      ircd-ratbox/modules/m_undline.c
+  1.89      +3 -2      ircd-ratbox/modules/m_unkline.c
+  1.87      +16 -4     ircd-ratbox/modules/m_who.c
+  1.27      +5 -4      ircd-ratbox/modules/m_xline.c
+  7.374     +8 -9      ircd-ratbox/src/channel.c
+  7.263     +2 -0      ircd-ratbox/src/s_user.c
+
+
+
 androsyn    2003/06/05 19:10:55 UTC	(20030605_0)
 
   Modified files:
