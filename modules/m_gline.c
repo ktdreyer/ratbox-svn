@@ -22,6 +22,16 @@
  *
  *  $Id$
  */
+
+#include <assert.h>
+#include <string.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <time.h>
+#include <fcntl.h>
+#include <errno.h>
+#include <limits.h>
+
 #include "tools.h"
 #include "handlers.h"
 #include "s_gline.h"
@@ -47,14 +57,6 @@
 #include "parse.h"
 #include "modules.h"
 #include "list.h"
-
-#include <assert.h>
-#include <string.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <time.h>
-#include <fcntl.h>
-#include <errno.h>
 
 /* internal functions */
 static void set_local_gline(
