@@ -95,15 +95,6 @@ clear_pending_glines(void)
 	}
 }
 
-
-
-static void
-rehash_channels(struct Client *source_p)
-{
-	sendto_realops_flags(UMODE_ALL, L_ALL, "%s is forcing cleanup of channels", source_p->name);
-	cleanup_channels(NULL);
-}
-
 static void
 rehash_dns(struct Client *source_p)
 {
@@ -181,7 +172,6 @@ rehash_help(struct Client *source_p)
 }
 	
 static struct hash_commands rehash_commands[] = {
-	{"CHANNELS", 	rehash_channels },
 	{"DNS", 	rehash_dns },
 	{"MOTD", 	rehash_motd },
 	{"OMOTD", 	rehash_omotd	},
