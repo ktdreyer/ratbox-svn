@@ -1,3 +1,9 @@
+*** 20010611_4 by androsyn
+Changed waitpid() check for zombies to run once every 30 seconds, rather than
+once per i/o loop cycle.
+
+
+
 *** 20010611_3 by androsyn
 Fixes for various moans and groans that gcc emitted.
 
