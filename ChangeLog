@@ -1,3 +1,15 @@
+androsyn    2004/07/08 20:27:10 EDT	(20040709_5)
+
+  Modified files:
+    src                  balloc.c 
+  Log:
+  gah...more shit
+  
+  Revision  Changes    Path
+  7.78      +17 -2     ircd-ratbox/src/balloc.c
+
+
+
 androsyn    2004/07/08 20:22:39 EDT	(20040709_4)
 
   Modified files:
