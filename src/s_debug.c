@@ -401,7 +401,7 @@ void count_memory(struct Client* cptr, char* nick)
               conf_mem + class_count * sizeof(struct Class) + 
               dbuf_mem + resolver_mem + ip_hash_mem + scache_mem;
 
-  sendto_one(cptr, ":%s %d %s :Total: ch %d cl %d co %d db %d",
+  sendto_one(cptr, ":%s %d %s :Total: channel %d client %d conf %d dbuf %d",
              me.name, RPL_STATSDEBUG, nick, channel_mem_total, 
              client_mem_total, conf_mem, dbuf_mem);
 

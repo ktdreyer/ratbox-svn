@@ -520,7 +520,6 @@ int server_estab(struct Client *cptr)
   int               split;
 
   assert(0 != cptr);
-  ClearAccess(cptr);
 
   inpath = get_client_name(cptr, TRUE); /* "refresh" inpath with host */
   split = irccmp(cptr->name, cptr->host);

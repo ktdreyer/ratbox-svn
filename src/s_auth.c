@@ -158,8 +158,6 @@ static void release_auth_client(struct Client* client)
 
   fdlist_add(client->fd, FDL_DEFAULT);
   add_client_to_list(client);
-  
-  SetAccess(client);
 }
  
 /*
