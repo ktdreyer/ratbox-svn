@@ -1,3 +1,7 @@
+*** 20001213_13 by spookey
+
+  --disable-openssl enabled openssl... that didn't seem right..
+
 *** 20001213_12 by db
 - tiny update to send.txt, sendto_common_channels 
 
