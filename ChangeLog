@@ -1,3 +1,21 @@
+leeh        2005/02/03 17:09:38 EST	(20050203_5)
+
+  Modified files:
+    src                  s_chanserv.c 
+  Added files:
+    help/chanserv        chaninfo u-chaninfo 
+  Log:
+  - added CHANSERV::CHANINFO, chanserv admin command giving extended info
+    about channel registration
+  - cleanup CHANSERV::SET somewhat
+  
+  Revision  Changes    Path
+  1.1       +4 -0      rserv/help/chanserv/chaninfo (new)
+  1.1       +4 -0      rserv/help/chanserv/u-chaninfo (new)
+  1.60      +150 -127  rserv/src/s_chanserv.c
+
+
+
 leeh        2005/02/03 11:17:54 EST	(20050203_4)
 
   Modified files:
