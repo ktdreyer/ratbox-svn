@@ -1,3 +1,9 @@
+*** 20010429_6 by androsyn
+Removed the assert()'s andrew had put there.  This seems to get rid of the
+cores. But now I need to figure out why poll() performance sucks so bad,
+other than it being poll() which sucks by nature.
+
+
 *** 20010429_5 by androsyn
 Hmm..okay..a slightly different assert...
 
