@@ -64,6 +64,7 @@ static int mo_modload(struct Client*, struct Client*, int, char**);
 static int mo_modlist(struct Client*, struct Client*, int, char**);
 static int mo_modreload(struct Client*, struct Client*, int, char**);
 static int mo_modunload(struct Client*, struct Client*, int, char**);
+static int mo_modrestart(struct Client*, struct Client*, int, char**);
 
 struct Message modload_msgtab = {
  "MODLOAD", 0, 2, 0, MFLG_SLOW, 0,
@@ -85,6 +86,11 @@ struct Message modlist_msgtab = {
   {m_unregistered, m_not_oper, m_ignore, mo_modlist}
 };
 
+struct Message modrestart_msgtab = {
+ "MODRESTART", 0, 1, 0, MFLG_SLOW, 0,
+ {m_unregistered, m_not_oper, m_ignore, mo_modrestart}
+};
+
 void
 modules_init(void)
 {
@@ -92,6 +98,7 @@ modules_init(void)
 	mod_add_cmd(&modunload_msgtab);
         mod_add_cmd(&modreload_msgtab);
 	mod_add_cmd(&modlist_msgtab);
+	mod_add_cmd(&modrestart_msgtab);
 }
 
 static struct module_path *
@@ -189,7 +196,7 @@ int unload_one_module (char *name)
 
   if(num_mods != 0)
     num_mods--;
-
+  
   log (L_INFO, "Module %s unloaded", name);
   sendto_realops_flags(FLAGS_ALL,"Module %s unloaded", name);
   return 0;
@@ -493,6 +500,33 @@ mo_modlist (struct Client *cptr, struct Client *sptr, int parc, char **parv)
     }
   }
   sendto_one(sptr, ":%s NOTICE %s :Done.", me.name, parv[0]);
+
+  return 0;
+}
+
+/* unload and reload all modules */
+static int
+mo_modrestart (struct Client *cptr, struct Client *sptr, int parc, char **parv)
+
+{
+  int i;
+
+  if (!IsSetOperAdmin (sptr))
+  {
+    sendto_one (sptr, ":%s NOTICE %s :You have no A flag",
+                me.name, parv[0]);
+    return 0;
+  }
+
+  sendto_one(sptr, ":%s NOTICE %s :Reloading all modules",
+             me.name, parv[0]);
+
+  for(i = 0; i < num_mods; )
+  {
+     unload_one_module(modlist[i]->name);
+  }
+
+  load_all_modules();
 
   return 0;
 }
