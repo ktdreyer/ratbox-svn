@@ -372,7 +372,7 @@ inet_ntop6(const unsigned char *src, char *dst, unsigned int size)
 		{
 			if(i == best.base)
 			{
-				if(i == '0')
+				if(i == 0)
 					*tp++ = '0';
 				*tp++ = ':';
 			}
