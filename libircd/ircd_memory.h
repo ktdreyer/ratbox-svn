@@ -84,7 +84,7 @@ extern inline void _DupString(char **x, const char *y)
     outofmemory();
   strcpy((*x), y); 
 }
-#endif __GNUC__
+#endif /* __GNUC__ */
 
 #define DupString(x,y) _DupString(&x, y)
 
