@@ -121,7 +121,7 @@ mr_nick(struct Client *client_p, struct Client *source_p, int parc, const char *
 	/* check if the nick is resv'd */
 	if(find_nick_resv(nick))
 	{
-		sendto_one(source_p, form_str(ERR_UNAVAILRESOURCE),
+		sendto_one(source_p, form_str(ERR_ERRONEUSNICKNAME),
 			   me.name, EmptyString(source_p->name) ? "*" : source_p->name, nick);
 		return 0;
 	}
@@ -178,7 +178,7 @@ m_nick(struct Client *client_p, struct Client *source_p, int parc, const char *p
 
 	if(find_nick_resv(nick))
 	{
-		sendto_one(source_p, form_str(ERR_UNAVAILRESOURCE),
+		sendto_one(source_p, form_str(ERR_ERRONEUSNICKNAME),
 			   me.name, source_p->name, nick);
 		return 0;
 	}

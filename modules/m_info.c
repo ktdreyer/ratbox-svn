@@ -210,6 +210,12 @@ static struct InfoStruct info_table[] = {
 		"Minimum CIDR bitlen for ipv6 glines"
 	},
 	{
+		"hide_error_messages",
+		OUTPUT_BOOLEAN2,
+		&ConfigFileEntry.hide_error_messages,
+		"Hide ERROR messages coming from servers"
+	},
+	{
 		"hub",
 		OUTPUT_BOOLEAN_YN,
 		&ServerInfo.hub,
@@ -298,6 +304,12 @@ static struct InfoStruct info_table[] = {
 		OUTPUT_BOOLEAN,
 		&ConfigFileEntry.non_redundant_klines,
 		"Check for and disallow redundant K-lines"
+	},
+	{
+		"operspy_admin_only",
+		OUTPUT_BOOLEAN,
+		&ConfigFileEntry.operspy_admin_only,
+		"Send +Z operspy notices to admins only"
 	},
 	{
 		"pace_wait",
@@ -737,7 +749,18 @@ send_conf_options(struct Client *source_p)
 
 				break;
 			}
+
+		case OUTPUT_BOOLEAN2:
+		{
+			int option = *((int *) info_table[i].option);
+
+			sendto_one(source_p, ":%s %d %s :%-30s %-5s [%-30s]",
+				   me.name, RPL_INFO, source_p->name,
+				   info_table[i].name,
+				   option ? ((option == 1) ? "MASK" : "YES") : "NO",
+				   info_table[i].desc ? info_table[i].desc : "<none>");
 		}		/* switch (info_table[i].output_type) */
+		}
 	}			/* forloop */
 
 

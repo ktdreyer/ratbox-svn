@@ -408,7 +408,8 @@ static struct mode_table umode_table[] = {
 };
 
 static struct mode_table flag_table[] = {
-	{"global_kill",		OPER_GLOBAL_KILL	},
+	{"local_kill",		OPER_LOCAL_KILL		},
+	{"global_kill",		OPER_GLOBAL_KILL|OPER_LOCAL_KILL	},
 	{"remote",		OPER_REMOTE		},
 	{"kline",		OPER_K			},
 	{"unkline",		OPER_UNKLINE		},
@@ -1916,6 +1917,21 @@ conf_set_general_havent_read_conf(void *data)
 }
 
 static void
+conf_set_general_hide_error_messages(void *data)
+{
+	char *val = data;
+
+	if(strcasecmp(val, "yes") == 0)
+		ConfigFileEntry.hide_error_messages = 2;
+	else if(strcasecmp(val, "opers") == 0)
+		ConfigFileEntry.hide_error_messages = 1;
+	else if(strcasecmp(val, "no") == 0)
+		ConfigFileEntry.hide_error_messages = 0;
+	else
+		conf_report_error("Invalid setting '%s' for general::hide_error_messages.", val);
+}
+
+static void
 conf_set_general_kline_with_reason(void *data)
 {
 	ConfigFileEntry.kline_with_reason = *(unsigned int *) data;
@@ -2731,6 +2747,8 @@ newconf_init()
 	add_conf_item("general", "gline_time", CF_TIME, conf_set_general_gline_time);
 	add_conf_item("general", "gline_min_cidr", CF_INT, conf_set_general_gline_min_cidr);
 	add_conf_item("general", "gline_min_cidr6", CF_INT, conf_set_general_gline_min_cidr6);
+	add_conf_item("general", "hide_error_messages", CF_STRING,
+		      conf_set_general_hide_error_messages);
 	add_conf_item("general", "idletime", CF_TIME, conf_set_general_idletime);
 	add_conf_item("general", "client_exit", CF_YESNO, conf_set_general_client_exit);
 	add_conf_item("general", "oper_only_umodes", CF_STRING | CF_FLIST,

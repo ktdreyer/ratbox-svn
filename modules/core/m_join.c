@@ -118,7 +118,7 @@ m_join(struct Client *client_p, struct Client *source_p, int parc, const char *p
 		/* see if its resv'd */
 		if(find_channel_resv(name) && (!IsOper(source_p) || !ConfigChannel.no_oper_resvs))
 		{
-			sendto_one(source_p, form_str(ERR_UNAVAILRESOURCE),
+			sendto_one(source_p, form_str(ERR_BADCHANNAME),
 				   me.name, source_p->name, name);
 			sendto_realops_flags(UMODE_SPY, L_ALL,
 					     "User %s (%s@%s) is attempting to join locally juped channel %s",

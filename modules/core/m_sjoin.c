@@ -98,7 +98,6 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char 
 	char *ptr_uid;
 	char *p;
 	int i;
-	dlink_node *m;
 	static char empty[] = "";
 
 	/* I dont trust servers *not* to end up sending us a blank sjoin, so
@@ -417,19 +416,10 @@ ms_sjoin(struct Client *client_p, struct Client *source_p, int parc, const char 
 	*(ptr_nick - 1) = '\0';
 	*(ptr_uid - 1) = '\0';
 
-	/* relay the SJOIN to other servers */
-	DLINK_FOREACH(m, serv_list.head)
-	{
-		target_p = m->data;
-
-		if(target_p == client_p->from)
-			continue;
-
-		if(DoesTS6(target_p))
-			sendto_one(target_p, "%s", buf_uid);
-		else
-			sendto_one(target_p, "%s", buf_nick);
-	}
+	sendto_server(client_p->from, NULL, CAP_TS6, NOCAPS,
+		      "%s", buf_uid);
+	sendto_server(client_p->from, NULL, NOCAPS, CAP_TS6,
+		      "%s", buf_nick);
 
 	/* if the source does TS6 we have to remove our bans.  Its now safe
 	 * to issue -b's to the non-ts6 servers, as the sjoin we've just

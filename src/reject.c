@@ -32,6 +32,7 @@
 #include "tools.h"
 #include "reject.h"
 #include "s_stats.h"
+#include "msg.h"
 
 static patricia_tree_t *reject_tree;
 static dlink_list delay_exit;
@@ -138,7 +139,8 @@ check_reject(struct Client *client_p)
 		if(rdata->count > ConfigFileEntry.reject_after_count)
 		{
 			ServerStats->is_rej++;
-			dlinkAddAlloc(client_p, &delay_exit);
+			SetReject(client_p);
+			dlinkMoveNode(&client_p->localClient->tnode, &unknown_list, &delay_exit);
 			return 1;
 		}
 	}	

@@ -1280,7 +1280,7 @@ exit_unknown_client(struct Client *client_p, struct Client *source_p, struct Cli
 	log_user_exit(source_p);
 #endif
 	if(source_p->localClient->fd >= 0)
-		sendto_one(source_p, "ERROR :Closing Link: %s (%s)", source_p->host, comment);
+		sendto_one(source_p, "ERROR :Closing Link: 127.0.0.1 (%s)", comment);
 	call_unknown_exit_hook(source_p, comment);
 	
 	close_connection(source_p);
@@ -1365,8 +1365,8 @@ exit_local_server(struct Client *client_p, struct Client *source_p, struct Clien
 
 	if(client_p != NULL && source_p != client_p && source_p->localClient->fd >= 0)
 	{
-		sendto_one(source_p, "ERROR :Closing Link: %s %s (%s)",
-			   source_p->host, source_p->name, comment);
+		sendto_one(source_p, "ERROR :Closing Link: 127.0.0.1 %s (%s)",
+			   source_p->name, comment);
 	}
 	
 	if(source_p->localClient->ctrlfd >= 0)
@@ -1430,8 +1430,7 @@ exit_local_client(struct Client *client_p, struct Client *source_p, struct Clien
 	dlinkDelete(&source_p->localClient->tnode, &lclient_list);
 	if(IsOper(source_p))
 		dlinkFindDestroy(&oper_list, source_p);
-	
-	
+
 	sendto_realops_flags(UMODE_CCONN, L_ALL,
 			     "Client exiting: %s (%s@%s) [%s] [%s]",
 			     source_p->name,

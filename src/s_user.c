@@ -511,8 +511,6 @@ register_local_user(struct Client *client_p, struct Client *source_p, const char
 int
 introduce_client(struct Client *client_p, struct Client *source_p, struct User *user, const char *nick)
 {
-	dlink_node *ptr;
-	struct Client *server;
 	static char ubuf[12];
 
 	if(MyClient(source_p))
@@ -526,44 +524,34 @@ introduce_client(struct Client *client_p, struct Client *source_p, struct User *
 		ubuf[1] = '\0';
 	}
 
-	/* arghhh one could try not introducing new nicks to ll leafs
-	 * but then you have to introduce them "on the fly" in SJOIN
-	 * not fun.
-	 * Its not going to cost much more bandwidth to simply let new
-	 * nicks just ride on through.
+	/* if it has an ID, introduce it with its id to TS6 servers,
+	 * otherwise introduce it normally to all.
 	 */
-
-	/*
-	 * We now introduce nicks "on the fly" in SJOIN anyway --
-	 * you _need_ to if you aren't going to burst everyone initially.
-	 *
-	 * rewritten to cope with UIDs .. eww eww eww --is
-	 */
-
-	DLINK_FOREACH(ptr, serv_list.head)
+	if(has_id(source_p))
 	{
-		server = ptr->data;
+		sendto_server(client_p, NULL, CAP_TS6, NOCAPS,
+			      ":%s UID %s %d %lu %s %s %s %s %s :%s",
+			      source_p->servptr->id, nick, 
+			      source_p->hopcount + 1,
+			      (unsigned long) source_p->tsinfo, ubuf,
+			      source_p->username, source_p->host,
+			      IsIPSpoof(source_p) ? "0" : source_p->sockhost,
+			      source_p->id, source_p->info);
 
-		if(server == client_p)
-			continue;
-
-		if(DoesTS6(server) && has_id(source_p))
-			sendto_one(server, 
-				   ":%s UID %s %d %lu %s %s %s %s %s :%s",
-				   source_p->servptr->id, nick, 
-				   source_p->hopcount + 1,
-				   (unsigned long) source_p->tsinfo, ubuf,
-				   source_p->username, source_p->host,
-				   IsIPSpoof(source_p) ? "0" : source_p->sockhost,
-				   source_p->id, source_p->info);
-		else
-			sendto_one(server, "NICK %s %d %lu %s %s %s %s :%s",
-				   nick, source_p->hopcount + 1,
-				   (unsigned long) source_p->tsinfo,
-				   ubuf, source_p->username, source_p->host,
-				   user->server, source_p->info);
-
+		sendto_server(client_p, NULL, NOCAPS, CAP_TS6,
+			      "NICK %s %d %lu %s %s %s %s :%s",
+			      nick, source_p->hopcount + 1,
+			      (unsigned long) source_p->tsinfo,
+			      ubuf, source_p->username, source_p->host,
+			      user->server, source_p->info);
 	}
+	else
+		sendto_server(client_p, NULL, NOCAPS, NOCAPS,
+			      "NICK %s %d %lu %s %s %s %s :%s",
+			      nick, source_p->hopcount + 1,
+			      (unsigned long) source_p->tsinfo,
+			      ubuf, source_p->username, source_p->host,
+			      user->server, source_p->info);
 
 
 	return 0;

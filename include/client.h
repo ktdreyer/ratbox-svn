@@ -257,12 +257,13 @@ struct exit_client_hook
 #define STAT_HANDSHAKE          0x02
 #define STAT_ME                 0x04
 #define STAT_UNKNOWN            0x08
-#define STAT_SERVER             0x10
-#define STAT_CLIENT             0x20
+#define STAT_REJECT		0x10
+#define STAT_SERVER             0x20
+#define STAT_CLIENT             0x40
 
 
 #define IsRegisteredUser(x)     ((x)->status == STAT_CLIENT)
-#define IsRegistered(x)         ((x)->status  > STAT_UNKNOWN)
+#define IsRegistered(x)         (((x)->status  > STAT_UNKNOWN) && ((x)->status != STAT_REJECT))
 #define IsConnecting(x)         ((x)->status == STAT_CONNECTING)
 #define IsHandshake(x)          ((x)->status == STAT_HANDSHAKE)
 #define IsMe(x)                 ((x)->status == STAT_ME)
@@ -273,6 +274,9 @@ struct exit_client_hook
 
 #define IsOper(x)		((x)->umodes & UMODE_OPER)
 #define IsAdmin(x)		((x)->umodes & UMODE_ADMIN)
+
+#define SetReject(x)		{(x)->status = STAT_REJECT; \
+				 (x)->handler = UNREGISTERED_HANDLER; }
 
 #define SetConnecting(x)        {(x)->status = STAT_CONNECTING; \
 				 (x)->handler = UNREGISTERED_HANDLER; }
@@ -385,22 +389,23 @@ struct exit_client_hook
 #define OPER_OPERWALL		0x001000
 #define OPER_HIDDENADMIN        0x002000
 #define OPER_INVIS		0x004000
+#define OPER_LOCAL_KILL		0x008000
 #define OPER_FLAGS      (OPER_GLOBAL_KILL | OPER_REMOTE | OPER_UNKLINE |\
                          OPER_GLINE | OPER_N | OPER_K | OPER_DIE |\
                          OPER_REHASH | OPER_ADMIN | OPER_XLINE | OPER_OPERWALL|\
-                         OPER_SPY | OPER_HIDDENADMIN)
+                         OPER_SPY | OPER_LOCAL_KILL | OPER_HIDDENADMIN)
 
-#define FLAGS2_EXEMPTGLINE      0x004000
-#define FLAGS2_EXEMPTKLINE      0x008000
-#define FLAGS2_EXEMPTFLOOD      0x010000
-#define FLAGS2_NOLIMIT          0x020000
-#define FLAGS2_IDLE_LINED       0x040000
-#define FLAGS2_RESTRICTED       0x080000
-#define FLAGS2_PING_COOKIE      0x100000
-#define FLAGS2_IP_SPOOFING      0x200000
-#define FLAGS2_FLOODDONE        0x400000
-#define FLAGS2_EXEMPTSPAMBOT	0x800000
-#define FLAGS2_EXEMPTSHIDE	0x1000000
+#define FLAGS2_EXEMPTGLINE      0x010000
+#define FLAGS2_EXEMPTKLINE      0x020000
+#define FLAGS2_EXEMPTFLOOD      0x040000
+#define FLAGS2_NOLIMIT          0x080000
+#define FLAGS2_IDLE_LINED       0x100000
+#define FLAGS2_RESTRICTED       0x200000
+#define FLAGS2_PING_COOKIE      0x400000
+#define FLAGS2_IP_SPOOFING      0x800000
+#define FLAGS2_FLOODDONE        0x1000000
+#define FLAGS2_EXEMPTSPAMBOT	0x2000000
+#define FLAGS2_EXEMPTSHIDE	0x4000000
 
 #define SEND_UMODES  (UMODE_INVISIBLE | UMODE_OPER | UMODE_WALLOP | \
                       UMODE_ADMIN)
@@ -507,6 +512,7 @@ struct exit_client_hook
 #define SetRestricted(x)        ((x)->flags2 |= FLAGS2_RESTRICTED)
 
 #define IsOperGlobalKill(x)     ((x)->flags2 & OPER_GLOBAL_KILL)
+#define IsOperLocalKill(x)	((x)->flags2 & OPER_LOCAL_KILL)
 #define IsOperRemote(x)         ((x)->flags2 & OPER_REMOTE)
 #define IsOperUnkline(x)        ((x)->flags2 & OPER_UNKLINE)
 #define IsOperGline(x)          ((x)->flags2 & OPER_GLINE)

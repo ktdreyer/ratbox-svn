@@ -1029,6 +1029,7 @@ set_default_conf(void)
 	ConfigFileEntry.gline_time = 12 * 3600;
 	ConfigFileEntry.gline_min_cidr = 16;
 	ConfigFileEntry.gline_min_cidr6 = 48;
+	ConfigFileEntry.hide_error_messages = 1;
 	ConfigFileEntry.idletime = 0;
 	ConfigFileEntry.dots_in_ident = 0;
 	ConfigFileEntry.max_targets = MAX_TARGETS_DEFAULT;
@@ -1440,7 +1441,7 @@ expire_tdline(dlink_list * tdlist, int type)
 char *
 oper_privs_as_string(struct Client *client_p, int port)
 {
-	static char privs_out[16];
+	static char privs_out[17];
 	char *privs_ptr;
 
 	privs_ptr = privs_out;
@@ -1468,6 +1469,11 @@ oper_privs_as_string(struct Client *client_p, int port)
 		*privs_ptr++ = 'O';
 	else
 		*privs_ptr++ = 'o';
+
+	if(port & OPER_LOCAL_KILL)
+		*privs_ptr++ = 'C';
+	else
+		*privs_ptr++ = 'c';
 
 	if(port & OPER_REMOTE)
 		*privs_ptr++ = 'R';

@@ -225,6 +225,7 @@ struct config_file_entry
 	int gline_min_cidr6;
 	int idletime;
 	int hide_server;
+	int hide_error_messages;
 	int client_exit;
 	int oper_only_umodes;
 	int oper_umodes;
