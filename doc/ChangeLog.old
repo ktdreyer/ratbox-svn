@@ -1,3 +1,7 @@
+*** 20001227_31 by ejb
+- add readme for cintrib
+
+
 *** 20001227_30 by davidt
 Fix rather confusing message to opers when a server sends a numeric
 directed at a server.
