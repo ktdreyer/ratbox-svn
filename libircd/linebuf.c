@@ -565,7 +565,7 @@ linebuf_putmsg(buf_head_t *bufhead, const char *format, va_list *va_args,
   /* Create a new line */
   bufline = linebuf_new_line(bufhead);
 
-  if (prefixfmt)
+  if (prefixfmt != NULL)
   {
     va_start(prefix_args, prefixfmt);
     len = vsnprintf(bufline->buf, BUF_DATA_SIZE, prefixfmt, prefix_args);
@@ -578,22 +578,33 @@ linebuf_putmsg(buf_head_t *bufhead, const char *format, va_list *va_args,
                     *va_args);
   }
   
-  /* Truncate the data if required */
-  if (len > 510)
-    len = 510;
+  if (len != 0)
+    {
+      /* Truncate the data if required */
+      if (len > 510)
+	len = 510;
 
-  /* Chop trailing CRLF's .. */
-  len--; /* change len to index of last char */
-  while ((bufline->buf[len] == '\r') || (bufline->buf[len] == '\n') ||
-         (bufline->buf[len] == '\0'))
-    len--;
+      /* Chop trailing CRLF's .. */
+      len--; /* change len to index of last char */
+      while ((bufline->buf[len] == '\r') || (bufline->buf[len] == '\n') ||
+	     (bufline->buf[len] == '\0'))
+	{
+	  len--;
+	}
+      bufline->buf[len++] = '\r';
+      bufline->buf[len++] = '\n';
+      bufline->buf[len++] = '\0'; 
 
-  bufline->buf[++len] = '\r';
-  bufline->buf[++len] = '\n';
-  bufline->buf[++len] = '\0'; /* this restores len to correct length */
-
-  bufline->len  = len;
-  bufhead->len += len;
+      bufline->len  = len;
+      bufhead->len += len;
+    }
+  else
+    {
+      bufline->buf[0] = '\r';
+      bufline->buf[1] = '\n';
+      bufline->buf[2] = '\0'; 
+      bufline->len  = 0;
+    }
 
   bufline->terminated = 1;
 }
