@@ -357,7 +357,7 @@ register_local_user(struct Client *client_p, struct Client *source_p, char *nick
 		sendto_one(source_p,
 			   ":%s NOTICE %s :*** Notice -- You have an illegal character in your hostname",
 			   me.name, source_p->name);
-		strncpy(source_p->host, source_p->localClient->sockhost, HOSTIPLEN + 1);
+		strlcpy(source_p->host, source_p->localClient->sockhost, sizeof(source_p->localClient->sockhost));
 	}
 
 	aconf = source_p->localClient->att_conf;
@@ -477,7 +477,7 @@ register_local_user(struct Client *client_p, struct Client *source_p, char *nick
 		add_to_id_hash_table(id, source_p);
 	}
 
-	inetntop_sock(&source_p->localClient->ip, ipaddr, HOSTIPLEN);
+	inetntop_sock(&source_p->localClient->ip, ipaddr, sizeof(ipaddr));
 
 	sendto_realops_flags(UMODE_CCONN, L_ALL,
 			     "Client connecting: %s (%s@%s) [%s] {%s} [%s]",

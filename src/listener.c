@@ -180,7 +180,7 @@ inetport(struct Listener *listener)
 		struct sockaddr_in6 *in6 = (struct sockaddr_in6 *)&listener->addr;
 		if(!IN6_ARE_ADDR_EQUAL(&in6->sin6_addr, &in6addr_any))
 		{
-			inetntop(AF_INET6, &in6->sin6_addr, listener->vhost, HOSTLEN);
+			inetntop(AF_INET6, &in6->sin6_addr, listener->vhost, sizeof(listener->vhost));
 			listener->name = listener->vhost;
 		}
 	} else
@@ -189,7 +189,7 @@ inetport(struct Listener *listener)
 		struct sockaddr_in *in = (struct sockaddr_in *)&listener->addr;
 		if(in->sin_addr.s_addr != INADDR_ANY)
 		{
-			inetntop(AF_INET, &in->sin_addr, listener->vhost, HOSTLEN);
+			inetntop(AF_INET, &in->sin_addr, listener->vhost, sizeof(listener->vhost));
 			listener->name = listener->vhost;
 		}	
 	}

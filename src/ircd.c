@@ -602,20 +602,6 @@ setup_corefile(void)
 #endif
 }
 
-/*
- * cleanup_zombies
- * inputs	- nothing
- * output	- nothing
- * side effects - Reaps zombies periodically
- * -AndroSyn
- */
-static void
-cleanup_zombies(void *unused)
-{
-	int status;
-	waitpid(-1, &status, WNOHANG);
-}
-
 int
 main(int argc, char *argv[])
 {
@@ -805,7 +791,6 @@ main(int argc, char *argv[])
 
 	/* Setup the timeout check. I'll shift it later :)  -- adrian */
 	eventAddIsh("comm_checktimeouts", comm_checktimeouts, NULL, 1);
-	eventAddIsh("cleanup_zombies", cleanup_zombies, NULL, 30);
 
 	if(ConfigServerHide.links_delay > 0)
 		eventAddIsh("write_links_file", write_links_file, NULL,

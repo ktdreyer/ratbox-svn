@@ -445,7 +445,7 @@ check_client(struct Client *client_p, struct Client *source_p, char *username)
 			ServerStats->is_ref++;
 			/* jdc - lists server name & port connections are on */
 			/*       a purely cosmetical change */
-			inetntop_sock(&source_p->localClient->ip, ipaddr, HOSTIPLEN);
+			inetntop_sock(&source_p->localClient->ip, ipaddr, sizeof(ipaddr));
 			sendto_realops_flags(UMODE_UNAUTH, L_ALL,
 					     "Unauthorised client connection from %s [%s] on [%s/%u].",
 					     get_client_name(source_p,

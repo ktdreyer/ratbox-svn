@@ -1685,7 +1685,7 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
 		return 0;
 
 	/* log */
-	inetntop_sock(&aconf->ipnum, buf, HOSTIPLEN);
+	inetntop_sock(&aconf->ipnum, buf, sizeof(buf));
 	ilog(L_NOTICE, "Connect to %s[%s] @%s", aconf->user, aconf->host, buf);
 
 	/*
@@ -1725,7 +1725,7 @@ serv_connect(struct ConfItem *aconf, struct Client *by)
 	/* Copy in the server, hostname, fd */
 	strlcpy(client_p->name, aconf->name, sizeof(client_p->name));
 	strlcpy(client_p->host, aconf->host, sizeof(client_p->host));
-	strlcpy(client_p->localClient->sockhost, buf, HOSTIPLEN);
+	strlcpy(client_p->localClient->sockhost, buf, sizeof(client_p->localClient->sockhost));
 	client_p->localClient->fd = fd;
 
 	/*

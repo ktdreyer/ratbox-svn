@@ -37,6 +37,13 @@ dummy_handler(int sig)
 	/* Empty */
 }
 
+
+static void
+sigchld_handler(int sig)
+{
+	int status;
+	waitpid(-1, &status, WNOHANG);
+}
 /*
  * sigterm_handler - exit the server
  */
@@ -134,5 +141,9 @@ setup_signals()
 	act.sa_handler = sigusr1_handler;
 	sigaddset(&act.sa_mask, SIGUSR1);
 	sigaction(SIGUSR1, &act, 0);
+
+	act.sa_handler = sigchld_handler;
+	sigaddset(&act.sa_mask, SIGCHLD);
+	sigaction(SIGCHLD, &act, 0);
 
 }
