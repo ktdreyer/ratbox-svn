@@ -1,3 +1,17 @@
+androsyn    2004/01/13 12:15:49 EST	(20040113_1)
+
+  Modified files:
+    modules/core         m_squit.c 
+    src                  hash.c 
+  Log:
+  Fix our SQUIT woes..find_squit() isn't approriate for remotely sent SQUITs.
+  
+  Revision  Changes    Path
+  1.74      +27 -23    ircd-ratbox/modules/core/m_squit.c
+  7.89      +7 -1      ircd-ratbox/src/hash.c
+
+
+
 androsyn    2004/01/12 19:06:48 EST	(20040113_0)
 
   Modified files:
