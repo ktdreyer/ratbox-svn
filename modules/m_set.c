@@ -100,18 +100,18 @@ static struct SetStruct set_cmd_table[] =
 {
   /* name		function        string arg  int arg */
   /* -------------------------------------------------------- */
-  { "AUTOCONN",		quote_autoconn,		1,        1 },
-  { "AUTOCONNALL",	quote_autoconnall,	0,        1 },
-  { "FLOODCOUNT",	quote_floodcount,	0,        1 },
-  { "IDLETIME",		quote_idletime,		0,        1 },
-  { "LOG",		quote_log,		0,        1 },
-  { "MAX",		quote_max,		0,        1 },
-  { "MSGLOCALE",        quote_msglocale,        1,        0 },
-  { "SPAMNUM",		quote_spamnum,		0,        1 },
-  { "SPAMTIME",		quote_spamtime,		0,        1 },
-  { "SHIDE",		quote_shide,		0,        1 },
+  { "AUTOCONN",		quote_autoconn,		1,	1 },
+  { "AUTOCONNALL",	quote_autoconnall,	0,	1 },
+  { "FLOODCOUNT",	quote_floodcount,	0,	1 },
+  { "IDLETIME",		quote_idletime,		0,	1 },
+  { "LOG",		quote_log,		0,	1 },
+  { "MAX",		quote_max,		0,	1 },
+  { "MSGLOCALE",	quote_msglocale,	1,	0 },
+  { "SPAMNUM",		quote_spamnum,		0,	1 },
+  { "SPAMTIME",		quote_spamtime,		0,	1 },
+  { "SHIDE",		quote_shide,		0,	1 },
   /* -------------------------------------------------------- */
-  { (char *) 0,		(int (*)()) 0,          0,        0 }
+  { (char *) 0,		(int (*)()) 0,		0,	0 }
 };
 
 
@@ -171,7 +171,7 @@ static int quote_autoconnall( struct Client *sptr, int newval)
 
     GlobalSetOptions.autoconn = newval;
   }
-  else 
+  else
   {
     sendto_one(sptr, ":%s NOTICE %s :AUTOCONNALL is currently %i",
                me.name, sptr->name, GlobalSetOptions.autoconn);
@@ -210,7 +210,7 @@ static int quote_idletime( struct Client *sptr, int newval )
                            sptr->name);
       GlobalSetOptions.idletime = 0;
     }
-    else 
+    else
     {
       sendto_realops_flags(FLAGS_ALL,
                            "%s has changed IDLETIME to %i",
@@ -218,7 +218,7 @@ static int quote_idletime( struct Client *sptr, int newval )
       GlobalSetOptions.idletime = (newval*60);
     }
   }
-  else 
+  else
   {
     sendto_one(sptr, ":%s NOTICE %s :IDLETIME is currently %i",
                me.name, sptr->name, GlobalSetOptions.idletime/60);
@@ -250,7 +250,7 @@ static int quote_log( struct Client *sptr, int newval )
     sendto_realops_flags(FLAGS_ALL,"%s has changed LOG level to %i (%s)",
                          sptr->name, newval, log_level_as_string);
   }
-  else 
+  else
   {
     sendto_one(sptr, ":%s NOTICE %s :LOG level is currently %i (%s)",
                me.name, sptr->name, get_log_level(),
@@ -267,34 +267,33 @@ static int quote_max( struct Client *sptr, int newval )
     if (newval > MASTER_MAX)
     {
       sendto_one(sptr,
-                 ":%s NOTICE %s :You cannot set MAXCLIENTS to > MASTER_MAX (%d)",
-                 me.name, sptr->name, MASTER_MAX);
+	":%s NOTICE %s :You cannot set MAXCLIENTS to > MASTER_MAX (%d)",
+	me.name, sptr->name, MASTER_MAX);
       return(0);
     }
 
     if (newval < 32)
     {
       sendto_one(sptr,
-                 ":%s NOTICE %s :You cannot set MAXCLIENTS to < 32 (%d:%d)",
-                 me.name, sptr->name, GlobalSetOptions.maxclients, highest_fd);
-
+	":%s NOTICE %s :You cannot set MAXCLIENTS to < 32 (%d:%d)",
+	me.name, sptr->name, GlobalSetOptions.maxclients, highest_fd);
       return(0);
     }
 
     GlobalSetOptions.maxclients = newval;
 
     sendto_realops_flags(FLAGS_ALL,
-                         "%s!%s@%s set new MAXCLIENTS to %d (%d current)",
-                         sptr->name, sptr->username, sptr->host,
-                         GlobalSetOptions.maxclients, Count.local);
+	"%s!%s@%s set new MAXCLIENTS to %d (%d current)",
+	sptr->name, sptr->username, sptr->host,
+	GlobalSetOptions.maxclients, Count.local);
 
     return(0);
   }
   else
   {
     sendto_one(sptr, ":%s NOTICE %s :Current Maxclients = %d (%d)",
-               me.name, sptr->name,
-               GlobalSetOptions.maxclients, Count.local);
+	me.name, sptr->name,
+	GlobalSetOptions.maxclients, Count.local);
   }
 
   return(0);
@@ -315,18 +314,18 @@ static int quote_msglocale( struct Client *sptr, char *locale )
     }
 
     sendto_one(sptr, ":%s NOTICE %s :Set MSGLOCALE to '%s'",
-               me.name, sptr->name,
-               getenv("LANGUAGE") ? getenv("LANGUAGE") : "<unset>");
+	me.name, sptr->name,
+	getenv("LANGUAGE") ? getenv("LANGUAGE") : "<unset>");
   }
   else
   {
     sendto_one(sptr, ":%s NOTICE %s :MSGLOCALE is currently '%s'",
-               me.name, sptr->name,
-               (getenv("LANGUAGE")) ? getenv("LANGUAGE") : "<unset>");
+	me.name, sptr->name,
+	(getenv("LANGUAGE")) ? getenv("LANGUAGE") : "<unset>");
   }
 #else
   sendto_one(sptr, ":%s NOTICE %s :No gettext() support available.",
-             me.name, sptr->name);
+	me.name, sptr->name);
 #endif
   return 0;
 }
@@ -352,13 +351,13 @@ static int quote_spamnum( struct Client *sptr, int newval )
       GlobalSetOptions.spam_num = newval;
     }
     sendto_realops_flags(FLAGS_ALL,"%s has changed SPAMNUM to %i",
-                         sptr->name, GlobalSetOptions.spam_num);
+		sptr->name, GlobalSetOptions.spam_num);
   }
   else
   {
     sendto_one(sptr, ":%s NOTICE %s :SPAMNUM is currently %i",
-               me.name,
-               sptr->name, GlobalSetOptions.spam_num);
+		me.name,
+		sptr->name, GlobalSetOptions.spam_num);
   }
   return(0);
 }
@@ -377,14 +376,15 @@ static int quote_spamtime( struct Client *sptr, int newval )
       GlobalSetOptions.spam_time = newval;
     }
     sendto_realops_flags(FLAGS_ALL,"%s has changed SPAMTIME to %i",
-                         sptr->name, GlobalSetOptions.spam_time);
+		sptr->name, GlobalSetOptions.spam_time);
   }
   else
   {
     sendto_one(sptr, ":%s NOTICE %s :SPAMTIME is currently %i",
-               me.name, sptr->name, GlobalSetOptions.spam_time);
+		me.name,
+		sptr->name, GlobalSetOptions.spam_time);
   }
-  
+
   return(0);
 }
 
@@ -405,7 +405,7 @@ static int quote_shide( struct Client *sptr, int newval )
     sendto_one(sptr, ":%s NOTICE %s :SHIDE is currently %i",
                me.name, sptr->name, GlobalSetOptions.hide_server);
   }
-  
+
   return 0;
 }
 
@@ -480,7 +480,7 @@ static int mo_set(struct Client *cptr, struct Client *sptr,
           {
             newval = -1;
           }
-          
+
           if(newval < 0)
           {
             sendto_one(sptr,
@@ -512,7 +512,7 @@ static int mo_set(struct Client *cptr, struct Client *sptr,
         }
       }
     }
-    
+
     /*
      * Code here will be executed when a /QUOTE SET command is not
      * found within set_cmd_table.
@@ -520,7 +520,7 @@ static int mo_set(struct Client *cptr, struct Client *sptr,
     sendto_one(sptr, ":%s NOTICE %s :Variable not found.", me.name, parv[0]);
     return(0);
   }
-  
+
   list_quote_commands(sptr);
   return(0);
 }
