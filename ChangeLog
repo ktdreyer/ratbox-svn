@@ -1,3 +1,16 @@
+androsyn    2003/10/08 11:25:11 EDT	(20031008_3)
+
+  Modified files:
+    .                    configure configure.ac 
+  Log:
+  Add a check for touch
+  
+  Revision  Changes    Path
+  7.193     +53 -12    ircd-ratbox/configure
+  7.7       +3 -2      ircd-ratbox/configure.ac
+
+
+
 androsyn    2003/10/08 11:20:10 EDT	(20031008_2)
 
   Modified files:
