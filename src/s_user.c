@@ -529,13 +529,22 @@ introduce_client(struct Client *client_p, struct Client *source_p, struct User *
 	 */
 	if(has_id(source_p))
 	{
+		char sockhost[HOSTLEN];
+		if(source_p->sockhost[0] == ':')
+		{
+			sockhost[0] = '0';
+			sockhost[1] = '\0';
+			strlcat(sockhost, source_p->sockhost, sizeof(sockhost));
+		} else
+			strcpy(sockhost, source_p->sockhost);
+		
 		sendto_server(client_p, NULL, CAP_TS6, NOCAPS,
 			      ":%s UID %s %d %lu %s %s %s %s %s :%s",
 			      source_p->servptr->id, nick, 
 			      source_p->hopcount + 1,
 			      (unsigned long) source_p->tsinfo, ubuf,
 			      source_p->username, source_p->host,
-			      IsIPSpoof(source_p) ? "0" : source_p->sockhost,
+			      IsIPSpoof(source_p) ? "0" : sockhost,
 			      source_p->id, source_p->info);
 
 		sendto_server(client_p, NULL, NOCAPS, CAP_TS6,
