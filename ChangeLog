@@ -1,3 +1,22 @@
+leeh        2003/07/27 15:38:50 EDT	(20030727_1)
+
+  Modified files:
+    modules              m_dline.c m_kline.c m_resv.c m_xline.c 
+  Log:
+  - fixed undline etc to not rehash if nothing was changed
+  Submitted by:
+  Reviewed by:
+  Approved by:
+  Obtained from:
+  
+  Revision  Changes    Path
+  1.23      +15 -11    ircd-ratbox/modules/m_dline.c
+  1.163     +10 -9     ircd-ratbox/modules/m_kline.c
+  1.41      +10 -9     ircd-ratbox/modules/m_resv.c
+  1.31      +8 -8      ircd-ratbox/modules/m_xline.c
+
+
+
 leeh        2003/07/27 15:26:55 EDT	(20030727_0)
 
   Modified files:
