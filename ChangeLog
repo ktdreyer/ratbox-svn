@@ -1,3 +1,15 @@
+leeh        2005/03/20 17:40:17 UTC	(20050320_12)
+
+  Modified files:
+    modules/core         m_nick.c 
+  Log:
+  - dont store an ipv6 sockhost if we arent compiled with v6 support
+  
+  Revision  Changes    Path
+  1.170     +13 -2     ircd-ratbox/modules/core/m_nick.c
+
+
+
 leeh        2005/03/20 17:25:08 UTC	(20050320_11)
 
   Modified files:
