@@ -1,3 +1,9 @@
+*** 20001225_3 by db
+- was missing nick in do_numeric in parse.c ... 401 was not
+  (no such nick) was not being seen properly by client on LL server.
+
+
+
 *** 20001225_2 by db
 - ummmm parse isnt' handed a null terminated line, its handed the end of
   of the buffer as well as the start. The end of the buffer if its 
