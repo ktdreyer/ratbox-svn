@@ -196,8 +196,24 @@ static void mo_gline(struct Client *client_p,
 			
       reason = parv[2];
 
-      /* If at least 3 opers agree this user should be G lined then do it */
+      /* inform users about the gline before we call check_majority_gline()
+       * so already voted comes below gline request --fl
+       */
+      sendto_realops_flags(FLAGS_ALL, L_ALL,
+			"%s!%s@%s on %s is requesting gline for [%s@%s] [%s]",
+			source_p->name,
+			source_p->username,
+			source_p->host,
+			me.name,
+			user,
+			host,
+			reason);
+      log_gline_request(source_p->name,
+                        (const char *)source_p->username,
+                        source_p->host,me.name,
+                        user,host,reason);
 
+      /* If at least 3 opers agree this user should be G lined then do it */
       check_majority_gline(source_p,
 			   source_p->name,
 			   (const char *)source_p->username,
@@ -234,21 +250,6 @@ static void mo_gline(struct Client *client_p,
                     me.name, source_p->name, source_p->username,
                     source_p->host, source_p->user->server, user, host,
                     reason);
-
-
-      sendto_realops_flags(FLAGS_ALL, L_ALL,
-			"%s!%s@%s on %s is requesting gline for [%s@%s] [%s]",
-			source_p->name,
-			source_p->username,
-			source_p->host,
-			me.name,
-			user,
-			host,
-			reason);
-      log_gline_request(source_p->name,
-                        (const char *)source_p->username,
-                        source_p->host,me.name,
-                        user,host,reason);
     }
   else
     {
