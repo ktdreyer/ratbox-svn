@@ -1,3 +1,15 @@
+db          2002/05/29 12:13:43 EDT	(20020529_0)
+
+  Modified files:
+    src                  balloc.c 
+  Log:
+  - fixed goof spotted by Jusuf
+  
+  Revision  Changes    Path
+  7.33      +5 -5      ircd-hybrid-7/src/balloc.c
+
+
+
 leeh        2002/05/27 18:48:15 EDT	(20020527_1)
 
   Removed files:
