@@ -1,3 +1,17 @@
+*** 20000201_2 by tomh
+
+Fix UMR picked up by purify:
+****  Purify instrumented ircd (pid 11725)  ****
+UMR: Uninitialized memory read (15 times):
+  * This is occurring while in:
+        read_message   [s_bsd.c:909]
+        main           [ircd.c:688]
+        _start         [crt1.o]
+  * Reading 4 bytes from 0xefffe5ac on the stack.
+  * Address 0xefffe5ac is local variable "poll_fds" in function read_message.
+
+
+
 *** 20000201_1 by db
 - converted separate user/host forms to user="user@host.part"; forms
   it looks nicer, and easier for admins to work with I think. Plus recommended
