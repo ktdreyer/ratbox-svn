@@ -1,3 +1,22 @@
+leeh        2002/11/11 20:31:20 UTC	(20021111_1)
+
+  Modified files:
+    include              numeric.h 
+    modules              m_list.c 
+    src                  class.c messages.tab 
+  Log:
+  - commited some rudimentary protection against sendq exceeding during
+    /list.  if a users sendq jumps over 90% of the limit, abort the list
+    with ERR_TOOMANYMATCHES
+  
+  Revision  Changes    Path
+  7.34      +2 -0      ircd-ratbox/include/numeric.h
+  1.50      +22 -6     ircd-ratbox/modules/m_list.c
+  7.41      +3 -0      ircd-ratbox/src/class.c
+  7.79      +1 -1      ircd-ratbox/src/messages.tab
+
+
+
 leeh        2002/11/11 18:33:29 UTC	(20021111_0)
 
   Modified files:
