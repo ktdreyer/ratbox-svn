@@ -23,6 +23,7 @@
 
 %option case-insensitive
 %option noyywrap
+%option nounput
 
 %{
 /* XXX - No we aren't but lex calls malloc :(. It is even worse that it
@@ -62,6 +63,7 @@
   if (!(result = conf_fbgets(buf, max_size, conf_fbfile_in))) \
     YY_FATAL_ERROR("input in flex scanner failed"); 
 #define MAX_INCLUDE_DEPTH 10
+
 
 int lineno=1;
 char linebuf[IRCD_BUFSIZE];
@@ -339,6 +341,12 @@ void ccomment(void)
     if (c == EOF)
     {
       YY_FATAL_ERROR("EOF in comment");
+      /* XXX hack alert this disables
+       * the stupid unused function warning
+       * gcc generates 
+       */
+      if(1 == 0)
+		yy_fatal_error("EOF in comment");
       break;
     }
   }
