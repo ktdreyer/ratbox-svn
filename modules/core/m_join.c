@@ -454,7 +454,7 @@ ms_join(struct Client *client_p, struct Client *source_p, int parc, const char *
 				     chptr->chname, modebuf, parabuf);
 
 	*modebuf = *parabuf = '\0';
-	channel_modes(chptr, source_p, modebuf, parabuf);
+	channel_modes(chptr, client_p, modebuf, parabuf);
 
 	if(!IsMember(source_p, chptr))
 	{
