@@ -1,3 +1,15 @@
+androsyn    2004/08/06 13:40:46 EDT	(20040806_1)
+
+  Modified files:
+    src                  patricia.c 
+  Log:
+  We really don't want a pointer to our pointer here
+  
+  Revision  Changes    Path
+  7.23      +1 -1      ircd-ratbox/src/patricia.c
+
+
+
 leeh        2004/08/06 13:25:07 EDT	(20040806_0)
 
   Modified files:
