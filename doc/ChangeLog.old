@@ -1,3 +1,8 @@
+*** 20010322_3 by ejb
+- add sendto_match_vacap_servs(), and make set_channel_mode
+  use it.  not tested yet ..
+
+
 *** 20010322_2 by androsyn
 Forgot an argument to inetntop()
 
