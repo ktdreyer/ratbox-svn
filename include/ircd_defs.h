@@ -130,33 +130,12 @@
 #endif /* #ifdef IPV6 */
 
 
-#ifdef SOCKADDR_IN_HAS_LEN
-struct irc_sockaddr_storage {
-	unsigned char ss_len;
-        sa_family_t ss_family;
-        char __ss_pad1[((sizeof(int64_t)) - sizeof(unsigned char) -   
-                        sizeof(sa_family_t) )];
-        int64_t __ss_align;
 #ifdef IPV6
-        char __ss_pad2[(128 - sizeof(unsigned char) - sizeof(sa_family_t) -
-                        ((sizeof(int64_t)) - sizeof(unsigned char) -
-                         sizeof(sa_family_t)) - (sizeof(int64_t)))];
-#endif
-};
-#else /* SOCKADDR_IN_HAS_LEN */
-struct irc_sockaddr_storage
-{
-  	sa_family_t ss_family;
-  	u_int32_t __ss_align;
-#ifdef IPV6
-        char __ss_padding[(128 - (sizeof(sa_family_t) + sizeof (u_int32_t)))];
+#define irc_sockaddr_storage sockaddr_storage
 #else
-        char __ss_padding[(16 - (sizeof(sa_family_t) + sizeof (u_int32_t)))];
-#endif 
-};
-#endif /* SOCKADDR_IN_HAS_LEN */
-
-
+#define irc_sockaddr_storage sockaddr
+#define ss_family sa_family
+#endif
 
 #ifdef SOCKADDR_IN_HAS_LEN
 #define SET_SS_LEN(x, y) ((struct irc_sockaddr_storage)(x)).ss_len = y
