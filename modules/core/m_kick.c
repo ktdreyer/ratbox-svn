@@ -91,7 +91,7 @@ m_kick(struct Client *client_p, struct Client *source_p, int parc, const char *p
 		return 0;
 	}
 
-	if(!IsServer(source_p))
+	if(!MyClient(source_p))
 	{
 		msptr = find_channel_membership(chptr, source_p);
 
