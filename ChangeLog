@@ -1,3 +1,25 @@
+leeh        2004/09/25 11:27:12 EDT	(20040925_3)
+
+  Modified files:
+    include              client.h service.h 
+    src                  s_alis.c s_operbot.c service.c 
+    src/s_chanserv       s_chanserv.c 
+    src/s_userserv       s_userserv.c 
+  Log:
+  - remove the service_error struct
+  - make service_error() take format strings
+  
+  Revision  Changes    Path
+  1.18      +0 -2      rserv/include/client.h
+  1.12      +1 -7      rserv/include/service.h
+  1.20      +8 -26     rserv/src/s_alis.c
+  1.11      +1 -1      rserv/src/s_chanserv/s_chanserv.c
+  1.7       +5 -11     rserv/src/s_operbot.c
+  1.8       +8 -30     rserv/src/s_userserv/s_userserv.c
+  1.18      +9 -19     rserv/src/service.c
+
+
+
 leeh        2004/09/25 11:25:27 EDT	(20040925_2)
 
   Modified files:
