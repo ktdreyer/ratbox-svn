@@ -1,3 +1,17 @@
+a1kmm       2002/07/21 00:55:22 EDT	(20020721_1)
+
+  Modified files:
+    src                  linebuf.c packet.c 
+  Log:
+  - Kill unknowns/servers that send NULL in packets, and notify clients that
+    they are.
+  
+  Revision  Changes    Path
+  7.88      +47 -37    ircd-hybrid-7/src/linebuf.c
+  7.86      +7 -2      ircd-hybrid-7/src/packet.c
+
+
+
 a1kmm       2002/07/20 22:59:43 EDT	(20020721_0)
 
   Modified files:
