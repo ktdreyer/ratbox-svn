@@ -1,3 +1,8 @@
+*** 20010311_1 by a1kmm
+- Got some basic reattaching to work, but it is not finished yet so you may not want to have PERSISTANT_CLIENTS
+  defined. We also need to decide what to send on reattach, as well as a nicer way of sending the id/key.
+
+
 *** 20010310_2 by fl_
 - added some checking to make sure glines from other servers have enough
   none wildcard chars.. (gline *@* anyone?)
