@@ -11,6 +11,8 @@
  * $Id$
  */
 
+#define WE_ARE_MEMORY_C
+
 #ifndef NOBALLOC
 #include <stdio.h>
 #include <unistd.h>
@@ -28,8 +30,15 @@
 
 #include <string.h>
 #include <stdlib.h>
-#include <sys/mman.h>
 static int newblock(BlockHeap * bh);
+
+#ifdef HAVE_MMAP
+#include <sys/mman.h>
+
+static inline void free_block(void *ptr, size_t size)
+{
+	munmap(ptr, size);
+}
 
 #ifndef MAP_ANON
 int zero_fd = -1;
@@ -45,18 +54,32 @@ static inline void *get_block(size_t size)
 {
     return (mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_PRIVATE, zero_fd, 0));
 }
-#else
+#else /* MAP_ANON */
+
 void initBlockHeap(void)
 {
     return;
 }
-
 static inline void *get_block(size_t size)
 {
     return (mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON, -1, 0));
 }
-#endif
 
+#endif /* MAP_ANON */
+
+#else  /* HAVE_MMAP */
+/* Poor bastards don't even have mmap() */
+static inline void *get_block(size_t size)
+{
+    return(malloc(size));
+}
+
+static inline void free_block(void *ptr, size_t unused)
+{
+	free(ptr);
+}
+
+#endif /* HAVE_MMAP */
 
 
 
@@ -102,7 +125,7 @@ static int newblock(BlockHeap * bh)
         data = offset + sizeof(MemBlock);
         newblk->block = b;
         newblk->data = data;
-        dlinkAddTail(data, &newblk->self, &b->free_list);
+        dlinkAdd(data, &newblk->self, &b->free_list);
         offset += bh->elemSize + sizeof(MemBlock);
     }
 
@@ -198,7 +221,7 @@ void *_BlockHeapAlloc(BlockHeap * bh)
         bh->freeElems--;
         new_node = walker->free_list.head;
         dlinkDelete(new_node, &walker->free_list);
-        dlinkAddTail(new_node->data, new_node, &walker->used_list);
+        dlinkAdd(new_node->data, new_node, &walker->used_list);
         assert(new_node->data != NULL);
         return (new_node->data);
     }
@@ -209,7 +232,7 @@ void *_BlockHeapAlloc(BlockHeap * bh)
             walker->freeElems--;
             new_node = walker->free_list.head;
             dlinkDelete(new_node, &walker->free_list);
-            dlinkAddTail(new_node->data, new_node, &walker->used_list);
+            dlinkAdd(new_node->data, new_node, &walker->used_list);
             assert(new_node->data != NULL);
             return (new_node->data);
         }
@@ -255,7 +278,7 @@ int _BlockHeapFree(BlockHeap * bh, void *ptr)
     bh->freeElems++;
     block->freeElems++;
     dlinkDelete(&memblock->self, &block->used_list);
-    dlinkAddTail(memblock->data, &memblock->self, &block->free_list);
+    dlinkAdd(memblock->data, &memblock->self, &block->free_list);
     return 0;
 }
 
@@ -288,7 +311,7 @@ int BlockHeapGarbageCollect(BlockHeap * bh)
 
     while (walker) {
         if (walker->freeElems == bh->elemsPerBlock) {
-            munmap(walker->elems, walker->alloc_size);
+            free_block(walker->elems, walker->alloc_size);
             if (last) {
                 last->next = walker->next;
                 MyFree(walker);
@@ -325,7 +348,7 @@ int BlockHeapDestroy(BlockHeap * bh)
         return 1;
     for (walker = bh->base; walker != NULL; walker = next) {
         next = walker->next;
-        munmap(walker->elems, walker->alloc_size);
+        free_block(walker->elems, walker->alloc_size);
         MyFree(walker);
     }
     MyFree(bh);

@@ -95,6 +95,9 @@
 /* Define if you have the kevent function.  */
 #undef HAVE_KEVENT
 
+/* Define if you have the mmap function.  */
+#undef HAVE_MMAP
+
 /* Define if you have the socketpair function.  */
 #undef HAVE_SOCKETPAIR
 

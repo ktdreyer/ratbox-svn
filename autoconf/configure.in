@@ -138,6 +138,10 @@ AC_CHECK_FUNCS(strtok_r)
 dnl check for socketpair
 AC_CHECK_FUNCS(socketpair)
 
+dnl check for mmap
+AC_CHECK_FUNCS(mmap)
+
+
 dnl Look for definitions such as RLIMIT_FDMAX, RLIMIT_NOFILE, and
 dnl RLIMIT_OPEN_MAX.  These are used for getrlimit().
 dnl NOTE: It seems stock autoconf doesn't use the -dM flag for cpp.
