@@ -1,3 +1,32 @@
+leeh        2005/01/30 19:42:15 EST	(20050131_0)
+
+  Modified files:
+    include              client.h service.h ucommand.h 
+    src                  io.c s_alis.c s_chanserv.c s_global.c 
+                         s_jupeserv.c s_operbot.c s_operserv.c 
+                         s_userserv.c service.c u_stats.c 
+                         ucommand.c 
+  Log:
+  - moved service commands and oper commands over to const char **parv
+  
+  Revision  Changes    Path
+  1.38      +1 -1      rserv/include/client.h
+  1.19      +2 -2      rserv/include/service.h
+  1.8       +2 -2      rserv/include/ucommand.h
+  1.36      +1 -1      rserv/src/io.c
+  1.32      +3 -3      rserv/src/s_alis.c
+  1.47      +65 -65    rserv/src/s_chanserv.c
+  1.6       +6 -6      rserv/src/s_global.c
+  1.22      +17 -17    rserv/src/s_jupeserv.c
+  1.26      +12 -12    rserv/src/s_operbot.c
+  1.6       +17 -17    rserv/src/s_operserv.c
+  1.41      +27 -27    rserv/src/s_userserv.c
+  1.41      +1 -1      rserv/src/service.c
+  1.12      +2 -2      rserv/src/u_stats.c
+  1.25      +26 -26    rserv/src/ucommand.c
+
+
+
 leeh        2005/01/30 18:54:03 EST	(20050130_0)
 
   Modified files:
