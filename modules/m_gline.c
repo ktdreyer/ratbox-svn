@@ -243,12 +243,12 @@ ms_gline(struct Client *client_p, struct Client *source_p, int parc, const char 
 	/* send in new form to compatable servers, hyb6 form to rest */
 	sendto_server(client_p, NULL, CAP_GLN, NOCAPS,
 		      ":%s GLINE %s %s :%s",
-		      source_p->name, user, host, reason);
+		      acptr->name, user, host, reason);
 	sendto_server(client_p, NULL, NOCAPS, CAP_GLN,
 		      ":%s GLINE %s %s %s %s %s %s :%s",
-		      source_p->user->server, source_p->name, 
-		      source_p->username, source_p->host,
-		      source_p->user->server, user, host, reason);
+		      acptr->user->server, acptr->name, 
+		      acptr->username, acptr->host,
+		      acptr->user->server, user, host, reason);
 
 	if(!ConfigFileEntry.glines)
 		return 0;
@@ -259,8 +259,8 @@ ms_gline(struct Client *client_p, struct Client *source_p, int parc, const char 
 		sendto_realops_flags(UMODE_ALL, L_ALL,
 				"%s!%s@%s on %s is requesting a gline without "
 				"%d non-wildcard characters for [%s@%s] [%s]",
-				source_p->name, source_p->username, 
-				source_p->host, source_p->user->server,
+				acptr->name, acptr->username, 
+				acptr->host, acptr->user->server,
 				ConfigFileEntry.min_nonwildcard,
 				user, host, reason);
 		return 0;
@@ -270,8 +270,8 @@ ms_gline(struct Client *client_p, struct Client *source_p, int parc, const char 
 
 	sendto_realops_flags(UMODE_ALL, L_ALL,
 			"%s!%s@%s on %s is requesting gline for [%s@%s] [%s]",
-			source_p->name, source_p->username, source_p->host,
-			source_p->user->server, user, host, reason);
+			acptr->name, acptr->username, acptr->host,
+			acptr->user->server, user, host, reason);
 
 	/* If at least 3 opers agree this user should be G lined then do it */
 	majority_gline(acptr, user, host, reason);
