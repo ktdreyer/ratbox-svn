@@ -1,3 +1,17 @@
+leeh        2004/09/25 11:35:43 EDT	(20040925_5)
+
+  Modified files:
+    .                    configure 
+  Log:
+  - add flags to the user registration storage
+  - move away from building libs to simply having one file like the other
+    services
+  
+  Revision  Changes    Path
+  1.11      +0 -4      rserv/configure
+
+
+
 leeh        2004/09/25 11:28:22 EDT	(20040925_4)
 
   Modified files:
