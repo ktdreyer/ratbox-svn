@@ -1,3 +1,9 @@
+*** 20001028_5 by db
+- most of the work is done in m_sjoin, it =should= send the mode
+  join messages etc. to the right vchan names now.
+
+
+
 *** 20001028_4 by db
 - ok, did preliminary mods on sjoin to support vchans.
   This function is a pile of festering pus..
