@@ -279,9 +279,10 @@ AC_MSG_CHECKING([for core IPv6 support])
 AC_COMPILE_IFELSE(
 [AC_LANG_PROGRAM(
 	[[#define IN_AUTOCONF
-	#include "netinet/in.h"]],
+	#include <sys/types.h>
+	#include <sys/socket.h>
+	#include <netinet/in.h>]],
 	[[struct sockaddr_in6 s; 
-	  struct sockaddr_storage t;
 	  s.sin6_family = 0;]]
 	)],
 [

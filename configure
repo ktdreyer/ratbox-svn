@@ -1997,13 +1997,13 @@ if test "$ac_test_CFLAGS" = set; then
   CFLAGS=$ac_save_CFLAGS
 elif test $ac_cv_prog_cc_g = yes; then
   if test "$GCC" = yes; then
-    CFLAGS="-g -O0"
+    CFLAGS="-g -O2"
   else
     CFLAGS="-g"
   fi
 else
   if test "$GCC" = yes; then
-    CFLAGS="-O0"
+    CFLAGS="-O2"
   else
     CFLAGS=
   fi
@@ -4715,12 +4715,13 @@ cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 #define IN_AUTOCONF
-	#include "netinet/in.h"
+	#include <sys/types.h>
+	#include <sys/socket.h>
+	#include <netinet/in.h>
 int
 main ()
 {
 struct sockaddr_in6 s;
-	  struct sockaddr_storage t;
 	  s.sin6_family = 0;
 
   ;
