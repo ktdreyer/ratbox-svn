@@ -1,3 +1,10 @@
+*** 20001223_9 by db
+- show a fake name in the second field on links, this makes scripts
+  and bx work better
+- when deopering remove admin flag (madmax pointed this one out)
+
+
+
 *** 20001223_8 by toot
 . added undline/ungline to opers.txt
 . log temp klines, and check for redundancy too
