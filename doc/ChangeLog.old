@@ -1,3 +1,8 @@
+*** 20011107_2 by davidt
+- fix pretty_mask to not damage the passed in string, so we can
+  use it afterwards.
+
+
 *** 20011107_1 by leeh
 - added the specific auth block thing
 
