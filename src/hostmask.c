@@ -77,7 +77,7 @@ try_parse_v6_netmask(const char *text, struct irc_inaddr *addr, int *b)
    {
     if (finsert>=0)
      return HM_HOST;
-    finsert = --dp;
+    finsert = dp;
    }
    else
    {
@@ -134,7 +134,7 @@ try_parse_v6_netmask(const char *text, struct irc_inaddr *addr, int *b)
  }
  /* Set unused bits to 0... -A1kmm*/
  if (bits < 128 && (bits%16!=0) )
-  dc[bits/16] &= ~((1<<(16-bits%16))-1);
+  dc[bits/16] &= ~((1<<(15-bits%16))-1);
  for (dp=bits/16+(bits%16?1:0); dp<8; dp++)
   dc[dp] = 0;
  /* And assign... -A1kmm */
