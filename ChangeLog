@@ -1,3 +1,15 @@
+leeh        2002/08/09 11:24:19 EDT	(20020809_9)
+
+  Modified files:
+    src                  hash.c 
+  Log:
+  - removed DEBUGMODE from hash.c
+  
+  Revision  Changes    Path
+  7.45      +2 -84     ircd-ratbox/src/hash.c
+
+
+
 androsyn    2002/08/09 11:03:16 EDT	(20020809_8)
 
   Modified files:
