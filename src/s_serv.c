@@ -68,6 +68,8 @@ int MaxClientCount     = 1;
 
 struct Client *uplink=NULL;
 
+static void        burst_members(struct Client *cptr, dlink_list *list);
+static void        burst_ll_members(struct Client *cptr, dlink_list *list);
 
 /*
  * list of recognized server capabilities.  "TS" is not on the list
@@ -555,6 +557,25 @@ void sendnick_TS(struct Client *cptr, struct Client *acptr)
     }
 }
 
+/*
+ * client_burst_if_needed
+ * 
+ * inputs	- pointer to server
+ * 		- pointer to client to add
+ * output	- NONE
+ * side effects - If this client is not known by this lazyleaf, send it
+ */
+void client_burst_if_needed(struct Client *cptr, struct Client *acptr)
+{
+  if (!ConfigFileEntry.hub) return;
+  if (!IsCapable(cptr,CAP_LL)) return;
+
+  if((acptr->lazyLinkClientExists & cptr->localClient->serverMask) == 0)
+    {
+      sendnick_TS( cptr, acptr );
+      acptr->lazyLinkClientExists |= cptr->localClient->serverMask;
+    }
+}
 
 /*
  * show_capabilities - show current server capabilities
@@ -897,7 +918,9 @@ static void server_burst(struct Client *cptr)
     {
       if(ConfigFileEntry.hub)
 	{
+#if 0
 	  do_lazy_link_burst(cptr);
+#endif
 	}
       else
 	{
@@ -1020,7 +1043,7 @@ cjoin_all(struct Client *cptr)
 }
 
 /*
- * sjoin_channel
+ * burst_channel
  *
  * inputs	- pointer to server to send sjoins to
  *              - channel pointer
@@ -1031,13 +1054,31 @@ cjoin_all(struct Client *cptr)
  *		  so cptr is always guaranteed to be a LL leaf.
  */
 void
-sjoin_channel(struct Client *cptr, struct Channel *chptr)
+burst_channel(struct Client *cptr, struct Channel *chptr)
 {
-  dlink_node *ptr;
-  struct Channel *vchan;
+  dlink_node        *ptr;
+  struct Channel*   vchan;
+  struct Client*    acptr;
 
-  /* serial counter borrowed from send.c */
-  current_serial++;
+  burst_ll_members(cptr,&chptr->chanops);
+  burst_ll_members(cptr,&chptr->voiced);
+  burst_ll_members(cptr,&chptr->halfops);
+  burst_ll_members(cptr,&chptr->peons);
+  send_channel_modes(cptr, chptr);
+
+  if(IsVchanTop(chptr))
+    {
+      for ( ptr = chptr->vchan_list.head; ptr;
+	    ptr = ptr->next)
+	{
+	  vchan = ptr->data;
+	  burst_ll_members(cptr,&vchan->chanops);
+	  burst_ll_members(cptr,&vchan->voiced);
+	  burst_ll_members(cptr,&vchan->halfops);
+	  burst_ll_members(cptr,&vchan->peons);
+	  send_channel_modes(cptr, vchan);
+	}
+    }
 
   send_channel_modes(cptr, chptr);
   add_lazylinkchannel(cptr,chptr);
@@ -1202,6 +1243,31 @@ void burst_members(struct Client *cptr, dlink_list *list)
 	  if (acptr->from != cptr)
 	    sendnick_TS(cptr, acptr);
 	}
+    }
+}
+
+/*
+ * burst_ll_members
+ *
+ * inputs	- pointer to server to send members to
+ * 		- dlink_list pointer to membership list to send
+ * output	- NONE
+ * side effects	- This version also has to check the bitmap for lazylink
+ */
+void burst_ll_members(struct Client *cptr, dlink_list *list)
+{
+  struct Client *acptr;
+  dlink_node *ptr;
+
+  for (ptr = list->head; ptr; ptr = ptr->next)
+    {
+      acptr = ptr->data;
+      if ((acptr->lazyLinkClientExists & cptr->localClient->serverMask) == 0)
+        {
+          add_lazylinkclient(cptr,acptr);
+          if (acptr->from != cptr)
+          sendnick_TS(cptr, acptr);
+        }
     }
 }
 

@@ -121,7 +121,7 @@ int     ms_cburst(struct Client *cptr,
 
   if(IsCapable(cptr,CAP_LL))
     {
-      sjoin_channel(cptr,chptr);
+      burst_channel(cptr,chptr);
 
       if(nick)
 	sendto_one(cptr,":%s LLJOIN %s %s %s", me.name, name, nick, key);

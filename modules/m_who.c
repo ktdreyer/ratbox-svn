@@ -202,6 +202,9 @@ int     m_who(struct Client *cptr,
       char *chname=NULL;
       int isinvis = 0;
 
+      if(IsServer(cptr))
+	client_burst_if_needed(cptr,acptr);
+
       isinvis = IsInvisible(acptr);
       for (lp = acptr->user->channel.head; lp; lp = lp->next)
 	{

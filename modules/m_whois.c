@@ -96,6 +96,7 @@ int     mo_whois(struct Client *cptr,
         return 0;
       parv[1] = parv[2];
     }
+
   return(do_whois(cptr,sptr,parc,parv));
 }
 
@@ -124,6 +125,9 @@ int do_whois(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
     {
       if( (acptr = hash_find_client(nick,(struct Client *)NULL)) )
 	{
+	  if (IsServer(cptr))
+	    client_burst_if_needed(cptr,acptr);
+
 	  if(IsPerson(acptr))
 	    {
 	      (void)single_whois(sptr,acptr,wilds);

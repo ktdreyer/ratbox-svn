@@ -114,7 +114,7 @@ int     m_invite(struct Client *cptr,
       sendto_one(sptr, form_str(ERR_USERNOTONSERV),
 		 me.name, parv[0], parv[1]);
       return 0;
-  }
+    }
 	  
   if (!(chptr = hash_find_channel(parv[2], NullChn)))
     {
@@ -206,4 +206,3 @@ int     ms_invite(struct Client *cptr,
   /* NOT REACHED */
   return 0;
 }
-
