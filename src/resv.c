@@ -22,7 +22,7 @@
 
 struct Resv *ResvList;
 
-struct Resv *create_resv(char *name, int type, int conf)
+struct Resv *create_resv(char *name, char *reason, int type, int conf)
 {
   struct Resv *resv_p;
   int len;
@@ -32,22 +32,26 @@ struct Resv *create_resv(char *name, int type, int conf)
   if ((type == RESV_CHANNEL) && (len > CHANNELLEN))
   {
     len = CHANNELLEN;
-    *(name + CHANNELLEN) = '\0';
+    name[CHANNELLEN] = '\0';
   }
   else if ((type == RESV_NICK) && (len > NICKLEN))
   {
     len = NICKLEN;
-    *(name + NICKLEN) = '\0';
+    name[NICKLEN] = '\0';
   }
+
+  if(strlen(reason) > TOPICLEN)
+    reason[TOPICLEN] = '\0';
 
   resv_p = (struct Resv *)hash_find_resv(name, (struct Resv *)NULL, type);
 
   if (resv_p)
     return NULL;
 
-  resv_p = (struct Resv *)MyMalloc(sizeof(struct Resv) + len + 1);
+  resv_p = (struct Resv *)MyMalloc(sizeof(struct Resv) + len + strlen(reason) + 1);
 
   strcpy(resv_p->name, name);
+  DupString(resv_p->reason, reason);
   resv_p->type = type;
   resv_p->conf = conf;
 

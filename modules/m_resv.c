@@ -79,7 +79,7 @@ static void mo_resv(struct Client *client_p, struct Client *source_p,
   char ctype[BUFSIZE];
   int type;
 
-  if(parc > 1)
+  if(parc > 2)
   {
     if(BadPtr(parv[1]))
       return;
@@ -89,15 +89,19 @@ static void mo_resv(struct Client *client_p, struct Client *source_p,
       type = RESV_CHANNEL;
       ircsprintf(ctype, "channel");
     }
-    else if(clean_nick_name != 0)
+    else if(clean_nick_name(parv[1]))
     {
       type = RESV_NICK;
       ircsprintf(ctype, "nick");
     }
     else
+    {
+      sendto_one(source_p, ":%s NOTICE %s :You have specified an invalid resv: [%s]",
+                 me.name, source_p->name, parv[1]);
       return;
+    }
     
-    resv_p = create_resv(parv[1], type, 0);
+    resv_p = create_resv(parv[1], parv[2], type, 0);
     if(!(resv_p))
     {
       sendto_one(source_p,
@@ -107,12 +111,14 @@ static void mo_resv(struct Client *client_p, struct Client *source_p,
     }
     
     sendto_one(source_p,
-               ":%s NOTICE %s :A local RESV has been placed on %s: %s",
-	       me.name, source_p->name, ctype, resv_p->name);
+               ":%s NOTICE %s :A local RESV has been placed on %s: %s [%s]",
+	       me.name, source_p->name, ctype,
+	       resv_p->name, resv_p->reason);
 
     sendto_realops_flags(FLAGS_ALL,
-                         "%s has placed a local RESV on %s: %s",
-			 get_oper_name(source_p), ctype, resv_p->name);
+                         "%s has placed a local RESV on %s: %s [%s]",
+			 get_oper_name(source_p), ctype, 
+			 resv_p->name, resv_p->reason);
              
     
   }
@@ -124,7 +130,8 @@ static void mo_resv(struct Client *client_p, struct Client *source_p,
     {
       for(resv_p = ResvList; resv_p; resv_p=resv_p->next)
       {
-        sendto_realops_flags(FLAGS_ALL, "RESV: %s", resv_p->name);
+        sendto_realops_flags(FLAGS_ALL, "RESV: %s [%s]", 
+	                     resv_p->name, resv_p->reason);
       }
     }
   }
@@ -150,7 +157,7 @@ static void mo_unresv(struct Client *client_p, struct Client *source_p,
     type = RESV_CHANNEL;
     ircsprintf(ctype, "channel");
   }
-  else if(clean_nick_name != 0)
+  else if(clean_nick_name(parv[1]))
   {
     type = RESV_NICK;
     ircsprintf(ctype, "nick");

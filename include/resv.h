@@ -32,6 +32,7 @@ struct Resv
   struct Resv *hnext;
 
   char	name[CHANNELLEN];
+  char	*reason;
   int	type;
   int	conf;
 };
@@ -41,7 +42,7 @@ struct Resv
 
 extern struct Resv *ResvList;
 
-extern struct Resv *create_resv(char *, int, int);
+extern struct Resv *create_resv(char *, char *, int, int);
 extern int delete_resv(struct Resv *);
 extern int clear_conf_resv();
 extern int find_resv(char *name, int type);
