@@ -1,3 +1,7 @@
+*** 20010115_2 by wcampbel
+Committed a bug fixed mkpasswd.c (also generates a more secure MD5 salt)
+
+
 *** 20010115_1 by ejb
 - added hook support for modules
   only has one hook so far, doing_whois, which is used for
