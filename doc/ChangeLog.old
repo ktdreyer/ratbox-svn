@@ -1,3 +1,7 @@
+*** 20010728_4 by leeh
+- make it compile with USE_TABLE_MODE #undef'd
+
+
 *** 20010728_3 by wcampbel
 Updated the mkpasswd.c program, forgot about this one
 
