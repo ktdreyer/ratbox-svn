@@ -1,3 +1,17 @@
+jmallett    2002/03/01 03:40:04 EST	(20020301_2)
+
+  Modified files:
+    .                    README.FIRST 
+  Log:
+  Back out my previous change.  Further [read: Proper] testing for the bug
+  here shows it does in fact exist.  Apologies for the misinformation.  The
+  test case was not as simple as I remembered it to be.
+  
+  Revision  Changes    Path
+  7.31      +1 -2      ircd-hybrid-7/README.FIRST
+
+
+
 jmallett    2002/03/01 02:41:58 EST	(20020301_1)
 
   Modified files:
