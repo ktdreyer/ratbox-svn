@@ -95,7 +95,7 @@ int ms_wallops(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
       return 0;
     }
 
-  sendto_all_local_opers(sptr, "WALLOPS", "%s", message);
+  sendto_all_local_opers(sptr, NULL, "%s", message);
   sendto_serv_butone(cptr, ":%s WALLOPS :%s", parv[0], message);
 
   return 0;
