@@ -208,13 +208,13 @@ static void cryptlink_auth(struct Client *client_p, struct Client *source_p,
     return;
   }
 
-  key = MyMalloc(RSA_size(ServerInfo.rsa_private_key));
-
   if ( verify_private_key() == -1 )
   {
     sendto_realops_flags(FLAGS_ALL, L_ADMIN,
       "verify_private_key() returned -1.  Check log for information.");
   }
+
+  key = MyMalloc(RSA_size(ServerInfo.rsa_private_key));
 
   len = RSA_private_decrypt( enc_len, enc, key,
                              ServerInfo.rsa_private_key,
@@ -499,13 +499,13 @@ static char *parse_cryptserv_args(struct Client *client_p,
     return(NULL);
   }
 
-  out = MyMalloc(RSA_size(ServerInfo.rsa_private_key));
-
   if (verify_private_key() == -1)
   {
     sendto_realops_flags(FLAGS_ALL, L_ADMIN,
       "verify_private_key() returned -1.  Check log for information.");
   }
+
+  out = MyMalloc(RSA_size(ServerInfo.rsa_private_key));
 
   len = RSA_private_decrypt(decoded_len, tmp, out,
                             ServerInfo.rsa_private_key,
