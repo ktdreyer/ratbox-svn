@@ -1,3 +1,15 @@
+leeh        2002/10/15 13:50:17 UTC	(20021015_1)
+
+  Modified files:
+    src                  newconf.c 
+  Log:
+  - default to allowing operwall.
+  
+  Revision  Changes    Path
+  7.46      +1 -0      ircd-ratbox/src/newconf.c
+
+
+
 leeh        2002/10/15 13:24:08 UTC	(20021015_0)
 
   Modified files:
