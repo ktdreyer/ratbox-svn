@@ -1226,8 +1226,13 @@ void set_channel_mode(struct Client *cptr,
 	  if(chptr->mode.mode & MODE_HIDEOPS)
 	    {
 	      if(the_mode == MODE_CHANOP && whatt == MODE_DEL)
-		sendto_one(who,":%s MODE %s -o %s",
-			   sptr->name,chname,who->name);
+		if (IsServer(who))
+		  sendto_one(who,":%s MODE %s -o %s",
+			     sptr->name,chname,who->name);
+		else
+		  sendto_one(who,":%s!%s@%s MODE %s -o %s",
+			     sptr->name,sptr->username, sptr->host,
+			     chname,who->name);
 	    }
         
           tmp = strlen(arg);
