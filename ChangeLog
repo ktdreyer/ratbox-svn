@@ -1,3 +1,17 @@
+leeh        2004/02/18 16:31:01 EST	(20040218_1)
+
+  Removed files:
+    include              s_newconf.h 
+    src                  s_newconf.c 
+  Log:
+  - s_newconf.? is now s_oldnewconf.? - its gunna be redone..
+  
+  Revision  Changes    Path
+  7.15      +0 -97     ircd-ratbox/include/s_newconf.h (dead)
+  7.15      +0 -528    ircd-ratbox/src/s_newconf.c (dead)
+
+
+
 leeh        2004/02/18 12:08:15 EST	(20040218_0)
 
   Modified files:
