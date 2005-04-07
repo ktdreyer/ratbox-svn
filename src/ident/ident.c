@@ -16,6 +16,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <signal.h>
+#include <stdarg.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -32,10 +33,12 @@
 #include "commio.h"
 #include "mem.h"
 
+#define send(x, y, z, a) write(x, y, z)
+
 /* data fd from ircd */
-int fd;
+int irc_fd;
 /* control fd from ircd */
-int cfd; 
+int irc_cfd; 
 
 #define MAXPARA 10
 #define REQIDLEN 10
@@ -50,32 +53,31 @@ int cfd;
 #define FWDHOST 4
 
 #define EmptyString(x) (!(x) || (*(x) == '\0'))
-
+static char buf[512]; /* scratch buffer */
 
 fd_set readfds;
 fd_set writefds;
 fd_set exceptfds;
 
-int fd = -1;
 
-static void report_error(char *errstr)
+static int
+send_sprintf(int fd, const char *format, ...)
 {
-	char buf[512];
-	sprintf(buf, "ERR %s: %s", errstr, strerror(errno)); 
-	send(cfd, buf, strlen(buf), 0);
-	exit(-1);
+	va_list args;
+	va_start(args, format);
+	vsprintf(buf, format, args); 
+	va_end(args);
+	return(send(fd, buf, strlen(buf), 0));
 }
 
-
-/* get_line()
- *   Gets a line of data from a given connection
- *
- * inputs	- connection to get line for, buffer to put in, size of buffer
- * outputs	- characters read
- */
-static int
-get_line(int fd, char *buf, int bufsize)
+static void report_error(char *errstr, ...)
 {
+	va_list ap;
+	va_start(ap, errstr);
+	vsprintf(buf, errstr, ap);
+	va_end(ap);
+	send(irc_cfd, buf, strlen(buf), 0);
+	exit(-1);
 }
 
 
@@ -178,32 +180,115 @@ struct auth_request
 };
 
 static void
+read_auth_timeout(int fd, void *data)
+{
+	struct auth_request *auth = data;
+	send_sprintf(irc_fd, "%s 0\n", auth->reqid);
+	MyFree(auth);
+	comm_close(fd);
+}
+
+
+static char *
+GetValidIdent(char *buf)
+{
+        int remp = 0;
+        int locp = 0;     
+        char *colon1Ptr;
+        char *colon2Ptr;
+        char *colon3Ptr;
+        char *commaPtr;
+        char *remotePortString;
+
+        /* All this to get rid of a sscanf() fun. */
+        remotePortString = buf;
+
+        colon1Ptr = strchr(remotePortString, ':');
+        if(!colon1Ptr)   
+                return NULL;
+
+        *colon1Ptr = '\0';
+        colon1Ptr++;
+        colon2Ptr = strchr(colon1Ptr, ':');
+        if(!colon2Ptr)   
+                return NULL;
+
+        *colon2Ptr = '\0';
+        colon2Ptr++;
+        commaPtr = strchr(remotePortString, ',');
+
+        if(!commaPtr)
+                return NULL;
+
+        *commaPtr = '\0';
+        commaPtr++;
+
+        remp = atoi(remotePortString);
+        if(!remp)
+                return NULL;
+
+        locp = atoi(commaPtr);
+        if(!locp)
+                return NULL;
+
+        /* look for USERID bordered by first pair of colons */
+        if(!strstr(colon1Ptr, "USERID"))
+                return NULL;
+
+        colon3Ptr = strchr(colon2Ptr, ':');
+        if(!colon3Ptr)
+                return NULL;
+
+        *colon3Ptr = '\0';
+        colon3Ptr++;
+        return (colon3Ptr);
+}
+
+
+static void
 read_auth(int fd, void *data)
 {
-	char buf[512];
+	struct auth_request *auth = data;
+	char *user;
 	int len;
 	len = recv(fd, buf, sizeof(buf), 0);
 	if(len < 0 && ignoreErrno(errno))
 	{
+		comm_settimeout(fd, 15, read_auth_timeout, auth);
 		comm_setselect(fd, FDLIST_SERVICE, COMM_SELECT_READ, read_auth, NULL, 15);
-		return;
-	} else
-		return;
-	
+	} else {
+		if((user = GetValidIdent(buf)) != NULL)
+		{
+			send_sprintf(irc_fd, "%s %s\n", auth->reqid, user);	
+		} else
+			send_sprintf(irc_fd, "%s 0\n", auth->reqid);
+		comm_close(fd);
+		MyFree(auth);
+	}
+	return;
 }
 
 static void
 connect_callback(int fd, int status, void *data)
 {
-	char buf[512];
+	struct auth_request *auth = data;
 	if(status == COMM_OK)
 	{
-		sprintf(buf, "%u, %u\r\n", 1, 2);
-		send(fd, buf, strlen(buf), 0);
+		/* one shot at the send, socket buffers should be able to handle it
+		 * if not, oh well, you lose
+		 */
+		if(send_sprintf(fd, "%u , %u\r\n", auth->srcport, auth->dstport) <= 0)
+		{
+			send_sprintf(irc_fd, "%s 0\n", auth->reqid);
+			comm_close(fd);
+			MyFree(auth);
+			return;
+		}
 		read_auth(fd, NULL);
 	} else {
-		fprintf(stderr, "callback got: %d\n", status);
+		send_sprintf(irc_fd, "%s 0\n", auth->reqid);
 		comm_close(fd);
+		MyFree(auth);
 	}
 }
 
@@ -211,7 +296,6 @@ void
 check_identd(const char *id, const char *bindaddr, const char *aft, const char *destaddr, const char *srcport, const char *dstport)
 {
 	struct auth_request *auth;
-	char buf[512];
 	auth = MyMalloc(sizeof(struct auth_request));
 	int aftype = AF_INET;
 #ifdef IPV6
@@ -258,10 +342,11 @@ check_identd(const char *id, const char *bindaddr, const char *aft, const char *
 	}		
 	auth->srcport = atoi(srcport);
 	auth->dstport = atoi(dstport);
+	strcpy(auth->reqid, id);
 
 	auth->authfd = comm_socket(aftype, SOCK_STREAM, 0);
 	comm_connect_tcp(auth->authfd, (struct sockaddr *)&auth->destaddr, 
-		(struct sockaddr *)&auth->bindaddr, sizeof(struct sockaddr_in), connect_callback, NULL, 1);
+		(struct sockaddr *)&auth->bindaddr, sizeof(struct sockaddr_in), connect_callback, auth, 5);
                                   
 }
 
@@ -282,7 +367,8 @@ process_request(int fd, void *data)
 		{
 			if(n == -1 && ignoreErrno(errno))
 				break;
-			/* report error */
+			else
+				report_error("ERR: read failed: %s\n", strerror(errno));
 		}
 
 	        if((p = memchr(buf, '\n', n)) != NULL)
@@ -292,43 +378,58 @@ process_request(int fd, void *data)
 		
 			parc = io_to_array(buf, parv);
 			check_identd(parv[0], parv[1], parv[2], parv[3], parv[4], parv[5]);
-	        }        
-//	        else report error
+	        } else
+			report_error("ERR: Got bogus data from server");       
 	}
 
 	comm_setselect(fd, FDLIST_SERVICE, COMM_SELECT_READ, process_request, NULL, 0);
 	return;	
 }
 
+static void
+process_ctrl(int fd, void *unused)
+{
+	char nbuf[1];
+	int len;
+	while(1)
+	{
+		if((len = recv(fd, nbuf, sizeof(buf), 0)) <= 0)
+		{
+			if(len == -1 && ignoreErrno(errno))
+				break;
+			else
+				exit(0); /* control socket is gone..so are we */
+		} 
+		/* eventually *do* something with the data */
+	}	
+	comm_setselect(fd, FDLIST_SERVER, COMM_SELECT_READ, process_ctrl, NULL, 0);
+}
 
 int main(int argc, char **argv)
 {
 	char *tfd;
 	char *tcfd;
-	int res;
-	int x = 2, i;
+
 	init_netio();	
 	tfd = getenv("FD");
 	tcfd = getenv("CFD");
 	if(tfd == NULL && tcfd == NULL)
 		exit(0);
-	fd = atoi(tfd);
-	cfd = atoi(tcfd);
+	irc_fd = atoi(tfd);
+	irc_cfd = atoi(tcfd);
 
-	comm_open(fd, FD_SOCKET);
-//	comm_open(cfd, FD_SOCKET);
+	comm_open(irc_fd, FD_SOCKET);
+	comm_open(irc_cfd, FD_SOCKET);
 
-	comm_set_nb(fd);
-//	comm_set_nb(cfd);
+	comm_set_nb(irc_fd);
+	comm_set_nb(irc_cfd);
 
-	process_request(fd, NULL);
-	
-//	check_identd(argv[1], argv[2], argv[3], argv[4], argv[5], argv[6]);	
+	process_request(irc_fd, NULL);
+	process_ctrl(irc_cfd, NULL);	
 	while(1) {
 		comm_select(1000);
 		comm_checktimeouts(NULL);
 	}
-//	check_identd("1", "10.123.2.101", "4", "207.188.202.227", "0", "1");
 	exit(0);
 }
 
