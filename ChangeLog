@@ -1,3 +1,27 @@
+leeh        2005/04/07 13:29:22 UTC	(20050407_4)
+
+  Modified files:
+    doc                  example.conf 
+    help/nickserv        index 
+    help/userserv        index 
+    src                  s_nickserv.c 
+  Added files:
+    help/nickserv        info 
+    help/userserv        info 
+  Log:
+  - add userserv::info help
+  - add nickserv::info command
+  
+  Revision  Changes    Path
+  1.38      +2 -0      rserv/doc/example.conf
+  1.2       +1 -0      rserv/help/nickserv/index
+  1.1       +3 -0      rserv/help/nickserv/info (new)
+  1.5       +1 -0      rserv/help/userserv/index
+  1.1       +6 -0      rserv/help/userserv/info (new)
+  1.5       +25 -1     rserv/src/s_nickserv.c
+
+
+
 leeh        2005/04/07 13:12:37 UTC	(20050407_3)
 
   Modified files:
