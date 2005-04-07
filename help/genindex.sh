@@ -6,7 +6,7 @@
 #
 # If the second line is marked [ADMIN] it goes in index-admin
 
-SUBDIRS="alis operbot chanserv userserv jupeserv operserv"
+SUBDIRS="alis operbot chanserv userserv jupeserv operserv nickserv"
 
 for i in $SUBDIRS; do
 	rm -f $i/index;

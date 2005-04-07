@@ -2,8 +2,9 @@ ratbox-services
 ---------------
 
 ratbox-services is a services daemon for use with ircd-ratbox.  It provides
-channel/username registration services, as well as a jupe service, an oper 
-service, an operbot and a list service.
+channel/username registration services, nickname services linked in through
+usernames, as well as a jupe service, an oper service, an operbot and a 
+list service.
 
 
 Installation

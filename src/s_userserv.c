@@ -860,6 +860,9 @@ dump_user_info(struct client *client_p, struct lconn *conn_p, struct user_reg *u
 {
 	char buf[BUFSIZE];
 	struct member_reg *mreg_p;
+#ifdef ENABLE_NICKSERV
+	struct nick_reg *nreg_p;
+#endif
 	struct client *target_p;
 	dlink_node *ptr;
 	char *p;
@@ -892,6 +895,35 @@ dump_user_info(struct client *client_p, struct lconn *conn_p, struct user_reg *u
 	if(buflen)
 		service_send(userserv_p, client_p, conn_p,
 				"[%s] Access to: %s", ureg_p->name, buf);
+
+#ifdef ENABLE_NICKSERV
+	p = buf;
+	buflen = 0;
+
+	DLINK_FOREACH(ptr, ureg_p->nicks.head)
+	{
+		nreg_p = ptr->data;
+
+		/* "Registered nicknames: " + " " */
+		if((buflen + strlen(nreg_p->name) + 25) >= (BUFSIZE - 3))
+		{
+			service_send(userserv_p, client_p, conn_p,
+					"[%s] Registered nicknames: %s",
+					ureg_p->name, buf);
+			p = buf;
+			buflen = 0;
+		}
+
+		mlen = sprintf(p, "%s ", nreg_p->name);
+		buflen += mlen;
+		p += mlen;
+	}
+
+	if(buflen)
+		service_send(userserv_p, client_p, conn_p,
+				"[%s] Registered nicknames: %s",
+				ureg_p->name, buf);
+#endif
 
 	service_send(userserv_p, client_p, conn_p,
 			"[%s] Currently logged on via:", ureg_p->name);

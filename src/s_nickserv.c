@@ -143,8 +143,6 @@ o_nick_nickdrop(struct client *client_p, struct lconn *conn_p, const char *parv[
 		return 0;
 	}
 
-	service_send(nickserv_p, client_p, conn_p,
-			
 	service_error(nickserv_p, client_p, "Nickname %s dropped", parv[0]);
 
 	slog(nickserv_p, 1, "%s - NICKDROP %s",
