@@ -54,6 +54,7 @@ static int o_nick_nickdrop(struct client *, struct lconn *, const char **, int);
 
 static int s_nick_register(struct client *, struct lconn *, const char **, int);
 static int s_nick_drop(struct client *, struct lconn *, const char **, int);
+static int s_nick_info(struct client *, struct lconn *, const char **, int);
 
 static struct service_command nickserv_command[] =
 {
@@ -256,7 +257,7 @@ s_nick_info(struct client *client_p, struct lconn *conn_p, const char *parv[], i
 	service_error(nickserv_p, client_p,
 			"[%s] Registered for %s",
 			nreg_p->name, 
-			get_duration((time_t) (CURRENT_TIME - ureg_p->reg_time)));
+			get_duration((time_t) (CURRENT_TIME - nreg_p->reg_time)));
 
 	slog(nickserv_p, 5, "%s %s INFO %s",
 		client_p->user->mask, client_p->user->user_reg->name, parv[0]);
