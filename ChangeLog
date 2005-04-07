@@ -1,3 +1,15 @@
+androsyn    2005/04/07 19:54:36 UTC	(20050407_1)
+
+  Modified files:
+    src/ident            ident.c 
+  Log:
+  more ident stuff
+  
+  Revision  Changes    Path
+  1.2       +145 -44   ircd-ratbox/src/ident/ident.c
+
+
+
 androsyn    2005/04/07 16:16:26 UTC	(20050407_0)
 
   Modified files:
