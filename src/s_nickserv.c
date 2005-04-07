@@ -54,6 +54,7 @@ static int o_nick_nickdrop(struct client *, struct lconn *, const char **, int);
 
 static int s_nick_register(struct client *, struct lconn *, const char **, int);
 static int s_nick_drop(struct client *, struct lconn *, const char **, int);
+static int s_nick_regain(struct client *, struct lconn *, const char **, int);
 static int s_nick_info(struct client *, struct lconn *, const char **, int);
 
 static struct service_command nickserv_command[] =
@@ -61,6 +62,7 @@ static struct service_command nickserv_command[] =
 	{ "NICKDROP",	&o_nick_nickdrop, 1, NULL, 1, 0L, 0, 0, CONF_OPER_NICKSERV, 0 },
 	{ "REGISTER",	&s_nick_register, 0, NULL, 1, 0L, 1, 0, 0, 0	},
 	{ "DROP",	&s_nick_drop,     1, NULL, 1, 0L, 1, 0, 0, 0	},
+	{ "REGAIN",	&s_nick_regain,   1, NULL, 1, 0L, 1, 0, 0, 0	},
 	{ "INFO",	&s_nick_info,     1, NULL, 1, 0L, 1, 0, 0, 0	}
 };
 
@@ -239,6 +241,49 @@ s_nick_drop(struct client *client_p, struct lconn *conn_p, const char *parv[], i
 		client_p->user->mask, client_p->user->user_reg->name, parv[0]);
 
 	free_nick_reg(nreg_p);
+	return 1;
+}
+
+static int
+s_nick_regain(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
+{
+	struct nick_reg *nreg_p;
+	struct client *target_p;
+
+	if((nreg_p = find_nick_reg(client_p, parv[0])) == NULL)
+		return 1;
+
+	if(nreg_p->user_reg != client_p->user->user_reg)
+	{
+		service_error(nickserv_p, client_p,
+				"Nickname %s is not registered to you",
+				nreg_p->name);
+		return 1;
+	}
+
+	if((target_p = find_user(parv[0])) == NULL)
+	{
+		service_error(nickserv_p, client_p,
+				"Nickname %s is not online", nreg_p->name);
+		return 1;
+	}
+
+	if(target_p == client_p)
+	{
+		service_error(nickserv_p, client_p,
+				"Nickname %s is already in use by you",
+				nreg_p->name);
+		return 1;
+	}
+
+	sendto_server("KILL %s :%s (REGAIN by %s)",
+			target_p->name, MYNAME, client_p->name);
+	exit_client(target_p);
+
+	slog(nickserv_p, 4, "%s %s REGAIN %s",
+		client_p->user->mask, client_p->user->user_reg->name,
+		parv[0]);
+
 	return 1;
 }
 

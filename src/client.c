@@ -574,6 +574,13 @@ c_nick(struct client *client_p, const char *parv[], int parc)
 		strlcpy(client_p->name, parv[0], sizeof(client_p->name));
 		add_client(client_p);
 
+		/* need to update their mask with new nick */
+		snprintf(buf, sizeof(buf), "%s!%s@%s",
+			client_p->name, target_p->user->username, 
+			client_p->user->host);
+		my_free(client_p->user->mask);
+		client_p->user->mask = my_strdup(buf);
+
 		client_p->user->tsinfo = atol(parv[1]);
 	}
 }

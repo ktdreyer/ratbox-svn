@@ -90,6 +90,8 @@ set_default_conf(void)
 	config_file.cexpireban_frequency = DEFAULT_EXPIREBAN_FREQUENCY;
 	config_file.cenforcetopic_frequency = DEFAULT_ENFORCETOPIC_FREQUENCY;
 
+	config_file.nmax_nicks = 2;
+
 	config_file.oper_score = 3;
 	config_file.jupe_score = 15;
 	config_file.unjupe_score = 15;

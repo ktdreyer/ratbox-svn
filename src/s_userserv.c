@@ -476,15 +476,21 @@ o_user_userinfo(struct client *client_p, struct lconn *conn_p, const char *parv[
 {
 	struct user_reg *ureg_p;
 
-	if((ureg_p = find_user_reg(NULL, parv[0])) == NULL)
+	if((ureg_p = find_user_reg_nick(NULL, parv[0])) == NULL)
 	{
-		service_send(userserv_p, client_p, conn_p,
-				"Username %s is not registered", parv[0]);
+		if(parv[0][0] == '=')
+			service_send(userserv_p, client_p, conn_p,
+					"Nickname %s is not logged in",
+					parv[0]);
+		else
+			service_send(userserv_p, client_p, conn_p,
+					"Username %s is not registered", parv[0]);
+
 		return 0;
 	}
 
 	slog(userserv_p, 1, "%s - USERINFO %s",
-			OPER_NAME(client_p, conn_p), ureg_p->name);
+		OPER_NAME(client_p, conn_p), ureg_p->name);
 
 	service_send(userserv_p, client_p, conn_p,
 			"[%s] Username registered for %s",
