@@ -1,3 +1,45 @@
+leeh        2005/04/07 13:12:37 UTC	(20050407_3)
+
+  Modified files:
+    src                  c_error.c c_message.c c_mode.c cache.c 
+                         channel.c client.c conf.c hook.c io.c 
+                         log.c modebuild.c rserv.c s_alis.c 
+                         s_chanserv.c s_global.c s_jupeserv.c 
+                         s_nickserv.c s_operbot.c s_operserv.c 
+                         s_userserv.c scommand.c service.c tools.c 
+                         u_stats.c ucommand.c 
+  Log:
+  - import the bsd license into those files I own.
+  
+  Revision  Changes    Path
+  1.9       +24 -0     rserv/src/c_error.c
+  1.19      +24 -0     rserv/src/c_message.c
+  1.31      +24 -0     rserv/src/c_mode.c
+  1.7       +24 -0     rserv/src/cache.c
+  1.42      +24 -0     rserv/src/channel.c
+  1.35      +24 -0     rserv/src/client.c
+  1.43      +24 -0     rserv/src/conf.c
+  1.5       +24 -0     rserv/src/hook.c
+  1.40      +24 -0     rserv/src/io.c
+  1.11      +24 -0     rserv/src/log.c
+  1.6       +24 -0     rserv/src/modebuild.c
+  1.50      +24 -0     rserv/src/rserv.c
+  1.36      +24 -0     rserv/src/s_alis.c
+  1.69      +24 -0     rserv/src/s_chanserv.c
+  1.14      +24 -0     rserv/src/s_global.c
+  1.29      +24 -0     rserv/src/s_jupeserv.c
+  1.4       +24 -0     rserv/src/s_nickserv.c
+  1.35      +24 -0     rserv/src/s_operbot.c
+  1.14      +24 -0     rserv/src/s_operserv.c
+  1.57      +24 -0     rserv/src/s_userserv.c
+  1.31      +24 -0     rserv/src/scommand.c
+  1.49      +24 -0     rserv/src/service.c
+  1.16      +24 -0     rserv/src/tools.c
+  1.17      +24 -0     rserv/src/u_stats.c
+  1.30      +24 -0     rserv/src/ucommand.c
+
+
+
 leeh        2005/04/07 13:05:03 UTC	(20050407_2)
 
   Modified files:
