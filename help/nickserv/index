@@ -1,2 +1,3 @@
  DROP        - Drops registration of nickname from your username.
+ INFO        - Gives information about the given nickname.
  REGISTER    - Registers your current nickname to your username.

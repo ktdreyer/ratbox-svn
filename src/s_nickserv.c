@@ -60,6 +60,7 @@ static struct service_command nickserv_command[] =
 	{ "NICKDROP",	&o_nick_nickdrop, 1, NULL, 1, 0L, 0, 0, CONF_OPER_NICKSERV, 0 },
 	{ "REGISTER",	&s_nick_register, 0, NULL, 1, 0L, 1, 0, 0, 0	},
 	{ "DROP",	&s_nick_drop,     1, NULL, 1, 0L, 1, 0, 0, 0	},
+	{ "INFO",	&s_nick_info,     1, NULL, 1, 0L, 1, 0, 0, 0	}
 };
 
 static struct ucommand_handler nickserv_ucommand[] =
@@ -239,5 +240,28 @@ s_nick_drop(struct client *client_p, struct lconn *conn_p, const char *parv[], i
 	free_nick_reg(nreg_p);
 	return 1;
 }
-	
+
+static int
+s_nick_info(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
+{
+	struct nick_reg *nreg_p;
+
+	if((nreg_p = find_nick_reg(client_p, parv[0])) == NULL)
+		return 1;
+
+	service_error(nickserv_p, client_p,
+			"[%s] Registered to %s",
+			nreg_p->name, nreg_p->user_reg->name);
+
+	service_error(nickserv_p, client_p,
+			"[%s] Registered for %s",
+			nreg_p->name, 
+			get_duration((time_t) (CURRENT_TIME - ureg_p->reg_time)));
+
+	slog(nickserv_p, 5, "%s %s INFO %s",
+		client_p->user->mask, client_p->user->user_reg->name, parv[0]);
+
+	return 1;
+}
+
 #endif

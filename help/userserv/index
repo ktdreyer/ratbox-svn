@@ -1,3 +1,4 @@
+ INFO        - Gives information about the given username.
  LOGIN       - Logs in to the given username.
  LOGOUT      - Logs out of services.
  REGISTER    - Registers given username.
