@@ -9,6 +9,7 @@ struct user_reg;
 
 struct nick_reg
 {
+	struct user_reg *user_reg;
 	char name[NICKLEN+1];
 	time_t reg_time;
 	time_t last_time;
@@ -22,6 +23,6 @@ struct nick_reg
 /* flags not stored in db: 0xFFFF000 */
 #define NS_FLAGS_NEEDUPDATE	0x00010000
 
-extern void free_nick_reg(struct nick_reg *, struct user_reg *);
+extern void free_nick_reg(struct nick_reg *);
 
 #endif

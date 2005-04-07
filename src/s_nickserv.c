@@ -29,11 +29,13 @@ static dlink_list nick_reg_table[MAX_NAME_HASH];
 static int o_nick_nickdrop(struct client *, struct lconn *, const char **, int);
 
 static int s_nick_register(struct client *, struct lconn *, const char **, int);
+static int s_nick_drop(struct client *, struct lconn *, const char **, int);
 
 static struct service_command nickserv_command[] =
 {
 	{ "NICKDROP",	&o_nick_nickdrop, 1, NULL, 1, 0L, 0, 0, CONF_OPER_NICKSERV, 0 },
-	{ "REGISTER",	&s_nick_register, 0, NULL, 1, 0L, 1, 0, 0, 0	}
+	{ "REGISTER",	&s_nick_register, 0, NULL, 1, 0L, 1, 0, 0, 0	},
+	{ "DROP",	&s_nick_drop,     1, NULL, 1, 0L, 1, 0, 0, 0	},
 };
 
 static struct ucommand_handler nickserv_ucommand[] =
@@ -68,7 +70,7 @@ add_nick_reg(struct nick_reg *nreg_p)
 }
 
 void
-free_nick_reg(struct nick_reg *nreg_p, struct user_reg *ureg_p)
+free_nick_reg(struct nick_reg *nreg_p)
 {
 	unsigned int hashv = hash_name(nreg_p->name);
 
@@ -76,7 +78,7 @@ free_nick_reg(struct nick_reg *nreg_p, struct user_reg *ureg_p)
 			nreg_p->name);
 
 	dlink_delete(&nreg_p->node, &nick_reg_table[hashv]);
-	dlink_delete(&nreg_p->usernode, &ureg_p->nicks);
+	dlink_delete(&nreg_p->usernode, &nreg_p->user_reg->nicks);
 	BlockHeapFree(nick_reg_heap, nreg_p);
 }
 
@@ -124,19 +126,31 @@ nick_db_callback(void *db, int argc, char **argv, char **colnames)
 
 	add_nick_reg(nreg_p);
 	dlink_add(nreg_p, &nreg_p->usernode, &ureg_p->nicks);
+	nreg_p->user_reg = ureg_p;
+
 	return 0;
 }
 
 static int
 o_nick_nickdrop(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
-#if 0
-	struct client *target_p;
-	dlink_node *ptr;
-	const char *data;
-	slog(global_p, 1, "%s - NETMSG %s", 
-		OPER_NAME(client_p, conn_p), data);
-#endif
+	struct nick_reg *nreg_p;
+
+	if((nreg_p = find_nick_reg(NULL, parv[0])) == NULL)
+	{
+		service_send(nickserv_p, client_p, conn_p,
+				"Nickname %s is not registered", parv[0]);
+		return 0;
+	}
+
+	service_send(nickserv_p, client_p, conn_p,
+			
+	service_error(nickserv_p, client_p, "Nickname %s dropped", parv[0]);
+
+	slog(nickserv_p, 1, "%s - NICKDROP %s",
+		OPER_NAME(client_p, conn_p), nreg_p->name);
+
+	free_nick_reg(nreg_p);
 	return 0;
 }
 
@@ -173,9 +187,35 @@ s_nick_register(struct client *client_p, struct lconn *conn_p, const char *parv[
 
 	add_nick_reg(nreg_p);
 	dlink_add(nreg_p, &nreg_p->usernode, &ureg_p->nicks);
+	nreg_p->user_reg = ureg_p;
 
 	service_error(nickserv_p, client_p, "Nickname registered");
 	return 1;
 }
 
+static int
+s_nick_drop(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
+{
+	struct nick_reg *nreg_p;
+
+	if((nreg_p = find_nick_reg(client_p, parv[0])) == NULL)
+		return 1;
+
+	if(nreg_p->user_reg != client_p->user->user_reg)
+	{
+		service_error(nickserv_p, client_p,
+				"Nickname %s is not registered to you",
+				nreg_p->name);
+		return 1;
+	}
+
+	service_error(nickserv_p, client_p, "Nickname %s dropped", parv[0]);
+
+	slog(nickserv_p, 3, "%s %s DROP %s",
+		client_p->user->mask, client_p->user->user_reg->name, parv[0]);
+
+	free_nick_reg(nreg_p);
+	return 1;
+}
+	
 #endif

@@ -310,6 +310,9 @@ main(int argc, char *argv[])
 #ifdef ENABLE_CHANSERV
 	init_s_chanserv();
 #endif
+#ifdef ENABLE_NICKSERV
+	init_s_nickserv();
+#endif
 #endif
 #ifdef ENABLE_OPERSERV
 	init_s_operserv();
@@ -319,9 +322,6 @@ main(int argc, char *argv[])
 #endif
 #ifdef ENABLE_GLOBAL
 	init_s_global();
-#endif
-#ifdef ENABLE_NICKSERV
-	init_s_nickserv();
 #endif
 
 	first_time = CURRENT_TIME;

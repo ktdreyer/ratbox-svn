@@ -119,7 +119,7 @@ free_user_reg(struct user_reg *ureg_p)
 
 	DLINK_FOREACH_SAFE(ptr, next_ptr, ureg_p->nicks.head)
 	{
-		free_nick_reg(ptr->data, ureg_p);
+		free_nick_reg(ptr->data);
 	}
 			
 	loc_sqlite_exec(NULL, "DELETE FROM users WHERE username = %Q",
