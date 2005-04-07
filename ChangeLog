@@ -1,3 +1,15 @@
+androsyn    2005/04/07 16:16:26 UTC	(20050407_0)
+
+  Modified files:
+    adns                 resolver.c 
+  Log:
+  handle general resolver failures
+  
+  Revision  Changes    Path
+  1.9       +1 -1      ircd-ratbox/adns/resolver.c
+
+
+
 androsyn    2005/04/06 20:46:01 UTC	(20050406_3)
 
   Added files:
