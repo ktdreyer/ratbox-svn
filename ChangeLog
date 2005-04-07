@@ -1,3 +1,21 @@
+leeh        2005/04/07 12:52:46 UTC	(20050407_0)
+
+  Modified files:
+    include              s_nickserv.h 
+    src                  rserv.c s_nickserv.c s_userserv.c 
+  Log:
+  - link the user_reg into the struct nick_reg
+  - added nickserv::nickdrop and nickserv::drop
+  - move the init_s_nickserv() inside #ifdef ENABLE_USERSERV
+  
+  Revision  Changes    Path
+  1.2       +2 -1      rserv/include/s_nickserv.h
+  1.49      +3 -3      rserv/src/rserv.c
+  1.2       +50 -10    rserv/src/s_nickserv.c
+  1.55      +1 -1      rserv/src/s_userserv.c
+
+
+
 leeh        2005/04/06 23:58:32 UTC	(20050406_3)
 
   Modified files:
