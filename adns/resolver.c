@@ -293,7 +293,7 @@ static void process_adns_incoming(void)
 				continue;
 			default:
                         	if(answer != NULL && answer->status == adns_s_systemfail)
-					failure = 1;
+					report_error("adns system failed");
 				send_answer(req, NULL);
 				break;
 		}
