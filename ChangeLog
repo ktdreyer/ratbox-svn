@@ -1,3 +1,15 @@
+androsyn    2005/04/08 19:41:03 UTC	(20050408_1)
+
+  Modified files:
+    src                  s_auth.c 
+  Log:
+  change that 3 to a 0
+  
+  Revision  Changes    Path
+  7.208     +1 -1      ircd-ratbox/src/s_auth.c
+
+
+
 androsyn    2005/04/08 19:40:19 UTC	(20050408_0)
 
   Modified files:
