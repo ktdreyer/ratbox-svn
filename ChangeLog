@@ -1,3 +1,15 @@
+androsyn    2005/04/08 21:49:22 UTC	(20050408_4)
+
+  Modified files:
+    src/ident            commio.c 
+  Log:
+  sys/types.h needs to be before socket.h doh
+  
+  Revision  Changes    Path
+  1.4       +1 -1      ircd-ratbox/src/ident/commio.c
+
+
+
 androsyn    2005/04/08 21:47:10 UTC	(20050408_3)
 
   Modified files:
