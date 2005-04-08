@@ -466,11 +466,15 @@ delete_auth_queries(struct Client *target_p)
 		return;
 	auth = target_p->localClient->auth_request;
 	target_p->localClient->auth_request = NULL;
+
 	if(IsDNSPending(auth))
 	{
 		cancel_lookup(auth->dns_query);
 		auth->dns_query = 0;
 	}
+
+	if(auth->reqid > 0)
+		authtable[auth->reqid] = NULL;
 
 	dlinkDelete(&auth->node, &auth_poll_list);
 	free_auth_request(auth);
@@ -487,56 +491,60 @@ read_auth_reply(int fd, void *data)
 	char *q, *p;
 	char buf[512];
 
-	len = recv(fd, buf, sizeof(buf), 0);
 
-	if(len < 0)
+	while(1)
 	{
-		if(ignoreErrno(errno))
+		len = recv(fd, buf, sizeof(buf), 0);
+
+		if(len < 0)
 		{
-			comm_setselect(fd, FDLIST_IDLECLIENT, COMM_SELECT_READ, read_auth_reply, auth, 0);
+			if(ignoreErrno(errno))
+			{
+				comm_setselect(fd, FDLIST_IDLECLIENT, COMM_SELECT_READ, read_auth_reply, auth, 0);
+				return;
+			}
+			fork_ident();
 			return;
 		}
-		fork_ident();
-		return;
+		
+		if(len == 0)
+		{
+			fork_ident();
+			return;
+		}
+
+		q = strchr(buf, ' ');
+
+		if(q == NULL)
+			return;
+
+		*q = '\0';
+		q++;
+
+		id = strtoul(buf, NULL, 16);
+		auth = authtable[id];
+
+		if(auth == NULL)
+			continue; /* its gone away...oh well */
+	
+		p = strchr(q, '\n');
+
+		if(p != NULL)
+			*p = '\0';
+
+
+		if(*q == '0')
+		{
+			strcpy(auth->client->username, "unknown");
+			auth_error(auth);
+			continue;
+		}
+
+		strlcpy(auth->client->username, q, sizeof(auth->client->username));
+		ClearAuth(auth);
+		ServerStats.is_asuc++;
+		sendheader(auth->client, REPORT_FIN_ID);
+		SetGotId(auth);
+		release_auth_client(auth);
 	}
-
-	if(len == 0)
-	{
-		fork_ident();
-		return;
-	}
-
-	q = strchr(buf, ' ');
-
-	if(q == NULL)
-		return;
-
-	*q = '\0';
-	q++;
-
-	id = strtoul(buf, NULL, 16);
-	auth = authtable[id];
-
-	if(auth == NULL)
-		return; /* its gone away...oh well */
-	p = strchr(q, '\n');
-
-	if(p != NULL)
-		*p = '\0';
-
-
-	if(*q == '0')
-	{
-		strcpy(auth->client->username, "unknown");
-		auth_error(auth);
-		return;
-	}
-
-	strlcpy(auth->client->username, q, sizeof(auth->client->username));
-	ClearAuth(auth);
-	ServerStats.is_asuc++;
-	sendheader(auth->client, REPORT_FIN_ID);
-	SetGotId(auth);
-	release_auth_client(auth);
-	return;
 }
