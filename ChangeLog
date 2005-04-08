@@ -1,3 +1,42 @@
+androsyn    2005/04/08 19:40:19 UTC	(20050408_0)
+
+  Modified files:
+    .                    Makefile.in configure configure.ac 
+    adns                 Makefile.in resolver.c 
+    include              s_auth.h 
+    modules              Makefile.in 
+    src                  .indent.pro Makefile.am Makefile.in dns.c 
+                         ircd.c s_auth.c 
+    src/ident            ident.c mem.c 
+    tools                Makefile.in 
+  Added files:
+    src/ident            Makefile.am Makefile.in 
+  Log:
+  The rest of the new ident checking code, this should all mostly work.  The
+  ident daemon failure checking needs to be made more robust though.
+  
+  Revision  Changes    Path
+  7.62      +0 -0      ircd-ratbox/Makefile.in
+  1.24      +0 -0      ircd-ratbox/adns/Makefile.in
+  1.10      +1 -9      ircd-ratbox/adns/resolver.c
+  7.260     +4 -3      ircd-ratbox/configure
+  7.71      +3 -2      ircd-ratbox/configure.ac
+  7.31      +1 -1      ircd-ratbox/include/s_auth.h
+  1.132     +0 -0      ircd-ratbox/modules/Makefile.in
+  7.4       +1 -1      ircd-ratbox/src/.indent.pro
+  7.5       +2 -0      ircd-ratbox/src/Makefile.am
+  7.168     +129 -30   ircd-ratbox/src/Makefile.in
+  7.9       +8 -10     ircd-ratbox/src/dns.c
+  1.1       +6 -0      ircd-ratbox/src/ident/Makefile.am (new)
+  1.1       +496 -0    ircd-ratbox/src/ident/Makefile.in (new)
+  1.3       +29 -8     ircd-ratbox/src/ident/ident.c
+  1.2       +0 -1      ircd-ratbox/src/ident/mem.c
+  7.386     +1 -1      ircd-ratbox/src/ircd.c
+  7.207     +236 -263  ircd-ratbox/src/s_auth.c
+  7.50      +0 -0      ircd-ratbox/tools/Makefile.in
+
+
+
 androsyn    2005/04/07 19:54:36 UTC	(20050407_1)
 
   Modified files:
