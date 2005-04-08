@@ -312,7 +312,7 @@ comm_checktimeouts(void *notused)
 			hdl = F->timeout_handler;
 			data = F->timeout_data;
 			comm_settimeout(F->fd, 0, NULL, NULL);
-			hdl(F->fd, F->data);
+			hdl(F->fd, data);
 		}
 	}
 }
