@@ -23,11 +23,12 @@
  *
  *  $Id$
  */
-#include <sys/types.h>
+
 #include <sys/socket.h>
-#include <sys/select.h>
+#include <sys/poll.h>
 #include <sys/time.h>
 #include <time.h>
+#include <sys/types.h>
 #include <netinet/in.h>
 #include <string.h>
 #include <fcntl.h>
@@ -35,8 +36,9 @@
 #include <errno.h>
 #include <assert.h>
 #define s_assert assert
-#define MASTER_MAX 255
+
 #define MAXCONNECTIONS 255
+#define MASTER_MAX 255
 
 #include "../../include/setup.h"
 #include "defs.h"
@@ -462,33 +464,248 @@ comm_socket(int family, int sock_type, int proto)
 	return fd;
 }
 
+#ifndef POLLRDNORM
+#define POLLRDNORM POLLIN
+#endif
+#ifndef POLLWRNORM
+#define POLLWRNORM POLLOUT
+#endif
 
+struct _pollfd_list
+{
+	struct pollfd pollfds[MAXCONNECTIONS];
+	int maxindex;		/* highest FD number */
+};
+
+typedef struct _pollfd_list pollfd_list_t;
+
+pollfd_list_t pollfd_list;
+static void poll_update_pollfds(int, short, PF *);
+static unsigned long last_count = 0; 
+static unsigned long empty_count = 0;
+/* XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX */
+/* Private functions */
+
+/*
+ * find a spare slot in the fd list. We can optimise this out later!
+ *   -- adrian
+ */
+static inline int
+poll_findslot(void)
+{
+	int i;
+	for (i = 0; i < MAXCONNECTIONS; i++)
+	{
+		if(pollfd_list.pollfds[i].fd == -1)
+		{
+			/* MATCH!!#$*&$ */
+			return i;
+		}
+	}
+	s_assert(1 == 0);
+	/* NOTREACHED */
+	return -1;
+}
+
+/*
+ * set and clear entries in the pollfds[] array.
+ */
+static void
+poll_update_pollfds(int fd, short event, PF * handler)
+{
+	fde_t *F = &fd_table[fd];
+	int comm_index;
+
+	if(F->comm_index < 0)
+	{
+		F->comm_index = poll_findslot();
+	}
+	comm_index = F->comm_index;
+
+	/* Update the events */
+	if(handler)
+	{
+		F->list = FDLIST_IDLECLIENT;
+		pollfd_list.pollfds[comm_index].events |= event;
+		pollfd_list.pollfds[comm_index].fd = fd;
+		/* update maxindex here */
+		if(comm_index > pollfd_list.maxindex)
+			pollfd_list.maxindex = comm_index;
+	}
+	else
+	{
+		if(comm_index >= 0)
+		{
+			pollfd_list.pollfds[comm_index].events &= ~event;
+			if(pollfd_list.pollfds[comm_index].events == 0)
+			{
+				pollfd_list.pollfds[comm_index].fd = -1;
+				pollfd_list.pollfds[comm_index].revents = 0;
+				F->comm_index = -1;
+				F->list = FDLIST_NONE;
+
+				/* update pollfd_list.maxindex here */
+				if(comm_index == pollfd_list.maxindex)
+					while (pollfd_list.maxindex >= 0 &&
+					       pollfd_list.pollfds[pollfd_list.maxindex].fd == -1)
+						pollfd_list.maxindex--;
+			}
+		}
+	}
+}
+
+
+/* XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX */
+/* Public functions */
+
+
+/*
+ * init_netio
+ *
+ * This is a needed exported function which will be called to initialise
+ * the network loop code.
+ */
+void
+init_netio(void)
+{
+	int fd;
+	fdlist_init();
+	for (fd = 0; fd < MAXCONNECTIONS; fd++)
+	{
+		pollfd_list.pollfds[fd].fd = -1;
+	}
+	pollfd_list.maxindex = 0;
+}
+
+/*
+ * comm_setselect
+ *
+ * This is a needed exported function which will be called to register
+ * and deregister interest in a pending IO state for a given FD.
+ */
+void
+comm_setselect(int fd, fdlist_t list, unsigned int type, PF * handler,
+	       void *client_data, time_t timeout)
+{
+	fde_t *F = &fd_table[fd];
+	s_assert(fd >= 0);
+	s_assert(F->flags.open);
+
+	if(type & COMM_SELECT_READ)
+	{
+		F->read_handler = handler;
+		F->read_data = client_data;
+		poll_update_pollfds(fd, POLLRDNORM, handler);
+	}
+	if(type & COMM_SELECT_WRITE)
+	{
+		F->write_handler = handler;
+		F->write_data = client_data;
+		poll_update_pollfds(fd, POLLWRNORM, handler);
+	}
+	if(timeout)
+		F->timeout = CurrentTime + (timeout / 1000);
+}
 
 static void
-fdlist_update_biggest(int fd, int opening)
-{
-	if(fd < highest_fd)
-		return;
-	s_assert(fd < MAXCONNECTIONS);
+irc_sleep(unsigned long useconds)
+{     
+#ifdef HAVE_NANOSLEEP    
+        struct timespec t;
+        t.tv_sec = useconds / (unsigned long) 1000000;
+        t.tv_nsec = (useconds % (unsigned long) 1000000) * 1000;
+        nanosleep(&t, (struct timespec *) NULL);
+#else    
+        struct timeval t;        
+        t.tv_sec = 0;    
+        t.tv_usec = useconds;
+        select(0, NULL, NULL, NULL, &t);
+#endif
+        return;
+}
 
-	if(fd > highest_fd)
+/* int comm_select_fdlist(unsigned long delay)
+ * Input: The maximum time to delay.
+ * Output: Returns -1 on error, 0 on success.
+ * Side-effects: Deregisters future interest in IO and calls the handlers
+ *               if an event occurs for an FD.
+ * Comments: Check all connections for new connections and input data
+ * that is to be processed. Also check for connections with data queued
+ * and whether we can write it out.
+ * Called to do the new-style IO, courtesy of squid (like most of this
+ * new IO code). This routine handles the stuff we've hidden in
+ * comm_setselect and fd_table[] and calls callbacks for IO ready
+ * events.
+ */
+int
+comm_select(unsigned long delay)
+{
+	int num;
+	int fd;
+	int ci;
+	unsigned long ndelay;
+	PF *hdl;
+
+	if(last_count > 0)
 	{
-		/*  
-		 * s_assert that we are not closing a FD bigger than
-		 * our known biggest FD
-		 */
-		s_assert(opening);
-		highest_fd = fd;
-		return;
+		empty_count = 0;
+		ndelay = 0;
 	}
-	/* if we are here, then fd == Biggest_FD */
-	/*
-	 * s_assert that we are closing the biggest FD; we can't be
-	 * re-opening it
-	 */
-	s_assert(!opening);
-	while (highest_fd >= 0 && !fd_table[highest_fd].flags.open)
-		highest_fd--;
+	else {
+		ndelay = ++empty_count * 15000 ;
+		if(ndelay > delay * 1000)
+			ndelay = delay * 1000;	
+	}
+	
+	for (;;)
+	{
+		/* XXX kill that +1 later ! -- adrian */
+		if(ndelay > 0)
+			irc_sleep(ndelay); 
+		last_count = num = poll(pollfd_list.pollfds, pollfd_list.maxindex + 1, 0);
+		if(num >= 0)
+			break;
+		if(ignoreErrno(errno))
+			continue;
+		/* error! */
+		set_time();
+		return -1;
+		/* NOTREACHED */
+	}
+
+	/* update current time again, eww.. */
+	set_time();
+
+	if(num == 0)
+		return 0;
+	/* XXX we *could* optimise by falling out after doing num fds ... */
+	for (ci = 0; ci < pollfd_list.maxindex + 1; ci++)
+	{
+		fde_t *F;
+		int revents;
+		if(((revents = pollfd_list.pollfds[ci].revents) == 0) ||
+		   (pollfd_list.pollfds[ci].fd) == -1)
+			continue;
+		fd = pollfd_list.pollfds[ci].fd;
+		F = &fd_table[fd];
+		if(revents & (POLLRDNORM | POLLIN | POLLHUP | POLLERR))
+		{
+			hdl = F->read_handler;
+			F->read_handler = NULL;
+			poll_update_pollfds(fd, POLLRDNORM, NULL);
+			if(hdl)
+				hdl(fd, F->read_data);
+		}
+		if(revents & (POLLWRNORM | POLLOUT | POLLHUP | POLLERR))
+		{
+			hdl = F->write_handler;
+			F->write_handler = NULL;
+			poll_update_pollfds(fd, POLLWRNORM, NULL);
+			if(hdl)
+				hdl(fd, F->write_data);
+		}
+	}
+	return 0;
 }
 
 
@@ -553,174 +770,29 @@ comm_close(int fd)
 	close(fd);
 }
 
-
-/*
- * Note that this is only a single list - multiple lists is kinda pointless
- * under select because the list size is a function of the highest FD :-)
- *   -- adrian
- */
-
-fd_set select_readfds;
-fd_set select_writefds;
-
-/*
- * You know, I'd rather have these local to comm_select but for some
- * reason my gcc decides that I can't modify them at all..
- *   -- adrian
- */
-fd_set tmpreadfds;
-fd_set tmpwritefds;
-
-static void select_update_selectfds(int fd, short event, PF * handler);
-
-/* XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX */
-/* Private functions */
-
-/*
- * set and clear entries in the select array ..
- */
 static void
-select_update_selectfds(int fd, short event, PF * handler)
+fdlist_update_biggest(int fd, int opening)
 {
-	/* Update the read / write set */
-	if(event & COMM_SELECT_READ)
+	if(fd < highest_fd)
+		return;
+	s_assert(fd < MAXCONNECTIONS);
+
+	if(fd > highest_fd)
 	{
-		if(handler)
-			FD_SET(fd, &select_readfds);
-		else
-			FD_CLR(fd, &select_readfds);
+		/*  
+		 * s_assert that we are not closing a FD bigger than
+		 * our known biggest FD
+		 */
+		s_assert(opening);
+		highest_fd = fd;
+		return;
 	}
-	if(event & COMM_SELECT_WRITE)
-	{
-		if(handler)
-			FD_SET(fd, &select_writefds);
-		else
-			FD_CLR(fd, &select_writefds);
-	}
+	/* if we are here, then fd == Biggest_FD */
+	/*
+	 * s_assert that we are closing the biggest FD; we can't be
+	 * re-opening it
+	 */
+	s_assert(!opening);
+	while (highest_fd >= 0 && !fd_table[highest_fd].flags.open)
+		highest_fd--;
 }
-
-
-/* XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX */
-/* Public functions */
-
-
-/*
- * init_netio
- *
- * This is a needed exported function which will be called to initialise
- * the network loop code.
- */
-void
-init_netio(void)
-{
-	FD_ZERO(&select_readfds);
-	FD_ZERO(&select_writefds);
-	fd_table = MyMalloc(sizeof(fde_t) * 255);
-}
-
-/*
- * comm_setselect
- *
- * This is a needed exported function which will be called to register
- * and deregister interest in a pending IO state for a given FD.
- */
-void
-comm_setselect(int fd, fdlist_t list, unsigned int type, PF * handler,
-	       void *client_data, time_t timeout)
-{
-	fde_t *F = &fd_table[fd];
-	s_assert(fd >= 0);
-	s_assert(F->flags.open);
-
-	if(type & COMM_SELECT_READ)
-	{
-		F->read_handler = handler;
-		F->read_data = client_data;
-		select_update_selectfds(fd, COMM_SELECT_READ, handler);
-	}
-	if(type & COMM_SELECT_WRITE)
-	{
-		F->write_handler = handler;
-		F->write_data = client_data;
-		select_update_selectfds(fd, COMM_SELECT_WRITE, handler);
-	}
-	if(timeout)
-		F->timeout = CurrentTime + (timeout / 1000);
-}
-
-/*
- * Check all connections for new connections and input data that is to be
- * processed. Also check for connections with data queued and whether we can
- * write it out.
- */
-
-/*
- * comm_select
- *
- * Do IO events
- */
-
-int
-comm_select(unsigned long delay)
-{
-	int num;
-	int fd;
-	PF *hdl;
-	fde_t *F;
-	struct timeval to;
-
-	/* Copy over the read/write sets so we don't have to rebuild em */
-	memcpy(&tmpreadfds, &select_readfds, sizeof(fd_set));
-	memcpy(&tmpwritefds, &select_writefds, sizeof(fd_set));
-
-	for (;;)
-	{
-		to.tv_sec = 0;
-		to.tv_usec = delay * 1000;
-		num = select(highest_fd + 1, &tmpreadfds, &tmpwritefds, NULL, &to);
-		if(num >= 0)
-			break;
-		if(ignoreErrno(errno))
-			continue;
-		set_time();
-		/* error! */
-		return -1;
-		/* NOTREACHED */
-	}
-	set_time();
-
-	if(num == 0)
-		return 0;
-
-	/* XXX we *could* optimise by falling out after doing num fds ... */
-	for (fd = 0; fd < highest_fd + 1; fd++)
-	{
-		F = &fd_table[fd];
-
-		if(FD_ISSET(fd, &tmpreadfds))
-		{
-			hdl = F->read_handler;
-			F->read_handler = NULL;
-			if(hdl)
-				hdl(fd, F->read_data);
-		}
-
-		if(F->flags.open == 0)
-			continue;	/* Read handler closed us..go on */
-
-		if(FD_ISSET(fd, &tmpwritefds))
-		{
-			hdl = F->write_handler;
-			F->write_handler = NULL;
-			if(hdl)
-				hdl(fd, F->write_data);
-		}
-
-		if(F->read_handler == NULL)
-			select_update_selectfds(fd, COMM_SELECT_READ, NULL);
-		if(F->write_handler == NULL)
-			select_update_selectfds(fd, COMM_SELECT_WRITE, NULL);
-	}
-	return 0;
-}
-
