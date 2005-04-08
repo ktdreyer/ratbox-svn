@@ -3,7 +3,6 @@
  */
 
 #include <stdlib.h>
-#include <memory.h>
 
 
 void *MyMalloc(size_t size)

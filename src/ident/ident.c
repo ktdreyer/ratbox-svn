@@ -25,15 +25,17 @@
 #include <netdb.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <ctype.h>
 #include <errno.h>
 
+
 #include "../../include/setup.h"
+#include "mem.h"
 #include "defs.h"
 #include "tools.h"
 #include "commio.h"
-#include "mem.h"
 
-#define send(x, y, z, a) write(x, y, z)
+#define USERLEN 10
 
 /* data fd from ircd */
 int irc_fd;
@@ -249,17 +251,34 @@ static void
 read_auth(int fd, void *data)
 {
 	struct auth_request *auth = data;
-	char *user;
-	int len;
+	char username[USERLEN], *s, *t;
+	int len, count;
+
 	len = recv(fd, buf, sizeof(buf), 0);
 	if(len < 0 && ignoreErrno(errno))
 	{
 		comm_settimeout(fd, 15, read_auth_timeout, auth);
-		comm_setselect(fd, FDLIST_SERVICE, COMM_SELECT_READ, read_auth, NULL, 15);
+		comm_setselect(fd, FDLIST_SERVICE, COMM_SELECT_READ, read_auth, auth, 15);
+		return;
 	} else {
-		if((user = GetValidIdent(buf)) != NULL)
+		buf[len] = '\0';
+		if((s = GetValidIdent(buf)))
 		{
-			send_sprintf(irc_fd, "%s %s\n", auth->reqid, user);	
+			t = username;
+			while(*s == '~' || *s == '^')
+				s++;
+			for(count = USERLEN; *s && count; s++)
+			{
+				if(*s == '@')
+					break;
+				if(!isspace(*s) && *s != ':' && *s != '[')
+				{
+					*t++ = *s;
+					count--;
+				}
+			}
+			*t = '\0';
+			send_sprintf(irc_fd, "%s %s\n", auth->reqid, username);	
 		} else
 			send_sprintf(irc_fd, "%s 0\n", auth->reqid);
 		comm_close(fd);
@@ -284,7 +303,7 @@ connect_callback(int fd, int status, void *data)
 			MyFree(auth);
 			return;
 		}
-		read_auth(fd, NULL);
+		read_auth(fd, auth);
 	} else {
 		send_sprintf(irc_fd, "%s 0\n", auth->reqid);
 		comm_close(fd);
@@ -377,6 +396,8 @@ process_request(int fd, void *data)
 	                *p = '\0';
 		
 			parc = io_to_array(buf, parv);
+			if(parc != 6)
+				report_error("ERR: wrong number of arguments passed\n");
 			check_identd(parv[0], parv[1], parv[2], parv[3], parv[4], parv[5]);
 	        } else
 			report_error("ERR: Got bogus data from server");       

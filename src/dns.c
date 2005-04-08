@@ -57,8 +57,8 @@ struct dnsreq
 static struct dnsreq querytable[IDTABLE];
 
 static u_int16_t id = 1;
-static int dns_fd;
-static int ctrl_fd;
+static int dns_fd = -1;
+static int ctrl_fd = -1;
 
 static u_int16_t 
 assign_id(void)
@@ -202,15 +202,13 @@ fork_resolver(void)
 		return;
 	}
 	fork_count++;
-	comm_close(dns_fd);
-	comm_close(ctrl_fd);
-	if(res_pid != 0)
-	{
-		/* if we got here with a resolver running
-		 * kill it 
-		 */
+	if(dns_fd > 0)
+		comm_close(dns_fd);
+	if(ctrl_fd > 0)
+		comm_close(ctrl_fd);
+	if(res_pid > 0)
 		kill(res_pid, SIGKILL);
-	}
+
 	socketpair(AF_UNIX, SOCK_DGRAM, 0, fdx);
 	socketpair(AF_UNIX, SOCK_STREAM, 0, cfdx);
 

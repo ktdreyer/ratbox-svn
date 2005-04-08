@@ -2,6 +2,8 @@
 
 AUTOMAKE_OPTIONS = foreign
 
+SUBDIRS = ident
+
 bin_PROGRAMS = ircd
 
 INCLUDES = -I../adns $(INCLTDL)

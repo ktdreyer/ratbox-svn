@@ -599,8 +599,8 @@ main(int argc, char *argv[])
 #ifndef STATIC_MODULES
 	load_core_modules(1);
 #endif
-	init_auth();		/* Initialise the auth code */
 	init_resolver();	/* Needs to be setup before the io loop */
+	init_auth();		/* Initialise the auth code */
 
 	if (testing_conf)
 		fprintf(stderr, "\nBeginning config test\n");

@@ -864,6 +864,7 @@ AC_CONFIG_FILES(		\
 	servlink/Makefile	\
 	contrib/Makefile	\
 	src/Makefile		\
+	src/ident/Makefile	\
 	modules/Makefile	\
 	tools/Makefile		\
 	doc/Makefile		\

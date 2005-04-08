@@ -279,7 +279,6 @@ static void process_adns_incoming(void)
 	adns_query q, r;
 	adns_answer *answer;
 	struct dns_request *req;
-	int failure = 0;
 		
 	adns_forallqueries_begin(dns_state);
 	while(   (q = adns_forallqueries_next(dns_state, (void *)&r)) != NULL)
@@ -578,7 +577,7 @@ int main(int argc, char **argv)
 	char *tfd;
 	char *tcfd;
 	int res;
-	int x = 2, i;
+	int i;
 	
 	tfd = getenv("FD");
 	tcfd = getenv("CFD");
@@ -587,13 +586,6 @@ int main(int argc, char **argv)
 		exit(0);
 	fd = atoi(tfd);
 	cfd = atoi(tcfd);
-#if 0
-	while(x++ < 65535)
-	{
-		if(x != fd && x != cfd)
-			close(x);
-	}
-#endif
 
 	if(fd > 255)
 	{
