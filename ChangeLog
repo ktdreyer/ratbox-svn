@@ -1,3 +1,15 @@
+androsyn    2005/04/08 22:00:56 UTC	(20050408_6)
+
+  Modified files:
+    src                  commio.c 
+  Log:
+  typo..
+  
+  Revision  Changes    Path
+  1.38      +1 -1      ircd-ratbox/src/commio.c
+
+
+
 androsyn    2005/04/08 21:56:39 UTC	(20050408_5)
 
   Modified files:
