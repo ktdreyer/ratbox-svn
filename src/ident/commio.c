@@ -23,12 +23,11 @@
  *
  *  $Id$
  */
-
+#include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/select.h>
 #include <sys/time.h>
 #include <time.h>
-#include <sys/types.h>
 #include <netinet/in.h>
 #include <string.h>
 #include <fcntl.h>

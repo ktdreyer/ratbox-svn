@@ -32,7 +32,7 @@
  */
 
 #include <stdlib.h>
-
+#include <sys/types.h>
 #define TOOLS_C
 #include "../../include/setup.h"
 #include "defs.h"

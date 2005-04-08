@@ -315,8 +315,8 @@ void
 check_identd(const char *id, const char *bindaddr, const char *aft, const char *destaddr, const char *srcport, const char *dstport)
 {
 	struct auth_request *auth;
-	auth = MyMalloc(sizeof(struct auth_request));
 	int aftype = AF_INET;
+	auth = MyMalloc(sizeof(struct auth_request));
 #ifdef IPV6
 	if(*aft == '6') 
 	{
