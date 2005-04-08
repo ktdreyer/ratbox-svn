@@ -1,3 +1,15 @@
+androsyn    2005/04/08 22:07:34 UTC	(20050408_7)
+
+  Modified files:
+    src                  s_auth.c 
+  Log:
+  handle the ircd getting rid of the client before ident
+  
+  Revision  Changes    Path
+  7.209     +3 -0      ircd-ratbox/src/s_auth.c
+
+
+
 androsyn    2005/04/08 22:00:56 UTC	(20050408_6)
 
   Modified files:
