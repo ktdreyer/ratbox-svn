@@ -544,7 +544,7 @@ read_auth_reply(int fd, void *data)
 		ClearAuth(auth);
 		ServerStats.is_asuc++;
 		sendheader(auth->client, REPORT_FIN_ID);
-		SetGotId(auth);
+		SetGotId(auth->client);
 		release_auth_client(auth);
 	}
 }
