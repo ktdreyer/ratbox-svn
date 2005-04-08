@@ -1,3 +1,15 @@
+androsyn    2005/04/08 22:22:49 UTC	(20050408_9)
+
+  Modified files:
+    src                  s_auth.c 
+  Log:
+  Do SetGotId() on the client, not the auth
+  
+  Revision  Changes    Path
+  7.211     +1 -1      ircd-ratbox/src/s_auth.c
+
+
+
 androsyn    2005/04/08 22:19:24 UTC	(20050408_8)
 
   Modified files:
