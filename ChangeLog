@@ -1,3 +1,17 @@
+androsyn    2005/04/08 21:56:39 UTC	(20050408_5)
+
+  Modified files:
+    src                  commio.c 
+    src/ident            commio.c 
+  Log:
+  Lets use the data pointer we saved, not the one we just nulled...
+  
+  Revision  Changes    Path
+  1.37      +1 -1      ircd-ratbox/src/commio.c
+  1.5       +1 -1      ircd-ratbox/src/ident/commio.c
+
+
+
 androsyn    2005/04/08 21:49:22 UTC	(20050408_4)
 
   Modified files:
