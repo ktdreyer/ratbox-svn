@@ -1,3 +1,15 @@
+androsyn    2005/04/08 22:19:24 UTC	(20050408_8)
+
+  Modified files:
+    src                  s_auth.c 
+  Log:
+  clear the point in the auth table when delete auth queries..
+  
+  Revision  Changes    Path
+  7.210     +45 -37    ircd-ratbox/src/s_auth.c
+
+
+
 androsyn    2005/04/08 22:07:34 UTC	(20050408_7)
 
   Modified files:
