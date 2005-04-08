@@ -1,3 +1,17 @@
+androsyn    2005/04/08 20:05:07 UTC	(20050408_2)
+
+  Modified files:
+    src/ident            commio.c ident.c tools.c 
+  Log:
+  fix compile errors on freebsd
+  
+  Revision  Changes    Path
+  1.2       +1 -2      ircd-ratbox/src/ident/commio.c
+  1.4       +1 -1      ircd-ratbox/src/ident/ident.c
+  1.2       +1 -1      ircd-ratbox/src/ident/tools.c
+
+
+
 androsyn    2005/04/08 19:41:03 UTC	(20050408_1)
 
   Modified files:
