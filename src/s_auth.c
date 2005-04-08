@@ -516,6 +516,9 @@ read_auth_reply(int fd, void *data)
 
 	id = strtoul(buf, NULL, 16);
 	auth = authtable[id];
+
+	if(auth == NULL)
+		return; /* its gone away...oh well */
 	p = strchr(q, '\n');
 
 	if(p != NULL)
