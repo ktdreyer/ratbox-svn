@@ -148,7 +148,7 @@ fork_ident(void)
 		setenv("CFD", fy, 1);
 		close(fdx[0]);
 		close(cfdx[0]);
-		for(i = 3; i < HARD_FDLIMIT; i++)
+		for(i = 0; i < HARD_FDLIMIT; i++)
 		{
 			if((i == fdx[1]) || (i == cfdx[1]))
 				comm_set_nb(i);
