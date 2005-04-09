@@ -1,3 +1,16 @@
+androsyn    2005/04/09 19:12:24 UTC	(20050409_0)
+
+  Modified files:
+    src                  ircd_signal.c s_auth.c 
+  Log:
+  add a sigchld handler for ident
+  
+  Revision  Changes    Path
+  7.34      +2 -0      ircd-ratbox/src/ircd_signal.c
+  7.212     +12 -6     ircd-ratbox/src/s_auth.c
+
+
+
 androsyn    2005/04/08 22:22:49 UTC	(20050408_9)
 
   Modified files:
