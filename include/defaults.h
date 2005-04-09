@@ -65,5 +65,5 @@ error HARD_FDLIMIT_ undefined
 #define JOIN_LEAVE_COUNT_EXPIRE_TIME 120
 #define MIN_SPAM_NUM 5
 #define MIN_SPAM_TIME 60
-#define CONFIG_RATBOX_LEVEL_1
+#define CONFIG_RATBOX_LEVEL_2
 #endif				/* INCLUDED_defaults_h */

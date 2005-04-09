@@ -53,15 +53,22 @@ CONFIG_CLEAN_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
-am_ident_OBJECTS = commio.$(OBJEXT) ident.$(OBJEXT) mem.$(OBJEXT) \
-	tools.$(OBJEXT)
+am_ident_OBJECTS = ident-ident.$(OBJEXT) ident-commio.$(OBJEXT) \
+	ident-snprintf.$(OBJEXT) ident-irc_string.$(OBJEXT) \
+	ident-match.$(OBJEXT) ident-memory.$(OBJEXT) \
+	ident-@SELECT_TYPE@.$(OBJEXT)
 ident_OBJECTS = $(am_ident_OBJECTS)
 ident_LDADD = $(LDADD)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)/include
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
-@AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/commio.Po ./$(DEPDIR)/ident.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/mem.Po ./$(DEPDIR)/tools.Po
+@AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/ident-@SELECT_TYPE@.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/ident-commio.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/ident-ident.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/ident-irc_string.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/ident-match.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/ident-memory.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/ident-snprintf.Po
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) \
@@ -212,7 +219,9 @@ sharedstatedir = @sharedstatedir@
 subdirs = @subdirs@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
-ident_SOURCES = commio.c ident.c mem.c tools.c
+AUTOMAKE_OPTIONS = foreign
+ident_CFLAGS = -DIDENT_BUILD
+ident_SOURCES = ident.c ../commio.c ../snprintf.c ../irc_string.c ../match.c ../memory.c ../@SELECT_TYPE@.c
 all: all-am
 
 .SUFFIXES:
@@ -226,9 +235,9 @@ $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__confi
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu  src/ident/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign  src/ident/Makefile'; \
 	cd $(top_srcdir) && \
-	  $(AUTOMAKE) --gnu  src/ident/Makefile
+	  $(AUTOMAKE) --foreign  src/ident/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
@@ -284,10 +293,13 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/commio.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ident.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mem.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tools.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ident-@SELECT_TYPE@.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ident-commio.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ident-ident.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ident-irc_string.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ident-match.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ident-memory.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ident-snprintf.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
@@ -312,6 +324,174 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/$*.Plo' tmpdepfile='$(DEPDIR)/$*.TPlo' @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LTCOMPILE) -c -o $@ $<
+
+ident-ident.o: ident.c
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ident_CFLAGS) $(CFLAGS) -MT ident-ident.o -MD -MP -MF "$(DEPDIR)/ident-ident.Tpo" -c -o ident-ident.o `test -f 'ident.c' || echo '$(srcdir)/'`ident.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/ident-ident.Tpo" "$(DEPDIR)/ident-ident.Po"; else rm -f "$(DEPDIR)/ident-ident.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ident.c' object='ident-ident.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/ident-ident.Po' tmpdepfile='$(DEPDIR)/ident-ident.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ident_CFLAGS) $(CFLAGS) -c -o ident-ident.o `test -f 'ident.c' || echo '$(srcdir)/'`ident.c
+
+ident-ident.obj: ident.c
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ident_CFLAGS) $(CFLAGS) -MT ident-ident.obj -MD -MP -MF "$(DEPDIR)/ident-ident.Tpo" -c -o ident-ident.obj `if test -f 'ident.c'; then $(CYGPATH_W) 'ident.c'; else $(CYGPATH_W) '$(srcdir)/ident.c'; fi`; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/ident-ident.Tpo" "$(DEPDIR)/ident-ident.Po"; else rm -f "$(DEPDIR)/ident-ident.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ident.c' object='ident-ident.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/ident-ident.Po' tmpdepfile='$(DEPDIR)/ident-ident.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ident_CFLAGS) $(CFLAGS) -c -o ident-ident.obj `if test -f 'ident.c'; then $(CYGPATH_W) 'ident.c'; else $(CYGPATH_W) '$(srcdir)/ident.c'; fi`
+
+ident-ident.lo: ident.c
+@am__fastdepCC_TRUE@	if $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ident_CFLAGS) $(CFLAGS) -MT ident-ident.lo -MD -MP -MF "$(DEPDIR)/ident-ident.Tpo" -c -o ident-ident.lo `test -f 'ident.c' || echo '$(srcdir)/'`ident.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/ident-ident.Tpo" "$(DEPDIR)/ident-ident.Plo"; else rm -f "$(DEPDIR)/ident-ident.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ident.c' object='ident-ident.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/ident-ident.Plo' tmpdepfile='$(DEPDIR)/ident-ident.TPlo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ident_CFLAGS) $(CFLAGS) -c -o ident-ident.lo `test -f 'ident.c' || echo '$(srcdir)/'`ident.c
+
+ident-commio.o: ../commio.c
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ident_CFLAGS) $(CFLAGS) -MT ident-commio.o -MD -MP -MF "$(DEPDIR)/ident-commio.Tpo" -c -o ident-commio.o `test -f '../commio.c' || echo '$(srcdir)/'`../commio.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/ident-commio.Tpo" "$(DEPDIR)/ident-commio.Po"; else rm -f "$(DEPDIR)/ident-commio.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='../commio.c' object='ident-commio.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/ident-commio.Po' tmpdepfile='$(DEPDIR)/ident-commio.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ident_CFLAGS) $(CFLAGS) -c -o ident-commio.o `test -f '../commio.c' || echo '$(srcdir)/'`../commio.c
+
+ident-commio.obj: ../commio.c
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ident_CFLAGS) $(CFLAGS) -MT ident-commio.obj -MD -MP -MF "$(DEPDIR)/ident-commio.Tpo" -c -o ident-commio.obj `if test -f '../commio.c'; then $(CYGPATH_W) '../commio.c'; else $(CYGPATH_W) '$(srcdir)/../commio.c'; fi`; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/ident-commio.Tpo" "$(DEPDIR)/ident-commio.Po"; else rm -f "$(DEPDIR)/ident-commio.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='../commio.c' object='ident-commio.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/ident-commio.Po' tmpdepfile='$(DEPDIR)/ident-commio.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ident_CFLAGS) $(CFLAGS) -c -o ident-commio.obj `if test -f '../commio.c'; then $(CYGPATH_W) '../commio.c'; else $(CYGPATH_W) '$(srcdir)/../commio.c'; fi`
+
+ident-commio.lo: ../commio.c
+@am__fastdepCC_TRUE@	if $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ident_CFLAGS) $(CFLAGS) -MT ident-commio.lo -MD -MP -MF "$(DEPDIR)/ident-commio.Tpo" -c -o ident-commio.lo `test -f '../commio.c' || echo '$(srcdir)/'`../commio.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/ident-commio.Tpo" "$(DEPDIR)/ident-commio.Plo"; else rm -f "$(DEPDIR)/ident-commio.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='../commio.c' object='ident-commio.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/ident-commio.Plo' tmpdepfile='$(DEPDIR)/ident-commio.TPlo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ident_CFLAGS) $(CFLAGS) -c -o ident-commio.lo `test -f '../commio.c' || echo '$(srcdir)/'`../commio.c
+
+ident-snprintf.o: ../snprintf.c
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ident_CFLAGS) $(CFLAGS) -MT ident-snprintf.o -MD -MP -MF "$(DEPDIR)/ident-snprintf.Tpo" -c -o ident-snprintf.o `test -f '../snprintf.c' || echo '$(srcdir)/'`../snprintf.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/ident-snprintf.Tpo" "$(DEPDIR)/ident-snprintf.Po"; else rm -f "$(DEPDIR)/ident-snprintf.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='../snprintf.c' object='ident-snprintf.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/ident-snprintf.Po' tmpdepfile='$(DEPDIR)/ident-snprintf.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ident_CFLAGS) $(CFLAGS) -c -o ident-snprintf.o `test -f '../snprintf.c' || echo '$(srcdir)/'`../snprintf.c
+
+ident-snprintf.obj: ../snprintf.c
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ident_CFLAGS) $(CFLAGS) -MT ident-snprintf.obj -MD -MP -MF "$(DEPDIR)/ident-snprintf.Tpo" -c -o ident-snprintf.obj `if test -f '../snprintf.c'; then $(CYGPATH_W) '../snprintf.c'; else $(CYGPATH_W) '$(srcdir)/../snprintf.c'; fi`; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/ident-snprintf.Tpo" "$(DEPDIR)/ident-snprintf.Po"; else rm -f "$(DEPDIR)/ident-snprintf.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='../snprintf.c' object='ident-snprintf.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/ident-snprintf.Po' tmpdepfile='$(DEPDIR)/ident-snprintf.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ident_CFLAGS) $(CFLAGS) -c -o ident-snprintf.obj `if test -f '../snprintf.c'; then $(CYGPATH_W) '../snprintf.c'; else $(CYGPATH_W) '$(srcdir)/../snprintf.c'; fi`
+
+ident-snprintf.lo: ../snprintf.c
+@am__fastdepCC_TRUE@	if $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ident_CFLAGS) $(CFLAGS) -MT ident-snprintf.lo -MD -MP -MF "$(DEPDIR)/ident-snprintf.Tpo" -c -o ident-snprintf.lo `test -f '../snprintf.c' || echo '$(srcdir)/'`../snprintf.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/ident-snprintf.Tpo" "$(DEPDIR)/ident-snprintf.Plo"; else rm -f "$(DEPDIR)/ident-snprintf.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='../snprintf.c' object='ident-snprintf.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/ident-snprintf.Plo' tmpdepfile='$(DEPDIR)/ident-snprintf.TPlo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ident_CFLAGS) $(CFLAGS) -c -o ident-snprintf.lo `test -f '../snprintf.c' || echo '$(srcdir)/'`../snprintf.c
+
+ident-irc_string.o: ../irc_string.c
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ident_CFLAGS) $(CFLAGS) -MT ident-irc_string.o -MD -MP -MF "$(DEPDIR)/ident-irc_string.Tpo" -c -o ident-irc_string.o `test -f '../irc_string.c' || echo '$(srcdir)/'`../irc_string.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/ident-irc_string.Tpo" "$(DEPDIR)/ident-irc_string.Po"; else rm -f "$(DEPDIR)/ident-irc_string.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='../irc_string.c' object='ident-irc_string.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/ident-irc_string.Po' tmpdepfile='$(DEPDIR)/ident-irc_string.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ident_CFLAGS) $(CFLAGS) -c -o ident-irc_string.o `test -f '../irc_string.c' || echo '$(srcdir)/'`../irc_string.c
+
+ident-irc_string.obj: ../irc_string.c
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ident_CFLAGS) $(CFLAGS) -MT ident-irc_string.obj -MD -MP -MF "$(DEPDIR)/ident-irc_string.Tpo" -c -o ident-irc_string.obj `if test -f '../irc_string.c'; then $(CYGPATH_W) '../irc_string.c'; else $(CYGPATH_W) '$(srcdir)/../irc_string.c'; fi`; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/ident-irc_string.Tpo" "$(DEPDIR)/ident-irc_string.Po"; else rm -f "$(DEPDIR)/ident-irc_string.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='../irc_string.c' object='ident-irc_string.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/ident-irc_string.Po' tmpdepfile='$(DEPDIR)/ident-irc_string.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ident_CFLAGS) $(CFLAGS) -c -o ident-irc_string.obj `if test -f '../irc_string.c'; then $(CYGPATH_W) '../irc_string.c'; else $(CYGPATH_W) '$(srcdir)/../irc_string.c'; fi`
+
+ident-irc_string.lo: ../irc_string.c
+@am__fastdepCC_TRUE@	if $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ident_CFLAGS) $(CFLAGS) -MT ident-irc_string.lo -MD -MP -MF "$(DEPDIR)/ident-irc_string.Tpo" -c -o ident-irc_string.lo `test -f '../irc_string.c' || echo '$(srcdir)/'`../irc_string.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/ident-irc_string.Tpo" "$(DEPDIR)/ident-irc_string.Plo"; else rm -f "$(DEPDIR)/ident-irc_string.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='../irc_string.c' object='ident-irc_string.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/ident-irc_string.Plo' tmpdepfile='$(DEPDIR)/ident-irc_string.TPlo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ident_CFLAGS) $(CFLAGS) -c -o ident-irc_string.lo `test -f '../irc_string.c' || echo '$(srcdir)/'`../irc_string.c
+
+ident-match.o: ../match.c
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ident_CFLAGS) $(CFLAGS) -MT ident-match.o -MD -MP -MF "$(DEPDIR)/ident-match.Tpo" -c -o ident-match.o `test -f '../match.c' || echo '$(srcdir)/'`../match.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/ident-match.Tpo" "$(DEPDIR)/ident-match.Po"; else rm -f "$(DEPDIR)/ident-match.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='../match.c' object='ident-match.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/ident-match.Po' tmpdepfile='$(DEPDIR)/ident-match.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ident_CFLAGS) $(CFLAGS) -c -o ident-match.o `test -f '../match.c' || echo '$(srcdir)/'`../match.c
+
+ident-match.obj: ../match.c
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ident_CFLAGS) $(CFLAGS) -MT ident-match.obj -MD -MP -MF "$(DEPDIR)/ident-match.Tpo" -c -o ident-match.obj `if test -f '../match.c'; then $(CYGPATH_W) '../match.c'; else $(CYGPATH_W) '$(srcdir)/../match.c'; fi`; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/ident-match.Tpo" "$(DEPDIR)/ident-match.Po"; else rm -f "$(DEPDIR)/ident-match.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='../match.c' object='ident-match.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/ident-match.Po' tmpdepfile='$(DEPDIR)/ident-match.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ident_CFLAGS) $(CFLAGS) -c -o ident-match.obj `if test -f '../match.c'; then $(CYGPATH_W) '../match.c'; else $(CYGPATH_W) '$(srcdir)/../match.c'; fi`
+
+ident-match.lo: ../match.c
+@am__fastdepCC_TRUE@	if $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ident_CFLAGS) $(CFLAGS) -MT ident-match.lo -MD -MP -MF "$(DEPDIR)/ident-match.Tpo" -c -o ident-match.lo `test -f '../match.c' || echo '$(srcdir)/'`../match.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/ident-match.Tpo" "$(DEPDIR)/ident-match.Plo"; else rm -f "$(DEPDIR)/ident-match.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='../match.c' object='ident-match.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/ident-match.Plo' tmpdepfile='$(DEPDIR)/ident-match.TPlo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ident_CFLAGS) $(CFLAGS) -c -o ident-match.lo `test -f '../match.c' || echo '$(srcdir)/'`../match.c
+
+ident-memory.o: ../memory.c
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ident_CFLAGS) $(CFLAGS) -MT ident-memory.o -MD -MP -MF "$(DEPDIR)/ident-memory.Tpo" -c -o ident-memory.o `test -f '../memory.c' || echo '$(srcdir)/'`../memory.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/ident-memory.Tpo" "$(DEPDIR)/ident-memory.Po"; else rm -f "$(DEPDIR)/ident-memory.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='../memory.c' object='ident-memory.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/ident-memory.Po' tmpdepfile='$(DEPDIR)/ident-memory.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ident_CFLAGS) $(CFLAGS) -c -o ident-memory.o `test -f '../memory.c' || echo '$(srcdir)/'`../memory.c
+
+ident-memory.obj: ../memory.c
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ident_CFLAGS) $(CFLAGS) -MT ident-memory.obj -MD -MP -MF "$(DEPDIR)/ident-memory.Tpo" -c -o ident-memory.obj `if test -f '../memory.c'; then $(CYGPATH_W) '../memory.c'; else $(CYGPATH_W) '$(srcdir)/../memory.c'; fi`; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/ident-memory.Tpo" "$(DEPDIR)/ident-memory.Po"; else rm -f "$(DEPDIR)/ident-memory.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='../memory.c' object='ident-memory.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/ident-memory.Po' tmpdepfile='$(DEPDIR)/ident-memory.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ident_CFLAGS) $(CFLAGS) -c -o ident-memory.obj `if test -f '../memory.c'; then $(CYGPATH_W) '../memory.c'; else $(CYGPATH_W) '$(srcdir)/../memory.c'; fi`
+
+ident-memory.lo: ../memory.c
+@am__fastdepCC_TRUE@	if $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ident_CFLAGS) $(CFLAGS) -MT ident-memory.lo -MD -MP -MF "$(DEPDIR)/ident-memory.Tpo" -c -o ident-memory.lo `test -f '../memory.c' || echo '$(srcdir)/'`../memory.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/ident-memory.Tpo" "$(DEPDIR)/ident-memory.Plo"; else rm -f "$(DEPDIR)/ident-memory.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='../memory.c' object='ident-memory.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/ident-memory.Plo' tmpdepfile='$(DEPDIR)/ident-memory.TPlo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ident_CFLAGS) $(CFLAGS) -c -o ident-memory.lo `test -f '../memory.c' || echo '$(srcdir)/'`../memory.c
+
+ident-@SELECT_TYPE@.o: ../@SELECT_TYPE@.c
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ident_CFLAGS) $(CFLAGS) -MT ident-@SELECT_TYPE@.o -MD -MP -MF "$(DEPDIR)/ident-@SELECT_TYPE@.Tpo" -c -o ident-@SELECT_TYPE@.o `test -f '../@SELECT_TYPE@.c' || echo '$(srcdir)/'`../@SELECT_TYPE@.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/ident-@SELECT_TYPE@.Tpo" "$(DEPDIR)/ident-@SELECT_TYPE@.Po"; else rm -f "$(DEPDIR)/ident-@SELECT_TYPE@.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='../@SELECT_TYPE@.c' object='ident-@SELECT_TYPE@.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/ident-@SELECT_TYPE@.Po' tmpdepfile='$(DEPDIR)/ident-@SELECT_TYPE@.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ident_CFLAGS) $(CFLAGS) -c -o ident-@SELECT_TYPE@.o `test -f '../@SELECT_TYPE@.c' || echo '$(srcdir)/'`../@SELECT_TYPE@.c
+
+ident-@SELECT_TYPE@.obj: ../@SELECT_TYPE@.c
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ident_CFLAGS) $(CFLAGS) -MT ident-@SELECT_TYPE@.obj -MD -MP -MF "$(DEPDIR)/ident-@SELECT_TYPE@.Tpo" -c -o ident-@SELECT_TYPE@.obj `if test -f '../@SELECT_TYPE@.c'; then $(CYGPATH_W) '../@SELECT_TYPE@.c'; else $(CYGPATH_W) '$(srcdir)/../@SELECT_TYPE@.c'; fi`; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/ident-@SELECT_TYPE@.Tpo" "$(DEPDIR)/ident-@SELECT_TYPE@.Po"; else rm -f "$(DEPDIR)/ident-@SELECT_TYPE@.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='../@SELECT_TYPE@.c' object='ident-@SELECT_TYPE@.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/ident-@SELECT_TYPE@.Po' tmpdepfile='$(DEPDIR)/ident-@SELECT_TYPE@.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ident_CFLAGS) $(CFLAGS) -c -o ident-@SELECT_TYPE@.obj `if test -f '../@SELECT_TYPE@.c'; then $(CYGPATH_W) '../@SELECT_TYPE@.c'; else $(CYGPATH_W) '$(srcdir)/../@SELECT_TYPE@.c'; fi`
+
+ident-@SELECT_TYPE@.lo: ../@SELECT_TYPE@.c
+@am__fastdepCC_TRUE@	if $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ident_CFLAGS) $(CFLAGS) -MT ident-@SELECT_TYPE@.lo -MD -MP -MF "$(DEPDIR)/ident-@SELECT_TYPE@.Tpo" -c -o ident-@SELECT_TYPE@.lo `test -f '../@SELECT_TYPE@.c' || echo '$(srcdir)/'`../@SELECT_TYPE@.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/ident-@SELECT_TYPE@.Tpo" "$(DEPDIR)/ident-@SELECT_TYPE@.Plo"; else rm -f "$(DEPDIR)/ident-@SELECT_TYPE@.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='../@SELECT_TYPE@.c' object='ident-@SELECT_TYPE@.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/ident-@SELECT_TYPE@.Plo' tmpdepfile='$(DEPDIR)/ident-@SELECT_TYPE@.TPlo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ident_CFLAGS) $(CFLAGS) -c -o ident-@SELECT_TYPE@.lo `test -f '../@SELECT_TYPE@.c' || echo '$(srcdir)/'`../@SELECT_TYPE@.c
 
 mostlyclean-libtool:
 	-rm -f *.lo

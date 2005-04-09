@@ -575,6 +575,14 @@ serv_connect(struct server_conf *server_p, struct Client *by)
 	strlcpy(client_p->sockhost, buf, sizeof(client_p->sockhost));
 	client_p->localClient->fd = fd;
 
+	/* shove the port number into the sockaddr */
+#ifdef IPV6
+	if(server_p->ipnum.ss_family == AF_INET6)
+		((struct sockaddr_in6 *)&server_p->ipnum)->sin6_port = server_p->port;
+	else
+#endif
+		((struct sockaddr_in *)&server_p->ipnum)->sin_port = server_p->port;
+
 	/*
 	 * Set up the initial server evilness, ripped straight from
 	 * connect_server(), so don't blame me for it being evil.
@@ -649,17 +657,16 @@ serv_connect(struct server_conf *server_p, struct Client *by)
 #endif
 	else
 	{
-		comm_connect_tcp(client_p->localClient->fd, server_p->host,
-				 server_p->port, NULL, 0, serv_connect_callback, 
-				 client_p, server_p->ipnum.ss_family, 
-				 ConfigFileEntry.connect_timeout);
+		comm_connect_tcp(client_p->localClient->fd, (struct sockaddr *)&server_p->ipnum,
+				 NULL, 0, serv_connect_callback, 
+				 client_p, ConfigFileEntry.connect_timeout);
 		 return 1;
 	}
 
-	comm_connect_tcp(client_p->localClient->fd, server_p->host,
-			 server_p->port, (struct sockaddr *) &myipnum,
+	comm_connect_tcp(client_p->localClient->fd, (struct sockaddr *)&server_p->ipnum,
+			 (struct sockaddr *) &myipnum,
 			 GET_SS_LEN(myipnum), serv_connect_callback, client_p,
-			 myipnum.ss_family, ConfigFileEntry.connect_timeout);
+			 ConfigFileEntry.connect_timeout);
 
 	return 1;
 }

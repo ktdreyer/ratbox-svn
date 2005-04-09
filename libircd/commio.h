@@ -110,7 +110,6 @@ struct _fde
 	PF *flush_handler;
 	void *flush_data;
 	time_t flush_timeout;
-	u_int16_t dns_query;
 	struct
 	{
 		unsigned int open:1;
@@ -176,8 +175,8 @@ extern int ignoreErrno(int ierrno);
 extern void comm_settimeout(int fd, time_t, PF *, void *);
 extern void comm_setflush(int fd, time_t, PF *, void *);
 extern void comm_checktimeouts(void *);
-extern void comm_connect_tcp(int fd, const char *, u_short,
-			     struct sockaddr *, int, CNCB *, void *, int, int);
+extern void comm_connect_tcp(int fd, struct sockaddr *,
+			     struct sockaddr *, int, CNCB *, void *, int);
 extern const char *comm_errstr(int status);
 extern int comm_socket(int family, int sock_type, int proto, const char *note);
 extern int comm_accept(int fd, struct sockaddr *pn, socklen_t *addrlen);

@@ -28,11 +28,11 @@
 #include <ctype.h>
 #include <errno.h>
 
+struct timeval SystemTime;
 
-#include "../../include/setup.h"
-#include "mem.h"
+#include "setup.h"
+#include "memory.h"
 #include "defs.h"
-#include "tools.h"
 #include "commio.h"
 
 #define USERLEN 10
@@ -57,11 +57,6 @@ int irc_cfd;
 #define EmptyString(x) (!(x) || (*(x) == '\0'))
 static char buf[512]; /* scratch buffer */
 
-fd_set readfds;
-fd_set writefds;
-fd_set exceptfds;
-
-
 static int
 send_sprintf(int fd, const char *format, ...)
 {
@@ -72,7 +67,8 @@ send_sprintf(int fd, const char *format, ...)
 	return(send(fd, buf, strlen(buf), 0));
 }
 
-static void report_error(char *errstr, ...)
+
+void ilog(char *errstr, ...)
 {
 	va_list ap;
 	va_start(ap, errstr);
@@ -80,6 +76,12 @@ static void report_error(char *errstr, ...)
 	va_end(ap);
 	send(irc_cfd, buf, strlen(buf), 0);
 	exit(-1);
+}
+
+void restart(char *msg)
+{
+	/* this is needed to deal with memory.c */
+	ilog("%s", msg);	
 }
 
 
@@ -363,7 +365,7 @@ check_identd(const char *id, const char *bindaddr, const char *aft, const char *
 	auth->dstport = atoi(dstport);
 	strcpy(auth->reqid, id);
 
-	auth->authfd = comm_socket(aftype, SOCK_STREAM, 0);
+	auth->authfd = comm_socket(aftype, SOCK_STREAM, 0, "auth fd");
 	comm_connect_tcp(auth->authfd, (struct sockaddr *)&auth->destaddr, 
 		(struct sockaddr *)&auth->bindaddr, sizeof(struct sockaddr_in), connect_callback, auth, 5);
                                   
@@ -387,7 +389,7 @@ process_request(int fd, void *data)
 			if(n == -1 && ignoreErrno(errno))
 				break;
 			else
-				report_error("ERR: read failed: %s\n", strerror(errno));
+				ilog("ERR: read failed: %s\n", strerror(errno));
 		}
 
 	        if((p = memchr(buf, '\n', n)) != NULL)
@@ -397,10 +399,10 @@ process_request(int fd, void *data)
 		
 			parc = io_to_array(buf, parv);
 			if(parc != 6)
-				report_error("ERR: wrong number of arguments passed\n");
+				ilog("ERR: wrong number of arguments passed\n");
 			check_identd(parv[0], parv[1], parv[2], parv[3], parv[4], parv[5]);
 	        } else
-			report_error("ERR: Got bogus data from server");       
+			ilog("ERR: Got bogus data from server");       
 	}
 
 	comm_setselect(fd, FDLIST_SERVICE, COMM_SELECT_READ, process_request, NULL, 0);
@@ -426,11 +428,17 @@ process_ctrl(int fd, void *unused)
 	comm_setselect(fd, FDLIST_SERVER, COMM_SELECT_READ, process_ctrl, NULL, 0);
 }
 
+void
+set_time(void)
+{
+	gettimeofday(&SystemTime, 0);
+}
+
 int main(int argc, char **argv)
 {
 	char *tfd;
 	char *tcfd;
-
+	fdlist_init();
 	init_netio();	
 	tfd = getenv("FD");
 	tcfd = getenv("CFD");
@@ -439,8 +447,8 @@ int main(int argc, char **argv)
 	irc_fd = atoi(tfd);
 	irc_cfd = atoi(tcfd);
 
-	comm_open(irc_fd, FD_SOCKET);
-	comm_open(irc_cfd, FD_SOCKET);
+	comm_open(irc_fd, FD_SOCKET, "ircd fd");
+	comm_open(irc_cfd, FD_SOCKET, "ircd cfd");
 
 	comm_set_nb(irc_fd);
 	comm_set_nb(irc_cfd);

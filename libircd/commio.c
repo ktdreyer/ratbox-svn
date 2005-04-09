@@ -75,7 +75,6 @@ int number_fd = 0;
 
 static void comm_connect_callback(int fd, int status);
 static PF comm_connect_timeout;
-static void comm_connect_dns_callback(const char *result, int status ,int aftype, void *data);
 static PF comm_connect_tryconnect;
 
 /* 32bit solaris is kinda slow and stdio only supports fds < 256
@@ -317,10 +316,12 @@ comm_checktimeouts(void *notused)
 	}
 }
 
+
+
 /*
- * void comm_connect_tcp(int fd, const char *host, u_short port,
+ * void comm_connect_tcp(int fd, struct sockaddr *dest,
  *                       struct sockaddr *clocal, int socklen,
- *                       CNCB *callback, void *data, int aftype, int timeout)
+ *                       CNCB *callback, void *data, int timeout)
  * Input: An fd to connect with, a host and port to connect to,
  *        a local sockaddr to connect from + length(or NULL to use the
  *        default), a callback, the data to pass into the callback, the
@@ -331,11 +332,10 @@ comm_checktimeouts(void *notused)
  *               may be called now, or it may be called later.
  */
 void
-comm_connect_tcp(int fd, const char *host, u_short port,
+comm_connect_tcp(int fd, struct sockaddr *dest,
 		 struct sockaddr *clocal, int socklen, CNCB * callback,
-		 void *data, int aftype, int timeout)
+		 void *data, int timeout)
 {
-	void *ipptr = NULL;
 	fde_t *F;
 	s_assert(fd >= 0);
 	F = &fd_table[fd];
@@ -344,24 +344,7 @@ comm_connect_tcp(int fd, const char *host, u_short port,
 	F->connect.callback = callback;
 	F->connect.data = data;
 
-	memset(&F->connect.hostaddr, 0, sizeof(F->connect.hostaddr));
-#ifdef IPV6
-	if(aftype == AF_INET6)
-	{
-		struct sockaddr_in6 *in6 = (struct sockaddr_in6 *)&F->connect.hostaddr;
-		SET_SS_LEN(F->connect.hostaddr, sizeof(struct sockaddr_in6));
-		in6->sin6_port = htons(port);
-		in6->sin6_family = AF_INET6;
-		ipptr = &in6->sin6_addr;
-	} else
-#endif
-	{
-		struct sockaddr_in *in = (struct sockaddr_in *)&F->connect.hostaddr;
-		SET_SS_LEN(F->connect.hostaddr, sizeof(struct sockaddr_in));
-		in->sin_port = htons(port);
-		in->sin_family = AF_INET;
-		ipptr = &in->sin_addr;
-	}
+	memcpy(&F->connect.hostaddr, dest, socklen);
 
 	/* Note that we're using a passed sockaddr here. This is because
 	 * generally you'll be bind()ing to a sockaddr grabbed from
@@ -378,22 +361,12 @@ comm_connect_tcp(int fd, const char *host, u_short port,
 		return;
 	}
 
-	/* Next, if we have been given an IP, get the addr and skip the
-	 * DNS check (and head direct to comm_connect_tryconnect().
-	 */
-	if(inetpton(aftype, host, ipptr) <= 0)
-	{
-		/* Send the DNS request, for the next level */
-		F->dns_query = lookup_hostname(host, aftype, comm_connect_dns_callback, F);
-	}
-	else
-	{
-		/* We have a valid IP, so we just call tryconnect */
-		/* Make sure we actually set the timeout here .. */
-		comm_settimeout(F->fd, timeout * 1000, comm_connect_timeout, NULL);
-		comm_connect_tryconnect(F->fd, NULL);
-	}
+	/* We have a valid IP, so we just call tryconnect */
+	/* Make sure we actually set the timeout here .. */
+	comm_settimeout(F->fd, timeout * 1000, comm_connect_timeout, NULL);
+	comm_connect_tryconnect(F->fd, NULL);
 }
+
 
 /*
  * comm_connect_callback() - call the callback, and continue with life
@@ -430,36 +403,6 @@ comm_connect_timeout(int fd, void *notused)
 	/* error! */
 	comm_connect_callback(fd, COMM_ERR_TIMEOUT);
 }
-
-
-/*
- * comm_connect_dns_callback() - called at the completion of the DNS request
- *
- * The DNS request has completed, so if we've got an error, return it,
- * otherwise we initiate the connect()
- */
-static void
-comm_connect_dns_callback(const char *result, int status, int aftype, void *data)
-{
-	fde_t *F = data;
-
-	if(!result)
-	{
-		F->dns_query = 0;
-		comm_connect_callback(F->fd, COMM_ERR_DNS);
-		return;
-	}
-
-	/* No error, set a 10 second timeout */
-	comm_settimeout(F->fd, 30 * 1000, comm_connect_timeout, NULL);
-
-	inetpton(aftype, result, &F->connect.hostaddr);
-
-
-	/* Now, call the tryconnect() routine to try a connect() */
-	comm_connect_tryconnect(F->fd, NULL);
-}
-
 
 /* static void comm_connect_tryconnect(int fd, void *notused)
  * Input: The fd, the handler data(unused).
@@ -701,7 +644,6 @@ comm_open(int fd, unsigned int type, const char *desc)
 	s_assert(!F->flags.open);
 	F->fd = fd;
 	F->type = type;
-	F->dns_query = 0;
 	F->flags.open = 1;
 #ifdef NOTYET
 	F->defer.until = 0;
@@ -733,11 +675,6 @@ comm_close(int fd)
 	comm_setselect(F->fd, FDLIST_NONE, COMM_SELECT_WRITE | COMM_SELECT_READ, NULL, NULL, 0);
 	comm_setflush(F->fd, 0, NULL, NULL);
 	
-	if (F->dns_query > 0)
-	{
-		cancel_lookup(F->dns_query);
-	}
-	F->dns_query = 0;	
 	F->flags.open = 0;
 	fdlist_update_biggest(fd, 0);
 	number_fd--;
@@ -754,6 +691,7 @@ comm_close(int fd)
 void
 comm_dump(struct Client *source_p)
 {
+#ifndef IDENT_BUILD /* hack for ident daemon build */
 	int i;
 
 	for (i = 0; i <= highest_fd; i++)
@@ -765,6 +703,7 @@ comm_dump(struct Client *source_p)
 				   "F :fd %-3d desc '%s'",
 				   i, fd_table[i].desc);
 	}
+#endif
 }
 
 /*

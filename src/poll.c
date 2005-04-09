@@ -24,7 +24,6 @@
  *
  *  $Id$
  */
-
 #include "stdinc.h"
 #include <sys/poll.h>
 #include "tools.h"
