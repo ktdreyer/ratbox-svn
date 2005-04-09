@@ -1,3 +1,50 @@
+androsyn    2005/04/09 23:57:47 UTC	(20050409_1)
+
+  Modified files:
+    .                    Makefile.in 
+    adns                 Makefile.in 
+    include              client.h commio.h defaults.h ircd_defs.h 
+                         s_auth.h 
+    modules              Makefile.in 
+    src                  Makefile.in commio.c poll.c s_serv.c 
+    src/ident            Makefile.am Makefile.in ident.c 
+    tools                Makefile.in 
+  Added files:
+    .                    compile 
+  Removed files:
+    src/ident            mem.c mem.h tools.c tools.h 
+  Log:
+  Have the ident daemon uses the commio stuff from the main tree, amazingly
+  it builds like this without too much pain.  Also changed the calling
+  convention for comm_connect_tcp(). We were already looking up the hostname
+  when parsing the config, if needed, so why look it up again in
+  comm_connect_tcp.  This also untangled any dns code from commio.c
+  
+  Revision  Changes    Path
+  7.63      +1 -1      ircd-ratbox/Makefile.in
+  1.25      +0 -0      ircd-ratbox/adns/Makefile.in
+  7.1       +136 -0    ircd-ratbox/compile (new)
+  7.277     +1 -1      ircd-ratbox/include/client.h
+  1.21      +2 -3      ircd-ratbox/include/commio.h
+  7.19      +1 -1      ircd-ratbox/include/defaults.h
+  7.63      +1 -1      ircd-ratbox/include/ircd_defs.h
+  7.32      +1 -1      ircd-ratbox/include/s_auth.h
+  1.133     +0 -0      ircd-ratbox/modules/Makefile.in
+  7.169     +1 -1      ircd-ratbox/src/Makefile.in
+  1.39      +14 -75    ircd-ratbox/src/commio.c
+  1.2       +4 -1      ircd-ratbox/src/ident/Makefile.am
+  1.2       +192 -12   ircd-ratbox/src/ident/Makefile.in
+  1.5       +24 -16    ircd-ratbox/src/ident/ident.c
+  1.3       +0 -24     ircd-ratbox/src/ident/mem.c (dead)
+  1.2       +0 -12     ircd-ratbox/src/ident/mem.h (dead)
+  1.3       +0 -97     ircd-ratbox/src/ident/tools.c (dead)
+  1.2       +0 -372    ircd-ratbox/src/ident/tools.h (dead)
+  7.91      +0 -1      ircd-ratbox/src/poll.c
+  7.439     +14 -7     ircd-ratbox/src/s_serv.c
+  7.51      +0 -0      ircd-ratbox/tools/Makefile.in
+
+
+
 androsyn    2005/04/09 19:12:24 UTC	(20050409_0)
 
   Modified files:
