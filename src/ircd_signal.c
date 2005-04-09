@@ -30,6 +30,7 @@
 #include "commio.h"
 #include "s_conf.h"
 #include "res.h"
+#include "s_auth.h"
 /*
  * dummy_handler - don't know if this is really needed but if alarm is still
  * being used we probably will
@@ -46,6 +47,7 @@ sigchld_handler(int sig)
 {
 	int status;
 	resolver_sigchld(); /* let the resolver check its children first */
+	ident_sigchld(); /* let the ident daemon check its children too */
 	waitpid(-1, &status, WNOHANG);
 }
 /*

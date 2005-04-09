@@ -107,8 +107,6 @@ assign_id(void)
 	return id;
 }
 
-
-
 static void
 fork_ident(void)
 {
@@ -174,6 +172,18 @@ fork_ident(void)
 	auth_pid = pid;
 	return;
 }
+
+void
+ident_sigchld(void)
+{
+	int status;
+	if(waitpid(auth_pid, &status, WNOHANG) == auth_pid)
+	{
+		fork_ident();
+	}
+}
+
+
 
 /*
  * init_auth()
@@ -320,10 +330,8 @@ start_auth_query(struct AuthRequest *auth)
 	int lport, rport;
 	int af = 4;
 
-
 	if(IsAnyDead(auth->client))
 		return;
-
 
 	sendheader(auth->client, REPORT_DO_ID);
 	/* 
@@ -345,7 +353,6 @@ start_auth_query(struct AuthRequest *auth)
 	}
 
 	mangle_mapped_sockaddr((struct sockaddr *) &localaddr);
-
 	inetntop_sock((struct sockaddr *) &localaddr, myip, sizeof(myip));
 
 #ifdef IPV6
@@ -371,7 +378,6 @@ start_auth_query(struct AuthRequest *auth)
 	SetAuthPending(auth);
 
 	auth->reqid = assign_id();
-
 	authtable[auth->reqid] = auth;
 
 	ircsnprintf(reqbuf, sizeof(reqbuf), "%x %s %d %s %u %u\n", auth->reqid, myip, af,
