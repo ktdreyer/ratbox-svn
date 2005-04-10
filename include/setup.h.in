@@ -172,7 +172,9 @@
 #undef LOG_DIR
 
 /* Maximum number of network connections */
+#ifndef MAX_CLIENTS
 #undef MAX_CLIENTS
+#endif
 
 /* Sizeof member heap. */
 #undef MEMBER_HEAP_SIZE
