@@ -1,3 +1,17 @@
+androsyn    2005/04/10 19:02:50 UTC	(20050410_2)
+
+  Modified files:
+    src                  dns.c s_auth.c 
+  Log:
+  when doing the exec on the resolver and ident daemons, shove something
+  useful in argv[0] that says what the heck the things are to the clueless
+  
+  Revision  Changes    Path
+  7.10      +1 -1      ircd-ratbox/src/dns.c
+  7.214     +1 -1      ircd-ratbox/src/s_auth.c
+
+
+
 androsyn    2005/04/10 00:26:15 UTC	(20050410_1)
 
   Modified files:
