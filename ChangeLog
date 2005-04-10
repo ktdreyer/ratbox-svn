@@ -1,3 +1,16 @@
+androsyn    2005/04/10 00:26:15 UTC	(20050410_1)
+
+  Modified files:
+    src                  s_auth.c s_serv.c 
+  Log:
+  helps if you change port numbers to network order...
+  
+  Revision  Changes    Path
+  7.213     +2 -2      ircd-ratbox/src/s_auth.c
+  7.440     +2 -2      ircd-ratbox/src/s_serv.c
+
+
+
 androsyn    2005/04/10 00:00:33 UTC	(20050410_0)
 
   Removed files:
