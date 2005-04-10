@@ -1,3 +1,28 @@
+androsyn    2005/04/10 19:20:32 UTC	(20050410_3)
+
+  Modified files:
+    .                    Makefile.in 
+    adns                 Makefile.in 
+    include              setup.h.in 
+    modules              Makefile.in 
+    src                  Makefile.in 
+    src/ident            Makefile.am Makefile.in 
+    tools                Makefile.in 
+  Log:
+  Allow for ident to override MAX_CLIENTS when building commio.c
+  
+  Revision  Changes    Path
+  7.64      +0 -0      ircd-ratbox/Makefile.in
+  1.26      +0 -0      ircd-ratbox/adns/Makefile.in
+  7.97      +2 -0      ircd-ratbox/include/setup.h.in
+  1.134     +0 -0      ircd-ratbox/modules/Makefile.in
+  7.170     +0 -0      ircd-ratbox/src/Makefile.in
+  1.3       +1 -1      ircd-ratbox/src/ident/Makefile.am
+  1.3       +2 -2      ircd-ratbox/src/ident/Makefile.in
+  7.52      +0 -0      ircd-ratbox/tools/Makefile.in
+
+
+
 androsyn    2005/04/10 19:02:50 UTC	(20050410_2)
 
   Modified files:
