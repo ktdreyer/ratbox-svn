@@ -578,10 +578,10 @@ serv_connect(struct server_conf *server_p, struct Client *by)
 	/* shove the port number into the sockaddr */
 #ifdef IPV6
 	if(server_p->ipnum.ss_family == AF_INET6)
-		((struct sockaddr_in6 *)&server_p->ipnum)->sin6_port = server_p->port;
+		((struct sockaddr_in6 *)&server_p->ipnum)->sin6_port = htons(server_p->port);
 	else
 #endif
-		((struct sockaddr_in *)&server_p->ipnum)->sin_port = server_p->port;
+		((struct sockaddr_in *)&server_p->ipnum)->sin_port = htons(server_p->port);
 
 	/*
 	 * Set up the initial server evilness, ripped straight from

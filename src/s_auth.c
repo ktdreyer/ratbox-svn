@@ -473,7 +473,7 @@ delete_auth_queries(struct Client *target_p)
 	auth = target_p->localClient->auth_request;
 	target_p->localClient->auth_request = NULL;
 
-	if(IsDNSPending(auth))
+	if(auth->dns_query > 0)
 	{
 		cancel_lookup(auth->dns_query);
 		auth->dns_query = 0;
@@ -538,7 +538,7 @@ read_auth_reply(int fd, void *data)
 		if(p != NULL)
 			*p = '\0';
 
-
+		
 		if(*q == '0')
 		{
 			strcpy(auth->client->username, "unknown");
