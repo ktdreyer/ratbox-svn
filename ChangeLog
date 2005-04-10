@@ -1,3 +1,16 @@
+androsyn    2005/04/10 00:00:33 UTC	(20050410_0)
+
+  Removed files:
+    src/ident            commio.c commio.h 
+  Log:
+  remove the files too
+  
+  Revision  Changes    Path
+  1.6       +0 -798    ircd-ratbox/src/ident/commio.c (dead)
+  1.2       +0 -194    ircd-ratbox/src/ident/commio.h (dead)
+
+
+
 androsyn    2005/04/09 23:57:47 UTC	(20050409_1)
 
   Modified files:
