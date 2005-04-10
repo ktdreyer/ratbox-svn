@@ -153,7 +153,7 @@ fork_ident(void)
 			else
 				close(i);
 		}
-		execl(BINPATH "/ident", "-ident", NULL);
+		execl(BINPATH "/ident", "-ircd ident daemon", NULL);
 	}
 	else if(pid == -1)
 	{

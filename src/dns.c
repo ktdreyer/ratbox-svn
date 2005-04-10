@@ -235,7 +235,7 @@ fork_resolver(void)
 			else
 				close(i);
 		}
-		execl(BINPATH "/resolver", "-resolver", NULL);
+		execl(BINPATH "/resolver", "-ircd dns resolver", NULL);
 	} else
 	if(pid == -1)
 	{
