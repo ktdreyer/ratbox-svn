@@ -45,6 +45,7 @@
 #include "hash.h"
 #include "cache.h"
 #include "memory.h"
+#include "s_auth.h"
 
 static int mo_rehash(struct Client *, struct Client *, int, const char **);
 
@@ -72,12 +73,22 @@ rehash_bans_loc(struct Client *source_p)
 }
 
 static void
-rehash_dns(struct Client *source_p)
+rehash_ident(struct Client *source_p)
 {
-	sendto_realops_flags(UMODE_ALL, L_ALL, "%s is rehashing DNS", 
+	sendto_realops_flags(UMODE_ALL, L_ALL, "%s is restarting ident daemon", 
 			     get_oper_name(source_p));
 
 	/* reread /etc/resolv.conf and reopen res socket */
+	restart_ident();
+
+}
+
+static void
+rehash_dns(struct Client *source_p)
+{
+	sendto_realops_flags(UMODE_ALL, L_ALL, "%s is restarting DNS", 
+			     get_oper_name(source_p));
+
 	restart_resolver();
 }
 
@@ -267,6 +278,7 @@ static struct hash_commands rehash_commands[] =
 {
 	{"BANS",	rehash_bans_loc		},
 	{"DNS", 	rehash_dns		},
+	{"IDENT",	rehash_ident		},
 	{"MOTD", 	rehash_motd		},
 	{"OMOTD", 	rehash_omotd		},
 	{"GLINES", 	rehash_glines		},

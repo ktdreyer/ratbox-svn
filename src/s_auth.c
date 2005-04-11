@@ -183,6 +183,11 @@ ident_sigchld(void)
 	}
 }
 
+void
+restart_ident(void)
+{
+	fork_ident();
+}
 
 
 /*

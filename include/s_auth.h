@@ -82,4 +82,5 @@ extern void remove_auth_request(struct AuthRequest *req);
 extern void init_auth(void);
 extern void delete_auth_queries(struct Client *);
 extern void ident_sigchld(void);
+extern void restart_ident(void);
 #endif /* INCLUDED_s_auth_h */

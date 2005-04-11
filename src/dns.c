@@ -332,10 +332,7 @@ init_resolver(void)
 void 
 restart_resolver(void)
 {
-	if(res_pid > 0)
-		kill(res_pid, SIGHUP);
-	else 
-		fork_resolver();
+	fork_resolver();
 }
 
 void
