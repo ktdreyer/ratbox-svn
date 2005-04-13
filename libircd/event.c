@@ -60,10 +60,33 @@
 #include "memory.h"
 #include "s_log.h"
 #include "numeric.h"
+#include "commio.h"
 
 static const char *last_event_ran = NULL;
 struct ev_entry event_table[MAX_EVENTS];
 static time_t event_time_min = -1;
+
+#ifdef COMM_DOES_EVENTS
+static void 
+event_run_callback(void *data)
+{
+	struct ev_entry *ev = data;
+
+	last_event_ran = ev->name;
+	ev->func(ev->arg);
+	event_time_min = -1;
+
+	if(!ev->frequency) {
+		ev->name = NULL;
+		ev->func = NULL;
+		ev->arg = NULL;
+		ev->active = 0;
+	} else {
+		ev->when = CurrentTime + ev->frequency;
+	}
+	fprintf(stderr, "run event %s %d now=%d\n", ev->name, ev->when - CurrentTime, CurrentTime);
+}
+#endif
 
 /*
  * void eventAdd(const char *name, EVH *func, void *arg, time_t when)
@@ -93,13 +116,17 @@ eventAdd(const char *name, EVH * func, void *arg, time_t when)
 			if((event_table[i].when < event_time_min) || (event_time_min == -1))
 				event_time_min = event_table[i].when;
 
+#ifdef COMM_DOES_EVENTS
+			event_table[i].comm_id = comm_schedule_event(when, 1, event_run_callback, &event_table[i]);
+			fprintf(stderr, "eventAdd: %s/%d\n", name, when);
+#endif
+
 			return;
 		}
 	}
 
 	/* erk! couldnt add to event table */
 	sendto_realops_flags(UMODE_DEBUG, L_ALL, "Unable to add event [%s] to event table", name);
-
 }
 
 void
@@ -122,6 +149,9 @@ eventAddOnce(const char *name, EVH *func, void *arg, time_t when)
 			if ((event_table[i].when < event_time_min) || (event_time_min == -1))
 				event_time_min = event_table[i].when;
 
+#ifdef COMM_DOES_EVENTS
+			event_table[i].comm_id = comm_schedule_event(when, 0, event_run_callback, &event_table[i]);
+#endif
 			return;
 		}
 	}
@@ -152,6 +182,10 @@ eventDelete(EVH * func, void *arg)
 	event_table[i].func = NULL;
 	event_table[i].arg = NULL;
 	event_table[i].active = 0;
+
+#ifdef COMM_DOES_EVENTS
+	comm_unschedule_event(event_table[i].comm_id);
+#endif
 }
 
 /* 
@@ -185,6 +219,7 @@ eventAddIsh(const char *name, EVH * func, void *arg, time_t delta_ish)
  * Output: None
  * Side Effects: Runs pending events in the event list
  */
+#ifndef COMM_DOES_EVENTS
 void
 eventRun(void)
 {
@@ -237,6 +272,7 @@ eventNextTime(void)
 
 	return event_time_min;
 }
+#endif
 
 /*
  * void eventInit(void)

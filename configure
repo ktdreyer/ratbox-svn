@@ -25851,6 +25851,11 @@ done
 
 	if test "x$haveports" = "xyes" ; then
 		SELECT_TYPE="ports"
+
+cat >>confdefs.h <<\_ACEOF
+#define HAVE_PORTS
+_ACEOF
+
 	fi
 fi
 

@@ -27,6 +27,12 @@
 #ifndef INCLUDED_commio_h
 #define INCLUDED_commio_h
 
+#include "setup.h"
+
+#ifdef HAVE_PORTS
+# define COMM_DOES_EVENTS
+#endif
+
 /* Callback for completed IO events */
 typedef void PF(int fd, void *);
 
@@ -148,6 +154,19 @@ extern void comm_dump(struct Client *source_p);
 extern void comm_note(int fd, const char *format, ...);
 #else
 extern void comm_note(int fd, const char *format, ...) __attribute__ ((format(printf, 2, 3)));
+#endif
+#ifdef COMM_DOES_EVENTS
+typedef void (*comm_event_cb_t)(void *);
+
+typedef struct timer_data {
+	timer_t		 td_timer_id;
+	comm_event_cb_t	 td_cb;
+	void		*td_udata;
+	int		 td_repeat;
+} *comm_event_id;
+
+extern comm_event_id comm_schedule_event(time_t, int, comm_event_cb_t, void *);
+extern void comm_unschedule_event(comm_event_id);
 #endif
 
 #define FB_EOF  0x01

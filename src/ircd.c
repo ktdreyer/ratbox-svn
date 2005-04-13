@@ -289,10 +289,11 @@ io_loop(void)
 		 * event
 		 */
 
+#ifndef COMM_DOES_EVENTS
 		delay = eventNextTime();
 		if(delay <= CurrentTime)
 			eventRun();
-
+#endif
 
 		comm_select(250);
 

@@ -610,6 +610,7 @@ if test ! "x$use_ports" = "xno"; then
 	AC_CHECK_FUNCS(port_create, [haveports=yes], [haveports=no])
 	if test "x$haveports" = "xyes" ; then
 		SELECT_TYPE="ports"
+		AC_DEFINE(HAVE_PORTS, [], [Define if you have the Solaris ports API])
 	fi
 fi
 

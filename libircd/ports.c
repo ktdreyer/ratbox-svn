@@ -28,6 +28,7 @@
 
 #include "stdinc.h"
 #include <port.h>
+#include <time.h> /* for timers */
 #include "tools.h"
 #include "class.h"
 #include "irc_string.h"
@@ -140,30 +141,94 @@ comm_setselect(int fd, fdlist_t list, unsigned int type, PF * handler,
 int
 comm_select(unsigned long delay)
 {
-	int i;
-	uint nget = pemax;
-	struct timespec poll_time;
+	int	 	 i, fd;
+	uint	 	 nget = 1;
+struct	timespec 	 poll_time;
+struct	timer_data	*tdata;
 
 	poll_time.tv_sec = delay / 1000;
 	poll_time.tv_nsec = (delay % 1000) * 1000000;
 
-	port_getn(pe, pelst, pemax, &nget, &poll_time);
+	i = port_getn(pe, pelst, pemax, &nget, &poll_time);
 	set_time();
 
-	for (i = 0; i < nget; i++) {
-		int fd = pelst[i].portev_object;
-		PF *hdl = NULL;
-		fde_t *F = &fd_table[fd];
+	if (i == -1)
+		return COMM_OK;
 
-		if ((pelst[i].portev_events & POLLRDNORM) && (hdl = F->read_handler)) {
-			F->read_handler = NULL;
-			hdl(fd, F->read_data);
-		}
-		if ((pelst[i].portev_events & POLLWRNORM) && (hdl = F->write_handler)) {
-			F->write_handler = NULL;
-			hdl(fd, F->write_data);
+	for (i = 0; i < nget; i++) {
+		switch(pelst[i].portev_source) {
+		case PORT_SOURCE_FD:
+			fd = pelst[i].portev_object;
+			PF *hdl = NULL;
+			fde_t *F = &fd_table[fd];
+
+			if ((pelst[i].portev_events & POLLRDNORM) && (hdl = F->read_handler)) {
+				F->read_handler = NULL;
+				hdl(fd, F->read_data);
+			}
+			if ((pelst[i].portev_events & POLLWRNORM) && (hdl = F->write_handler)) {
+				F->write_handler = NULL;
+				hdl(fd, F->write_data);
+			}
+			break;
+
+		case PORT_SOURCE_TIMER:
+			tdata = pelst[i].portev_user;
+			tdata->td_cb(tdata->td_udata);
+
+			if (!tdata->td_repeat)
+				free(tdata);
+
+			break;
 		}
 	}
 	return COMM_OK;
 }
 
+comm_event_id
+comm_schedule_event(time_t when, int repeat, comm_event_cb_t cb, void *udata)
+{
+	timer_t	 	 id;
+struct	timer_data	*tdata;
+struct	sigevent	 ev;
+	port_notify_t	 not;
+struct	itimerspec	 ts;
+	time_t		 relwhen;
+	
+	memset(&ev, 0, sizeof(ev));
+	ev.sigev_notify = SIGEV_PORT;
+	ev.sigev_value.sival_ptr = &not;
+
+	tdata = malloc(sizeof(struct timer_data));
+	tdata->td_cb = cb;
+	tdata->td_udata = udata;
+
+	not.portnfy_port = pe;
+	not.portnfy_user = tdata;
+
+	if (timer_create(CLOCK_REALTIME, &ev, &id) < 0)
+		/*ilog(L_IOERROR, "timer_create: %s\n", strerror(errno));*/
+		fprintf(stderr, "timer_create: %s\n", strerror(errno));
+
+	tdata->td_timer_id = id;
+
+	memset(&ts, 0, sizeof(ts));
+	ts.it_value.tv_sec = when;
+	ts.it_value.tv_nsec = 0;
+
+	if (repeat)
+		ts.it_interval = ts.it_value;
+	tdata->td_repeat = repeat;
+
+	fprintf(stderr, "sched event for %d %u/%li\n", when, ts.it_value.tv_sec, ts.it_value.tv_nsec);
+	if (timer_settime(id, 0, &ts, NULL) < 0)
+		fprintf(stderr, "timer_settime: %s %u/%li\n", strerror(errno), ts.it_value.tv_sec, ts.it_value.tv_nsec);
+	return tdata;
+}
+
+void
+comm_unschedule_event(comm_event_id id)
+{
+	timer_delete(id->td_timer_id);
+	free(id);
+}
