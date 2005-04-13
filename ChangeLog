@@ -1,3 +1,16 @@
+ejb         2005/04/13 22:14:42 UTC	(20050413_4)
+
+  Modified files:
+    src                  event.c ports.c 
+  Log:
+  remove debug cruft
+  
+  Revision  Changes    Path
+  7.55      +0 -2      ircd-ratbox/src/event.c
+  1.4       +2 -4      ircd-ratbox/src/ports.c
+
+
+
 androsyn    2005/04/13 22:13:43 UTC	(20050413_3)
 
   Modified files:
