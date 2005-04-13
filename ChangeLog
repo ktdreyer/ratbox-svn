@@ -1,3 +1,28 @@
+ejb         2005/04/13 18:53:57 UTC	(20050413_0)
+
+  Modified files:
+    .                    configure configure.ac 
+    adns                 Makefile.am resolver.c 
+    include              stdinc.h 
+    src/ident            ident.c 
+  Added files:
+    src                  ports.c 
+  Log:
+  - don't use inet_aton, Solaris doesn't have it.
+  - define INADDR_NONE in stdinc.h if the system doesn't have it.
+  - support Solaris ports IO, the replacement for the deprecated /dev/poll.
+  
+  Revision  Changes    Path
+  1.4       +1 -1      ircd-ratbox/adns/Makefile.am
+  1.11      +1 -1      ircd-ratbox/adns/resolver.c
+  7.261     +487 -137  ircd-ratbox/configure
+  7.72      +18 -2     ircd-ratbox/configure.ac
+  1.25      +4 -0      ircd-ratbox/include/stdinc.h
+  1.6       +2 -2      ircd-ratbox/src/ident/ident.c
+  1.1       +170 -0    ircd-ratbox/src/ports.c (new)
+
+
+
 androsyn    2005/04/11 03:51:52 UTC	(20050411_0)
 
   Modified files:
