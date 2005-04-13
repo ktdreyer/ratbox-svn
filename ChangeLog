@@ -1,3 +1,15 @@
+ejb         2005/04/13 18:58:43 UTC	(20050413_1)
+
+  Modified files:
+    src                  ports.c 
+  Log:
+  fix header comment
+  
+  Revision  Changes    Path
+  1.2       +1 -2      ircd-ratbox/src/ports.c
+
+
+
 ejb         2005/04/13 18:53:57 UTC	(20050413_0)
 
   Modified files:
