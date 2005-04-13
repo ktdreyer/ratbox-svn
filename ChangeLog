@@ -1,3 +1,21 @@
+androsyn    2005/04/13 22:13:43 UTC	(20050413_3)
+
+  Modified files:
+    src                  listener.c packet.c send.c 
+  Added files:
+    src                  sigio.c 
+  Log:
+  add rt sigio support for linux back in.  still need to do autoconf junk for
+  it though
+  
+  Revision  Changes    Path
+  7.135     +68 -62    ircd-ratbox/src/listener.c
+  7.146     +56 -58    ircd-ratbox/src/packet.c
+  7.294     +23 -15    ircd-ratbox/src/send.c
+  7.51      +351 -0    ircd-ratbox/src/sigio.c (new)
+
+
+
 ejb         2005/04/13 21:44:10 UTC	(20050413_2)
 
   Modified files:
