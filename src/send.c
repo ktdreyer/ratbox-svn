@@ -179,9 +179,30 @@ send_queued_write(int fd, void *data)
 
 	if(linebuf_len(&to->localClient->buf_sendq))
 	{
-		while ((retlen =
-			linebuf_flush(to->localClient->fd, &to->localClient->buf_sendq)) > 0)
+		while (1)
 		{
+			if(IsIOError(to))
+				return;
+				
+			retlen = linebuf_flush(to->localClient->fd, &to->localClient->buf_sendq);
+			
+			if(retlen < 0)
+			{
+				if(!ignoreErrno(errno))
+				{
+					dead_link(to);
+					return;
+				}  
+				if(linebuf_len(&to->localClient->buf_sendq))
+					comm_setselect(fd, FDLIST_IDLECLIENT, flags, send_queued_write, to, 0);
+				return;
+			} else 
+			if(retlen == 0)
+			{
+				dead_link(to);
+				return;
+			} 
+			
 			/* We have some data written .. update counters */
 #ifdef USE_IODEBUG_HOOKS
                         hd.arg2 = retlen;
@@ -207,20 +228,7 @@ send_queued_write(int fd, void *data)
 				me.localClient->sendB &= 0x03ff;
 			}
 		}
-
-		if(retlen == 0 || (retlen < 0 && !ignoreErrno(errno)))
-		{
-			dead_link(to);
-			return;
-		}
 	}
-	if(ignoreErrno(errno))
-		flags = COMM_SELECT_WRITE|COMM_SELECT_RETRY;
-	else
-		flags = COMM_SELECT_WRITE;
-	if(linebuf_len(&to->localClient->buf_sendq))
-	comm_setselect(fd, FDLIST_IDLECLIENT, flags,
-			       send_queued_write, to, 0);
 }
 
 /* send_queued_slink_write()

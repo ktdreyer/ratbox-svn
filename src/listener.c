@@ -494,8 +494,8 @@ accept_connection(int pfd, void *data)
 	socklen_t addrlen = sizeof(sai);
 	int fd;
 	struct Listener *listener = data;
-    struct ConfItem *aconf;
-    char buf[BUFSIZE];
+	struct ConfItem *aconf;
+	char buf[BUFSIZE];
     
 	s_assert(listener != NULL);
 	if(listener == NULL)
@@ -512,74 +512,80 @@ accept_connection(int pfd, void *data)
 	 * be accepted until some old is closed first.
 	 */
 
-	fd = comm_accept(listener->fd, (struct sockaddr *)&sai, &addrlen);
 
-	/* This needs to be done here, otherwise we break dlines */
-	mangle_mapped_sockaddr((struct sockaddr *)&sai);
+	 while(listener != NULL) /* loop until we again EAGAIN or listener goes null */
+	 {
 
-	if(fd < 0)
-	{
-		/* Re-register a new IO request for the next accept .. */
-		comm_setselect(listener->fd, FDLIST_SERVICE,
-			       COMM_SELECT_READ, accept_connection, listener, 0);
-		return;
-	}
-	/*
-	 * check for connection limit
-	 */
-	if((MAXCONNECTIONS - 10) < fd)
-	{
-		++ServerStats.is_ref;
-		/*
-		 * slow down the whining to opers bit
-		 */
-		if((last_oper_notice + 20) <= CurrentTime)
+	 	fd = comm_accept(listener->fd, (struct sockaddr *)&sai, &addrlen);
+
+		/* This needs to be done here, otherwise we break dlines */
+		mangle_mapped_sockaddr((struct sockaddr *)&sai);
+
+		if(fd <= 0)
 		{
-			sendto_realops_flags(UMODE_ALL, L_ALL,
-					     "All connections in use. (%s)",
-					     get_listener_name(listener));
-			last_oper_notice = CurrentTime;
+			if(ignoreErrno(errno))
+			{
+				/* Re-register a new IO request for the next accept .. */
+				comm_setselect(listener->fd, FDLIST_SERVICE,
+					       COMM_SELECT_READ, accept_connection, listener, 0);
+				return;
+			} else 
+			{
+				sendto_realops_flags(UMODE_ALL, L_ALL, "Listener (%s) failed with (%s) closing", 
+							get_listener_name(listener), strerror(errno));
+				close_listener(listener);
+				return;
+			}
+
+		}
+		/*
+		 * check for connection limit
+		 */
+		if((MAXCONNECTIONS - 10) < fd)
+		{
+			++ServerStats.is_ref;
+			/*
+			 * slow down the whining to opers bit
+			 */
+			if((last_oper_notice + 20) <= CurrentTime)
+			{
+				sendto_realops_flags(UMODE_ALL, L_ALL,
+						     "All connections in use. (%s)",
+						     get_listener_name(listener));
+				last_oper_notice = CurrentTime;
+			}
+			
+			write(fd, "ERROR :All connections in use\r\n", 32);
+			comm_close(fd);
+			/* Re-register a new IO request for the next accept .. */
+			continue;
 		}
 
-		write(fd, "ERROR :All connections in use\r\n", 32);
-		comm_close(fd);
-		/* Re-register a new IO request for the next accept .. */
-		comm_setselect(listener->fd, FDLIST_SERVICE,
-			       COMM_SELECT_READ, accept_connection, listener, 0);
-		return;
-	}
-
-	/* Do an initial check we aren't connecting too fast or with too many
-	 * from this IP... */
-	if((aconf = conf_connect_allowed((struct sockaddr *)&sai, sai.ss_family)) != NULL)
-	{
-		ServerStats.is_ref++;
-
-        if(ConfigFileEntry.dline_with_reason)
-        {
-            if (ircsnprintf(buf, sizeof(buf), "ERROR :*** Banned: %s\r\n", aconf->passwd) >= (sizeof(buf)-1))
-            {
-                buf[sizeof(buf) - 3] = '\r';
-                buf[sizeof(buf) - 2] = '\n';
-                buf[sizeof(buf) - 1] = '\0';
-            }
-        }
-        else
-           ircsprintf(buf, "ERROR :You have been D-lined.\r\n");
+		/* Do an initial check we aren't connecting too fast or with too many
+		 * from this IP... */
+		if((aconf = conf_connect_allowed((struct sockaddr *)&sai, sai.ss_family)) != NULL)
+		{
+			ServerStats.is_ref++;
+			
+		        if(ConfigFileEntry.dline_with_reason)
+		        {
+		            if (ircsnprintf(buf, sizeof(buf), "ERROR :*** Banned: %s\r\n", aconf->passwd) >= (sizeof(buf)-1))
+		            {
+		                buf[sizeof(buf) - 3] = '\r';
+		                buf[sizeof(buf) - 2] = '\n';
+		                buf[sizeof(buf) - 1] = '\0';
+		            }
+		        }
+		        else
+		           ircsprintf(buf, "ERROR :You have been D-lined.\r\n");
         
-        write(fd, buf, strlen(buf));
-		comm_close(fd);
+		        write(fd, buf, strlen(buf));
+			comm_close(fd);
+			continue;
+			
+		}
 
-		/* Re-register a new IO request for the next accept .. */
-		comm_setselect(listener->fd, FDLIST_SERVICE,
-			       COMM_SELECT_READ, accept_connection, listener, 0);
-		return;
+		ServerStats.is_ac++;
+		add_connection(listener, fd, (struct sockaddr *)&sai);
 	}
-
-	ServerStats.is_ac++;
-	add_connection(listener, fd, (struct sockaddr *)&sai);
-
-	/* Re-register a new IO request for the next accept .. */
-	comm_setselect(listener->fd, FDLIST_SERVICE, COMM_SELECT_READ,
-		       accept_connection, listener, 0);
 }

@@ -328,81 +328,79 @@ read_packet(int fd, void *data)
 #ifdef USE_IODEBUG_HOOKS
 	hook_data_int hdata;
 #endif
-	if(IsAnyDead(client_p))
-		return;
 
-	/*
-	 * Read some data. We *used to* do anti-flood protection here, but
-	 * I personally think it makes the code too hairy to make sane.
-	 *     -- adrian
-	 */
-	length = read(client_p->localClient->fd, readBuf, READBUF_SIZE);
 
-	if(length <= 0)
+	while(1) /* note..for things like rt sigio to work you *must* loop on read until you get EAGAIN */
 	{
-		if((length == -1) && ignoreErrno(errno))
+		if(IsAnyDead(client_p))
+			return;
+
+		/*
+		 * Read some data. We *used to* do anti-flood protection here, but
+		 * I personally think it makes the code too hairy to make sane.
+		 *     -- adrian
+		 */
+		length = read(client_p->localClient->fd, readBuf, READBUF_SIZE);
+
+		if(length < 0)
 		{
-			comm_setselect(client_p->localClient->fd, FDLIST_IDLECLIENT,
-				       COMM_SELECT_READ, read_packet, client_p, 0);
+			if(ignoreErrno(errno))
+			{
+				comm_setselect(client_p->localClient->fd, FDLIST_IDLECLIENT, 
+						COMM_SELECT_READ, read_packet, client_p, 0);
+			} else
+				error_exit_client(client_p, length);
+			return;
+		} else
+		if(length == 0)
+		{
+			error_exit_client(client_p, length);
 			return;
 		}
-		error_exit_client(client_p, length);
-		return;
-	}
-
+		
 #ifdef USE_IODEBUG_HOOKS
-	hdata.client = client_p;
-	hdata.arg1 = readBuf;
-	hdata.arg2 = length;
-	call_hook(h_iorecv_id, &hdata);
+		hdata.client = client_p;
+		hdata.arg1 = readBuf;
+		hdata.arg2 = length;
+		call_hook(h_iorecv_id, &hdata);
 #endif
 
-	if(client_p->localClient->lasttime < CurrentTime)
-		client_p->localClient->lasttime = CurrentTime;
-	client_p->flags &= ~FLAGS_PINGSENT;
+		if(client_p->localClient->lasttime < CurrentTime)
+			client_p->localClient->lasttime = CurrentTime;
+			client_p->flags &= ~FLAGS_PINGSENT;
 
-	/*
-	 * Before we even think of parsing what we just read, stick
-	 * it on the end of the receive queue and do it when its
-	 * turn comes around.
-	 */
-	if(IsHandshake(client_p) || IsUnknown(client_p))
-		binary = 1;
+		/*
+		 * Before we even think of parsing what we just read, stick
+		 * it on the end of the receive queue and do it when its
+		 * turn comes around.
+		 */
+		if(IsHandshake(client_p) || IsUnknown(client_p))
+			binary = 1;
 
-	lbuf_len = linebuf_parse(&client_p->localClient->buf_recvq, readBuf, length, binary);
+		lbuf_len = linebuf_parse(&client_p->localClient->buf_recvq, readBuf, length, binary);
 
-	lclient_p->actually_read += lbuf_len;
+		lclient_p->actually_read += lbuf_len;
 
-	if(IsAnyDead(client_p))
-		return;
-		
-	/* Attempt to parse what we have */
-	parse_client_queued(client_p);
-
-	if(IsAnyDead(client_p))
-		return;
-		
-	/* Check to make sure we're not flooding */
-	if(!IsAnyServer(client_p) &&
-	   (linebuf_alloclen(&client_p->localClient->buf_recvq) > ConfigFileEntry.client_flood))
-	{
-		if(!(ConfigFileEntry.no_oper_flood && IsOper(client_p)))
-		{
-			exit_client(client_p, client_p, client_p, "Excess Flood");
+		if(IsAnyDead(client_p))
 			return;
-		}
-	}
+		
+		/* Attempt to parse what we have */
+		parse_client_queued(client_p);
 
-	/* If we get here, we need to register for another COMM_SELECT_READ */
-	if(PARSE_AS_SERVER(client_p))
-	{
-		comm_setselect(client_p->localClient->fd, FDLIST_SERVER, COMM_SELECT_READ,
-			      read_packet, client_p, 0);
-	}
-	else
-	{
-		comm_setselect(client_p->localClient->fd, FDLIST_IDLECLIENT,
-			       COMM_SELECT_READ, read_packet, client_p, 0);
+		if(IsAnyDead(client_p))
+			return;
+		
+		/* Check to make sure we're not flooding */
+		if(!IsAnyServer(client_p) &&
+		   (linebuf_alloclen(&client_p->localClient->buf_recvq) > ConfigFileEntry.client_flood))
+		{
+			if(!(ConfigFileEntry.no_oper_flood && IsOper(client_p)))
+			{
+				exit_client(client_p, client_p, client_p, "Excess Flood");
+				return;
+			}
+	
+		}
 	}
 }
 
