@@ -534,7 +534,7 @@ resolve_ip(char **parv)
 		case '4':
 			flags = adns_r_ptr;
 			req->reqtype = REVIPV4;
-			if(!inet_aton(rec, &req->sins.in.sin_addr))
+			if(!inet_pton(AF_INET, rec, &req->sins.in.sin_addr))
 				report_error("Invalid address passed");
 			req->sins.in.sin_family = AF_INET;
 

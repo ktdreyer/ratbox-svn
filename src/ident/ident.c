@@ -332,7 +332,7 @@ check_identd(const char *id, const char *bindaddr, const char *aft, const char *
 	else 
 #else /* ipv6*/
 	{
-		inet_aton(bindaddr, &auth->bindaddr.in.sin_addr);
+		inet_pton(AF_INET, bindaddr, &auth->bindaddr.in.sin_addr);
 		auth->bindaddr.in.sin_family = AF_INET;
 #ifdef SOCKADDR_IN_HAS_LEN
 		auth->bindaddr.in.sin_len = sizeof(struct sockaddr_in);
@@ -354,7 +354,7 @@ check_identd(const char *id, const char *bindaddr, const char *aft, const char *
 	} else
 #endif
 	{
-		inet_aton(destaddr, &auth->destaddr.in.sin_addr);
+		inet_pton(AF_INET, destaddr, &auth->destaddr.in.sin_addr);
 		auth->destaddr.in.sin_family = AF_INET;
 #ifdef SOCKADDR_IN_HAS_LEN
 		auth->destaddr.in.sin_len = sizeof(struct sockaddr_in);

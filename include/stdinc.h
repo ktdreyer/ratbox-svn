@@ -153,5 +153,9 @@ extern int errno;
 #endif /* defined(__INTEL_COMPILER) || defined(__GNUC__) */
 #endif /* strdupa */
 
+#ifndef INADDR_NONE
+# define INADDR_NONE ((in_addr_t) 0xffffffff)
+#endif
+
 #include "ircd_defs.h"
 #include "common.h"

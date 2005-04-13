@@ -105,6 +105,7 @@ dnl Networking Functions
 dnl ====================
 
 AC_SEARCH_LIBS(socket, socket, , [AC_MSG_ERROR([You have no socket()! Aborting.])])
+AC_SEARCH_LIBS(inet_ntoa, nsl, , [AC_MSG_ERROR([You have no inet_ntoa()! Aborting.])])
 
 AC_CHECK_MEMBER([struct sockaddr.sa_len], [AC_DEFINE(SOCKADDR_IN_HAS_LEN, 1, [Define to 1 if sockaddr has a 'sa_len'
 member.])],,[[#include <sys/types.h>
@@ -462,6 +463,14 @@ AC_ARG_ENABLE(kqueue, AC_HELP_STRING([--enable-kqueue],[Force kqueue() usage.]),
   fi
 ],)
 
+AC_ARG_ENABLE(ports, AC_HELP_STRING([--enable-ports],[Force Solaris ports usage.]),
+[ if test $enableval = yes; then
+	SELECT_TYPE_EXPLICIT="ports"
+  else
+	use_ports=no
+  fi
+],)
+
 AC_ARG_ENABLE(devpoll,AC_HELP_STRING([--enable-devpoll],[Force usage of /dev/poll.]),
 [ if test $enableval = yes; then 
 	SELECT_TYPE_EXPLICIT="devpoll" 
@@ -594,6 +603,13 @@ if test ! "x$use_kqueue" = "xno"; then
 	AC_CHECK_FUNCS(kevent, [havekqueue=yes], [havekqueue=no])
 	if test "x$havekqueue" = "xyes" ; then
 		SELECT_TYPE="kqueue"
+	fi
+fi
+
+if test ! "x$use_ports" = "xno"; then
+	AC_CHECK_FUNCS(port_create, [haveports=yes], [haveports=no])
+	if test "x$haveports" = "xyes" ; then
+		SELECT_TYPE="ports"
 	fi
 fi
 
