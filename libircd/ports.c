@@ -207,8 +207,7 @@ struct	itimerspec	 ts;
 	not.portnfy_user = tdata;
 
 	if (timer_create(CLOCK_REALTIME, &ev, &id) < 0)
-		/*ilog(L_IOERROR, "timer_create: %s\n", strerror(errno));*/
-		fprintf(stderr, "timer_create: %s\n", strerror(errno));
+		ilog(L_IOERROR, "timer_create: %s\n", strerror(errno));
 
 	tdata->td_timer_id = id;
 
@@ -220,9 +219,8 @@ struct	itimerspec	 ts;
 		ts.it_interval = ts.it_value;
 	tdata->td_repeat = repeat;
 
-	fprintf(stderr, "sched event for %d %u/%li\n", when, ts.it_value.tv_sec, ts.it_value.tv_nsec);
 	if (timer_settime(id, 0, &ts, NULL) < 0)
-		fprintf(stderr, "timer_settime: %s %u/%li\n", strerror(errno), ts.it_value.tv_sec, ts.it_value.tv_nsec);
+		ilog(L_IOERROR, "timer_settime: %s\n", strerror(errno));
 	return tdata;
 }
 

@@ -84,7 +84,6 @@ event_run_callback(void *data)
 	} else {
 		ev->when = CurrentTime + ev->frequency;
 	}
-	fprintf(stderr, "run event %s %d now=%d\n", ev->name, ev->when - CurrentTime, CurrentTime);
 }
 #endif
 
@@ -118,7 +117,6 @@ eventAdd(const char *name, EVH * func, void *arg, time_t when)
 
 #ifdef COMM_DOES_EVENTS
 			event_table[i].comm_id = comm_schedule_event(when, 1, event_run_callback, &event_table[i]);
-			fprintf(stderr, "eventAdd: %s/%d\n", name, when);
 #endif
 
 			return;
