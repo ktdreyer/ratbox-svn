@@ -1,3 +1,15 @@
+androsyn    2005/04/14 02:03:10 UTC	(20050414_0)
+
+  Modified files:
+    src/ident            ident.c 
+  Log:
+  make the ilog in ident match the one in ircd
+  
+  Revision  Changes    Path
+  1.7       +5 -5      ircd-ratbox/src/ident/ident.c
+
+
+
 ejb         2005/04/13 22:14:42 UTC	(20050413_4)
 
   Modified files:
