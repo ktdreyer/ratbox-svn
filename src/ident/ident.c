@@ -68,7 +68,7 @@ send_sprintf(int fd, const char *format, ...)
 }
 
 
-void ilog(char *errstr, ...)
+void ilog(int level, char *errstr, ...)
 {
 	va_list ap;
 	va_start(ap, errstr);
@@ -81,7 +81,7 @@ void ilog(char *errstr, ...)
 void restart(char *msg)
 {
 	/* this is needed to deal with memory.c */
-	ilog("%s", msg);	
+	ilog(0, "%s", msg);	
 }
 
 
@@ -389,7 +389,7 @@ process_request(int fd, void *data)
 			if(n == -1 && ignoreErrno(errno))
 				break;
 			else
-				ilog("ERR: read failed: %s\n", strerror(errno));
+				ilog(0, "ERR: read failed: %s\n", strerror(errno));
 		}
 
 	        if((p = memchr(buf, '\n', n)) != NULL)
@@ -399,10 +399,10 @@ process_request(int fd, void *data)
 		
 			parc = io_to_array(buf, parv);
 			if(parc != 6)
-				ilog("ERR: wrong number of arguments passed\n");
+				ilog(0, "ERR: wrong number of arguments passed\n");
 			check_identd(parv[0], parv[1], parv[2], parv[3], parv[4], parv[5]);
 	        } else
-			ilog("ERR: Got bogus data from server");       
+			ilog(0, "ERR: Got bogus data from server");       
 	}
 
 	comm_setselect(fd, FDLIST_SERVICE, COMM_SELECT_READ, process_request, NULL, 0);
