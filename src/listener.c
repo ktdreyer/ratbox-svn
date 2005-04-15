@@ -523,19 +523,10 @@ accept_connection(int pfd, void *data)
 
 		if(fd < 0)
 		{
-			if(ignoreErrno(errno))
-			{
-				/* Re-register a new IO request for the next accept .. */
-				comm_setselect(listener->fd, FDLIST_SERVICE,
-					       COMM_SELECT_READ, accept_connection, listener, 0);
-				return;
-			} else 
-			{
-				sendto_realops_flags(UMODE_ALL, L_ALL, "Listener (%s) failed with (%s) closing", 
-							get_listener_name(listener), strerror(errno));
-				close_listener(listener);
-				return;
-			}
+			/* Re-register a new IO request for the next accept .. */
+			comm_setselect(listener->fd, FDLIST_SERVICE,
+				      COMM_SELECT_READ, accept_connection, listener, 0);
+			return;
 		}
 		
 		/*
