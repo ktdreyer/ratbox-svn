@@ -1,3 +1,26 @@
+androsyn    2005/04/15 19:32:26 UTC	(20050415_0)
+
+  Modified files:
+    include              commio.h setup.h.in tools.h 
+    src                  commio.c dns.c ircd_signal.c listener.c 
+                         s_auth.c tools.c 
+  Log:
+  add in some changes that make things a little more stable.  also add in some
+  rather slow sanity checking code to check the auth_poll_list
+  
+  Revision  Changes    Path
+  1.23      +2 -0      ircd-ratbox/include/commio.h
+  7.99      +2 -0      ircd-ratbox/include/setup.h.in
+  1.58      +12 -5     ircd-ratbox/include/tools.h
+  1.40      +40 -1     ircd-ratbox/src/commio.c
+  7.12      +19 -15    ircd-ratbox/src/dns.c
+  7.35      +1 -0      ircd-ratbox/src/ircd_signal.c
+  7.136     +2 -2      ircd-ratbox/src/listener.c
+  7.216     +41 -19    ircd-ratbox/src/s_auth.c
+  7.51      +19 -0     ircd-ratbox/src/tools.c
+
+
+
 androsyn    2005/04/14 02:03:10 UTC	(20050414_0)
 
   Modified files:
