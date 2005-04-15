@@ -91,6 +91,7 @@ static PF read_auth_reply;
 
 static int fork_ident_count = 0;
 static int auth_fd = -1, auth_cfd = -1;
+static int need_restart = 0;
 static pid_t auth_pid = -1;
 static u_int16_t id;
 #define IDTABLE 0x1000
@@ -118,9 +119,10 @@ fork_ident(void)
 	if(fork_ident_count > 10)
 	{
 		ilog(L_MAIN, "Ident daemon is spinning: %d\n", fork_ident_count);
-
+		fork_ident_count++;
+		return;
 	}
-	fork_ident_count++;
+
 	if(auth_fd > 0)
 		comm_close(auth_fd);
 	if(auth_cfd > 0)
@@ -129,16 +131,22 @@ fork_ident(void)
 	{
 		kill(auth_pid, SIGKILL);
 	}
-	socketpair(AF_UNIX, SOCK_DGRAM, 0, fdx);
-	socketpair(AF_UNIX, SOCK_STREAM, 0, cfdx);
+
+	if(comm_socketpair(AF_UNIX, SOCK_DGRAM, 0, fdx, "ident data channel"))
+	{
+		return;
+	}
+
+	if(comm_socketpair(AF_UNIX, SOCK_STREAM, 0, cfdx, "ident ctrl channel"))
+	{
+		comm_close(fdx[0]);
+		close(fdx[1]);
+		return;
+
+	}
 
 	ircsnprintf(fx, sizeof(fx), "%d", fdx[1]);
 	ircsnprintf(fy, sizeof(fy), "%d", cfdx[1]);
-
-	comm_set_nb(fdx[0]);
-	comm_set_nb(fdx[1]);
-	comm_set_nb(cfdx[0]);
-	comm_set_nb(cfdx[1]);
 
 	if(!(pid = fork()))
 	{
@@ -148,9 +156,7 @@ fork_ident(void)
 		close(cfdx[0]);
 		for(i = 0; i < HARD_FDLIMIT; i++)
 		{
-			if((i == fdx[1]) || (i == cfdx[1]))
-				comm_set_nb(i);
-			else
+			if((i != fdx[1] && i != cfdx[1]))	
 				close(i);
 		}
 		execl(BINPATH "/ident", "-ircd ident daemon", NULL);
@@ -158,15 +164,13 @@ fork_ident(void)
 	else if(pid == -1)
 	{
 		ilog(L_MAIN, "fork failed: %s", strerror(errno));
-		close(fdx[0]);
+		comm_close(fdx[0]);
 		close(fdx[1]);
-		close(cfdx[0]);
+		comm_close(cfdx[0]);
 		close(cfdx[1]);
 		return;
 	}
 
-	comm_open(fdx[0], FD_SOCKET, "ident daemon data socket");
-	comm_open(cfdx[0], FD_SOCKET, "ident daemon control socket");
 	auth_fd = fdx[0];
 	auth_cfd = cfdx[0];
 	auth_pid = pid;
@@ -179,7 +183,8 @@ ident_sigchld(void)
 	int status;
 	if(waitpid(auth_pid, &status, WNOHANG) == auth_pid)
 	{
-		fork_ident();
+		auth_pid = -1;
+		need_restart = 1;
 	}
 }
 
@@ -189,6 +194,15 @@ restart_ident(void)
 	fork_ident();
 }
 
+static void
+check_ident(void *unused)
+{
+	if(need_restart)
+	{
+		fork_ident();
+		need_restart = 0;
+	}
+}
 
 /*
  * init_auth()
@@ -203,11 +217,12 @@ init_auth(void)
 	if(auth_pid < 0)
 	{
 		ilog(L_MAIN, "Unable to fork ident daemon");
+		exit(0);
 	}
 	memset(&auth_poll_list, 0, sizeof(auth_poll_list));
 	eventAddIsh("timeout_auth_queries_event", timeout_auth_queries_event, NULL, 1);
 	auth_heap = BlockHeapCreate(sizeof(struct AuthRequest), LCLIENT_HEAP_SIZE);
-
+	eventAddIsh("check_ident", check_ident, NULL, 5);
 }
 
 
@@ -253,7 +268,9 @@ release_auth_client(struct AuthRequest *auth)
 		authtable[auth->reqid] = NULL;
 
 	client->localClient->auth_request = NULL;
+	list_sanity_check(&auth_poll_list);
 	dlinkDelete(&auth->node, &auth_poll_list);
+	list_sanity_check(&auth_poll_list);
 	free_auth_request(auth);
 	if(client->localClient->fd > highest_fd)
 		highest_fd = client->localClient->fd;
@@ -312,7 +329,6 @@ auth_error(struct AuthRequest *auth)
 		authtable[auth->reqid] = NULL;
 	ClearAuth(auth);
 	sendheader(auth->client, REPORT_FAIL_ID);
-	release_auth_client(auth);
 }
 
 /*
@@ -412,8 +428,10 @@ start_auth(struct Client *client)
 	auth = make_auth_request(client);
 
 	sendheader(client, REPORT_DO_DNS);
+	list_sanity_check(&auth_poll_list);
 
 	dlinkAdd(auth, &auth->node, &auth_poll_list);
+	list_sanity_check(&auth_poll_list);
 
 	/* Note that the order of things here are done for a good reason
 	 * if you try to do start_auth_query before lookup_ip there is a 
@@ -443,6 +461,7 @@ timeout_auth_queries_event(void *notused)
 	dlink_node *next_ptr;
 	struct AuthRequest *auth;
 
+	list_sanity_check(&auth_poll_list);
 	DLINK_FOREACH_SAFE(ptr, next_ptr, auth_poll_list.head)
 	{
 		auth = ptr->data;
@@ -465,6 +484,7 @@ timeout_auth_queries_event(void *notused)
 			release_auth_client(auth);
 		}
 	}
+	list_sanity_check(&auth_poll_list);
 	return;
 }
 
@@ -486,8 +506,10 @@ delete_auth_queries(struct Client *target_p)
 
 	if(auth->reqid > 0)
 		authtable[auth->reqid] = NULL;
+	list_sanity_check(&auth_poll_list);
 
 	dlinkDelete(&auth->node, &auth_poll_list);
+	list_sanity_check(&auth_poll_list);
 	free_auth_request(auth);
 }
 

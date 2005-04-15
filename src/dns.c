@@ -47,6 +47,7 @@ static void submit_dns(const char, int id, int aftype, const char *addr);
 static void fork_resolver(void);
 
 static pid_t res_pid;
+static int need_restart = 0;
 
 struct dnsreq
 {
@@ -55,7 +56,6 @@ struct dnsreq
 };
 
 static struct dnsreq querytable[IDTABLE];
-
 static u_int16_t id = 1;
 static int dns_fd = -1;
 static int ctrl_fd = -1;
@@ -209,17 +209,11 @@ fork_resolver(void)
 	if(res_pid > 0)
 		kill(res_pid, SIGKILL);
 
-	socketpair(AF_UNIX, SOCK_DGRAM, 0, fdx);
-	socketpair(AF_UNIX, SOCK_STREAM, 0, cfdx);
+	comm_socketpair(AF_UNIX, SOCK_DGRAM, 0, fdx, "resolver data socket");
+	comm_socketpair(AF_UNIX, SOCK_STREAM, 0, cfdx, "resolver ctrl socket");
 
 	ircsnprintf(fx, sizeof(fx), "%d", fdx[1]);
 	ircsnprintf(fy, sizeof(fy), "%d", cfdx[1]);
-	
-	comm_set_nb(fdx[0]);
-	comm_set_nb(fdx[1]);
-	comm_set_nb(cfdx[0]);
-	comm_set_nb(cfdx[1]);
-	
 	
 	if(!(pid = fork()))
 	{
@@ -239,18 +233,18 @@ fork_resolver(void)
 	} else
 	if(pid == -1)
 	{
-		close(fdx[0]);
+		comm_close(fdx[0]);
 		close(fdx[1]);
-		close(cfdx[0]);
+		comm_close(cfdx[0]);
 		close(cfdx[1]);
 		return;
 	}
 	close(fdx[1]);
 	close(cfdx[1]);	
-	comm_open(fdx[0], FD_SOCKET, "Resolver daemon socket");
-	comm_open(cfdx[0], FD_SOCKET, "Resolver daemon control socket");
+
 	dns_fd = fdx[0];
 	ctrl_fd = cfdx[0];
+
 	fork_count = 0;
 	res_pid = pid;
 	return;
@@ -317,7 +311,15 @@ submit_dns(char type, int nid, int aftype, const char *addr)
 	read_dns(dns_fd, NULL);
 }
 
-
+static void
+check_resolver(void *unused)
+{
+	if(need_restart) 
+	{
+		fork_resolver();
+		need_restart = 0;
+	}
+}
 
 void
 init_resolver(void)
@@ -326,7 +328,9 @@ init_resolver(void)
 	if(res_pid < 0)
 	{
 		ilog(L_MAIN, "Unable to fork resolver: %s", strerror(errno));		
+		exit(0);
 	}
+	eventAddIsh("check_resolver", check_resolver, NULL, 5);
 }
 
 void 
@@ -341,7 +345,7 @@ resolver_sigchld(void)
 	int status;
 	if(waitpid(res_pid, &status, WNOHANG) == res_pid)
 	{
-		fork_resolver();		
+		need_restart = 1;		
 	}
 }
 

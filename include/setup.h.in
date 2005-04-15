@@ -177,8 +177,10 @@
 /* Prefix where to write logfiles. */
 #undef LOG_DIR
 
+#ifndef MAX_CLIENTS
 /* Maximum number of network connections */
 #undef MAX_CLIENTS
+#endif
 
 /* Sizeof member heap. */
 #undef MEMBER_HEAP_SIZE

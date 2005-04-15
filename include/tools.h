@@ -28,6 +28,8 @@
 #define __TOOLS_H__
 
 
+#define LIST_SANITY 1 /* define this to sanity check lists: *VERY SLOW* */
+
 /*
  * double-linked-list stuff
  */
@@ -90,6 +92,13 @@ void mem_frob(void *data, int len);
 #define dlinkDestroy(node, list) do { dlinkDelete(node, list); free_dlink_node(node); } while(0)
 
 
+unsigned long slow_list_length(dlink_list *);
+
+#ifdef LIST_SANITY
+#define list_sanity_check(list) if(slow_list_length(list) != dlink_list_length(list)) abort();
+#else
+#define list_sanity_check(list)
+#endif
 /*
  * The functions below are included for the sake of inlining
  * hopefully this will speed up things just a bit
@@ -167,6 +176,7 @@ dlinkAdd(void *data, dlink_node * m, dlink_list * list)
 	assert(data != NULL);
 	assert(m != NULL);
 	assert(list != NULL);
+
 	m->data = data;
 	m->next = list->head;
 
@@ -233,6 +243,7 @@ dlinkAddTail(void *data, dlink_node * m, dlink_list * list)
 	assert(m != NULL);
 	assert(list != NULL);
 	assert(data != NULL);
+
 	m->data = data;
 	m->next = NULL;
 	m->prev = list->tail;
@@ -255,7 +266,6 @@ dlinkDelete(dlink_node * m, dlink_list * list)
 {
 	assert(m != NULL);
 	assert(list != NULL);
-
 	/* Assumption: If m->next == NULL, then list->tail == m
 	 *      and:   If m->prev == NULL, then list->head == m
 	 */
@@ -279,7 +289,6 @@ dlinkFindDelete(void *data, dlink_list *list)
 	dlink_node *m;
 	assert(list != NULL);
 	assert(data != NULL);
-
 	DLINK_FOREACH(m, list->head)
 	{
 		if(m->data != data)
@@ -299,7 +308,6 @@ dlinkFindDelete(void *data, dlink_list *list)
 		list->length--;
 		return m;
 	}
-
 	return NULL;
 }
 
@@ -310,7 +318,6 @@ dlinkFindDestroy(void *data, dlink_list *list)
 
 	assert(list != NULL);
 	assert(data != NULL);
-
 	ptr = dlinkFindDelete(data, list);
 
 	if(ptr != NULL)
@@ -334,7 +341,7 @@ dlinkFind(void *data, dlink_list *list)
 	dlink_node *ptr;
 	assert(list != NULL);
 	assert(data != NULL);
-
+	
 	DLINK_FOREACH(ptr, list->head)
 	{
 		if(ptr->data == data)

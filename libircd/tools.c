@@ -36,6 +36,7 @@
 #include "tools.h"
 #include "balloc.h"
 #include "memory.h"
+#include "s_log.h"
 
 #ifndef NDEBUG
 /*
@@ -96,6 +97,24 @@ free_dlink_node(dlink_node * ptr)
 	assert(ptr != NULL);
 
 	BlockHeapFree(dnode_heap, ptr);
+}
+
+unsigned long
+slow_list_length(dlink_list *list)
+{
+        dlink_node *ptr;
+        unsigned long count = 0;
+    
+        for (ptr = list->head; ptr; ptr = ptr->next)
+        {
+                count++;
+                if(count > list->length * 2)
+                {
+                        ilog(L_MAIN, "count > list->length * 2 - I give up");
+			abort();
+                }
+        }
+        return count;
 }
 
 

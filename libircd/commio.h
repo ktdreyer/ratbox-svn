@@ -198,6 +198,8 @@ extern void comm_connect_tcp(int fd, struct sockaddr *,
 			     struct sockaddr *, int, CNCB *, void *, int);
 extern const char *comm_errstr(int status);
 extern int comm_socket(int family, int sock_type, int proto, const char *note);
+extern int comm_socketpair(int family, int sock_type, int proto, int *nfd, const char *note);
+
 extern int comm_accept(int fd, struct sockaddr *pn, socklen_t *addrlen);
 
 /* These must be defined in the network IO loop code of your choice */

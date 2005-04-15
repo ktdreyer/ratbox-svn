@@ -521,7 +521,7 @@ accept_connection(int pfd, void *data)
 		/* This needs to be done here, otherwise we break dlines */
 		mangle_mapped_sockaddr((struct sockaddr *)&sai);
 
-		if(fd <= 0)
+		if(fd < 0)
 		{
 			if(ignoreErrno(errno))
 			{
@@ -536,8 +536,8 @@ accept_connection(int pfd, void *data)
 				close_listener(listener);
 				return;
 			}
-
 		}
+		
 		/*
 		 * check for connection limit
 		 */
