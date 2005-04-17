@@ -1,3 +1,27 @@
+androsyn    2005/04/17 07:20:02 UTC	(20050417_2)
+
+  Modified files:
+    .                    Makefile.in 
+    adns                 Makefile.in 
+    modules              Makefile.in 
+    src                  Makefile.in 
+    src/ident            Makefile.am Makefile.in ident.c 
+    tools                Makefile.in 
+  Log:
+  more fun and excitement in identd land
+  
+  Revision  Changes    Path
+  7.66      +0 -0      ircd-ratbox/Makefile.in
+  1.28      +0 -0      ircd-ratbox/adns/Makefile.in
+  1.136     +0 -0      ircd-ratbox/modules/Makefile.in
+  7.172     +0 -0      ircd-ratbox/src/Makefile.in
+  1.5       +1 -1      ircd-ratbox/src/ident/Makefile.am
+  1.5       +2 -2      ircd-ratbox/src/ident/Makefile.in
+  1.9       +21 -21    ircd-ratbox/src/ident/ident.c
+  7.54      +0 -0      ircd-ratbox/tools/Makefile.in
+
+
+
 androsyn    2005/04/17 06:43:12 UTC	(20050417_1)
 
   Modified files:
