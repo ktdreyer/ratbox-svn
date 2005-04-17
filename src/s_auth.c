@@ -235,7 +235,7 @@ release_auth_client(struct AuthRequest *auth)
 {
 	struct Client *client = auth->client;
 
-	if(IsDNSPending(auth) || IsDoingAuth(auth))
+	if(IsDNS(auth) || IsAuth(auth))
 		return;
 
 	if(auth->reqid > 0)
@@ -269,7 +269,7 @@ static void
 auth_dns_callback(const char *res, int status, int aftype, void *data)
 {
 	struct AuthRequest *auth = data;
-	ClearDNSPending(auth);
+	ClearDNS(auth);
 	auth->dns_query = 0;
 	/* The resolver won't return us anything > HOSTLEN */
 	if(status == 1)
@@ -340,7 +340,6 @@ start_auth_query(struct AuthRequest *auth)
 	socklen_t remotelen = sizeof(struct irc_sockaddr_storage);
 	char myip[HOSTIPLEN + 1];
 	int lport, rport;
-	int af = 4;
 
 	if(IsAnyDead(auth->client))
 		return;
@@ -361,6 +360,7 @@ start_auth_query(struct AuthRequest *auth)
 		ilog(L_IOERROR, "auth get{sock,peer}name error for %s:%m", 
 					log_client_name(auth->client, SHOW_IP));
 		auth_error(auth);
+		release_auth_client(auth);
 		return;
 	}
 
@@ -369,25 +369,17 @@ start_auth_query(struct AuthRequest *auth)
 
 #ifdef IPV6
 	if(localaddr.ss_family == AF_INET6)
-	{
 		lport = ntohs(((struct sockaddr_in6 *) &localaddr)->sin6_port);
-		af = 6;
-	}
 	else
 #endif
 		lport = ntohs(((struct sockaddr_in *) &localaddr)->sin_port);
 
 #ifdef IPV6
 	if(localaddr.ss_family == AF_INET6)
-	{
 		rport = ntohs(((struct sockaddr_in6 *) &remoteaddr)->sin6_port);
-		af = 6;
-	}
 	else
 #endif
 		rport = ntohs(((struct sockaddr_in *) &remoteaddr)->sin_port);
-
-	SetAuthPending(auth);
 
 	auth->reqid = assign_id();
 	authtable[auth->reqid] = auth;
@@ -428,12 +420,13 @@ start_auth(struct Client *client)
 	 * before the call to start_auth_query, otherwise you'll have
 	 * the same thing.  So think before you hack 
 	 */
-	SetDNSPending(auth);
-
+	SetDNS(auth);   /* set both at the same time to eliminate possible race conditions */
+	SetAuth(auth);
 	if(ConfigFileEntry.disable_auth == 0)
 	{
 		start_auth_query(auth);
-	}
+	} else 
+		ClearAuth(auth);
 
 	auth->dns_query = lookup_ip(client->sockhost, client->localClient->ip.ss_family, auth_dns_callback, auth);
 }
@@ -455,13 +448,13 @@ timeout_auth_queries_event(void *notused)
 
 		if(auth->timeout < CurrentTime)
 		{
-			if(IsDoingAuth(auth))
+			if(IsAuth(auth))
 			{
 				auth_error(auth);
 			}
-			if(IsDNSPending(auth))
+			if(IsDNS(auth))
 			{
-				ClearDNSPending(auth);
+				ClearDNS(auth);
 				cancel_lookup(auth->dns_query);
 				auth->dns_query = 0;
 				sendheader(auth->client, REPORT_FAIL_DNS);
@@ -532,8 +525,8 @@ parse_auth_reply(void)
 
 		if(*q == '0')
 		{
-			strcpy(auth->client->username, "unknown");
 			auth_error(auth);
+			release_auth_client(auth);
 			continue;
 		}
 

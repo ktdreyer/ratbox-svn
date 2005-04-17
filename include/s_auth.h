@@ -54,26 +54,16 @@ struct AuthRequest
  * flag values for AuthRequest
  * NAMESPACE: AM_xxx - Authentication Module
  */
-#define AM_AUTH_CONNECTING   (1 << 0)
-#define AM_AUTH_PENDING      (1 << 1)
-#define AM_DNS_PENDING       (1 << 2)
+#define AM_AUTH_PENDING      0x1
+#define AM_DNS_PENDING       0x2
 
-#define SetDNSPending(x)     ((x)->flags |= AM_DNS_PENDING)
-#define ClearDNSPending(x)   ((x)->flags &= ~AM_DNS_PENDING)
-#define IsDNSPending(x)      ((x)->flags &  AM_DNS_PENDING)
+#define SetDNS(x)     ((x)->flags |= AM_DNS_PENDING)
+#define ClearDNS(x)   ((x)->flags &= ~AM_DNS_PENDING)
+#define IsDNS(x)      ((x)->flags &  AM_DNS_PENDING)
 
-#define SetAuthConnect(x)    ((x)->flags |= AM_AUTH_CONNECTING)
-#define ClearAuthConnect(x)  ((x)->flags &= ~AM_AUTH_CONNECTING)
-#define IsAuthConnect(x)     ((x)->flags &  AM_AUTH_CONNECTING)
-
-#define SetAuthPending(x)    ((x)->flags |= AM_AUTH_PENDING)
-#define ClearAuthPending(x)  ((x)->flags &= AM_AUTH_PENDING)
-#define IsAuthPending(x)     ((x)->flags &  AM_AUTH_PENDING)
-
-#define ClearAuth(x)         ((x)->flags &= ~(AM_AUTH_PENDING | AM_AUTH_CONNECTING))
-#define IsDoingAuth(x)       ((x)->flags &  (AM_AUTH_PENDING | AM_AUTH_CONNECTING))
-/* #define SetGotId(x)       ((x)->flags |= FLAGS_GOTID) */
-
+#define SetAuth(x)    ((x)->flags |= AM_AUTH_PENDING)
+#define ClearAuth(x)  ((x)->flags &= ~AM_AUTH_PENDING)
+#define IsAuth(x)     ((x)->flags & AM_AUTH_PENDING)
 
 
 extern void start_auth(struct Client *);
