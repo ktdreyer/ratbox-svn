@@ -180,7 +180,7 @@ extern void comm_unschedule_event(comm_event_id);
 /* Type of IO */
 #define	COMM_SELECT_READ		0x1
 #define	COMM_SELECT_WRITE		0x2
-#define COMM_SELECT_RETRY		0x4
+
 extern int readcalls;
 extern const char *const NONB_ERROR_MSG;
 extern const char *const SETBUF_ERROR_MSG;
@@ -202,6 +202,7 @@ extern int comm_socket(int family, int sock_type, int proto, const char *note);
 extern int comm_socketpair(int family, int sock_type, int proto, int *nfd, const char *note);
 
 extern int comm_accept(int fd, struct sockaddr *pn, socklen_t *addrlen);
+extern int comm_pipe(int *fd, const char *desc);
 
 /* These must be defined in the network IO loop code of your choice */
 extern void comm_setselect(int fd, fdlist_t list, unsigned int type,

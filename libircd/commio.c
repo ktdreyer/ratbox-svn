@@ -436,7 +436,7 @@ comm_connect_tryconnect(int fd, void *notused)
 			comm_connect_callback(F->fd, COMM_OK);
 		else if(ignoreErrno(errno))
 			/* Ignore error? Reschedule */
-			comm_setselect(F->fd, FDLIST_SERVER, COMM_SELECT_READ|COMM_SELECT_WRITE|COMM_SELECT_RETRY,
+			comm_setselect(F->fd, FDLIST_SERVER, COMM_SELECT_WRITE,
 				       comm_connect_tryconnect, NULL, 0);
 		else
 			/* Error? Fail with COMM_ERR_CONNECT */
@@ -498,6 +498,24 @@ comm_socketpair(int family, int sock_type, int proto, int *nfd, const char *note
 	return 0;
 	
 }
+
+
+int 
+comm_pipe(int *fd, const char *desc)
+{
+
+	if(number_fd >= MASTER_MAX)
+	{
+		errno = ENFILE;
+		return -1;
+	}
+	if(pipe(fd) == -1)
+		return -1;
+	comm_open(fd[0], FD_PIPE, desc);
+	comm_open(fd[1], FD_PIPE, desc);
+	return 0;
+}
+
 /*
  * comm_socket() - open a socket
  *

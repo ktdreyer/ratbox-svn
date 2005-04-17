@@ -41,9 +41,9 @@ struct timeval SystemTime;
 #define USERLEN 10
 
 /* data fd from ircd */
-int irc_fd;
+int irc_ifd;
 /* control fd from ircd */
-int irc_cfd; 
+int irc_ofd; 
 
 #define MAXPARA 10
 #define REQIDLEN 10
@@ -180,7 +180,7 @@ write_sendq(int fd, void *unused)
         int retlen;
         if(linebuf_len(&sendq) > 0)
         {
-                while((retlen = linebuf_flush(irc_fd, &sendq)) > 0);
+                while((retlen = linebuf_flush(irc_ofd, &sendq)) > 0);
                 if(retlen == 0 || (retlen < 0 && !ignoreErrno(errno)))
                 {
                         exit(1);
@@ -189,7 +189,7 @@ write_sendq(int fd, void *unused)
          
         if(linebuf_len(&sendq) > 0)
         {
-                comm_setselect(irc_fd, FDLIST_SERVICE, COMM_SELECT_WRITE,
+                comm_setselect(irc_ofd, FDLIST_SERVICE, COMM_SELECT_WRITE,
                                write_sendq, NULL, 0);
         }
 }
@@ -201,7 +201,7 @@ read_auth_timeout(int fd, void *data)
 {
 	struct auth_request *auth = data;
 	linebuf_put(&sendq, "%s 0", auth->reqid);
-	write_sendq(irc_fd, NULL);
+	write_sendq(irc_ofd, NULL);
 	BlockHeapFree(authheap, auth);
 	comm_close(fd);
 }
@@ -273,8 +273,8 @@ read_auth(int fd, void *data)
 	len = recv(fd, buf, sizeof(buf), 0);
 	if(len < 0 && ignoreErrno(errno))
 	{
-		comm_settimeout(fd, 15, read_auth_timeout, auth);
-		comm_setselect(fd, FDLIST_SERVICE, COMM_SELECT_READ, read_auth, auth, 15);
+		comm_settimeout(fd, 30, read_auth_timeout, auth);
+		comm_setselect(fd, FDLIST_SERVICE, COMM_SELECT_READ, read_auth, auth, 30);
 		return;
 	} else {
 		buf[len] = '\0';
@@ -297,7 +297,7 @@ read_auth(int fd, void *data)
 			linebuf_put(&sendq, "%s %s", auth->reqid, username);
 		} else
 			linebuf_put(&sendq, "%s 0", auth->reqid);
-		write_sendq(irc_fd, NULL);
+		write_sendq(irc_ofd, NULL);
 		comm_close(fd);
 		BlockHeapFree(authheap, auth);
 	}
@@ -315,7 +315,7 @@ connect_callback(int fd, int status, void *data)
 		if(send_sprintf(fd, "%u , %u\r\n", auth->srcport, auth->dstport) <= 0)
 		{
 			linebuf_put(&sendq, "%s 0", auth->reqid);
-			write_sendq(irc_fd, NULL);
+			write_sendq(irc_ofd, NULL);
 			comm_close(fd);
 			BlockHeapFree(authheap, auth);
 			return;
@@ -323,7 +323,7 @@ connect_callback(int fd, int status, void *data)
 		read_auth(fd, auth);
 	} else {
 		linebuf_put(&sendq, "%s 0", auth->reqid);
-		write_sendq(irc_fd, NULL);
+		write_sendq(irc_ofd, NULL);
 		comm_close(fd);
 		BlockHeapFree(authheap, auth);
 	}
@@ -352,7 +352,7 @@ check_identd(const char *id, const char *bindaddr, const char *destaddr, const c
 
 	auth->authfd = comm_socket(aftype, SOCK_STREAM, 0, "auth fd");
 	comm_connect_tcp(auth->authfd, (struct sockaddr *)&auth->destaddr, 
-		(struct sockaddr *)&auth->bindaddr, sizeof(struct sockaddr_in), connect_callback, auth, 15);
+		(struct sockaddr *)&auth->bindaddr, sizeof(struct sockaddr_in), connect_callback, auth, 30);
                                   
 }
 
@@ -377,7 +377,7 @@ read_auth_request(int fd, void *data)
 {
         int length;
 
-        while((length = read(irc_fd, readBuf, sizeof(readBuf))) > 0)
+        while((length = read(irc_ifd, readBuf, sizeof(readBuf))) > 0)
         {
                 linebuf_parse(&recvq, readBuf, length, 0);
                 parse_auth_request();
@@ -389,7 +389,7 @@ read_auth_request(int fd, void *data)
         if(length == -1 && !ignoreErrno(errno))
                 exit(1);
 
-        comm_setselect(irc_fd, FDLIST_SERVICE, COMM_SELECT_READ, read_auth_request, NULL, 0);
+        comm_setselect(irc_ifd, FDLIST_SERVICE, COMM_SELECT_READ, read_auth_request, NULL, 0);
 }
 
 void
@@ -400,13 +400,16 @@ set_time(void)
 
 int main(int argc, char **argv)
 {
-	char *tfd;
+	char *tifd;
+	char *tofd;
 	fdlist_init();
 	init_netio();	
-	tfd = getenv("FD");
-	if(tfd == NULL)
+	tifd = getenv("IFD");
+	tofd = getenv("OFD");
+	if(tifd == NULL || tofd == NULL)
 		exit(1);
-	irc_fd = atoi(tfd);
+	irc_ifd = atoi(tifd);
+	irc_ofd = atoi(tofd);
 	init_dlink_nodes();
 	initBlockHeap();
 	linebuf_init();	
@@ -414,10 +417,12 @@ int main(int argc, char **argv)
 	linebuf_newbuf(&recvq);
 	authheap = BlockHeapCreate(sizeof(struct auth_request), 2048);
 
-	comm_open(irc_fd, FD_SOCKET, "ircd fd");
-	comm_set_nb(irc_fd);
+	comm_open(irc_ifd, FD_PIPE, "ircd ifd");
+	comm_open(irc_ofd, FD_PIPE, "ircd ofd");
+	comm_set_nb(irc_ifd);
+	comm_set_nb(irc_ofd);
 	
-	read_auth_request(irc_fd, NULL);
+	read_auth_request(irc_ifd, NULL);
 	while(1) {
 		comm_select(1000);
 		comm_checktimeouts(NULL);

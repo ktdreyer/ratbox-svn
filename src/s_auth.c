@@ -93,7 +93,8 @@ static buf_head_t auth_recvq;
 
 static PF read_auth_reply;
 static int fork_ident_count = 0;
-static int auth_fd = -1;
+static int auth_ofd = -1;
+static int auth_ifd = -1;
 static pid_t auth_pid = -1;
 static u_int16_t id;
 #define IDTABLE 0x1000
@@ -113,8 +114,11 @@ assign_id(void)
 static void
 fork_ident(void)
 {
-	int fdx[2];
+	int ifd[2];
+	int ofd[2];
+	
 	char fx[6];
+	char fy[6];
 	pid_t pid;
 	int i;
 
@@ -124,27 +128,33 @@ fork_ident(void)
 
 	}
 	fork_ident_count++;
-	if(auth_fd > 0)
-		comm_close(auth_fd);
-
+	if(auth_ifd > 0)
+		comm_close(auth_ifd);
+	if(auth_ofd > 0)
+		comm_close(auth_ofd);
 	if(auth_pid > 0)
 	{
 		kill(auth_pid, SIGKILL);
 	}
-	comm_socketpair(AF_UNIX, SOCK_STREAM, 0, fdx, "ident daemon");
+//	comm_socketpair(AF_UNIX, SOCK_STREAM, 0, fdx, "ident daemon");
+	comm_pipe(ifd, "ident daemon - read");
+	comm_pipe(ofd, "ident daemon - write");
 
-	ircsnprintf(fx, sizeof(fx), "%d", fdx[1]);
+	ircsnprintf(fx, sizeof(fx), "%d", ifd[1]); /*ident write*/
+	ircsnprintf(fy, sizeof(fy), "%d", ofd[0]); /*ident read*/
 
-	comm_set_nb(fdx[0]);
-	comm_set_nb(fdx[1]);
+	comm_set_nb(ifd[0]);
+	comm_set_nb(ifd[1]);
+	comm_set_nb(ifd[0]);
+	comm_set_nb(ofd[1]);
 
 	if(!(pid = fork()))
 	{
-		setenv("FD", fx, 1);
-		close(fdx[0]);
+		setenv("IFD", fy, 1);
+		setenv("OFD", fx, 1);
 		for(i = 0; i < HARD_FDLIMIT; i++)
 		{
-			if(i != fdx[1])
+			if(i != ifd[1] && i != ofd[0])
 				close(i);
 		}
 		execl(BINPATH "/ident", "-ircd ident daemon", NULL);
@@ -152,12 +162,17 @@ fork_ident(void)
 	else if(pid == -1)
 	{
 		ilog(L_MAIN, "fork failed: %s", strerror(errno));
-		comm_close(fdx[0]);
-		close(fdx[1]);
+		comm_close(ifd[0]);
+		comm_close(ifd[1]);
+		comm_close(ofd[0]);
+		comm_close(ofd[1]);
 		return;
 	}
+	comm_close(ifd[1]);
+	comm_close(ofd[0]);
 
-	auth_fd = fdx[0];
+	auth_ifd = ifd[0];
+	auth_ofd = ofd[1];
 	auth_pid = pid;
 	return;
 }
@@ -309,7 +324,7 @@ auth_write_sendq(int fd, void *unused)
 	int retlen;
 	if(linebuf_len(&auth_sendq) > 0)
 	{
-		while((retlen = linebuf_flush(auth_fd, &auth_sendq)) > 0);
+		while((retlen = linebuf_flush(auth_ofd, &auth_sendq)) > 0);
 		if(retlen == 0 || (retlen < 0 && !ignoreErrno(errno)))
 		{
 			fork_ident();
@@ -318,7 +333,7 @@ auth_write_sendq(int fd, void *unused)
 	
 	if(linebuf_len(&auth_sendq) > 0)
 	{
-		comm_setselect(auth_fd, FDLIST_SERVICE, COMM_SELECT_WRITE, 
+		comm_setselect(auth_ofd, FDLIST_SERVICE, COMM_SELECT_WRITE, 
 			       auth_write_sendq, NULL, 0);
 	}
 }
@@ -388,9 +403,9 @@ start_auth_query(struct AuthRequest *auth)
 		    auth->client->sockhost, (unsigned int)rport, (unsigned int)lport); 
 
 
-	auth_write_sendq(auth_fd, NULL);
+	auth_write_sendq(auth_ofd, NULL);
 
-	read_auth_reply(auth_fd, NULL);
+	read_auth_reply(auth_ifd, NULL);
 	return;
 }
 
@@ -546,7 +561,7 @@ read_auth_reply(int fd, void *data)
 {
 	int length;
 
-	while((length = read(auth_fd, authBuf, sizeof(authBuf))) > 0)
+	while((length = read(auth_ifd, authBuf, sizeof(authBuf))) > 0)
 	{
 		linebuf_parse(&auth_recvq, authBuf, length, 0);
 		parse_auth_reply();
@@ -558,6 +573,6 @@ read_auth_reply(int fd, void *data)
 	if(length == -1 && !ignoreErrno(errno))
 		fork_ident();
 	
-	comm_setselect(auth_fd, FDLIST_SERVICE, COMM_SELECT_READ, read_auth_reply, NULL, 0);	
+	comm_setselect(auth_ifd, FDLIST_SERVICE, COMM_SELECT_READ, read_auth_reply, NULL, 0);	
 }
 

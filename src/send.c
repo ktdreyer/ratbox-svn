@@ -289,7 +289,7 @@ send_queued_slink_write(int fd, void *data)
 
 	if(to->localClient->slinkq_len)
 		comm_setselect(to->localClient->ctrlfd, FDLIST_IDLECLIENT,
-			       COMM_SELECT_WRITE|COMM_SELECT_RETRY, send_queued_slink_write, to, 0);
+			       COMM_SELECT_WRITE, send_queued_slink_write, to, 0);
 }
 
 /* sendto_one()
