@@ -1,3 +1,40 @@
+androsyn    2005/04/17 06:26:42 UTC	(20050417_0)
+
+  Modified files:
+    .                    Makefile.in 
+    adns                 Makefile.in 
+    include              balloc.h commio.h linebuf.h struct.h 
+    modules              Makefile.in m_stats.c 
+    src                  Makefile.in commio.c event.c linebuf.c 
+                         s_auth.c tools.c 
+    src/ident            Makefile.am Makefile.in ident.c 
+    tools                Makefile.in 
+  Log:
+  Make the ident daemon and associated code in s_auth.c use linebufs when
+  talking to each other to deal with nasties like EAGAIN...
+  
+  Revision  Changes    Path
+  7.65      +0 -0      ircd-ratbox/Makefile.in
+  1.27      +2 -2      ircd-ratbox/adns/Makefile.in
+  1.38      +1 -0      ircd-ratbox/include/balloc.h
+  1.24      +3 -2      ircd-ratbox/include/commio.h
+  1.36      +26 -0     ircd-ratbox/include/linebuf.h
+  7.5       +1 -23     ircd-ratbox/include/struct.h
+  1.135     +0 -0      ircd-ratbox/modules/Makefile.in
+  1.255     +16 -4     ircd-ratbox/modules/m_stats.c
+  7.171     +0 -0      ircd-ratbox/src/Makefile.in
+  1.41      +4 -6      ircd-ratbox/src/commio.c
+  7.56      +6 -2      ircd-ratbox/src/event.c
+  1.4       +15 -2     ircd-ratbox/src/ident/Makefile.am
+  1.4       +124 -4    ircd-ratbox/src/ident/Makefile.in
+  1.8       +97 -134   ircd-ratbox/src/ident/ident.c
+  7.132     +77 -0     ircd-ratbox/src/linebuf.c
+  7.217     +77 -89    ircd-ratbox/src/s_auth.c
+  7.52      +1 -1      ircd-ratbox/src/tools.c
+  7.53      +0 -0      ircd-ratbox/tools/Makefile.in
+
+
+
 androsyn    2005/04/15 20:49:25 UTC	(20050415_1)
 
   Modified files:
