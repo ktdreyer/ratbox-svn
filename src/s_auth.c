@@ -301,7 +301,6 @@ auth_error(struct AuthRequest *auth)
 		authtable[auth->reqid] = NULL;
 	ClearAuth(auth);
 	sendheader(auth->client, REPORT_FAIL_ID);
-	release_auth_client(auth);
 }
 
 static void
