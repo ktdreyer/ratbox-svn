@@ -48,7 +48,9 @@
 # endif
 #endif
 
+#ifndef NO_BLOCKHEAP
 static BlockHeap *linebuf_heap;
+#endif
 
 static int bufline_count = 0;
 
@@ -63,15 +65,22 @@ static int bufline_count = 0;
 void
 linebuf_init(void)
 {
+#ifndef NO_BLOCKHEAP
 	linebuf_heap = BlockHeapCreate(sizeof(buf_line_t), LINEBUF_HEAP_SIZE);
+#endif
 }
 
 static buf_line_t *
 linebuf_allocate(void)
 {
 	buf_line_t *t;
+#ifndef NO_BLOCKHEAP
 	t = BlockHeapAlloc(linebuf_heap);
 	t->refcount = 0;
+#else
+	t = MyMalloc(sizeof(buf_line_t));
+	t->refcount = 0;
+#endif
 	return (t);
 
 }
@@ -79,7 +88,11 @@ linebuf_allocate(void)
 static void
 linebuf_free(buf_line_t * p)
 {
+#ifndef NO_BLOCKHEAP
 	BlockHeapFree(linebuf_heap, p);
+#else
+	MyFree(p);
+#endif
 }
 
 /*
@@ -534,6 +547,8 @@ linebuf_attach(buf_head_t * bufhead, buf_head_t * new)
 	}
 }
 
+
+
 /*
  * linebuf_putmsg
  *
@@ -571,6 +586,64 @@ linebuf_putmsg(buf_head_t * bufhead, const char *format, va_list * va_args,
 	if(va_args != NULL)
 	{
 		len += ircvsnprintf((bufline->buf + len), (BUF_DATA_SIZE - len), format, *va_args);
+	}
+
+	bufline->terminated = 1;
+
+	/* Truncate the data if required */
+	if(len > 510)
+	{
+		len = 510;
+		bufline->buf[len++] = '\r';
+		bufline->buf[len++] = '\n';
+	}
+	else if(len == 0)
+	{
+		bufline->buf[len++] = '\r';
+		bufline->buf[len++] = '\n';
+		bufline->buf[len] = '\0';
+	}
+	else
+	{
+		/* Chop trailing CRLF's .. */
+		while ((bufline->buf[len] == '\r')
+		       || (bufline->buf[len] == '\n') || (bufline->buf[len] == '\0'))
+		{
+			len--;
+		}
+
+		bufline->buf[++len] = '\r';
+		bufline->buf[++len] = '\n';
+		bufline->buf[++len] = '\0';
+	}
+
+	bufline->len = len;
+	bufhead->len += len;
+}
+
+void
+linebuf_put(buf_head_t * bufhead, const char *format, ...)
+{
+	buf_line_t *bufline;
+	int len = 0;
+	va_list args;
+
+	/* make sure the previous line is terminated */
+#ifndef NDEBUG
+	if(bufhead->list.tail)
+	{
+		bufline = bufhead->list.tail->data;
+		s_assert(bufline->terminated);
+	}
+#endif
+	/* Create a new line */
+	bufline = linebuf_new_line(bufhead);
+
+	if(format != NULL)
+	{
+		va_start(args, format);
+		len = ircvsnprintf(bufline->buf, BUF_DATA_SIZE, format, args);
+		va_end(args);
 	}
 
 	bufline->terminated = 1;
@@ -681,5 +754,9 @@ linebuf_flush(int fd, buf_head_t * bufhead)
 void
 count_linebuf_memory(size_t * count, size_t * linebuf_memory_used)
 {
+#ifndef NO_BLOCKHEAP
 	BlockHeapUsage(linebuf_heap, count, NULL, linebuf_memory_used);
+#else
+	*count = 0; *linebuf_memory_used = 0;
+#endif
 }

@@ -40,6 +40,7 @@ typedef struct BlockHeap BlockHeap;
 #define BlockHeapDestroy(x) 	 
 #define BlockHeapAlloc(x) MyMalloc((int)x) 	 
 #define BlockHeapFree(x,y) MyFree(y) 	 
+#define BlockHeapUsage(bh, bused, bfree, bmemusage) do { (*(size_t *)bused) = 0; *((size_t *)bfree) = 0; *((size_t *)bmemusage) = 0; } while(0)
  
 #else
 

@@ -124,7 +124,7 @@ static void stats_memory(struct Client *);
 static void stats_servlinks(struct Client *);
 static void stats_ltrace(struct Client *, int, const char **);
 static void stats_ziplinks(struct Client *);
-
+static void stats_comm(struct Client *);
 /* This table contains the possible stats items, in order:
  * stats letter,  function to call, operonly? adminonly?
  * case only matters in the stats letter column.. -- fl_
@@ -141,8 +141,8 @@ static struct StatsStruct stats_cmd_table[] = {
 	{'D', stats_deny,		1, 0, },
 	{'e', stats_exempt,		1, 0, },
 	{'E', stats_events,		1, 1, },
-	{'f', comm_dump,		1, 1, },
-	{'F', comm_dump,		1, 1, },
+	{'f', stats_comm,		1, 1, },
+	{'F', stats_comm,		1, 1, },
 	{'g', stats_pending_glines,	1, 0, },
 	{'G', stats_glines,		1, 0, },
 	{'h', stats_hubleaf,		0, 0, },
@@ -1684,6 +1684,18 @@ stats_l_client(struct Client *source_p, struct Client *target_p,
 	}
 }
 
+static void
+comm_dump_callback(const char *str, void *data)
+{
+	struct Client *source_p = data;
+	sendto_one_numeric(source_p, RPL_STATSDEBUG, str);
+}
+
+static void
+stats_comm(struct Client *source_p)
+{
+	comm_dump(comm_dump_callback, source_p);
+}
 /*
  * stats_spy
  *

@@ -122,9 +122,10 @@ eventAdd(const char *name, EVH * func, void *arg, time_t when)
 			return;
 		}
 	}
-
+#ifndef NO_IRCD
 	/* erk! couldnt add to event table */
 	sendto_realops_flags(UMODE_DEBUG, L_ALL, "Unable to add event [%s] to event table", name);
+#endif
 }
 
 void
@@ -154,9 +155,11 @@ eventAddOnce(const char *name, EVH *func, void *arg, time_t when)
 		}
 	}
 
+#ifndef NO_IRCD
 	/* erk! couldnt add to event table */
 	sendto_realops_flags(UMODE_DEBUG, L_ALL,
 			     "Unable to add event [%s] to event table", name);
+#endif
 }
 
 /*
@@ -308,6 +311,7 @@ eventFind(EVH * func, void *arg)
 	return -1;
 }
 
+#ifndef NO_IRCD
 /* 
  * void show_events(struct Client *source_p)
  *
@@ -339,7 +343,7 @@ show_events(struct Client *source_p)
 		}
 	}
 }
-
+#endif
 /* 
  * void set_back_events(time_t by)
  * Input: Time to set back events by.

@@ -728,21 +728,19 @@ comm_close(int fd)
  * comm_dump() - dump the list of active filedescriptors
  */
 void
-comm_dump(struct Client *source_p)
+comm_dump(DUMPCB *cb, void *data)
 {
-#ifndef IDENT_BUILD /* hack for ident daemon build */
 	int i;
-
+	char buf[128];
 	for (i = 0; i <= highest_fd; i++)
 	{
 		if(!fd_table[i].flags.open)
 			continue;
 
-		sendto_one_numeric(source_p, RPL_STATSDEBUG, 
-				   "F :fd %-3d desc '%s'",
+		ircsnprintf(buf, sizeof(buf), "F :fd %-3d desc '%s'",
 				   i, fd_table[i].desc);
+		cb(buf, data);
 	}
-#endif
 }
 
 /*

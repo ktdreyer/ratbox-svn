@@ -34,7 +34,10 @@ struct timeval SystemTime;
 #include "memory.h"
 #include "defs.h"
 #include "commio.h"
-
+#include "tools.h"
+#include "balloc.h"
+#include "linebuf.h"
+#include "irc_string.h"
 #define USERLEN 10
 
 /* data fd from ircd */
@@ -56,33 +59,31 @@ int irc_cfd;
 
 #define EmptyString(x) (!(x) || (*(x) == '\0'))
 static char buf[512]; /* scratch buffer */
+static char readBuf[READBUF_SIZE];
+
+static buf_head_t recvq;
+static buf_head_t sendq;
 
 static int
 send_sprintf(int fd, const char *format, ...)
 {
-	va_list args;
-	va_start(args, format);
-	vsprintf(buf, format, args); 
-	va_end(args);
-	return(send(fd, buf, strlen(buf), 0));
+        va_list args; 
+        va_start(args, format);
+        vsprintf(buf, format, args);
+        va_end(args); 
+        return(send(fd, buf, strlen(buf), 0));
 }
 
-
-void ilog(int level, char *errstr, ...)
+void ilog(char *errstr, ...)
 {
-	va_list ap;
-	va_start(ap, errstr);
-	vsprintf(buf, errstr, ap);
-	va_end(ap);
-	send(irc_cfd, buf, strlen(buf), 0);
-	exit(-1);
+	exit(2);
 }
 
 void restart(char *msg)
 {
-	/* this is needed to deal with memory.c */
-	ilog(0, "%s", msg);	
+	exit(1);
 }
+
 
 
 /* io_to_array()
@@ -163,31 +164,43 @@ ID success/failure username
 
 struct auth_request
 {
-	union
-	{
-		struct sockaddr_in in;
-#ifdef IPV6
-		struct sockaddr_in6 in6;
-#endif
-	} bindaddr;
-	union
-	{
-		struct sockaddr_in in;
-#ifdef IPV6		
-		struct sockaddr_in6 in6;
-#endif
-	} destaddr;
+	struct irc_sockaddr_storage bindaddr;
+	struct irc_sockaddr_storage destaddr;
 	int srcport;
 	int dstport;
 	char reqid[REQIDLEN];
 	int authfd;
 };
 
+
+static void
+write_sendq(int fd, void *unused)
+{
+        int retlen;
+        if(linebuf_len(&sendq) > 0)
+        {
+                while((retlen = linebuf_flush(irc_fd, &sendq)) > 0);
+                if(retlen == 0 || (retlen < 0 && !ignoreErrno(errno)))
+                {
+                        exit(1);
+                }
+        }
+         
+        if(linebuf_len(&sendq) > 0)
+        {
+                comm_setselect(irc_fd, FDLIST_SERVICE, COMM_SELECT_WRITE,
+                               write_sendq, NULL, 0);
+        }
+}
+ 
+
+
 static void
 read_auth_timeout(int fd, void *data)
 {
 	struct auth_request *auth = data;
-	send_sprintf(irc_fd, "%s 0\n", auth->reqid);
+	linebuf_put(&sendq, "%s 0", auth->reqid);
+	write_sendq(irc_fd, NULL);
 	MyFree(auth);
 	comm_close(fd);
 }
@@ -280,13 +293,13 @@ read_auth(int fd, void *data)
 				}
 			}
 			*t = '\0';
-			send_sprintf(irc_fd, "%s %s\n", auth->reqid, username);	
+			linebuf_put(&sendq, "%s %s", auth->reqid, username);
 		} else
-			send_sprintf(irc_fd, "%s 0\n", auth->reqid);
+			linebuf_put(&sendq, "%s 0", auth->reqid);
+		write_sendq(irc_fd, NULL);
 		comm_close(fd);
 		MyFree(auth);
 	}
-	return;
 }
 
 static void
@@ -300,67 +313,39 @@ connect_callback(int fd, int status, void *data)
 		 */
 		if(send_sprintf(fd, "%u , %u\r\n", auth->srcport, auth->dstport) <= 0)
 		{
-			send_sprintf(irc_fd, "%s 0\n", auth->reqid);
+			linebuf_put(&sendq, "%s 0", auth->reqid);
+			write_sendq(irc_fd, NULL);
 			comm_close(fd);
 			MyFree(auth);
 			return;
 		}
 		read_auth(fd, auth);
 	} else {
-		send_sprintf(irc_fd, "%s 0\n", auth->reqid);
+		linebuf_put(&sendq, "%s 0", auth->reqid);
+		write_sendq(irc_fd, NULL);
 		comm_close(fd);
 		MyFree(auth);
 	}
 }
 
 void
-check_identd(const char *id, const char *bindaddr, const char *aft, const char *destaddr, const char *srcport, const char *dstport)
+check_identd(const char *id, const char *bindaddr, const char *destaddr, const char *srcport, const char *dstport)
 {
 	struct auth_request *auth;
 	int aftype = AF_INET;
 	auth = MyMalloc(sizeof(struct auth_request));
-#ifdef IPV6
-	if(*aft == '6') 
-	{
-		aftype = AF_INET6;
-		inet_pton(AF_INET6, bindaddr, &auth->bindaddr.in6.sin6_addr);
-		auth->bindaddr.in6.sin6_family = AF_INET6;
-#ifdef SOCKADDR_IN_HAS_LEN
-		auth->binaddr.in6.sin6_len = sizeof(struct sockaddr_in6);
-#endif
-	}
-	else 
-#else /* ipv6*/
-	{
-		inet_pton(AF_INET, bindaddr, &auth->bindaddr.in.sin_addr);
-		auth->bindaddr.in.sin_family = AF_INET;
-#ifdef SOCKADDR_IN_HAS_LEN
-		auth->bindaddr.in.sin_len = sizeof(struct sockaddr_in);
-#endif
-	}
-#endif /* ipv6*/
+
+	inetpton_sock(bindaddr, (struct sockaddr *)&auth->bindaddr);
+
+	inetpton_sock(destaddr, (struct sockaddr *)&auth->destaddr);
 
 #ifdef IPV6
-	if(*aft == '6')
-	{
-		aftype = AF_INET6;
-		inet_pton(AF_INET6, destaddr, &auth->destaddr.in6.sin6_addr);
-		auth->destaddr.in6.sin6_family = AF_INET6;
-#ifdef SOCKADDR_IN_HAS_LEN
-		auth->destaddr.in6.sin6_len = sizeof(struct sockaddr_in6);
+	if(((struct sockaddr *)&destaddr)->sa_family == AF_INET6)
+		((struct sockaddr_in6 *)&auth->destaddr)->sin6_port = htons(113);
+	else
 #endif
-		auth->destaddr.in6.sin6_port = htons(113);
+		((struct sockaddr_in *)&auth->destaddr)->sin_port = htons(113);
 
-	} else
-#endif
-	{
-		inet_pton(AF_INET, destaddr, &auth->destaddr.in.sin_addr);
-		auth->destaddr.in.sin_family = AF_INET;
-#ifdef SOCKADDR_IN_HAS_LEN
-		auth->destaddr.in.sin_len = sizeof(struct sockaddr_in);
-#endif
-		auth->destaddr.in.sin_port = htons(113);
-	}		
 	auth->srcport = atoi(srcport);
 	auth->dstport = atoi(dstport);
 	strcpy(auth->reqid, id);
@@ -371,61 +356,40 @@ check_identd(const char *id, const char *bindaddr, const char *aft, const char *
                                   
 }
 
-
-
 static void
-process_request(int fd, void *data)
+parse_auth_request(void)
 {
-	char *p;
-	char buf[512];
-	int parc;
+        int len;
 	static char *parv[MAXPARA + 1];
-	int n;
-
-	while(1)
-	{
-		if((n = read(fd, buf, sizeof(buf))) <= 0)
-		{
-			if(n == -1 && ignoreErrno(errno))
-				break;
-			else
-				ilog(0, "ERR: read failed: %s\n", strerror(errno));
-		}
-
-	        if((p = memchr(buf, '\n', n)) != NULL)
-	        {
-	                n = p - buf + 1;
-	                *p = '\0';
-		
-			parc = io_to_array(buf, parv);
-			if(parc != 6)
-				ilog(0, "ERR: wrong number of arguments passed\n");
-			check_identd(parv[0], parv[1], parv[2], parv[3], parv[4], parv[5]);
-	        } else
-			ilog(0, "ERR: Got bogus data from server");       
+	int parc;
+        while((len = linebuf_get(&recvq, readBuf, sizeof(readBuf),
+                                 LINEBUF_COMPLETE, LINEBUF_PARSED)) > 0)
+        {
+		parc = io_to_array(readBuf, parv);
+		if(parc != 5)
+			exit(1);
+		check_identd(parv[0], parv[1], parv[2], parv[3], parv[4]);
 	}
-
-	comm_setselect(fd, FDLIST_SERVICE, COMM_SELECT_READ, process_request, NULL, 0);
-	return;	
 }
 
 static void
-process_ctrl(int fd, void *unused)
+read_auth_request(int fd, void *data)
 {
-	char nbuf[1];
-	int len;
-	while(1)
-	{
-		if((len = recv(fd, nbuf, sizeof(buf), 0)) <= 0)
-		{
-			if(len == -1 && ignoreErrno(errno))
-				break;
-			else
-				exit(0); /* control socket is gone..so are we */
-		} 
-		/* eventually *do* something with the data */
-	}	
-	comm_setselect(fd, FDLIST_SERVER, COMM_SELECT_READ, process_ctrl, NULL, 0);
+        int length;
+
+        while((length = read(irc_fd, readBuf, sizeof(readBuf))) > 0)
+        {
+                linebuf_parse(&recvq, readBuf, length, 0);
+                parse_auth_request();
+        }
+         
+        if(length == 0)
+                exit(1);
+
+        if(length == -1 && !ignoreErrno(errno))
+                exit(1);
+
+        comm_setselect(irc_fd, FDLIST_SERVICE, COMM_SELECT_READ, read_auth_request, NULL, 0);
 }
 
 void
@@ -437,24 +401,23 @@ set_time(void)
 int main(int argc, char **argv)
 {
 	char *tfd;
-	char *tcfd;
 	fdlist_init();
 	init_netio();	
 	tfd = getenv("FD");
-	tcfd = getenv("CFD");
-	if(tfd == NULL && tcfd == NULL)
-		exit(0);
+	if(tfd == NULL)
+		exit(1);
 	irc_fd = atoi(tfd);
-	irc_cfd = atoi(tcfd);
-
+	init_dlink_nodes();
+	initBlockHeap();
+	linebuf_init();	
+	linebuf_newbuf(&sendq);
+	linebuf_newbuf(&recvq);
+	
 	comm_open(irc_fd, FD_SOCKET, "ircd fd");
-	comm_open(irc_cfd, FD_SOCKET, "ircd cfd");
 
 	comm_set_nb(irc_fd);
-	comm_set_nb(irc_cfd);
-
-	process_request(irc_fd, NULL);
-	process_ctrl(irc_cfd, NULL);	
+	
+	read_auth_request(irc_fd, NULL);
 	while(1) {
 		comm_select(1000);
 		comm_checktimeouts(NULL);

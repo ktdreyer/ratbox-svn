@@ -26,30 +26,8 @@
 #ifndef INCLUDED_struct_h
 #define INCLUDED_struct_h
 
-/*** linebuf.h ***/
 
-/* How big we want a buffer - 510 data bytes, plus space for a '\0' */
-#define BUF_DATA_SIZE		511
-
-typedef struct _buf_line
-{
-	char buf[BUF_DATA_SIZE + 2];
-	unsigned int terminated;	/* Whether we've terminated the buffer */
-	unsigned int flushing;	/* Whether we're flushing .. */
-	unsigned int raw;	/* Whether this linebuf may hold 8-bit data */
-	int len;		/* How much data we've got */
-	int refcount;		/* how many linked lists are we in? */
-	struct _buf_line *next;	/* next in free list */
-} buf_line_t;
-
-typedef struct _buf_head
-{
-	dlink_list list;	/* the actual dlink list */
-	int len;		/* length of all the data */
-	int alloclen;		/* Actual allocated data length */
-	int writeofs;		/* offset in the first line for the write */
-	int numlines;		/* number of lines */
-} buf_head_t;
+#include "linebuf.h" /* okay shoot me..if i want to reuse the linebuf code i gotta do this */
 
 
 /*** client.h ***/

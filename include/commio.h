@@ -39,7 +39,8 @@ typedef void PF(int fd, void *);
 /* Callback for completed connections */
 /* int fd, int status, void * */
 typedef void CNCB(int fd, int, void *);
-
+/* callback for fd table dumps */
+typedef void DUMPCB(const char *string, void *);
 /*
  * priority values used in fdlist code
  */
@@ -149,7 +150,7 @@ void fdlist_init(void);
 
 extern void comm_open(int, unsigned int, const char *);
 extern void comm_close(int);
-extern void comm_dump(struct Client *source_p);
+extern void comm_dump(DUMPCB *, void *data);
 #ifndef __GNUC__
 extern void comm_note(int fd, const char *format, ...);
 #else

@@ -52,6 +52,7 @@
 #include "memory.h"
 #include "hook.h"
 #include "balloc.h"
+#include "linebuf.h"
 #include "res.h"
 
 /*
@@ -87,11 +88,12 @@ static dlink_list auth_poll_list;
 static BlockHeap *auth_heap;
 static EVH timeout_auth_queries_event;
 
-static PF read_auth_reply;
+static buf_head_t auth_sendq;
+static buf_head_t auth_recvq;
 
+static PF read_auth_reply;
 static int fork_ident_count = 0;
-static int auth_fd = -1, auth_cfd = -1;
-static int need_restart = 0;
+static int auth_fd = -1;
 static pid_t auth_pid = -1;
 static u_int16_t id;
 #define IDTABLE 0x1000
@@ -111,52 +113,38 @@ assign_id(void)
 static void
 fork_ident(void)
 {
-	int fdx[2], cfdx[2];
-	char fx[5], fy[5];
+	int fdx[2];
+	char fx[6];
 	pid_t pid;
 	int i;
 
 	if(fork_ident_count > 10)
 	{
 		ilog(L_MAIN, "Ident daemon is spinning: %d\n", fork_ident_count);
-		fork_ident_count++;
-		return;
-	}
 
+	}
+	fork_ident_count++;
 	if(auth_fd > 0)
 		comm_close(auth_fd);
-	if(auth_cfd > 0)
-		comm_close(auth_cfd);
+
 	if(auth_pid > 0)
 	{
 		kill(auth_pid, SIGKILL);
 	}
-
-	if(comm_socketpair(AF_UNIX, SOCK_DGRAM, 0, fdx, "ident data channel"))
-	{
-		return;
-	}
-
-	if(comm_socketpair(AF_UNIX, SOCK_STREAM, 0, cfdx, "ident ctrl channel"))
-	{
-		comm_close(fdx[0]);
-		close(fdx[1]);
-		return;
-
-	}
+	comm_socketpair(AF_UNIX, SOCK_STREAM, 0, fdx, "ident daemon");
 
 	ircsnprintf(fx, sizeof(fx), "%d", fdx[1]);
-	ircsnprintf(fy, sizeof(fy), "%d", cfdx[1]);
+
+	comm_set_nb(fdx[0]);
+	comm_set_nb(fdx[1]);
 
 	if(!(pid = fork()))
 	{
 		setenv("FD", fx, 1);
-		setenv("CFD", fy, 1);
 		close(fdx[0]);
-		close(cfdx[0]);
 		for(i = 0; i < HARD_FDLIMIT; i++)
 		{
-			if((i != fdx[1] && i != cfdx[1]))	
+			if(i != fdx[1])
 				close(i);
 		}
 		execl(BINPATH "/ident", "-ircd ident daemon", NULL);
@@ -166,13 +154,10 @@ fork_ident(void)
 		ilog(L_MAIN, "fork failed: %s", strerror(errno));
 		comm_close(fdx[0]);
 		close(fdx[1]);
-		comm_close(cfdx[0]);
-		close(cfdx[1]);
 		return;
 	}
 
 	auth_fd = fdx[0];
-	auth_cfd = cfdx[0];
 	auth_pid = pid;
 	return;
 }
@@ -183,8 +168,7 @@ ident_sigchld(void)
 	int status;
 	if(waitpid(auth_pid, &status, WNOHANG) == auth_pid)
 	{
-		auth_pid = -1;
-		need_restart = 1;
+		fork_ident();
 	}
 }
 
@@ -194,15 +178,6 @@ restart_ident(void)
 	fork_ident();
 }
 
-static void
-check_ident(void *unused)
-{
-	if(need_restart)
-	{
-		fork_ident();
-		need_restart = 0;
-	}
-}
 
 /*
  * init_auth()
@@ -214,18 +189,17 @@ init_auth(void)
 {
 	/* This hook takes a struct Client for its argument */
 	fork_ident();
+	linebuf_newbuf(&auth_sendq);
+	linebuf_newbuf(&auth_recvq);
 	if(auth_pid < 0)
 	{
 		ilog(L_MAIN, "Unable to fork ident daemon");
-		exit(0);
 	}
 	memset(&auth_poll_list, 0, sizeof(auth_poll_list));
 	eventAddIsh("timeout_auth_queries_event", timeout_auth_queries_event, NULL, 1);
 	auth_heap = BlockHeapCreate(sizeof(struct AuthRequest), LCLIENT_HEAP_SIZE);
-	eventAddIsh("check_ident", check_ident, NULL, 5);
+
 }
-
-
 
 /*
  * make_auth_request - allocate a new auth request
@@ -268,9 +242,7 @@ release_auth_client(struct AuthRequest *auth)
 		authtable[auth->reqid] = NULL;
 
 	client->localClient->auth_request = NULL;
-	list_sanity_check(&auth_poll_list);
 	dlinkDelete(&auth->node, &auth_poll_list);
-	list_sanity_check(&auth_poll_list);
 	free_auth_request(auth);
 	if(client->localClient->fd > highest_fd)
 		highest_fd = client->localClient->fd;
@@ -329,6 +301,27 @@ auth_error(struct AuthRequest *auth)
 		authtable[auth->reqid] = NULL;
 	ClearAuth(auth);
 	sendheader(auth->client, REPORT_FAIL_ID);
+	release_auth_client(auth);
+}
+
+static void
+auth_write_sendq(int fd, void *unused)
+{
+	int retlen;
+	if(linebuf_len(&auth_sendq) > 0)
+	{
+		while((retlen = linebuf_flush(auth_fd, &auth_sendq)) > 0);
+		if(retlen == 0 || (retlen < 0 && !ignoreErrno(errno)))
+		{
+			fork_ident();
+		}
+	}
+	
+	if(linebuf_len(&auth_sendq) > 0)
+	{
+		comm_setselect(auth_fd, FDLIST_SERVICE, COMM_SELECT_WRITE, 
+			       auth_write_sendq, NULL, 0);
+	}
 }
 
 /*
@@ -347,7 +340,6 @@ start_auth_query(struct AuthRequest *auth)
 	socklen_t locallen = sizeof(struct irc_sockaddr_storage);
 	socklen_t remotelen = sizeof(struct irc_sockaddr_storage);
 	char myip[HOSTIPLEN + 1];
-	char reqbuf[512];
 	int lport, rport;
 	int af = 4;
 
@@ -401,13 +393,12 @@ start_auth_query(struct AuthRequest *auth)
 	auth->reqid = assign_id();
 	authtable[auth->reqid] = auth;
 
-	ircsnprintf(reqbuf, sizeof(reqbuf), "%x %s %d %s %u %u\n", auth->reqid, myip, af,
-		    auth->client->sockhost, (unsigned int)rport, (unsigned int)lport);
+	linebuf_put(&auth_sendq, "%x %s %s %u %u", auth->reqid, myip, 
+		    auth->client->sockhost, (unsigned int)rport, (unsigned int)lport); 
 
-	if(send(auth_fd, reqbuf, strlen(reqbuf), 0) <= 0)
-	{
-		fork_ident();
-	}
+
+	auth_write_sendq(auth_fd, NULL);
+
 	read_auth_reply(auth_fd, NULL);
 	return;
 }
@@ -428,10 +419,8 @@ start_auth(struct Client *client)
 	auth = make_auth_request(client);
 
 	sendheader(client, REPORT_DO_DNS);
-	list_sanity_check(&auth_poll_list);
 
 	dlinkAdd(auth, &auth->node, &auth_poll_list);
-	list_sanity_check(&auth_poll_list);
 
 	/* Note that the order of things here are done for a good reason
 	 * if you try to do start_auth_query before lookup_ip there is a 
@@ -461,7 +450,6 @@ timeout_auth_queries_event(void *notused)
 	dlink_node *next_ptr;
 	struct AuthRequest *auth;
 
-	list_sanity_check(&auth_poll_list);
 	DLINK_FOREACH_SAFE(ptr, next_ptr, auth_poll_list.head)
 	{
 		auth = ptr->data;
@@ -484,7 +472,6 @@ timeout_auth_queries_event(void *notused)
 			release_auth_client(auth);
 		}
 	}
-	list_sanity_check(&auth_poll_list);
 	return;
 }
 
@@ -506,55 +493,34 @@ delete_auth_queries(struct Client *target_p)
 
 	if(auth->reqid > 0)
 		authtable[auth->reqid] = NULL;
-	list_sanity_check(&auth_poll_list);
 
 	dlinkDelete(&auth->node, &auth_poll_list);
-	list_sanity_check(&auth_poll_list);
 	free_auth_request(auth);
 }
 
 /* read auth reply from ident daemon */
 
+static char authBuf[READBUF_SIZE];
+
 static void
-read_auth_reply(int fd, void *data)
+parse_auth_reply(void)
 {
 	int len;
-	struct AuthRequest *auth;
-	u_int16_t id;
+	struct AuthRequest *auth;	
 	char *q, *p;
-	char buf[512];
-
-
-	while(1)
+	while((len = linebuf_get(&auth_recvq, authBuf, sizeof(authBuf), 
+			         LINEBUF_COMPLETE, LINEBUF_PARSED)) > 0)	
 	{
-		len = recv(fd, buf, sizeof(buf), 0);
-
-		if(len < 0)
-		{
-			if(ignoreErrno(errno))
-			{
-				comm_setselect(fd, FDLIST_IDLECLIENT, COMM_SELECT_READ, read_auth_reply, auth, 0);
-				return;
-			}
-			fork_ident();
-			return;
-		}
 		
-		if(len == 0)
-		{
-			fork_ident();
-			return;
-		}
-
-		q = strchr(buf, ' ');
+		q = strchr(authBuf, ' ');
 
 		if(q == NULL)
-			return;
+			continue;
 
 		*q = '\0';
 		q++;
 
-		id = strtoul(buf, NULL, 16);
+		id = strtoul(authBuf, NULL, 16);
 		auth = authtable[id];
 
 		if(auth == NULL)
@@ -565,7 +531,6 @@ read_auth_reply(int fd, void *data)
 		if(p != NULL)
 			*p = '\0';
 
-		
 		if(*q == '0')
 		{
 			strcpy(auth->client->username, "unknown");
@@ -580,4 +545,27 @@ read_auth_reply(int fd, void *data)
 		SetGotId(auth->client);
 		release_auth_client(auth);
 	}
+
+
 }
+
+static void
+read_auth_reply(int fd, void *data)
+{
+	int length;
+
+	while((length = read(auth_fd, authBuf, sizeof(authBuf))) > 0)
+	{
+		linebuf_parse(&auth_recvq, authBuf, length, 0);
+		parse_auth_reply();
+	}
+
+	if(length == 0)
+		fork_ident();
+
+	if(length == -1 && !ignoreErrno(errno))
+		fork_ident();
+	
+	comm_setselect(auth_fd, FDLIST_SERVICE, COMM_SELECT_READ, read_auth_reply, NULL, 0);	
+}
+

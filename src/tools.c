@@ -66,6 +66,7 @@ static BlockHeap *dnode_heap;
 void
 init_dlink_nodes(void)
 {
+
 	dnode_heap = BlockHeapCreate(sizeof(dlink_node), DNODE_HEAP_SIZE);
 	if(dnode_heap == NULL)
 		outofmemory();
@@ -95,7 +96,6 @@ void
 free_dlink_node(dlink_node * ptr)
 {
 	assert(ptr != NULL);
-
 	BlockHeapFree(dnode_heap, ptr);
 }
 
