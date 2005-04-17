@@ -1,3 +1,17 @@
+androsyn    2005/04/17 17:25:43 UTC	(20050417_3)
+
+  Modified files:
+    include              s_auth.h 
+    src                  s_auth.c 
+  Log:
+  i think i got the rest of this ident stuff sorted...
+  
+  Revision  Changes    Path
+  7.34      +9 -19     ircd-ratbox/include/s_auth.h
+  7.219     +11 -18    ircd-ratbox/src/s_auth.c
+
+
+
 androsyn    2005/04/17 07:20:02 UTC	(20050417_2)
 
   Modified files:
