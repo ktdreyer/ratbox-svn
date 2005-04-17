@@ -1,3 +1,15 @@
+androsyn    2005/04/17 06:43:12 UTC	(20050417_1)
+
+  Modified files:
+    src                  s_auth.c 
+  Log:
+  don't do a release_auth_client from auth_error
+  
+  Revision  Changes    Path
+  7.218     +0 -1      ircd-ratbox/src/s_auth.c
+
+
+
 androsyn    2005/04/17 06:26:42 UTC	(20050417_0)
 
   Modified files:
