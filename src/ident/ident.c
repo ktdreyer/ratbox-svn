@@ -58,6 +58,19 @@ int irc_cfd;
 #define FWDHOST 4
 
 #define EmptyString(x) (!(x) || (*(x) == '\0'))
+
+struct auth_request
+{
+	struct irc_sockaddr_storage bindaddr;
+	struct irc_sockaddr_storage destaddr;
+	int srcport;
+	int dstport;
+	char reqid[REQIDLEN];
+	int authfd;
+};
+
+static BlockHeap *authheap;
+
 static char buf[512]; /* scratch buffer */
 static char readBuf[READBUF_SIZE];
 
@@ -161,18 +174,6 @@ ID success/failure username
 
 */
 
-
-struct auth_request
-{
-	struct irc_sockaddr_storage bindaddr;
-	struct irc_sockaddr_storage destaddr;
-	int srcport;
-	int dstport;
-	char reqid[REQIDLEN];
-	int authfd;
-};
-
-
 static void
 write_sendq(int fd, void *unused)
 {
@@ -201,7 +202,7 @@ read_auth_timeout(int fd, void *data)
 	struct auth_request *auth = data;
 	linebuf_put(&sendq, "%s 0", auth->reqid);
 	write_sendq(irc_fd, NULL);
-	MyFree(auth);
+	BlockHeapFree(authheap, auth);
 	comm_close(fd);
 }
 
@@ -298,7 +299,7 @@ read_auth(int fd, void *data)
 			linebuf_put(&sendq, "%s 0", auth->reqid);
 		write_sendq(irc_fd, NULL);
 		comm_close(fd);
-		MyFree(auth);
+		BlockHeapFree(authheap, auth);
 	}
 }
 
@@ -316,7 +317,7 @@ connect_callback(int fd, int status, void *data)
 			linebuf_put(&sendq, "%s 0", auth->reqid);
 			write_sendq(irc_fd, NULL);
 			comm_close(fd);
-			MyFree(auth);
+			BlockHeapFree(authheap, auth);
 			return;
 		}
 		read_auth(fd, auth);
@@ -324,7 +325,7 @@ connect_callback(int fd, int status, void *data)
 		linebuf_put(&sendq, "%s 0", auth->reqid);
 		write_sendq(irc_fd, NULL);
 		comm_close(fd);
-		MyFree(auth);
+		BlockHeapFree(authheap, auth);
 	}
 }
 
@@ -333,10 +334,9 @@ check_identd(const char *id, const char *bindaddr, const char *destaddr, const c
 {
 	struct auth_request *auth;
 	int aftype = AF_INET;
-	auth = MyMalloc(sizeof(struct auth_request));
+	auth = BlockHeapAlloc(authheap);
 
 	inetpton_sock(bindaddr, (struct sockaddr *)&auth->bindaddr);
-
 	inetpton_sock(destaddr, (struct sockaddr *)&auth->destaddr);
 
 #ifdef IPV6
@@ -352,7 +352,7 @@ check_identd(const char *id, const char *bindaddr, const char *destaddr, const c
 
 	auth->authfd = comm_socket(aftype, SOCK_STREAM, 0, "auth fd");
 	comm_connect_tcp(auth->authfd, (struct sockaddr *)&auth->destaddr, 
-		(struct sockaddr *)&auth->bindaddr, sizeof(struct sockaddr_in), connect_callback, auth, 5);
+		(struct sockaddr *)&auth->bindaddr, sizeof(struct sockaddr_in), connect_callback, auth, 15);
                                   
 }
 
@@ -412,9 +412,9 @@ int main(int argc, char **argv)
 	linebuf_init();	
 	linebuf_newbuf(&sendq);
 	linebuf_newbuf(&recvq);
-	
-	comm_open(irc_fd, FD_SOCKET, "ircd fd");
+	authheap = BlockHeapCreate(sizeof(struct auth_request), 2048);
 
+	comm_open(irc_fd, FD_SOCKET, "ircd fd");
 	comm_set_nb(irc_fd);
 	
 	read_auth_request(irc_fd, NULL);
