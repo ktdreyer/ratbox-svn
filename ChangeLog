@@ -1,3 +1,15 @@
+leeh        2005/04/18 14:37:10 UTC	(20050418_2)
+
+  Modified files:
+    src                  c_mode.c 
+  Log:
+  - clear voiced_list at the end of c_mode()
+  
+  Revision  Changes    Path
+  1.33      +7 -1      rserv/src/c_mode.c
+
+
+
 leeh        2005/04/18 14:29:37 UTC	(20050418_1)
 
   Modified files:
