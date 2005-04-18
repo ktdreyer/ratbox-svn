@@ -1,3 +1,21 @@
+leeh        2005/04/18 14:29:37 UTC	(20050418_1)
+
+  Modified files:
+    help/chanserv        set 
+    include              hook.h s_chanserv.h 
+    src                  c_mode.c s_chanserv.c 
+  Log:
+  - added chanserv::set:novoices, disabling anyone being voiced
+  
+  Revision  Changes    Path
+  1.7       +1 -0      rserv/help/chanserv/set
+  1.8       +2 -1      rserv/include/hook.h
+  1.26      +3 -1      rserv/include/s_chanserv.h
+  1.32      +7 -0      rserv/src/c_mode.c
+  1.70      +101 -1    rserv/src/s_chanserv.c
+
+
+
 leeh        2005/04/18 12:24:24 UTC	(20050418_0)
 
   Modified files:
