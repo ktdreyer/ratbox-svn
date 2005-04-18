@@ -580,8 +580,14 @@ c_mode(struct client *client_p, const char *parv[], int parc)
 		free_dlink_node(ptr);
 	}
 
+	DLINK_FOREACH_SAFE(ptr, next_ptr, voiced_list.head)
+	{
+		free_dlink_node(ptr);
+	}
+
 	opped_list.head = opped_list.tail = NULL;
-	opped_list.length = 0;
+	voiced_list.head = voiced_list.tail = NULL;
+	opped_list.length = voiced_list.length = 0;
 
 	/* some services were deopped.. */
 	DLINK_FOREACH_SAFE(ptr, next_ptr, deopped_list.head)
