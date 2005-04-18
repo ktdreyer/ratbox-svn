@@ -28,6 +28,19 @@ AC_TYPE_SIGNAL
 AC_FUNC_STRFTIME
 AC_CHECK_FUNCS(select strlcpy strlcat gethostbyname mmap getaddrinfo)
 
+AC_MSG_CHECKING(Compile with warning flags)
+AC_ARG_ENABLE(warnings,
+[ --enable-warnings         Enable warning flags to compiler
+ --disable-warnings        Disable warning flags to compiler],
+[ cf_enable_warnings=$enableval ],[ cf_enable_warnings=no ])
+
+if test "X$cf_enable_warnings" = "Xyes"; then
+	CFLAGS="$CFLAGS -O0 -Wall -Werror -Wunused -Wshadow -Wmissing-declarations -Wwrite-strings"
+	AC_MSG_RESULT(yes)
+else
+	AC_MSG_RESULT(no)
+fi
+
 AC_MSG_CHECKING(Nickname Service)
 AC_ARG_ENABLE(nickserv,
 [ --enable-nickserv         Enable Nickname Service

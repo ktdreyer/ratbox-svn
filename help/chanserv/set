@@ -1,4 +1,4 @@
-SET <option> [parameter]
+SET <channel> <option> [parameter]
 {190} Sets various channel options
   AUTOJOIN     [on|off]: Places services within the channel.
   NOOPS        [on|off]: Disallow any user being opped.

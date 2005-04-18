@@ -12,7 +12,7 @@ BIN=ratbox-services@EXEEXT@
 INCLUDES=-I ../include/ @SQLITE_INCLUDES@
 LDFLAGS=@LDFLAGS@
 LIBS=@LIBS@
-CFLAGS=-g -O0 -Wall -Werror -Wunused -Wshadow -Wmissing-declarations -Wwrite-strings -DPREFIX=\"$(PREFIX)\"
+CFLAGS=@CPPFLAGS@ @CFLAGS@ -DPREFIX=\"$(PREFIX)\"
 MAKE = make
 
 # Anything marked with the .PHONY attribute is always considered "out of date"
