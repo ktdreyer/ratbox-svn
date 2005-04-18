@@ -184,6 +184,7 @@ comm_set_buffers(int fd, int size)
  * side effects - use POSIX compliant non blocking and
  *                be done with it.
  */
+#ifndef comm_set_nb
 int
 comm_set_nb(int fd)
 {
@@ -198,7 +199,7 @@ comm_set_nb(int fd)
 	fd_table[fd].flags.nonblocking = 1;
 	return 1;
 }
-
+#endif
 
 /*
  * stolen from squid - its a neat (but overused! :) routine which we
@@ -436,7 +437,7 @@ comm_connect_tryconnect(int fd, void *notused)
 			comm_connect_callback(F->fd, COMM_OK);
 		else if(ignoreErrno(errno))
 			/* Ignore error? Reschedule */
-			comm_setselect(F->fd, FDLIST_SERVER, COMM_SELECT_WRITE,
+			comm_setselect(F->fd, FDLIST_SERVER, COMM_SELECT_READ|COMM_SELECT_WRITE,
 				       comm_connect_tryconnect, NULL, 0);
 		else
 			/* Error? Fail with COMM_ERR_CONNECT */

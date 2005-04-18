@@ -81,7 +81,7 @@
 /* Define to 1 if you have the `poll' function. */
 #undef HAVE_POLL
 
-/* Define if you have the Solaris ports API */
+/* using ports */
 #undef HAVE_PORTS
 
 /* Define to 1 if you have the `port_create' function. */
@@ -89,6 +89,9 @@
 
 /* Define to 1 if you have the `select' function. */
 #undef HAVE_SELECT
+
+/* Define to 1 if you have the `sigtimedwait' function. */
+#undef HAVE_SIGTIMEDWAIT
 
 /* Define to 1 if you have the `socketpair' function. */
 #undef HAVE_SOCKETPAIR
@@ -177,10 +180,8 @@
 /* Prefix where to write logfiles. */
 #undef LOG_DIR
 
-#ifndef MAX_CLIENTS
 /* Maximum number of network connections */
 #undef MAX_CLIENTS
-#endif
 
 /* Sizeof member heap. */
 #undef MEMBER_HEAP_SIZE

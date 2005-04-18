@@ -497,6 +497,14 @@ AC_ARG_ENABLE(epoll, AC_HELP_STRING([--enable-epoll],[Force sys_epoll usage (Lin
   fi
 ],)
 
+AC_ARG_ENABLE(epoll, AC_HELP_STRING([--enable-rtsigio],[Force rtsigio usage (Linux only).]),
+[ if test $enableval = yes; then
+        SELECT_TYPE_EXPLICIT="sigio"
+  else
+        use_epoll=no
+  fi
+],)
+
 dnl **********************************************************************
 dnl Check for --with-confdir
 dnl **********************************************************************
@@ -581,6 +589,7 @@ if test ! "x$use_select" = "xno"; then
 	fi
 fi
 
+
 if test ! "x$use_poll" = "xno"; then
 	AC_CHECK_FUNCS(poll, [havepoll=yes], [havepoll=no])
 	if test "x$havepoll" = "xyes" ; then
@@ -610,9 +619,34 @@ if test ! "x$use_ports" = "xno"; then
 	AC_CHECK_FUNCS(port_create, [haveports=yes], [haveports=no])
 	if test "x$haveports" = "xyes" ; then
 		SELECT_TYPE="ports"
-		AC_DEFINE(HAVE_PORTS, [], [Define if you have the Solaris ports API])
+		AC_DEFINE(HAVE_PORTS, 1, [using ports])
 	fi
 fi
+
+if test ! "x$use_rtsigio" = "xno"; then
+	havertsig=no
+	if test "x$havepoll" = "xyes" ; then
+		AC_CHECK_FUNCS(sigtimedwait, [havertsig=yes], )
+	fi
+
+	if test "x$havertsig" = "xyes" ; then
+		AC_MSG_CHECKING(for F_SETSIG in fcntl.h)
+		AC_EGREP_CPP(yes,
+[
+#define _GNU_SOURCE
+#include <fcntl.h>
+#ifdef F_SETSIG
+yes
+#endif
+],	[ AC_MSG_RESULT(yes) ], [ AC_MSG_RESULT(no); havertsig=no])
+
+	fi
+
+	if test "x$havertsig" = "xyes"; then
+		SELECT_TYPE="sigio"
+	fi
+fi
+
 
 if test ! "x$use_epoll" = "xno"; then
 	AC_CHECK_FUNCS(epoll_ctl, [haveepoll=yes], [haveepoll=no])
@@ -679,6 +713,8 @@ fi
 fi
 
 fi
+
+
 
 if test -z "$SELECT_TYPE"; then
 	AC_MSG_ERROR([Unable to find a usable IO interface],)

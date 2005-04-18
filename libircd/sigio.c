@@ -137,15 +137,25 @@ poll_update_pollfds(int fd, short event, PF * handler)
  * Output: None
  * Side Effect: Sets the FD up for SIGIO
  */
-static void
+int
 setup_sigio_fd(int fd)
 {
-	int flags;
+	int flags = 0;
 	flags = fcntl(fd, F_GETFL, 0);
+	if(flags == -1)
+		return 0;
 	flags |= O_ASYNC | O_NONBLOCK;
-	fcntl(fd, F_SETFL, flags);
-	fcntl(fd, F_SETSIG, sigio_signal);
-	fcntl(fd, F_SETOWN, getpid());
+	if(fcntl(fd, F_SETFL, flags) == -1)
+		return 0;
+	
+	if(fcntl(fd, F_SETSIG, sigio_signal) == -1)
+		return 0;
+
+	if(fcntl(fd, F_SETOWN, getpid()) == -1)
+		return 0;
+
+	fd_table[fd].flags.nonblocking = 1;
+	return 1;
 }
 
 /*
@@ -180,7 +190,7 @@ comm_setselect(int fd, fdlist_t list, unsigned int type, PF * handler,
 	s_assert(fd >= 0);
 	F = &fd_table[fd];
 	s_assert(F->flags.open);
-	if(F->pflags == 0 && F->type == FD_SOCKET)
+	if(F->pflags == 0 && (F->type == FD_SOCKET || F->type == FD_PIPE))
 	{
 		setup_sigio_fd(fd);
 		F->pflags = 1;

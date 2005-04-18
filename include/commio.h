@@ -29,7 +29,7 @@
 
 #include "setup.h"
 
-#ifdef HAVE_PORTS
+#if defined(HAVE_PORTS)
 # define COMM_DOES_EVENTS
 #endif
 
@@ -211,11 +211,14 @@ extern void init_netio(void);
 extern int read_message(time_t, unsigned char);
 extern int comm_select(unsigned long);
 extern int disable_sock_options(int);
+extern int setup_sigio_fd(int fd);
 #ifdef IPV6
 extern void mangle_mapped_sockaddr(struct sockaddr *in);
 #else
 #define mangle_mapped_sockaddr(x) 
 #endif
-
+#ifdef USING_SIGIO
+#define comm_set_nb(x) setup_sigio_fd(x)
+#endif
 
 #endif /* INCLUDED_commio_h */
