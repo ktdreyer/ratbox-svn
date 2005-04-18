@@ -1,3 +1,32 @@
+androsyn    2005/04/18 01:39:49 UTC	(20050418_0)
+
+  Modified files:
+    .                    Makefile.in configure configure.ac 
+    adns                 Makefile.in 
+    include              commio.h setup.h.in 
+    modules              Makefile.in 
+    src                  Makefile.in commio.c sigio.c 
+    src/ident            Makefile.in 
+    tools                Makefile.in 
+  Log:
+  more sigio fixes
+  
+  Revision  Changes    Path
+  7.67      +0 -0      ircd-ratbox/Makefile.in
+  1.29      +0 -0      ircd-ratbox/adns/Makefile.in
+  7.263     +298 -242  ircd-ratbox/configure
+  7.74      +39 -3     ircd-ratbox/configure.ac
+  1.26      +5 -2      ircd-ratbox/include/commio.h
+  7.100     +4 -3      ircd-ratbox/include/setup.h.in
+  1.137     +0 -0      ircd-ratbox/modules/Makefile.in
+  7.173     +0 -0      ircd-ratbox/src/Makefile.in
+  1.43      +3 -2      ircd-ratbox/src/commio.c
+  1.6       +1 -1      ircd-ratbox/src/ident/Makefile.in
+  7.52      +16 -6     ircd-ratbox/src/sigio.c
+  7.55      +0 -0      ircd-ratbox/tools/Makefile.in
+
+
+
 androsyn    2005/04/17 18:51:12 UTC	(20050417_4)
 
   Modified files:
