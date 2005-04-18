@@ -1,3 +1,25 @@
+leeh        2005/04/18 12:24:24 UTC	(20050418_0)
+
+  Modified files:
+    .                    configure 
+    autoconf             configure.in 
+    help/chanserv        set 
+    src                  Makefile.in 
+  Log:
+  - add --enable-warnings flag to configure to enable the compiler warning
+    flags, disable them by default
+  - via rse@engelschall.com:
+    - fix missing <channel> parameter to chanserv::set help
+    - properly honour CPPFLAGS/CFLAGS
+  
+  Revision  Changes    Path
+  1.23      +13 -0     rserv/autoconf/configure.in
+  1.22      +102 -81   rserv/configure
+  1.6       +1 -1      rserv/help/chanserv/set
+  1.33      +2 -2      rserv/src/Makefile.in
+
+
+
 leeh        2005/04/17 16:38:56 UTC	(20050417_1)
 
   Modified files:
