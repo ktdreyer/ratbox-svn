@@ -10,7 +10,8 @@
 #define HOOK_SJOIN_LOWERTS	5
 #define HOOK_BURST_LOGIN	6
 #define HOOK_USER_LOGIN		7
-#define HOOK_LAST_HOOK		8
+#define HOOK_MODE_VOICE		8
+#define HOOK_LAST_HOOK		9
 
 typedef int (*hook_func)(void *, void *);
 

@@ -45,6 +45,7 @@ struct scommand_handler mode_command = { "MODE", c_mode, 0, DLINK_EMPTY };
 /* linked list of services that were deopped */
 static dlink_list deopped_list;
 static dlink_list opped_list;
+static dlink_list voiced_list;
 
 /* valid_key()
  *   validates key, and transforms to lower ascii
@@ -443,7 +444,10 @@ parse_full_mode(struct channel *chptr, struct client *source_p,
 			else
 			{
 				if(dir)
+				{
 					mptr->flags |= MODE_VOICED;
+					dlink_add_alloc(mptr, &voiced_list);
+				}
 				else
 					mptr->flags &= ~MODE_VOICED;
 
@@ -563,6 +567,9 @@ c_mode(struct client *client_p, const char *parv[], int parc)
 
 	if(dlink_list_length(&opped_list))
 		hook_call(HOOK_MODE_OP, chptr, &opped_list);
+
+	if(dlink_list_length(&voiced_list))
+		hook_call(HOOK_MODE_VOICE, chptr, &voiced_list);
 
 	if(oldmode.mode != chptr->mode.mode || oldmode.limit != chptr->mode.limit ||
 	   strcasecmp(oldmode.key, chptr->mode.key))

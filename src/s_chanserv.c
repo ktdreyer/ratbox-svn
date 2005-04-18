@@ -148,6 +148,7 @@ static void free_ban_reg(struct chan_reg *chreg_p, struct ban_reg *banreg_p);
 
 static int h_chanserv_join(void *members, void *unused);
 static int h_chanserv_mode_op(void *chptr, void *members);
+static int h_chanserv_mode_voice(void *chptr, void *members);
 static int h_chanserv_mode_simple(void *chptr, void *unused);
 static int h_chanserv_sjoin_lowerts(void *chptr, void *unused);
 static int h_chanserv_user_login(void *client, void *unused);
@@ -170,6 +171,7 @@ init_s_chanserv(void)
 
 	hook_add(h_chanserv_join, HOOK_JOIN_CHANNEL);
 	hook_add(h_chanserv_mode_op, HOOK_MODE_OP);
+	hook_add(h_chanserv_mode_voice, HOOK_MODE_VOICE);
 	hook_add(h_chanserv_mode_simple, HOOK_MODE_SIMPLE);
 	hook_add(h_chanserv_sjoin_lowerts, HOOK_SJOIN_LOWERTS);
 	hook_add(h_chanserv_user_login, HOOK_USER_LOGIN);
@@ -906,6 +908,41 @@ h_chanserv_mode_op(void *v_chptr, void *v_members)
 }
 
 static int
+h_chanserv_mode_voice(void *v_chptr, void *v_members)
+{
+	struct channel *chptr = v_chptr;
+	struct chmember *member_p;
+	struct chan_reg *chreg_p;
+	dlink_list *members = v_members;
+	dlink_node *ptr, *next_ptr;
+
+	if(!dlink_list_length(members))
+		return 0;
+
+	if((chreg_p = find_channel_reg(NULL, chptr->name)) == NULL)
+		return 0;
+
+	if(chreg_p->flags & CS_FLAGS_SUSPENDED)
+		return 0;
+
+	/* only thing we're testing here.. */
+	if(!(chreg_p->flags & CS_FLAGS_NOVOICES))
+		return 0;
+
+	modebuild_start(chanserv_p, chptr);
+
+	DLINK_FOREACH_SAFE(ptr, next_ptr, members->head)
+	{
+		member_p = ptr->data;
+		modebuild_add(DIR_DEL, "v", member_p->client_p->name);
+	}
+
+	modebuild_finish();
+
+	return 0;
+}
+
+static int
 h_chanserv_mode_simple(void *v_chptr, void *v_chreg)
 {
 	struct channel *chptr = v_chptr;
@@ -1045,6 +1082,8 @@ h_chanserv_join(void *v_chptr, void *v_members)
 
 		if(hit)
 			continue;
+		else
+			hit = 0;
 
 		if(mreg_p != NULL)
 		{
@@ -1068,8 +1107,22 @@ h_chanserv_join(void *v_chptr, void *v_members)
 				member_p->flags &= ~MODE_OPPED;
 			}
 
+			hit++;
+		}
+
+		if(is_voiced(member_p) && (chreg_p->flags & CS_FLAGS_NOVOICES))
+		{
+			if(dlink_list_length(&chptr->users) == 1)
+				enable_autojoin(chreg_p);
+
+			modebuild_add(DIR_DEL, "v", member_p->client_p->name);
+			member_p->flags &= ~MODE_VOICED;
 			continue;
 		}
+
+		/* removed ops from them.. cant be setting them back */
+		if(hit)
+			continue;
 
 		if(mreg_p != NULL)
 		{
@@ -1830,6 +1883,28 @@ s_chan_clearops_loc(struct channel *chptr, struct chan_reg *chreg_p,
 	modebuild_finish();
 }
 
+static void
+s_chan_clearvoices_loc(struct channel *chptr, struct chan_reg *chreg_p)
+{
+	struct chmember *msptr;
+	dlink_node *ptr;
+
+	modebuild_start(chanserv_p, chptr);
+
+	DLINK_FOREACH(ptr, chptr->users.head)
+	{
+		msptr = ptr->data;
+
+		if(!is_voiced(msptr))
+			continue;
+
+		modebuild_add(DIR_DEL, "v", msptr->client_p->name);
+		msptr->flags &= ~MODE_VOICED;
+	}
+
+	modebuild_finish();
+}
+
 static int
 s_chan_clearops(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
@@ -2005,6 +2080,20 @@ s_chan_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 
 			/* hack! */
 			s_chan_clearops_loc(chptr, chreg_p, S_C_OP);
+		}
+
+		return 1;
+	}
+	else if(!strcasecmp(parv[1], "NOVOICES"))
+	{
+		retval = s_chan_set_flag(client_p, chreg_p, parv[1], arg, CS_FLAGS_NOVOICES);
+
+		if(retval == 1)
+		{
+			if(!(chptr = find_channel(chreg_p->name)))
+				return 1;
+
+			s_chan_clearvoices_loc(chptr, chreg_p);
 		}
 
 		return 1;
@@ -2289,6 +2378,16 @@ s_chan_voice(struct client *client_p, struct lconn *conn_p, const char *parv[], 
 
 	if((reg_p = verify_member_reg_name(client_p, &chptr, parv[0], S_C_USER)) == NULL)
 		return 1;
+
+	/* noone is allowed to be voiced.. */
+	if(reg_p->channel_reg->flags & CS_FLAGS_NOVOICES)
+	{
+		service_error(chanserv_p, client_p,
+			"Channel %s is set NOVOICES",
+			reg_p->channel_reg->name);
+		return 1;
+	}
+
 
 	if((msptr = find_chmember(chptr, client_p)) == NULL)
 	{
@@ -2784,10 +2883,11 @@ dump_info_extended(struct client *client_p, struct lconn *conn_p,
 
 	if(chreg_p->flags & CS_FLAGS_SHOW)
 		service_send(chanserv_p, client_p, conn_p,
-			"[%s] Settings: %s%s%s%s",
+			"[%s] Settings: %s%s%s%s%s",
 			chreg_p->name,
 			(chreg_p->flags & CS_FLAGS_AUTOJOIN) ? "AUTOJOIN " : "",
 			(chreg_p->flags & CS_FLAGS_NOOPS) ? "NOOPS " : "",
+			(chreg_p->flags & CS_FLAGS_NOVOICES) ? "NOVOICES " : "",
 			(chreg_p->flags & CS_FLAGS_RESTRICTOPS) ? "RESTRICTOPS " : "",
 			(chreg_p->flags & CS_FLAGS_WARNOVERRIDE) ? "WARNOVERRIDE" : "");
 

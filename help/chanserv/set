@@ -3,6 +3,7 @@ SET <channel> <option> [parameter]
   AUTOJOIN     [on|off]: Places services within the channel.
   NOOPS        [on|off]: Disallow any user being opped.
   RESTRICTOPS  [on|off]: Disallow any users without OP access being opped.
+  NOVOICES     [on|off]: Disallow any user being voiced.
   WARNOVERRIDE [on|off]: Warns chanops when INVITE/GETKEY are used.
                          Requires AUTOJOIN.
   CREATEMODES  [modes] : Channel modes used on channel creation.  Set to "+"
