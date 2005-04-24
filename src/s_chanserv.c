@@ -711,6 +711,9 @@ e_chanserv_expirechan(void *unused)
 	dlink_node *ptr, *next_ptr;
 	int i;
 
+	/* Start a transaction, we're going to make a lot of changes */
+	loc_sqlite_exec(NULL, "BEGIN TRANSACTION");
+
 	HASH_WALK_SAFE(i, MAX_CHANNEL_TABLE, ptr, next_ptr, chan_reg_table)
 	{
 		chreg_p = ptr->data;
@@ -741,6 +744,8 @@ e_chanserv_expirechan(void *unused)
 		destroy_channel_reg(chreg_p);
 	}
 	HASH_WALK_END
+
+	loc_sqlite_exec(NULL, "COMMIT TRANSACTION");
 }	
 
 static void
@@ -751,6 +756,9 @@ e_chanserv_expireban(void *unused)
 	dlink_node *hptr;
 	dlink_node *ptr, *next_ptr;
 	int i;
+
+	/* Start a transaction, we're going to make a lot of changes */
+	loc_sqlite_exec(NULL, "BEGIN TRANSACTION");
 
 	HASH_WALK(i, MAX_CHANNEL_TABLE, hptr, chan_reg_table)
 	{
@@ -770,6 +778,8 @@ e_chanserv_expireban(void *unused)
 		}
 	}
 	HASH_WALK_END
+
+	loc_sqlite_exec(NULL, "COMMIT TRANSACTION");
 }
 
 static void

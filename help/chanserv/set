@@ -1,6 +1,7 @@
 SET <channel> <option> [parameter]
 {190} Sets various channel options
-  AUTOJOIN     [on|off]: Places services within the channel.
+  AUTOJOIN     [on|off]: Places services within the channel.  May be
+                         automatically enabled by NOOPS/NOVOICES.
   NOOPS        [on|off]: Disallow any user being opped.
   RESTRICTOPS  [on|off]: Disallow any users without OP access being opped.
   NOVOICES     [on|off]: Disallow any user being voiced.

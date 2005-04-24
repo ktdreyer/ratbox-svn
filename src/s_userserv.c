@@ -303,6 +303,9 @@ e_user_expire(void *unused)
 	dlink_node *ptr, *next_ptr;
 	int i;
 
+	/* Start a transaction, we're going to make a lot of changes */
+	loc_sqlite_exec(NULL, "BEGIN TRANSACTION");
+
 	HASH_WALK_SAFE(i, MAX_NAME_HASH, ptr, next_ptr, user_reg_table)
 	{
 		ureg_p = ptr->data;
@@ -328,6 +331,7 @@ e_user_expire(void *unused)
 		free_user_reg(ureg_p);
 	}
 	HASH_WALK_END
+	loc_sqlite_exec(NULL, "COMMIT TRANSACTION");
 }
 
 static int
