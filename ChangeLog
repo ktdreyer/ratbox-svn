@@ -1,3 +1,19 @@
+leeh        2005/04/24 20:03:05 UTC	(20050424_1)
+
+  Modified files:
+    help/chanserv        set 
+    src                  s_chanserv.c s_userserv.c 
+  Log:
+  - note AUTOJOIN may be automatically enabled sometimes
+  - via jilles, make expiry use transactions
+  
+  Revision  Changes    Path
+  1.8       +2 -1      rserv/help/chanserv/set
+  1.71      +10 -0     rserv/src/s_chanserv.c
+  1.59      +4 -0      rserv/src/s_userserv.c
+
+
+
 leeh        2005/04/24 01:38:52 UTC	(20050424_0)
 
   rserv/sqlite - New directory
