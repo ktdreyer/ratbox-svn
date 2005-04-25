@@ -128,6 +128,8 @@ write_sendq(void)
                         exit(1);
                 }
         }
+        if(linebuf_len(&sendq) > 0)
+		FD_SET(ofd, &writefds);
 }
 
 /*
@@ -346,7 +348,6 @@ read_io(void)
 		FD_ZERO(&exceptfds);
 
 		FD_SET(ifd, &readfds);
-		FD_SET(ofd, &writefds);
 		
 		if(ifd > ofd)
 			maxfd = ifd+1;
