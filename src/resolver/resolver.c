@@ -29,7 +29,6 @@
 
 #include "setup.h"     
 #include "memory.h"    
-#include "defs.h"      
 #include "tools.h"     
 #include "balloc.h"    
 #include "linebuf.h"   
