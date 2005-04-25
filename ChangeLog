@@ -1,3 +1,15 @@
+androsyn    2005/04/25 04:37:11 UTC	(20050425_2)
+
+  Modified files:
+    src/resolver         resolver.c 
+  Log:
+  dont need defs.h in there
+  
+  Revision  Changes    Path
+  1.2       +1 -2      ircd-ratbox/src/resolver/resolver.c
+
+
+
 androsyn    2005/04/25 04:17:44 UTC	(20050425_1)
 
   Modified files:
