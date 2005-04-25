@@ -1,3 +1,28 @@
+androsyn    2005/04/25 04:14:33 UTC	(20050425_0)
+
+  Modified files:
+    .                    Makefile.in 
+    adns                 Makefile.am Makefile.in 
+    modules              Makefile.in 
+    src                  Makefile.in 
+    src/ident            Makefile.in 
+    src/resolver         Makefile.in 
+    tools                Makefile.in 
+  Log:
+  rerun automake
+  
+  Revision  Changes    Path
+  7.69      +0 -0      ircd-ratbox/Makefile.in
+  1.5       +0 -5      ircd-ratbox/adns/Makefile.am
+  1.31      +20 -66    ircd-ratbox/adns/Makefile.in
+  1.139     +0 -0      ircd-ratbox/modules/Makefile.in
+  7.175     +1 -1      ircd-ratbox/src/Makefile.in
+  1.8       +0 -0      ircd-ratbox/src/ident/Makefile.in
+  1.2       +1 -1      ircd-ratbox/src/resolver/Makefile.in
+  7.57      +0 -0      ircd-ratbox/tools/Makefile.in
+
+
+
 androsyn    2005/04/18 01:39:49 UTC	(20050418_0)
 
   Modified files:
