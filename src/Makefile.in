@@ -252,7 +252,7 @@ subdirs = @subdirs@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 AUTOMAKE_OPTIONS = foreign
-SUBDIRS = ident
+SUBDIRS = ident resolver
 INCLUDES = -I../adns $(INCLTDL)
 ircd_SOURCES = \
   dns.c                        \

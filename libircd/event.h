@@ -27,8 +27,9 @@
 #ifndef INCLUDED_event_h
 #define INCLUDED_event_h
 
+#ifndef NO_IRCD
 #include "commio.h"
-
+#endif
 /*
  * How many event entries we need to allocate at a time in the block
  * allocator. 16 should be plenty at a time.
@@ -47,7 +48,7 @@ struct ev_entry
 	time_t frequency;
 	time_t when;
 	int active;
-#ifdef COMM_DOES_EVENTS
+#if defined(COMM_DOES_EVENTS)
 	comm_event_id comm_id;
 #endif
 };

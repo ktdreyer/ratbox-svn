@@ -139,9 +139,11 @@ comm_setselect(int fd, fdlist_t list, unsigned int type, PF * handler,
 	if(op == -1)
 		return;
 
-
 	ep_event.events = F->pflags;
 	ep_event.data.ptr = F;
+
+	if(op == EPOLL_CTL_ADD || op == EPOLL_CTL_MOD)
+		ep_event.events |= EPOLLET;
 
 	if(epoll_ctl(ep, op, fd, &ep_event) != 0)
 	{
@@ -231,6 +233,9 @@ comm_select(unsigned long delay)
 				op = EPOLL_CTL_MOD;
 			F->pflags = ep_event.events = flags;
 			ep_event.data.ptr = F;
+			if(op == EPOLL_CTL_MOD || op == EPOLL_CTL_ADD)
+				ep_event.events |= EPOLLET;
+				
 			if(epoll_ctl(ep, op, F->fd, &ep_event) != 0)
 			{
 				ilog(L_IOERROR, "comm_setselect(): epoll_ctl failed: %s", strerror(errno));

@@ -29,7 +29,7 @@
 
 #include "setup.h"
 
-#if defined(HAVE_PORTS)
+#if defined(HAVE_PORTS) && !defined(NO_IRCD)
 # define COMM_DOES_EVENTS
 #endif
 

@@ -401,6 +401,15 @@ read_packet(int fd, void *data)
 			}
 	
 		}
+		
+		/* we got a short read, thus the next call is probably returning EAGAIN */
+
+		if(length < READBUF_SIZE) 
+		{
+			comm_setselect(client_p->localClient->fd, FDLIST_IDLECLIENT,
+					COMM_SELECT_READ, read_packet, client_p, 0);
+			return;
+		}
 	}
 }
 

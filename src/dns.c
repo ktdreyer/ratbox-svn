@@ -46,6 +46,10 @@
 static void submit_dns(const char, int id, int aftype, const char *addr);
 static void fork_resolver(void);
 
+static char dnsBuf[READBUF_SIZE];
+static buf_head_t dns_sendq;
+static buf_head_t dns_recvq;
+
 static pid_t res_pid;
 static int need_restart = 0;
 
@@ -57,8 +61,8 @@ struct dnsreq
 
 static struct dnsreq querytable[IDTABLE];
 static u_int16_t id = 1;
-static int dns_fd = -1;
-static int ctrl_fd = -1;
+static int dns_ifd = -1;
+static int dns_ofd = -1;
 
 static u_int16_t 
 assign_id(void)
@@ -185,12 +189,13 @@ restart_spinning_resolver(void *unused)
 static void
 fork_resolver(void)
 {
-	int fdx[2];
-	int cfdx[2];
 	pid_t pid;
 	int i;
-	char fx[5];
-	char fy[5];
+        int ifd[2];
+        int ofd[2];
+        
+        char fx[6];   
+        char fy[6];
 
 	if(fork_count > 10)
 	{
@@ -202,48 +207,53 @@ fork_resolver(void)
 		return;
 	}
 	fork_count++;
-	if(dns_fd > 0)
-		comm_close(dns_fd);
-	if(ctrl_fd > 0)
-		comm_close(ctrl_fd);
+	if(dns_ifd > 0)
+		comm_close(dns_ifd);
+	if(dns_ofd > 0)
+		comm_close(dns_ofd);
 	if(res_pid > 0)
 		kill(res_pid, SIGKILL);
 
-	comm_socketpair(AF_UNIX, SOCK_DGRAM, 0, fdx, "resolver data socket");
-	comm_socketpair(AF_UNIX, SOCK_STREAM, 0, cfdx, "resolver ctrl socket");
+        comm_pipe(ifd, "resolver daemon - read");
+        comm_pipe(ofd, "resolver daemon - write");
 
-	ircsnprintf(fx, sizeof(fx), "%d", fdx[1]);
-	ircsnprintf(fy, sizeof(fy), "%d", cfdx[1]);
-	
+        ircsnprintf(fx, sizeof(fx), "%d", ifd[1]); /*dns write*/
+        ircsnprintf(fy, sizeof(fy), "%d", ofd[0]); /*dns read*/ 
+
+        comm_set_nb(ifd[0]);
+        comm_set_nb(ifd[1]);
+        comm_set_nb(ifd[0]);
+        comm_set_nb(ofd[1]);
+
 	if(!(pid = fork()))
 	{
-		setenv("FD", fx,1);
-		setenv("CFD", fy, 1);	
-		close(fdx[0]);
-		close(cfdx[0]);
+                setenv("IFD", fy, 1);
+                setenv("OFD", fx, 1);
+
 		/* set our fds as non blocking and close everything else */
 		for (i = 0; i < HARD_FDLIMIT; i++)
 		{
-                        if((i == fdx[1]) || (i == cfdx[1]))
-                                comm_set_nb(i);
-			else
+			if(i != ifd[1] && i != ofd[0])
 				close(i);
 		}
 		execl(BINPATH "/resolver", "-ircd dns resolver", NULL);
 	} else
 	if(pid == -1)
 	{
-		comm_close(fdx[0]);
-		close(fdx[1]);
-		comm_close(cfdx[0]);
-		close(cfdx[1]);
-		return;
+                ilog(L_MAIN, "fork failed: %s", strerror(errno));
+                comm_close(ifd[0]);
+                comm_close(ifd[1]);
+                comm_close(ofd[0]);
+                comm_close(ofd[1]);
+                return;
 	}
-	close(fdx[1]);
-	close(cfdx[1]);	
 
-	dns_fd = fdx[0];
-	ctrl_fd = cfdx[0];
+        comm_close(ifd[1]);
+        comm_close(ofd[0]);
+
+
+	dns_ifd = ifd[0];
+	dns_ofd = ofd[1];
 
 	fork_count = 0;
 	res_pid = pid;
@@ -251,86 +261,86 @@ fork_resolver(void)
 }
 
 static void
-read_dns(int fd, void *unused)
+parse_dns_reply(void)
 {
-	char buf[512];
-	char *p;
-	char *parv[MAXPARA];
-	int parc;
-	int res;
-
-	while(1)
+	int len, parc;
+	char *parv[MAXPARA+1];
+	while((len = linebuf_get(&dns_recvq, dnsBuf, sizeof(dnsBuf), 
+				 LINEBUF_COMPLETE, LINEBUF_PARSED)) > 0)
 	{
-		res = recv(dns_fd, buf, sizeof(buf), 0);	
-		if(res < 0)
-		{
-			if(ignoreErrno(errno))
-			{	
-				comm_setselect(dns_fd, FDLIST_SERVICE, COMM_SELECT_READ, read_dns, NULL, 0);
-				return;
-			} else {
-				fork_resolver();
-				return;	
-			}
-		} else if(res == 0) {
-			fork_resolver();
-			return;
-		}
-	 	p = memchr(buf, '\n', sizeof(buf));	
-		if(p != NULL)
-			*p = '\0';	
-		/* we should get a full packet here */
-		parc = string_to_array(buf, parv); /* we shouldn't be using this here, but oh well */
-#if 0
-		if(parc != 4)
+		parc = string_to_array(dnsBuf, parv); /* we shouldn't be using this here, but oh well */
+
+		if(parc != 5)
 		{
 			ilog(L_MAIN, "Resolver sent a result with wrong number of arguments");
 			fork_resolver();
 			return;
 		}
-#endif
 		results_callback(parv[1], parv[2], parv[3], parv[4]);
 	}
 }
 
-void 
-submit_dns(char type, int nid, int aftype, const char *addr)
+static void
+read_dns(int fd, void *data)
 {
-	char buf[512];
-	int res, len;
-	ircsnprintf(buf, sizeof(buf), "%c %x %d %s\n", type, nid, aftype, addr);
-	len = strlen(buf);
-	res = send(dns_fd, buf, len, 0);
-	
-	if(res <= 0)
-	{
-		fork_resolver();
-		return;
-	}
-	/* try to read back results */
-	read_dns(dns_fd, NULL);
+        int length;
+
+        while((length = read(dns_ifd, dnsBuf, sizeof(dnsBuf))) > 0)
+        {
+                linebuf_parse(&dns_recvq, dnsBuf, length, 0);
+                parse_dns_reply();
+        }
+   
+        if(length == 0)
+                fork_resolver();
+ 
+        if(length == -1 && !ignoreErrno(errno))
+                fork_resolver(); 
+
+        comm_setselect(dns_ifd, FDLIST_SERVICE, COMM_SELECT_READ, read_dns, NULL, 0);
 }
 
 static void
-check_resolver(void *unused)
+dns_write_sendq(int fd, void *unused)
 {
-	if(need_restart) 
-	{
-		fork_resolver();
-		need_restart = 0;
-	}
+        int retlen;
+        if(linebuf_len(&dns_sendq) > 0)
+        {
+                while((retlen = linebuf_flush(dns_ofd, &dns_sendq)) > 0);
+                if(retlen == 0 || (retlen < 0 && !ignoreErrno(errno)))
+                {
+                        fork_resolver();
+                }
+        }
+         
+        if(linebuf_len(&dns_sendq) > 0)
+        {
+                comm_setselect(dns_ofd, FDLIST_SERVICE, COMM_SELECT_WRITE,
+                               dns_write_sendq, NULL, 0);
+        }
+}
+ 
+
+void 
+submit_dns(char type, int nid, int aftype, const char *addr)
+{
+	linebuf_put(&dns_sendq, "%c %x %d %s", type, nid, aftype, addr);
+	dns_write_sendq(dns_ofd, NULL);
+	read_dns(dns_ifd, NULL);
 }
 
 void
 init_resolver(void)
 {
 	fork_resolver();
+	linebuf_newbuf(&dns_sendq);
+	linebuf_newbuf(&dns_recvq);
+	
 	if(res_pid < 0)
 	{
 		ilog(L_MAIN, "Unable to fork resolver: %s", strerror(errno));		
 		exit(0);
 	}
-	eventAddIsh("check_resolver", check_resolver, NULL, 5);
 }
 
 void 

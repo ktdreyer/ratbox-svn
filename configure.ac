@@ -918,6 +918,7 @@ AC_CONFIG_FILES(		\
 	contrib/Makefile	\
 	src/Makefile		\
 	src/ident/Makefile	\
+	src/resolver/Makefile	\
 	modules/Makefile	\
 	tools/Makefile		\
 	doc/Makefile		\

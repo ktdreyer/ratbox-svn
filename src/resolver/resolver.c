@@ -9,25 +9,40 @@
  *
  * $Id$
  */
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <signal.h>
-#include <unistd.h>
-#include <sys/types.h>
+#include <stdlib.h>    
+#include <stdio.h>     
+#include <string.h>    
+#include <signal.h>    
+#include <stdarg.h>    
+#include <unistd.h>    
+#include <sys/types.h> 
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include <netdb.h>
+#include <netdb.h> 
 #include <unistd.h>
 #include <fcntl.h>
+#include <ctype.h>
 #include <errno.h>
+
+#define READBUF_SIZE    16384
+
+#include "setup.h"     
+#include "memory.h"    
+#include "defs.h"      
+#include "tools.h"     
+#include "balloc.h"    
+#include "linebuf.h"   
+#include "irc_string.h"
+#include "event.h"
 #include "adns.h"
 
+int ignoreErrno(int ierrno);
+
 /* data fd from ircd */
-int fd;
-/* control fd from ircd */
-int cfd; 
+int ifd = -1;
+/* data to ircd */
+int ofd = -1; 
 
 #define MAXPARA 10
 #define REQIDLEN 10
@@ -43,10 +58,14 @@ int cfd;
 
 #define EmptyString(x) (!(x) || (*(x) == '\0'))
 
-static void process_request(void);
+static char readBuf[READBUF_SIZE];
 static void resolve_ip(char **parv);
 static void resolve_host(char **parv);
+static int io_to_array(char *string, char **parv);
+struct timeval SystemTime;
 
+buf_head_t sendq;
+buf_head_t recvq;
 
 struct dns_request
 {
@@ -70,7 +89,6 @@ fd_set writefds;
 fd_set exceptfds;
 
 adns_state dns_state;
-int fd = -1;
 
 
 static void
@@ -92,88 +110,98 @@ setup_signals(void)
         sigaction(SIGHUP, &act, 0);
 }
 
-static void report_error(const char *errstr)
+void
+set_time(void)
 {
-	char buf[512];
-	sprintf(buf, "ERR %s: %s", errstr, strerror(errno)); 
-	send(cfd, buf, strlen(buf), 0);
-	exit(-1);
+	gettimeofday(&SystemTime, NULL);
 }
 
-static void *MyMalloc(size_t size)
+
+static void
+write_sendq(void)
 {
-	void *ptr;
-	ptr = calloc(1, size);
-	if(ptr == NULL)
-	{
-		report_error("MyMalloc failed, giving up");
-		exit(1);
-	}
-	return(ptr);
-}
-
-static  void MyFree(void *ptr)
-{
-	if(ptr != NULL)
-		free(ptr);
-}
-
-/* stolen from squid */
-static int
-ignore_errno(int ierrno)
-{
-	switch(ierrno)
-	{
-		case EINPROGRESS:
-		case EWOULDBLOCK:
-#if EAGAIN != EWOULDBLOCK
-		case EAGAIN:
-#endif
-		case EALREADY:
-		case EINTR:
-#ifdef ERESTART
-		case ERESTART:
-#endif
-			return 1;
-
-		default:
-			return 0;
-	}
-}
-
-/* get_line()
- *   Gets a line of data from a given connection
- *
- * inputs	- connection to get line for, buffer to put in, size of buffer
- * outputs	- characters read
- */
-static int
-get_line(char *buf, int bufsize)
-{
-	char *p;
-	int n = bufsize;
-
-	if((n = read(fd, buf, n)) <= 0)
-	{
-		if(n == -1 && ignore_errno(errno))
-			return 0;
-		return -1;	
-	}
-
-        if((p = memchr(buf, '\n', n)) != NULL)
+        int retlen;
+        if(linebuf_len(&sendq) > 0)
         {
-                n = p - buf + 1;
-                *p = '\0';
-        }        
-        else 
-                return 0;
-	
-	return n;
+                while((retlen = linebuf_flush(ofd, &sendq)) > 0);
+                if(retlen == 0 || (retlen < 0 && !ignoreErrno(errno)))
+                {
+                        exit(1);
+                }
+        }
 }
+
+/*
+request protocol:
+
+INPUTS:
+
+IPTYPE:    4, 5,  6, ipv4, ipv6.int/arpa, ipv6 respectively
+requestid: identifier of the request
+ 
+
+RESIP  requestid IPTYPE IP 
+RESHST requestid IPTYPE hostname
+
+OUTPUTS:
+ERR error string = daemon failed and is going to shutdown
+otherwise
+
+FWD requestid PASS/FAIL hostname or reason for failure
+REV requestid PASS/FAIL IP or reason
+
+*/
+
+
+static void
+parse_request(void)
+{
+        int len;  
+        static char *parv[MAXPARA + 1];
+        int parc;  
+        while((len = linebuf_get(&recvq, readBuf, sizeof(readBuf),
+                                 LINEBUF_COMPLETE, LINEBUF_PARSED)) > 0)
+        {
+                parc = io_to_array(readBuf, parv);
+                if(parc != 4)
+                        exit(1);
+		switch(*parv[0])
+		{
+			case 'I':
+				resolve_ip(parv);
+				break;
+			case 'H':
+				resolve_host(parv);
+				break;
+			default:
+				break;
+		}
+        }
+	
+
+}
+
+static void                       
+read_request(void)
+{
+        int length;
+
+        while((length = read(ifd, readBuf, sizeof(readBuf))) > 0)
+        {
+                linebuf_parse(&recvq, readBuf, length, 0);
+                parse_request();
+        }
+         
+        if(length == 0)
+                exit(1);
+
+        if(length == -1 && !ignoreErrno(errno))
+                exit(1);
+}
+
 
 static void send_answer(struct dns_request *req, adns_answer *reply)
 {
-	char buf[512];
 	char response[64];
 	int result = 0;
 	int aftype = 0;
@@ -233,9 +261,7 @@ static void send_answer(struct dns_request *req, adns_answer *reply)
 			}
 			default:
 			{
-				snprintf(buf, sizeof(buf), "I have an revfwd type of %d, and I don't know what to do!", req->revfwd);
-				report_error(buf);				
-				break;				
+				exit(1);
 			}				
 		}
 
@@ -254,8 +280,8 @@ static void send_answer(struct dns_request *req, adns_answer *reply)
               		MyFree(reply);
 			if(result != 0)
 			{
-				snprintf(buf, sizeof(buf), "%s 0 FAILED\n", req->reqid);
-				send(fd, buf, strlen(buf));
+				linebuf_put(&sendq, "%s 0 FAILED", req->reqid);
+				write_sendq();
 				MyFree(reply);
 				MyFree(req);
 
@@ -266,9 +292,8 @@ static void send_answer(struct dns_request *req, adns_answer *reply)
 		strcpy(response, "FAILED");
 		result = 0;
 	}
-	snprintf(buf, sizeof(buf), "%s %d %d %s\n", req->reqid, result, aftype, response);
-	if(send(fd, buf, strlen(buf), 0) == -1)
-		report_error("send failure");
+	linebuf_put(&sendq, "%s %d %d %s\n", req->reqid, result, aftype, response);
+	write_sendq();
 	MyFree(reply);
 	MyFree(req);
 }
@@ -292,7 +317,7 @@ static void process_adns_incoming(void)
 				continue;
 			default:
                         	if(answer != NULL && answer->status == adns_s_systemfail)
-					report_error("adns system failed");
+					exit(2);
 				send_answer(req, NULL);
 				break;
 		}
@@ -311,6 +336,7 @@ static void
 read_io(void)
 {
 	struct timeval *tv, tvbuf, now, tvx;
+	time_t delay;
 	int select_result;
 	int maxfd = -1;
 
@@ -320,16 +346,20 @@ read_io(void)
 		FD_ZERO(&writefds);
 		FD_ZERO(&exceptfds);
 
-		FD_SET(fd, &readfds);
-		FD_SET(cfd, &exceptfds);
-		FD_SET(cfd, &readfds);
+		FD_SET(ifd, &readfds);
+		FD_SET(ofd, &writefds);
 		
-		if(fd > cfd)
-			maxfd = fd+1;
+		if(ifd > ofd)
+			maxfd = ifd+1;
 		else
-			maxfd = cfd+1;
+			maxfd = ofd+1;
 
-		gettimeofday(&now, 0);
+		set_time();
+
+                delay = eventNextTime();
+                if(delay <= SystemTime.tv_sec)
+			eventRun();
+                                                        
 		adns_beforeselect(dns_state, &maxfd, &readfds, &writefds, &exceptfds, &tv, &tvbuf, &now);
 		tvx.tv_sec = 1;
 		tvx.tv_usec = 0;
@@ -343,15 +373,14 @@ read_io(void)
 		/* have data to parse */
 		if(select_result > 0)
 		{
-			if(FD_ISSET(fd, &readfds))
+			if(FD_ISSET(ifd, &readfds))
 			{
-				process_request();
+				read_request();
 				/* incoming requests */
 			}
-			if(FD_ISSET(cfd, &exceptfds) || FD_ISSET(cfd, &readfds))
+			if(FD_ISSET(ofd, &writefds))
 			{
-				/* its dead cap'n */
-				exit(1);
+				write_sendq();
 			}
 		}
 		
@@ -366,8 +395,8 @@ read_io(void)
  * inputs	- string to parse, array to put in
  * outputs	- number of parameters
  */
-static inline int
-io_to_array(char *string, char *parv[MAXPARA])
+static int
+io_to_array(char *string, char **parv)
 {
 	char *p, *buf = string;
 	int x = 0;
@@ -419,60 +448,7 @@ io_to_array(char *string, char *parv[MAXPARA])
 }
 
 
-/*
-request protocol:
 
-INPUTS:
-
-IPTYPE:    4, 5,  6, ipv4, ipv6.int/arpa, ipv6 respectively
-requestid: identifier of the request
- 
-
-RESIP  requestid IPTYPE IP 
-RESHST requestid IPTYPE hostname
-
-OUTPUTS:
-ERR error string = daemon failed and is going to shutdown
-otherwise
-
-FWD requestid PASS/FAIL hostname or reason for failure
-REV requestid PASS/FAIL IP or reason
-
-*/
-
-static void
-process_request(void)
-{
-	char buf[512];
-	int parc;
-	static char *parv[MAXPARA + 1];
-
-
-	if(get_line(buf, sizeof(buf)) <= 0)
-	{
-		report_error("Failed reading line");
-	}
-	parc = io_to_array(buf, parv);
-
-	if(parc != 4)
-	{
-		report_error("Server didn't send me the right amount of arguments, I quit");
-	}
-
-	switch(*parv[0])
-	{
-	
-		case 'I':
-			resolve_ip(parv);
-			break;
-		case 'H':
-			resolve_host(parv);
-			break;
-		default:
-			return;
-			
-	}
-}
 
 static void
 resolve_host(char **parv)
@@ -524,7 +500,7 @@ resolve_ip(char **parv)
 
 	if(strlen(requestid) >= REQIDLEN)
 	{
-		report_error("Server sent me a requestid that was too long");
+		exit(3);
 	}
 	req = MyMalloc(sizeof(struct dns_request));
 	req->revfwd = REQREV;
@@ -534,8 +510,8 @@ resolve_ip(char **parv)
 		case '4':
 			flags = adns_r_ptr;
 			req->reqtype = REVIPV4;
-			if(!inet_pton(AF_INET, rec, &req->sins.in.sin_addr))
-				report_error("Invalid address passed");
+			if(!inetpton(AF_INET, rec, &req->sins.in.sin_addr))
+				exit(6);
 			req->sins.in.sin_family = AF_INET;
 
 			break;
@@ -543,19 +519,21 @@ resolve_ip(char **parv)
 		case '5': /* This is the case of having to fall back to "ip6.int" */
 			req->reqtype = REVIPV6FALLBACK;
 			flags = adns_r_ptr_ip6;
-			inet_pton(AF_INET6, rec, &req->sins.in6.sin6_addr);
+			if(!inetpton(AF_INET6, rec, &req->sins.in6.sin6_addr))
+				exit(6);
 			req->sins.in6.sin6_family = AF_INET6;
 			req->fallback = 0;
 			break;
 		case '6':
 			req->reqtype = REVIPV6;
 			flags = adns_r_ptr_ip6;
-			inet_pton(AF_INET6, rec, &req->sins.in6.sin6_addr);
+			if(!inetpton(AF_INET6, rec, &req->sins.in6.sin6_addr))
+				exit(6);
 			req->sins.in6.sin6_family = AF_INET6;
 			break;
 #endif
 		default:
-			report_error("Server sent invalid IP type");
+			exit(7);
 	}
 
         result = adns_submit_reverse(dns_state,
@@ -574,54 +552,57 @@ resolve_ip(char **parv)
 
 int main(int argc, char **argv)
 {
-	char *tfd;
-	char *tcfd;
-	int res;
-	int i;
-	
-	tfd = getenv("FD");
-	tcfd = getenv("CFD");
-	
-	if(tfd == NULL && tcfd == NULL)
-		exit(0);
-	fd = atoi(tfd);
-	cfd = atoi(tcfd);
+        int i, res;
+        char *tifd;
+        char *tofd;
 
-	if(fd > 255)
+        tifd = getenv("IFD");
+        tofd = getenv("OFD");
+        if(tifd == NULL || tofd == NULL)
+                exit(1);
+        ifd = atoi(tifd);
+        ofd = atoi(tofd);
+        init_dlink_nodes();
+        initBlockHeap();
+        linebuf_init();
+        linebuf_newbuf(&sendq);
+        linebuf_newbuf(&recvq);
+
+	if(ifd > 255)
 	{
 		for(i = 3; i < 255; i++)
 		{
-			if(i != cfd) 
+			if(i != ofd) 
 			{
-				if(dup2(fd, i) < 0)
+				if(dup2(ifd, i) < 0)
 					exit(1);
-				close(fd);
-				fd = i;
+				close(ifd);
+				ifd = i;
 				break;
 			}
 		}
 	}
 
-	if(cfd > 255)
+	if(ofd > 255)
 	{
 		for(i = 3; i < 255; i++)
 		{
-			if(i != fd) 
+			if(i != ifd) 
 			{
-				if(dup2(cfd, i) < 0)
+				if(dup2(ofd, i) < 0)
 					exit(1);
-				close(cfd);
-				cfd = i;
+				close(ofd);
+				ofd = i;
 				break;
 			}
 		}
 	}
 	
-	res = fcntl(fd, F_GETFL, 0);
-	fcntl(fd, F_SETFL, res | O_NONBLOCK);
+	res = fcntl(ifd, F_GETFL, 0);
+	fcntl(ifd, F_SETFL, res | O_NONBLOCK);
 
-	res = fcntl(cfd, F_GETFL, 0);
-	fcntl(cfd, F_SETFL, res | O_NONBLOCK);
+	res = fcntl(ofd, F_GETFL, 0);
+	fcntl(ofd, F_SETFL, res | O_NONBLOCK);
 	
 	adns_init(&dns_state, adns_if_noautosys, 0);
 	setup_signals();
@@ -630,3 +611,34 @@ int main(int argc, char **argv)
 }
 
 
+int
+ignoreErrno(int ierrno)
+{
+        switch (ierrno)
+        {
+        case EINPROGRESS:
+        case EWOULDBLOCK:
+#if EAGAIN != EWOULDBLOCK
+        case EAGAIN:
+#endif
+        case EALREADY:
+        case EINTR:
+#ifdef ERESTART
+        case ERESTART:
+#endif
+                return 1;
+        default:
+                return 0;
+        }
+}
+
+/* compatability for ircd included stuff */
+void ilog(char *errstr, ...)
+{
+        exit(2);
+}
+
+void restart(char *msg)
+{
+        exit(1);   
+}

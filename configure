@@ -26540,7 +26540,7 @@ fi
 
 
 
-                                                                                                    ac_config_files="$ac_config_files Makefile adns/Makefile servlink/Makefile contrib/Makefile src/Makefile src/ident/Makefile modules/Makefile tools/Makefile doc/Makefile help/Makefile"
+                                                                                                              ac_config_files="$ac_config_files Makefile adns/Makefile servlink/Makefile contrib/Makefile src/Makefile src/ident/Makefile src/resolver/Makefile modules/Makefile tools/Makefile doc/Makefile help/Makefile"
 
 
 cat >confcache <<\_ACEOF
@@ -27133,6 +27133,7 @@ do
   "contrib/Makefile" ) CONFIG_FILES="$CONFIG_FILES contrib/Makefile" ;;
   "src/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/Makefile" ;;
   "src/ident/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/ident/Makefile" ;;
+  "src/resolver/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/resolver/Makefile" ;;
   "modules/Makefile" ) CONFIG_FILES="$CONFIG_FILES modules/Makefile" ;;
   "tools/Makefile" ) CONFIG_FILES="$CONFIG_FILES tools/Makefile" ;;
   "doc/Makefile" ) CONFIG_FILES="$CONFIG_FILES doc/Makefile" ;;

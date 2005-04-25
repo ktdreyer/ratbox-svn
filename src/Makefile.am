@@ -2,7 +2,7 @@
 
 AUTOMAKE_OPTIONS = foreign
 
-SUBDIRS = ident
+SUBDIRS = ident resolver
 
 bin_PROGRAMS = ircd
 

@@ -38,6 +38,7 @@ struct timeval SystemTime;
 #include "balloc.h"
 #include "linebuf.h"
 #include "irc_string.h"
+#include "event.h"
 #define USERLEN 10
 
 /* data fd from ircd */
@@ -402,6 +403,7 @@ int main(int argc, char **argv)
 {
 	char *tifd;
 	char *tofd;
+	time_t delay;
 	fdlist_init();
 	init_netio();	
 	tifd = getenv("IFD");
@@ -426,6 +428,12 @@ int main(int argc, char **argv)
 	while(1) {
 		comm_select(1000);
 		comm_checktimeouts(NULL);
+#ifndef COMM_DOES_EVENTS
+                delay = eventNextTime();
+                if(delay <= SystemTime.tv_sec)
+			eventRun();
+#endif
+                                                        
 	}
 	exit(0);
 }
