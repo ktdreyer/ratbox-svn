@@ -1,10 +1,5 @@
 # $Id$
 
-bin_PROGRAMS = resolver
-
-resolver_SOURCES = resolver.c
-resolver_LDADD = libadns.a
-
 libadns_a_SOURCES = check.c event.c general.c parse.c query.c reply.c setup.c transmit.c types.c
 noinst_LIBRARIES = libadns.a
 
