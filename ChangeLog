@@ -1,3 +1,17 @@
+androsyn    2005/04/26 19:30:20 UTC	(20050426_2)
+
+  Modified files:
+    src                  s_conf.c 
+    src/resolver         resolver.c 
+  Log:
+  add a missing ( in s_conf.c and initialize tv to NULL in resolver.c
+  
+  Revision  Changes    Path
+  1.4       +1 -1      ircd-ratbox/src/resolver/resolver.c
+  7.524     +1 -1      ircd-ratbox/src/s_conf.c
+
+
+
 androsyn    2005/04/26 15:57:51 UTC	(20050426_1)
 
   Modified files:
