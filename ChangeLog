@@ -1,3 +1,15 @@
+androsyn    2005/04/26 15:54:04 UTC	(20050426_0)
+
+  Modified files:
+    src                  s_conf.c 
+  Log:
+  convert port to host order before display it in Unauthorised connection message
+  
+  Revision  Changes    Path
+  7.522     +2 -2      ircd-ratbox/src/s_conf.c
+
+
+
 androsyn    2005/04/25 04:41:43 UTC	(20050425_3)
 
   Modified files:
