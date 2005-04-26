@@ -336,7 +336,7 @@ static void process_adns_incoming(void)
 static void
 read_io(void)
 {
-	struct timeval *tv, tvbuf, now, tvx;
+	struct timeval *tv = NULL, tvbuf, now, tvx;
 	time_t delay;
 	int select_result;
 	int maxfd = -1;
