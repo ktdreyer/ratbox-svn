@@ -249,10 +249,10 @@ check_client(struct Client *client_p, struct Client *source_p, const char *usern
 			int port = -1;
 #ifdef IPV6
 			if(source_p->localClient->ip.ss_family == AF_INET6)
-				port = ntohs((struct sockaddr_in6 *)&source_p->localClient->listener)->sin6_port);
+				port = ntohs((struct sockaddr_in6 *)&source_p->localClient->listener->addr)->sin6_port);
 			else
 #endif
-				port = ntohs(((struct sockaddr_in *)&source_p->localClient->listener)->sin_port); 
+				port = ntohs(((struct sockaddr_in *)&source_p->localClient->listener->addr)->sin_port); 
 			
 			ServerStats.is_ref++;
 			/* jdc - lists server name & port connections are on */
