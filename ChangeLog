@@ -1,3 +1,15 @@
+androsyn    2005/04/27 00:23:54 UTC	(20050427_0)
+
+  Modified files:
+    src/ident            ident.c 
+  Log:
+  using sizeof(struct sockaddr_in) isnt gonna work for ipv6
+  
+  Revision  Changes    Path
+  1.12      +2 -2      ircd-ratbox/src/ident/ident.c
+
+
+
 androsyn    2005/04/26 19:30:20 UTC	(20050426_2)
 
   Modified files:
