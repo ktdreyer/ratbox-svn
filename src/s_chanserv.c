@@ -891,7 +891,9 @@ h_chanserv_mode_op(void *v_chptr, void *v_members)
 		DLINK_FOREACH_SAFE(ptr, next_ptr, members->head)
 		{
 			member_p = ptr->data;
+			member_p->flags &= ~MODE_OPPED;
 			modebuild_add(DIR_DEL, "o", member_p->client_p->name);
+			dlink_destroy(ptr, &members);
 		}
 	}
 	else
@@ -905,10 +907,13 @@ h_chanserv_mode_op(void *v_chptr, void *v_members)
 			mreg_p = find_member_reg(member_p->client_p->user->user_reg, 
 						chreg_p);
 
-			if(!mreg_p || mreg_p->suspend || 
-			   mreg_p->level < S_C_OP)
+			if(!mreg_p || mreg_p->suspend || mreg_p->level < S_C_OP)
+			{
+				member_p->flags &= ~MODE_OPPED;
 				modebuild_add(DIR_DEL, "o",
 						member_p->client_p->name);
+				dlink_destroy(ptr, &members);
+			}
 		}
 	}
 
@@ -944,7 +949,9 @@ h_chanserv_mode_voice(void *v_chptr, void *v_members)
 	DLINK_FOREACH_SAFE(ptr, next_ptr, members->head)
 	{
 		member_p = ptr->data;
+		member_p->flags &= ~MODE_VOICED;
 		modebuild_add(DIR_DEL, "v", member_p->client_p->name);
+		dlink_destroy(ptr, &members);
 	}
 
 	modebuild_finish();
