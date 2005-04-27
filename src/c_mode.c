@@ -432,11 +432,19 @@ parse_full_mode(struct channel *chptr, struct client *source_p,
 				if(dir)
 				{
 					mptr->flags &= ~MODE_DEOPPED;
+
+					/* ignore redundant modes */
+					if(mptr->flags & MODE_OPPED)
+						continue;
+
 					mptr->flags |= MODE_OPPED;
 					dlink_add_alloc(mptr, &opped_list);
 				}
-				else
+				else if(mptr->flags & MODE_OPPED)
+				{
+					dlink_find_destroy(mptr, &opped_list);
 					mptr->flags &= ~MODE_OPPED;
+				}
 
 				if(source_p)
 					modebuild_add(dir, "o", nick);
@@ -445,11 +453,18 @@ parse_full_mode(struct channel *chptr, struct client *source_p,
 			{
 				if(dir)
 				{
+					/* ignore redundant modes */
+					if(mptr->flags & MODE_VOICED)
+						continue;
+
 					mptr->flags |= MODE_VOICED;
 					dlink_add_alloc(mptr, &voiced_list);
 				}
-				else
+				else if(mptr->flags & MODE_VOICED)
+				{
+					dlink_find_destroy(mptr, &voiced_list);
 					mptr->flags &= ~MODE_VOICED;
+				}
 
 				if(source_p)
 					modebuild_add(dir, "v", nick);
