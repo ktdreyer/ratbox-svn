@@ -1,3 +1,16 @@
+leeh        2005/04/27 21:57:21 UTC	(20050427_1)
+
+  Modified files:
+    src                  s_chanserv.c 
+  Log:
+  - properly clear flags from a users membership when we deop/devoice them due
+    to NOOPS etc.
+  
+  Revision  Changes    Path
+  1.72      +9 -2      rserv/src/s_chanserv.c
+
+
+
 leeh        2005/04/27 21:48:23 UTC	(20050427_0)
 
   Modified files:
