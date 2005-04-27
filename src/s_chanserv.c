@@ -893,7 +893,7 @@ h_chanserv_mode_op(void *v_chptr, void *v_members)
 			member_p = ptr->data;
 			member_p->flags &= ~MODE_OPPED;
 			modebuild_add(DIR_DEL, "o", member_p->client_p->name);
-			dlink_destroy(ptr, &members);
+			dlink_destroy(ptr, members);
 		}
 	}
 	else
@@ -912,7 +912,7 @@ h_chanserv_mode_op(void *v_chptr, void *v_members)
 				member_p->flags &= ~MODE_OPPED;
 				modebuild_add(DIR_DEL, "o",
 						member_p->client_p->name);
-				dlink_destroy(ptr, &members);
+				dlink_destroy(ptr, members);
 			}
 		}
 	}
@@ -951,7 +951,7 @@ h_chanserv_mode_voice(void *v_chptr, void *v_members)
 		member_p = ptr->data;
 		member_p->flags &= ~MODE_VOICED;
 		modebuild_add(DIR_DEL, "v", member_p->client_p->name);
-		dlink_destroy(ptr, &members);
+		dlink_destroy(ptr, members);
 	}
 
 	modebuild_finish();
