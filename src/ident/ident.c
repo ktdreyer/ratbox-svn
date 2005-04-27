@@ -334,7 +334,6 @@ void
 check_identd(const char *id, const char *bindaddr, const char *destaddr, const char *srcport, const char *dstport)
 {
 	struct auth_request *auth;
-	int aftype = AF_INET;
 	auth = BlockHeapAlloc(authheap);
 
 	inetpton_sock(bindaddr, (struct sockaddr *)&auth->bindaddr);
@@ -351,7 +350,7 @@ check_identd(const char *id, const char *bindaddr, const char *destaddr, const c
 	auth->dstport = atoi(dstport);
 	strcpy(auth->reqid, id);
 
-	auth->authfd = comm_socket(aftype, SOCK_STREAM, 0, "auth fd");
+	auth->authfd = comm_socket(((struct sockaddr *)&auth->destaddr)->sa_family, SOCK_STREAM, 0, "auth fd");
 	comm_connect_tcp(auth->authfd, (struct sockaddr *)&auth->destaddr, 
 		(struct sockaddr *)&auth->bindaddr, sizeof(auth->bindaddr), connect_callback, auth, 30);
                                   
