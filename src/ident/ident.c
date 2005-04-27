@@ -352,7 +352,7 @@ check_identd(const char *id, const char *bindaddr, const char *destaddr, const c
 
 	auth->authfd = comm_socket(((struct sockaddr *)&auth->destaddr)->sa_family, SOCK_STREAM, 0, "auth fd");
 	comm_connect_tcp(auth->authfd, (struct sockaddr *)&auth->destaddr, 
-		(struct sockaddr *)&auth->bindaddr, sizeof(auth->bindaddr), connect_callback, auth, 30);
+		(struct sockaddr *)&auth->bindaddr, GET_SS_LEN(auth->destaddr), connect_callback, auth, 30);
                                   
 }
 
