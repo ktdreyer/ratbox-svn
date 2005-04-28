@@ -1,3 +1,86 @@
+leeh        2005/04/28 00:41:55 UTC	(20050428_0)
+
+  Added files:
+    sqlite               Makefile.in README VERSION aclocal.m4 
+                         config.guess config.sub configure 
+                         configure.ac install-sh lemon.html 
+                         ltmain.sh main.mk spec.template sqlite.1 
+                         sqlite.def sqlite.pc.in 
+    sqlite/src           attach.c auth.c btree.c btree.h 
+                         btree_rb.c build.c copy.c date.c delete.c 
+                         encode.c expr.c func.c hash.c hash.h 
+                         insert.c main.c md5.c os.c os.h pager.c 
+                         pager.h parse.y pragma.c printf.c 
+                         random.c select.c shell.c sqlite.h.in 
+                         sqliteInt.h table.c tokenize.c trigger.c 
+                         update.c util.c vacuum.c vdbe.c vdbe.h 
+                         vdbeInt.h vdbeaux.c where.c 
+    sqlite/tool          lemon.c lempar.c 
+  Log:
+  - pull in the sqlite sources
+  
+  Revision  Changes    Path
+  1.1       +366 -0    rserv/sqlite/Makefile.in (new)
+  1.1       +39 -0     rserv/sqlite/README (new)
+  1.1       +1 -0      rserv/sqlite/VERSION (new)
+  1.1       +5913 -0   rserv/sqlite/aclocal.m4 (new)
+  1.1       +1432 -0   rserv/sqlite/config.guess (new)
+  1.1       +1537 -0   rserv/sqlite/config.sub (new)
+  1.1       +21007 -0  rserv/sqlite/configure (new)
+  1.1       +486 -0    rserv/sqlite/configure.ac (new)
+  1.1       +251 -0    rserv/sqlite/install-sh (new)
+  1.1       +892 -0    rserv/sqlite/lemon.html (new)
+  1.1       +6399 -0   rserv/sqlite/ltmain.sh (new)
+  1.1       +306 -0    rserv/sqlite/main.mk (new)
+  1.1       +62 -0     rserv/sqlite/spec.template (new)
+  1.1       +203 -0    rserv/sqlite/sqlite.1 (new)
+  1.1       +45 -0     rserv/sqlite/sqlite.def (new)
+  1.1       +13 -0     rserv/sqlite/sqlite.pc.in (new)
+  1.1       +311 -0    rserv/sqlite/src/attach.c (new)
+  1.1       +219 -0    rserv/sqlite/src/auth.c (new)
+  1.1       +3584 -0   rserv/sqlite/src/btree.c (new)
+  1.1       +156 -0    rserv/sqlite/src/btree.h (new)
+  1.1       +1488 -0   rserv/sqlite/src/btree_rb.c (new)
+  1.1       +2156 -0   rserv/sqlite/src/build.c (new)
+  1.1       +110 -0    rserv/sqlite/src/copy.c (new)
+  1.1       +875 -0    rserv/sqlite/src/date.c (new)
+  1.1       +393 -0    rserv/sqlite/src/delete.c (new)
+  1.1       +254 -0    rserv/sqlite/src/encode.c (new)
+  1.1       +1662 -0   rserv/sqlite/src/expr.c (new)
+  1.1       +658 -0    rserv/sqlite/src/func.c (new)
+  1.1       +356 -0    rserv/sqlite/src/hash.c (new)
+  1.1       +109 -0    rserv/sqlite/src/hash.h (new)
+  1.1       +919 -0    rserv/sqlite/src/insert.c (new)
+  1.1       +1143 -0   rserv/sqlite/src/main.c (new)
+  1.1       +386 -0    rserv/sqlite/src/md5.c (new)
+  1.1       +1850 -0   rserv/sqlite/src/os.c (new)
+  1.1       +192 -0    rserv/sqlite/src/os.h (new)
+  1.1       +2220 -0   rserv/sqlite/src/pager.c (new)
+  1.1       +107 -0    rserv/sqlite/src/pager.h (new)
+  1.1       +897 -0    rserv/sqlite/src/parse.y (new)
+  1.1       +712 -0    rserv/sqlite/src/pragma.c (new)
+  1.1       +859 -0    rserv/sqlite/src/printf.c (new)
+  1.1       +97 -0     rserv/sqlite/src/random.c (new)
+  1.1       +2434 -0   rserv/sqlite/src/select.c (new)
+  1.1       +1354 -0   rserv/sqlite/src/shell.c (new)
+  1.1       +886 -0    rserv/sqlite/src/sqlite.h.in (new)
+  1.1       +1270 -0   rserv/sqlite/src/sqliteInt.h (new)
+  1.1       +204 -0    rserv/sqlite/src/table.c (new)
+  1.1       +679 -0    rserv/sqlite/src/tokenize.c (new)
+  1.1       +765 -0    rserv/sqlite/src/trigger.c (new)
+  1.1       +459 -0    rserv/sqlite/src/update.c (new)
+  1.1       +1135 -0   rserv/sqlite/src/util.c (new)
+  1.1       +305 -0    rserv/sqlite/src/vacuum.c (new)
+  1.1       +4921 -0   rserv/sqlite/src/vdbe.c (new)
+  1.1       +112 -0    rserv/sqlite/src/vdbe.h (new)
+  1.1       +304 -0    rserv/sqlite/src/vdbeInt.h (new)
+  1.1       +1062 -0   rserv/sqlite/src/vdbeaux.c (new)
+  1.1       +1235 -0   rserv/sqlite/src/where.c (new)
+  1.1       +4384 -0   rserv/sqlite/tool/lemon.c (new)
+  1.1       +688 -0    rserv/sqlite/tool/lempar.c (new)
+
+
+
 leeh        2005/04/27 22:29:07 UTC	(20050427_6)
 
   rserv/sqlite/tool - New directory
