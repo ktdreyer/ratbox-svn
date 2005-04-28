@@ -1,3 +1,18 @@
+leeh        2005/04/28 13:26:54 UTC	(20050428_4)
+
+  Modified files:
+    sqlite               Makefile.in configure configure.ac 
+  Log:
+  - move some stuff out of sqlite Makefile and into autoconf, this should make
+    us compatible with bsd-make
+  
+  Revision  Changes    Path
+  1.2       +8 -8      rserv/sqlite/Makefile.in
+  1.2       +16 -2     rserv/sqlite/configure
+  1.2       +14 -2     rserv/sqlite/configure.ac
+
+
+
 leeh        2005/04/28 12:54:41 UTC	(20050428_3)
 
   Modified files:
