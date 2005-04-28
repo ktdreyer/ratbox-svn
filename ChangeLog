@@ -1,3 +1,18 @@
+leeh        2005/04/28 13:59:11 UTC	(20050428_6)
+
+  Modified files:
+    .                    README 
+  Added files:
+    .                    RELEASE_NOTES 
+  Log:
+  - added RELEASE_NOTES
+  
+  Revision  Changes    Path
+  1.5       +5 -0      rserv/README
+  1.1       +33 -0     rserv/RELEASE_NOTES (new)
+
+
+
 leeh        2005/04/28 13:37:03 UTC	(20050428_5)
 
   Modified files:
