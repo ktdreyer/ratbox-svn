@@ -65,11 +65,11 @@ ENCODING = @ENCODING@
 # tables to always be in memory.
 #
 INMEMORYDB = @INMEMORYDB@
-INCOREFLAGS = -DTEMP_STORE=@TEMP_STORE@
+INCOREFLAGS = -DTEMP_STORE=@TEMP_STORE@ @OMIT_INMEMORYDB@
 
-ifeq (${INMEMORYDB},0)
-INCOREFLAGS += -DSQLITE_OMIT_INMEMORYDB=1
-endif
+#ifeq (${INMEMORYDB},0)
+#INCOREFLAGS += -DSQLITE_OMIT_INMEMORYDB=1
+#endif
 
 # You should not have to change anything below this line
 ###############################################################################
@@ -81,12 +81,12 @@ LIBOBJ = attach.lo auth.lo btree.lo build.lo copy.lo date.lo \
          main.lo opcodes.lo os.lo pager.lo parse.lo pragma.lo \
          printf.lo random.lo select.lo table.lo tokenize.lo \
          update.lo util.lo vacuum.lo vdbe.lo vdbeaux.lo \
-         where.lo trigger.lo
+         where.lo trigger.lo @LIBOBJ_BTREE@
 
 # Only build the in-core DB if it is required.
-ifeq (${INMEMORYDB},1)
-LIBOBJ += btree_rb.lo
-endif
+#ifeq (${INMEMORYDB},1)
+#LIBOBJ += btree_rb.lo
+#endif
 
 # All of the source code files.
 #

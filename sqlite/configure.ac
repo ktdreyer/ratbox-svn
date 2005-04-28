@@ -364,6 +364,18 @@ case "$enable_tempdb_in_ram" in
   ;;
 esac
 
+
+if test "$INMEMORYDB" = "1"; then
+	LIBOBJ_BTREE="btree_rb.lo"
+	OMIT_INMEMORYDB=""
+else
+	LIBOBJ_BTREE=""
+	OMIT_INMEMORYDB="-DSQLITE_OMIT_INMEMORYDB=1"
+fi
+
+AC_SUBST(LIBOBJ_BTREE)
+AC_SUBST(OMIT_INMEMORYDB)
+
 AC_SUBST(INMEMORYDB)
 AC_SUBST(TEMP_STORE)
 
