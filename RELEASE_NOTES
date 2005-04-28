@@ -1,0 +1,33 @@
+
+This is the current beta version of ratbox-services.
+
+
+-- ratbox-services-1.0beta2
+- added nickname services which work via username registrations.
+
+  IMPORTANT: if nickserv is not disabled in configure via --disable-nickserv
+  you MUST update your services database with the new nickserv table.
+
+  Once it has been installed, edit the schema.txt file, removing the other
+  CREATE TABLE commands, apart from the CREATE TABLE nicks command.  Then
+  run: sqlite services.sb < schema.txt
+
+- update some helpfiles
+- make sure chanserv parts when a channel registration is dropped
+- fix a core in OPERBOT::OBJOIN
+- add support for sending wallops when admin commands are used
+- make USERSERV::USERINFO work on =nick
+- update a clients n!u@h mask when they change nicks
+- compiler warning flags are set by --enable-warnings, CPPFLAGS/CFLAGS
+  are honoured
+- added CHANSERV::SET::NOVOICES
+- handle redundant ops/voices better
+- fix a bug where we didnt reset a users op status when we deopped them
+- fixed missing host_register stuff in the conf parser
+- imported sqlite into the tree, automatically built when we cant find
+  it installed in the system
+
+-- ratbox-services-1.0beta1
+No release notes.
+
+$Id$
