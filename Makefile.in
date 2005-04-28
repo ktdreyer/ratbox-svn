@@ -9,7 +9,7 @@ LDFLAGS=@LDFLAGS@
 
 SUBDIRS=@SQLITE_SUBDIR@ src help
 
-MAKE = make
+@SET_MAKE@
 
 all: build
 
