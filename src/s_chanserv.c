@@ -1154,7 +1154,8 @@ h_chanserv_join(void *v_chptr, void *v_members)
 				member_p->flags |= MODE_OPPED;
 			}
 			else if(mreg_p->flags & CS_MEMBER_AUTOVOICE &&
-				!is_voiced(member_p))
+				!is_voiced(member_p) &&
+				!(chreg_p->flags & CS_FLAGS_NOVOICES))
 			{
 				modebuild_add(DIR_ADD, "v",
 					member_p->client_p->name);
@@ -1221,7 +1222,8 @@ h_chanserv_user_login(void *v_client_p, void *unused)
 			member_p->flags |= MODE_OPPED;
 		}
 		else if(mreg_p->flags & CS_MEMBER_AUTOVOICE &&
-			!is_voiced(member_p))
+			!is_voiced(member_p) &&
+			!(chreg_p->flags & CS_FLAGS_NOVOICES))
 		{
 			sendto_server(":%s MODE %s +v %s",
 					chanserv_p->name, chptr->name,
