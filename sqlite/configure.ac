@@ -141,6 +141,8 @@ dnl show in in configure.
 # The following RCS revision string applies to configure.in
 # $Revision$
 
+AC_PREFIX_DEFAULT(/usr/local/ratbox-services)
+
 #########
 # Programs needed
 #
@@ -151,7 +153,7 @@ AC_PROG_INSTALL
 # Set up an appropriate program prefix
 #
 if test "$program_prefix" = "NONE"; then
-  program_prefix=""
+  program_prefix="/usr/local/ratbox-services"
 fi
 AC_SUBST(program_prefix)
 
