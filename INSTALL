@@ -10,35 +10,12 @@ ratbox-services installation guide
 2. Ensure you have a grammar/lexical parser installed.  Bison and flex are
    recommended, though yacc and lex should do.
 
-3. Install sqlite.  You may either do this via your OS using a tool like
-   apt-get, or via packages.  You can usually tell if it is installed by
-   running the command: sqlite -help
-
-   SQLite downloads are available from http://www.sqlite.org/download.html
-   Replace 'x' here with the current version number!  (Note: I only say 2.x
-   here, because thats what apt on debian gives me and is what I know works)
-
-   To install from RPM:
-      1. Download sqlite-devel-2.8.x.i386.rpm
-                  sqlite-2.8.x.i386.rpm
-      2. rpm -i sqlite-devel-2.8.x.i386.rpm sqlite-2.8.x.i386.rpm
-
-   To install from source:
-      1. Download sqlite-2.8.x.tar.gz
-      2. tar -zxf sqlite-2.8.x.tar.gz
-      3. cd sqlite
-      
-      If you have root access and want to install sqlite in /usr/local
-        4a. ./configure --prefix=/usr/local
-        4b. make
-        4c. su to root user
-	4d. cd /path/to/sqlite/source
-	4e. make install
-
-      If you do not have root access:
-        5a. ./configure --prefix=/home/yourusername/sqlite
-        5b. make
-        5c. make install
+3. ratbox-services will automatically compile sqlite if it is not found, 
+   which is used for storing the database.  At this stage you may prefer
+   to have sqlite installed system wide.  If that is the case, you should
+   download sqlite version 2.x from http://www.sqlite.org/download.html and
+   install it yourself, otherwise ratbox-services will build it itself if
+   not found.
 
 4. Run the configure script.  By default it will attempt to install to
    /usr/local/ratbox-services.  If you want it in this directory, then
@@ -47,7 +24,7 @@ ratbox-services installation guide
 	chown youruser:yourgroup /usr/local/ratbox-services
    Then install as normal from your username.  Services will not run as
    root, nor should you run make install as root.
-   
+
 
    If you wish to install it to a different directory include the 
    --prefix option:
@@ -57,11 +34,11 @@ ratbox-services installation guide
    include the relevant option:
    	./configure --disable-operbot
 
-   If SQLite is installed but configure doesnt find it:
+   If SQLite is installed but configure doesnt find it, and you do not
+   wish ratbox-services to build sqlite itself:
         ./configure --with-sqlite=PATH
    configure will search PATH/include and PATH/lib for the needed SQLite
-   parts.  eg, if you installed sqlite (as above) to /home/youruser/sqlite:
-        ./configure --with-sqlite=/home/youruser/sqlite
+   parts.
 
    If your nick or topic length set in ircd are different to 9 and 160
    respectively, then:
@@ -83,6 +60,9 @@ ratbox-services installation guide
 9. Initialise your database, this must be done even if you are converting
    from hybserv:
 	sqlite services.db < schema.txt
+
+   If ratbox-services compiled sqlite itself, the sqlite binary can be
+   found in PREFIX/bin.
 
    If you are converting from hybserv, see the website for further
    instructions: http://services.ircd-ratbox.org/
