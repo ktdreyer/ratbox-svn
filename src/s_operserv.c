@@ -126,6 +126,25 @@ otakeover(struct channel *chptr, int invite)
 	chptr->tsinfo--;
 
 	join_service(operserv_p, chptr->name, chptr->tsinfo, NULL);
+
+	/* need to reop some services */
+	if(dlink_list_length(&chptr->services) > 1)
+	{
+		struct client *target_p;
+		dlink_node *ptr;
+
+		modebuild_start(operserv_p, chptr);
+
+		DLINK_FOREACH(ptr, chptr->services.head)
+		{
+			target_p = ptr->data;
+
+			if(target_p != operserv_p)
+				modebuild_add(DIR_ADD, "o", target_p->name);
+		}
+
+		modebuild_finish();
+	}
 }
 
 static void
