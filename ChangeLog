@@ -1,3 +1,15 @@
+leeh        2005/04/28 13:37:03 UTC	(20050428_5)
+
+  Modified files:
+    src                  s_chanserv.c 
+  Log:
+  - fix autovoice with novoices
+  
+  Revision  Changes    Path
+  1.74      +4 -2      rserv/src/s_chanserv.c
+
+
+
 leeh        2005/04/28 13:26:54 UTC	(20050428_4)
 
   Modified files:
