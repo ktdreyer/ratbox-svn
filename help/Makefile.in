@@ -23,6 +23,7 @@ install:
 build:
 clean:
 depend:
+all:
 
 distclean:
 	$(RM) -f Makefile

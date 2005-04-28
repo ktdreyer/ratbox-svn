@@ -7,7 +7,7 @@ BIN=ratbox-services@EXEEXT@
 LIBS=@LIBS@
 LDFLAGS=@LDFLAGS@
 
-SUBDIRS=src help
+SUBDIRS=@SQLITE_SUBDIR@ src help
 
 MAKE = make
 
@@ -22,7 +22,7 @@ build:
 	@for i in $(SUBDIRS); do \
 		echo "build -> $$i"; \
 		cd $$i; \
-		$(MAKE) build || exit; cd ..; \
+		$(MAKE) all || exit; cd ..; \
 	done
 
 install: build

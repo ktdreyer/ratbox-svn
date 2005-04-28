@@ -12,6 +12,7 @@ BIN=ratbox-services@EXEEXT@
 INCLUDES=-I ../include/ @SQLITE_INCLUDES@
 LDFLAGS=@LDFLAGS@
 LIBS=@LIBS@
+SQLITE_LIB=@SQLITE_LIB@
 CFLAGS=@CPPFLAGS@ @CFLAGS@ -DPREFIX=\"$(PREFIX)\"
 MAKE = make
 
@@ -50,7 +51,7 @@ OBJS=$(SRCS:.c=.o)
 all: $(BIN)
 
 $(BIN): $(OBJS) y.tab.o lex.yy.o
-	${CC} ${CFLAGS} ${LDFLAGS} -o $@ ${OBJS} y.tab.o lex.yy.o $(LIBS) $(LEXLIB)
+	${CC} ${CFLAGS} ${LDFLAGS} -o $@ ${OBJS} y.tab.o lex.yy.o $(SQLITE_LIB) $(LIBS) $(LEXLIB)
 
 .c.o:
 	${CC} $(INCLUDES) ${CFLAGS} -c $<

@@ -169,37 +169,61 @@ else
 	AC_MSG_RESULT(no)
 fi
 
+ac_cv_found_sqlite_inc="no"
+ac_cv_found_sqlite_lib="no"
+
+SQLITE_LIB="-lsqlite"
+
 dnl Try to find SQLite.
 SQLITE_INCLUDES=""
 AC_ARG_WITH([sqlite],
 [ --with-sqlite=DIR         Path to search for sqlite], 
 [SQLITE_DIR=$withval], [SQLITE_DIR="/usr"])
 
-AC_CHECK_HEADER(sqlite.h, [], [
+AC_CHECK_HEADER(sqlite.h, 
+[
+	ac_cv_found_sqlite_inc="yes"
+], [
 	AC_MSG_CHECKING(for sqlite.h in given path)
 	if test -f "$SQLITE_DIR/include/sqlite.h"; then
 		SQLITE_INCLUDES="-I $SQLITE_DIR/include/"
 		AC_MSG_RESULT(yes)
+		ac_cv_found_sqlite_inc="yes"
 	else
 		AC_MSG_RESULT(no)
-		echo "Cannot find SQLite headers.  Please specify search path --with-sqlite=DIR"
-		exit
 	fi
 ], [])
 
-AC_CHECK_LIB([sqlite], [main], [], [
+AC_CHECK_LIB([sqlite], [main], 
+[
+	ac_cv_found_sqlite_lib="yes"
+], [
 	AC_MSG_CHECKING(for main in -lsqlite in given path)
 
 	if test -e "$SQLITE_DIR/lib/libsqlite.so"; then
 		LDFLAGS="$LDFLAGS -L$SQLITE_DIR/lib/"
 		LIBS="$LIBS -lsqlite"
 		AC_MSG_RESULT(yes)
+		ac_cv_found_sqlite_lib="yes"
 	else
 		AC_MSG_RESULT(no)
-		echo "Cannot find SQLite library libsqlite.so.  Please specify search path --with-sqlite=DIR"
-		exit
 	fi
 ])
+
+AC_MSG_CHECKING(sqlite was found)
+
+if test "X$ac_cv_found_sqlite_inc" != "Xyes" || test "X$ac_cv_found_sqlite_lib" != "Xyes"; then
+	AC_CONFIG_SUBDIRS(sqlite)
+	AC_MSG_RESULT(no)
+	SQLITE_INCLUDES="-I ../sqlite/"
+	SQLITE_SUBDIR="sqlite"
+	SQLITE_LIB="../sqlite/.libs/libsqlite.a"
+else
+	AC_MSG_RESULT(yes)
+	SQLITE_SUBDIR=""
+	dnl dont go into sqlite/ if we dont need to.
+	no_recursion="yes"
+fi
 
 AC_ARG_WITH([nicklen],
 [ --with-nicklen=LENGTH     Sets nick length to LENGTH],
@@ -215,7 +239,9 @@ AC_ARG_WITH([topiclen],
 AC_MSG_RESULT("checking topic length... $ac_cv_topiclen")
 AC_DEFINE_UNQUOTED(TOPICLEN, (${ac_cv_topiclen}+1), Topic Length)
 
-AC_SUBST(SQLITE_INCLUDES) 
+AC_SUBST(SQLITE_INCLUDES)
+AC_SUBST(SQLITE_SUBDIR)
+AC_SUBST(SQLITE_LIB)
 
 AC_SUBST(S_NICKSERV)
 AC_SUBST(S_CHANSERV)
