@@ -217,7 +217,7 @@ if test "X$ac_cv_found_sqlite_inc" != "Xyes" || test "X$ac_cv_found_sqlite_lib" 
 	AC_MSG_RESULT(no)
 	SQLITE_INCLUDES="-I ../sqlite/"
 	SQLITE_SUBDIR="sqlite"
-	SQLITE_LIB="../sqlite/.libs/libsqlite.a"
+	SQLITE_LIB="../sqlite/libsqlite.a"
 else
 	AC_MSG_RESULT(yes)
 	SQLITE_SUBDIR=""
