@@ -1,3 +1,19 @@
+leeh        2005/04/29 02:41:36 UTC	(20050429_1)
+
+  Modified files:
+    sqlite               Makefile.in 
+  Removed files:
+    sqlite               ltmain.sh 
+  Log:
+  - remove ltmain.sh
+  - stop installing libsqlite.a and sqlite.h, they dont really help.
+  
+  Revision  Changes    Path
+  1.4       +7 -6      rserv/sqlite/Makefile.in
+  1.2       +0 -6399   rserv/sqlite/ltmain.sh (dead)
+
+
+
 leeh        2005/04/29 02:38:22 UTC	(20050429_0)
 
   Modified files:
