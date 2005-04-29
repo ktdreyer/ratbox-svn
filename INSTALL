@@ -15,7 +15,8 @@ ratbox-services installation guide
    to have sqlite installed system wide.  If that is the case, you should
    download sqlite version 2.x from http://www.sqlite.org/download.html and
    install it yourself, otherwise ratbox-services will build it itself if
-   not found.
+   not found.  The sqlite included here is NOT suitable for installation
+   system wide, only for building ratbox-services.
 
 4. Run the configure script.  By default it will attempt to install to
    /usr/local/ratbox-services.  If you want it in this directory, then
