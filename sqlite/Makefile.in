@@ -323,14 +323,15 @@ auth.o:	$(TOP)/src/auth.c $(HDR)
 	$(TCC) -c $(TOP)/src/auth.c
 
 install:	sqlite libsqlite.a sqlite.h
-	$(INSTALL) -d $(DESTDIR)$(exec_prefix)/lib
-	$(INSTALL) libsqlite.a $(DESTDIR)$(exec_prefix)/lib
 	$(INSTALL) -d $(DESTDIR)$(exec_prefix)/bin
 	$(INSTALL) sqlite $(DESTDIR)$(exec_prefix)/bin
-	$(INSTALL) -d $(DESTDIR)$(prefix)/include
-	$(INSTALL) -m 0644 sqlite.h $(DESTDIR)$(prefix)/include
-	$(INSTALL) -d $(DESTDIR)$(exec_prefix)/lib/pkgconfig; 
-	$(INSTALL) -m 0644 sqlite.pc $(DESTDIR)$(exec_prefix)/lib/pkgconfig; 
+
+#	$(INSTALL) -d $(DESTDIR)$(exec_prefix)/lib
+#	$(INSTALL) libsqlite.a $(DESTDIR)$(exec_prefix)/lib
+#	$(INSTALL) -d $(DESTDIR)$(prefix)/include
+#	$(INSTALL) -m 0644 sqlite.h $(DESTDIR)$(prefix)/include
+#	$(INSTALL) -d $(DESTDIR)$(exec_prefix)/lib/pkgconfig; 
+#	$(INSTALL) -m 0644 sqlite.pc $(DESTDIR)$(exec_prefix)/lib/pkgconfig; 
 
 clean:	
 	rm -f *.o sqlite@TARGET_EXEEXT@ libsqlite.a sqlite.h opcodes.*
