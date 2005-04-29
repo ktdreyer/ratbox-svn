@@ -1,3 +1,20 @@
+leeh        2005/04/29 03:05:19 UTC	(20050429_3)
+
+  Modified files:
+    .                    INSTALL 
+  Added files:
+    sqlite               README_RATBOX 
+  Log:
+  - add a README_RATBOX to sqlite/
+  - note the sqlite included here isnt suitable for being installed system
+    wide.
+  
+  Revision  Changes    Path
+  1.10      +2 -1      rserv/INSTALL
+  1.1       +14 -0     rserv/sqlite/README_RATBOX (new)
+
+
+
 leeh        2005/04/29 02:43:27 UTC	(20050429_2)
 
   Removed files:
