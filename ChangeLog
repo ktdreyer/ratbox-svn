@@ -1,3 +1,21 @@
+leeh        2005/04/29 02:38:22 UTC	(20050429_0)
+
+  Modified files:
+    .                    configure 
+    autoconf             configure.in 
+    sqlite               Makefile.in configure configure.ac 
+  Log:
+  - remove libtool from sqlite.  we only ever generate static library now
+  
+  Revision  Changes      Path
+  1.25      +1 -1        rserv/autoconf/configure.in
+  1.24      +1 -1        rserv/configure
+  1.3       +87 -110     rserv/sqlite/Makefile.in
+  1.4       +974 -17147  rserv/sqlite/configure
+  1.4       +6 -19       rserv/sqlite/configure.ac
+
+
+
 leeh        2005/04/28 18:57:50 UTC	(20050428_8)
 
   Modified files:
