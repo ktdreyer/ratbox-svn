@@ -1,3 +1,17 @@
+leeh        2005/04/30 13:18:00 UTC	(20050430_1)
+
+  Modified files:
+    src                  s_alis.c 
+  Log:
+  - via jilles,
+    - list #channel (without wildcards) didn't show +p-s channels
+    - maxmatches counted all channels instead of just matching ones
+  
+  Revision  Changes    Path
+  1.37      +7 -9      rserv/src/s_alis.c
+
+
+
 leeh        2005/04/30 12:42:43 UTC	(20050430_0)
 
   Modified files:
