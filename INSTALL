@@ -11,12 +11,17 @@ ratbox-services installation guide
    recommended, though yacc and lex should do.
 
 3. ratbox-services will automatically compile sqlite if it is not found, 
-   which is used for storing the database.  At this stage you may prefer
-   to have sqlite installed system wide.  If that is the case, you should
-   download sqlite version 2.x from http://www.sqlite.org/download.html and
-   install it yourself, otherwise ratbox-services will build it itself if
-   not found.  The sqlite included here is NOT suitable for installation
-   system wide, only for building ratbox-services.
+   which is used for storing the database.  
+   
+   You may prefer to have sqlite installed system wide.  If that is the case, 
+   you should download sqlite version 2.x from 
+   http://www.sqlite.org/download.html and install it yourself.
+   
+   The sqlite included here is NOT suitable for installation system wide, 
+   only for building ratbox-services.  See sqlite/README_RATBOX
+
+   Note, SQLite is simply a database interface to a normal file, it does
+   not run as a seperate process.
 
 4. Run the configure script.  By default it will attempt to install to
    /usr/local/ratbox-services.  If you want it in this directory, then
