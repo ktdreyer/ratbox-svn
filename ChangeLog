@@ -1,3 +1,18 @@
+leeh        2005/04/30 12:42:43 UTC	(20050430_0)
+
+  Modified files:
+    .                    INSTALL 
+    doc                  example.conf 
+  Log:
+  - update INSTALL
+  - add missing ';' on nickserv block
+  
+  Revision  Changes    Path
+  1.11      +11 -6     rserv/INSTALL
+  1.39      +2 -1      rserv/doc/example.conf
+
+
+
 leeh        2005/04/29 03:05:19 UTC	(20050429_3)
 
   Modified files:
