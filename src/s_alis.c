@@ -352,11 +352,7 @@ s_alis_list(struct client *client_p, struct lconn *conn_p, const char *parv[], i
         {
                 if((chptr = find_channel(query.mask)) != NULL)
                 {
-                        if(chptr->topic[0] == '\0')
-                                query.show_topicwho = 0;
-
-                        if(!(chptr->mode.mode & MODE_SECRET) &&
-                                        !(chptr->mode.mode & MODE_PRIVATE))
+                        if(!(chptr->mode.mode & MODE_SECRET))
                                 print_channel(client_p, chptr, &query);
                 }
 
@@ -370,12 +366,14 @@ s_alis_list(struct client *client_p, struct lconn *conn_p, const char *parv[], i
 
                 /* matches, so show it */
                 if(show_channel(chptr, &query))
+                {
                         print_channel(client_p, chptr, &query);
 
-                if(--maxmatch == 0)
-                {
-                        service_error(alis_p, client_p, "Maximum channel output reached");
-                        break;
+                        if(--maxmatch == 0)
+                        {
+                                service_error(alis_p, client_p, "Maximum channel output reached");
+                                break;
+                        }
                 }
         }
 
