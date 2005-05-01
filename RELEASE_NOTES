@@ -24,8 +24,10 @@ This is the current beta version of ratbox-services.
 - handle redundant ops/voices better
 - fix a bug where we didnt reset a users op status when we deopped them
 - fixed missing host_register stuff in the conf parser
-- imported sqlite into the tree, automatically built when we cant find
-  it installed in the system
+- imported a cut down version of sqlite into the tree, automatically 
+  built when we cant find it installed in the system
+- fix a couple of problems with ALIS::LIST
+
 
 -- ratbox-services-1.0beta1
 No release notes.
