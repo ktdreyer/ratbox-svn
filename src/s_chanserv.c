@@ -2117,6 +2117,11 @@ s_chan_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 
 		return 1;
 	}
+	else if(!strcasecmp(parv[1], "NOVOICECMD"))
+	{
+		s_chan_set_flag(client_p, chreg_p, parv[1], arg, CS_FLAGS_NOVOICECMD);
+		return 1;
+	}
 	else if(!strcasecmp(parv[1], "AUTOJOIN"))
 	{
 		retval = s_chan_set_flag(client_p, chreg_p, parv[1], arg, CS_FLAGS_AUTOJOIN);
@@ -2407,6 +2412,13 @@ s_chan_voice(struct client *client_p, struct lconn *conn_p, const char *parv[], 
 		return 1;
 	}
 
+	if(reg_p->channel_reg->flags & CS_FLAGS_NOVOICECMD)
+	{
+		service_error(chanserv_p, client_p,
+				"Channel %s is set NOVOICECMD",
+				reg_p->channel_reg->name);
+		return 1;
+	}
 
 	if((msptr = find_chmember(chptr, client_p)) == NULL)
 	{
@@ -2907,6 +2919,7 @@ dump_info_extended(struct client *client_p, struct lconn *conn_p,
 			(chreg_p->flags & CS_FLAGS_AUTOJOIN) ? "AUTOJOIN " : "",
 			(chreg_p->flags & CS_FLAGS_NOOPS) ? "NOOPS " : "",
 			(chreg_p->flags & CS_FLAGS_NOVOICES) ? "NOVOICES " : "",
+			(chreg_p->flags & CS_FLAGS_NOVOICECMD) ? "NOVOICECMD " : "",
 			(chreg_p->flags & CS_FLAGS_RESTRICTOPS) ? "RESTRICTOPS " : "",
 			(chreg_p->flags & CS_FLAGS_WARNOVERRIDE) ? "WARNOVERRIDE" : "");
 
