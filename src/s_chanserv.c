@@ -2914,7 +2914,7 @@ dump_info_extended(struct client *client_p, struct lconn *conn_p,
 
 	if(chreg_p->flags & CS_FLAGS_SHOW)
 		service_send(chanserv_p, client_p, conn_p,
-			"[%s] Settings: %s%s%s%s%s",
+			"[%s] Settings: %s%s%s%s%s%s",
 			chreg_p->name,
 			(chreg_p->flags & CS_FLAGS_AUTOJOIN) ? "AUTOJOIN " : "",
 			(chreg_p->flags & CS_FLAGS_NOOPS) ? "NOOPS " : "",
