@@ -1,3 +1,15 @@
+leeh        2005/05/03 10:55:58 UTC	(20050503_0)
+
+  Modified files:
+    src                  s_chanserv.c 
+  Log:
+  - add missing %s when displaying channel flags
+  
+  Revision  Changes    Path
+  1.76      +1 -1      rserv/src/s_chanserv.c
+
+
+
 leeh        2005/05/02 22:57:37 UTC	(20050502_0)
 
   Modified files:
