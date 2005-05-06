@@ -701,6 +701,9 @@ signoff_client(struct lconn *conn_p)
 	if(ConnDead(conn_p))
 		return;
 
+	/* Mark it as dead right away to avoid infinite calls! -- jilles */
+	SetConnDead(conn_p);
+
 	if(UserAuth(conn_p))
                 sendto_all(UMODE_AUTH, "%s has logged out", conn_p->name);
 
@@ -708,7 +711,6 @@ signoff_client(struct lconn *conn_p)
 		deallocate_conf_oper(conn_p->oper);
 
 	sock_close(conn_p);
-	SetConnDead(conn_p);
 }
 
 static void
@@ -719,6 +721,9 @@ signoff_server(struct lconn *conn_p)
 
 	if(ConnDead(conn_p))
 		return;
+
+	/* Mark it as dead right away to avoid infinite calls! -- jilles */
+	SetConnDead(conn_p);
 
 	/* clear any introduced status */
 	DLINK_FOREACH(ptr, service_list.head)
@@ -739,7 +744,6 @@ signoff_server(struct lconn *conn_p)
 	}
 
 	sock_close(conn_p);
-	SetConnDead(conn_p);
 }
 
 
