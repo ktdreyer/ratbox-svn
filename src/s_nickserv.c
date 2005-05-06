@@ -184,6 +184,10 @@ h_nick_warn_client(void *vclient_p, void *unused)
 	if((nreg_p->flags & NS_FLAGS_WARN) == 0)
 		return 0;
 
+	/* here for nick change */
+	if(nreg_p->user_reg == target_p->user->user_reg)
+		continue;
+
 	service_error(nickserv_p, client_p, "%s", config_file.nwarn_string);
 	return 0;
 }
