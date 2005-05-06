@@ -1,3 +1,15 @@
+leeh        2005/05/06 23:00:27 UTC	(20050506_4)
+
+  Modified files:
+    src                  s_nickserv.c 
+  Log:
+  - s/target_p/client_p
+  
+  Revision  Changes    Path
+  1.12      +1 -1      rserv/src/s_nickserv.c
+
+
+
 leeh        2005/05/06 22:57:38 UTC	(20050506_3)
 
   Modified files:
