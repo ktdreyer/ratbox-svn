@@ -560,6 +560,9 @@ c_nick(struct client *client_p, const char *parv[], int parc)
 		add_client(target_p);
 		dlink_add(target_p, &target_p->listnode, &user_list);
 		dlink_add(target_p, &target_p->upnode, &uplink_p->server->users);
+
+		if(IsEOB(uplink_p))
+			hook_call(HOOK_NEW_CLIENT, target_p, NULL);
 	}
 
         /* client changing nicks */
@@ -582,6 +585,8 @@ c_nick(struct client *client_p, const char *parv[], int parc)
 		client_p->user->mask = my_strdup(buf);
 
 		client_p->user->tsinfo = atol(parv[1]);
+
+		hook_call(HOOK_NICKCHANGE, client_p, NULL);
 	}
 }
 

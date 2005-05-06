@@ -91,6 +91,11 @@ set_default_conf(void)
 	config_file.cenforcetopic_frequency = DEFAULT_ENFORCETOPIC_FREQUENCY;
 
 	config_file.nmax_nicks = 2;
+	config_file.nallow_set_warn = 1;
+
+	my_free(config_file.nwarn_string);
+	config_file.nwarn_string = my_strdup("This nickname is registered, you may "
+				"be disconnected if a user regains this nickname.");
 
 	config_file.oper_score = 3;
 	config_file.jupe_score = 15;

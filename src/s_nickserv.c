@@ -44,6 +44,7 @@
 #include "s_userserv.h"
 #include "s_nickserv.h"
 #include "balloc.h"
+#include "hook.h"
 
 static struct client *nickserv_p;
 static BlockHeap *nick_reg_heap;
@@ -57,6 +58,9 @@ static int s_nick_drop(struct client *, struct lconn *, const char **, int);
 static int s_nick_regain(struct client *, struct lconn *, const char **, int);
 static int s_nick_set(struct client *, struct lconn *, const char **, int);
 static int s_nick_info(struct client *, struct lconn *, const char **, int);
+
+static int h_nick_warn_client(void *target_p, void *unused);
+static int h_nick_server_eob(void *client_p, void *unused);
 
 static struct service_command nickserv_command[] =
 {
@@ -90,6 +94,10 @@ init_s_nickserv(void)
 	nick_reg_heap = BlockHeapCreate(sizeof(struct nick_reg), HEAP_NICK_REG);
 
 	loc_sqlite_exec(nick_db_callback, "SELECT * FROM nicks");
+
+	hook_add(h_nick_warn_client, HOOK_NEW_CLIENT);
+	hook_add(h_nick_warn_client, HOOK_NICKCHANGE);
+	hook_add(h_nick_server_eob, HOOK_SERVER_EOB);
 }
 
 static void
@@ -157,6 +165,55 @@ nick_db_callback(void *db, int argc, char **argv, char **colnames)
 	add_nick_reg(nreg_p);
 	dlink_add(nreg_p, &nreg_p->usernode, &ureg_p->nicks);
 	nreg_p->user_reg = ureg_p;
+
+	return 0;
+}
+
+static int
+h_nick_warn_client(void *vclient_p, void *unused)
+{
+	struct nick_reg *nreg_p;
+	struct client *client_p = vclient_p;
+
+	if(!config_file.nallow_set_warn || EmptyString(config_file.nwarn_string))
+		return 0;
+
+	if((nreg_p = find_nick_reg(NULL, client_p->name)) == NULL)
+		return 0;
+
+	if((nreg_p->flags & NS_FLAGS_WARN) == 0)
+		return 0;
+
+	service_error(nickserv_p, client_p, "%s", config_file.nwarn_string);
+	return 0;
+}
+
+static int
+h_nick_server_eob(void *vclient_p, void *unused)
+{
+	struct nick_reg *nreg_p;
+	struct client *client_p = vclient_p;
+	struct client *target_p;
+	dlink_node *ptr;
+
+	if(!config_file.nallow_set_warn || EmptyString(config_file.nwarn_string))
+		return 0;
+
+	DLINK_FOREACH(ptr, client_p->server->users.head)
+	{
+		target_p = ptr->data;
+
+		if((nreg_p = find_nick_reg(NULL, target_p->name)) == NULL)
+			continue;
+
+		if((nreg_p->flags & NS_FLAGS_WARN) == 0)
+			continue;
+
+		if(nreg_p->user_reg == target_p->user->user_reg)
+			continue;
+
+		service_error(nickserv_p, target_p, "%s", config_file.nwarn_string);
+	}
 
 	return 0;
 }

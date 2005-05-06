@@ -11,7 +11,12 @@
 #define HOOK_BURST_LOGIN	6
 #define HOOK_USER_LOGIN		7
 #define HOOK_MODE_VOICE		8
-#define HOOK_LAST_HOOK		9
+#define HOOK_NEW_CLIENT		9	/* client is introduced to the network,
+					 * outside of burst
+					 */
+#define HOOK_NICKCHANGE		10	/* client changing nick */
+#define HOOK_SERVER_EOB		11	/* specific server sent EOB */
+#define HOOK_LAST_HOOK		12
 
 typedef int (*hook_func)(void *, void *);
 

@@ -359,7 +359,11 @@ c_pong(struct client *client_p, const char *parv[], int parc)
 		hook_call(HOOK_FINISHED_BURSTING, NULL, NULL);
         }
 
-	SetEOB(client_p);
+	if(!IsEOB(client_p))
+	{
+		SetEOB(client_p);
+		hook_call(HOOK_SERVER_EOB, client_p, NULL);
+	}
 }
 
 static void
