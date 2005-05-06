@@ -186,7 +186,7 @@ h_nick_warn_client(void *vclient_p, void *unused)
 
 	/* here for nick change */
 	if(nreg_p->user_reg == client_p->user->user_reg)
-		continue;
+		return 0;
 
 	service_error(nickserv_p, client_p, "%s", config_file.nwarn_string);
 	return 0;

@@ -959,6 +959,11 @@ dump_user_info(struct client *client_p, struct lconn *conn_p, struct user_reg *u
 				ureg_p->name, buf);
 #endif
 
+	if(!EmptyString(ureg_p->email))
+		service_send(userserv_p, client_p, conn_p,
+				"[%s] Email: %s", 
+				ureg_p->name, ureg_p->email);
+
 	service_send(userserv_p, client_p, conn_p,
 			"[%s] Currently logged on via:", ureg_p->name);
 
