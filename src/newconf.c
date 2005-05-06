@@ -871,6 +871,7 @@ static struct ConfEntry conf_chanserv_table[] =
 
 static struct ConfEntry conf_nickserv_table[] =
 {
+	{ "allow_set_warn",	CF_YESNO, NULL, 0, &config_file.nallow_set_warn		},
 	{ "max_nicks",		CF_INT,   NULL, 0, &config_file.nmax_nicks		},
 	{ "\0", 0, NULL, 0, NULL }
 };

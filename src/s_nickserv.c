@@ -55,6 +55,7 @@ static int o_nick_nickdrop(struct client *, struct lconn *, const char **, int);
 static int s_nick_register(struct client *, struct lconn *, const char **, int);
 static int s_nick_drop(struct client *, struct lconn *, const char **, int);
 static int s_nick_regain(struct client *, struct lconn *, const char **, int);
+static int s_nick_set(struct client *, struct lconn *, const char **, int);
 static int s_nick_info(struct client *, struct lconn *, const char **, int);
 
 static struct service_command nickserv_command[] =
@@ -63,6 +64,7 @@ static struct service_command nickserv_command[] =
 	{ "REGISTER",	&s_nick_register, 0, NULL, 1, 0L, 1, 0, 0, 0	},
 	{ "DROP",	&s_nick_drop,     1, NULL, 1, 0L, 1, 0, 0, 0	},
 	{ "REGAIN",	&s_nick_regain,   1, NULL, 1, 0L, 1, 0, 0, 0	},
+	{ "SET",	&s_nick_set,	  2, NULL, 1, 0L, 1, 0, 0, 0	},
 	{ "INFO",	&s_nick_info,     1, NULL, 1, 0L, 1, 0, 0, 0	}
 };
 
@@ -211,6 +213,9 @@ s_nick_register(struct client *client_p, struct lconn *conn_p, const char *parv[
 	strlcpy(nreg_p->name, client_p->name, sizeof(nreg_p->name));
 	nreg_p->reg_time = nreg_p->last_time = CURRENT_TIME;
 
+	if(config_file.nallow_set_warn)
+		nreg_p->flags |= NS_FLAGS_WARN;
+
 	add_nick_reg(nreg_p);
 	dlink_add(nreg_p, &nreg_p->usernode, &ureg_p->nicks);
 	nreg_p->user_reg = ureg_p;
@@ -292,6 +297,87 @@ s_nick_regain(struct client *client_p, struct lconn *conn_p, const char *parv[],
 
 	return 1;
 }
+
+static int
+s_nick_set_flag(struct client *client_p, struct nick_reg *nreg_p,
+		const char *name, const char *arg, int flag)
+{
+	if(!strcasecmp(arg, "ON"))
+	{
+		service_error(nickserv_p, client_p,
+			"Nickname %s %s set ON", nreg_p->name, name);
+
+		if(nreg_p->flags & flag)
+			return 0;
+
+		nreg_p->flags |= flag;
+
+		loc_sqlite_exec(NULL, "UPDATE nicks SET flags=%d "
+				"WHERE nickname=%Q",
+				nreg_p->flags, nreg_p->name);
+
+		return 1;
+	}
+	else if(!strcasecmp(arg, "OFF"))
+	{
+		service_error(nickserv_p, client_p,
+			"Nickname %s %s set OFF", nreg_p->name, name);
+
+		if((nreg_p->flags & flag) == 0)
+			return 0;
+
+		nreg_p->flags &= ~flag;
+
+		loc_sqlite_exec(NULL, "UPDATE nicks SET flags=%d "
+				"WHERE nickname=%Q",
+				nreg_p->flags, nreg_p->name);
+
+		return -1;
+	}
+
+	service_error(nickserv_p, client_p,
+			"Nickname %s %s is %s",
+			nreg_p->name, name, (nreg_p->flags & flag) ? "ON" : "OFF");
+	return 0;
+}
+
+static int
+s_nick_set(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
+{
+	static const char dummy[] = "\0";
+	struct nick_reg *nreg_p;
+	const char *arg;
+
+	if((nreg_p = find_nick_reg(client_p, parv[0])) == NULL)
+		return 1;
+
+	if(nreg_p->user_reg != client_p->user->user_reg)
+	{
+		service_error(nickserv_p, client_p,
+				"Nickname %s is not registered to you",
+				nreg_p->name);
+		return 1;
+	}
+
+	arg = EmptyString(parv[2]) ? dummy : parv[2];
+
+	if(!strcasecmp(parv[1], "WARN"))
+	{
+		if(!config_file.nallow_set_warn)
+		{
+			service_error(nickserv_p, client_p,
+					"%s::SET::WARN is disabled",
+					nickserv_p->name);
+			return 1;
+		}
+
+		s_nick_set_flag(client_p, nreg_p, parv[1], arg, NS_FLAGS_WARN);
+		return 1;
+	}
+
+	service_error(nickserv_p, client_p, "Set option invalid");
+	return 1;
+}	
 
 static int
 s_nick_info(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)

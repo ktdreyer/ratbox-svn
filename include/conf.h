@@ -61,6 +61,7 @@ struct _config_file
 
 	/* nickserv */
 	int nmax_nicks;
+	int nallow_set_warn;
 
 	/* jupeserv */
 	int oper_score;

@@ -19,6 +19,7 @@ struct nick_reg
 };
 
 /* flags stored in db: 0xFFFF */
+#define NS_FLAGS_WARN		0x0001
 
 /* flags not stored in db: 0xFFFF000 */
 #define NS_FLAGS_NEEDUPDATE	0x00010000
