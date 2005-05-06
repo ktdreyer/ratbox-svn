@@ -1,3 +1,17 @@
+leeh        2005/05/06 23:09:04 UTC	(20050506_5)
+
+  Modified files:
+    src                  s_nickserv.c s_userserv.c 
+  Log:
+  - s/continue/return 0
+  - make userserv::userinfo return email address
+  
+  Revision  Changes    Path
+  1.13      +1 -1      rserv/src/s_nickserv.c
+  1.60      +5 -0      rserv/src/s_userserv.c
+
+
+
 leeh        2005/05/06 23:00:27 UTC	(20050506_4)
 
   Modified files:
