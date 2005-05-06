@@ -1,3 +1,25 @@
+leeh        2005/05/06 22:26:47 UTC	(20050506_2)
+
+  Modified files:
+    doc                  example.conf 
+    include              conf.h hook.h 
+    src                  client.c conf.c newconf.c s_nickserv.c 
+                         scommand.c 
+  Log:
+  - finish off the nickserv warnings
+  
+  Revision  Changes    Path
+  1.41      +5 -0      rserv/doc/example.conf
+  1.42      +1 -0      rserv/include/conf.h
+  1.9       +6 -1      rserv/include/hook.h
+  1.38      +5 -0      rserv/src/client.c
+  1.45      +5 -0      rserv/src/conf.c
+  1.48      +1 -0      rserv/src/newconf.c
+  1.10      +57 -0     rserv/src/s_nickserv.c
+  1.32      +5 -1      rserv/src/scommand.c
+
+
+
 leeh        2005/05/06 21:51:25 UTC	(20050506_1)
 
   Modified files:
