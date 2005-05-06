@@ -1,3 +1,26 @@
+leeh        2005/05/06 21:51:25 UTC	(20050506_1)
+
+  Modified files:
+    doc                  example.conf 
+    include              conf.h s_nickserv.h 
+    src                  newconf.c s_nickserv.c 
+  Added files:
+    help/nickserv        set 
+  Log:
+  - added nickserv::set
+  - added nickserv::set::warn, prelim work for warning users when they use
+    a registered nickname
+  
+  Revision  Changes    Path
+  1.40      +6 -0      rserv/doc/example.conf
+  1.1       +4 -0      rserv/help/nickserv/set (new)
+  1.41      +1 -0      rserv/include/conf.h
+  1.3       +1 -0      rserv/include/s_nickserv.h
+  1.47      +1 -0      rserv/src/newconf.c
+  1.9       +86 -0     rserv/src/s_nickserv.c
+
+
+
 leeh        2005/05/06 14:45:48 UTC	(20050506_0)
 
   Modified files:
