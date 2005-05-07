@@ -1,3 +1,19 @@
+leeh        2005/05/07 13:48:52 UTC	(20050507_0)
+
+  Modified files:
+    include              client.h io.h 
+    src                  client.c scommand.c 
+  Log:
+  - start accepting GCAP via ENCAP, and hunting for "RSFNC" capability.
+  
+  Revision  Changes    Path
+  1.43      +1 -0      rserv/include/client.h
+  1.23      +14 -12    rserv/include/io.h
+  1.39      +6 -0      rserv/src/client.c
+  1.33      +14 -0     rserv/src/scommand.c
+
+
+
 leeh        2005/05/06 23:09:04 UTC	(20050506_5)
 
   Modified files:
