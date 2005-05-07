@@ -44,6 +44,7 @@ extern dlink_list connection_list;
 #define CONN_SENTPING           0x0020
 #define CONN_TS			0x0040
 #define CONN_CAP_SERVICE	0x0080
+#define CONN_CAP_RSFNC		0x0100
 /* CONTINUES ... */
 
 #define ConnConnecting(x)	((x)->flags & CONN_CONNECTING)
@@ -54,6 +55,7 @@ extern dlink_list connection_list;
 #define ConnSentPing(x)		((x)->flags & CONN_SENTPING)
 #define ConnTS(x)		((x)->flags & CONN_TS)
 #define ConnCapService(x)	((x)->flags & CONN_CAP_SERVICE)
+#define ConnCapRSFNC(x)		((x)->flags & CONN_CAP_RSFNC)
 
 #define SetConnConnecting(x)	((x)->flags |= CONN_CONNECTING)
 #define SetConnDccIn(x)		((x)->flags |= CONN_DCCIN)
@@ -68,9 +70,9 @@ extern dlink_list connection_list;
 #define ClearConnSentPing(x)	((x)->flags &= ~CONN_SENTPING)
 
 /* server flags */
-#define CONN_FLAGS_UNTERMINATED	0x00100
-#define CONN_FLAGS_EOB		0x00200
-#define CONN_FLAGS_SENTBURST	0x00400
+#define CONN_FLAGS_UNTERMINATED	0x01000
+#define CONN_FLAGS_EOB		0x02000
+#define CONN_FLAGS_SENTBURST	0x04000
 
 #define SetConnSentBurst(x)	((x)->flags |= CONN_FLAGS_SENTBURST)
 #define SetConnEOB(x)		((x)->flags |= CONN_FLAGS_EOB)
@@ -79,20 +81,20 @@ extern dlink_list connection_list;
 #define sent_burst		((server_p) && (server_p->flags & CONN_FLAGS_SENTBURST))
 
 /* user flags */
-#define CONN_FLAGS_AUTH		0x01000
+#define CONN_FLAGS_AUTH		0x10000
 
 #define UserAuth(x)	((x)->flags & CONN_FLAGS_AUTH)
 #define SetUserAuth(x)	((x)->flags |= CONN_FLAGS_AUTH)
 
 /* usermodes */
-#define UMODE_CHAT              0x10000
-#define UMODE_AUTH              0x20000
-#define UMODE_SERVER            0x40000
-#define UMODE_SPY		0x80000
-#define UMODE_REGISTER		0x100000
-#define UMODE_JUPES		0x200000
-#define UMODE_ALIS		0x400000
-#define UMODE_BOTFIGHT		0x800000
+#define UMODE_CHAT              0x0100000
+#define UMODE_AUTH              0x0200000
+#define UMODE_SERVER            0x0400000
+#define UMODE_SPY		0x0800000
+#define UMODE_REGISTER		0x1000000
+#define UMODE_JUPES		0x2000000
+#define UMODE_ALIS		0x4000000
+#define UMODE_BOTFIGHT		0x8000000
 
 #define UMODE_ALL               (UMODE_CHAT|UMODE_AUTH|UMODE_SERVER|UMODE_SPY|\
 				 UMODE_REGISTER|UMODE_ALIS|UMODE_JUPES)

@@ -119,6 +119,7 @@ struct host_entry
 
 #define FLAGS_DEAD	0x0001
 #define FLAGS_EOB	0x0002
+#define FLAGS_RSFNC	0x0004
 
 #define IsDead(x)	((x) && (x)->flags & FLAGS_DEAD)
 #define SetDead(x)	((x)->flags |= FLAGS_DEAD)

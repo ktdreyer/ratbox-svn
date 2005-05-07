@@ -720,7 +720,13 @@ c_server(struct client *client_p, const char *parv[], int parc)
 	}
 	/* its connected to us */
 	else
+	{
 		server_p->client_p = target_p;
+
+		/* got RSFNC in capab line, set it in struct client */
+		if(ConnCapRSFNC(server_p))
+			target_p->flags |= FLAGS_RSFNC;
+	}
 
 	add_client(target_p);
 	dlink_add(target_p, &target_p->listnode, &server_list);

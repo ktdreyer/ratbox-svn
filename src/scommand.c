@@ -244,6 +244,7 @@ static struct capab_entry
 	int flag;
 } capab_table[] = {
 	{ "SERVICES",	CONN_CAP_SERVICE	},
+	{ "RSFNC",	CONN_CAP_RSFNC		},
 	{ "\0", 0 }
 };
 
@@ -299,6 +300,19 @@ c_encap(struct client *client_p, const char *parv[], int parc)
 			return;
 
 		hook_call(HOOK_BURST_LOGIN, client_p, (void *) parv[2]);
+	}
+	else if(!irccmp(parv[1], "GCAP"))
+	{
+		char *p;
+
+		if(EmptyString(parv[2]) || !IsServer(client_p))
+			return;
+
+		if((p = strstr(parv[2], "RSFNC")))
+		{
+			if(*(p+6) == '\0' || *(p+6) == ' ')
+				client_p->flags |= FLAGS_RSFNC;
+		}
 	}
 }
 
