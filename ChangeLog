@@ -1,3 +1,15 @@
+leeh        2005/05/09 13:25:50 UTC	(20050509_0)
+
+  Modified files:
+    adns                 internal.h 
+  Log:
+  - #include setup.h
+  
+  Revision  Changes    Path
+  1.18      +1 -0      ircd-ratbox/adns/internal.h
+
+
+
 androsyn    2005/04/27 01:07:58 UTC	(20050427_2)
 
   Modified files:
