@@ -32,6 +32,7 @@
 #ifndef ADNS_INTERNAL_H_INCLUDED
 #define ADNS_INTERNAL_H_INCLUDED
 
+#include "setup.h"
 #include "config.h"
 #ifdef __GNUC__
 #define INLINE __inline__
