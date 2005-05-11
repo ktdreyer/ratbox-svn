@@ -284,13 +284,14 @@ find_channel_reg(struct client *client_p, const char *name)
 
 static struct member_reg *
 make_member_reg(struct user_reg *ureg_p, struct chan_reg *chreg_p,
-		const char *lastmod, int level)
+		const char *lastmod, int level, int flags)
 {
 	struct member_reg *mreg_p = BlockHeapAlloc(member_reg_heap);
 
 	mreg_p->user_reg = ureg_p;
 	mreg_p->channel_reg = chreg_p;
 	mreg_p->level = level;
+	mreg_p->flags = flags;
 	mreg_p->lastmod = my_strdup(lastmod);
 
 	dlink_add(mreg_p, &mreg_p->usernode, &ureg_p->channels);
@@ -520,8 +521,8 @@ member_db_callback(void *db, int argc, char **argv, char **colnames)
 	   (ureg_p = find_user_reg(NULL, argv[1])) == NULL)
 		return 0;
 
-	mreg_p = make_member_reg(ureg_p, chreg_p, argv[2], atoi(argv[3]));
-	mreg_p->flags  = (atoi(argv[4]) & CS_MEMBER_ALL);
+	mreg_p = make_member_reg(ureg_p, chreg_p, argv[2], atoi(argv[3]),
+			atoi(argv[4]) & CS_MEMBER_ALL);
 	mreg_p->suspend = atoi(argv[5]);
 	return 0;
 }
@@ -639,9 +640,10 @@ enable_autojoin(struct chan_reg *chreg_p)
 static void
 write_member_db_entry(struct member_reg *reg_p)
 {
-	loc_sqlite_exec(NULL, "INSERT INTO members VALUES(%Q, %Q, %Q, %u, 0, 0)",
+	loc_sqlite_exec(NULL, "INSERT INTO members VALUES(%Q, %Q, %Q, %u, %d, 0)",
 			reg_p->channel_reg->name,
-			reg_p->user_reg->name, reg_p->lastmod, reg_p->level);
+			reg_p->user_reg->name, reg_p->lastmod, reg_p->level,
+			reg_p->flags);
 }
 
 static void
@@ -1267,7 +1269,7 @@ o_chan_chanregister(struct client *client_p, struct lconn *conn_p, const char *p
 	chreg_p = BlockHeapAlloc(channel_reg_heap);
 	init_channel_reg(chreg_p, parv[0]);
 
-	mreg_p = make_member_reg(ureg_p, chreg_p, OPER_NAME(client_p, conn_p), 200);
+	mreg_p = make_member_reg(ureg_p, chreg_p, OPER_NAME(client_p, conn_p), 200, 0);
 	write_member_db_entry(mreg_p);
 
 	service_send(chanserv_p, client_p, conn_p,
@@ -1483,7 +1485,7 @@ s_chan_register(struct client *client_p, struct lconn *conn_p, const char *parv[
 	init_channel_reg(reg_p, parv[0]);
 
 	mreg_p = make_member_reg(client_p->user->user_reg, reg_p,
-				client_p->user->user_reg->name, 200);
+				client_p->user->user_reg->name, 200, 0);
 	write_member_db_entry(mreg_p);
 
 	service_error(chanserv_p, client_p, "Channel %s registered",
@@ -1499,6 +1501,7 @@ s_chan_adduser(struct client *client_p, struct lconn *conn_p, const char *parv[]
 	struct member_reg *mreg_p;
 	struct member_reg *mreg_tp;
 	int level;
+	int flags = 0;
 
 	if((mreg_p = verify_member_reg_name(client_p, NULL, parv[0], S_C_USERLIST)) == NULL)
 		return 1;
@@ -1521,15 +1524,38 @@ s_chan_adduser(struct client *client_p, struct lconn *conn_p, const char *parv[]
 		return 1;
 	}
 
-	slog(chanserv_p, 5, "%s %s ADDUSER %s %s %d",
-		client_p->user->mask, client_p->user->user_reg->name,
-		parv[0], ureg_p->name, level);
+	if(parc > 3)
+	{
+		if(!strcasecmp(parv[3], "OP"))
+		{
+			flags = CS_MEMBER_AUTOOP;
+		}
+		else if(!strcasecmp(parv[3], "VOICE"))
+		{
+			flags = CS_MEMBER_AUTOVOICE;
+		}
+		else if(!strcasecmp(parv[3], "NONE"))
+		{
+		}
+		else
+		{
+			service_error(chanserv_p, client_p,
+					"Auto level %s invalid", parv[3]);
+			return 1;
+		}
+	}
 
-	mreg_tp = make_member_reg(ureg_p, mreg_p->channel_reg, mreg_p->user_reg->name, level);
+	slog(chanserv_p, 5, "%s %s ADDUSER %s %s %d %s",
+		client_p->user->mask, client_p->user->user_reg->name,
+		parv[0], ureg_p->name, level, flags != 0 ? parv[3] : "NONE");
+
+	mreg_tp = make_member_reg(ureg_p, mreg_p->channel_reg, mreg_p->user_reg->name, level, flags);
 	write_member_db_entry(mreg_tp);
 
-	service_error(chanserv_p, client_p, "User %s on %s level %d added",
-			ureg_p->name, mreg_p->channel_reg->name, level);
+	service_error(chanserv_p, client_p, "User %s on %s level %d%s%s added",
+			ureg_p->name, mreg_p->channel_reg->name, level,
+			flags != 0 ? " autolevel " : "",
+			flags != 0 ? parv[3] : "");
 
 	return 1;
 }
