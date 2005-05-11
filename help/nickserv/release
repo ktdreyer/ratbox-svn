@@ -1,0 +1,3 @@
+RELEASE <nickname>
+Removes the client using <nickname> from the network.
+  <nickname>: Nickname to release
