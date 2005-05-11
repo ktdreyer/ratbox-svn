@@ -26,6 +26,8 @@ AC_CHECK_HEADERS(sys/time.h stdlib.h stdarg.h string.h strings.h unistd.h errno.
 
 AC_TYPE_SIGNAL
 AC_FUNC_STRFTIME
+AC_CHECK_LIB(socket, socket)
+AC_CHECK_LIB(nsl, gethostbyname)
 AC_CHECK_FUNCS(select strlcpy strlcat gethostbyname mmap getaddrinfo)
 
 AC_MSG_CHECKING(Compile with warning flags)

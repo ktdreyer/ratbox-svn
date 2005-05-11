@@ -57,8 +57,11 @@
 /* Define if you have the crypt library (-lcrypt).  */
 #undef HAVE_LIBCRYPT
 
-/* Define if you have the sqlite library (-lsqlite).  */
-#undef HAVE_LIBSQLITE
+/* Define if you have the nsl library (-lnsl).  */
+#undef HAVE_LIBNSL
+
+/* Define if you have the socket library (-lsocket).  */
+#undef HAVE_LIBSOCKET
 
 /* Nickname Service */
 #undef ENABLE_NICKSERV
