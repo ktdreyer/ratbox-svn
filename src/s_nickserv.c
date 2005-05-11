@@ -397,8 +397,8 @@ s_nick_regain(struct client *client_p, struct lconn *conn_p, const char *parv[],
 	if((client_p->uplink->flags & FLAGS_RSFNC) == 0)
 	{
 		service_error(nickserv_p, client_p,
-				"%s::REGAIN is not supported by %s",
-				nickserv_p->name, target_p->user->servername);
+				"%s::REGAIN is not supported by your server",
+				nickserv_p->name);
 		return 1;
 	}
 
