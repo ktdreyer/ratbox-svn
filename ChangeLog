@@ -1,3 +1,16 @@
+leeh        2005/05/11 12:55:09 UTC	(20050511_2)
+
+  Modified files:
+    src                  s_nickserv.c 
+  Log:
+  - make the error message when server doesnt support RSFNC "your server"
+    rather than the actual server.
+  
+  Revision  Changes    Path
+  1.15      +2 -2      rserv/src/s_nickserv.c
+
+
+
 leeh        2005/05/11 12:53:16 UTC	(20050511_1)
 
   Modified files:
