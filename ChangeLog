@@ -1,3 +1,20 @@
+leeh        2005/05/11 12:38:46 UTC	(20050511_0)
+
+  Modified files:
+    .                    configure 
+    autoconf             configure.in 
+    include              setup.h.in 
+  Log:
+  - via rse@engelschall.com:
+    - check for socket() in -lsocket and gethostbyname() in -lnsl
+  
+  Revision  Changes    Path
+  1.26      +2 -0      rserv/autoconf/configure.in
+  1.25      +115 -21   rserv/configure
+  1.12      +5 -2      rserv/include/setup.h.in
+
+
+
 leeh        2005/05/07 13:48:52 UTC	(20050507_0)
 
   Modified files:
