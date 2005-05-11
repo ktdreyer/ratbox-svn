@@ -409,9 +409,10 @@ s_nick_regain(struct client *client_p, struct lconn *conn_p, const char *parv[],
 	/* send out a forced nick change for the client to their new
 	 * nickname, at a TS of 60 seconds ago to prevent collisions.
 	 */
-	sendto_server("ENCAP %s RSFNC %s %s %lu",
+	sendto_server("ENCAP %s RSFNC %s %s %lu %lu",
 			client_p->user->servername, client_p->name,
-			nreg_p->name, CURRENT_TIME - 60);
+			nreg_p->name, CURRENT_TIME - 60,
+			client_p->user->tsinfo);
 
 	exit_client(target_p);
 
