@@ -1,3 +1,21 @@
+leeh        2005/05/11 12:53:16 UTC	(20050511_1)
+
+  Modified files:
+    help/nickserv        regain 
+    src                  s_nickserv.c 
+  Added files:
+    help/nickserv        release 
+  Log:
+  - renamed NS::REGAIN to NS::RELEASE
+  - added new NS::RELEASE, which issues a FNC if it can.
+  
+  Revision  Changes    Path
+  1.2       +2 -2      rserv/help/nickserv/regain
+  1.1       +3 -0      rserv/help/nickserv/release (new)
+  1.14      +66 -2     rserv/src/s_nickserv.c
+
+
+
 leeh        2005/05/11 12:38:46 UTC	(20050511_0)
 
   Modified files:
