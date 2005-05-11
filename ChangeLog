@@ -1,3 +1,18 @@
+leeh        2005/05/11 13:26:30 UTC	(20050511_4)
+
+  Modified files:
+    src                  s_chanserv.c 
+  Log:
+  - move tsinfo and lasttime updates into their own event which uses a
+    transaction.
+  - dont schedule a tsinfo update unless autojoin is enabled and the TS
+    is actually different.
+  
+  Revision  Changes    Path
+  1.78      +39 -12    rserv/src/s_chanserv.c
+
+
+
 leeh        2005/05/11 13:01:29 UTC	(20050511_3)
 
   Modified files:
