@@ -152,6 +152,7 @@ static int h_chanserv_mode_voice(void *chptr, void *members);
 static int h_chanserv_mode_simple(void *chptr, void *unused);
 static int h_chanserv_sjoin_lowerts(void *chptr, void *unused);
 static int h_chanserv_user_login(void *client, void *unused);
+static void e_chanserv_updatechan(void *unused);
 static void e_chanserv_expirechan(void *unused);
 static void e_chanserv_expireban(void *unused);
 static void e_chanserv_enforcetopic(void *unused);
@@ -176,6 +177,7 @@ init_s_chanserv(void)
 	hook_add(h_chanserv_sjoin_lowerts, HOOK_SJOIN_LOWERTS);
 	hook_add(h_chanserv_user_login, HOOK_USER_LOGIN);
 
+	eventAdd("chanserv_updatechan", e_chanserv_updatechan, NULL, 3601);
 	eventAdd("chanserv_expirechan", e_chanserv_expirechan, NULL, 43205);
 
 	/* we add these with defaults, then update the timers when we parse
@@ -624,17 +626,17 @@ enable_autojoin(struct chan_reg *chreg_p)
 	 * TS in future -- jilles
 	 */
 	chptr = find_channel(chreg_p->name);
-	if (chptr != NULL)
+
+	if(chptr != NULL && chptr->tsinfo != chreg_p->tsinfo)
+	{
+		chreg_p->flags |= CS_FLAGS_NEEDUPDATE;
 		chreg_p->tsinfo = chptr->tsinfo;
+	}
 
 	/* Join with stored TS */
 	join_service(chanserv_p, chreg_p->name, chreg_p->tsinfo,
 			chreg_p->emode.mode ? &chreg_p->emode :
 			&chreg_p->cmode);
-
-	loc_sqlite_exec(NULL, "UPDATE channels SET tsinfo = %lu, flags = %d "
-			"WHERE chname = %Q",
-			chreg_p->tsinfo, chreg_p->flags, chreg_p->name);
 }
 
 static void
@@ -707,7 +709,7 @@ access_users_on_channel(struct chan_reg *chreg_p)
 }
 
 static void
-e_chanserv_expirechan(void *unused)
+e_chanserv_updatechan(void *unused)
 {
 	struct chan_reg *chreg_p;
 	dlink_node *ptr, *next_ptr;
@@ -724,9 +726,28 @@ e_chanserv_expirechan(void *unused)
 		{
 			chreg_p->flags &= ~CS_FLAGS_NEEDUPDATE;
 			loc_sqlite_exec(NULL, "UPDATE channels "
-					"SET last_time = %lu WHERE chname = %Q",
-					chreg_p->last_time, chreg_p->name);
+					"SET last_time=%lu, tsinfo=%lu WHERE chname = %Q",
+					chreg_p->last_time, chreg_p->tsinfo, chreg_p->name);
 		}
+	}
+	HASH_WALK_END
+
+	loc_sqlite_exec(NULL, "COMMIT TRANSACTION");
+}
+
+static void
+e_chanserv_expirechan(void *unused)
+{
+	struct chan_reg *chreg_p;
+	dlink_node *ptr, *next_ptr;
+	int i;
+
+	/* Start a transaction, we're going to make a lot of changes */
+	loc_sqlite_exec(NULL, "BEGIN TRANSACTION");
+
+	HASH_WALK_SAFE(i, MAX_CHANNEL_TABLE, ptr, next_ptr, chan_reg_table)
+	{
+		chreg_p = ptr->data;
 
 		if((chreg_p->last_time + config_file.cexpire_time) > CURRENT_TIME)
 			continue;
@@ -826,10 +847,16 @@ h_chanserv_sjoin_lowerts(void *v_chptr, void *unused)
 		return 0;
 
 	/* Save the new TS for later -- jilles */
-	chreg_p->tsinfo = chptr->tsinfo;
-	loc_sqlite_exec(NULL, "UPDATE channels SET tsinfo = %lu "
-			"WHERE chname = %Q",
-			chreg_p->tsinfo, chreg_p->name);
+	/* but only if it's actually different and autojoin is enabled:
+	 * chreg_p->tsinfo is only used if autojoin is enabled and it
+	 * is updated whenever autojoin is turned on. -- jilles
+	 */
+	if(chreg_p->tsinfo != chptr->tsinfo &&
+		chreg_p->flags & CS_FLAGS_AUTOJOIN)
+	{
+		chreg_p->tsinfo = chptr->tsinfo;
+		chreg_p->flags |= CS_FLAGS_NEEDUPDATE;
+	}
 
 	if(!chreg_p->emode.mode || 
 	   (chptr->mode.mode & chreg_p->emode.mode) == chreg_p->emode.mode)
