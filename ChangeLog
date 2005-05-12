@@ -1,3 +1,36 @@
+leeh        2005/05/12 22:41:51 UTC	(20050512_3)
+
+  Modified files:
+    doc                  example.conf 
+    include              conf.h io.h 
+    src                  conf.c newconf.c s_chanserv.c s_global.c 
+                         s_jupeserv.c s_nickserv.c s_operbot.c 
+                         s_operserv.c s_userserv.c service.c 
+                         ucommand.c 
+  Log:
+  - made the service privs rather more fine grained.  each service now has its
+    own config option which sets specific flags for that service.
+  
+    ive temporarily broken privs for dcc'd clients.
+  
+  Revision  Changes    Path
+  1.42      +52 -8     rserv/doc/example.conf
+  1.43      +34 -26    rserv/include/conf.h
+  1.24      +1 -0      rserv/include/io.h
+  1.46      +2 -0      rserv/src/conf.c
+  1.49      +109 -14   rserv/src/newconf.c
+  1.81      +12 -12    rserv/src/s_chanserv.c
+  1.15      +2 -2      rserv/src/s_global.c
+  1.30      +4 -4      rserv/src/s_jupeserv.c
+  1.17      +2 -2      rserv/src/s_nickserv.c
+  1.36      +4 -4      rserv/src/s_operbot.c
+  1.16      +8 -8      rserv/src/s_operserv.c
+  1.62      +14 -13    rserv/src/s_userserv.c
+  1.51      +1 -1      rserv/src/service.c
+  1.32      +1 -0      rserv/src/ucommand.c
+
+
+
 leeh        2005/05/12 21:39:33 UTC	(20050512_2)
 
   Modified files:
