@@ -1411,7 +1411,7 @@ o_chan_chanlist(struct client *client_p, struct lconn *conn_p, const char *parv[
 	int para = 0;
 	int longlist = 0, suspended = 0;
 	int i;
-	int buflen;
+	int buflen = 0;
 	int arglen;
 
 	buf[0] = '\0';
@@ -1489,7 +1489,7 @@ o_chan_chanlist(struct client *client_p, struct lconn *conn_p, const char *parv[
 			service_send(chanserv_p, client_p, conn_p,
 				"  %s - To %s For %s %s",
 				chreg_p->name, find_owner(chreg_p),
-				get_short_duration(CURRENT_TIME - chreg_p->last_time),
+				get_short_duration(CURRENT_TIME - chreg_p->reg_time),
 				p);
 		}
 

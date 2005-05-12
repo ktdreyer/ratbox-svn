@@ -1,4 +1,6 @@
  DROP        - Drops registration of nickname from your username.
  INFO        - Gives information about the given nickname.
- REGAIN      - Regains the given nickname for use
+ REGAIN      - Changes your nickname to the given nickname.
  REGISTER    - Registers your current nickname to your username.
+ RELEASE     - Removes the client using <nickname> from the network.
+ SET         - Sets various nickname options

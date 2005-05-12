@@ -58,6 +58,7 @@ static int o_user_userregister(struct client *, struct lconn *, const char **, i
 static int o_user_userdrop(struct client *, struct lconn *, const char **, int);
 static int o_user_usersuspend(struct client *, struct lconn *, const char **, int);
 static int o_user_userunsuspend(struct client *, struct lconn *, const char **, int);
+static int o_user_userlist(struct client *, struct lconn *, const char **, int);
 static int o_user_userinfo(struct client *, struct lconn *, const char **, int);
 static int o_user_usersetpass(struct client *, struct lconn *, const char **, int);
 
@@ -73,7 +74,8 @@ static struct service_command userserv_command[] =
 	{ "USERDROP",		&o_user_userdrop,	1, NULL, 1, 0L, 0, 0, CONF_OPER_USERSERV, 0 },
 	{ "USERSUSPEND",	&o_user_usersuspend,	1, NULL, 1, 0L, 0, 0, CONF_OPER_USERSERV, 0 },
 	{ "USERUNSUSPEND",	&o_user_userunsuspend,	1, NULL, 1, 0L, 0, 0, CONF_OPER_USERSERV, 0 },
-	{ "USERINFO",		&o_user_userinfo,	1, NULL, 1, 0L, 0, 0, CONF_OPER_USERSERV, 0 },
+	{ "USERLIST",		&o_user_userlist,	1, NULL, 1, 0L, 0, 0, CONF_OPER_USERSERV, 0 },
+	{ "USERINFO",		&o_user_userinfo,	0, NULL, 1, 0L, 0, 0, CONF_OPER_USERSERV, 0 },
 	{ "USERSETPASS",	&o_user_usersetpass,	2, NULL, 1, 0L, 0, 0, CONF_OPER_USERSERV, 0 },
 	{ "REGISTER",	&s_user_register,	2, NULL, 1, 0L, 0, 0, 0, 0 },
 	{ "LOGIN",	&s_user_login,		2, NULL, 1, 0L, 0, 0, 0, 0 },
@@ -472,6 +474,127 @@ o_user_userunsuspend(struct client *client_p, struct lconn *conn_p, const char *
 
 	service_send(userserv_p, client_p, conn_p,
 			"Username %s unsuspended", reg_p->name);
+	return 0;
+}
+
+#define USERLIST_LEN	350	/* should be long enough */
+
+static int
+o_user_userlist(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
+{
+	static char def_mask[] = "*";
+	static char buf[BUFSIZE];
+	struct user_reg *ureg_p;
+	const char *mask = def_mask;
+	dlink_node *ptr;
+	unsigned int limit = 100;
+	int para = 0;
+	int longlist = 0, suspended = 0;
+	int i;
+	int buflen = 0;
+	int arglen;
+
+	buf[0] = '\0';
+
+	if(parc > para && !strcmp(parv[para], "-long"))
+	{
+		longlist++;
+		para++;
+	}
+
+	if(parc > para && !strcmp(parv[para], "-suspended"))
+	{
+		suspended++;
+		para++;
+	}
+
+	if(parc > para)
+	{
+		mask = parv[para];
+		para++;
+	
+		if(parc > para)
+			limit = atoi(parv[para]);
+	}
+
+	service_send(userserv_p, client_p, conn_p,
+			"Username list matching %s, limit %u%s",
+			mask, limit,
+			suspended ? ", suspended" : "");
+
+	HASH_WALK(i, MAX_NAME_HASH, ptr, user_reg_table)
+	{
+		ureg_p = ptr->data;
+
+		if(!match(mask, ureg_p->name))
+			continue;
+
+		if(suspended)
+		{
+			if((ureg_p->flags & US_FLAGS_SUSPENDED) == 0)
+				continue;
+		}
+		else if(ureg_p->flags & US_FLAGS_SUSPENDED)
+			continue;
+
+		if(!longlist)
+		{
+			arglen = strlen(ureg_p->name);
+
+			if(buflen + arglen >= USERLIST_LEN)
+			{
+				service_send(userserv_p, client_p, conn_p,
+						"  %s", buf);
+				buf[0] = '\0';
+				buflen = 0;
+			}
+
+			strcat(buf, ureg_p->name);
+			strcat(buf, " ");
+			buflen += arglen+1;
+		}
+		else
+		{
+			static char last_active[] = "Active";
+			char timebuf[BUFSIZE];
+			const char *p = last_active;
+
+			if(suspended || !dlink_list_length(&ureg_p->users))
+			{
+				snprintf(timebuf, sizeof(timebuf), "Last %s",
+					get_short_duration(CURRENT_TIME - ureg_p->last_time));
+				p = timebuf;
+			}
+
+			service_send(userserv_p, client_p, conn_p,
+				"  %s - Email %s For %s %s",
+				ureg_p->name,
+				EmptyString(ureg_p->email) ? "<>" : ureg_p->email,
+				get_short_duration(CURRENT_TIME - ureg_p->reg_time),
+				p);
+		}
+
+		if(limit == 1)
+		{
+			/* two loops to exit here, kludge it */
+			i = MAX_NAME_HASH;
+			break;
+		}
+
+		limit--;
+	}
+	HASH_WALK_END
+
+	if(!longlist)
+		service_send(userserv_p, client_p, conn_p, "  %s", buf);
+
+	service_send(userserv_p, client_p, conn_p,
+			"End of username list%s",
+			(limit == 1) ? ", limit reached" : "");
+
+	slog(userserv_p, 1, "%s - USERLIST %s",
+		OPER_NAME(client_p, conn_p), mask);
+
 	return 0;
 }
 
