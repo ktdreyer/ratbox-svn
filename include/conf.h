@@ -93,7 +93,8 @@ struct conf_oper
         char *host;
         char *pass;
 	char *server;
-        int flags;
+        int flags;		/* general flags */
+	int sflags;		/* individual service flags */
 	int refcount;
 };
 
@@ -114,31 +115,38 @@ struct conf_oper
 #define CONF_OPER_ADMIN		0x0000100
 #define CONF_OPER_ROUTE		0x0000200
 
-#define CONF_OPER_CHANSERV	0x0001000
-#define CONF_OPER_CREGISTER	0x0002000
-#define CONF_OPER_USERSERV	0x0004000
-#define CONF_OPER_UREGISTER	0x0008000
+#define CONF_OPER_US_REGISTER	0x0000001
+#define CONF_OPER_US_SUSPEND	0x0000002
+#define CONF_OPER_US_DROP	0x0000004
+#define CONF_OPER_US_LIST	0x0000008
+#define CONF_OPER_US_INFO	0x0000010
+#define CONF_OPER_US_SETPASS	0x0000020
 
-#define CONF_OPER_OPERSERV	0x0010000
+#define CONF_OPER_US_OPER	(CONF_OPER_US_LIST|CONF_OPER_US_INFO)
+#define CONF_OPER_US_ADMIN	(CONF_OPER_US_REGISTER|CONF_OPER_US_SUSPEND|CONF_OPER_US_DROP|\
+				 CONF_OPER_US_SETPASS|CONF_OPER_US_OPER)
 
-#define CONF_OPER_OPERBOT	0x0100000
-#define CONF_OPER_JUPESERV	0x0200000
-#define CONF_OPER_GLOBAL	0x0400000
-#define CONF_OPER_NICKSERV	0x0800000
+#define CONF_OPER_CS_REGISTER	0x0000100
+#define CONF_OPER_CS_SUSPEND	0x0000200
+#define CONF_OPER_CS_DROP	0x0000400
+#define CONF_OPER_CS_LIST	0x0000800
+#define CONF_OPER_CS_INFO	0x0001000
 
-#define OperAdmin(x)	((x)->privs & CONF_OPER_ADMIN)
-#define CliOperAdmin(x)	((x)->user->oper && (x)->user->oper->flags & CONF_OPER_ADMIN)
-#define OperRoute(x)	((x)->privs & CONF_OPER_ROUTE)
+#define CONF_OPER_CS_OPER	(CONF_OPER_CS_LIST|CONF_OPER_CS_INFO)
+#define CONF_OPER_CS_ADMIN	(CONF_OPER_CS_OPER|CONF_OPER_CS_REGISTER|CONF_OPER_CS_SUSPEND|\
+				 CONF_OPER_CS_DROP)
 
-#define OperCSAdmin(x)		((x)->privs & CONF_OPER_CHANSERV)
-#define CliOperCSAdmin(x)	((x)->user->oper && (x)->user->oper->flags & CONF_OPER_CHANSERV)
-#define OperCSRegister(x)	((x)->privs & CONF_OPER_CREGISTER)
-#define CliOperCSRegister(x)	((x)->user->oper && (x)->user->oper->flags & CONF_OPER_CREGISTER)
+#define CONF_OPER_NS_DROP	0x0010000
 
-#define OperUSAdmin(x)		((x)->privs & CONF_OPER_USERSERV)
-#define CliOperUSAdmin(x)	((x)->user->oper && (x)->user->oper->flags & CONF_OPER_USERSERV)
-#define OperUSRegister(x)	((x)->privs & CONF_OPER_UREGISTER)
-#define CliOperUSRegister(x)	((x)->user->oper && (x)->user->oper->flags & CONF_OPER_UREGISTER)
+#define CONF_OPER_OS_CHANNEL	0x0080000
+#define CONF_OPER_OS_TAKEOVER	0x0100000
+#define CONF_OPER_OS_OMODE	0x0200000
+
+#define CONF_OPER_OS_ADMIN	(CONF_OPER_OS_CHANNEL|CONF_OPER_OS_TAKEOVER|CONF_OPER_OS_OMODE)
+
+#define CONF_OPER_OB_CHANNEL	0x1000000
+#define CONF_OPER_GLOB_NETMSG	0x2000000
+#define CONF_OPER_JS_JUPE	0x4000000
 
 #define CONF_SERVER_AUTOCONN	0x0001
 

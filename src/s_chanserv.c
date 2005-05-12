@@ -99,12 +99,12 @@ static int s_chan_info(struct client *, struct lconn *, const char **, int);
 
 static struct service_command chanserv_command[] =
 {
-	{ "CHANREGISTER",	&o_chan_chanregister,	2, NULL, 1, 0L, 0, 0, CONF_OPER_CREGISTER, 0 },
-	{ "CHANDROP",		&o_chan_chandrop,	1, NULL, 1, 0L, 0, 0, CONF_OPER_CHANSERV, 0 },
-	{ "CHANSUSPEND",	&o_chan_chansuspend,	1, NULL, 1, 0L, 0, 0, CONF_OPER_CHANSERV, 0 },
-	{ "CHANUNSUSPEND",	&o_chan_chanunsuspend,	1, NULL, 1, 0L, 0, 0, CONF_OPER_CHANSERV, 0 },
-	{ "CHANLIST",		&o_chan_chanlist,	0, NULL, 1, 0L, 0, 0, CONF_OPER_CHANSERV, 0 },
-	{ "CHANINFO",		&o_chan_chaninfo,	1, NULL, 1, 0L, 0, 0, CONF_OPER_CHANSERV, 0 },
+	{ "CHANREGISTER",	&o_chan_chanregister,	2, NULL, 1, 0L, 0, 0, CONF_OPER_CS_REGISTER, 0 },
+	{ "CHANDROP",		&o_chan_chandrop,	1, NULL, 1, 0L, 0, 0, CONF_OPER_CS_DROP, 0 },
+	{ "CHANSUSPEND",	&o_chan_chansuspend,	1, NULL, 1, 0L, 0, 0, CONF_OPER_CS_SUSPEND, 0 },
+	{ "CHANUNSUSPEND",	&o_chan_chanunsuspend,	1, NULL, 1, 0L, 0, 0, CONF_OPER_CS_SUSPEND, 0 },
+	{ "CHANLIST",		&o_chan_chanlist,	0, NULL, 1, 0L, 0, 0, CONF_OPER_CS_LIST, 0 },
+	{ "CHANINFO",		&o_chan_chaninfo,	1, NULL, 1, 0L, 0, 0, CONF_OPER_CS_INFO, 0 },
 	{ "REGISTER",	&s_chan_register,	1, NULL, 1, 0L, 1, 0, 0, UMODE_REGISTER	},
 	{ "SET",	&s_chan_set,		2, NULL, 1, 0L, 1, 0, 0, 0 },
 	{ "ADDUSER",	&s_chan_adduser,	3, NULL, 1, 0L, 1, 0, 0, 0 },
@@ -132,12 +132,12 @@ static struct service_command chanserv_command[] =
 
 static struct ucommand_handler chanserv_ucommand[] =
 {
-	{ "chanregister",	o_chan_chanregister,	CONF_OPER_CREGISTER,	2, 1, NULL },
-	{ "chandrop",		o_chan_chandrop,	CONF_OPER_CHANSERV,	1, 1, NULL },
-	{ "chansuspend",	o_chan_chansuspend,	CONF_OPER_CHANSERV,	1, 1, NULL },
-	{ "chanunsuspend",	o_chan_chanunsuspend,	CONF_OPER_CHANSERV,	1, 1, NULL },
-	{ "chanlist",		o_chan_chanlist,	CONF_OPER_CHANSERV,	0, 1, NULL },
-	{ "chaninfo",		o_chan_chaninfo,	CONF_OPER_CHANSERV,	1, 1, NULL },
+	{ "chanregister",	o_chan_chanregister,	CONF_OPER_CS_REGISTER,	2, 1, NULL },
+	{ "chandrop",		o_chan_chandrop,	CONF_OPER_CS_DROP,	1, 1, NULL },
+	{ "chansuspend",	o_chan_chansuspend,	CONF_OPER_CS_SUSPEND,	1, 1, NULL },
+	{ "chanunsuspend",	o_chan_chanunsuspend,	CONF_OPER_CS_SUSPEND,	1, 1, NULL },
+	{ "chanlist",		o_chan_chanlist,	CONF_OPER_CS_LIST,	0, 1, NULL },
+	{ "chaninfo",		o_chan_chaninfo,	CONF_OPER_CS_INFO,	1, 1, NULL },
 	{ "\0",			NULL,			0,			0, 0, NULL }
 };
 

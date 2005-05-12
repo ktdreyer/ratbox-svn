@@ -38,14 +38,57 @@ static struct mode_table privs_table[] = {
 	{ "admin",	CONF_OPER_ADMIN		},
 	{ "dcc",	CONF_OPER_DCC		},
 	{ "route",	CONF_OPER_ROUTE		},
-	{ "chanserv",	CONF_OPER_CHANSERV	},
-	{ "cregister",	CONF_OPER_CREGISTER	},
-	{ "userserv",	CONF_OPER_USERSERV	},
-	{ "uregister",	CONF_OPER_UREGISTER	},
-	{ "operbot",	CONF_OPER_OPERBOT	},
-	{ "jupeserv",	CONF_OPER_JUPESERV	},
-	{ "global",	CONF_OPER_GLOBAL	},
-	{ "operserv",	CONF_OPER_OPERSERV	},
+	{ "\0",		0			}
+};
+
+static struct mode_table userserv_table[] = {
+	{ "admin",	CONF_OPER_US_ADMIN	},
+	{ "oper",	CONF_OPER_US_OPER	},
+	{ "register",	CONF_OPER_US_REGISTER	},
+	{ "suspend",	CONF_OPER_US_SUSPEND	},
+	{ "drop",	CONF_OPER_US_DROP	},
+	{ "list",	CONF_OPER_US_LIST	},
+	{ "info",	CONF_OPER_US_INFO	},
+	{ "setpass",	CONF_OPER_US_SETPASS	},
+	{ "\0",		0			}
+};
+
+static struct mode_table chanserv_table[] = {
+	{ "admin",	CONF_OPER_CS_ADMIN	},
+	{ "oper",	CONF_OPER_CS_OPER	},
+	{ "register",	CONF_OPER_CS_REGISTER	},
+	{ "suspend",	CONF_OPER_CS_SUSPEND	},
+	{ "drop",	CONF_OPER_CS_DROP	},
+	{ "list",	CONF_OPER_CS_LIST	},
+	{ "info",	CONF_OPER_CS_INFO	},
+	{ "\0",		0			}
+};
+
+static struct mode_table nickserv_table[] = {
+	{ "drop",	CONF_OPER_NS_DROP	},
+	{ "\0",		0			}
+};
+
+static struct mode_table operserv_table[] = {
+	{ "admin",	CONF_OPER_OS_ADMIN	},
+	{ "channel",	CONF_OPER_OS_CHANNEL	},
+	{ "takeover",	CONF_OPER_OS_TAKEOVER	},
+	{ "osmode",	CONF_OPER_OS_OMODE	},
+	{ "\0",		0			}
+};
+
+static struct mode_table operbot_table[] = {
+	{ "channel",	CONF_OPER_OB_CHANNEL	},
+	{ "\0",		0			}
+};
+
+static struct mode_table global_table[] = {
+	{ "netmsg",	CONF_OPER_GLOB_NETMSG	},
+	{ "\0",		0			}
+};
+
+static struct mode_table jupeserv_table[] = {
+	{ "jupe",	CONF_OPER_JS_JUPE	},
 	{ "\0",		0			}
 };
 
@@ -194,8 +237,6 @@ find_umode(struct mode_table *tab, char *name)
 static void
 set_modes_from_table(int *modes, const char *whatis, struct mode_table *tab, conf_parm_t * args)
 {
-	*modes = 0;
-
 	for (; args; args = args->next)
 	{
 		int mode;
@@ -565,6 +606,7 @@ conf_end_operator(struct TopConf *tc)
 		yy_tmpoper->name = my_strdup(yy_oper->name);
 		yy_tmpoper->pass = my_strdup(yy_oper->pass);
 		yy_tmpoper->flags = yy_oper->flags;
+		yy_tmpoper->sflags = yy_oper->sflags;
 
 		dlink_add_tail_alloc(yy_tmpoper, &conf_oper_list);
 		dlink_destroy(ptr, &yy_oper_list);
@@ -639,11 +681,56 @@ conf_set_oper_encrypted(void *data)
 static void
 conf_set_oper_flags(void *data)
 {
-	int saveflags;
-
-	saveflags = yy_oper->flags & CONF_OPER_ENCRYPTED;
 	set_modes_from_table(&yy_oper->flags, "flag", privs_table, data);
-	yy_oper->flags |= saveflags;
+}
+
+static void
+conf_set_oper_userserv(void *data)
+{
+	set_modes_from_table(&yy_oper->sflags, "flag",
+				userserv_table, data);
+}
+
+static void
+conf_set_oper_chanserv(void *data)
+{
+	set_modes_from_table(&yy_oper->sflags, "flag",
+				chanserv_table, data);
+}
+
+static void
+conf_set_oper_nickserv(void *data)
+{
+	set_modes_from_table(&yy_oper->sflags, "flag",
+				nickserv_table, data);
+}
+
+static void
+conf_set_oper_operserv(void *data)
+{
+	set_modes_from_table(&yy_oper->sflags, "flag",
+				operserv_table, data);
+}
+
+static void
+conf_set_oper_operbot(void *data)
+{
+	set_modes_from_table(&yy_oper->sflags, "flag",
+				operbot_table, data);
+}
+
+static void
+conf_set_oper_global(void *data)
+{
+	set_modes_from_table(&yy_oper->sflags, "flag",
+				global_table, data);
+}
+
+static void
+conf_set_oper_jupeserv(void *data)
+{
+	set_modes_from_table(&yy_oper->sflags, "flag",
+				jupeserv_table, data);
 }
 
 static int
@@ -735,6 +822,7 @@ conf_set_service_realname(void *data)
 static void
 conf_set_service_flags(void *data)
 {
+	yy_service->service->flags = 0;
 	set_modes_from_table(&yy_service->service->flags, "flag",
 				service_flags_table, data);
 }
@@ -825,6 +913,13 @@ static struct ConfEntry conf_oper_table[] =
 	{ "password",	CF_QSTRING, conf_set_oper_password,	0, NULL },
 	{ "encrypted",	CF_YESNO,   conf_set_oper_encrypted,	0, NULL },
 	{ "flags",	CF_STRING|CF_FLIST,  conf_set_oper_flags,	0, NULL },
+	{ "userserv",	CF_STRING|CF_FLIST,  conf_set_oper_userserv,	0, NULL },
+	{ "chanserv",	CF_STRING|CF_FLIST,  conf_set_oper_chanserv,	0, NULL },
+	{ "nickserv",	CF_STRING|CF_FLIST,  conf_set_oper_nickserv,	0, NULL },
+	{ "operserv",	CF_STRING|CF_FLIST,  conf_set_oper_operserv,	0, NULL },
+	{ "operbot",	CF_STRING|CF_FLIST,  conf_set_oper_operbot,	0, NULL },
+	{ "global",	CF_STRING|CF_FLIST,  conf_set_oper_global,	0, NULL },
+	{ "jupeserv",	CF_STRING|CF_FLIST,  conf_set_oper_jupeserv,	0, NULL },
 	{ "\0", 0, NULL, 0, NULL }
 };
 

@@ -56,18 +56,18 @@ static int h_operserv_sjoin_lowerts(void *chptr, void *unused);
 
 static struct service_command operserv_command[] =
 {
-	{ "OSJOIN",	&o_oper_osjoin,		1, NULL, 1, 0L, 0, 0, CONF_OPER_OPERSERV, 0 },
-	{ "OSPART",	&o_oper_ospart,		1, NULL, 1, 0L, 0, 0, CONF_OPER_OPERSERV, 0 },
-	{ "TAKEOVER",	&o_oper_takeover,	1, NULL, 1, 0L, 0, 0, CONF_OPER_OPERSERV, 0 },
-	{ "OMODE",	&o_oper_omode,		2, NULL, 1, 0L, 0, 0, CONF_OPER_OPERSERV, 0 }
+	{ "OSJOIN",	&o_oper_osjoin,		1, NULL, 1, 0L, 0, 0, CONF_OPER_OS_CHANNEL, 0 },
+	{ "OSPART",	&o_oper_ospart,		1, NULL, 1, 0L, 0, 0, CONF_OPER_OS_CHANNEL, 0 },
+	{ "TAKEOVER",	&o_oper_takeover,	1, NULL, 1, 0L, 0, 0, CONF_OPER_OS_TAKEOVER, 0 },
+	{ "OMODE",	&o_oper_omode,		2, NULL, 1, 0L, 0, 0, CONF_OPER_OS_OMODE, 0 }
 };
 
 static struct ucommand_handler operserv_ucommand[] =
 {
-	{ "osjoin",	o_oper_osjoin,	CONF_OPER_OPERSERV, 1, 1, NULL },
-	{ "ospart",	o_oper_ospart,	CONF_OPER_OPERSERV, 1, 1, NULL },
-	{ "takeover",	o_oper_takeover,CONF_OPER_OPERSERV, 1, 1, NULL },
-	{ "omode",	o_oper_omode,	CONF_OPER_OPERSERV, 2, 1, NULL },
+	{ "osjoin",	o_oper_osjoin,	CONF_OPER_OS_CHANNEL, 1, 1, NULL },
+	{ "ospart",	o_oper_ospart,	CONF_OPER_OS_CHANNEL, 1, 1, NULL },
+	{ "takeover",	o_oper_takeover,CONF_OPER_OS_TAKEOVER, 1, 1, NULL },
+	{ "omode",	o_oper_omode,	CONF_OPER_OS_OMODE, 2, 1, NULL },
 	{ "\0", NULL, 0, 0, 0, NULL }
 };
 

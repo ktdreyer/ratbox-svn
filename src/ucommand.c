@@ -232,6 +232,7 @@ u_login(struct client *unused, struct lconn *conn_p, const char *parv[], int par
         SetUserAuth(conn_p);
         conn_p->flags |= UMODE_DEFAULT;
 	conn_p->privs = oper_p->flags;
+	conn_p->sprivs = oper_p->sflags;
 
         sendto_one(conn_p, "Login successful, for available commands see .help");
 

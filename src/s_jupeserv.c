@@ -71,8 +71,8 @@ static int s_jupeserv_pending(struct client *, struct lconn *, const char **, in
 
 static struct service_command jupeserv_command[] =
 {
-	{ "JUPE",	&o_jupeserv_jupe,	2, NULL, 1, 0L, 0, 0, CONF_OPER_JUPESERV, 0 },
-	{ "UNJUPE",	&o_jupeserv_unjupe,	1, NULL, 1, 0L, 0, 0, CONF_OPER_JUPESERV, 0 },
+	{ "JUPE",	&o_jupeserv_jupe,	2, NULL, 1, 0L, 0, 0, CONF_OPER_JS_JUPE, 0 },
+	{ "UNJUPE",	&o_jupeserv_unjupe,	1, NULL, 1, 0L, 0, 0, CONF_OPER_JS_JUPE, 0 },
 	{ "CALLJUPE",	&s_jupeserv_calljupe,	1, NULL, 1, 0L, 0, 1, 0, UMODE_JUPES },
 	{ "CALLUNJUPE",	&s_jupeserv_callunjupe,	1, NULL, 1, 0L, 0, 1, 0, UMODE_JUPES },
 	{ "PENDING",	&s_jupeserv_pending,	0, NULL, 1, 0L, 0, 1, 0, UMODE_JUPES }
@@ -80,8 +80,8 @@ static struct service_command jupeserv_command[] =
 
 static struct ucommand_handler jupeserv_ucommand[] =
 {
-	{ "jupe",	o_jupeserv_jupe,	CONF_OPER_JUPESERV, 2, 1, NULL },
-	{ "unjupe",	o_jupeserv_unjupe,	CONF_OPER_JUPESERV, 1, 1, NULL },
+	{ "jupe",	o_jupeserv_jupe,	CONF_OPER_JS_JUPE, 2, 1, NULL },
+	{ "unjupe",	o_jupeserv_unjupe,	CONF_OPER_JS_JUPE, 1, 1, NULL },
 	{ "\0",	NULL, 0, 0, 0, NULL }
 };
 

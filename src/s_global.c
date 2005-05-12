@@ -48,12 +48,12 @@ static int o_global_netmsg(struct client *, struct lconn *, const char **, int);
 
 static struct service_command global_command[] =
 {
-	{ "NETMSG",	&o_global_netmsg, 1, NULL, 1, 0L, 0, 0, CONF_OPER_GLOBAL, 0 }
+	{ "NETMSG",	&o_global_netmsg, 1, NULL, 1, 0L, 0, 0, CONF_OPER_GLOB_NETMSG, 0 }
 };
 
 static struct ucommand_handler global_ucommand[] =
 {
-	{ "netmsg", o_global_netmsg, CONF_OPER_GLOBAL, 1, 1, NULL },
+	{ "netmsg", o_global_netmsg, CONF_OPER_GLOB_NETMSG, 1, 1, NULL },
 	{ "\0", NULL, 0, 0, 0, NULL }
 };
 

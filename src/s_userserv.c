@@ -70,13 +70,13 @@ static int s_user_info(struct client *, struct lconn *, const char **, int);
 
 static struct service_command userserv_command[] =
 {
-	{ "USERREGISTER",	&o_user_userregister,	2, NULL, 1, 0L, 0, 0, CONF_OPER_UREGISTER, 0 },
-	{ "USERDROP",		&o_user_userdrop,	1, NULL, 1, 0L, 0, 0, CONF_OPER_USERSERV, 0 },
-	{ "USERSUSPEND",	&o_user_usersuspend,	1, NULL, 1, 0L, 0, 0, CONF_OPER_USERSERV, 0 },
-	{ "USERUNSUSPEND",	&o_user_userunsuspend,	1, NULL, 1, 0L, 0, 0, CONF_OPER_USERSERV, 0 },
-	{ "USERLIST",		&o_user_userlist,	1, NULL, 1, 0L, 0, 0, CONF_OPER_USERSERV, 0 },
-	{ "USERINFO",		&o_user_userinfo,	0, NULL, 1, 0L, 0, 0, CONF_OPER_USERSERV, 0 },
-	{ "USERSETPASS",	&o_user_usersetpass,	2, NULL, 1, 0L, 0, 0, CONF_OPER_USERSERV, 0 },
+	{ "USERREGISTER",	&o_user_userregister,	2, NULL, 1, 0L, 0, 0, CONF_OPER_US_REGISTER, 0 },
+	{ "USERDROP",		&o_user_userdrop,	1, NULL, 1, 0L, 0, 0, CONF_OPER_US_DROP, 0 },
+	{ "USERSUSPEND",	&o_user_usersuspend,	1, NULL, 1, 0L, 0, 0, CONF_OPER_US_SUSPEND, 0 },
+	{ "USERUNSUSPEND",	&o_user_userunsuspend,	1, NULL, 1, 0L, 0, 0, CONF_OPER_US_SUSPEND, 0 },
+	{ "USERLIST",		&o_user_userlist,	1, NULL, 1, 0L, 0, 0, CONF_OPER_US_LIST, 0 },
+	{ "USERINFO",		&o_user_userinfo,	0, NULL, 1, 0L, 0, 0, CONF_OPER_US_INFO, 0 },
+	{ "USERSETPASS",	&o_user_usersetpass,	2, NULL, 1, 0L, 0, 0, CONF_OPER_US_SETPASS, 0 },
 	{ "REGISTER",	&s_user_register,	2, NULL, 1, 0L, 0, 0, 0, 0 },
 	{ "LOGIN",	&s_user_login,		2, NULL, 1, 0L, 0, 0, 0, 0 },
 	{ "LOGOUT",	&s_user_logout,		0, NULL, 1, 0L, 1, 0, 0, 0 },
@@ -86,12 +86,13 @@ static struct service_command userserv_command[] =
 
 static struct ucommand_handler userserv_ucommand[] =
 {
-	{ "userregister",	o_user_userregister,	CONF_OPER_UREGISTER,	2, 1, NULL },
-	{ "userdrop",		o_user_userdrop,	CONF_OPER_USERSERV,	1, 1, NULL },
-	{ "usersuspend",	o_user_usersuspend,	CONF_OPER_USERSERV,	1, 1, NULL },
-	{ "userunsuspend",	o_user_userunsuspend,	CONF_OPER_USERSERV,	1, 1, NULL },
-	{ "userinfo",		o_user_userinfo,	CONF_OPER_USERSERV,	1, 1, NULL },
-	{ "usersetpass",	o_user_usersetpass,	CONF_OPER_USERSERV,	2, 1, NULL },
+	{ "userregister",	o_user_userregister,	CONF_OPER_US_REGISTER,	2, 1, NULL },
+	{ "userdrop",		o_user_userdrop,	CONF_OPER_US_DROP,	1, 1, NULL },
+	{ "usersuspend",	o_user_usersuspend,	CONF_OPER_US_SUSPEND,	1, 1, NULL },
+	{ "userunsuspend",	o_user_userunsuspend,	CONF_OPER_US_SUSPEND,	1, 1, NULL },
+	{ "userlist",		o_user_userlist,	CONF_OPER_US_LIST,	0, 1, NULL },
+	{ "userinfo",		o_user_userinfo,	CONF_OPER_US_INFO,	1, 1, NULL },
+	{ "usersetpass",	o_user_usersetpass,	CONF_OPER_US_SETPASS,	2, 1, NULL },
 	{ "\0",			NULL,			0,			0, 0, NULL }
 };
 

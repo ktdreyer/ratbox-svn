@@ -550,7 +550,7 @@ handle_service(struct client *service_p, struct client *client_p, char *text)
 		if((cmd_entry->operonly && !is_oper(client_p)) ||
 		   (cmd_entry->operflags && 
 		    (!client_p->user->oper || 
-		     (client_p->user->oper->flags & cmd_entry->operflags) == 0)))
+		     (client_p->user->oper->sflags & cmd_entry->operflags) == 0)))
 		{
 			service_error(service_p, client_p, "No access to %s::%s",
 					service_p->name, cmd_entry->cmd);

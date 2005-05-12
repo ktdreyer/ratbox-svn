@@ -311,6 +311,7 @@ static struct flag_table oper_flags[] =
 {
 	{ 'D', CONF_OPER_DCC		},
 	{ 'A', CONF_OPER_ADMIN		},
+#if 0
 	{ 'C', CONF_OPER_CHANSERV	},
 	{ 'c', CONF_OPER_CREGISTER	},
 	{ 'U', CONF_OPER_USERSERV	},
@@ -319,6 +320,7 @@ static struct flag_table oper_flags[] =
 	{ 'J', CONF_OPER_JUPESERV	},
 	{ 'G', CONF_OPER_GLOBAL		},
 	{ 'O', CONF_OPER_OPERSERV	},
+#endif
 	{ '\0',0 }
 };
 

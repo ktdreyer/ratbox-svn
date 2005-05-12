@@ -21,6 +21,7 @@ struct lconn
 	int fd;
 	int flags;
 	int privs;		/* privs as an oper */
+	int sprivs;		/* privs on services */
 	time_t first_time;
 	time_t last_time;
 
