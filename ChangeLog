@@ -1,3 +1,28 @@
+leeh        2005/05/12 19:16:41 UTC	(20050512_1)
+
+  Modified files:
+    help/chanserv        chanlist index-admin 
+    help/nickserv        index 
+    help/userserv        index-admin 
+    src                  s_chanserv.c s_userserv.c 
+  Added files:
+    help/userserv        userlist 
+  Log:
+  - initialise buflen to 0, and s/last_time/reg_time in chanserv::chanlist
+  - add userserv::userlist
+  - regenerate help index
+  
+  Revision  Changes    Path
+  1.2       +2 -2      rserv/help/chanserv/chanlist
+  1.6       +1 -0      rserv/help/chanserv/index-admin
+  1.4       +3 -1      rserv/help/nickserv/index
+  1.6       +1 -0      rserv/help/userserv/index-admin
+  1.1       +6 -0      rserv/help/userserv/userlist (new)
+  1.80      +2 -2      rserv/src/s_chanserv.c
+  1.61      +124 -1    rserv/src/s_userserv.c
+
+
+
 leeh        2005/05/12 17:13:15 UTC	(20050512_0)
 
   Modified files:
