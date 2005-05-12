@@ -129,6 +129,21 @@ get_duration(time_t seconds)
 }
 
 const char *
+get_short_duration(time_t seconds)
+{
+	static char buf[BUFSIZE];
+        int days, hours;
+
+        days = (int) (seconds / 86400);
+        seconds %= 86400;
+        hours = (int) (seconds / 3600);
+
+        snprintf(buf, sizeof(buf), "%dd%dh", days, hours);
+
+        return buf;
+}
+
+const char *
 get_time(time_t when)
 {
 	static char timebuffer[BUFSIZE];

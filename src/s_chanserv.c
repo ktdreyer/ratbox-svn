@@ -70,6 +70,7 @@ static int o_chan_chanregister(struct client *, struct lconn *, const char **, i
 static int o_chan_chandrop(struct client *, struct lconn *, const char **, int);
 static int o_chan_chansuspend(struct client *, struct lconn *, const char **, int);
 static int o_chan_chanunsuspend(struct client *, struct lconn *, const char **, int);
+static int o_chan_chanlist(struct client *, struct lconn *, const char **, int);
 static int o_chan_chaninfo(struct client *, struct lconn *, const char **, int);
 
 static int s_chan_register(struct client *, struct lconn *, const char **, int);
@@ -102,6 +103,7 @@ static struct service_command chanserv_command[] =
 	{ "CHANDROP",		&o_chan_chandrop,	1, NULL, 1, 0L, 0, 0, CONF_OPER_CHANSERV, 0 },
 	{ "CHANSUSPEND",	&o_chan_chansuspend,	1, NULL, 1, 0L, 0, 0, CONF_OPER_CHANSERV, 0 },
 	{ "CHANUNSUSPEND",	&o_chan_chanunsuspend,	1, NULL, 1, 0L, 0, 0, CONF_OPER_CHANSERV, 0 },
+	{ "CHANLIST",		&o_chan_chanlist,	0, NULL, 1, 0L, 0, 0, CONF_OPER_CHANSERV, 0 },
 	{ "CHANINFO",		&o_chan_chaninfo,	1, NULL, 1, 0L, 0, 0, CONF_OPER_CHANSERV, 0 },
 	{ "REGISTER",	&s_chan_register,	1, NULL, 1, 0L, 1, 0, 0, UMODE_REGISTER	},
 	{ "SET",	&s_chan_set,		2, NULL, 1, 0L, 1, 0, 0, 0 },
@@ -134,6 +136,7 @@ static struct ucommand_handler chanserv_ucommand[] =
 	{ "chandrop",		o_chan_chandrop,	CONF_OPER_CHANSERV,	1, 1, NULL },
 	{ "chansuspend",	o_chan_chansuspend,	CONF_OPER_CHANSERV,	1, 1, NULL },
 	{ "chanunsuspend",	o_chan_chanunsuspend,	CONF_OPER_CHANSERV,	1, 1, NULL },
+	{ "chanlist",		o_chan_chanlist,	CONF_OPER_CHANSERV,	0, 1, NULL },
 	{ "chaninfo",		o_chan_chaninfo,	CONF_OPER_CHANSERV,	1, 1, NULL },
 	{ "\0",			NULL,			0,			0, 0, NULL }
 };
@@ -1391,6 +1394,126 @@ o_chan_chanunsuspend(struct client *client_p, struct lconn *conn_p, const char *
 
 	service_send(chanserv_p, client_p, conn_p,
 			"Channel %s unsuspended", reg_p->name);
+	return 0;
+}
+
+#define CHANLIST_LEN	350	/* should be long enough */
+
+static int
+o_chan_chanlist(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
+{
+	static char def_mask[] = "*";
+	static char buf[BUFSIZE];
+	struct chan_reg *chreg_p;
+	const char *mask = def_mask;
+	dlink_node *ptr;
+	unsigned int limit = 100;
+	int para = 0;
+	int longlist = 0, suspended = 0;
+	int i;
+	int buflen;
+	int arglen;
+
+	buf[0] = '\0';
+
+	if(parc > para && !strcmp(parv[para], "-long"))
+	{
+		longlist++;
+		para++;
+	}
+
+	if(parc > para && !strcmp(parv[para], "-suspended"))
+	{
+		suspended++;
+		para++;
+	}
+
+	if(parc > para)
+	{
+		mask = parv[para];
+		para++;
+	
+		if(parc > para)
+			limit = atoi(parv[para]);
+	}
+
+	service_send(chanserv_p, client_p, conn_p,
+			"Channel list matching %s, limit %u%s",
+			mask, limit,
+			suspended ? ", suspended" : "");
+
+	HASH_WALK(i, MAX_CHANNEL_TABLE, ptr, chan_reg_table)
+	{
+		chreg_p = ptr->data;
+
+		if(!match(mask, chreg_p->name))
+			continue;
+
+		if(suspended)
+		{
+			if((chreg_p->flags & CS_FLAGS_SUSPENDED) == 0)
+				continue;
+		}
+		else if(chreg_p->flags & CS_FLAGS_SUSPENDED)
+			continue;
+
+		if(!longlist)
+		{
+			arglen = strlen(chreg_p->name);
+
+			if(buflen + arglen >= CHANLIST_LEN)
+			{
+				service_send(chanserv_p, client_p, conn_p,
+						"  %s", buf);
+				buf[0] = '\0';
+				buflen = 0;
+			}
+
+			strcat(buf, chreg_p->name);
+			strcat(buf, " ");
+			buflen += arglen+1;
+		}
+		else
+		{
+			static char last_active[] = "Active";
+			char timebuf[BUFSIZE];
+			const char *p = last_active;
+
+			if(suspended || !access_users_on_channel(chreg_p))
+			{
+				snprintf(timebuf, sizeof(timebuf), "Last %s",
+					get_short_duration(CURRENT_TIME - chreg_p->last_time));
+				p = timebuf;
+			}
+
+			service_send(chanserv_p, client_p, conn_p,
+				"  %s - To %s For %s %s",
+				chreg_p->name, find_owner(chreg_p),
+				get_short_duration(CURRENT_TIME - chreg_p->last_time),
+				p);
+		}
+
+		if(limit == 1)
+		{
+			/* two loops to exit here, kludge it */
+			i = MAX_CHANNEL_TABLE;
+			break;
+		}
+
+		limit--;
+	}
+	HASH_WALK_END
+
+	if(!longlist)
+		service_send(chanserv_p, client_p, conn_p, "  %s", buf);
+
+	service_send(chanserv_p, client_p, conn_p,
+			"End of channel list%s",
+			(limit == 1) ? ", limit reached" : "");
+
+	slog(chanserv_p, 1, "%s - CHANLIST %s",
+		OPER_NAME(client_p, conn_p), mask);
+
 	return 0;
 }
 
