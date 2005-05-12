@@ -51,7 +51,7 @@ open_service_logfile(struct client *service_p)
 {
 	char buf[PATH_MAX];
 
-	snprintf(buf, sizeof(buf), "%s%s.log", LOG_DIR, lcase(service_p->service->id));
+	snprintf(buf, sizeof(buf), "%s%s.log", LOGDIR, lcase(service_p->service->id));
 
 	service_p->service->logfile = fopen(buf, "a");
 }

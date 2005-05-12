@@ -7,14 +7,22 @@ INSTALL=@INSTALL@
 LEX=@LEX@
 LEXLIB=@LEXLIB@
 YACC=@YACC@
-PREFIX=@prefix@
 BIN=ratbox-services@EXEEXT@
 INCLUDES=-I ../include/ @SQLITE_INCLUDES@
 LDFLAGS=@LDFLAGS@
 LIBS=@LIBS@
 SQLITE_LIB=@SQLITE_LIB@
-CFLAGS=@CPPFLAGS@ @CFLAGS@ -DPREFIX=\"$(PREFIX)\"
 MAKE = make
+
+prefix=@prefix@
+sysconfdir=@sysconfdir@
+localstatedir=@localstatedir@
+logdir=@logdir@
+rundir=@rundir@
+helpdir=@helpdir@
+
+CFLAGS=@CPPFLAGS@ @CFLAGS@ -DPREFIX=\"$(prefix)\" -DSYSCONFDIR=\"$(sysconfdir)\" \
+	-DLOGDIR=\"$(logdir)\" -DRUNDIR=\"$(rundir)\" -DHELPDIR=\"$(helpdir)\"
 
 # Anything marked with the .PHONY attribute is always considered "out of date"
 .PHONY: $(BIN)

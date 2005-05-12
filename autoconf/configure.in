@@ -30,6 +30,22 @@ AC_CHECK_LIB(socket, socket)
 AC_CHECK_LIB(nsl, gethostbyname)
 AC_CHECK_FUNCS(select strlcpy strlcat gethostbyname mmap getaddrinfo)
 
+AC_ARG_WITH(logdir,
+[ --with-logdir=DIR         logfiles in DIR [localstatedir/log] ],
+[ logdir=$with_logdir ],[ logdir=$localstatedir'/log' ])
+
+AC_ARG_WITH(rundir,
+[ --with-rundir=DIR         pidfile in DIR [localstatedir/run] ],
+[ rundir=$with_rundir ],[ rundir=$localstatedir'/run' ])
+
+AC_ARG_WITH(helpdir,
+[ --with-helpdir=DIR        helpfiles in DIR [datadir/ratbox-services/help] ],
+[ helpdir=$with_helpdir ],[ helpdir=$datadir'/ratbox-services/help' ])
+
+AC_SUBST(logdir)
+AC_SUBST(rundir)
+AC_SUBST(helpdir)
+
 AC_MSG_CHECKING(Compile with warning flags)
 AC_ARG_ENABLE(warnings,
 [ --enable-warnings         Enable warning flags to compiler

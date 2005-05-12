@@ -132,19 +132,19 @@ add_service(struct service_handler *service)
                 char filename[PATH_MAX];
                 int i;
 
-		snprintf(filename, sizeof(filename), "%s%s/index",
+		snprintf(filename, sizeof(filename), "%s/%s/index",
 				HELP_PATH, lcase(service->id));
 
 		client_p->service->help = cache_file(filename, "index");
 
-		snprintf(filename, sizeof(filename), "%s%s/index-admin",
+		snprintf(filename, sizeof(filename), "%s/%s/index-admin",
 				HELP_PATH, lcase(service->id));
 
 		client_p->service->helpadmin = cache_file(filename, "index-admin");
 
                 for(i = 0; i < maxlen; i++)
                 {
-                        snprintf(filename, sizeof(filename), "%s%s/",
+                        snprintf(filename, sizeof(filename), "%s/%s/",
                                  HELP_PATH, lcase(service->id));
 
                         /* we cant lcase() twice in one function call */

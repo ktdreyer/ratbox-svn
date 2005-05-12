@@ -5,14 +5,11 @@
  * IMPORTANT: if you alter the directories these files go to,
  *            you must create those paths yourself.
  */
-
-#define LOG_DIR		PREFIX "/logs/"
-
-#define CONF_PATH	PREFIX "/services.conf"
-#define PID_PATH	PREFIX "/services.pid"
-#define LOG_PATH	LOG_DIR "/services.log"
-#define HELP_PATH       PREFIX "/help/"
-#define DB_PATH		PREFIX "/services.db"
+#define CONF_PATH	SYSCONFDIR "/ratbox-services.conf"
+#define PID_PATH	RUNDIR "/ratbox-services.pid"
+#define LOG_PATH	LOGDIR "/ratbox-services.log"
+#define HELP_PATH       HELPDIR
+#define DB_PATH		SYSCONFDIR "/ratbox-services.db"
 
 /* SMALL_NETWORK
  * If your network is fairly small, enable this to save some memory.

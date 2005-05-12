@@ -35,6 +35,7 @@ AR=@AR@
 #
 prefix = @prefix@
 exec_prefix = @exec_prefix@
+bindir = @bindir@
 INSTALL = @INSTALL@
 
 # Compiler options needed for programs that use the readline() library.

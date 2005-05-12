@@ -183,7 +183,7 @@ add_ucommand_handler(struct client *service_p,
 		dlink_add_tail_alloc(chandler, &service_p->service->ucommand_list);
 
         /* now see if we can load a helpfile.. */
-        snprintf(filename, sizeof(filename), "%s%s/u-",
+        snprintf(filename, sizeof(filename), "%s/%s/u-",
                  HELP_PATH, lcase(servicename));
         strlcat(filename, lcase(chandler->cmd), sizeof(filename));
 

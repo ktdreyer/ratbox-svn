@@ -2,12 +2,21 @@
 
 RM=@RM@
 INSTALL=@INSTALL@
-PREFIX=@prefix@
 BIN=ratbox-services@EXEEXT@
 LIBS=@LIBS@
 LDFLAGS=@LDFLAGS@
 
 SUBDIRS=@SQLITE_SUBDIR@ src help
+
+prefix=@prefix@
+exec_prefix=@prefix@
+sbindir=@sbindir@
+sysconfdir=@sysconfdir@
+datadir=@datadir@
+localstatedir=@localstatedir@
+logdir=@logdir@
+rundir=@rundir@
+helpdir=@helpdir@
 
 @SET_MAKE@
 
@@ -26,11 +35,15 @@ build:
 	done
 
 install: build
-	$(INSTALL) -m 750 -d $(PREFIX)
-	$(INSTALL) -m 750 -d $(PREFIX)/logs
-	$(INSTALL) -m 750 src/$(BIN) $(PREFIX)
-	$(INSTALL) -m 640 doc/example.conf $(PREFIX)
-	$(INSTALL) -m 640 doc/schema.txt $(PREFIX)
+	$(INSTALL) -m 750 -d $(prefix)
+	$(INSTALL) -m 750 -d $(sbindir)
+	$(INSTALL) -m 750 -d $(sysconfdir)
+	$(INSTALL) -m 750 -d $(logdir)
+	$(INSTALL) -m 750 -d $(rundir)
+	$(INSTALL) -m 750 -d $(helpdir)
+	$(INSTALL) -m 750 src/$(BIN) $(sbindir)
+	$(INSTALL) -m 640 doc/example.conf $(sysconfdir)
+	$(INSTALL) -m 640 doc/schema.txt $(sysconfdir)
 	@for i in $(SUBDIRS); do \
 		echo "install -> $$i"; \
 		cd $$i; \
