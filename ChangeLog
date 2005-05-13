@@ -1,3 +1,15 @@
+leeh        2005/05/13 17:45:14 UTC	(20050513_0)
+
+  Modified files:
+    src                  log.c 
+  Log:
+  - via jilles, fix per-service logfiles
+  
+  Revision  Changes    Path
+  1.13      +1 -1      rserv/src/log.c
+
+
+
 leeh        2005/05/12 22:41:51 UTC	(20050512_3)
 
   Modified files:
