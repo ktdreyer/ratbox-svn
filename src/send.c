@@ -4,7 +4,7 @@
  *
  *  Copyright (C) 1990 Jarkko Oikarinen and University of Oulu, Co Center
  *  Copyright (C) 1996-2002 Hybrid Development Team
- *  Copyright (C) 2002-2005 ircd-ratbox development team
+ *  Copyright (C) 2002-2004 ircd-ratbox development team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -26,12 +26,11 @@
 
 #include "stdinc.h"
 #include "tools.h"
-#include "struct.h"
 #include "send.h"
 #include "channel.h"
 #include "class.h"
-#include "linebuf.h"
 #include "client.h"
+#include "common.h"
 #include "irc_string.h"
 #include "ircd.h"
 #include "numeric.h"
@@ -40,6 +39,7 @@
 #include "sprintf_irc.h"
 #include "s_conf.h"
 #include "s_newconf.h"
+#include "linebuf.h"
 #include "s_log.h"
 #include "memory.h"
 #include "hook.h"
@@ -156,6 +156,7 @@ send_linebuf_remote(struct Client *to, struct Client *from, buf_head_t *linebuf)
  *
  * inputs	- fd to have queue sent, client we're sending to
  * outputs	- contents of queue
+ * side effects - write is rescheduled if queue isnt emptied
  */
 void
 send_queued_write(int fd, void *data)
@@ -179,30 +180,9 @@ send_queued_write(int fd, void *data)
 
 	if(linebuf_len(&to->localClient->buf_sendq))
 	{
-		while (1)
+		while ((retlen =
+			linebuf_flush(to->localClient->fd, &to->localClient->buf_sendq)) > 0)
 		{
-			if(IsIOError(to))
-				return;
-				
-			retlen = linebuf_flush(to->localClient->fd, &to->localClient->buf_sendq);
-			
-			if(retlen < 0)
-			{
-				if(!ignoreErrno(errno))
-				{
-					dead_link(to);
-					return;
-				}  
-				if(linebuf_len(&to->localClient->buf_sendq))
-					comm_setselect(fd, FDLIST_IDLECLIENT, flags, send_queued_write, to, 0);
-				return;
-			} else 
-			if(retlen == 0)
-			{
-				dead_link(to);
-				return;
-			} 
-			
 			/* We have some data written .. update counters */
 #ifdef USE_IODEBUG_HOOKS
                         hd.arg2 = retlen;
@@ -228,13 +208,27 @@ send_queued_write(int fd, void *data)
 				me.localClient->sendB &= 0x03ff;
 			}
 		}
+
+		if(retlen == 0 || (retlen < 0 && !ignoreErrno(errno)))
+		{
+			dead_link(to);
+			return;
+		}
 	}
+	if(ignoreErrno(errno))
+		flags = COMM_SELECT_WRITE|COMM_SELECT_RETRY;
+	else
+		flags = COMM_SELECT_WRITE;
+	if(linebuf_len(&to->localClient->buf_sendq))
+	comm_setselect(fd, FDLIST_IDLECLIENT, flags,
+			       send_queued_write, to, 0);
 }
 
 /* send_queued_slink_write()
  *
  * inputs	- fd to have queue sent, client we're sending to
  * outputs	- contents of queue
+ * side effects - write is rescheduled if queue isnt emptied
  */
 void
 send_queued_slink_write(int fd, void *data)
@@ -287,9 +281,10 @@ send_queued_slink_write(int fd, void *data)
 		}
 	}
 
+	/* if we have any more data, reschedule a write */
 	if(to->localClient->slinkq_len)
 		comm_setselect(to->localClient->ctrlfd, FDLIST_IDLECLIENT,
-			       COMM_SELECT_WRITE, send_queued_slink_write, to, 0);
+			       COMM_SELECT_WRITE|COMM_SELECT_RETRY, send_queued_slink_write, to, 0);
 }
 
 /* sendto_one()
@@ -516,6 +511,7 @@ void
 sendto_channel_flags(struct Client *one, int type, struct Client *source_p,
 		     struct Channel *chptr, const char *pattern, ...)
 {
+	static char buf[BUFSIZE];
 	va_list args;
 	buf_head_t linebuf_local;
 	buf_head_t linebuf_name;
@@ -532,19 +528,20 @@ sendto_channel_flags(struct Client *one, int type, struct Client *source_p,
 	current_serial++;
 
 	va_start(args, pattern);
+	ircvsnprintf(buf, sizeof(buf), pattern, args);
+	va_end(args);
 
 	if(IsServer(source_p))
-		linebuf_putmsg(&linebuf_local, pattern, &args,
-			       ":%s ", source_p->name);
+		linebuf_putmsg(&linebuf_local, NULL, NULL,
+			       ":%s %s", source_p->name, buf);
 	else
-		linebuf_putmsg(&linebuf_local, pattern, &args,
-			       ":%s!%s@%s ",
+		linebuf_putmsg(&linebuf_local, NULL, NULL,
+			       ":%s!%s@%s %s",
 			       source_p->name, source_p->username, 
-			       source_p->host);
+			       source_p->host, buf);
 
-	linebuf_putmsg(&linebuf_name, pattern, &args, ":%s ", source_p->name);
-	linebuf_putmsg(&linebuf_id, pattern, &args, ":%s ", use_id(source_p));
-	va_end(args);
+	linebuf_putmsg(&linebuf_name, NULL, NULL, ":%s %s", source_p->name, buf);
+	linebuf_putmsg(&linebuf_id, NULL, NULL, ":%s %s", use_id(source_p), buf);
 
 	DLINK_FOREACH_SAFE(ptr, next_ptr, chptr->members.head)
 	{
@@ -696,6 +693,7 @@ void
 sendto_match_butone(struct Client *one, struct Client *source_p,
 		    const char *mask, int what, const char *pattern, ...)
 {
+	static char buf[BUFSIZE];
 	va_list args;
 	struct Client *target_p;
 	dlink_node *ptr;
@@ -709,17 +707,20 @@ sendto_match_butone(struct Client *one, struct Client *source_p,
 	linebuf_newbuf(&linebuf_id);
 
 	va_start(args, pattern);
+	ircvsnprintf(buf, sizeof(buf), pattern, args);
+	va_end(args);
 
 	if(IsServer(source_p))
-		linebuf_putmsg(&linebuf_local, pattern, &args, ":%s ", 
-			       source_p->name);
+		linebuf_putmsg(&linebuf_local, NULL, NULL,
+			       ":%s %s", source_p->name, buf);
 	else
-		linebuf_putmsg(&linebuf_local, pattern, &args, ":%s!%s@%s ",
-			       source_p->name, source_p->username, source_p->host);
+		linebuf_putmsg(&linebuf_local, NULL, NULL,
+			       ":%s!%s@%s %s",
+			       source_p->name, source_p->username, 
+			       source_p->host, buf);
 
-	linebuf_putmsg(&linebuf_name, pattern, &args, ":%s ", source_p->name);
-	linebuf_putmsg(&linebuf_id, pattern, &args, ":%s ", use_id(source_p));
-	va_end(args);
+	linebuf_putmsg(&linebuf_name, NULL, NULL, ":%s %s", source_p->name, buf);
+	linebuf_putmsg(&linebuf_id, NULL, NULL, ":%s %s", use_id(source_p), buf);
 
 	if(what == MATCH_HOST)
 	{
@@ -769,6 +770,7 @@ void
 sendto_match_servs(struct Client *source_p, const char *mask, int cap, 
 			int nocap, const char *pattern, ...)
 {
+	static char buf[BUFSIZE];
 	va_list args;
 	dlink_node *ptr;
 	struct Client *target_p;
@@ -782,9 +784,13 @@ sendto_match_servs(struct Client *source_p, const char *mask, int cap,
 	linebuf_newbuf(&linebuf_name);
 
 	va_start(args, pattern);
-	linebuf_putmsg(&linebuf_id, pattern, &args, ":%s ", use_id(source_p));
-	linebuf_putmsg(&linebuf_name, pattern, &args, ":%s ", source_p->name);
+	ircvsnprintf(buf, sizeof(buf), pattern, args);
 	va_end(args);
+
+	linebuf_putmsg(&linebuf_id, NULL, NULL, 
+			":%s %s", use_id(source_p), buf);
+	linebuf_putmsg(&linebuf_name, NULL, NULL, 
+			":%s %s", source_p->name, buf);
 
 	current_serial++;
 
@@ -991,6 +997,7 @@ kill_client(struct Client *target_p, struct Client *diedie, const char *pattern,
 void
 kill_client_serv_butone(struct Client *one, struct Client *target_p, const char *pattern, ...)
 {
+	static char buf[BUFSIZE];
 	va_list args;
 	struct Client *client_p;
 	dlink_node *ptr;
@@ -1002,11 +1009,13 @@ kill_client_serv_butone(struct Client *one, struct Client *target_p, const char 
 	linebuf_newbuf(&linebuf_id);
 	
 	va_start(args, pattern);
-	linebuf_putmsg(&linebuf_name, pattern, &args, ":%s KILL %s :",
-		       me.name, target_p->name);
-	linebuf_putmsg(&linebuf_id, pattern, &args, ":%s KILL %s :",
-		       use_id(&me), use_id(target_p));
+	ircvsnprintf(buf, sizeof(buf), pattern, args);
 	va_end(args);
+
+	linebuf_putmsg(&linebuf_name, NULL, NULL, ":%s KILL %s :%s",
+		       me.name, target_p->name, buf);
+	linebuf_putmsg(&linebuf_id, NULL, NULL, ":%s KILL %s :%s",
+		       use_id(&me), use_id(target_p), buf);
 
 	DLINK_FOREACH_SAFE(ptr, next_ptr, serv_list.head)
 	{
