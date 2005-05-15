@@ -1,3 +1,15 @@
+androsyn    2005/05/15 22:02:37 UTC	(20050515_0)
+
+  Modified files:
+    src                  send.c 
+  Log:
+  Port changes from 2.1 forward for amd64
+  
+  Revision  Changes    Path
+  7.296     +57 -48    ircd-ratbox/src/send.c
+
+
+
 leeh        2005/05/09 13:25:50 UTC	(20050509_0)
 
   Modified files:
