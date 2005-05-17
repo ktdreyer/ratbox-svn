@@ -53,8 +53,8 @@ static struct service_command global_command[] =
 
 static struct ucommand_handler global_ucommand[] =
 {
-	{ "netmsg", o_global_netmsg, CONF_OPER_GLOB_NETMSG, 1, 1, NULL },
-	{ "\0", NULL, 0, 0, 0, NULL }
+	{ "netmsg", o_global_netmsg, 0, CONF_OPER_GLOB_NETMSG, 1, 1, NULL },
+	{ "\0", NULL, 0, 0, 0, 0, NULL }
 };
 
 static struct service_handler global_service = {

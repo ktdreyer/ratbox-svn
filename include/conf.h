@@ -93,8 +93,8 @@ struct conf_oper
         char *host;
         char *pass;
 	char *server;
-        int flags;		/* general flags */
-	int sflags;		/* individual service flags */
+	unsigned int flags;		/* general flags */
+	unsigned int sflags;		/* individual service flags */
 	int refcount;
 };
 

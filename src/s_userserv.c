@@ -86,14 +86,14 @@ static struct service_command userserv_command[] =
 
 static struct ucommand_handler userserv_ucommand[] =
 {
-	{ "userregister",	o_user_userregister,	CONF_OPER_US_REGISTER,	2, 1, NULL },
-	{ "userdrop",		o_user_userdrop,	CONF_OPER_US_DROP,	1, 1, NULL },
-	{ "usersuspend",	o_user_usersuspend,	CONF_OPER_US_SUSPEND,	1, 1, NULL },
-	{ "userunsuspend",	o_user_userunsuspend,	CONF_OPER_US_SUSPEND,	1, 1, NULL },
-	{ "userlist",		o_user_userlist,	CONF_OPER_US_LIST,	0, 1, NULL },
-	{ "userinfo",		o_user_userinfo,	CONF_OPER_US_INFO,	1, 1, NULL },
-	{ "usersetpass",	o_user_usersetpass,	CONF_OPER_US_SETPASS,	2, 1, NULL },
-	{ "\0",			NULL,			0,			0, 0, NULL }
+	{ "userregister",	o_user_userregister,	0, CONF_OPER_US_REGISTER,	2, 1, NULL },
+	{ "userdrop",		o_user_userdrop,	0, CONF_OPER_US_DROP,	1, 1, NULL },
+	{ "usersuspend",	o_user_usersuspend,	0, CONF_OPER_US_SUSPEND,	1, 1, NULL },
+	{ "userunsuspend",	o_user_userunsuspend,	0, CONF_OPER_US_SUSPEND,	1, 1, NULL },
+	{ "userlist",		o_user_userlist,	0, CONF_OPER_US_LIST,	0, 1, NULL },
+	{ "userinfo",		o_user_userinfo,	0, CONF_OPER_US_INFO,	1, 1, NULL },
+	{ "usersetpass",	o_user_usersetpass,	0, CONF_OPER_US_SETPASS,	2, 1, NULL },
+	{ "\0",			NULL,			0, 0,			0, 0, NULL }
 };
 
 static struct service_handler userserv_service = {

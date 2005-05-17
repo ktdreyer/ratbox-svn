@@ -76,8 +76,8 @@ static struct service_command nickserv_command[] =
 
 static struct ucommand_handler nickserv_ucommand[] =
 {
-	{ "nickdrop", o_nick_nickdrop, CONF_OPER_NS_DROP, 1, 1, NULL },
-	{ "\0", NULL, 0, 0, 0, NULL }
+	{ "nickdrop", o_nick_nickdrop, 0, CONF_OPER_NS_DROP, 1, 1, NULL },
+	{ "\0", NULL, 0, 0, 0, 0, NULL }
 };
 
 static struct service_handler nick_service = {

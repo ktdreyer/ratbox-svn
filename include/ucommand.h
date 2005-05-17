@@ -14,7 +14,8 @@ struct ucommand_handler
 {
 	const char *cmd;
 	int (*func)(struct client *, struct lconn *, const char **, int);
-	int flags;
+	unsigned int flags;	/* normal oper flags required */
+	unsigned int sflags;	/* services flags required */
 	int minpara;
 	int spy;
         struct cachefile *helpfile;

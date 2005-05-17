@@ -69,18 +69,18 @@ static int u_who(struct client *, struct lconn *, const char **, int);
 
 static struct ucommand_handler ucommands[] =
 {
-	{ "boot",	u_boot,		CONF_OPER_ADMIN,	1, 1, NULL },
-	{ "connect",	u_connect,	CONF_OPER_ROUTE,	1, 1, NULL },
-	{ "die",	u_die,		CONF_OPER_ADMIN,	1, 1, NULL },
-	{ "events",	u_events,	CONF_OPER_ADMIN,	0, 1, NULL },
-	{ "flags",	u_flags,	0,			0, 0, NULL },
-	{ "help",	u_help,		0,			0, 0, NULL },
-	{ "quit",	u_quit,		0,			0, 0, NULL },
-	{ "rehash",	u_rehash,	CONF_OPER_ADMIN,	0, 1, NULL },
-	{ "service",	u_service,	0,			0, 1, NULL },
-	{ "status",	u_status,	0,			0, 1, NULL },
-	{ "who",	u_who,		0,			0, 0, NULL },
-	{ "\0",         NULL,		0,			0, 0, NULL }
+	{ "boot",	u_boot,		CONF_OPER_ADMIN,	0, 1, 1, NULL },
+	{ "connect",	u_connect,	CONF_OPER_ROUTE,	0, 1, 1, NULL },
+	{ "die",	u_die,		CONF_OPER_ADMIN,	0, 1, 1, NULL },
+	{ "events",	u_events,	CONF_OPER_ADMIN,	0, 0, 1, NULL },
+	{ "flags",	u_flags,	0,			0, 0, 0, NULL },
+	{ "help",	u_help,		0,			0, 0, 0, NULL },
+	{ "quit",	u_quit,		0,			0, 0, 0, NULL },
+	{ "rehash",	u_rehash,	CONF_OPER_ADMIN,	0, 0, 1, NULL },
+	{ "service",	u_service,	0,			0, 0, 1, NULL },
+	{ "status",	u_status,	0,			0, 0, 1, NULL },
+	{ "who",	u_who,		0,			0, 0, 0, NULL },
+	{ "\0",         NULL,		0,			0, 0, 0, NULL }
 };
 
 void
@@ -143,18 +143,24 @@ handle_ucommand(struct lconn *conn_p, const char *command,
         if((handler = find_ucommand(command)) != NULL)
 	{
 		if(parc < handler->minpara)
-			sendto_one(conn_p, "Insufficient parameters");
-		else if(!handler->flags || conn_p->privs & handler->flags)
 		{
-			if(handler->spy)
-				sendto_all(UMODE_SPY, "#%s# %s %s",
-					conn_p->name, ucase(handler->cmd),
-					rebuild_params((const char **) parv, parc, 1));
-
-			handler->func(NULL, conn_p, parv, parc);
+			sendto_one(conn_p, "Insufficient parameters");
+			return;
 		}
-		else
+
+		if((handler->flags && !(conn_p->privs & handler->flags)) ||
+		   (handler->sflags && !(conn_p->sprivs & handler->sflags)))
+		{
 			sendto_one(conn_p, "Insufficient access");
+			return;
+		}
+
+		if(handler->spy)
+			sendto_all(UMODE_SPY, "#%s# %s %s",
+				conn_p->name, ucase(handler->cmd),
+				rebuild_params((const char **) parv, parc, 1));
+
+		handler->func(NULL, conn_p, parv, parc);
 	}
         else
                 sendto_one(conn_p, "Invalid command: %s", command);
