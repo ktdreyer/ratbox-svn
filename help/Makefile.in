@@ -10,13 +10,13 @@ helpdir=@helpdir@
 SUBDIRS=alis main operbot chanserv userserv jupeserv operserv nickserv
 
 install: 
-	$(INSTALL) -m 750 -d $(helpdir)
+	$(INSTALL) -m 750 -d $(DESTDIR)$(helpdir)
 
 	@for i in $(SUBDIRS); do \
-		$(INSTALL) -m 750 -d $(helpdir)/$$i; \
+		$(INSTALL) -m 750 -d $(DESTDIR)$(helpdir)/$$i; \
 		for j in $$i/*; do \
 			if [ -f $$j ]; then \
-				$(INSTALL_DATA) $$j $(helpdir)/$$i; \
+				$(INSTALL_DATA) $$j $(DESTDIR)$(helpdir)/$$i; \
 			fi \
 		done \
 	done
