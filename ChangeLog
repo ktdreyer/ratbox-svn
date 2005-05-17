@@ -1,3 +1,28 @@
+leeh        2005/05/17 13:30:37 UTC	(20050517_0)
+
+  Modified files:
+    include              conf.h ucommand.h 
+    src                  s_chanserv.c s_global.c s_jupeserv.c 
+                         s_nickserv.c s_operbot.c s_operserv.c 
+                         s_userserv.c u_stats.c ucommand.c 
+  Log:
+  - fix oper privs over dcc
+  
+  Revision  Changes    Path
+  1.44      +2 -2      rserv/include/conf.h
+  1.12      +2 -1      rserv/include/ucommand.h
+  1.82      +7 -7      rserv/src/s_chanserv.c
+  1.16      +2 -2      rserv/src/s_global.c
+  1.31      +3 -3      rserv/src/s_jupeserv.c
+  1.18      +2 -2      rserv/src/s_nickserv.c
+  1.37      +3 -3      rserv/src/s_operbot.c
+  1.17      +5 -5      rserv/src/s_operserv.c
+  1.63      +8 -8      rserv/src/s_userserv.c
+  1.18      +1 -1      rserv/src/u_stats.c
+  1.33      +27 -21    rserv/src/ucommand.c
+
+
+
 leeh        2005/05/15 22:24:47 UTC	(20050515_0)
 
   rserv/help/banserv - New directory
