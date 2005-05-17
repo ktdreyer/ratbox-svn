@@ -1,3 +1,18 @@
+leeh        2005/05/17 13:35:33 UTC	(20050517_1)
+
+  Modified files:
+    .                    Makefile.in 
+    help                 Makefile.in 
+  Log:
+  - via <rse@engelschall.com>,
+    - support DESTDIR make variable for package managers
+  
+  Revision  Changes    Path
+  1.11      +10 -10    rserv/Makefile.in
+  1.9       +4 -4      rserv/help/Makefile.in
+
+
+
 leeh        2005/05/17 13:30:37 UTC	(20050517_0)
 
   Modified files:
