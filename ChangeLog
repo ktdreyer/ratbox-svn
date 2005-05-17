@@ -1,3 +1,19 @@
+leeh        2005/05/17 23:22:11 UTC	(20050517_2)
+
+  Modified files:
+    include              service.h 
+    src                  c_message.c scommand.c service.c 
+  Log:
+  - add support for receiving messages over ENCAP, via "RSMSG"
+  
+  Revision  Changes    Path
+  1.25      +3 -1      rserv/include/service.h
+  1.20      +1 -1      rserv/src/c_message.c
+  1.34      +12 -0     rserv/src/scommand.c
+  1.52      +23 -14    rserv/src/service.c
+
+
+
 leeh        2005/05/17 13:35:33 UTC	(20050517_1)
 
   Modified files:
