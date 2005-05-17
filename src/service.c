@@ -391,16 +391,30 @@ handle_service_help(struct client *service_p, struct client *client_p, const cha
 }
 
 void
-handle_service(struct client *service_p, struct client *client_p, char *text)
+handle_service_msg(struct client *service_p, struct client *client_p, char *text)
 {
-	struct service_command *cmd_entry;
         char *parv[MAXPARA+1];
         char *p;
-        int parc;
-        int retval;
+        int parc = 0;
 
         if(!IsUser(client_p))
                 return;
+
+        if((p = strchr(text, ' ')) != NULL)
+	{
+                *p++ = '\0';
+	        parc = string_to_array(p, parv);
+	}
+
+	handle_service(service_p, client_p, text, parc, (const char **) parv);
+}
+
+void
+handle_service(struct client *service_p, struct client *client_p, 
+		const char *command, int parc, const char *parv[])
+{
+	struct service_command *cmd_entry;
+        int retval;
 
         /* this service doesnt handle commands via privmsg */
         if(service_p->service->command == NULL)
@@ -435,12 +449,7 @@ handle_service(struct client *service_p, struct client *client_p, char *text)
 		}
 	}
 
-        if((p = strchr(text, ' ')) != NULL)
-                *p++ = '\0';
-
-        parc = string_to_array(p, parv);
-
-        if(!strcasecmp(text, "HELP"))
+        if(!strcasecmp(command, "HELP"))
         {
 		if(ServiceStealth(service_p) && !client_p->user->oper && !is_oper(client_p))
 			return;
@@ -466,10 +475,10 @@ handle_service(struct client *service_p, struct client *client_p, char *text)
 
 		return;
         }
-	else if(!strcasecmp(text, "OPERLOGIN") || !strcasecmp(text, "OLOGIN"))
+	else if(!strcasecmp(command, "OPERLOGIN") || !strcasecmp(command, "OLOGIN"))
 	{
 		struct conf_oper *oper_p;
-		char *crpass;
+		const char *crpass;
 
 		if(client_p->user->oper)
 		{
@@ -518,7 +527,7 @@ handle_service(struct client *service_p, struct client *client_p, char *text)
 
 		return;
 	}
-	else if(!strcasecmp(text, "OPERLOGOUT") || !strcasecmp(text, "OLOGOUT"))
+	else if(!strcasecmp(command, "OPERLOGOUT") || !strcasecmp(command, "OLOGOUT"))
 	{
 		if(client_p->user->oper == NULL)
 		{
@@ -543,7 +552,7 @@ handle_service(struct client *service_p, struct client *client_p, char *text)
 	if(ServiceStealth(service_p) && !client_p->user->oper && !is_oper(client_p))
 		return;
 
-	if((cmd_entry = bsearch(text, service_p->service->command, 
+	if((cmd_entry = bsearch(command, service_p->service->command, 
 				service_p->service->command_size / sizeof(struct service_command),
 				sizeof(struct service_command), (bqcmp) scmd_compare)))
 	{

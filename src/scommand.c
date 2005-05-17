@@ -287,6 +287,8 @@ c_capab(struct client *client_p, const char *parv[], int parc)
 static void
 c_encap(struct client *client_p, const char *parv[], int parc)
 {
+	struct client *service_p;
+
 	if(parc < 2)
 		return;
 
@@ -313,6 +315,16 @@ c_encap(struct client *client_p, const char *parv[], int parc)
 			if(*(p+6) == '\0' || *(p+6) == ' ')
 				client_p->flags |= FLAGS_RSFNC;
 		}
+	}
+	else if(!irccmp(parv[1], "RSMSG"))
+	{
+		if(parc < 4 || !IsUser(client_p))
+			return;
+
+		if((service_p = find_service(parv[2])) == NULL)
+			return;
+
+		handle_service(service_p, client_p, parv[3], parc-4, parv+4);
 	}
 }
 

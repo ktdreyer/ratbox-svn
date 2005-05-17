@@ -58,8 +58,10 @@ extern void deintroduce_service(struct client *client_p);
 
 extern void update_service_floodcount(void *unused);
 
+extern void handle_service_msg(struct client *service_p,
+				struct client *client_p, char *text);
 extern void handle_service(struct client *service_p, struct client *client_p,
-                           char *text);
+                           const char *command, int parc, const char **parv);
 extern void service_error(struct client *service_p, struct client *client_p,
                           const char *, ...);
 

@@ -176,6 +176,6 @@ c_message(struct client *client_p, const char *parv[], int parc)
 	}
 
 	text = LOCAL_COPY(parv[1]);
-	handle_service(target_p, client_p, text);
+	handle_service_msg(target_p, client_p, text);
 }
 
