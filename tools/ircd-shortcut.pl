@@ -70,11 +70,13 @@ print FILE <<".EOF.";
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "stdinc.h"
+#include "tools.h"
 #include "client.h"
 #include "s_serv.h"
 #include "modules.h"
 #include "msg.h"
 #include "send.h"
+#include "hash.h"
 
 .EOF.
 
@@ -117,6 +119,14 @@ m_$sname(struct Client *client_p, struct Client *source_p,
 {
 	char buf[BUFSIZE];
 	int i = 1;
+
+	if(find_server(NULL, "$servername") == NULL)
+	{
+		sendto_one(source_p, 
+			":%s 440 %s $sname :Services are currently unavailable",
+			me.name, source_p->name);
+		return 0;
+	}
 
 	buf[0] = '\\0';
 
