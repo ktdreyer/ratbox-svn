@@ -75,3 +75,7 @@ ratbox-services installation guide
 
 10. Run ./ratbox-services
 
+11. Investigate PREFIX/bin/ircd-shortcut.pl if you wish to install command
+    shortcuts for your services in your ircd, eg /chanserv etc.
+
+

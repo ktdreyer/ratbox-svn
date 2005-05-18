@@ -10,6 +10,7 @@ SUBDIRS=@SQLITE_SUBDIR@ src help
 
 prefix=@prefix@
 exec_prefix=@prefix@
+bindir=@bindir@
 sbindir=@sbindir@
 sysconfdir=@sysconfdir@
 datadir=@datadir@
@@ -36,11 +37,13 @@ build:
 
 install: build
 	$(INSTALL) -m 750 -d $(DESTDIR)$(prefix)
+	$(INSTALL) -m 750 -d $(DESTDIR)$(bindir)
 	$(INSTALL) -m 750 -d $(DESTDIR)$(sbindir)
 	$(INSTALL) -m 750 -d $(DESTDIR)$(sysconfdir)
 	$(INSTALL) -m 750 -d $(DESTDIR)$(logdir)
 	$(INSTALL) -m 750 -d $(DESTDIR)$(rundir)
 	$(INSTALL) -m 750 -d $(DESTDIR)$(helpdir)
+	$(INSTALL) -m 750 tools/ircd-shortcut.pl $(DESTDIR)$(bindir)
 	$(INSTALL) -m 750 src/$(BIN) $(DESTDIR)$(sbindir)
 	$(INSTALL) -m 640 doc/example.conf $(DESTDIR)$(sysconfdir)
 	$(INSTALL) -m 640 doc/schema.txt $(DESTDIR)$(sysconfdir)
