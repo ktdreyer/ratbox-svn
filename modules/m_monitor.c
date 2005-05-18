@@ -47,7 +47,7 @@ static int m_monitor(struct Client *, struct Client *, int, const char **);
 
 struct Message monitor_msgtab = {
 	"MONITOR", 0, 0, 0, MFLG_SLOW,
-	{{m_monitor, 2}, {m_monitor, 2}, mg_ignore, mg_ignore, mg_ignore, {m_monitor, 2}}
+	{mg_unreg, {m_monitor, 2}, mg_ignore, mg_ignore, mg_ignore, {m_monitor, 2}}
 };
 
 mapi_clist_av1 monitor_clist[] = { &monitor_msgtab, NULL };
