@@ -1,3 +1,19 @@
+leeh        2005/05/18 00:33:18 UTC	(20050518_1)
+
+  Modified files:
+    .                    INSTALL Makefile.in 
+  Added files:
+    tools                ircd-shortcut.pl 
+  Log:
+  - add my ircd shortcut generator
+  
+  Revision  Changes    Path
+  1.13      +4 -0      rserv/INSTALL
+  1.12      +4 -1      rserv/Makefile.in
+  1.1       +148 -0    rserv/tools/ircd-shortcut.pl (new)
+
+
+
 leeh        2005/05/18 00:29:14 UTC	(20050518_0)
 
   rserv/tools - New directory
