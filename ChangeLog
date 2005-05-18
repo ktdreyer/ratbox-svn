@@ -1,3 +1,15 @@
+androsyn    2005/05/18 22:00:32 UTC	(20050518_0)
+
+  Modified files:
+    modules              m_monitor.c 
+  Log:
+  Don't allow monitor to be used as an unregistered client.
+  
+  Revision  Changes    Path
+  1.11      +2 -2      ircd-ratbox/modules/m_monitor.c
+
+
+
 androsyn    2005/05/17 22:53:47 UTC	(20050517_0)
 
   Modified files:
