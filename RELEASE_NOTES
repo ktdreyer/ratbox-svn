@@ -1,6 +1,42 @@
 
 This is the current beta version of ratbox-services.
 
+-- ratbox-services-1.0beta3
+- reorganised the directory structure
+
+  IMPORTANT: You must move your configuration files for them to work
+  with the new directory structure.  After installing this version,
+  you should move your config file and db file to:
+  	PREFIX/etc/ratbox-services.conf
+	PREFIX/etc/ratbox-services.db
+
+- services privs are now far more fine grained
+
+  IMPORTANT: If you expect to have any admin access to your services,
+  you must redo your privs per operator {};.  See example.conf for
+  details.
+
+- added CHANSERV::SET::NOVOICECMD, disables use of VOICE command in channel
+- fix a core when exiting dcc clients due to read/write error
+- added NICKSERV::SET::WARN, controls whether warnings are issued when
+  another client uses a registered nickname, can be disabled in the config
+  via allow_set_warn = yes|no;
+- make USERSERV::USERINFO return email address
+- fix checks for socket() and gethostbyname()
+- NICKSERV::REGAIN renamed to NICKSERV::RELEASE, added NICKSERV::REGAIN
+  which when used by clients on servers supporting it, forcibly changes
+  their nickname to the one they wish to regain
+- allow autoop/autovoice setting in CHANSERV::ADDUSER
+- tidy up tsinfo updates
+- add CHANSERV::CHANLIST and USERSERV::USERLIST, to list registered
+  channels/usernames
+- added a shortcut generator for use with ircd, this creates an ircd
+  module containing commands such as /chanserv to interface with services
+- can now forcibly build the bundled sqlite with --with-sqlitebuild to
+  configure
+- add short introductions to the help indexes
+- .rehash help/kill -USR1 now reloads helpfiles
+
 
 -- ratbox-services-1.0beta2
 - added nickname services which work via username registrations.
