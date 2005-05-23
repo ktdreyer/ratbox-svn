@@ -329,7 +329,7 @@ handle_service_help_index(struct client *service_p, struct client *client_p)
 	if(fileptr)
 	{
 		/* dump them the index file */
-		service_error(service_p, client_p, "Available commands:");
+		/* this contains a short introduction and a list of commands */
 
 		DLINK_FOREACH(ptr, fileptr->contents.head)
 		{

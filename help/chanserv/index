@@ -1,3 +1,7 @@
+This service allows you to register and control various
+aspects of channels, such as who is allowed channel
+operator privileges. To use this service, you need a
+registered username. Available commands:
  ADDBAN      - { 10} Adds a ban to chanserv
  ADDUSER     - {150} Adds a user to a channel's access list
  CLEARALLOPS - {140} Clears all ops with level less than your own
