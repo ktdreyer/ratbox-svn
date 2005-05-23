@@ -235,7 +235,7 @@ find_umode(struct mode_table *tab, char *name)
 }
 
 static void
-set_modes_from_table(int *modes, const char *whatis, struct mode_table *tab, conf_parm_t * args)
+set_modes_from_table(unsigned int *modes, const char *whatis, struct mode_table *tab, conf_parm_t * args)
 {
 	for (; args; args = args->next)
 	{

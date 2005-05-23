@@ -395,7 +395,7 @@ free_client(struct client *target_p)
 	        BlockHeapFree(server_heap, target_p->server);
 
 	BlockHeapFree(client_heap, target_p);
-};
+}
 
 /* string_to_umode()
  *   Converts a given string into a usermode

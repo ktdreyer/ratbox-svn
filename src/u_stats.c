@@ -143,5 +143,5 @@ u_stats(struct client *unused, struct lconn *conn_p, const char *parv[], int par
 
         sendto_one(conn_p, "Unknown stats type: %s", parv[0]);
 	return 0;
-};
+}
         

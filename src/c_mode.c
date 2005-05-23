@@ -58,7 +58,7 @@ valid_key(const char *data)
 {
 	static char buf[KEYLEN+1];
 	unsigned char *s, c;
-	unsigned char *fix = buf;
+	unsigned char *fix = (unsigned char *) buf;
 
 	strlcpy(buf, data, sizeof(buf));
 
