@@ -109,7 +109,6 @@ init_balloc(void)
 
 	if(zero_fd < 0)
 		blockheap_fail("Failed opening /dev/zero");
-	fd_open(zero_fd, FD_FILE, "Anonymous mmap()");
 #endif
 	eventAdd("block_heap_gc", block_heap_gc, NULL, 30);
 }
@@ -144,7 +143,7 @@ mem_frob(void *data, int len)
  * Output: None
  * Side Effects: Returns memory for the block back to the OS
  */
-static inline void
+static __inline void
 free_block(void *ptr, size_t size)
 {
 #ifdef HAVE_MMAP
@@ -162,7 +161,7 @@ free_block(void *ptr, size_t size)
  * Output: Pointer to new block
  * Side Effects: None
  */
-static inline void *
+static __inline void *
 get_block(size_t size)
 {
 	void *ptr;

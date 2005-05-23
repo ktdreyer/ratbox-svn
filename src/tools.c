@@ -227,7 +227,7 @@ strip_tabs(char *dest, const unsigned char *src, size_t len)
 	return dest;
 }
 
-inline int
+__inline int
 string_to_array(char *string, char *parv[])
 {
         char *p, *buf = string;

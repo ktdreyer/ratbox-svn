@@ -815,7 +815,7 @@ read_client(struct lconn *conn_p)
  * inputs	- string to parse, array to put in
  * outputs	- number of parameters
  */
-static inline int
+static __inline int
 io_to_array(char *string, char *parv[MAXPARA])
 {
 	char *p, *buf = string;

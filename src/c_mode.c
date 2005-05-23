@@ -57,12 +57,12 @@ static const char *
 valid_key(const char *data)
 {
 	static char buf[KEYLEN+1];
-	u_char *s, c;
-	u_char *fix = buf;
+	unsigned char *s, c;
+	unsigned char *fix = buf;
 
 	strlcpy(buf, data, sizeof(buf));
 
-	for(s = (u_char *) buf; (c = *s); s++)
+	for(s = (unsigned char *) buf; (c = *s); s++)
 	{
 		c &= 0x7f;
 
