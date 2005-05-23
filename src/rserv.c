@@ -33,12 +33,18 @@
 #include "stdinc.h"
 #include <signal.h>
 #include <sys/resource.h>
-#ifndef ANFL_LAPTOP
+
+/* build sqlite, so use local version */
+#ifdef SQLITE_BUILD
+#include "sqlite.h"
+#else
 #include <sqlite.h>
 #endif
+
 #ifdef HAVE_CRYPT_H
 #include <crypt.h>
 #endif
+
 #ifdef HAVE_GETOPT_H
 #include <getopt.h>
 #endif

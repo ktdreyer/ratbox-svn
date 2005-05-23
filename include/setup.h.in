@@ -87,6 +87,9 @@
 /* Global Messaging Service */
 #undef ENABLE_GLOBAL
 
+/* Build packaged sqlite */
+#undef SQLITE_BUILD
+
 /* Nick Length */
 #undef NICKLEN
 

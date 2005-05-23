@@ -2255,26 +2255,28 @@ fi
 echo $ac_n "checking sqlite was found""... $ac_c" 1>&6
 echo "configure:2257: checking sqlite was found" >&5
 
-if test "X$ac_cv_found_sqlite_inc" != "Xyes" || test "X$ac_cv_found_sqlite_lib" != "Xyes"; then
+if test "X$ac_cv_found_sqlite_inc" != "Xyes" ||  
+   test "X$ac_cv_found_sqlite_lib" != "Xyes" || 
+   test "X$ac_cv_sqlitebuild" = "Xyes"; then
 	subdirs="sqlite"
 
-	echo "$ac_t""no" 1>&6
+	cat >> confdefs.h <<\EOF
+#define SQLITE_BUILD 1
+EOF
+
 	SQLITE_INCLUDES="-I ../sqlite/"
 	SQLITE_SUBDIR="sqlite"
 	SQLITE_LIB="../sqlite/libsqlite.a"
-else
-	if test "X$ac_cv_sqlitebuild" = "Xyes"; then
-		subdirs="sqlite sqlite"
 
-		SQLITE_INCLUDES="-I ../sqlite/"
-		SQLITE_SUBDIR="sqlite"
-		SQLITE_LIB="../sqlite/libsqlite.a"
+	if test "X$ac_cv_sqlitebuild" = "Xyes"; then
 		echo "$ac_t"""yes.. building anyway"" 1>&6
 	else
-		echo "$ac_t""yes" 1>&6
-		SQLITE_SUBDIR=""
-				no_recursion="yes"
+		echo "$ac_t""no" 1>&6
 	fi
+else
+	echo "$ac_t""yes" 1>&6
+	SQLITE_SUBDIR=""
+		no_recursion="yes"
 fi
 
 # Check whether --with-nicklen or --without-nicklen was given.
@@ -2735,7 +2737,7 @@ if test "$no_recursion" != yes; then
     esac
   done
 
-  for ac_config_dir in sqlite sqlite; do
+  for ac_config_dir in sqlite; do
 
     # Do not complain, so a configure script can configure whichever
     # parts of a large source tree are present.

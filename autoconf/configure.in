@@ -235,25 +235,25 @@ AC_CHECK_LIB([sqlite], [main],
 
 AC_MSG_CHECKING(sqlite was found)
 
-if test "X$ac_cv_found_sqlite_inc" != "Xyes" || test "X$ac_cv_found_sqlite_lib" != "Xyes"; then
+if test "X$ac_cv_found_sqlite_inc" != "Xyes" ||  
+   test "X$ac_cv_found_sqlite_lib" != "Xyes" || 
+   test "X$ac_cv_sqlitebuild" = "Xyes"; then
 	AC_CONFIG_SUBDIRS(sqlite)
-	AC_MSG_RESULT(no)
+	AC_DEFINE(SQLITE_BUILD, 1, Build packaged sqlite)
 	SQLITE_INCLUDES="-I ../sqlite/"
 	SQLITE_SUBDIR="sqlite"
 	SQLITE_LIB="../sqlite/libsqlite.a"
-else
+
 	if test "X$ac_cv_sqlitebuild" = "Xyes"; then
-		AC_CONFIG_SUBDIRS(sqlite)
-		SQLITE_INCLUDES="-I ../sqlite/"
-		SQLITE_SUBDIR="sqlite"
-		SQLITE_LIB="../sqlite/libsqlite.a"
 		AC_MSG_RESULT("yes.. building anyway")
 	else
-		AC_MSG_RESULT(yes)
-		SQLITE_SUBDIR=""
-		dnl dont go into sqlite/ if we dont need to.
-		no_recursion="yes"
+		AC_MSG_RESULT(no)
 	fi
+else
+	AC_MSG_RESULT(yes)
+	SQLITE_SUBDIR=""
+	dnl dont go into sqlite/ if we dont need to.
+	no_recursion="yes"
 fi
 
 AC_ARG_WITH([nicklen],
