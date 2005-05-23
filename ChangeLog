@@ -1,3 +1,22 @@
+leeh        2005/05/23 11:09:16 UTC	(20050523_1)
+
+  Modified files:
+    include              tools.h 
+    src                  balloc.c c_mode.c io.c tools.c 
+  Log:
+  - rename inline hints to __inline
+  - remove an invalid fd_open() call
+  - change u_char to unsigned char
+  
+  Revision  Changes    Path
+  1.21      +1 -1      rserv/include/tools.h
+  1.9       +2 -3      rserv/src/balloc.c
+  1.35      +3 -3      rserv/src/c_mode.c
+  1.42      +1 -1      rserv/src/io.c
+  1.18      +1 -1      rserv/src/tools.c
+
+
+
 leeh        2005/05/23 10:46:45 UTC	(20050523_0)
 
   Modified files:
