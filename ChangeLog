@@ -1,3 +1,19 @@
+leeh        2005/05/23 10:46:45 UTC	(20050523_0)
+
+  Modified files:
+    .                    INSTALL configure 
+    autoconf             configure.in 
+  Log:
+  - add --with-sqlitebuild option to configure, to forcibly build sqlite.
+  - tidy up INSTALL
+  
+  Revision  Changes    Path
+  1.14      +25 -13    rserv/INSTALL
+  1.28      +17 -4     rserv/autoconf/configure.in
+  1.27      +114 -93   rserv/configure
+
+
+
 leeh        2005/05/18 14:31:19 UTC	(20050518_2)
 
   Modified files:
