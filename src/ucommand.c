@@ -86,7 +86,7 @@ static struct ucommand_handler ucommands[] =
 void
 init_ucommand(void)
 {
-        add_ucommands(NULL, ucommands, NULL);
+        add_ucommands(NULL, ucommands);
 }
 
 static int
@@ -168,10 +168,8 @@ handle_ucommand(struct lconn *conn_p, const char *command,
 
 void
 add_ucommand_handler(struct client *service_p, 
-		struct ucommand_handler *chandler, const char *servicename)
+			struct ucommand_handler *chandler)
 {
-        static char def_servicename[] = "main";
-        char filename[PATH_MAX];
 	unsigned int hashv;
 
 	if(chandler == NULL || EmptyString(chandler->cmd))
@@ -180,31 +178,21 @@ add_ucommand_handler(struct client *service_p,
 	hashv = hash_command(chandler->cmd);
 	dlink_add_alloc(chandler, &ucommand_table[hashv]);
 
-        if(servicename == NULL)
-	{
+	/* command not associated with any service */
+        if(service_p == NULL)
 		dlink_add_tail_alloc(chandler, &ucommand_list);
-                servicename = def_servicename;
-	}
 	else
 		dlink_add_tail_alloc(chandler, &service_p->service->ucommand_list);
-
-        /* now see if we can load a helpfile.. */
-        snprintf(filename, sizeof(filename), "%s/%s/u-",
-                 HELP_PATH, lcase(servicename));
-        strlcat(filename, lcase(chandler->cmd), sizeof(filename));
-
-        chandler->helpfile = cache_file(filename, chandler->cmd);
 }
 
 void
-add_ucommands(struct client *service_p, 
-		struct ucommand_handler *handler, const char *servicename)
+add_ucommands(struct client *service_p, struct ucommand_handler *handler)
 {
         int i;
 
         for(i = 0; handler[i].cmd[0] != '\0'; i++)
         {
-                add_ucommand_handler(service_p, &handler[i], servicename);
+                add_ucommand_handler(service_p, &handler[i]);
         }
 }
 
@@ -366,6 +354,15 @@ u_quit(struct client *unused, struct lconn *conn_p, const char *parv[], int parc
 static int
 u_rehash(struct client *unused, struct lconn *conn_p, const char *parv[], int parc)
 {
+	if(parc > 0 && !irccmp(parv[0], "help"))
+	{
+		mlog("services rehashing: %s reloading help", conn_p->name);
+		sendto_all(0, "services rehashing: %s reloading help",
+				conn_p->name);
+		rehash_help();
+		return 0;
+	}
+
 	mlog("services rehashing: %s reloading config file", conn_p->name);
 	sendto_all(0, "services rehashing: %s reloading config file", conn_p->name);
 
@@ -552,7 +549,7 @@ u_help(struct client *unused, struct lconn *conn_p, const char *parv[], int parc
         if((handler = find_ucommand(parv[0])) != NULL)
         {
                 if(handler->helpfile == NULL)
-                        sendto_one(conn_p, "No help available on %s", parv[1]);
+                        sendto_one(conn_p, "No help available on %s", parv[0]);
                 else
                         send_cachefile(handler->helpfile, conn_p);
 

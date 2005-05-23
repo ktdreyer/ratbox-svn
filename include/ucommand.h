@@ -24,8 +24,8 @@ struct ucommand_handler
 extern void init_ucommand(void);
 extern void handle_ucommand(struct lconn *, const char *command, 
 				const char *parv[], int parc);
-extern void add_ucommand_handler(struct client *, struct ucommand_handler *, const char *);
-extern void add_ucommands(struct client *, struct ucommand_handler *, const char *);
+extern void add_ucommand_handler(struct client *, struct ucommand_handler *);
+extern void add_ucommands(struct client *, struct ucommand_handler *);
 
 extern struct ucommand_handler *find_ucommand(const char *command);
 

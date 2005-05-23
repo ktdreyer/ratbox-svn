@@ -63,6 +63,117 @@ scmd_compare(const char *name, struct service_command *cmd)
 	return strcasecmp(name, cmd->cmd);
 }
 
+static void
+load_service_help(struct client *service_p)
+{
+	struct service_command *scommand;
+	struct ucommand_handler *ucommand;
+	char filename[PATH_MAX];
+	dlink_node *ptr;
+	int maxlen = service_p->service->command_size / sizeof(struct service_command);
+	unsigned long i;
+
+        if(service_p->service->command == NULL)
+		return;
+
+	scommand = service_p->service->command;
+
+	snprintf(filename, sizeof(filename), "%s/%s/index",
+		HELP_PATH, lcase(service_p->service->id));
+
+	service_p->service->help = cache_file(filename, "index");
+
+	snprintf(filename, sizeof(filename), "%s/%s/index-admin",
+		HELP_PATH, lcase(service_p->service->id));
+
+	service_p->service->helpadmin = cache_file(filename, "index-admin");
+
+	for(i = 0; i < maxlen; i++)
+	{
+		snprintf(filename, sizeof(filename), "%s/%s/",
+			HELP_PATH, lcase(service_p->service->id));
+
+		/* we cant lcase() twice in one function call */
+		strlcat(filename, lcase(scommand[i].cmd),
+			sizeof(filename));
+
+		scommand[i].helpfile = cache_file(filename, scommand[i].cmd);
+	}
+
+	DLINK_FOREACH(ptr, service_p->service->ucommand_list.head)
+	{
+		ucommand = ptr->data;
+
+	        /* now see if we can load a helpfile.. */
+        	snprintf(filename, sizeof(filename), "%s/%s/u-",
+                	 HELP_PATH, lcase(service_p->service->id));
+	        strlcat(filename, lcase(ucommand->cmd), sizeof(filename));
+
+        	ucommand->helpfile = cache_file(filename, ucommand->cmd);
+	}
+}
+
+static void
+clear_service_help(struct client *service_p)
+{
+	struct service_command *scommand;
+	struct ucommand_handler *ucommand;
+	dlink_node *ptr;
+	int maxlen = service_p->service->command_size / sizeof(struct service_command);
+	int i;
+	
+	if(service_p->service->command == NULL)
+		return;
+
+	scommand = service_p->service->command;
+
+	free_cachefile(service_p->service->help);
+	free_cachefile(service_p->service->helpadmin);
+	service_p->service->help = NULL;
+	service_p->service->helpadmin = NULL;
+
+	for(i = 0; i < maxlen; i++)
+	{
+		free_cachefile(scommand[i].helpfile);
+		scommand[i].helpfile = NULL;
+	}
+
+	DLINK_FOREACH(ptr, service_p->service->ucommand_list.head)
+	{
+		ucommand = ptr->data;
+
+		free_cachefile(ucommand->helpfile);
+		ucommand->helpfile = NULL;
+	}
+}
+
+void
+rehash_help(void)
+{
+	struct ucommand_handler *ucommand;
+	char filename[PATH_MAX];
+	dlink_node *ptr;
+
+	DLINK_FOREACH(ptr, service_list.head)
+	{
+		clear_service_help(ptr->data);
+		load_service_help(ptr->data);
+	}
+
+	DLINK_FOREACH(ptr, ucommand_list.head)
+	{
+		ucommand = ptr->data;
+
+		free_cachefile(ucommand->helpfile);
+
+        	snprintf(filename, sizeof(filename), "%s/main/u-",
+                	 HELP_PATH);
+	        strlcat(filename, lcase(ucommand->cmd), sizeof(filename));
+
+        	ucommand->helpfile = cache_file(filename, ucommand->cmd);
+	}
+}
+
 struct client *
 add_service(struct service_handler *service)
 {
@@ -123,40 +234,11 @@ add_service(struct service_handler *service)
 
 	dlink_add(client_p, &client_p->listnode, &service_list);
 
-	open_service_logfile(client_p);
-
-        /* try and cache any help stuff */
-        if(service->command != NULL)
-        {
-                struct service_command *scommand = service->command;
-                char filename[PATH_MAX];
-                int i;
-
-		snprintf(filename, sizeof(filename), "%s/%s/index",
-				HELP_PATH, lcase(service->id));
-
-		client_p->service->help = cache_file(filename, "index");
-
-		snprintf(filename, sizeof(filename), "%s/%s/index-admin",
-				HELP_PATH, lcase(service->id));
-
-		client_p->service->helpadmin = cache_file(filename, "index-admin");
-
-                for(i = 0; i < maxlen; i++)
-                {
-                        snprintf(filename, sizeof(filename), "%s/%s/",
-                                 HELP_PATH, lcase(service->id));
-
-                        /* we cant lcase() twice in one function call */
-                        strlcat(filename, lcase(scommand[i].cmd),
-                                sizeof(filename));
-
-                        scommand[i].helpfile = cache_file(filename, scommand[i].cmd);
-                }
-        }
-
         if(service->ucommand != NULL)
-                add_ucommands(client_p, service->ucommand, service->id);
+                add_ucommands(client_p, service->ucommand);
+
+	open_service_logfile(client_p);
+	load_service_help(client_p);
 
 	return client_p;
 }

@@ -76,8 +76,10 @@ int current_mark;
 int testing_conf = 0;
 
 static int need_rehash = 0;
+static int need_rehash_help = 0;
 static void sig_hup(int);
 static void sig_term(int);
+static void sig_usr1(int);
 static void check_rehash(void *);
 
 void
@@ -293,9 +295,13 @@ main(int argc, char *argv[])
 
 	signal(SIGHUP, sig_hup);
 	signal(SIGTERM, sig_term);
+	signal(SIGUSR1, sig_usr1);
 
 	signal(SIGTRAP, SIG_IGN); /* Needed on FreeBSD and possibly others */
 	signal(SIGPIPE, SIG_IGN);
+
+	/* in case of typo */
+	signal(SIGUSR2, SIG_IGN);
 
 	current_mark = 0;
 
@@ -326,7 +332,7 @@ main(int argc, char *argv[])
 	add_scommand_handler(&mode_command);
 	add_scommand_handler(&privmsg_command);
 
-        add_ucommand_handler(NULL, &stats_ucommand, NULL);
+        add_ucommand_handler(NULL, &stats_ucommand);
 
 	/* load our services.. */
 #ifdef ENABLE_ALIS
@@ -395,12 +401,26 @@ void sig_term(int sig)
 	die("Got signal SIGTERM");
 }
 
+void sig_usr1(int sig)
+{
+	need_rehash_help = 1;
+	signal(SIGUSR1, sig_usr1);
+}
+
 void check_rehash(void *unused)
 {
-	if (need_rehash)
+	if(need_rehash)
 	{
 		rehash(1); /* Caught a signal */
 		need_rehash = 0;
+	}
+
+	if(need_rehash_help)
+	{
+		mlog("services rehashing: got SIGUSR1, reloading help");
+		sendto_all(0, "services rehashing: got SIGUSR1, reloading help");
+		rehash_help();
+		need_rehash_help = 0;
 	}
 }
 

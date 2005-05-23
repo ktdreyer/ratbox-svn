@@ -47,6 +47,8 @@ extern dlink_list service_list;
 
 #define OPER_NAME(client_p, conn_p) ((conn_p) ? (conn_p)->name : (client_p)->user->oper->name)
 
+extern void rehash_help(void);
+
 extern struct client *add_service();
 extern struct client *find_service_id(const char *name);
 extern void introduce_service(struct client *client_p);
