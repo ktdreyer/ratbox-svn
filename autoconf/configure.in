@@ -194,6 +194,11 @@ SQLITE_LIB="-lsqlite"
 
 dnl Try to find SQLite.
 SQLITE_INCLUDES=""
+
+AC_ARG_WITH([sqlitebuild],
+[ --with-sqlitebuild        Forces packaged sqlite to be used for build],
+[ac_cv_sqlitebuild=$withval], [ac_cv_sqlitebuild=no])
+
 AC_ARG_WITH([sqlite],
 [ --with-sqlite=DIR         Path to search for sqlite], 
 [SQLITE_DIR=$withval], [SQLITE_DIR="/usr"])
@@ -237,10 +242,18 @@ if test "X$ac_cv_found_sqlite_inc" != "Xyes" || test "X$ac_cv_found_sqlite_lib" 
 	SQLITE_SUBDIR="sqlite"
 	SQLITE_LIB="../sqlite/libsqlite.a"
 else
-	AC_MSG_RESULT(yes)
-	SQLITE_SUBDIR=""
-	dnl dont go into sqlite/ if we dont need to.
-	no_recursion="yes"
+	if test "X$ac_cv_sqlitebuild" = "Xyes"; then
+		AC_CONFIG_SUBDIRS(sqlite)
+		SQLITE_INCLUDES="-I ../sqlite/"
+		SQLITE_SUBDIR="sqlite"
+		SQLITE_LIB="../sqlite/libsqlite.a"
+		AC_MSG_RESULT("yes.. building anyway")
+	else
+		AC_MSG_RESULT(yes)
+		SQLITE_SUBDIR=""
+		dnl dont go into sqlite/ if we dont need to.
+		no_recursion="yes"
+	fi
 fi
 
 AC_ARG_WITH([nicklen],
