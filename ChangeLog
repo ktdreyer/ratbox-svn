@@ -1,3 +1,17 @@
+leeh        2005/05/23 15:01:31 UTC	(20050523_7)
+
+  Modified files:
+    .                    RELEASE_NOTES 
+    include              config.h 
+  Log:
+  - revved patchlevel to 1.0beta3
+  
+  Revision  Changes    Path
+  1.3       +36 -0     rserv/RELEASE_NOTES
+  1.28      +1 -1      rserv/include/config.h
+
+
+
 leeh        2005/05/23 14:43:02 UTC	(20050523_6)
 
   Modified files:
