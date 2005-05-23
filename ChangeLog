@@ -1,3 +1,20 @@
+leeh        2005/05/23 11:14:58 UTC	(20050523_2)
+
+  Modified files:
+    include              client.h 
+    src                  c_mode.c client.c newconf.c u_stats.c 
+  Log:
+  - fix some errors when compiling with -pedantic
+  
+  Revision  Changes    Path
+  1.44      +1 -1      rserv/include/client.h
+  1.36      +1 -1      rserv/src/c_mode.c
+  1.40      +1 -1      rserv/src/client.c
+  1.50      +1 -1      rserv/src/newconf.c
+  1.19      +1 -1      rserv/src/u_stats.c
+
+
+
 leeh        2005/05/23 11:09:16 UTC	(20050523_1)
 
   Modified files:
