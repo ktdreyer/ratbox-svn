@@ -1,3 +1,21 @@
+leeh        2005/05/23 12:01:46 UTC	(20050523_3)
+
+  Modified files:
+    .                    configure 
+    autoconf             configure.in 
+    include              setup.h.in 
+    src                  rserv.c 
+  Log:
+  - fix build when compiling sqlite, to use the local sqlite.h
+  
+  Revision  Changes    Path
+  1.29      +11 -11    rserv/autoconf/configure.in
+  1.28      +14 -12    rserv/configure
+  1.13      +3 -0      rserv/include/setup.h.in
+  1.51      +7 -1      rserv/src/rserv.c
+
+
+
 leeh        2005/05/23 11:14:58 UTC	(20050523_2)
 
   Modified files:
