@@ -1,3 +1,15 @@
+leeh        2005/05/25 13:25:01 UTC	(20050525_0)
+
+  Modified files:
+    src                  s_jupeserv.c 
+  Log:
+  - via sjk, fix server/host ordering on jupe notices
+  
+  Revision  Changes    Path
+  1.32      +4 -4      rserv/src/s_jupeserv.c
+
+
+
 leeh        2005/05/23 15:01:31 UTC	(20050523_7)
 
   Modified files:
