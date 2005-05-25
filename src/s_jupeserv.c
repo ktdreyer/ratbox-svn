@@ -1,5 +1,5 @@
-/* src/s_operbot.c
- *   Contains the code for the operbot service.
+/* src/s_jupeserv.c
+ *   Contains the code for the jupe service.
  *
  * Copyright (C) 2004-2005 Lee Hardy <leeh@leeh.co.uk>
  * Copyright (C) 2004-2005 ircd-ratbox development team
@@ -299,8 +299,8 @@ o_jupeserv_jupe(struct client *client_p, struct lconn *conn_p, const char *parv[
 	if(client_p)
 		sendto_server(":%s WALLOPS :JUPE set on %s by %s!%s@%s on %s [%s]",
 				MYNAME, jupe_p->name, client_p->name,
-				client_p->user->username, client_p->user->servername,
-				client_p->user->host, jupe_p->reason);
+				client_p->user->username, client_p->user->host,
+				client_p->user->servername, jupe_p->reason);
 	else
 		sendto_server(":%s WALLOPS :JUPE %s by %s [%s]",
 				MYNAME, jupe_p->name, conn_p->name, jupe_p->reason);
