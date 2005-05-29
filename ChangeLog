@@ -1,3 +1,26 @@
+androsyn    2005/05/29 22:39:30 UTC	(20050529_0)
+
+  Modified files:
+    include              send.h 
+    modules              m_help.c 
+    src                  linebuf.c s_user.c send.c 
+  Log:
+  Experimenting with some things.  I wonder if it is an optimization to
+  queue up messages from one command, rather than trying to send it out each
+  system call. Basically implement sendto_one_queue which doesn't try to write
+  out.  To uncork the queue, just do a normal sendto_one().  Also put writev
+  back in.  Somebody might want to take a look at the writev code and make
+  sure I didn't mess it up
+  
+  Revision  Changes    Path
+  7.87      +1 -0      ircd-ratbox/include/send.h
+  1.75      +3 -3      ircd-ratbox/modules/m_help.c
+  7.134     +104 -20   ircd-ratbox/src/linebuf.c
+  7.353     +7 -7      ircd-ratbox/src/s_user.c
+  7.298     +52 -21    ircd-ratbox/src/send.c
+
+
+
 androsyn    2005/05/18 22:00:32 UTC	(20050518_0)
 
   Modified files:
