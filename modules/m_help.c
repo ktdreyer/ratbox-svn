@@ -132,14 +132,14 @@ dohelp(struct Client *source_p, int flags, const char *topic)
 	lineptr = fptr->data;
 
 	/* first line cant be empty */
-	sendto_one(source_p, form_str(RPL_HELPSTART),
+	sendto_one_queue(source_p, form_str(RPL_HELPSTART),
 		   me.name, source_p->name, topic, lineptr->data);
 
 	DLINK_FOREACH(ptr, fptr->next)
 	{
 		lineptr = ptr->data;
 
-		sendto_one(source_p, form_str(RPL_HELPTXT),
+		sendto_one_queue(source_p, form_str(RPL_HELPTXT),
 			   me.name, source_p->name, topic, lineptr->data);
 	}
 

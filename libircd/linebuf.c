@@ -171,7 +171,7 @@ linebuf_skip_crlf(char *ch, int len)
 	int orig_len = len;
 
 	/* First, skip until the first non-CRLF */
-	for (; len; len--, ch++)
+	for(; len; len--, ch++)
 	{
 		if(*ch == '\r')
 			break;
@@ -180,7 +180,7 @@ linebuf_skip_crlf(char *ch, int len)
 	}
 
 	/* Then, skip until the last CRLF */
-	for (; len; len--, ch++)
+	for(; len; len--, ch++)
 	{
 		if((*ch != '\r') && (*ch != '\n'))
 			break;
@@ -230,10 +230,9 @@ client_flush_input(struct Client *client_p)
 void
 linebuf_donebuf(buf_head_t * bufhead)
 {
-	while (bufhead->list.head != NULL)
+	while(bufhead->list.head != NULL)
 	{
-		linebuf_done_line(bufhead,
-				  (buf_line_t *) bufhead->list.head->data, bufhead->list.head);
+		linebuf_done_line(bufhead, (buf_line_t *) bufhead->list.head->data, bufhead->list.head);
 	}
 }
 
@@ -283,7 +282,7 @@ linebuf_copy_line(buf_head_t * bufhead, buf_line_t * bufline, char *data, int le
 		memcpy(bufch, ch, (BUF_DATA_SIZE - bufline->len - 1));
 		bufline->buf[BUF_DATA_SIZE - 1] = '\0';
 		bufch = bufline->buf + BUF_DATA_SIZE - 2;
-		while (cpylen && (*bufch == '\r' || *bufch == '\n'))
+		while(cpylen && (*bufch == '\r' || *bufch == '\n'))
 		{
 			*bufch = '\0';
 			cpylen--;
@@ -310,7 +309,7 @@ linebuf_copy_line(buf_head_t * bufhead, buf_line_t * bufline, char *data, int le
 	}
 
 	/* Yank the CRLF off this, replace with a \0 */
-	while (cpylen && (*bufch == '\r' || *bufch == '\n'))
+	while(cpylen && (*bufch == '\r' || *bufch == '\n'))
 	{
 		*bufch = '\0';
 		cpylen--;
@@ -418,7 +417,7 @@ linebuf_parse(buf_head_t * bufhead, char *data, int len, int raw)
 			cpylen = linebuf_copy_line(bufhead, bufline, data, len);
 		else
 			cpylen = linebuf_copy_raw(bufhead, bufline, data, len);
-			
+
 		if(cpylen == -1)
 			return -1;
 
@@ -434,7 +433,7 @@ linebuf_parse(buf_head_t * bufhead, char *data, int len, int raw)
 	}
 
 	/* Next, the loop */
-	while (len > 0)
+	while(len > 0)
 	{
 		/* We obviously need a new buffer, so .. */
 		bufline = linebuf_new_line(bufhead);
@@ -444,7 +443,7 @@ linebuf_parse(buf_head_t * bufhead, char *data, int len, int raw)
 			cpylen = linebuf_copy_line(bufhead, bufline, data, len);
 		else
 			cpylen = linebuf_copy_raw(bufhead, bufline, data, len);
-		
+
 		if(cpylen == -1)
 			return -1;
 
@@ -493,14 +492,14 @@ linebuf_get(buf_head_t * bufhead, char *buf, int buflen, int partial, int raw)
 	if(bufline->raw && !raw)
 	{
 		/* skip leading EOL characters */
-		while (cpylen && (*start == '\r' || *start == '\n'))
+		while(cpylen && (*start == '\r' || *start == '\n'))
 		{
 			start++;
 			cpylen--;
 		}
 		/* skip trailing EOL characters */
 		ch = &start[cpylen - 1];
-		while (cpylen && (*ch == '\r' || *ch == '\n'))
+		while(cpylen && (*ch == '\r' || *ch == '\n'))
 		{
 			ch--;
 			cpylen--;
@@ -558,8 +557,7 @@ linebuf_attach(buf_head_t * bufhead, buf_head_t * new)
  * Then format/va_args is appended to the buffer.
  */
 void
-linebuf_putmsg(buf_head_t * bufhead, const char *format, va_list * va_args,
-	       const char *prefixfmt, ...)
+linebuf_putmsg(buf_head_t * bufhead, const char *format, va_list * va_args, const char *prefixfmt, ...)
 {
 	buf_line_t *bufline;
 	int len = 0;
@@ -606,8 +604,7 @@ linebuf_putmsg(buf_head_t * bufhead, const char *format, va_list * va_args,
 	else
 	{
 		/* Chop trailing CRLF's .. */
-		while ((bufline->buf[len] == '\r')
-		       || (bufline->buf[len] == '\n') || (bufline->buf[len] == '\0'))
+		while((bufline->buf[len] == '\r') || (bufline->buf[len] == '\n') || (bufline->buf[len] == '\0'))
 		{
 			len--;
 		}
@@ -664,8 +661,7 @@ linebuf_put(buf_head_t * bufhead, const char *format, ...)
 	else
 	{
 		/* Chop trailing CRLF's .. */
-		while ((bufline->buf[len] == '\r')
-		       || (bufline->buf[len] == '\n') || (bufline->buf[len] == '\0'))
+		while((bufline->buf[len] == '\r') || (bufline->buf[len] == '\n') || (bufline->buf[len] == '\0'))
 		{
 			len--;
 		}
@@ -693,12 +689,98 @@ linebuf_put(buf_head_t * bufhead, const char *format, ...)
  *        and tag it so that we don't re-schedule another write until
  *        we have a CRLF.
  */
-
+#define HAVE_WRITEV 1
 int
 linebuf_flush(int fd, buf_head_t * bufhead)
 {
 	buf_line_t *bufline;
 	int retval;
+
+#ifdef HAVE_WRITEV
+	dlink_node *ptr;
+	int x = 0, y;
+	int xret;
+#ifndef UIO_MAXIOV
+#define UIO_MAXIOV 16
+#endif
+	static struct iovec vec[UIO_MAXIOV];
+
+	/* Check we actually have a first buffer */
+	if(bufhead->list.head == NULL)
+	{
+		/* nope, so we return none .. */
+		errno = EWOULDBLOCK;
+		return -1;
+	}
+
+	ptr = bufhead->list.head;
+	
+	bufline = ptr->data;
+	if(!bufline->terminated)
+	{
+		errno = EWOULDBLOCK;
+		return -1;
+	}
+
+	do
+	{
+		if(ptr == NULL)
+			break;
+
+		bufline = ptr->data;
+
+		if(!bufline->terminated)
+			break;
+		
+		if(!bufline->flushing)
+		{
+			bufhead->writeofs = 0;
+		}
+
+		vec[x].iov_base = bufline->buf + bufhead->writeofs;
+		vec[x].iov_len = bufline->len - bufhead->writeofs;
+		ptr = ptr->next;
+	} while(++x < UIO_MAXIOV);
+
+	if(x == 0)
+	{
+		errno = EWOULDBLOCK;
+		return -1;
+	}
+
+	xret = retval = writev(fd, vec, x);
+	if(retval <= 0)
+		return retval;
+
+	ptr = bufhead->list.head;
+
+	for(y = 0; y < x; y++)
+	{
+		bufline = ptr->data;
+
+		if((bufline->flushing == 0 && xret >= bufline->len)
+		   || (bufline->flushing == 1 && xret >= bufline->len - bufhead->writeofs))
+		{
+			bufhead->writeofs = 0;
+			if(bufline->flushing == 0)
+				xret -= bufline->len;
+			else
+				xret -= bufhead->writeofs;
+
+			ptr = ptr->next;
+			s_assert(bufhead->len >= 0);
+			linebuf_done_line(bufhead, bufline, bufhead->list.head);
+		}
+		else
+		{
+			bufline->flushing = 1;
+			bufhead->writeofs += xret;
+			break;
+		}
+	}
+
+
+#else /* HAVE_WRITEV */
 	/* Check we actually have a first buffer */
 	if(bufhead->list.head == NULL)
 	{
@@ -742,6 +824,7 @@ linebuf_flush(int fd, buf_head_t * bufhead)
 	}
 
 	/* Return line length */
+#endif
 	return retval;
 }
 
@@ -757,6 +840,7 @@ count_linebuf_memory(size_t * count, size_t * linebuf_memory_used)
 #ifndef NO_BLOCKHEAP
 	BlockHeapUsage(linebuf_heap, count, NULL, linebuf_memory_used);
 #else
-	*count = 0; *linebuf_memory_used = 0;
+	*count = 0;
+	*linebuf_memory_used = 0;
 #endif
 }

@@ -1073,13 +1073,13 @@ send_umode_out(struct Client *client_p, struct Client *source_p, int old)
 void
 user_welcome(struct Client *source_p)
 {
-	sendto_one(source_p, form_str(RPL_WELCOME), me.name, source_p->name,
+	sendto_one_queue(source_p, form_str(RPL_WELCOME), me.name, source_p->name,
 		   ServerInfo.network_name, source_p->name);
-	sendto_one(source_p, form_str(RPL_YOURHOST), me.name,
+	sendto_one_queue(source_p, form_str(RPL_YOURHOST), me.name,
 		   source_p->name,
 		   get_listener_name(source_p->localClient->listener), ircd_version);
 
-	sendto_one(source_p, form_str(RPL_CREATED), me.name, source_p->name, creation);
+	sendto_one_queue(source_p, form_str(RPL_CREATED), me.name, source_p->name, creation);
 	sendto_one(source_p, form_str(RPL_MYINFO), me.name, source_p->name, me.name, ircd_version);
 
 	show_isupport(source_p);
@@ -1088,18 +1088,18 @@ user_welcome(struct Client *source_p)
 
 	if(ConfigFileEntry.short_motd)
 	{
-		sendto_one(source_p,
+		sendto_one_queue(source_p,
 			   "NOTICE %s :*** Notice -- motd was last changed at %s",
 			   source_p->name, user_motd_changed);
 
-		sendto_one(source_p,
+		sendto_one_queue(source_p,
 			   "NOTICE %s :*** Notice -- Please read the motd if you haven't read it",
 			   source_p->name);
 
-		sendto_one(source_p, form_str(RPL_MOTDSTART), 
+		sendto_one_queue(source_p, form_str(RPL_MOTDSTART), 
 			   me.name, source_p->name, me.name);
 
-		sendto_one(source_p, form_str(RPL_MOTD),
+		sendto_one_queue(source_p, form_str(RPL_MOTD),
 			   me.name, source_p->name, "*** This is the short motd ***");
 
 		sendto_one(source_p, form_str(RPL_ENDOFMOTD), me.name, source_p->name);

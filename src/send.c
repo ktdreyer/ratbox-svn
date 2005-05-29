@@ -48,8 +48,8 @@
 #define LOG_BUFSIZE 2048
 
 /* send the message to the link the target is attached to */
-#define send_linebuf(a,b) _send_linebuf((a->from ? a->from : a) ,b)
-
+#define send_linebuf(a,b) _send_linebuf((a->from ? a->from : a) ,b, 0)
+#define send_linebuf_queue(a, b) _send_linebuf((a->from ? a->from : a) ,b, 1)
 unsigned long current_serial = 0L;
 
 /* send_linebuf()
@@ -59,7 +59,7 @@ unsigned long current_serial = 0L;
  * side effects - linebuf is attached to client
  */
 static int
-_send_linebuf(struct Client *to, buf_head_t *linebuf)
+_send_linebuf(struct Client *to, buf_head_t *linebuf, int queue)
 {
 	if(IsMe(to))
 	{
@@ -107,7 +107,8 @@ _send_linebuf(struct Client *to, buf_head_t *linebuf)
 	 */
 	to->localClient->sendM += 1;
 	me.localClient->sendM += 1;
-	if(linebuf_len(&to->localClient->buf_sendq) > 0)
+
+	if(linebuf_len(&to->localClient->buf_sendq) > 0 && queue == 0)
 		send_queued_write(to->localClient->fd, to);
 	return 0;
 }
@@ -149,7 +150,7 @@ send_linebuf_remote(struct Client *to, struct Client *from, buf_head_t *linebuf)
 		return;
 	}
 
-	_send_linebuf(to, linebuf);
+	_send_linebuf(to, linebuf, 0);
 	return;
 }
 
@@ -309,8 +310,38 @@ sendto_one(struct Client *target_p, const char *pattern, ...)
 	linebuf_putmsg(&linebuf, pattern, &args, NULL);
 	va_end(args);
 
-	_send_linebuf(target_p, &linebuf);
+	_send_linebuf(target_p, &linebuf, 0);
 
+	linebuf_donebuf(&linebuf);
+
+}
+
+/* sendto_one()
+ *
+ * inputs	- client to send to, va_args
+ * outputs	- client has message put into its queue
+ * side effects - 
+ */
+void
+sendto_one_queue(struct Client *target_p, const char *pattern, ...)
+{
+	va_list args;
+	buf_head_t linebuf;
+
+	/* send remote if to->from non NULL */
+	if(target_p->from != NULL)
+		target_p = target_p->from;
+
+	if(IsIOError(target_p))
+		return;
+
+	linebuf_newbuf(&linebuf);
+
+	va_start(args, pattern);
+	linebuf_putmsg(&linebuf, pattern, &args, NULL);
+	va_end(args);
+
+	_send_linebuf(target_p, &linebuf, 1);
 	linebuf_donebuf(&linebuf);
 
 }
@@ -352,7 +383,7 @@ sendto_one_prefix(struct Client *target_p, struct Client *source_p,
 		       command, get_id(target_p, target_p));
 	va_end(args);
 
-	_send_linebuf(dest_p, &linebuf);
+	_send_linebuf(dest_p, &linebuf, 0);
 	linebuf_donebuf(&linebuf);
 }
 
@@ -391,7 +422,7 @@ sendto_one_notice(struct Client *target_p, const char *pattern, ...)
 		       get_id(&me, target_p), get_id(target_p, target_p));
 	va_end(args);
 
-	_send_linebuf(dest_p, &linebuf);
+	_send_linebuf(dest_p, &linebuf, 0);
 	linebuf_donebuf(&linebuf);
 }
 
@@ -432,7 +463,7 @@ sendto_one_numeric(struct Client *target_p, int numeric, const char *pattern, ..
 		       numeric, get_id(target_p, target_p));
 	va_end(args);
 
-	_send_linebuf(dest_p, &linebuf);
+	_send_linebuf(dest_p, &linebuf, 0);
 	linebuf_donebuf(&linebuf);
 }
 
@@ -491,7 +522,7 @@ sendto_server(struct Client *one, struct Channel *chptr, unsigned long caps,
 		if(!NotCapable(target_p, nocaps))
 			continue;
 
-		_send_linebuf(target_p, &linebuf);
+		_send_linebuf(target_p, &linebuf, 0);
 	}
 
 	linebuf_donebuf(&linebuf);
@@ -573,7 +604,7 @@ sendto_channel_flags(struct Client *one, int type, struct Client *source_p,
 			}
 		}
 		else
-			_send_linebuf(target_p, &linebuf_local);
+			_send_linebuf(target_p, &linebuf_local, 0);
 	}
 
 	linebuf_donebuf(&linebuf_local);
@@ -615,7 +646,7 @@ sendto_channel_local(int type, struct Channel *chptr, const char *pattern, ...)
 		if(type && ((msptr->flags & type) == 0))
 			continue;
 
-		_send_linebuf(target_p, &linebuf);
+		_send_linebuf(target_p, &linebuf, 0);
 	}
 
 	linebuf_donebuf(&linebuf);
@@ -726,7 +757,7 @@ sendto_match_butone(struct Client *one, struct Client *source_p,
 			target_p = ptr->data;
 
 			if(match(mask, target_p->host))
-				_send_linebuf(target_p, &linebuf_local);
+				_send_linebuf(target_p, &linebuf_local, 0);
 		}
 	}
 	/* what = MATCH_SERVER, if it doesnt match us, just send remote */
@@ -735,7 +766,7 @@ sendto_match_butone(struct Client *one, struct Client *source_p,
 		DLINK_FOREACH_SAFE(ptr, next_ptr, lclient_list.head)
 		{
 			target_p = ptr->data;
-			_send_linebuf(target_p, &linebuf_local);
+			_send_linebuf(target_p, &linebuf_local, 0);
 		}
 	}
 
@@ -816,9 +847,9 @@ sendto_match_servs(struct Client *source_p, const char *mask, int cap,
 				continue;
 
 			if(has_id(target_p->from))
-				_send_linebuf(target_p->from, &linebuf_id);
+				_send_linebuf(target_p->from, &linebuf_id, 0);
 			else
-				_send_linebuf(target_p->from, &linebuf_name);
+				_send_linebuf(target_p->from, &linebuf_name, 0);
 		}
 	}
 
@@ -863,7 +894,7 @@ sendto_anywhere(struct Client *target_p, struct Client *source_p,
 	va_end(args);
 
 	if(MyClient(target_p))
-		_send_linebuf(target_p, &linebuf);
+		_send_linebuf(target_p, &linebuf, 0);
 	else
 		send_linebuf_remote(target_p, source_p, &linebuf);
 
@@ -904,7 +935,7 @@ sendto_realops_flags(int flags, int level, const char *pattern, ...)
 			continue;
 
 		if(client_p->umodes & flags)
-			_send_linebuf(client_p, &linebuf);
+			_send_linebuf(client_p, &linebuf, 0);
 	}
 
 	linebuf_donebuf(&linebuf);
@@ -950,7 +981,7 @@ sendto_wallops_flags(int flags, struct Client *source_p, const char *pattern, ..
 			continue;
 
 		if(client_p->umodes & flags)
-			_send_linebuf(client_p, &linebuf);
+			_send_linebuf(client_p, &linebuf, 0);
 	}
 
 	linebuf_donebuf(&linebuf);
@@ -1026,9 +1057,9 @@ kill_client_serv_butone(struct Client *one, struct Client *target_p, const char 
 			continue;
 
 		if(has_id(client_p))
-			_send_linebuf(client_p, &linebuf_id);
+			_send_linebuf(client_p, &linebuf_id, 0);
 		else
-			_send_linebuf(client_p, &linebuf_name);
+			_send_linebuf(client_p, &linebuf_name, 0);
 	}
 
 	linebuf_donebuf(&linebuf_id);
