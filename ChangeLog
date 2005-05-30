@@ -1,3 +1,20 @@
+androsyn    2005/05/30 05:58:34 UTC	(20050530_0)
+
+  Modified files:
+    .                    configure configure.ac 
+    include              setup.h.in 
+    src                  linebuf.c 
+  Log:
+  Add writev checks
+  
+  Revision  Changes    Path
+  7.265     +5 -3      ircd-ratbox/configure
+  7.76      +3 -3      ircd-ratbox/configure.ac
+  7.101     +6 -0      ircd-ratbox/include/setup.h.in
+  7.135     +0 -1      ircd-ratbox/src/linebuf.c
+
+
+
 androsyn    2005/05/29 22:39:30 UTC	(20050529_0)
 
   Modified files:
