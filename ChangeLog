@@ -1,3 +1,15 @@
+androsyn    2005/05/30 16:46:50 UTC	(20050530_1)
+
+  Modified files:
+    modules              m_resv.c 
+  Log:
+  use target_server and not parv[3] to check if the target server is us. thanks to jilles for the patch
+  
+  Revision  Changes    Path
+  1.83      +2 -2      ircd-ratbox/modules/m_resv.c
+
+
+
 androsyn    2005/05/30 05:58:34 UTC	(20050530_0)
 
   Modified files:
