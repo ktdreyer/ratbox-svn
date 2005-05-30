@@ -125,7 +125,7 @@ mo_resv(struct Client *client_p, struct Client *source_p, int parc, const char *
 	{
 		propagate_resv(source_p, target_server, temp_time, name, reason);
 
-		if(match(parv[3], me.name) == 0)
+		if(match(target_server, me.name) == 0)
 			return 0;
 	}
 	else if(dlink_list_length(&cluster_conf_list) > 0)
