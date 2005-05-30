@@ -689,7 +689,6 @@ linebuf_put(buf_head_t * bufhead, const char *format, ...)
  *        and tag it so that we don't re-schedule another write until
  *        we have a CRLF.
  */
-#define HAVE_WRITEV 1
 int
 linebuf_flush(int fd, buf_head_t * bufhead)
 {
