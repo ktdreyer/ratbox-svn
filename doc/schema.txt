@@ -3,8 +3,8 @@
 CREATE TABLE nicks (
 	nickname TEXT,
 	username TEXT,
-	reg_time TIMESTAMP,
-	last_time TIMESTAMP,
+	reg_time INTEGER,
+	last_time INTEGER,
 	flags INTEGER,
 	PRIMARY KEY(nickname)
 );
@@ -14,8 +14,8 @@ CREATE TABLE users (
 	password TEXT,
 	email TEXT,
 	suspender TEXT,
-	reg_time TIMESTAMP,
-	last_time TIMESTAMP,
+	reg_time INTEGER,
+	last_time INTEGER,
 	flags INTEGER,
 	PRIMARY KEY(username)
 );
@@ -26,9 +26,9 @@ CREATE TABLE channels (
 	url TEXT,
 	createmodes TEXT,
 	enforcemodes TEXT,
-	tsinfo TIMESTAMP,
-	reg_time TIMESTAMP,
-	last_time TIMESTAMP,
+	tsinfo INTEGER,
+	reg_time INTEGER,
+	last_time INTEGER,
 	flags INTEGER,
 	suspender TEXT,
 	PRIMARY KEY(chname)
@@ -51,19 +51,19 @@ CREATE TABLE bans (
 	reason TEXT,
 	username TEXT,
 	level INTEGER,
-	hold TIMESTAMP,
+	hold INTEGER,
 	FOREIGN KEY(chname) REFERENCES channels (chname) MATCH FULL
 );
 
 CREATE TABLE operbot (
 	chname TEXT,
-	tsinfo TIMESTAMP,
+	tsinfo INTEGER,
 	oper TEXT
 );
 
 CREATE TABLE operserv (
 	chname TEXT,
-	tsinfo TIMESTAMP,
+	tsinfo INTEGER,
 	oper TEXT
 );
 
