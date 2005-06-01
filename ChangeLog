@@ -1,3 +1,15 @@
+leeh        2005/06/01 16:57:02 UTC	(20050601_3)
+
+  Modified files:
+    src                  rserv.c 
+  Log:
+  - remove ANFL_LAPTOP ifdefs
+  
+  Revision  Changes    Path
+  1.54      +0 -10     rserv/src/rserv.c
+
+
+
 leeh        2005/06/01 16:55:55 UTC	(20050601_2)
 
   Modified files:
