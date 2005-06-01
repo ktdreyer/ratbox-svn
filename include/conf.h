@@ -148,6 +148,9 @@ struct conf_oper
 #define CONF_OPER_GLOB_NETMSG	0x2000000
 #define CONF_OPER_JS_JUPE	0x4000000
 
+#define CONF_OPER_BAN_PERM	0x10000000
+#define CONF_OPER_BAN_TEMP	0x20000000
+
 #define CONF_SERVER_AUTOCONN	0x0001
 
 #define ConfServerAutoconn(x)	((x)->flags & CONF_SERVER_AUTOCONN)

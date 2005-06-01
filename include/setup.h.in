@@ -87,6 +87,9 @@
 /* Global Messaging Service */
 #undef ENABLE_GLOBAL
 
+/* Ban Service */
+#undef ENABLE_BANSERV
+
 /* Build packaged sqlite */
 #undef SQLITE_BUILD
 

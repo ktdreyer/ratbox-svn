@@ -359,6 +359,9 @@ main(int argc, char *argv[])
 #ifdef ENABLE_GLOBAL
 	init_s_global();
 #endif
+#ifdef ENABLE_BANSERV
+	init_s_banserv();
+#endif
 
 	first_time = CURRENT_TIME;
 

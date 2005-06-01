@@ -92,6 +92,12 @@ static struct mode_table jupeserv_table[] = {
 	{ "\0",		0			}
 };
 
+static struct mode_table banserv_table[] = {
+	{ "perm",	CONF_OPER_BAN_PERM|CONF_OPER_BAN_TEMP	},
+	{ "temp",	CONF_OPER_BAN_TEMP	},
+	{ "\0", 0 }
+};
+
 static struct mode_table service_flags_table[] = {
 	{ "opered",	SERVICE_OPERED		},
 	{ "msg_self",	SERVICE_MSGSELF		},
@@ -733,6 +739,13 @@ conf_set_oper_jupeserv(void *data)
 				jupeserv_table, data);
 }
 
+static void
+conf_set_oper_banserv(void *data)
+{
+	set_modes_from_table(&yy_oper->sflags, "flag",
+				banserv_table, data);
+}
+
 static int
 conf_begin_service(struct TopConf *tc)
 {
@@ -920,6 +933,7 @@ static struct ConfEntry conf_oper_table[] =
 	{ "operbot",	CF_STRING|CF_FLIST,  conf_set_oper_operbot,	0, NULL },
 	{ "global",	CF_STRING|CF_FLIST,  conf_set_oper_global,	0, NULL },
 	{ "jupeserv",	CF_STRING|CF_FLIST,  conf_set_oper_jupeserv,	0, NULL },
+	{ "banserv",	CF_STRING|CF_FLIST,  conf_set_oper_banserv,	0, NULL },
 	{ "\0", 0, NULL, 0, NULL }
 };
 
