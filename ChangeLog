@@ -1,3 +1,20 @@
+androsyn    2005/06/01 06:41:40 UTC	(20050601_0)
+
+  Modified files:
+    src                  s_chanserv.c s_jupeserv.c s_operbot.c 
+                         s_operserv.c 
+  Log:
+  /me beats lee over the head with a sql92 manual.  Column names in INSERT's
+  are a must ;)
+  
+  Revision  Changes    Path
+  1.83      +4 -2      rserv/src/s_chanserv.c
+  1.33      +2 -2      rserv/src/s_jupeserv.c
+  1.38      +1 -1      rserv/src/s_operbot.c
+  1.18      +1 -1      rserv/src/s_operserv.c
+
+
+
 leeh        2005/05/25 13:25:01 UTC	(20050525_0)
 
   Modified files:
