@@ -1,3 +1,15 @@
+leeh        2005/06/01 23:40:33 UTC	(20050601_4)
+
+  Modified files:
+    src                  s_banserv.c 
+  Log:
+  - add XLINE/RESV to banserv
+  
+  Revision  Changes    Path
+  1.2       +114 -2    rserv/src/s_banserv.c
+
+
+
 leeh        2005/06/01 16:57:02 UTC	(20050601_3)
 
   Modified files:
