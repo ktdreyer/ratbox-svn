@@ -65,9 +65,7 @@
 #include "newconf.h"
 #include "serno.h"
 
-#ifndef ANFL_LAPTOP
 struct sqlite *rserv_db;
-#endif
 
 struct timeval system_time;
 
@@ -88,10 +86,8 @@ die(const char *format, ...)
 	char buf[BUFSIZE];
 	va_list args;
 
-#ifndef ANFL_LAPTOP
 	if(rserv_db)
 		sqlite_close(rserv_db);
-#endif
 
 	va_start(args, format);
 	vsnprintf(buf, sizeof(buf), format, args);
@@ -209,9 +205,7 @@ print_startup(int pid, int nofork)
 int 
 main(int argc, char *argv[])
 {
-#ifndef ANFL_LAPTOP
 	char *errmsg;
-#endif
 	char c;
 	int nofork = 0;
 	int childpid;
@@ -313,12 +307,10 @@ main(int argc, char *argv[])
 	/* tools requires balloc */
 	init_tools();
 
-#ifndef ANFL_LAPTOP
 	if((rserv_db = sqlite_open(DB_PATH, 0, &errmsg)) == NULL)
 	{
 		die("Failed to open db file: %s", errmsg);
 	}
-#endif
 
 	/* commands require cache */
 	init_cache();
@@ -430,7 +422,6 @@ void check_rehash(void *unused)
 void
 loc_sqlite_exec(db_callback cb, const char *format, ...)
 {
-#ifndef ANFL_LAPTOP
 	va_list args;
 	char *errmsg;
 	int i;
@@ -442,7 +433,6 @@ loc_sqlite_exec(db_callback cb, const char *format, ...)
 		die("problem with db file");
 	}
 	va_end(args);
-#endif
 }
 
 char *
