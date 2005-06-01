@@ -1,3 +1,19 @@
+androsyn    2005/06/01 07:07:47 UTC	(20050601_1)
+
+  Modified files:
+    doc                  schema.txt 
+  Log:
+  Using the TIMESTAMP type in the schema here isn't really standard SQL as
+  TIMESTAMP doesn't mean a unix timestamp.  For our purposes using INTEGER
+  is the approriate data type.  Using TIMESTAMP on sqlite works because
+  sqlite doesn't actually enforce any data types, where as a database like
+  mysql or postgresql does enforce this.
+  
+  Revision  Changes    Path
+  1.19      +10 -10    rserv/doc/schema.txt
+
+
+
 androsyn    2005/06/01 06:41:40 UTC	(20050601_0)
 
   Modified files:
