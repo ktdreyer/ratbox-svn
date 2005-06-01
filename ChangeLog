@@ -1,3 +1,31 @@
+leeh        2005/06/01 16:55:55 UTC	(20050601_2)
+
+  Modified files:
+    .                    configure 
+    autoconf             configure.in 
+    doc                  example.conf 
+    include              c_init.h conf.h setup.h.in 
+    src                  Makefile.in newconf.c rserv.c 
+  Added files:
+    src                  s_banserv.c 
+  Log:
+  - beginnings of a ban service, the autoconf stuff and basic service, conf
+    options and ability to issue klines
+  
+  Revision  Changes    Path
+  1.30      +17 -0     rserv/autoconf/configure.in
+  1.29      +118 -89   rserv/configure
+  1.43      +23 -0     rserv/doc/example.conf
+  1.19      +5 -13     rserv/include/c_init.h
+  1.45      +3 -0      rserv/include/conf.h
+  1.14      +3 -0      rserv/include/setup.h.in
+  1.36      +2 -2      rserv/src/Makefile.in
+  1.51      +14 -0     rserv/src/newconf.c
+  1.53      +3 -0      rserv/src/rserv.c
+  1.1       +169 -0    rserv/src/s_banserv.c (new)
+
+
+
 androsyn    2005/06/01 07:07:47 UTC	(20050601_1)
 
   Modified files:
