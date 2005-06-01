@@ -279,7 +279,7 @@ o_oper_osjoin(struct client *client_p, struct lconn *conn_p, const char *parv[],
 
 	tsinfo = chptr != NULL ? chptr->tsinfo : CURRENT_TIME;
 
-	loc_sqlite_exec(NULL, "INSERT INTO operserv VALUES(%Q, %lu, %Q)",
+	loc_sqlite_exec(NULL, "INSERT INTO (chname, tsinfo, oper) operserv VALUES(%Q, %lu, %Q)",
 			parv[0], tsinfo, OPER_NAME(client_p, conn_p));
 
 	join_service(operserv_p, parv[0], tsinfo, NULL);

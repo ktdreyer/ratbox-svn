@@ -129,7 +129,7 @@ o_operbot_objoin(struct client *client_p, struct lconn *conn_p, const char *parv
 
 	tsinfo = chptr != NULL ? chptr->tsinfo : CURRENT_TIME;
 
-	loc_sqlite_exec(NULL, "INSERT INTO operbot VALUES(%Q, %lu, %Q)",
+	loc_sqlite_exec(NULL, "INSERT INTO operbot (chname, tsinfo, oper) VALUES(%Q, %lu, %Q)",
 			parv[0], tsinfo, OPER_NAME(client_p, conn_p));
 
 	join_service(operbot_p, parv[0], tsinfo, NULL);

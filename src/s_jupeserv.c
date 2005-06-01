@@ -293,7 +293,7 @@ o_jupeserv_jupe(struct client *client_p, struct lconn *conn_p, const char *parv[
 	else
 		jupe_p->reason = my_strdup(reason);
 
-	loc_sqlite_exec(NULL, "INSERT INTO jupes VALUES(%Q, %Q)",
+	loc_sqlite_exec(NULL, "INSERT INTO jupes (servername, reason) VALUES(%Q, %Q)",
 			jupe_p->name, jupe_p->reason);
 
 	if(client_p)
@@ -419,7 +419,7 @@ s_jupeserv_calljupe(struct client *client_p, struct lconn *conn_p, const char *p
 				client_p->user->username, client_p->user->host, 
 				client_p->user->servername, jupe_p->reason);
 
-		loc_sqlite_exec(NULL, "INSERT INTO jupes VALUES(%Q, %Q)",
+		loc_sqlite_exec(NULL, "INSERT INTO jupes (servername, reason) VALUES(%Q, %Q)",
 				jupe_p->name, jupe_p->reason);
 
 		add_jupe(jupe_p);

@@ -645,7 +645,8 @@ enable_autojoin(struct chan_reg *chreg_p)
 static void
 write_member_db_entry(struct member_reg *reg_p)
 {
-	loc_sqlite_exec(NULL, "INSERT INTO members VALUES(%Q, %Q, %Q, %u, %d, 0)",
+	loc_sqlite_exec(NULL, "INSERT INTO members (chname, username, lastmod, level, flags, suspend) "
+			      " VALUES(%Q, %Q, %Q, %u, %d, 0)",
 			reg_p->channel_reg->name,
 			reg_p->user_reg->name, reg_p->lastmod, reg_p->level,
 			reg_p->flags);
@@ -661,7 +662,8 @@ delete_member_db_entry(struct member_reg *reg_p)
 static void
 write_ban_db_entry(struct ban_reg *reg_p, const char *chname)
 {
-	loc_sqlite_exec(NULL, "INSERT INTO bans VALUES(%Q, %Q, %Q, %Q, %d, %lu)",
+	loc_sqlite_exec(NULL, "INSERT INTO bans (chname, mask, reason, username, level, hold) " 
+			      "VALUES(%Q, %Q, %Q, %Q, %d, %lu)",
 			chname, reg_p->mask, reg_p->reason, reg_p->username,
 			reg_p->level, reg_p->hold);
 }
