@@ -45,15 +45,21 @@
 static struct client *banserv_p;
 
 static int o_banserv_kline(struct client *, struct lconn *, const char **, int);
+static int o_banserv_xline(struct client *, struct lconn *, const char **, int);
+static int o_banserv_resv(struct client *, struct lconn *, const char **, int);
 
 static struct service_command banserv_command[] =
 {
-	{ "KLINE",	&o_banserv_kline, 1, NULL, 1, 0L, 0, 0, CONF_OPER_BAN_TEMP, 0 }
+	{ "KLINE", &o_banserv_kline, 2, NULL, 1, 0L, 0, 0, CONF_OPER_BAN_TEMP, 0 },
+	{ "XLINE", &o_banserv_xline, 2, NULL, 1, 0L, 0, 0, CONF_OPER_BAN_TEMP, 0 },
+	{ "RESV",  &o_banserv_resv,  2, NULL, 1, 0L, 0, 0, CONF_OPER_BAN_TEMP, 0 }
 };
 
 static struct ucommand_handler banserv_ucommand[] =
 {
-	{ "kline",	o_banserv_kline,	0, CONF_OPER_BAN_TEMP, 1, 1, NULL },
+	{ "kline",	o_banserv_kline,	0, CONF_OPER_BAN_TEMP, 2, 1, NULL },
+	{ "xline",	o_banserv_xline,	0, CONF_OPER_BAN_TEMP, 2, 1, NULL },
+	{ "resv",	o_banserv_resv,		0, CONF_OPER_BAN_TEMP, 2, 1, NULL },
 	{ "\0", NULL, 0, 0, 0, 0, NULL }
 };
 
@@ -162,6 +168,112 @@ o_banserv_kline(struct client *client_p, struct lconn *conn_p, const char *parv[
 
 	slog(banserv_p, 1, "%s - KLINE %s %s %s",
 		OPER_NAME(client_p, conn_p), user, host, reason);
+
+	return 0;
+}
+
+static int
+o_banserv_xline(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
+{
+	const char *gecos, *reason;
+	time_t temptime = 0;
+	int para = 0;
+
+	if((temptime = get_temp_time(parv[para])))
+		para++;
+
+	if(!temptime)
+	{
+		unsigned int hit = 0;
+
+		if(client_p)
+		{
+			if(!(client_p->user->oper->flags & CONF_OPER_BAN_PERM))
+				hit++;
+		}
+		else if(!conn_p->sprivs & CONF_OPER_BAN_PERM)
+			hit++;
+
+		if(hit)
+		{
+			service_send(banserv_p, client_p, conn_p,
+					"No access to set permanent xlines");
+			return 0;
+		}
+	}
+
+	gecos = parv[para++];
+	reason = rebuild_params(parv, parc, para);
+
+	if(EmptyString(reason))
+	{
+		service_send(banserv_p, client_p, conn_p,
+				"Insufficient parameters to %s::XLINE",
+				banserv_p->name);
+		return 0;
+	}
+
+	service_send(banserv_p, client_p, conn_p,
+			"Issued xline for %s", gecos);
+
+	sendto_server(":%s ENCAP * XLINE %lu %s 2 :%s",
+			banserv_p->name, temptime, gecos, reason);
+
+	slog(banserv_p, 1, "%s - XLINE %s %s",
+		OPER_NAME(client_p, conn_p), gecos, reason);
+
+	return 0;
+}
+
+static int
+o_banserv_resv(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
+{
+	const char *mask, *reason;
+	time_t temptime = 0;
+	int para = 0;
+
+	if((temptime = get_temp_time(parv[para])))
+		para++;
+
+	if(!temptime)
+	{
+		unsigned int hit = 0;
+
+		if(client_p)
+		{
+			if(!(client_p->user->oper->flags & CONF_OPER_BAN_PERM))
+				hit++;
+		}
+		else if(!conn_p->sprivs & CONF_OPER_BAN_PERM)
+			hit++;
+
+		if(hit)
+		{
+			service_send(banserv_p, client_p, conn_p,
+					"No access to set permanent resvs");
+			return 0;
+		}
+	}
+
+	mask = parv[para++];
+	reason = rebuild_params(parv, parc, para);
+
+	if(EmptyString(reason))
+	{
+		service_send(banserv_p, client_p, conn_p,
+				"Insufficient parameters to %s::RESV",
+				banserv_p->name);
+		return 0;
+	}
+
+	service_send(banserv_p, client_p, conn_p,
+			"Issued resv for %s", mask);
+
+	sendto_server(":%s ENCAP * RESV %lu %s 0 :%s",
+			banserv_p->name, temptime, mask, reason);
+
+	slog(banserv_p, 1, "%s - RESV %s %s",
+		OPER_NAME(client_p, conn_p), mask, reason);
 
 	return 0;
 }
