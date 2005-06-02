@@ -1,3 +1,22 @@
+leeh        2005/06/02 23:16:07 UTC	(20050602_3)
+
+  Modified files:
+    doc                  schema.txt 
+    include              rserv.h 
+    src                  rserv.c s_banserv.c 
+  Log:
+  - introduce local versions of sqlite_compile() and sqlite_step()
+  - add new operbans table to schema
+  - store klines/xlines/resvs in the db.
+  
+  Revision  Changes    Path
+  1.20      +11 -0     rserv/doc/schema.txt
+  1.14      +2 -0      rserv/include/rserv.h
+  1.55      +60 -0     rserv/src/rserv.c
+  1.5       +69 -1     rserv/src/s_banserv.c
+
+
+
 leeh        2005/06/02 00:24:25 UTC	(20050602_2)
 
   Modified files:
