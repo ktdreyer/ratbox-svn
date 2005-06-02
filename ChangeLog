@@ -1,3 +1,20 @@
+leeh        2005/06/02 00:08:59 UTC	(20050602_1)
+
+  Modified files:
+    doc                  example.conf 
+    include              conf.h 
+    src                  newconf.c s_banserv.c 
+  Log:
+  - make banserv privs more finegrained
+  
+  Revision  Changes    Path
+  1.44      +8 -5      rserv/doc/example.conf
+  1.46      +24 -21    rserv/include/conf.h
+  1.52      +5 -2      rserv/src/newconf.c
+  1.3       +6 -6      rserv/src/s_banserv.c
+
+
+
 leeh        2005/06/02 00:01:54 UTC	(20050602_0)
 
   Modified files:
