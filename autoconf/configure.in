@@ -48,8 +48,7 @@ AC_SUBST(helpdir)
 
 AC_MSG_CHECKING(Compile with warning flags)
 AC_ARG_ENABLE(warnings,
-[ --enable-warnings         Enable warning flags to compiler
- --disable-warnings        Disable warning flags to compiler],
+[ --enable-warnings         Enable warning flags to compiler],
 [ cf_enable_warnings=$enableval ],[ cf_enable_warnings=no ])
 
 if test "X$cf_enable_warnings" = "Xyes"; then
@@ -61,8 +60,7 @@ fi
 
 AC_MSG_CHECKING(Nickname Service)
 AC_ARG_ENABLE(nickserv,
-[ --enable-nickserv         Enable Nickname Service
- --disable-nickserv        Disable Nickname Service],
+[ --disable-nickserv        Disable Nickname Service],
 [ cf_enable_nickserv=$enableval ],[ cf_enable_nickserv=yes ])
 
 if test "X$cf_enable_nickserv" = "Xyes"; then
@@ -76,8 +74,7 @@ fi
 
 AC_MSG_CHECKING(Channel Service)
 AC_ARG_ENABLE(chanserv,
-[ --enable-chanserv         Enable Channel Service
- --disable-chanserv        Disable Channel Service],
+[ --disable-chanserv        Disable Channel Service],
 [ cf_enable_chanserv=$enableval ],[ cf_enable_chanserv=yes ])
 
 if test "X$cf_enable_chanserv" = "Xyes"; then
@@ -91,8 +88,7 @@ fi
 
 AC_MSG_CHECKING(User Service)
 AC_ARG_ENABLE(userserv,
-[ --enable-userserv         Enable User Service
- --disable-userserv        Disable User Service],
+[ --disable-userserv        Disable User Service],
 [ cf_enable_userserv=$enableval ],[ cf_enable_userserv=yes ])
 
 if test "X$cf_enable_chanserv" = "Xyes"; then
@@ -114,8 +110,7 @@ fi
 
 AC_MSG_CHECKING(Oper Service)
 AC_ARG_ENABLE(operserv,
-[ --enable-operserv         Enable Oper Service
- --disable-operserv        Disable Oper Service],
+[ --disable-operserv        Disable Oper Service],
 [ cf_enable_operserv=$enableval ],[  cf_enable_operserv=yes ])
 
 if test "X$cf_enable_operserv" = "Xyes"; then
@@ -129,8 +124,7 @@ fi
 
 AC_MSG_CHECKING(List Service)
 AC_ARG_ENABLE(alis,
-[ --enable-alis             Enable ALIS (List Service)
- --disable-alis            Disable (List Service)],
+[ --disable-alis            Disable (List Service)],
 [ cf_enable_alis=$enableval ],[ cf_enable_alis=yes ])
 
 if test "X$cf_enable_alis" = "Xyes"; then
@@ -144,8 +138,7 @@ fi
 
 AC_MSG_CHECKING(Jupe Service)
 AC_ARG_ENABLE(jupeserv,
-[ --enable-jupeserv         Enable Jupe Service
- --disable-jupeserv        Disable Jupe Service],
+[ --disable-jupeserv        Disable Jupe Service],
 [ cf_enable_jupe=$enableval ],[ cf_enable_jupe=yes ])
 
 if test "X$cf_enable_jupe" = "Xyes"; then
@@ -159,8 +152,7 @@ fi
 
 AC_MSG_CHECKING(Operbot Service)
 AC_ARG_ENABLE(operbot,
-[ --enable-operbot          Enable Operbot Service
- --disable-operbot         Disable Operbot Service],
+[ --disable-operbot         Disable Operbot Service],
  [ cf_enable_operbot=$enableval ],[ cf_enable_operbot=yes ])
 
 if test "X$cf_enable_operbot" = "Xyes"; then
@@ -174,8 +166,7 @@ fi
 
 AC_MSG_CHECKING(Global Service)
 AC_ARG_ENABLE(global,
-[ --enable-global           Enable global messaging service
- --disable-global          Disable global messaging service],
+[ --disable-global          Disable global messaging service],
  [ cf_enable_global=$enableval ],[ cf_enable_global=yes ])
 
 if test  "X$cf_enable_global" =  "Xyes"; then
@@ -189,8 +180,7 @@ fi
 
 AC_MSG_CHECKING(Ban Service)
 AC_ARG_ENABLE(banserv,
-[ --enable-banserv          Enable ban service
- --disable-banserv         Disable ban service],
+[ --disable-banserv         Disable ban service],
  [ cf_enable_banserv=$enableval ],[ cf_enable_banserv=yes ])
 
 if test "X$cf_enable_banserv" = "Xyes"; then
