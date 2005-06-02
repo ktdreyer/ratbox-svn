@@ -1,3 +1,15 @@
+leeh        2005/06/02 00:24:25 UTC	(20050602_2)
+
+  Modified files:
+    src                  s_banserv.c 
+  Log:
+  - unkline/unxline/unresv for banserv
+  
+  Revision  Changes    Path
+  1.4       +135 -3    rserv/src/s_banserv.c
+
+
+
 leeh        2005/06/02 00:08:59 UTC	(20050602_1)
 
   Modified files:
