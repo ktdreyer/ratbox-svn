@@ -435,6 +435,66 @@ loc_sqlite_exec(db_callback cb, const char *format, ...)
 	va_end(args);
 }
 
+void *
+loc_sqlite_compile(const char *format, ...)
+{
+	char *buf;
+	sqlite_vm *sql_vm;
+	va_list args;
+	const char *tail;
+	char *errmsg;
+	int i;
+	
+	va_start(args, format);
+	buf = sqlite_vmprintf(format, args);
+	va_end(args);
+
+	if((i = sqlite_compile(rserv_db, buf, &tail, &sql_vm, &errmsg)))
+	{
+		mlog("fatal eror: problem with compiling sql: %s", errmsg);
+		die("problem with compiling sql statement");
+	}
+
+	sqlite_freemem(buf);
+	return((void *) sql_vm);
+}
+
+int
+loc_sqlite_step(void *sql_vm, int *ncol, const char ***coldata, 
+		const char ***colnames)
+{
+	int i;
+
+	if((i = sqlite_step((sqlite_vm *) sql_vm, ncol, coldata, colnames)))
+	{
+		if(i == SQLITE_DONE)
+		{
+			char *errmsg;
+
+			if((i = sqlite_finalize((sqlite_vm *) sql_vm, &errmsg)))
+			{
+				mlog("fatal error: problem with finalizing sql: %s",
+					errmsg);
+				die("problem with finalising sql statement");
+			}
+
+			return 0;
+		}
+		else if(i == SQLITE_ROW)
+		{
+			return 1;
+		}
+		else
+		{
+			mlog("fatal error: problem with sql step: %d", i);
+			die("problem with sql step");
+		}
+	}
+
+	/* shouldnt hit */
+	return 0;
+}
+
 char *
 rebuild_params(const char **parv, int parc, int start)
 {

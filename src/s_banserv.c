@@ -111,11 +111,30 @@ get_temp_time(const char *duration)
 
 	return(result*60);
 }
-			
+
+static int
+find_ban(const char *mask, char type)
+{
+	void *sql_vm;
+	const char **coldata;
+	const char **colnames;
+	int ncol;
+	
+	sql_vm = loc_sqlite_compile("SELECT * FROM operbans WHERE "
+					"type='%c' AND mask=%Q",
+					type, mask);
+
+	if(loc_sqlite_step(sql_vm, &ncol, &coldata, &colnames))
+		return 1;
+
+	return 0;
+}
+
 static int
 o_banserv_kline(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	static const char wild[] = "*";
+	char buf[BUFSIZE];
 	const char *user, *host, *reason;
 	char *mask, *p;
 	time_t temptime = 0;
@@ -123,6 +142,14 @@ o_banserv_kline(struct client *client_p, struct lconn *conn_p, const char *parv[
 
 	if((temptime = get_temp_time(parv[para])))
 		para++;
+
+	if(find_ban(parv[para], 'K'))
+	{
+		service_send(banserv_p, client_p, conn_p,
+				"Kline already placed on %s",
+				parv[para]);
+		return 0;
+	}
 
 	if(!temptime)
 	{
@@ -169,6 +196,15 @@ o_banserv_kline(struct client *client_p, struct lconn *conn_p, const char *parv[
 		host = mask;
 	}
 
+	snprintf(buf, sizeof(buf), "%s@%s", user, host);
+
+	loc_sqlite_exec(NULL, "INSERT INTO operbans "
+			"(type, mask, reason, hold, create_time, oper, flags) "
+			"VALUES('K', %Q, %Q, %lu, %lu, %Q, 0)",
+			buf, reason,
+			temptime ? CURRENT_TIME + temptime : 0,
+			CURRENT_TIME, OPER_NAME(client_p, conn_p));
+			
 	service_send(banserv_p, client_p, conn_p,
 			"Issued kline for %s@%s", user, host);
 
@@ -190,6 +226,15 @@ o_banserv_xline(struct client *client_p, struct lconn *conn_p, const char *parv[
 
 	if((temptime = get_temp_time(parv[para])))
 		para++;
+
+	if(find_ban(parv[para], 'X'))
+	{
+		service_send(banserv_p, client_p, conn_p,
+				"Xline already placed on %s",
+				parv[para]);
+		return 0;
+	}
+
 
 	if(!temptime)
 	{
@@ -222,6 +267,13 @@ o_banserv_xline(struct client *client_p, struct lconn *conn_p, const char *parv[
 		return 0;
 	}
 
+	loc_sqlite_exec(NULL, "INSERT INTO operbans "
+			"(type, mask, reason, hold, create_time, oper, flags) "
+			"VALUES('X', %Q, %Q, %lu, %lu, %Q, 0)",
+			gecos, reason, 
+			temptime ? CURRENT_TIME + temptime : 0,
+			CURRENT_TIME, OPER_NAME(client_p, conn_p));
+
 	service_send(banserv_p, client_p, conn_p,
 			"Issued xline for %s", gecos);
 
@@ -243,6 +295,14 @@ o_banserv_resv(struct client *client_p, struct lconn *conn_p, const char *parv[]
 
 	if((temptime = get_temp_time(parv[para])))
 		para++;
+
+	if(find_ban(parv[para], 'R'))
+	{
+		service_send(banserv_p, client_p, conn_p,
+				"Resv already placed on %s",
+				parv[para]);
+		return 0;
+	}
 
 	if(!temptime)
 	{
@@ -275,6 +335,13 @@ o_banserv_resv(struct client *client_p, struct lconn *conn_p, const char *parv[]
 		return 0;
 	}
 
+	loc_sqlite_exec(NULL, "INSERT INTO operbans "
+			"(type, mask, reason, hold, create_time, oper, flags) "
+			"VALUES('R', %Q, %Q, %lu, %lu, %Q, 0)",
+			mask, reason, 
+			temptime ? CURRENT_TIME + temptime : 0,
+			CURRENT_TIME, OPER_NAME(client_p, conn_p));
+
 	service_send(banserv_p, client_p, conn_p,
 			"Issued resv for %s", mask);
 
@@ -293,6 +360,7 @@ o_banserv_unkline(struct client *client_p, struct lconn *conn_p, const char *par
 	static const char wild[] = "*";
 	const char *user, *host;
 	char *mask, *p;
+
 
 	if(1)
 	{

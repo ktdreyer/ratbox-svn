@@ -71,3 +71,14 @@ CREATE TABLE jupes (
 	servername TEXT,
 	reason TEXT
 );
+
+CREATE TABLE operbans (
+	type TEXT,
+	mask TEXT,
+	reason TEXT,
+	operreason TEXT,
+	hold INTEGER,
+	create_time INTEGER,
+	oper TEXT,
+	flags INTEGER
+);

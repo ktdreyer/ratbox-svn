@@ -23,6 +23,8 @@ const char *get_crypt(const char *password, const char *csalt);
 
 typedef int (*db_callback) (void *, int, char **, char **);
 void loc_sqlite_exec(db_callback cb, const char *format, ...);
+void *loc_sqlite_compile(const char *format, ...);
+int loc_sqlite_step(void *, int *, const char ***, const char ***);
 
 char *rebuild_params(const char **, int, int);
 
