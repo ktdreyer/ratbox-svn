@@ -1,3 +1,17 @@
+leeh        2005/06/02 00:01:54 UTC	(20050602_0)
+
+  Modified files:
+    .                    configure 
+    autoconf             configure.in 
+  Log:
+  - only show those configure options that arent defaults
+  
+  Revision  Changes    Path
+  1.31      +10 -20    rserv/autoconf/configure.in
+  1.30      +91 -101   rserv/configure
+
+
+
 leeh        2005/06/01 23:40:33 UTC	(20050601_4)
 
   Modified files:
