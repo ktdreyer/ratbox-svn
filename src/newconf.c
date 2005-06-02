@@ -93,8 +93,11 @@ static struct mode_table jupeserv_table[] = {
 };
 
 static struct mode_table banserv_table[] = {
-	{ "perm",	CONF_OPER_BAN_PERM|CONF_OPER_BAN_TEMP	},
-	{ "temp",	CONF_OPER_BAN_TEMP	},
+	{ "kline",	CONF_OPER_BAN_KLINE	},
+	{ "xline",	CONF_OPER_BAN_XLINE	},
+	{ "resv",	CONF_OPER_BAN_RESV	},
+	{ "perm",	CONF_OPER_BAN_PERM	},
+	{ "remove",	CONF_OPER_BAN_REMOVE	},
 	{ "\0", 0 }
 };
 

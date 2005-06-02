@@ -50,16 +50,16 @@ static int o_banserv_resv(struct client *, struct lconn *, const char **, int);
 
 static struct service_command banserv_command[] =
 {
-	{ "KLINE", &o_banserv_kline, 2, NULL, 1, 0L, 0, 0, CONF_OPER_BAN_TEMP, 0 },
-	{ "XLINE", &o_banserv_xline, 2, NULL, 1, 0L, 0, 0, CONF_OPER_BAN_TEMP, 0 },
-	{ "RESV",  &o_banserv_resv,  2, NULL, 1, 0L, 0, 0, CONF_OPER_BAN_TEMP, 0 }
+	{ "KLINE", &o_banserv_kline, 2, NULL, 1, 0L, 0, 0, CONF_OPER_BAN_KLINE, 0 },
+	{ "XLINE", &o_banserv_xline, 2, NULL, 1, 0L, 0, 0, CONF_OPER_BAN_XLINE, 0 },
+	{ "RESV",  &o_banserv_resv,  2, NULL, 1, 0L, 0, 0, CONF_OPER_BAN_RESV, 0 }
 };
 
 static struct ucommand_handler banserv_ucommand[] =
 {
-	{ "kline",	o_banserv_kline,	0, CONF_OPER_BAN_TEMP, 2, 1, NULL },
-	{ "xline",	o_banserv_xline,	0, CONF_OPER_BAN_TEMP, 2, 1, NULL },
-	{ "resv",	o_banserv_resv,		0, CONF_OPER_BAN_TEMP, 2, 1, NULL },
+	{ "kline",	o_banserv_kline,	0, CONF_OPER_BAN_KLINE, 2, 1, NULL },
+	{ "xline",	o_banserv_xline,	0, CONF_OPER_BAN_XLINE, 2, 1, NULL },
+	{ "resv",	o_banserv_resv,		0, CONF_OPER_BAN_RESV, 2, 1, NULL },
 	{ "\0", NULL, 0, 0, 0, 0, NULL }
 };
 
