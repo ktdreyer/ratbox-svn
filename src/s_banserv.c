@@ -47,12 +47,18 @@ static struct client *banserv_p;
 static int o_banserv_kline(struct client *, struct lconn *, const char **, int);
 static int o_banserv_xline(struct client *, struct lconn *, const char **, int);
 static int o_banserv_resv(struct client *, struct lconn *, const char **, int);
+static int o_banserv_unkline(struct client *, struct lconn *, const char **, int);
+static int o_banserv_unxline(struct client *, struct lconn *, const char **, int);
+static int o_banserv_unresv(struct client *, struct lconn *, const char **, int);
 
 static struct service_command banserv_command[] =
 {
-	{ "KLINE", &o_banserv_kline, 2, NULL, 1, 0L, 0, 0, CONF_OPER_BAN_KLINE, 0 },
-	{ "XLINE", &o_banserv_xline, 2, NULL, 1, 0L, 0, 0, CONF_OPER_BAN_XLINE, 0 },
-	{ "RESV",  &o_banserv_resv,  2, NULL, 1, 0L, 0, 0, CONF_OPER_BAN_RESV, 0 }
+	{ "KLINE",	&o_banserv_kline,	2, NULL, 1, 0L, 0, 0, CONF_OPER_BAN_KLINE, 0 },
+	{ "XLINE",	&o_banserv_xline,	2, NULL, 1, 0L, 0, 0, CONF_OPER_BAN_XLINE, 0 },
+	{ "RESV",	&o_banserv_resv,	2, NULL, 1, 0L, 0, 0, CONF_OPER_BAN_RESV, 0 },
+	{ "UNKLINE",	&o_banserv_unkline,	1, NULL, 1, 0L, 0, 0, CONF_OPER_BAN_KLINE, 0 },
+	{ "UNXLINE",	&o_banserv_unxline,	1, NULL, 1, 0L, 0, 0, CONF_OPER_BAN_XLINE, 0 },
+	{ "UNRESV",	&o_banserv_unresv,	1, NULL, 1, 0L, 0, 0, CONF_OPER_BAN_RESV, 0 }
 };
 
 static struct ucommand_handler banserv_ucommand[] =
@@ -60,6 +66,9 @@ static struct ucommand_handler banserv_ucommand[] =
 	{ "kline",	o_banserv_kline,	0, CONF_OPER_BAN_KLINE, 2, 1, NULL },
 	{ "xline",	o_banserv_xline,	0, CONF_OPER_BAN_XLINE, 2, 1, NULL },
 	{ "resv",	o_banserv_resv,		0, CONF_OPER_BAN_RESV, 2, 1, NULL },
+	{ "unkline",	o_banserv_unkline,	0, CONF_OPER_BAN_KLINE, 1, 1, NULL },
+	{ "unxline",	o_banserv_unxline,	0, CONF_OPER_BAN_XLINE, 1, 1, NULL },
+	{ "unresv",	o_banserv_unresv,	0, CONF_OPER_BAN_RESV, 1, 1, NULL },
 	{ "\0", NULL, 0, 0, 0, 0, NULL }
 };
 
@@ -274,6 +283,129 @@ o_banserv_resv(struct client *client_p, struct lconn *conn_p, const char *parv[]
 
 	slog(banserv_p, 1, "%s - RESV %s %s",
 		OPER_NAME(client_p, conn_p), mask, reason);
+
+	return 0;
+}
+
+static int
+o_banserv_unkline(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
+{
+	static const char wild[] = "*";
+	const char *user, *host;
+	char *mask, *p;
+
+	if(1)
+	{
+		unsigned int hit = 0;
+
+		if(client_p)
+		{
+			if(!(client_p->user->oper->flags & CONF_OPER_BAN_REMOVE))
+				hit++;
+		}
+		else if(!conn_p->sprivs & CONF_OPER_BAN_REMOVE)
+			hit++;
+
+		if(hit)
+		{
+			service_send(banserv_p, client_p, conn_p,
+					"No access to remove klines");
+			return 0;
+		}
+	}
+
+	mask = LOCAL_COPY(parv[0]);
+
+	if((p = strchr(mask, '@')))
+	{
+		*p++ = '\0';
+		user = mask;
+		host = p;
+	}
+	else
+	{
+		user = wild;
+		host = mask;
+	}
+
+	service_send(banserv_p, client_p, conn_p,
+			"Issued unkline for %s@%s", user, host);
+
+	sendto_server(":%s ENCAP * UNKLINE %s %s",
+			banserv_p->name, user, host);
+
+	slog(banserv_p, 1, "%s - UNKLINE %s %s",
+		OPER_NAME(client_p, conn_p), user, host);
+
+	return 0;
+}
+
+static int
+o_banserv_unxline(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
+{
+	if(1)
+	{
+		unsigned int hit = 0;
+
+		if(client_p)
+		{
+			if(!(client_p->user->oper->flags & CONF_OPER_BAN_REMOVE))
+				hit++;
+		}
+		else if(!conn_p->sprivs & CONF_OPER_BAN_REMOVE)
+			hit++;
+
+		if(hit)
+		{
+			service_send(banserv_p, client_p, conn_p,
+					"No access to remove xlines");
+			return 0;
+		}
+	}
+
+	service_send(banserv_p, client_p, conn_p,
+			"Issued unxline for %s", parv[0]);
+
+	sendto_server(":%s ENCAP * UNXLINE %s",
+			banserv_p->name, parv[0]);
+
+	slog(banserv_p, 1, "%s - UNXLINE %s",
+		OPER_NAME(client_p, conn_p), parv[0]);
+
+	return 0;
+}
+
+static int
+o_banserv_unresv(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
+{
+	if(1)
+	{
+		unsigned int hit = 0;
+
+		if(client_p)
+		{
+			if(!(client_p->user->oper->flags & CONF_OPER_BAN_REMOVE))
+				hit++;
+		}
+		else if(!conn_p->sprivs & CONF_OPER_BAN_REMOVE)
+			hit++;
+
+		if(hit)
+		{
+			service_send(banserv_p, client_p, conn_p,
+					"No access to remove xlines");
+			return 0;
+		}
+	}
+
+	service_send(banserv_p, client_p, conn_p,
+			"Issued unresv for %s", parv[0]);
+
+	sendto_server(":%s ENCAP * UNRESV %s",
+			banserv_p->name, parv[0]);
+
+	slog(banserv_p, 1, "%s - UNRESV %s",
+		OPER_NAME(client_p, conn_p), parv[0]);
 
 	return 0;
 }
