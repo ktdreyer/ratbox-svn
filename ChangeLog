@@ -1,3 +1,15 @@
+androsyn    2005/06/03 19:09:21 UTC	(20050603_0)
+
+  Modified files:
+    src                  match.c 
+  Log:
+  passing a pointer to a pointer is not what was intended, oops
+  
+  Revision  Changes    Path
+  7.48      +3 -3      ircd-ratbox/src/match.c
+
+
+
 androsyn    2005/05/30 16:46:50 UTC	(20050530_1)
 
   Modified files:
