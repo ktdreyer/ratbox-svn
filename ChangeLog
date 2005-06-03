@@ -1,3 +1,16 @@
+leeh        2005/06/03 20:45:48 UTC	(20050603_2)
+
+  Modified files:
+    src                  s_banserv.c 
+  Log:
+  - make adding klines etc use an UPDATE when theres an entry already there
+    but marked as remove
+  
+  Revision  Changes    Path
+  1.8       +64 -25    rserv/src/s_banserv.c
+
+
+
 leeh        2005/06/03 17:14:01 UTC	(20050603_1)
 
   Modified files:
