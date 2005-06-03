@@ -42,6 +42,8 @@
 #include "ucommand.h"
 #include "log.h"
 
+#define BANSERV_FLAGS_REMOVE	0x0001
+
 static struct client *banserv_p;
 
 static int o_banserv_kline(struct client *, struct lconn *, const char **, int);
@@ -82,11 +84,6 @@ void
 init_s_banserv(void)
 {
 	banserv_p = add_service(&banserv_service);
-
-	/* banserv has to be opered otherwise it
-	 * wont work. --anfl
-	 */
-	banserv_p->service->flags |= SERVICE_OPERED;
 }
 
 static time_t
@@ -125,7 +122,10 @@ find_ban(const char *mask, char type)
 					type, mask);
 
 	if(loc_sqlite_step(sql_vm, &ncol, &coldata, &colnames))
+	{
+		loc_sqlite_finalize(sql_vm);
 		return 1;
+	}
 
 	return 0;
 }

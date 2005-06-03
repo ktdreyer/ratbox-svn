@@ -468,22 +468,9 @@ loc_sqlite_step(void *sql_vm, int *ncol, const char ***coldata,
 	if((i = sqlite_step((sqlite_vm *) sql_vm, ncol, coldata, colnames)))
 	{
 		if(i == SQLITE_DONE)
-		{
-			char *errmsg;
-
-			if((i = sqlite_finalize((sqlite_vm *) sql_vm, &errmsg)))
-			{
-				mlog("fatal error: problem with finalizing sql: %s",
-					errmsg);
-				die("problem with finalising sql statement");
-			}
-
-			return 0;
-		}
+			loc_sqlite_finalize(sql_vm);
 		else if(i == SQLITE_ROW)
-		{
 			return 1;
-		}
 		else
 		{
 			mlog("fatal error: problem with sql step: %d", i);
@@ -495,6 +482,20 @@ loc_sqlite_step(void *sql_vm, int *ncol, const char ***coldata,
 	return 0;
 }
 
+void
+loc_sqlite_finalize(void *sql_vm)
+{
+	char *errmsg;
+	int i;
+
+	if((i = sqlite_finalize((sqlite_vm *) sql_vm, &errmsg)))
+	{
+		mlog("fatal error: problem with finalizing sql: %s",
+			errmsg);
+		die("problem with finalising sql statement");
+	}
+}
+		
 char *
 rebuild_params(const char **parv, int parc, int start)
 {
