@@ -1,3 +1,18 @@
+leeh        2005/06/03 17:14:01 UTC	(20050603_1)
+
+  Modified files:
+    doc                  schema.txt 
+    src                  s_banserv.c 
+  Log:
+  - add remove column to operbans table
+  - tie unklines etc to the database
+  
+  Revision  Changes    Path
+  1.21      +1 -0      rserv/doc/schema.txt
+  1.7       +85 -9     rserv/src/s_banserv.c
+
+
+
 leeh        2005/06/03 11:45:42 UTC	(20050603_0)
 
   Modified files:
