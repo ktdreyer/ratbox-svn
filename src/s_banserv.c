@@ -123,6 +123,12 @@ find_ban(const char *mask, char type)
 
 	if(loc_sqlite_step(sql_vm, &ncol, &coldata, &colnames))
 	{
+		if(atoi(coldata[7]) == 1)
+		{
+			loc_sqlite_finalize(sql_vm);
+			return -1;
+		}
+
 		loc_sqlite_finalize(sql_vm);
 		return 1;
 	}
@@ -171,16 +177,18 @@ static int
 o_banserv_kline(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	static const char wild[] = "*";
-	char buf[BUFSIZE];
 	const char *user, *host, *reason;
 	char *mask, *p;
 	time_t temptime = 0;
 	int para = 0;
+	int res;
 
 	if((temptime = get_temp_time(parv[para])))
 		para++;
 
-	if(find_ban(parv[para], 'K'))
+	res = find_ban(parv[para], 'K');
+
+	if(res == 1)
 	{
 		service_send(banserv_p, client_p, conn_p,
 				"Kline already placed on %s",
@@ -233,14 +241,22 @@ o_banserv_kline(struct client *client_p, struct lconn *conn_p, const char *parv[
 		host = mask;
 	}
 
-	snprintf(buf, sizeof(buf), "%s@%s", user, host);
-
-	loc_sqlite_exec(NULL, "INSERT INTO operbans "
-			"(type, mask, reason, hold, create_time, oper, remove, flags) "
-			"VALUES('K', %Q, %Q, %lu, %lu, %Q, 0, 0)",
-			buf, reason,
-			temptime ? CURRENT_TIME + temptime : 0,
-			CURRENT_TIME, OPER_NAME(client_p, conn_p));
+	if(res)
+		loc_sqlite_exec(NULL, "UPDATE operbans SET reason=%Q, "
+				"hold=%ld, oper=%Q, remove=0 WHERE "
+				"type='K' AND mask='%q@%q'",
+				reason,
+				temptime ? CURRENT_TIME + temptime : 0,
+				OPER_NAME(client_p, conn_p),
+				user, host);
+	else
+		loc_sqlite_exec(NULL, "INSERT INTO operbans "
+				"(type, mask, reason, hold, create_time, "
+				"oper, remove, flags) "
+				"VALUES('K', '%q@%q', %Q, %lu, %lu, %Q, 0, 0)",
+				user, host, reason,
+				temptime ? CURRENT_TIME + temptime : 0,
+				CURRENT_TIME, OPER_NAME(client_p, conn_p));
 			
 	service_send(banserv_p, client_p, conn_p,
 			"Issued kline for %s@%s", user, host);
@@ -260,18 +276,20 @@ o_banserv_xline(struct client *client_p, struct lconn *conn_p, const char *parv[
 	const char *gecos, *reason;
 	time_t temptime = 0;
 	int para = 0;
+	int res;
 
 	if((temptime = get_temp_time(parv[para])))
 		para++;
 
-	if(find_ban(parv[para], 'X'))
+	res = find_ban(parv[para], 'X');
+
+	if(res == 1)
 	{
 		service_send(banserv_p, client_p, conn_p,
 				"Xline already placed on %s",
 				parv[para]);
 		return 0;
 	}
-
 
 	if(!temptime)
 	{
@@ -304,12 +322,21 @@ o_banserv_xline(struct client *client_p, struct lconn *conn_p, const char *parv[
 		return 0;
 	}
 
-	loc_sqlite_exec(NULL, "INSERT INTO operbans "
-			"(type, mask, reason, hold, create_time, oper, remove, flags) "
-			"VALUES('X', %Q, %Q, %lu, %lu, %Q, 0, 0)",
-			gecos, reason, 
-			temptime ? CURRENT_TIME + temptime : 0,
-			CURRENT_TIME, OPER_NAME(client_p, conn_p));
+	if(res)
+		loc_sqlite_exec(NULL, "UPDATE operbans SET reason=%Q, "
+				"hold=%ld, oper=%Q, remove=0 WHERE "
+				"type='X' AND mask=%Q",
+				reason,
+				temptime ? CURRENT_TIME + temptime : 0,
+				OPER_NAME(client_p, conn_p), gecos);
+	else
+		loc_sqlite_exec(NULL, "INSERT INTO operbans "
+				"(type, mask, reason, hold, create_time, "
+				"oper, remove, flags) "
+				"VALUES('X', %Q, %Q, %lu, %lu, %Q, 0, 0)",
+				gecos, reason, 
+				temptime ? CURRENT_TIME + temptime : 0,
+				CURRENT_TIME, OPER_NAME(client_p, conn_p));
 
 	service_send(banserv_p, client_p, conn_p,
 			"Issued xline for %s", gecos);
@@ -329,11 +356,14 @@ o_banserv_resv(struct client *client_p, struct lconn *conn_p, const char *parv[]
 	const char *mask, *reason;
 	time_t temptime = 0;
 	int para = 0;
+	int res;
 
 	if((temptime = get_temp_time(parv[para])))
 		para++;
 
-	if(find_ban(parv[para], 'R'))
+	res = find_ban(parv[para], 'R');
+
+	if(res == 1)
 	{
 		service_send(banserv_p, client_p, conn_p,
 				"Resv already placed on %s",
@@ -372,12 +402,21 @@ o_banserv_resv(struct client *client_p, struct lconn *conn_p, const char *parv[]
 		return 0;
 	}
 
-	loc_sqlite_exec(NULL, "INSERT INTO operbans "
-			"(type, mask, reason, hold, create_time, oper, remove, flags) "
-			"VALUES('R', %Q, %Q, %lu, %lu, %Q, 0, 0)",
-			mask, reason, 
-			temptime ? CURRENT_TIME + temptime : 0,
-			CURRENT_TIME, OPER_NAME(client_p, conn_p));
+	if(res)
+		loc_sqlite_exec(NULL, "UPDATE operbans SET reason=%Q, "
+				"hold=%ld, oper=%Q, remove=0 WHERE "
+				"type='R' AND mask=%Q",
+				reason,
+				temptime ? CURRENT_TIME + temptime : 0,
+				OPER_NAME(client_p, conn_p), mask);
+	else
+		loc_sqlite_exec(NULL, "INSERT INTO operbans "
+				"(type, mask, reason, hold, create_time, "
+				"oper, remove, flags) "
+				"VALUES('R', %Q, %Q, %lu, %lu, %Q, 0, 0)",
+				mask, reason, 
+				temptime ? CURRENT_TIME + temptime : 0,
+				CURRENT_TIME, OPER_NAME(client_p, conn_p));
 
 	service_send(banserv_p, client_p, conn_p,
 			"Issued resv for %s", mask);
