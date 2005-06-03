@@ -1,3 +1,19 @@
+leeh        2005/06/03 11:45:42 UTC	(20050603_0)
+
+  Modified files:
+    include              rserv.h 
+    src                  rserv.c s_banserv.c 
+  Log:
+  - introduce local version of sqlite_finalize()
+  - fix find_ban() to properly finalise the compiled sql statement
+  
+  Revision  Changes    Path
+  1.15      +1 -0      rserv/include/rserv.h
+  1.56      +15 -14    rserv/src/rserv.c
+  1.6       +5 -5      rserv/src/s_banserv.c
+
+
+
 leeh        2005/06/02 23:16:07 UTC	(20050602_3)
 
   Modified files:
