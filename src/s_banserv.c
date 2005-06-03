@@ -130,6 +130,43 @@ find_ban(const char *mask, char type)
 	return 0;
 }
 
+/* find_ban_remove()
+ * Finds bans in the database suitable for removing.
+ * 
+ * inputs	- mask, type (K/X/R)
+ * outputs	- oper who set the ban, NULL if none found
+ * side effects	-
+ */
+static const char *
+find_ban_remove(const char *mask, char type)
+{
+	static char buf[BUFSIZE];
+	void *sql_vm;
+	const char **coldata;
+	const char **colnames;
+	int ncol;
+	
+	sql_vm = loc_sqlite_compile("SELECT * FROM operbans WHERE "
+					"type='%c' AND mask=%Q",
+					type, mask);
+
+	if(loc_sqlite_step(sql_vm, &ncol, &coldata, &colnames))
+	{
+		/* check this ban isnt already marked as removed */
+		if(atoi(coldata[7]) == 1)
+		{
+			loc_sqlite_finalize(sql_vm);
+			return NULL;
+		}
+
+		strlcpy(buf, coldata[6], sizeof(buf));
+		loc_sqlite_finalize(sql_vm);
+		return buf;
+	}
+
+	return NULL;
+}
+
 static int
 o_banserv_kline(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
@@ -199,8 +236,8 @@ o_banserv_kline(struct client *client_p, struct lconn *conn_p, const char *parv[
 	snprintf(buf, sizeof(buf), "%s@%s", user, host);
 
 	loc_sqlite_exec(NULL, "INSERT INTO operbans "
-			"(type, mask, reason, hold, create_time, oper, flags) "
-			"VALUES('K', %Q, %Q, %lu, %lu, %Q, 0)",
+			"(type, mask, reason, hold, create_time, oper, remove, flags) "
+			"VALUES('K', %Q, %Q, %lu, %lu, %Q, 0, 0)",
 			buf, reason,
 			temptime ? CURRENT_TIME + temptime : 0,
 			CURRENT_TIME, OPER_NAME(client_p, conn_p));
@@ -268,8 +305,8 @@ o_banserv_xline(struct client *client_p, struct lconn *conn_p, const char *parv[
 	}
 
 	loc_sqlite_exec(NULL, "INSERT INTO operbans "
-			"(type, mask, reason, hold, create_time, oper, flags) "
-			"VALUES('X', %Q, %Q, %lu, %lu, %Q, 0)",
+			"(type, mask, reason, hold, create_time, oper, remove, flags) "
+			"VALUES('X', %Q, %Q, %lu, %lu, %Q, 0, 0)",
 			gecos, reason, 
 			temptime ? CURRENT_TIME + temptime : 0,
 			CURRENT_TIME, OPER_NAME(client_p, conn_p));
@@ -336,8 +373,8 @@ o_banserv_resv(struct client *client_p, struct lconn *conn_p, const char *parv[]
 	}
 
 	loc_sqlite_exec(NULL, "INSERT INTO operbans "
-			"(type, mask, reason, hold, create_time, oper, flags) "
-			"VALUES('R', %Q, %Q, %lu, %lu, %Q, 0)",
+			"(type, mask, reason, hold, create_time, oper, remove, flags) "
+			"VALUES('R', %Q, %Q, %lu, %lu, %Q, 0, 0)",
 			mask, reason, 
 			temptime ? CURRENT_TIME + temptime : 0,
 			CURRENT_TIME, OPER_NAME(client_p, conn_p));
@@ -360,9 +397,17 @@ o_banserv_unkline(struct client *client_p, struct lconn *conn_p, const char *par
 	static const char wild[] = "*";
 	const char *user, *host;
 	char *mask, *p;
+	const char *oper = find_ban_remove(parv[0], 'K');
 
+	if(oper == NULL)
+	{
+		service_send(banserv_p, client_p, conn_p,
+				"Kline not placed on %s",
+				parv[0]);
+		return 0;
+	}
 
-	if(1)
+	if(irccmp(oper, OPER_NAME(client_p, conn_p)))
 	{
 		unsigned int hit = 0;
 
@@ -396,6 +441,9 @@ o_banserv_unkline(struct client *client_p, struct lconn *conn_p, const char *par
 		host = mask;
 	}
 
+	loc_sqlite_exec(NULL, "UPDATE operbans SET remove=1 WHERE "
+			"mask='%q@%q' AND type='K'", user, host);
+
 	service_send(banserv_p, client_p, conn_p,
 			"Issued unkline for %s@%s", user, host);
 
@@ -411,7 +459,17 @@ o_banserv_unkline(struct client *client_p, struct lconn *conn_p, const char *par
 static int
 o_banserv_unxline(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
-	if(1)
+	const char *oper = find_ban_remove(parv[0], 'K');
+
+	if(oper == NULL)
+	{
+		service_send(banserv_p, client_p, conn_p,
+				"Xline not placed on %s",
+				parv[0]);
+		return 0;
+	}
+
+	if(irccmp(oper, OPER_NAME(client_p, conn_p)))
 	{
 		unsigned int hit = 0;
 
@@ -430,6 +488,10 @@ o_banserv_unxline(struct client *client_p, struct lconn *conn_p, const char *par
 			return 0;
 		}
 	}
+
+	loc_sqlite_exec(NULL, "UPDATE operbans SET remove=1 WHERE "
+			"mask=%Q AND type='X'",
+			parv[0]);
 
 	service_send(banserv_p, client_p, conn_p,
 			"Issued unxline for %s", parv[0]);
@@ -446,7 +508,17 @@ o_banserv_unxline(struct client *client_p, struct lconn *conn_p, const char *par
 static int
 o_banserv_unresv(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
-	if(1)
+	const char *oper = find_ban_remove(parv[0], 'K');
+
+	if(oper == NULL)
+	{
+		service_send(banserv_p, client_p, conn_p,
+				"Resv not placed on %s",
+				parv[0]);
+		return 0;
+	}
+
+	if(irccmp(oper, OPER_NAME(client_p, conn_p)))
 	{
 		unsigned int hit = 0;
 
@@ -465,6 +537,10 @@ o_banserv_unresv(struct client *client_p, struct lconn *conn_p, const char *parv
 			return 0;
 		}
 	}
+
+	loc_sqlite_exec(NULL, "UPDATE operbans SET remove=1 WHERE "
+			"mask=%Q AND type='R'",
+			parv[0]);
 
 	service_send(banserv_p, client_p, conn_p,
 			"Issued unresv for %s", parv[0]);

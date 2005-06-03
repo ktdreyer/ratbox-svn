@@ -80,5 +80,6 @@ CREATE TABLE operbans (
 	hold INTEGER,
 	create_time INTEGER,
 	oper TEXT,
+	remove INTEGER,
 	flags INTEGER
 );
