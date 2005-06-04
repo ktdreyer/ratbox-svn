@@ -1,3 +1,15 @@
+leeh        2005/06/04 15:05:05 UTC	(20050604_3)
+
+  Modified files:
+    src                  s_banserv.c 
+  Log:
+  - pass the right letters to find_ban_remove() for xline/resv
+  
+  Revision  Changes    Path
+  1.11      +2 -2      rserv/src/s_banserv.c
+
+
+
 leeh        2005/06/04 12:51:04 UTC	(20050604_2)
 
   Modified files:
