@@ -1,3 +1,31 @@
+leeh        2005/06/04 16:05:39 UTC	(20050604_4)
+
+  Modified files:
+    include              io.h log.h newconf.h rserv.h service.h 
+                         stdinc.h 
+    src                  event.c modebuild.c s_alis.c s_banserv.c 
+                         scommand.c u_stats.c 
+  Log:
+  - patch via jilles to use the __attribute__ gcc stuff for checking
+    printf() formatting stuff
+  - fix compile warnings
+  
+  Revision  Changes    Path
+  1.25      +4 -4      rserv/include/io.h
+  1.7       +2 -2      rserv/include/log.h
+  1.5       +1 -1      rserv/include/newconf.h
+  1.16      +1 -1      rserv/include/rserv.h
+  1.27      +4 -4      rserv/include/service.h
+  1.11      +10 -0     rserv/include/stdinc.h
+  1.8       +1 -1      rserv/src/event.c
+  1.7       +2 -1      rserv/src/modebuild.c
+  1.38      +4 -4      rserv/src/s_alis.c
+  1.12      +2 -2      rserv/src/s_banserv.c
+  1.35      +1 -1      rserv/src/scommand.c
+  1.20      +2 -2      rserv/src/u_stats.c
+
+
+
 leeh        2005/06/04 15:05:05 UTC	(20050604_3)
 
   Modified files:
