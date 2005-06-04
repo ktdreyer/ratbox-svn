@@ -1,3 +1,22 @@
+leeh        2005/06/04 11:12:50 UTC	(20050604_0)
+
+  Modified files:
+    doc                  example.conf 
+    include              conf.h 
+    src                  conf.c newconf.c s_banserv.c 
+  Log:
+  - new config option banserv::unban_time
+  - added expiry of bans in banserv
+  
+  Revision  Changes    Path
+  1.45      +5 -0      rserv/doc/example.conf
+  1.47      +3 -0      rserv/include/conf.h
+  1.47      +2 -0      rserv/src/conf.c
+  1.53      +7 -0      rserv/src/newconf.c
+  1.9       +57 -2     rserv/src/s_banserv.c
+
+
+
 leeh        2005/06/03 20:45:48 UTC	(20050603_2)
 
   Modified files:
