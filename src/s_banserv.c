@@ -554,7 +554,7 @@ o_banserv_unkline(struct client *client_p, struct lconn *conn_p, const char *par
 static int
 o_banserv_unxline(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
-	const char *oper = find_ban_remove(parv[0], 'K');
+	const char *oper = find_ban_remove(parv[0], 'X');
 
 	if(oper == NULL)
 	{
@@ -603,7 +603,7 @@ o_banserv_unxline(struct client *client_p, struct lconn *conn_p, const char *par
 static int
 o_banserv_unresv(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
-	const char *oper = find_ban_remove(parv[0], 'K');
+	const char *oper = find_ban_remove(parv[0], 'R');
 
 	if(oper == NULL)
 	{
