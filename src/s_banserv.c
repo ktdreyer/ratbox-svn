@@ -535,8 +535,9 @@ o_banserv_unkline(struct client *client_p, struct lconn *conn_p, const char *par
 		host = mask;
 	}
 
-	loc_sqlite_exec(NULL, "UPDATE operbans SET remove=1 WHERE "
-			"mask='%q@%q' AND type='K'", user, host);
+	loc_sqlite_exec(NULL, "UPDATE operbans SET remove=1, hold=%lu "
+			"WHERE mask=%Q AND type='K'",
+			CURRENT_TIME + config_file.bs_unban_time, parv[0]);
 
 	service_send(banserv_p, client_p, conn_p,
 			"Issued unkline for %s@%s", user, host);
@@ -583,9 +584,9 @@ o_banserv_unxline(struct client *client_p, struct lconn *conn_p, const char *par
 		}
 	}
 
-	loc_sqlite_exec(NULL, "UPDATE operbans SET remove=1 WHERE "
-			"mask=%Q AND type='X'",
-			parv[0]);
+	loc_sqlite_exec(NULL, "UPDATE operbans SET remove=1, hold=%lu "
+			"WHERE mask=%Q AND type='X'",
+			CURRENT_TIME + config_file.bs_unban_time, parv[0]);
 
 	service_send(banserv_p, client_p, conn_p,
 			"Issued unxline for %s", parv[0]);
@@ -632,9 +633,9 @@ o_banserv_unresv(struct client *client_p, struct lconn *conn_p, const char *parv
 		}
 	}
 
-	loc_sqlite_exec(NULL, "UPDATE operbans SET remove=1 WHERE "
-			"mask=%Q AND type='R'",
-			parv[0]);
+	loc_sqlite_exec(NULL, "UPDATE operbans SET remove=1, hold=%lu "
+			"WHERE mask=%Q AND type='R'",
+			CURRENT_TIME + config_file.bs_unban_time, parv[0]);
 
 	service_send(banserv_p, client_p, conn_p,
 			"Issued unresv for %s", parv[0]);
