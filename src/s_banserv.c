@@ -41,8 +41,7 @@
 #include "conf.h"
 #include "ucommand.h"
 #include "log.h"
-
-#define BANSERV_FLAGS_REMOVE	0x0001
+#include "event.h"
 
 static struct client *banserv_p;
 
@@ -80,10 +79,66 @@ static struct service_handler banserv_service = {
 	banserv_command, sizeof(banserv_command), banserv_ucommand, NULL
 };
 
+static void e_banserv_expire(void *unused);
+
 void
 init_s_banserv(void)
 {
 	banserv_p = add_service(&banserv_service);
+
+	eventAdd("e_banserv_expire", e_banserv_expire, NULL, 902);
+}
+
+static void
+e_banserv_expire(void *unused)
+{
+	void *sql_vm;
+	const char **coldata;
+	const char **colnames;
+	int ncol;
+
+	sql_vm = loc_sqlite_compile("SELECT * FROM operbans WHERE "
+				"hold <= %lu AND remove=0",
+				CURRENT_TIME);
+
+	while(loc_sqlite_step(sql_vm, &ncol, &coldata, &colnames))
+	{
+		if(coldata[0][0] == 'K')
+		{
+			static const char def_wild[] = "*";
+			char buf[BUFSIZE];
+			const char *user;
+			char *host;
+
+			strlcpy(buf, coldata[1], sizeof(buf));
+
+			if((host = strchr(buf, '@')))
+			{
+				user = buf;
+				*host++ = '\0';
+			}
+			else
+			{
+				user = def_wild;
+				host = buf;
+			}
+
+			sendto_server(":%s ENCAP * UNKLINE %s %s",
+					banserv_p, user, host);
+		}
+		else if(coldata[0][0] == 'X')
+			sendto_server(":%s ENCAP * UNXLINE %s",
+					banserv_p, coldata[1]);
+		else if(coldata[0][0] == 'R')
+			sendto_server(":%s ENCAP * UNRESV %s",
+					banserv_p->name, coldata[1]);
+	}
+
+	loc_sqlite_exec(NULL, "DELETE FROM operbans WHERE hold <= %lu AND remove=1",
+			CURRENT_TIME);
+	loc_sqlite_exec(NULL, "UPDATE operbans SET remove=1, hold=%lu "
+			"WHERE hold <= %lu",
+			CURRENT_TIME + config_file.bs_unban_time, CURRENT_TIME);
 }
 
 static time_t

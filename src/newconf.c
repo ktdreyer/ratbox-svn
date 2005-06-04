@@ -1004,6 +1004,12 @@ static struct ConfEntry conf_alis_table[] =
 	{ "\0", 0, NULL, 0, NULL }
 };
 
+static struct ConfEntry conf_banserv_table[] =
+{
+	{ "unban_time",		CF_TIME,NULL, 0, &config_file.bs_unban_time	},
+	{ "\0", 0, NULL, 0, NULL }
+};
+
 void
 newconf_init()
 {
@@ -1019,4 +1025,5 @@ newconf_init()
 	add_conf_extension("service", "nickserv", conf_nickserv_table);
 	add_conf_extension("service", "jupeserv", conf_jupeserv_table);
 	add_conf_extension("service", "alis", conf_alis_table);
+	add_conf_extension("service", "banserv", conf_banserv_table);
 }

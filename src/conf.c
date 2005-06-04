@@ -93,6 +93,8 @@ set_default_conf(void)
 	config_file.nmax_nicks = 2;
 	config_file.nallow_set_warn = 1;
 
+	config_file.bs_unban_time = 1209600;	/* 2 weeks */
+
 	my_free(config_file.nwarn_string);
 	config_file.nwarn_string = my_strdup("This nickname is registered, you may "
 				"be disconnected if a user regains this nickname.");

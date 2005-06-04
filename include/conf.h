@@ -70,6 +70,9 @@ struct _config_file
 	int unjupe_score;
 	int pending_time;
 
+	/* banserv */
+	int bs_unban_time;
+
 	/* alis */
 	int max_matches;
 };
