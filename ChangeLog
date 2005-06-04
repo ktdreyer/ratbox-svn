@@ -1,3 +1,16 @@
+leeh        2005/06/04 16:59:00 UTC	(20050604_5)
+
+  Modified files:
+    src                  s_banserv.c s_nickserv.c 
+  Log:
+  - via jilles, cast various time_t's to ulong
+  
+  Revision  Changes    Path
+  1.13      +5 -3      rserv/src/s_banserv.c
+  1.19      +2 -2      rserv/src/s_nickserv.c
+
+
+
 leeh        2005/06/04 16:05:39 UTC	(20050604_4)
 
   Modified files:
