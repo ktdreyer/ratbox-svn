@@ -317,7 +317,8 @@ o_banserv_kline(struct client *client_p, struct lconn *conn_p, const char *parv[
 			"Issued kline for %s@%s", user, host);
 
 	sendto_server(":%s ENCAP * KLINE %lu %s %s :%s",
-			banserv_p->name, temptime, user, host, reason);
+			banserv_p->name, (unsigned long)temptime, user, host,
+			reason);
 
 	slog(banserv_p, 1, "%s - KLINE %s %s %s",
 		OPER_NAME(client_p, conn_p), user, host, reason);
@@ -397,7 +398,8 @@ o_banserv_xline(struct client *client_p, struct lconn *conn_p, const char *parv[
 			"Issued xline for %s", gecos);
 
 	sendto_server(":%s ENCAP * XLINE %lu %s 2 :%s",
-			banserv_p->name, temptime, gecos, reason);
+			banserv_p->name, (unsigned long)temptime, gecos,
+			reason);
 
 	slog(banserv_p, 1, "%s - XLINE %s %s",
 		OPER_NAME(client_p, conn_p), gecos, reason);
@@ -477,7 +479,7 @@ o_banserv_resv(struct client *client_p, struct lconn *conn_p, const char *parv[]
 			"Issued resv for %s", mask);
 
 	sendto_server(":%s ENCAP * RESV %lu %s 0 :%s",
-			banserv_p->name, temptime, mask, reason);
+			banserv_p->name, (unsigned long)temptime, mask, reason);
 
 	slog(banserv_p, 1, "%s - RESV %s %s",
 		OPER_NAME(client_p, conn_p), mask, reason);

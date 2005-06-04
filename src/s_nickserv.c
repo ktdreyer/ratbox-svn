@@ -411,8 +411,8 @@ s_nick_regain(struct client *client_p, struct lconn *conn_p, const char *parv[],
 	 */
 	sendto_server("ENCAP %s RSFNC %s %s %lu %lu",
 			client_p->user->servername, client_p->name,
-			nreg_p->name, CURRENT_TIME - 60,
-			client_p->user->tsinfo);
+			nreg_p->name, (unsigned long)(CURRENT_TIME - 60),
+			(unsigned long)client_p->user->tsinfo);
 
 	exit_client(target_p);
 
