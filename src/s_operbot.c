@@ -83,7 +83,8 @@ init_s_operbot(void)
 {
 	operbot_p = add_service(&operbot_service);
 
-	loc_sqlite_exec(operbot_db_callback, "SELECT * FROM operbot");
+	loc_sqlite_exec(operbot_db_callback,
+			"SELECT chname, tsinfo FROM operbot");
 
 	hook_add(h_operbot_sjoin_lowerts, HOOK_SJOIN_LOWERTS);
 }

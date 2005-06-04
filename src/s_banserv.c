@@ -97,7 +97,7 @@ e_banserv_expire(void *unused)
 	const char **colnames;
 	int ncol;
 
-	sql_vm = loc_sqlite_compile("SELECT * FROM operbans WHERE "
+	sql_vm = loc_sqlite_compile("SELECT type, mask FROM operbans WHERE "
 				"hold <= %lu AND remove=0",
 				CURRENT_TIME);
 
@@ -172,13 +172,13 @@ find_ban(const char *mask, char type)
 	const char **colnames;
 	int ncol;
 	
-	sql_vm = loc_sqlite_compile("SELECT * FROM operbans WHERE "
+	sql_vm = loc_sqlite_compile("SELECT remove FROM operbans WHERE "
 					"type='%c' AND mask=%Q",
 					type, mask);
 
 	if(loc_sqlite_step(sql_vm, &ncol, &coldata, &colnames))
 	{
-		if(atoi(coldata[7]) == 1)
+		if(atoi(coldata[0]) == 1)
 		{
 			loc_sqlite_finalize(sql_vm);
 			return -1;
@@ -207,20 +207,20 @@ find_ban_remove(const char *mask, char type)
 	const char **colnames;
 	int ncol;
 	
-	sql_vm = loc_sqlite_compile("SELECT * FROM operbans WHERE "
+	sql_vm = loc_sqlite_compile("SELECT remove, oper FROM operbans WHERE "
 					"type='%c' AND mask=%Q",
 					type, mask);
 
 	if(loc_sqlite_step(sql_vm, &ncol, &coldata, &colnames))
 	{
 		/* check this ban isnt already marked as removed */
-		if(atoi(coldata[7]) == 1)
+		if(atoi(coldata[0]) == 1)
 		{
 			loc_sqlite_finalize(sql_vm);
 			return NULL;
 		}
 
-		strlcpy(buf, coldata[6], sizeof(buf));
+		strlcpy(buf, coldata[1], sizeof(buf));
 		loc_sqlite_finalize(sql_vm);
 		return buf;
 	}

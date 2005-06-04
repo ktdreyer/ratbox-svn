@@ -451,9 +451,6 @@ channel_db_callback(void *db, int argc, char **argv, char **colnames)
 	char *modev[MAXPARA + 1];
 	int modec;
 
-	if(argc < 10)
-		return 0;
-
 	if(EmptyString(argv[0]))
 		return 0;
 
@@ -515,9 +512,6 @@ member_db_callback(void *db, int argc, char **argv, char **colnames)
 	struct chan_reg *chreg_p;
 	struct user_reg *ureg_p;
 	struct member_reg *mreg_p;
-
-	if(argc < 6)
-		return 0;
 
 	if(EmptyString(argv[0]) || EmptyString(argv[1]))
 		return 0;
@@ -586,9 +580,6 @@ ban_db_callback(void *db, int argc, char **argv, char **colnames)
 	struct ban_reg *banreg_p;
 	int level, hold;
 
-	if(argc < 6)
-		return 0;
-
 	if(EmptyString(argv[0]) || EmptyString(argv[1]))
 		return 0;
 
@@ -605,9 +596,16 @@ ban_db_callback(void *db, int argc, char **argv, char **colnames)
 static void
 load_channel_db(void)
 {
-	loc_sqlite_exec(channel_db_callback, "SELECT * FROM channels");
-	loc_sqlite_exec(member_db_callback, "SELECT * FROM members");
-	loc_sqlite_exec(ban_db_callback, "SELECT * FROM bans");
+	loc_sqlite_exec(channel_db_callback, 
+			"SELECT chname, topic, url, createmodes, "
+			"enforcemodes, tsinfo, reg_time, last_time, "
+			"flags, suspender FROM channels");
+	loc_sqlite_exec(member_db_callback, 
+			"SELECT chname, username, lastmod, level, "
+			"flags, suspend FROM members");
+	loc_sqlite_exec(ban_db_callback, 
+			"SELECT chname, mask, reason, username, "
+			"level, hold FROM bans");
 }
 
 static void

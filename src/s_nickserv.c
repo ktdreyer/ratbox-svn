@@ -95,7 +95,8 @@ init_s_nickserv(void)
 
 	nick_reg_heap = BlockHeapCreate(sizeof(struct nick_reg), HEAP_NICK_REG);
 
-	loc_sqlite_exec(nick_db_callback, "SELECT * FROM nicks");
+	loc_sqlite_exec(nick_db_callback, 
+			"SELECT nickname, username, reg_time, last_time, flags FROM nicks");
 
 	hook_add(h_nick_warn_client, HOOK_NEW_CLIENT);
 	hook_add(h_nick_warn_client, HOOK_NICKCHANGE);
@@ -148,9 +149,6 @@ nick_db_callback(void *db, int argc, char **argv, char **colnames)
 {
 	struct nick_reg *nreg_p;
 	struct user_reg *ureg_p;
-
-	if(argc < 4)
-		return 0;
 
 	if(EmptyString(argv[0]) || EmptyString(argv[1]))
 		return 0;

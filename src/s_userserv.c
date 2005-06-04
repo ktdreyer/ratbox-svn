@@ -114,7 +114,9 @@ init_s_userserv(void)
 
 	userserv_p = add_service(&userserv_service);
 
-	loc_sqlite_exec(user_db_callback, "SELECT * FROM users");
+	loc_sqlite_exec(user_db_callback, 
+			"SELECT username, password, email, suspender, "
+			"reg_time, last_time, flags FROM users");
 
 	hook_add(h_user_burst_login, HOOK_BURST_LOGIN);
 
@@ -160,9 +162,6 @@ static int
 user_db_callback(void *db, int argc, char **argv, char **colnames)
 {
 	struct user_reg *reg_p;
-
-	if(argc < 7)
-		return 0;
 
 	if(EmptyString(argv[0]))
 		return 0;

@@ -83,7 +83,8 @@ init_s_operserv(void)
 {
 	operserv_p = add_service(&operserv_service);
 
-	loc_sqlite_exec(operserv_db_callback, "SELECT * FROM operserv");
+	loc_sqlite_exec(operserv_db_callback, 
+			"SELECT chname, tsinfo FROM operserv");
 
 	hook_add(h_operserv_sjoin_lowerts, HOOK_SJOIN_LOWERTS);
 }

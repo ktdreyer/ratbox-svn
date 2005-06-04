@@ -105,7 +105,7 @@ init_s_jupeserv(void)
 	hook_add(h_jupeserv_finburst, HOOK_FINISHED_BURSTING);
 	eventAdd("e_jupeserv_expire", e_jupeserv_expire, NULL, 60);
 
-	loc_sqlite_exec(jupe_db_callback, "SELECT * FROM jupes");
+	loc_sqlite_exec(jupe_db_callback, "SELECT servername, reason FROM jupes");
 }
 
 static struct server_jupe *
