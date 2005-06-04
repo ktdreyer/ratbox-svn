@@ -2228,8 +2228,8 @@ s_chan_set_flag(struct client *client_p, struct chan_reg *chreg_p,
 	}
 	
 	service_error(chanserv_p, client_p,
-			"Channel %s %s is %s",
-			chreg_p->name, (chreg_p->flags & flag) ? "ON" : "OFF");
+			"Channel %s %s is %s", chreg_p->name, name,
+			(chreg_p->flags & flag) ? "ON" : "OFF");
 	return 0;
 }
 
