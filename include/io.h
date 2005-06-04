@@ -111,10 +111,10 @@ extern void connect_to_client(struct client *client_p, struct conf_oper *oper_p,
 extern void connect_from_client(struct client *client_p, struct conf_oper *oper_p,
 				const char *servicenick);
 
-extern void sendto_server(const char *format, ...);
-extern void sendto_one(struct lconn *, const char *format, ...);
-extern void sendto_all(int umode, const char *format, ...);
-extern void sendto_all_butone(struct lconn *, int umode, 
+extern void PRINTFLIKE(1, 2) sendto_server(const char *format, ...);
+extern void PRINTFLIKE(2, 3) sendto_one(struct lconn *, const char *format, ...);
+extern void PRINTFLIKE(2, 3) sendto_all(int umode, const char *format, ...);
+extern void PRINTFLIKE(3, 4) sendto_all_butone(struct lconn *, int umode, 
                               const char *format, ...);
 
 extern int sock_create(int);

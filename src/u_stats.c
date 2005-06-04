@@ -83,8 +83,8 @@ static void
 stats_uplink(struct lconn *conn_p)
 {
         if(server_p != NULL)
-                sendto_one(conn_p, "Currently connected to %s Idle: %d "
-                           "SendQ: %d Connected: %s",
+                sendto_one(conn_p, "Currently connected to %s Idle: %ld "
+                           "SendQ: %ld Connected: %s",
                            server_p->name,
                            (CURRENT_TIME - server_p->last_time), 
                            get_sendq(server_p),

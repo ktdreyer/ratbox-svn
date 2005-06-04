@@ -65,7 +65,7 @@ int add_top_conf(const char *name, int (*sfunc) (struct TopConf *),
 		int (*efunc) (struct TopConf *), struct ConfEntry *);
 int add_conf_item(const char *, const char *, int, void (*)(void *));
 int remove_conf_item(const char *, const char *);
-void conf_report_error(const char *, ...);
+void PRINTFLIKE(1, 2) conf_report_error(const char *, ...);
 void newconf_init(void);
 int conf_start_block(const char *, const char *);
 int conf_end_block(struct TopConf *);

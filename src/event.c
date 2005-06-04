@@ -267,7 +267,7 @@ event_show(struct lconn *conn_p)
                 if(!event_table[i].active)
                         continue;
 
-                sendto_one(conn_p, "        %-27s %-4d seconds",
+                sendto_one(conn_p, "        %-27s %-4ld seconds",
                            event_table[i].name,
                            (event_table[i].when - CURRENT_TIME));
         }

@@ -124,11 +124,11 @@ e_banserv_expire(void *unused)
 			}
 
 			sendto_server(":%s ENCAP * UNKLINE %s %s",
-					banserv_p, user, host);
+					banserv_p->name, user, host);
 		}
 		else if(coldata[0][0] == 'X')
 			sendto_server(":%s ENCAP * UNXLINE %s",
-					banserv_p, coldata[1]);
+					banserv_p->name, coldata[1]);
 		else if(coldata[0][0] == 'R')
 			sendto_server(":%s ENCAP * UNRESV %s",
 					banserv_p->name, coldata[1]);

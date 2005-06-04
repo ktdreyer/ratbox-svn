@@ -153,7 +153,8 @@ kickbuild_finish(struct client *service_p, struct channel *chptr)
 
 		sendto_server(":%s KICK %s %s :%s",
 				service_p->name, chptr->name,
-				ptr->data, rptr->data);
+				(const char *) ptr->data, 
+				(const char *) rptr->data);
 		dlink_destroy(rptr, &kickbuildr_list);
 		dlink_destroy(ptr, &kickbuild_list);
 	}

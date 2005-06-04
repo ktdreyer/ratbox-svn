@@ -247,21 +247,21 @@ print_channel(struct client *client_p, struct channel *chptr,
                 show_topicwho = 0;
 
 	if(query->show_mode && show_topicwho)
-		service_error(alis_p, client_p, "%-50s %-8s %3d :%s (%s)",
+		service_error(alis_p, client_p, "%-50s %-8s %3ld :%s (%s)",
 			chptr->name, chmode_to_string_simple(&chptr->mode),
 			dlink_list_length(&chptr->users),
 			chptr->topic, chptr->topicwho);
 	else if(query->show_mode)
-		service_error(alis_p, client_p, "%-50s %-8s %3d :%s",
+		service_error(alis_p, client_p, "%-50s %-8s %3ld :%s",
 			chptr->name, chmode_to_string_simple(&chptr->mode),
 			dlink_list_length(&chptr->users),
 			chptr->topic);
 	else if(show_topicwho)
-		service_error(alis_p, client_p, "%-50s %3d :%s (%s)",
+		service_error(alis_p, client_p, "%-50s %3ld :%s (%s)",
 			chptr->name, dlink_list_length(&chptr->users),
 			chptr->topic, chptr->topicwho);
 	else
-		service_error(alis_p, client_p, "%-50s %3d :%s",
+		service_error(alis_p, client_p, "%-50s %3ld :%s",
 			chptr->name, dlink_list_length(&chptr->users),
 			chptr->topic);
 }

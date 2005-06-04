@@ -59,4 +59,14 @@ extern int errno;
 #endif /* defined(__INTEL_COMPILER) || defined(__GNUC__) */
 #endif /* strdupa */
 
+#if defined(__GNUC__) || defined(__INTEL_COMPILER)
+#define PRINTFLIKE(fmtarg, firstvararg) \
+	__attribute__((__format__ (__printf__, fmtarg, firstvararg)))
+#define SCANFLIKE(fmtarg, firstvararg) \
+	__attribute__((__format__ (__scanf__, fmtarg, firstvararg)))
+#else
+#define PRINTFLIKE(fmtarg, firstvararg)
+#define SCANFLIKE(fmtarg, firstvararg)
+#endif /* defined(__INTEL_COMPILER) || defined(__GNUC__) */
+
 #endif

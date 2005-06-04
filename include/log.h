@@ -8,8 +8,8 @@ extern void open_logfile(void);
 extern void open_service_logfile(struct client *service_p);
 extern void reopen_logfiles(void);
 
-extern void mlog(const char *format, ...);
+extern void PRINTFLIKE(1, 2) mlog(const char *format, ...);
 
-extern void slog(struct client *, int level, const char *format, ...);
+extern void PRINTFLIKE(3, 4) slog(struct client *, int level, const char *format, ...);
 
 #endif

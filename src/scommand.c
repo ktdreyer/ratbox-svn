@@ -553,7 +553,7 @@ c_stats(struct client *client_p, const char *parv[], int parc)
 
 		case 'v': case 'V':
 			sendto_server(":%s 249 %s V :%s (AutoConn.!*@*) Idle: "
-                                      "%d SendQ: %d Connected %s",
+                                      "%ld SendQ: %ld Connected %s",
 				      MYNAME, client_p->name, server_p->name, 
 				      (CURRENT_TIME - server_p->last_time), 
                                       get_sendq(server_p),
