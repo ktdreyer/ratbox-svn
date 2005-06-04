@@ -1,3 +1,25 @@
+leeh        2005/06/04 20:43:28 UTC	(20050604_6)
+
+  Modified files:
+    include              conf.h 
+    src                  s_banserv.c s_chanserv.c s_jupeserv.c 
+                         s_nickserv.c s_operbot.c s_operserv.c 
+                         s_userserv.c 
+  Log:
+  - alter the SELECT statements so they reference columns directly
+  
+  Revision  Changes    Path
+  1.48      +1 -0      rserv/include/conf.h
+  1.14      +6 -6      rserv/src/s_banserv.c
+  1.85      +10 -12    rserv/src/s_chanserv.c
+  1.34      +1 -1      rserv/src/s_jupeserv.c
+  1.20      +2 -4      rserv/src/s_nickserv.c
+  1.39      +2 -1      rserv/src/s_operbot.c
+  1.19      +2 -1      rserv/src/s_operserv.c
+  1.64      +3 -4      rserv/src/s_userserv.c
+
+
+
 leeh        2005/06/04 16:59:00 UTC	(20050604_5)
 
   Modified files:
