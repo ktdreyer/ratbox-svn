@@ -1,3 +1,15 @@
+leeh        2005/06/04 11:14:32 UTC	(20050604_1)
+
+  Modified files:
+    src                  s_banserv.c 
+  Log:
+  - make unkline etc set hold time properly
+  
+  Revision  Changes    Path
+  1.10      +9 -8      rserv/src/s_banserv.c
+
+
+
 leeh        2005/06/04 11:12:50 UTC	(20050604_0)
 
   Modified files:
