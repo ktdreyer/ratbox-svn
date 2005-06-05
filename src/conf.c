@@ -94,7 +94,7 @@ set_default_conf(void)
 	config_file.nallow_set_warn = 1;
 
 	config_file.bs_unban_time = 1209600;	/* 2 weeks */
-	config_file.bs_workaround = no;
+	config_file.bs_temp_workaround = 0;
 
 	my_free(config_file.nwarn_string);
 	config_file.nwarn_string = my_strdup("This nickname is registered, you may "
