@@ -51,6 +51,7 @@ static int o_banserv_resv(struct client *, struct lconn *, const char **, int);
 static int o_banserv_unkline(struct client *, struct lconn *, const char **, int);
 static int o_banserv_unxline(struct client *, struct lconn *, const char **, int);
 static int o_banserv_unresv(struct client *, struct lconn *, const char **, int);
+static int o_banserv_sync(struct client *, struct lconn *, const char **, int);
 
 static struct service_command banserv_command[] =
 {
@@ -59,7 +60,8 @@ static struct service_command banserv_command[] =
 	{ "RESV",	&o_banserv_resv,	2, NULL, 1, 0L, 0, 0, CONF_OPER_BAN_RESV, 0 },
 	{ "UNKLINE",	&o_banserv_unkline,	1, NULL, 1, 0L, 0, 0, CONF_OPER_BAN_KLINE, 0 },
 	{ "UNXLINE",	&o_banserv_unxline,	1, NULL, 1, 0L, 0, 0, CONF_OPER_BAN_XLINE, 0 },
-	{ "UNRESV",	&o_banserv_unresv,	1, NULL, 1, 0L, 0, 0, CONF_OPER_BAN_RESV, 0 }
+	{ "UNRESV",	&o_banserv_unresv,	1, NULL, 1, 0L, 0, 0, CONF_OPER_BAN_RESV, 0 },
+	{ "SYNC",	&o_banserv_sync,	1, NULL, 1, 0L, 0, 0, 0, 0 }
 };
 
 static struct ucommand_handler banserv_ucommand[] =
@@ -70,6 +72,7 @@ static struct ucommand_handler banserv_ucommand[] =
 	{ "unkline",	o_banserv_unkline,	0, CONF_OPER_BAN_KLINE, 1, 1, NULL },
 	{ "unxline",	o_banserv_unxline,	0, CONF_OPER_BAN_XLINE, 1, 1, NULL },
 	{ "unresv",	o_banserv_unresv,	0, CONF_OPER_BAN_RESV, 1, 1, NULL },
+	{ "sync",	o_banserv_sync,		0, 0, 1, 1, NULL },
 	{ "\0", NULL, 0, 0, 0, 0, NULL }
 };
 
@@ -228,12 +231,138 @@ find_ban_remove(const char *mask, char type)
 	return NULL;
 }
 
+static void
+push_ban(const char *target, char type, const char *mask, 
+		const char *reason, time_t hold)
+{
+	if(type == 'K')
+	{
+		static const char def_mask[] = "*";
+		char buf[BUFSIZE];
+		const char *user;
+		char *host;
+
+		strlcpy(buf, mask, sizeof(buf));
+
+		if((host = strchr(buf, '@')))
+		{
+			user = buf;
+			*host++ = '\0';
+		}
+		else
+		{
+			user = def_mask;
+			host = buf;
+		}
+
+		sendto_server(":%s ENCAP %s KLINE %lu %s %s :%s",
+				banserv_p->name, target,
+				(unsigned long) hold,
+				user, host, reason);
+	}
+	else if(type == 'X')
+		sendto_server(":%s ENCAP %s XLINE %lu %s 2 :%s",
+				banserv_p->name, target,
+				(unsigned long) hold, mask, reason);
+	else if(type == 'R')
+		sendto_server(":%s ENCAP %s RESV %lu %s 0 :%s",
+				banserv_p->name, target,
+				(unsigned long) hold, mask, reason);
+}
+
+static void
+push_unban(const char *target, char type, const char *mask)
+{
+	if(type == 'K')
+	{
+		static const char def_mask[] = "*";
+		char buf[BUFSIZE];
+		const char *user;
+		char *host;
+
+		strlcpy(buf, mask, sizeof(buf));
+
+		if((host = strchr(buf, '@')))
+		{
+			user = buf;
+			*host++ = '\0';
+		}
+		else
+		{
+			user = def_mask;
+			host = buf;
+		}
+
+		sendto_server(":%s ENCAP %s UNKLINE %s %s",
+				banserv_p->name, target, user, host);
+	}
+	else if(type == 'X')
+		sendto_server(":%s ENCAP %s UNXLINE %s",
+				banserv_p->name, target, mask);
+	else if(type == 'R')
+		sendto_server(":%s ENCAP %s UNRESV %s",
+				banserv_p->name, target, mask);
+}
+
+static void
+sync_bans(const char *target, char banletter)
+{
+	void *sql_vm;
+	const char **coldata;
+	const char **colnames;
+	int ncol;
+
+	/* first is temporary bans */
+	if(banletter)
+		sql_vm = loc_sqlite_compile("SELECT type, mask, reason, hold FROM operbans "
+					"WHERE hold > %lu AND remove=0 AND type='%c'",
+					CURRENT_TIME, banletter);
+	else
+		sql_vm = loc_sqlite_compile("SELECT type, mask, reason, hold FROM operbans "
+					"WHERE hold > %lu AND remove=0",
+					CURRENT_TIME);
+
+	while(loc_sqlite_step(sql_vm, &ncol, &coldata, &colnames))
+	{
+		push_ban(target, coldata[0][0], coldata[1], coldata[2],
+			(unsigned long) (atol(coldata[3]) - CURRENT_TIME));
+	}
+
+	/* permanent bans */
+	if(banletter)
+		sql_vm = loc_sqlite_compile("SELECT type, mask, reason, hold FROM operbans "
+					"WHERE hold=0 AND remove=0 AND type='%c'",
+					CURRENT_TIME, banletter);
+	else
+		sql_vm = loc_sqlite_compile("SELECT type, mask, reason, hold FROM operbans "
+					"WHERE hold=0 AND remove=0",
+					CURRENT_TIME);
+
+	while(loc_sqlite_step(sql_vm, &ncol, &coldata, &colnames))
+	{
+		push_ban(target, coldata[0][0], coldata[1], coldata[2], 0);
+	}
+
+	/* bans to remove */
+	if(banletter)
+		sql_vm = loc_sqlite_compile("SELECT type, mask FROM operbans "
+					"WHERE hold > %lu AND remove=1 AND type='%c'",
+					CURRENT_TIME, banletter);
+	else
+		sql_vm = loc_sqlite_compile("SELECT type, mask FROM operbans "
+					"WHERE hold > %lu AND remove=1",
+					CURRENT_TIME);
+
+	while(loc_sqlite_step(sql_vm, &ncol, &coldata, &colnames))
+	{
+		push_unban(target, coldata[0][0], coldata[1]);
+	}
+}
+
 static int
 o_banserv_kline(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
-	static const char wild[] = "*";
-	const char *user, *host, *reason;
-	char *mask, *p;
+	const char *mask, *reason;
 	time_t temptime = 0;
 	int para = 0;
 	int res;
@@ -271,9 +400,7 @@ o_banserv_kline(struct client *client_p, struct lconn *conn_p, const char *parv[
 		}
 	}
 
-	mask = LOCAL_COPY(parv[para]);
-	para++;
-
+	mask = parv[para++];
 	reason = rebuild_params(parv, parc, para);
 
 	if(EmptyString(reason))
@@ -284,44 +411,29 @@ o_banserv_kline(struct client *client_p, struct lconn *conn_p, const char *parv[
 		return 0;
 	}
 
-	if((p = strchr(mask, '@')))
-	{
-		*p++ = '\0';
-		user = mask;
-		host = p;
-	}
-	else
-	{
-		user = wild;
-		host = mask;
-	}
-
 	if(res)
 		loc_sqlite_exec(NULL, "UPDATE operbans SET reason=%Q, "
 				"hold=%ld, oper=%Q, remove=0 WHERE "
-				"type='K' AND mask='%q@%q'",
+				"type='K' AND mask='%q'",
 				reason,
 				temptime ? CURRENT_TIME + temptime : 0,
-				OPER_NAME(client_p, conn_p),
-				user, host);
+				OPER_NAME(client_p, conn_p), mask);
 	else
 		loc_sqlite_exec(NULL, "INSERT INTO operbans "
 				"(type, mask, reason, hold, create_time, "
 				"oper, remove, flags) "
-				"VALUES('K', '%q@%q', %Q, %lu, %lu, %Q, 0, 0)",
-				user, host, reason,
+				"VALUES('K', %Q, %Q, %lu, %lu, %Q, 0, 0)",
+				mask, reason,
 				temptime ? CURRENT_TIME + temptime : 0,
 				CURRENT_TIME, OPER_NAME(client_p, conn_p));
 			
 	service_send(banserv_p, client_p, conn_p,
-			"Issued kline for %s@%s", user, host);
+			"Issued kline for %s", mask);
 
-	sendto_server(":%s ENCAP * KLINE %lu %s %s :%s",
-			banserv_p->name, (unsigned long)temptime, user, host,
-			reason);
+	push_ban("*", 'K', mask, reason, temptime);
 
-	slog(banserv_p, 1, "%s - KLINE %s %s %s",
-		OPER_NAME(client_p, conn_p), user, host, reason);
+	slog(banserv_p, 1, "%s - KLINE %s %s",
+		OPER_NAME(client_p, conn_p), mask, reason);
 
 	return 0;
 }
@@ -397,9 +509,7 @@ o_banserv_xline(struct client *client_p, struct lconn *conn_p, const char *parv[
 	service_send(banserv_p, client_p, conn_p,
 			"Issued xline for %s", gecos);
 
-	sendto_server(":%s ENCAP * XLINE %lu %s 2 :%s",
-			banserv_p->name, (unsigned long)temptime, gecos,
-			reason);
+	push_ban("*", 'X', gecos, reason, temptime);
 
 	slog(banserv_p, 1, "%s - XLINE %s %s",
 		OPER_NAME(client_p, conn_p), gecos, reason);
@@ -478,8 +588,7 @@ o_banserv_resv(struct client *client_p, struct lconn *conn_p, const char *parv[]
 	service_send(banserv_p, client_p, conn_p,
 			"Issued resv for %s", mask);
 
-	sendto_server(":%s ENCAP * RESV %lu %s 0 :%s",
-			banserv_p->name, (unsigned long)temptime, mask, reason);
+	push_ban("*", 'R', mask, reason, temptime);
 
 	slog(banserv_p, 1, "%s - RESV %s %s",
 		OPER_NAME(client_p, conn_p), mask, reason);
@@ -647,6 +756,78 @@ o_banserv_unresv(struct client *client_p, struct lconn *conn_p, const char *parv
 
 	slog(banserv_p, 1, "%s - UNRESV %s",
 		OPER_NAME(client_p, conn_p), parv[0]);
+
+	return 0;
+}
+
+static int
+o_banserv_sync(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
+{
+	char banletter = '\0';
+
+	if(conn_p || irccmp(client_p->user->servername, parv[0]))
+	{
+		struct client *target_p;
+		dlink_node *ptr;
+		unsigned int hit = 0;
+
+		if(client_p)
+		{
+			if(!(client_p->user->oper->flags & CONF_OPER_BAN_SYNC))
+				hit++;
+		}
+		else if(!conn_p->sprivs & CONF_OPER_BAN_SYNC)
+			hit++;
+
+		if(hit)
+		{
+			service_send(banserv_p, client_p, conn_p,
+					"No access to sync bans");
+			return 0;
+		}
+
+		/* check their mask matches at least one server */
+		DLINK_FOREACH(ptr, server_list.head)
+		{
+			target_p = ptr->data;
+
+			if(match(parv[0], target_p->name))
+				break;
+		}
+
+		/* NULL if loop terminated without a break */
+		if(ptr == NULL)
+		{
+			service_send(banserv_p, client_p, conn_p,
+				"Server %s does not exist", parv[0]);
+			return 0;
+		}
+	}
+
+	if(!EmptyString(parv[1]))
+	{
+		if(!irccmp(parv[1], "klines"))
+			banletter = 'K';
+		else if(!irccmp(parv[1], "xlines"))
+			banletter = 'X';
+		else if(!irccmp(parv[1], "resvs"))
+			banletter = 'R';
+		else
+		{
+			service_send(banserv_p, client_p, conn_p,
+					"Invalid ban type");
+			return 0;
+		}
+	}
+
+	sync_bans(parv[0], banletter);
+
+	service_send(banserv_p, client_p, conn_p,
+			"Issued sync to %s", parv[0]);
+
+	slog(banserv_p, 1, "%s - SYNC %s %s",
+		OPER_NAME(client_p, conn_p), parv[0],
+		EmptyString(parv[1]) ? "" : parv[1]);
 
 	return 0;
 }

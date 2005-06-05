@@ -98,6 +98,7 @@ static struct mode_table banserv_table[] = {
 	{ "resv",	CONF_OPER_BAN_RESV	},
 	{ "perm",	CONF_OPER_BAN_PERM	},
 	{ "remove",	CONF_OPER_BAN_REMOVE	},
+	{ "sync",	CONF_OPER_BAN_SYNC	},
 	{ "\0", 0 }
 };
 
