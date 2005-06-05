@@ -1,3 +1,16 @@
+leeh        2005/06/05 00:45:53 UTC	(20050605_0)
+
+  Modified files:
+    src                  newconf.c s_banserv.c 
+  Log:
+  - added banserv::sync, to force a manual sync to a given server
+  
+  Revision  Changes    Path
+  1.54      +1 -0      rserv/src/newconf.c
+  1.15      +216 -35   rserv/src/s_banserv.c
+
+
+
 leeh        2005/06/04 20:43:28 UTC	(20050604_6)
 
   Modified files:
