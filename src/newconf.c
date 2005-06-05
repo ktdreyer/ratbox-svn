@@ -1007,7 +1007,8 @@ static struct ConfEntry conf_alis_table[] =
 
 static struct ConfEntry conf_banserv_table[] =
 {
-	{ "unban_time",		CF_TIME,NULL, 0, &config_file.bs_unban_time	},
+	{ "unban_time",		CF_TIME, NULL, 0, &config_file.bs_unban_time	},
+	{ "temp_workaround",	CF_YESNO,NULL, 0, &config_file.bs_temp_workaround },
 	{ "\0", 0, NULL, 0, NULL }
 };
 

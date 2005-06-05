@@ -72,6 +72,7 @@ struct _config_file
 
 	/* banserv */
 	int bs_unban_time;
+	int bs_temp_workaround;
 
 	/* alis */
 	int max_matches;

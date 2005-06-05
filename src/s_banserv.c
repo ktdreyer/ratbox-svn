@@ -84,6 +84,8 @@ static struct service_handler banserv_service = {
 
 static void e_banserv_expire(void *unused);
 
+static void push_unban(const char *target, char type, const char *mask);
+
 void
 init_s_banserv(void)
 {
@@ -235,6 +237,17 @@ static void
 push_ban(const char *target, char type, const char *mask, 
 		const char *reason, time_t hold)
 {
+	/* when ircd receives a temp ban it already has banned, it just
+	 * ignores the request and doesnt update the expiry.  This can cause
+	 * problems with the old max temp time of 4 weeks.  This work
+	 * around issues an unban first, allowing the new ban to be set,
+	 * which just delays the expiry somewhat.
+	 *
+	 * We only do this for temporary bans. --anfl
+	 */
+	if(config_file.bs_temp_workaround && hold)
+		push_unban(target, type, mask);
+
 	if(type == 'K')
 	{
 		static const char def_mask[] = "*";
