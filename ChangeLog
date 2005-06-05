@@ -1,3 +1,15 @@
+leeh        2005/06/05 14:23:08 UTC	(20050605_2)
+
+  Modified files:
+    src                  conf.c 
+  Log:
+  - helps if I set the right variable
+  
+  Revision  Changes    Path
+  1.49      +1 -1      rserv/src/conf.c
+
+
+
 leeh        2005/06/05 14:21:55 UTC	(20050605_1)
 
   Modified files:
