@@ -1,3 +1,22 @@
+leeh        2005/06/05 14:21:55 UTC	(20050605_1)
+
+  Modified files:
+    doc                  example.conf 
+    include              conf.h 
+    src                  conf.c newconf.c s_banserv.c 
+  Log:
+  - added temp_workaround option to banserv, which causes an unkline to be
+    issued before all temporary klines (etc)
+  
+  Revision  Changes    Path
+  1.46      +15 -1     rserv/doc/example.conf
+  1.49      +1 -0      rserv/include/conf.h
+  1.48      +1 -0      rserv/src/conf.c
+  1.55      +2 -1      rserv/src/newconf.c
+  1.16      +13 -0     rserv/src/s_banserv.c
+
+
+
 leeh        2005/06/05 00:45:53 UTC	(20050605_0)
 
   Modified files:
