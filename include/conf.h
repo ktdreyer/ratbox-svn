@@ -7,8 +7,9 @@ struct FileBuf;
 
 #define MYNAME config_file.name
 
-#define DEFAULT_ENFORCETOPIC_FREQUENCY	3600
-#define DEFAULT_EXPIREBAN_FREQUENCY	900
+#define DEFAULT_ENFORCETOPIC_FREQUENCY	3600	/* 1 hour */
+#define DEFAULT_EXPIREBAN_FREQUENCY	900	/* 15 mins */
+#define DEFAULT_AUTOSYNC_FREQUENCY	604800	/* 1 week */
 
 extern time_t first_time;
 
@@ -73,6 +74,7 @@ struct _config_file
 	/* banserv */
 	int bs_unban_time;
 	int bs_temp_workaround;
+	int bs_autosync_frequency;
 
 	/* alis */
 	int max_matches;

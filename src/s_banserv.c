@@ -83,15 +83,25 @@ static struct service_handler banserv_service = {
 };
 
 static void e_banserv_expire(void *unused);
+static void e_banserv_autosync(void *unused);
 
 static void push_unban(const char *target, char type, const char *mask);
+static void sync_bans(const char *target, char banletter);
 
 void
 init_s_banserv(void)
 {
 	banserv_p = add_service(&banserv_service);
 
-	eventAdd("e_banserv_expire", e_banserv_expire, NULL, 902);
+	eventAdd("banserv_expire", e_banserv_expire, NULL, 902);
+	eventAdd("banserv_autosync", e_banserv_autosync, NULL,
+			DEFAULT_AUTOSYNC_FREQUENCY);
+}
+
+static void
+e_banserv_autosync(void *unused)
+{
+	sync_bans("*", 0);
 }
 
 static void

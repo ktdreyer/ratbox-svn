@@ -888,6 +888,25 @@ conf_set_chanserv_enforcetopic(void *data)
 	eventUpdate("chanserv_enforcetopic", val);
 }
 
+static void
+conf_set_banserv_autosync(void *data)
+{
+	unsigned int val = *(unsigned int *) data;
+
+	if(val < 60)
+	{
+		conf_report_error("Ignoring banserv::autosync_frequency "
+			"-- invalid duration");
+		return;
+	}
+
+	if(config_file.bs_autosync_frequency == val)
+		return;
+
+	config_file.bs_autosync_frequency = val;
+	eventUpdate("banserv_autosync", val);
+}
+
 static struct ConfEntry conf_serverinfo_table[] =
 {
 	{ "client_flood_max",		CF_INT,  NULL, 0, &config_file.client_flood_max	},
@@ -1009,6 +1028,7 @@ static struct ConfEntry conf_banserv_table[] =
 {
 	{ "unban_time",		CF_TIME, NULL, 0, &config_file.bs_unban_time	},
 	{ "temp_workaround",	CF_YESNO,NULL, 0, &config_file.bs_temp_workaround },
+	{ "autosync_frequency",	CF_TIME, 	conf_set_banserv_autosync, 0, NULL },
 	{ "\0", 0, NULL, 0, NULL }
 };
 
