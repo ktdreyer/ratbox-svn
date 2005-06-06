@@ -1,3 +1,21 @@
+leeh        2005/06/06 11:46:11 UTC	(20050606_0)
+
+  Modified files:
+    doc                  example.conf 
+    include              conf.h 
+    src                  conf.c newconf.c s_banserv.c 
+  Log:
+  - add event to do automatic ban syncing
+  
+  Revision  Changes    Path
+  1.47      +5 -0      rserv/doc/example.conf
+  1.50      +4 -2      rserv/include/conf.h
+  1.50      +1 -0      rserv/src/conf.c
+  1.56      +20 -0     rserv/src/newconf.c
+  1.17      +11 -1     rserv/src/s_banserv.c
+
+
+
 leeh        2005/06/05 14:23:08 UTC	(20050605_2)
 
   Modified files:
