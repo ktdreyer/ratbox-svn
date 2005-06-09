@@ -308,6 +308,90 @@ find_listener(struct irc_sockaddr_storage *addr)
 }
 
 
+void
+add_ssl_listener(int port, const char *vhost_ip, int family)
+{
+	struct Listener *listener;
+	struct irc_sockaddr_storage vaddr;
+
+	/*
+	 * if no port in conf line, don't bother
+	 */
+	if(port == 0)
+		return;
+	memset(&vaddr, 0, sizeof(vaddr));
+	vaddr.ss_family = family;
+
+	if(vhost_ip != NULL)
+	{
+		if(family == AF_INET)
+		{
+			if(inetpton(family, vhost_ip, &((struct sockaddr_in *)&vaddr)->sin_addr) <= 0)
+				return;
+		} 
+#ifdef IPV6
+		else
+		{
+			if(inetpton(family, vhost_ip, &((struct sockaddr_in6 *)&vaddr)->sin6_addr) <= 0)
+				return;
+		
+		}
+#endif
+	} else
+	{
+		switch(family)
+		{
+			case AF_INET:
+				((struct sockaddr_in *)&vaddr)->sin_addr.s_addr = INADDR_ANY;
+				break;
+#ifdef IPV6
+			case AF_INET6:
+				memcpy(&((struct sockaddr_in6 *)&vaddr)->sin6_addr, &in6addr_any, sizeof(struct in6_addr));
+				break;
+			default:
+				return;
+#endif
+		} 
+	}
+	switch(family)
+	{
+		case AF_INET:
+			SET_SS_LEN(vaddr, sizeof(struct sockaddr_in));
+			((struct sockaddr_in *)&vaddr)->sin_port = htons(port);
+			break;
+#ifdef IPV6
+		case AF_INET6:
+			SET_SS_LEN(vaddr, sizeof(struct sockaddr_in6));
+			((struct sockaddr_in6 *)&vaddr)->sin6_port = htons(port);
+			break;
+#endif
+		default:
+			break;
+	}
+	if((listener = find_listener(&vaddr)))
+	{
+		if(listener->fd > -1)
+			return;
+	}
+	else
+	{
+		listener = make_listener(&vaddr);
+		listener->next = ListenerPollList;
+		ListenerPollList = listener;
+	}
+
+	listener->fd = -1;
+
+	if(inetport(listener))
+		listener->active = 1;
+	else
+		close_listener(listener);
+	
+
+
+
+}
+
 /*
  * add_listener- create a new listener
  * port - the port number to listen on

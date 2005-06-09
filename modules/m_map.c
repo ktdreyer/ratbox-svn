@@ -117,7 +117,7 @@ dump_map(struct Client *client_p, struct Client *root_p, char *pbuf)
 		 " | Users: %5lu (%4.1f%%)", dlink_list_length(&root_p->serv->users),
 		 100 * (float) dlink_list_length(&root_p->serv->users) / (float) Count.total);
 
-	sendto_one(client_p, form_str(RPL_MAP), me.name, client_p->name, buf);
+	sendto_one_queue(client_p, form_str(RPL_MAP), me.name, client_p->name, buf);
 
 	if(root_p->serv->servers.head != NULL)
 	{

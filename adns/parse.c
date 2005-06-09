@@ -46,7 +46,7 @@ int vbuf__append_quoted1035(vbuf *vb, const byte *buf, int len) {
 	break;
       }
     }
-    if (!adns__vbuf_append(vb,buf,i) || !adns__vbuf_append(vb,qbuf,strlen(qbuf)))
+    if (!adns__vbuf_append(vb,(const char *)buf,i) || !adns__vbuf_append(vb,(const char *)qbuf,strlen(qbuf)))
       return 0;
     if (i<len) i++;
     buf+= i;
@@ -75,7 +75,7 @@ adns_status adns__findlabel_next(findlabel_state *flstate,
   int lablen, jumpto;
   const char *dgram;
 
-  dgram= flstate->dgram;
+  dgram= (const char *)flstate->dgram;
   for (;;) {
     if (flstate->cbyte >= flstate->dglen) goto x_truncated;
     if (flstate->cbyte >= flstate->max) goto x_badresponse;
@@ -151,7 +151,7 @@ adns_status adns__parse_domain_more(findlabel_state *flstate, adns_state ads,
 	if (ch != '-' && !ctype_alpha(ch) && !ctype_digit(ch))
 	  return adns_s_answerdomaininvalid;
       }
-      if (!adns__vbuf_append(vb,dgram+labstart,lablen))
+      if (!adns__vbuf_append(vb,(const char *)dgram+labstart,lablen))
 	return adns_s_nomemory;
     }
   }

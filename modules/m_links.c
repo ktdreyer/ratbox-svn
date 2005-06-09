@@ -55,7 +55,6 @@ mapi_hlist_av1 links_hlist[] = {
 	{ NULL, NULL }
 };
 
-static dlink_list links_cache_list;
 DECLARE_MODULE_AV1(links, NULL, NULL, links_clist, links_hlist, NULL, "$Revision$");
 
 static void send_links_cache(struct Client *source_p);

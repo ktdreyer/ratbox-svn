@@ -147,7 +147,9 @@ AC_COMPILE_IFELSE(
 		AC_COMPILE_IFELSE(
 			[AC_LANG_PROGRAM(
 				[[#define IN_AUTOCONF
-				#include "include/stdinc.h"]],
+				#include <sys/types.h>
+				#include <sys/socket.h>
+				#include <netinet/in.h>]],
 				[[struct in6_addr a = in6addr_any;]]
 			)],
 			[AC_MSG_RESULT(yes)],
