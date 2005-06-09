@@ -1,3 +1,41 @@
+androsyn    2005/06/09 22:57:29 UTC	(20050609_0)
+
+  Modified files:
+    .                    configure configure.ac 
+    adns                 event.c general.c internal.h parse.c 
+                         query.c reply.c transmit.c types.c 
+    include              hash.h ircd.h listener.h newconf.h 
+                         s_conf.h 
+    modules              m_links.c m_map.c 
+    src                  hash.c listener.c monitor.c whowas.c 
+  Log:
+  minor little cleanups to make gcc 4 happy
+  
+  Revision  Changes    Path
+  1.33      +2 -1      ircd-ratbox/adns/event.c
+  1.21      +4 -4      ircd-ratbox/adns/general.c
+  1.19      +2 -2      ircd-ratbox/adns/internal.h
+  1.16      +3 -3      ircd-ratbox/adns/parse.c
+  1.29      +2 -2      ircd-ratbox/adns/query.c
+  1.13      +1 -1      ircd-ratbox/adns/reply.c
+  1.16      +2 -2      ircd-ratbox/adns/transmit.c
+  1.24      +3 -3      ircd-ratbox/adns/types.c
+  7.266     +5 -3      ircd-ratbox/configure
+  7.77      +5 -3      ircd-ratbox/configure.ac
+  7.59      +4 -4      ircd-ratbox/include/hash.h
+  7.89      +0 -1      ircd-ratbox/include/ircd.h
+  7.23      +1 -0      ircd-ratbox/include/listener.h
+  7.37      +0 -2      ircd-ratbox/include/newconf.h
+  7.324     +0 -1      ircd-ratbox/include/s_conf.h
+  1.78      +1 -2      ircd-ratbox/modules/m_links.c
+  1.44      +2 -2      ircd-ratbox/modules/m_map.c
+  7.122     +9 -9      ircd-ratbox/src/hash.c
+  7.138     +84 -0     ircd-ratbox/src/listener.c
+  7.8       +1 -1      ircd-ratbox/src/monitor.c
+  7.39      +1 -1      ircd-ratbox/src/whowas.c
+
+
+
 androsyn    2005/06/03 19:09:21 UTC	(20050603_0)
 
   Modified files:
