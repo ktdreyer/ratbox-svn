@@ -1,3 +1,15 @@
+leeh        2005/06/11 01:52:25 UTC	(20050611_0)
+
+  Modified files:
+    src                  s_banserv.c 
+  Log:
+  - add findkline/findxline/findresv to banserv
+  
+  Revision  Changes    Path
+  1.18      +66 -1     rserv/src/s_banserv.c
+
+
+
 leeh        2005/06/06 11:46:11 UTC	(20050606_0)
 
   Modified files:
