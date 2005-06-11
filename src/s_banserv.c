@@ -116,53 +116,11 @@ e_banserv_autosync(void *unused)
 static void
 e_banserv_expire(void *unused)
 {
-	void *sql_vm;
-	const char **coldata;
-	const char **colnames;
-	int ncol;
-
-	sql_vm = loc_sqlite_compile("SELECT type, mask FROM operbans WHERE "
-				"hold <= %lu AND remove=0",
-				CURRENT_TIME);
-
-	while(loc_sqlite_step(sql_vm, &ncol, &coldata, &colnames))
-	{
-		if(coldata[0][0] == 'K')
-		{
-			static const char def_wild[] = "*";
-			char buf[BUFSIZE];
-			const char *user;
-			char *host;
-
-			strlcpy(buf, coldata[1], sizeof(buf));
-
-			if((host = strchr(buf, '@')))
-			{
-				user = buf;
-				*host++ = '\0';
-			}
-			else
-			{
-				user = def_wild;
-				host = buf;
-			}
-
-			sendto_server(":%s ENCAP * UNKLINE %s %s",
-					banserv_p->name, user, host);
-		}
-		else if(coldata[0][0] == 'X')
-			sendto_server(":%s ENCAP * UNXLINE %s",
-					banserv_p->name, coldata[1]);
-		else if(coldata[0][0] == 'R')
-			sendto_server(":%s ENCAP * UNRESV %s",
-					banserv_p->name, coldata[1]);
-	}
-
-	loc_sqlite_exec(NULL, "DELETE FROM operbans WHERE hold <= %lu AND remove=1",
+	/* these bans are temp, so they will expire automatically on 
+	 * servers
+	 */
+	loc_sqlite_exec(NULL, "DELETE FROM operbans WHERE hold <= %lu",
 			CURRENT_TIME);
-	loc_sqlite_exec(NULL, "UPDATE operbans SET remove=1, hold=%lu "
-			"WHERE hold <= %lu",
-			CURRENT_TIME + config_file.bs_unban_time, CURRENT_TIME);
 }
 
 static time_t
@@ -186,6 +144,31 @@ get_temp_time(const char *duration)
 		result = (60*24*7*52);
 
 	return(result*60);
+}
+
+static int
+split_ban(const char *mask, char **user, char **host)
+{
+	static char buf[BUFSIZE];
+	char *p;
+
+	strlcpy(buf, mask, sizeof(buf));
+
+	if((p = strchr(buf, '@')) == NULL)
+		return 0;
+
+	*p++ = '\0';
+
+	if(EmptyString(buf) || EmptyString(p))
+		return 0;
+
+	if(user)
+		*user = buf;
+
+	if(host)
+		*host = p;
+
+	return 1;
 }
 
 static int
@@ -269,23 +252,10 @@ push_ban(const char *target, char type, const char *mask,
 
 	if(type == 'K')
 	{
-		static const char def_mask[] = "*";
-		char buf[BUFSIZE];
-		const char *user;
-		char *host;
+		char *user, *host;
 
-		strlcpy(buf, mask, sizeof(buf));
-
-		if((host = strchr(buf, '@')))
-		{
-			user = buf;
-			*host++ = '\0';
-		}
-		else
-		{
-			user = def_mask;
-			host = buf;
-		}
+		if(!split_ban(mask, &user, &host))
+			return;
 
 		sendto_server(":%s ENCAP %s KLINE %lu %s %s :%s",
 				banserv_p->name, target,
@@ -307,23 +277,10 @@ push_unban(const char *target, char type, const char *mask)
 {
 	if(type == 'K')
 	{
-		static const char def_mask[] = "*";
-		char buf[BUFSIZE];
-		const char *user;
-		char *host;
+		char *user, *host;
 
-		strlcpy(buf, mask, sizeof(buf));
-
-		if((host = strchr(buf, '@')))
-		{
-			user = buf;
-			*host++ = '\0';
-		}
-		else
-		{
-			user = def_mask;
-			host = buf;
-		}
+		if(!split_ban(mask, &user, &host))
+			return;
 
 		sendto_server(":%s ENCAP %s UNKLINE %s %s",
 				banserv_p->name, target, user, host);
@@ -433,6 +390,15 @@ o_banserv_kline(struct client *client_p, struct lconn *conn_p, const char *parv[
 	}
 
 	mask = parv[para++];
+
+
+	if(!split_ban(mask, NULL, NULL))
+	{
+		service_send(banserv_p, client_p, conn_p,
+				"Invalid kline %s", mask);
+		return 0;
+	}
+
 	reason = rebuild_params(parv, parc, para);
 
 	if(EmptyString(reason))
@@ -631,9 +597,6 @@ o_banserv_resv(struct client *client_p, struct lconn *conn_p, const char *parv[]
 static int
 o_banserv_unkline(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
-	static const char wild[] = "*";
-	const char *user, *host;
-	char *mask, *p;
 	const char *oper = find_ban_remove(parv[0], 'K');
 
 	if(oper == NULL)
@@ -664,18 +627,11 @@ o_banserv_unkline(struct client *client_p, struct lconn *conn_p, const char *par
 		}
 	}
 
-	mask = LOCAL_COPY(parv[0]);
-
-	if((p = strchr(mask, '@')))
+	if(!split_ban(parv[0], NULL, NULL))
 	{
-		*p++ = '\0';
-		user = mask;
-		host = p;
-	}
-	else
-	{
-		user = wild;
-		host = mask;
+		service_send(banserv_p, client_p, conn_p,
+				"Invalid kline %s", parv[0]);
+		return 0;
 	}
 
 	loc_sqlite_exec(NULL, "UPDATE operbans SET remove=1, hold=%lu "
@@ -683,13 +639,12 @@ o_banserv_unkline(struct client *client_p, struct lconn *conn_p, const char *par
 			CURRENT_TIME + config_file.bs_unban_time, parv[0]);
 
 	service_send(banserv_p, client_p, conn_p,
-			"Issued unkline for %s@%s", user, host);
+			"Issued unkline for %s", parv[0]);
 
-	sendto_server(":%s ENCAP * UNKLINE %s %s",
-			banserv_p->name, user, host);
+	push_unban("*", 'K', parv[0]);
 
-	slog(banserv_p, 1, "%s - UNKLINE %s %s",
-		OPER_NAME(client_p, conn_p), user, host);
+	slog(banserv_p, 1, "%s - UNKLINE %s",
+		OPER_NAME(client_p, conn_p), parv[0]);
 
 	return 0;
 }
@@ -734,8 +689,7 @@ o_banserv_unxline(struct client *client_p, struct lconn *conn_p, const char *par
 	service_send(banserv_p, client_p, conn_p,
 			"Issued unxline for %s", parv[0]);
 
-	sendto_server(":%s ENCAP * UNXLINE %s",
-			banserv_p->name, parv[0]);
+	push_unban("*", 'X', parv[0]);
 
 	slog(banserv_p, 1, "%s - UNXLINE %s",
 		OPER_NAME(client_p, conn_p), parv[0]);
@@ -783,8 +737,7 @@ o_banserv_unresv(struct client *client_p, struct lconn *conn_p, const char *parv
 	service_send(banserv_p, client_p, conn_p,
 			"Issued unresv for %s", parv[0]);
 
-	sendto_server(":%s ENCAP * UNRESV %s",
-			banserv_p->name, parv[0]);
+	push_unban("*", 'R', parv[0]);
 
 	slog(banserv_p, 1, "%s - UNRESV %s",
 		OPER_NAME(client_p, conn_p), parv[0]);
