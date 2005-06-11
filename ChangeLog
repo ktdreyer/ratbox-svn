@@ -1,3 +1,18 @@
+leeh        2005/06/11 15:36:26 UTC	(20050611_1)
+
+  Modified files:
+    src                  s_banserv.c 
+  Log:
+  - temp bans expire automatically on servers, we dont need to push unklines
+    for them
+  - added split_ban(), to split a kline into user and host
+  - make unkline etc use push_unban()
+  
+  Revision  Changes    Path
+  1.19      +54 -101   rserv/src/s_banserv.c
+
+
+
 leeh        2005/06/11 01:52:25 UTC	(20050611_0)
 
   Modified files:
