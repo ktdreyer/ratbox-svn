@@ -52,6 +52,9 @@ static int o_banserv_unkline(struct client *, struct lconn *, const char **, int
 static int o_banserv_unxline(struct client *, struct lconn *, const char **, int);
 static int o_banserv_unresv(struct client *, struct lconn *, const char **, int);
 static int o_banserv_sync(struct client *, struct lconn *, const char **, int);
+static int o_banserv_findkline(struct client *, struct lconn *, const char **, int);
+static int o_banserv_findxline(struct client *, struct lconn *, const char **, int);
+static int o_banserv_findresv(struct client *, struct lconn *, const char **, int);
 
 static struct service_command banserv_command[] =
 {
@@ -61,7 +64,10 @@ static struct service_command banserv_command[] =
 	{ "UNKLINE",	&o_banserv_unkline,	1, NULL, 1, 0L, 0, 0, CONF_OPER_BAN_KLINE, 0 },
 	{ "UNXLINE",	&o_banserv_unxline,	1, NULL, 1, 0L, 0, 0, CONF_OPER_BAN_XLINE, 0 },
 	{ "UNRESV",	&o_banserv_unresv,	1, NULL, 1, 0L, 0, 0, CONF_OPER_BAN_RESV, 0 },
-	{ "SYNC",	&o_banserv_sync,	1, NULL, 1, 0L, 0, 0, 0, 0 }
+	{ "SYNC",	&o_banserv_sync,	1, NULL, 1, 0L, 0, 0, 0, 0 },
+	{ "FINDKLINE",	&o_banserv_findkline,	1, NULL, 1, 0L, 0, 0, CONF_OPER_BAN_KLINE, 0 },
+	{ "FINDXLINE",	&o_banserv_findxline,	1, NULL, 1, 0L, 0, 0, CONF_OPER_BAN_XLINE, 0 },
+	{ "FINDRESV",	&o_banserv_findresv,	1, NULL, 1, 0L, 0, 0, CONF_OPER_BAN_RESV, 0 }
 };
 
 static struct ucommand_handler banserv_ucommand[] =
@@ -72,6 +78,9 @@ static struct ucommand_handler banserv_ucommand[] =
 	{ "unkline",	o_banserv_unkline,	0, CONF_OPER_BAN_KLINE, 1, 1, NULL },
 	{ "unxline",	o_banserv_unxline,	0, CONF_OPER_BAN_XLINE, 1, 1, NULL },
 	{ "unresv",	o_banserv_unresv,	0, CONF_OPER_BAN_RESV, 1, 1, NULL },
+	{ "findkline",	o_banserv_findkline,	0, CONF_OPER_BAN_KLINE, 1, 1, NULL },
+	{ "findxline",	o_banserv_findxline,	0, CONF_OPER_BAN_XLINE, 1, 1, NULL },
+	{ "findresv",	o_banserv_findresv,	0, CONF_OPER_BAN_RESV, 1, 1, NULL },
 	{ "sync",	o_banserv_sync,		0, 0, 1, 1, NULL },
 	{ "\0", NULL, 0, 0, 0, 0, NULL }
 };
@@ -852,6 +861,62 @@ o_banserv_sync(struct client *client_p, struct lconn *conn_p, const char *parv[]
 		OPER_NAME(client_p, conn_p), parv[0],
 		EmptyString(parv[1]) ? "" : parv[1]);
 
+	return 0;
+}
+
+static void
+list_bans(struct client *client_p, struct lconn *conn_p, 
+		const char *mask, char type)
+{
+	void *sql_vm;
+	const char **coldata;
+	const char **colnames;
+	int ncol;
+	time_t duration;
+
+	sql_vm = loc_sqlite_compile("SELECT mask, reason, operreason, hold, oper "
+			"FROM operbans WHERE type='%c' AND remove=0 AND "
+			"hold > %lu",
+			type, (unsigned long) CURRENT_TIME);
+
+	service_send(banserv_p, client_p, conn_p,
+			"Ban list matching %s", mask);
+
+	while(loc_sqlite_step(sql_vm, &ncol, &coldata, &colnames))
+	{
+		if(!match(mask, coldata[0]))
+			continue;
+
+		duration = ((unsigned long) atol(coldata[3]) - CURRENT_TIME);
+
+		service_send(banserv_p, client_p, conn_p,
+				"  %-30s exp:%s oper:%s [%s%s]",
+				coldata[0], get_short_duration(duration),
+				coldata[4], coldata[1],
+				EmptyString(coldata[2]) ? "" : coldata[2]);
+	}
+
+	service_send(banserv_p, client_p, conn_p, "End of ban list");
+}
+
+static int
+o_banserv_findkline(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
+{
+	list_bans(client_p, conn_p, parv[0], 'K');
+	return 0;
+}
+
+static int
+o_banserv_findxline(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
+{
+	list_bans(client_p, conn_p, parv[0], 'X');
+	return 0;
+}
+
+static int
+o_banserv_findresv(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
+{
+	list_bans(client_p, conn_p, parv[0], 'R');
 	return 0;
 }
 
