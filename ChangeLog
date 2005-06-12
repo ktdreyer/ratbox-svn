@@ -1,3 +1,15 @@
+leeh        2005/06/12 22:37:03 UTC	(20050612_0)
+
+  Modified files:
+    src                  io.c 
+  Log:
+  - refcount oper blocks properly when we initiate the dcc to a client
+  
+  Revision  Changes    Path
+  1.43      +1 -0      rserv/src/io.c
+
+
+
 leeh        2005/06/11 15:36:26 UTC	(20050611_1)
 
   Modified files:
