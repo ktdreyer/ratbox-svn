@@ -567,6 +567,7 @@ connect_from_client(struct client *client_p, struct conf_oper *oper_p,
 	conn_p = my_malloc(sizeof(struct lconn));
 	conn_p->name = my_strdup(oper_p->name);
         conn_p->oper = oper_p;
+	oper_p->refcount++;
 
 	conn_p->fd = client_fd;
 	conn_p->first_time = conn_p->last_time = CURRENT_TIME;
