@@ -1,3 +1,16 @@
+androsyn    2005/06/12 09:21:49 UTC	(20050612_1)
+
+  Modified files:
+    src                  s_user.c 
+  Log:
+  introduce_client() didn't need to be shoving in a 0 for ::1 as inetntop
+  already takes care of this.
+  
+  Revision  Changes    Path
+  7.355     +1 -10     ircd-ratbox/src/s_user.c
+
+
+
 androsyn    2005/06/12 03:10:28 UTC	(20050612_0)
 
   Modified files:
