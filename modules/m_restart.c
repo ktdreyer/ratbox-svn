@@ -62,20 +62,20 @@ mo_restart(struct Client *client_p, struct Client *source_p, int parc, const cha
 
 	if(!IsOperDie(source_p))
 	{
-		sendto_one(source_p, form_str(ERR_NOPRIVS),
+		sendto_one(source_p, POP_QUEUE, form_str(ERR_NOPRIVS),
 			   me.name, source_p->name, "die");
 		return 0;
 	}
 
 	if(parc < 2 || EmptyString(parv[1]))
 	{
-		sendto_one(source_p, ":%s NOTICE %s :Need server name /restart %s",
+		sendto_one(source_p, POP_QUEUE, ":%s NOTICE %s :Need server name /restart %s",
 			   me.name, source_p->name, me.name);
 		return 0;
 	}
 	else if(irccmp(parv[1], me.name))
 	{
-		sendto_one(source_p, ":%s NOTICE %s :Mismatch on /restart %s",
+		sendto_one(source_p, POP_QUEUE, ":%s NOTICE %s :Mismatch on /restart %s",
 			   me.name, source_p->name, me.name);
 		return 0;
 	}
@@ -84,7 +84,7 @@ mo_restart(struct Client *client_p, struct Client *source_p, int parc, const cha
 	{
 		target_p = ptr->data;
 
-		sendto_one(target_p,
+		sendto_one(target_p, POP_QUEUE,
 			   ":%s NOTICE %s :Server Restarting. %s",
 			   me.name, target_p->name, get_client_name(source_p, HIDE_IP));
 	}
@@ -93,7 +93,7 @@ mo_restart(struct Client *client_p, struct Client *source_p, int parc, const cha
 	{
 		target_p = ptr->data;
 
-		sendto_one(target_p, ":%s ERROR :Restart by %s",
+		sendto_one(target_p, POP_QUEUE, ":%s ERROR :Restart by %s",
 			   me.name, get_client_name(source_p, HIDE_IP));
 	}
 

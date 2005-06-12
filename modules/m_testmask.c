@@ -72,7 +72,7 @@ mo_testmask(struct Client *client_p, struct Client *source_p,
 
 	if((hostname = strchr(username, '@')) == NULL)
 	{
-		sendto_one(source_p, ":%s NOTICE %s :Invalid parameters",
+		sendto_one(source_p, POP_QUEUE, ":%s NOTICE %s :Invalid parameters",
 				me.name, source_p->name);
 		return 0;
 	}
@@ -96,7 +96,7 @@ mo_testmask(struct Client *client_p, struct Client *source_p,
 		}
 	}
 
-	sendto_one(source_p, form_str(RPL_TESTMASK),
+	sendto_one(source_p, POP_QUEUE, form_str(RPL_TESTMASK),
 			me.name, source_p->name, username, hostname,
 			lcount, gcount);
 	return 0;

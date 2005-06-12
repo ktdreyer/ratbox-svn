@@ -86,7 +86,7 @@ mo_etrace(struct Client *client_p, struct Client *source_p, int parc, const char
 			if(target_p)
 			{
 				if(!MyClient(target_p))
-					sendto_one(target_p, ":%s ENCAP %s ETRACE %s",
+					sendto_one(target_p, POP_QUEUE, ":%s ENCAP %s ETRACE %s",
 						get_id(source_p, target_p),
 						target_p->user->server,
 						get_id(target_p, target_p));
@@ -94,7 +94,7 @@ mo_etrace(struct Client *client_p, struct Client *source_p, int parc, const char
 					do_single_etrace(source_p, target_p);
 			}
 			else
-				sendto_one_numeric(source_p, ERR_NOSUCHNICK,
+				sendto_one_numeric(source_p, POP_QUEUE, ERR_NOSUCHNICK,
 						form_str(ERR_NOSUCHNICK), parv[1]);
 		}
 	}
@@ -116,7 +116,7 @@ me_etrace(struct Client *client_p, struct Client *source_p, int parc, const char
 	if((target_p = find_person(parv[1])) && MyClient(target_p))
 		do_single_etrace(source_p, target_p);
 
-        sendto_one_numeric(source_p, RPL_ENDOFTRACE, form_str(RPL_ENDOFTRACE), 
+        sendto_one_numeric(source_p, POP_QUEUE, RPL_ENDOFTRACE, form_str(RPL_ENDOFTRACE), 
 				target_p ? target_p->name : parv[1]);
 
 	return 0;
@@ -139,7 +139,7 @@ do_etrace(struct Client *source_p, int ipv4, int ipv6)
 			continue;
 #endif
 
-		sendto_one(source_p, form_str(RPL_ETRACE),
+		sendto_one(source_p, POP_QUEUE, form_str(RPL_ETRACE),
 			   me.name, source_p->name, 
 			   IsOper(target_p) ? "Oper" : "User", 
 			   get_client_class(target_p),
@@ -150,7 +150,7 @@ do_etrace(struct Client *source_p, int ipv4, int ipv6)
 			    target_p->sockhost, target_p->info);
 	}
 
-	sendto_one_numeric(source_p, RPL_ENDOFTRACE, form_str(RPL_ENDOFTRACE), me.name);
+	sendto_one_numeric(source_p, POP_QUEUE, RPL_ENDOFTRACE, form_str(RPL_ENDOFTRACE), me.name);
 }
 
 static void
@@ -163,7 +163,7 @@ do_etrace_full(struct Client *source_p)
 		do_single_etrace(source_p, ptr->data);
 	}
 
-	sendto_one_numeric(source_p, RPL_ENDOFTRACE, form_str(RPL_ENDOFTRACE), me.name);
+	sendto_one_numeric(source_p, POP_QUEUE, RPL_ENDOFTRACE, form_str(RPL_ENDOFTRACE), me.name);
 }
 
 /*
@@ -181,7 +181,7 @@ do_single_etrace(struct Client *source_p, struct Client *target_p)
 	 * advertise its internal ip address in the field --fl
 	 */
 	if(IsIPSpoof(target_p))
-		sendto_one(source_p, form_str(RPL_ETRACEFULL),
+		sendto_one(source_p, POP_QUEUE, form_str(RPL_ETRACEFULL),
 				me.name, source_p->name, 
 				IsOper(target_p) ? "Oper" : "User",
 				get_client_class(target_p),
@@ -189,7 +189,7 @@ do_single_etrace(struct Client *source_p, struct Client *target_p)
 				"255.255.255.255", "<hidden> <hidden>", target_p->info);
 	else
 #endif
-		sendto_one(source_p, form_str(RPL_ETRACEFULL),
+		sendto_one(source_p, POP_QUEUE, form_str(RPL_ETRACEFULL),
 				me.name, source_p->name, 
 				IsOper(target_p) ? "Oper" : "User",
 				get_client_class(target_p),

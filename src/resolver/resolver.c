@@ -57,6 +57,10 @@ int ofd = -1;
 
 #define EmptyString(x) (!(x) || (*(x) == '\0'))
 
+void set_time(void);
+void ilog(char *errstr, ...);
+void restart(char *msg);
+
 static char readBuf[READBUF_SIZE];
 static void resolve_ip(char **parv);
 static void resolve_host(char **parv);

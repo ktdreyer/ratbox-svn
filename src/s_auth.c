@@ -82,7 +82,7 @@ typedef enum
 }
 ReportType;
 
-#define sendheader(c, r) sendto_one(c, HeaderMessages[(r)])
+#define sendheader(c, r) sendto_one(c, POP_QUEUE, HeaderMessages[(r)])
 
 static dlink_list auth_poll_list;
 static BlockHeap *auth_heap;

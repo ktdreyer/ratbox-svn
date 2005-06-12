@@ -60,6 +60,9 @@ int irc_ofd;
 
 #define EmptyString(x) (!(x) || (*(x) == '\0'))
 
+void ilog(char *errstr, ...);
+void restart(char *msg);
+
 struct auth_request
 {
 	struct irc_sockaddr_storage bindaddr;
@@ -110,7 +113,7 @@ void restart(char *msg)
 static inline int
 io_to_array(char *string, char *parv[MAXPARA])
 {
-	char *p, *buf = string;
+	char *p, *xbuf = string;
 	int x = 0;
 
 	parv[x] = NULL;
@@ -118,35 +121,35 @@ io_to_array(char *string, char *parv[MAXPARA])
         if(EmptyString(string))
                 return x;
 
-	while (*buf == ' ')	/* skip leading spaces */
-		buf++;
-	if(*buf == '\0')	/* ignore all-space args */
+	while (*xbuf == ' ')	/* skip leading spaces */
+		xbuf++;
+	if(*xbuf == '\0')	/* ignore all-space args */
 		return x;
 
 	do
 	{
-		if(*buf == ':')	/* Last parameter */
+		if(*xbuf == ':')	/* Last parameter */
 		{
-			buf++;
-			parv[x++] = buf;
+			xbuf++;
+			parv[x++] = xbuf;
 			parv[x] = NULL;
 			return x;
 		}
 		else
 		{
-			parv[x++] = buf;
+			parv[x++] = xbuf;
 			parv[x] = NULL;
-			if((p = strchr(buf, ' ')) != NULL)
+			if((p = strchr(xbuf, ' ')) != NULL)
 			{
 				*p++ = '\0';
-				buf = p;
+				xbuf = p;
 			}
 			else
 				return x;
 		}
-		while (*buf == ' ')
-			buf++;
-		if(*buf == '\0')
+		while (*xbuf == ' ')
+			xbuf++;
+		if(*xbuf == '\0')
 			return x;
 	}
 	while (x < MAXPARA - 1);
@@ -209,7 +212,7 @@ read_auth_timeout(int fd, void *data)
 
 
 static char *
-GetValidIdent(char *buf)
+GetValidIdent(char *xbuf)
 {
         int remp = 0;
         int locp = 0;     
@@ -220,7 +223,7 @@ GetValidIdent(char *buf)
         char *remotePortString;
 
         /* All this to get rid of a sscanf() fun. */
-        remotePortString = buf;
+        remotePortString = xbuf;
 
         colon1Ptr = strchr(remotePortString, ':');
         if(!colon1Ptr)   
@@ -330,7 +333,7 @@ connect_callback(int fd, int status, void *data)
 	}
 }
 
-void
+static void
 check_identd(const char *id, const char *bindaddr, const char *destaddr, const char *srcport, const char *dstport)
 {
 	struct auth_request *auth;

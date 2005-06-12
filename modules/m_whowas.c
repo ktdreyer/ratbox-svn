@@ -67,9 +67,9 @@ m_whowas(struct Client *client_p, struct Client *source_p, int parc, const char 
 	{
 		if((last_used + ConfigFileEntry.pace_wait_simple) > CurrentTime)
 		{
-			sendto_one(source_p, form_str(RPL_LOAD2HI),
+			sendto_one(source_p, HOLD_QUEUE, form_str(RPL_LOAD2HI),
 				   me.name, source_p->name, "WHOWAS");
-			sendto_one(source_p, form_str(RPL_ENDOFWHOWAS),
+			sendto_one(source_p, POP_QUEUE, form_str(RPL_ENDOFWHOWAS),
 				   me.name, source_p->name, parv[1]);
 			return 0;
 		}
@@ -98,11 +98,11 @@ m_whowas(struct Client *client_p, struct Client *source_p, int parc, const char 
 	{
 		if(!irccmp(nick, temp->name))
 		{
-			sendto_one(source_p, form_str(RPL_WHOWASUSER),
+			sendto_one(source_p, HOLD_QUEUE, form_str(RPL_WHOWASUSER),
 				   me.name, source_p->name, temp->name,
 				   temp->username, temp->hostname, temp->realname);
 
-			sendto_one_numeric(source_p, RPL_WHOISSERVER,
+			sendto_one_numeric(source_p, HOLD_QUEUE, RPL_WHOISSERVER,
 					   form_str(RPL_WHOISSERVER),
 					   temp->name, temp->servername,
 					   myctime(temp->logoff));
@@ -114,10 +114,10 @@ m_whowas(struct Client *client_p, struct Client *source_p, int parc, const char 
 	}
 
 	if(!found)
-		sendto_one(source_p, form_str(ERR_WASNOSUCHNICK), 
+		sendto_one(source_p, HOLD_QUEUE, form_str(ERR_WASNOSUCHNICK), 
 			   me.name, source_p->name, nick);
 
-	sendto_one(source_p, form_str(RPL_ENDOFWHOWAS), 
+	sendto_one(source_p, POP_QUEUE, form_str(RPL_ENDOFWHOWAS), 
 		   me.name, source_p->name, parv[1]);
 	return 0;
 }

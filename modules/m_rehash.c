@@ -302,7 +302,7 @@ mo_rehash(struct Client *client_p, struct Client *source_p, int parc, const char
 {
 	if(!IsOperRehash(source_p))
 	{
-		sendto_one(source_p, form_str(ERR_NOPRIVS),
+		sendto_one(source_p, POP_QUEUE, form_str(ERR_NOPRIVS),
 			   me.name, source_p->name, "rehash");
 		return 0;
 	}
@@ -317,7 +317,7 @@ mo_rehash(struct Client *client_p, struct Client *source_p, int parc, const char
 		{
 			if(irccmp(parv[1], rehash_commands[x].cmd) == 0)
 			{
-				sendto_one(source_p, form_str(RPL_REHASHING), me.name,
+				sendto_one(source_p, POP_QUEUE, form_str(RPL_REHASHING), me.name,
 					   source_p->name, rehash_commands[x].cmd);
 				rehash_commands[x].handler(source_p);
 				ilog(L_MAIN, "REHASH %s From %s[%s]", parv[1],
@@ -334,12 +334,12 @@ mo_rehash(struct Client *client_p, struct Client *source_p, int parc, const char
 			strlcat(cmdbuf, " ", sizeof(cmdbuf));
 			strlcat(cmdbuf, rehash_commands[x].cmd, sizeof(cmdbuf));
 		}
-		sendto_one(source_p, ":%s NOTICE %s :rehash one of:%s", me.name, source_p->name,
+		sendto_one(source_p, POP_QUEUE, ":%s NOTICE %s :rehash one of:%s", me.name, source_p->name,
 			   cmdbuf);
 	}
 	else
 	{
-		sendto_one(source_p, form_str(RPL_REHASHING), me.name, source_p->name,
+		sendto_one(source_p, POP_QUEUE, form_str(RPL_REHASHING), me.name, source_p->name,
 			   ConfigFileEntry.configfile);
 		sendto_realops_flags(UMODE_ALL, L_ALL,
 				     "%s is rehashing server config file", get_oper_name(source_p));

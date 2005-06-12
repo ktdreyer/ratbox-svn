@@ -70,7 +70,7 @@ m_knock(struct Client *client_p, struct Client *source_p, int parc, const char *
 
 	if(MyClient(source_p) && ConfigChannel.use_knock == 0)
 	{
-		sendto_one(source_p, form_str(ERR_KNOCKDISABLED),
+		sendto_one(source_p, POP_QUEUE, form_str(ERR_KNOCKDISABLED),
 			   me.name, source_p->name);
 		return 0;
 	}
@@ -83,14 +83,14 @@ m_knock(struct Client *client_p, struct Client *source_p, int parc, const char *
 
 	if(!IsChannelName(name))
 	{
-		sendto_one_numeric(source_p, ERR_NOSUCHCHANNEL,
+		sendto_one_numeric(source_p, POP_QUEUE, ERR_NOSUCHCHANNEL,
 				   form_str(ERR_NOSUCHCHANNEL), name);
 		return 0;
 	}
 
 	if((chptr = find_channel(name)) == NULL)
 	{
-		sendto_one_numeric(source_p, ERR_NOSUCHCHANNEL,
+		sendto_one_numeric(source_p, POP_QUEUE, ERR_NOSUCHCHANNEL,
 				   form_str(ERR_NOSUCHCHANNEL), name);
 		return 0;
 	}
@@ -98,7 +98,7 @@ m_knock(struct Client *client_p, struct Client *source_p, int parc, const char *
 	if(IsMember(source_p, chptr))
 	{
 		if(MyClient(source_p))
-			sendto_one(source_p, form_str(ERR_KNOCKONCHAN),
+			sendto_one(source_p, POP_QUEUE, form_str(ERR_KNOCKONCHAN),
 				   me.name, source_p->name, name);
 		return 0;
 	}
@@ -107,7 +107,7 @@ m_knock(struct Client *client_p, struct Client *source_p, int parc, const char *
 	     (chptr->mode.limit && 
 	      dlink_list_length(&chptr->members) >= (unsigned long)chptr->mode.limit)))
 	{
-		sendto_one_numeric(source_p, ERR_CHANOPEN,
+		sendto_one_numeric(source_p, POP_QUEUE, ERR_CHANOPEN,
 				   form_str(ERR_CHANOPEN), name);
 		return 0;
 	}
@@ -115,7 +115,7 @@ m_knock(struct Client *client_p, struct Client *source_p, int parc, const char *
 	/* cant knock to a +p channel */
 	if(HiddenChannel(chptr))
 	{
-		sendto_one_numeric(source_p, ERR_CANNOTSENDTOCHAN,
+		sendto_one_numeric(source_p, POP_QUEUE, ERR_CANNOTSENDTOCHAN,
 				   form_str(ERR_CANNOTSENDTOCHAN), name);
 		return 0;
 	}
@@ -126,7 +126,7 @@ m_knock(struct Client *client_p, struct Client *source_p, int parc, const char *
 		/* don't allow a knock if the user is banned */
 		if(is_banned(chptr, source_p, NULL, NULL, NULL))
 		{
-			sendto_one_numeric(source_p, ERR_CANNOTSENDTOCHAN,
+			sendto_one_numeric(source_p, POP_QUEUE, ERR_CANNOTSENDTOCHAN,
 					   form_str(ERR_CANNOTSENDTOCHAN), name);
 			return 0;
 		}
@@ -138,13 +138,13 @@ m_knock(struct Client *client_p, struct Client *source_p, int parc, const char *
 		if(!IsOper(source_p) && 
 		   (source_p->localClient->last_knock + ConfigChannel.knock_delay) > CurrentTime)
 		{
-			sendto_one(source_p, form_str(ERR_TOOMANYKNOCK),
+			sendto_one(source_p, POP_QUEUE, form_str(ERR_TOOMANYKNOCK),
 					me.name, source_p->name, name, "user");
 			return 0;
 		}
 		else if((chptr->last_knock + ConfigChannel.knock_delay_channel) > CurrentTime)
 		{
-			sendto_one(source_p, form_str(ERR_TOOMANYKNOCK),
+			sendto_one(source_p, POP_QUEUE, form_str(ERR_TOOMANYKNOCK),
 					me.name, source_p->name, name, "channel");
 			return 0;
 		}
@@ -152,7 +152,7 @@ m_knock(struct Client *client_p, struct Client *source_p, int parc, const char *
 		/* ok, we actually can send the knock, tell client */
 		source_p->localClient->last_knock = CurrentTime;
 
-		sendto_one(source_p, form_str(RPL_KNOCKDLVR),
+		sendto_one(source_p, POP_QUEUE, form_str(RPL_KNOCKDLVR),
 			   me.name, source_p->name, name);
 	}
 

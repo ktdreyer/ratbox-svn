@@ -54,23 +54,23 @@ mo_unreject(struct Client *client_p, struct Client *source_p, int parc, const ch
 	if(ConfigFileEntry.reject_after_count == 0 || ConfigFileEntry.reject_ban_time == 0 ||
 	   ConfigFileEntry.reject_duration == 0)
 	{
-		sendto_one(source_p, ":%s NOTICE %s :Reject cache is disabled",
+		sendto_one(source_p, POP_QUEUE, ":%s NOTICE %s :Reject cache is disabled",
 			   me.name, source_p->name);
 		return 0;			
 	}
 
 	if(!parse_netmask(parv[1], NULL, NULL))
 	{
-		sendto_one(source_p, ":%s NOTICE %s :Unable to parse netmask %s", 
+		sendto_one(source_p, POP_QUEUE, ":%s NOTICE %s :Unable to parse netmask %s", 
 			   me.name, source_p->name, parv[1]);
 		return 0;
 	}	
 	
 	if(remove_reject(parv[1]))
-		sendto_one(source_p, ":%s NOTICE %s :Removed reject for %s", 
+		sendto_one(source_p, POP_QUEUE, ":%s NOTICE %s :Removed reject for %s", 
 			   me.name, source_p->name, parv[1]);
 	else
-		sendto_one(source_p, ":%s NOTICE %s :Unable to remove reject for %s",
+		sendto_one(source_p, POP_QUEUE, ":%s NOTICE %s :Unable to remove reject for %s",
 			   me.name, source_p->name, parv[1]);
 	return 0;
 }

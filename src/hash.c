@@ -833,10 +833,10 @@ output_hash(struct Client *source_p, const char *name, int length, int *counts, 
 	unsigned long total = 0;
 	int i;
 
-	sendto_one_numeric(source_p, RPL_STATSDEBUG,
+	sendto_one_numeric(source_p, HOLD_QUEUE, RPL_STATSDEBUG,
 			"B :%s Hash Statistics", name);
 
-	sendto_one_numeric(source_p, RPL_STATSDEBUG,
+	sendto_one_numeric(source_p, HOLD_QUEUE, RPL_STATSDEBUG,
 			"B :Size: %d Empty: %d (%.3f%%)",
 			length, counts[0], 
 			(float) ((counts[0]*100) / (float) length));
@@ -848,17 +848,18 @@ output_hash(struct Client *source_p, const char *name, int length, int *counts, 
 
 	/* dont want to divide by 0! --fl */
 	if(counts[0] != length)
-		sendto_one_numeric(source_p, RPL_STATSDEBUG,
+		sendto_one_numeric(source_p, HOLD_QUEUE, RPL_STATSDEBUG,
 				"B :Average depth: %.3f/%.3f Highest depth: %d",
 				(float) (total / (length - counts[0])),
 				(float) (total / length), deepest);
 
 	for(i = 0; i < 11; i++)
 	{
-		sendto_one_numeric(source_p, RPL_STATSDEBUG,
+		sendto_one_numeric(source_p, HOLD_QUEUE, RPL_STATSDEBUG,
 				"B :Nodes with %d entries: %d",
 				i, counts[i]);
 	}
+	send_pop_queue(source_p);
 }
 	
 
@@ -889,10 +890,11 @@ void
 hash_stats(struct Client *source_p)
 {
 	count_hash(source_p, channelTable, CH_MAX, "Channel");
-	sendto_one_numeric(source_p, RPL_STATSDEBUG, "B :--");
+	sendto_one_numeric(source_p, HOLD_QUEUE, RPL_STATSDEBUG, "B :--");
 	count_hash(source_p, clientTable, U_MAX, "Client");
-	sendto_one_numeric(source_p, RPL_STATSDEBUG, "B :--");
+	sendto_one_numeric(source_p, HOLD_QUEUE, RPL_STATSDEBUG, "B :--");
 	count_hash(source_p, idTable, U_MAX, "ID");
-	sendto_one_numeric(source_p, RPL_STATSDEBUG, "B :--");
+	sendto_one_numeric(source_p, HOLD_QUEUE, RPL_STATSDEBUG, "B :--");
 	count_hash(source_p, hostTable, HOST_MAX, "Hostname");
+	send_pop_queue(source_p);
 }	

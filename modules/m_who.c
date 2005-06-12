@@ -96,7 +96,7 @@ m_who(struct Client *client_p, struct Client *source_p, int parc, const char *pa
 			do_who_on_channel(source_p, msptr->chptr, server_oper, YES);
 		}
 
-		sendto_one(source_p, form_str(RPL_ENDOFWHO),
+		sendto_one(source_p, POP_QUEUE, form_str(RPL_ENDOFWHO),
 			   me.name, source_p->name, "*");
 		return 0;
 	}
@@ -108,7 +108,7 @@ m_who(struct Client *client_p, struct Client *source_p, int parc, const char *pa
 
 		if(EmptyString(mask))
 		{
-			sendto_one(source_p, form_str(RPL_ENDOFWHO),
+			sendto_one(source_p, POP_QUEUE, form_str(RPL_ENDOFWHO),
 					me.name, source_p->name, parv[1]);
 			return 0;
 		}
@@ -129,7 +129,7 @@ m_who(struct Client *client_p, struct Client *source_p, int parc, const char *pa
 			else if(!SecretChannel(chptr))
 				do_who_on_channel(source_p, chptr, server_oper, NO);
 		}
-		sendto_one(source_p, form_str(RPL_ENDOFWHO),
+		sendto_one(source_p, POP_QUEUE, form_str(RPL_ENDOFWHO),
 			   me.name, source_p->name, mask);
 		return 0;
 	}
@@ -165,7 +165,7 @@ m_who(struct Client *client_p, struct Client *source_p, int parc, const char *pa
 		else
 			do_who(source_p, target_p, NULL, "");
 
-		sendto_one(source_p, form_str(RPL_ENDOFWHO), 
+		sendto_one(source_p, POP_QUEUE, form_str(RPL_ENDOFWHO), 
 			   me.name, source_p->name, mask);
 		return 0;
 	}
@@ -178,9 +178,9 @@ m_who(struct Client *client_p, struct Client *source_p, int parc, const char *pa
 	{
 		if((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
 		{
-			sendto_one(source_p, form_str(RPL_LOAD2HI),
+			sendto_one(source_p, HOLD_QUEUE, form_str(RPL_LOAD2HI),
 					me.name, source_p->name, "WHO");
-			sendto_one(source_p, form_str(RPL_ENDOFWHO),
+			sendto_one(source_p, POP_QUEUE, form_str(RPL_ENDOFWHO),
 				   me.name, source_p->name, "*");
 			return 0;
 		}
@@ -197,7 +197,7 @@ m_who(struct Client *client_p, struct Client *source_p, int parc, const char *pa
 	else
 		who_global(source_p, mask, server_oper, operspy);
 
-	sendto_one(source_p, form_str(RPL_ENDOFWHO),
+	sendto_one(source_p, POP_QUEUE, form_str(RPL_ENDOFWHO),
 		   me.name, source_p->name, mask);
 
 	return 0;
@@ -372,7 +372,7 @@ do_who(struct Client *source_p, struct Client *target_p, const char *chname, con
 	ircsprintf(status, "%c%s%s",
 		   target_p->user->away ? 'G' : 'H', IsOper(target_p) ? "*" : "", op_flags);
 
-	sendto_one(source_p, form_str(RPL_WHOREPLY), me.name, source_p->name,
+	sendto_one(source_p, HOLD_QUEUE, form_str(RPL_WHOREPLY), me.name, source_p->name,
 		   (chname) ? (chname) : "*",
 		   target_p->username,
 		   target_p->host, target_p->user->server, target_p->name,

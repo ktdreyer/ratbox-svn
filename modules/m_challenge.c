@@ -99,7 +99,7 @@ m_challenge(struct Client *client_p, struct Client *source_p, int parc, const ch
 	/* if theyre an oper, reprint oper motd and ignore */
 	if(IsOper(source_p))
 	{
-		sendto_one(source_p, form_str(RPL_YOUREOPER), me.name, source_p->name);
+		sendto_one(source_p, POP_QUEUE, form_str(RPL_YOUREOPER), me.name, source_p->name);
 		send_oper_motd(source_p);
 		return 0;
 	}
@@ -112,7 +112,7 @@ m_challenge(struct Client *client_p, struct Client *source_p, int parc, const ch
 
 		if(irccmp(source_p->localClient->response, ++parv[1]))
 		{
-			sendto_one(source_p, form_str(ERR_PASSWDMISMATCH), me.name, source_p->name);
+			sendto_one(source_p, POP_QUEUE, form_str(ERR_PASSWDMISMATCH), me.name, source_p->name);
 			ilog(L_FOPER, "FAILED OPER (%s) by (%s!%s@%s)",
 			     source_p->localClient->auth_oper, source_p->name,
 			     source_p->username, source_p->host);
@@ -131,7 +131,7 @@ m_challenge(struct Client *client_p, struct Client *source_p, int parc, const ch
 
 		if(oper_p == NULL)
 		{
-			sendto_one(source_p, form_str(ERR_NOOPERHOST), 
+			sendto_one(source_p, POP_QUEUE, form_str(ERR_NOOPERHOST), 
 				   me.name, source_p->name);
 			ilog(L_FOPER, "FAILED OPER (%s) by (%s!%s@%s)",
 			     source_p->localClient->auth_oper, source_p->name,
@@ -168,7 +168,7 @@ m_challenge(struct Client *client_p, struct Client *source_p, int parc, const ch
 
 	if(oper_p == NULL)
 	{
-		sendto_one(source_p, form_str(ERR_NOOPERHOST), me.name, source_p->name);
+		sendto_one(source_p, POP_QUEUE, form_str(ERR_NOOPERHOST), me.name, source_p->name);
 		ilog(L_FOPER, "FAILED OPER (%s) by (%s!%s@%s)",
 		     parv[1], source_p->name,
 		     source_p->username, source_p->host);
@@ -182,14 +182,14 @@ m_challenge(struct Client *client_p, struct Client *source_p, int parc, const ch
 
 	if(!oper_p->rsa_pubkey)
 	{
-		sendto_one(source_p, ":%s NOTICE %s :I'm sorry, PK authentication "
+		sendto_one(source_p, POP_QUEUE, ":%s NOTICE %s :I'm sorry, PK authentication "
 			   "is not enabled for your oper{} block.", me.name, parv[0]);
 		return 0;
 	}
 
 	if(!generate_challenge(&challenge, &(source_p->localClient->response), oper_p->rsa_pubkey))
 	{
-		sendto_one(source_p, form_str(RPL_RSACHALLENGE), 
+		sendto_one(source_p, POP_QUEUE, form_str(RPL_RSACHALLENGE), 
 			   me.name, source_p->name, challenge);
 	}
 

@@ -193,7 +193,7 @@ mr_server(struct Client *client_p, struct Client *source_p, int parc, const char
 				     "Attempt to re-introduce server %s from %s",
 				     name, get_server_name(client_p, HIDE_IP));
 
-		sendto_one(client_p, "ERROR :Server already exists.");
+		sendto_one(client_p, POP_QUEUE, "ERROR :Server already exists.");
 		exit_client(client_p, client_p, client_p, "Server Exists");
 		return 0;
 	}
@@ -205,7 +205,7 @@ mr_server(struct Client *client_p, struct Client *source_p, int parc, const char
 				     client_p->id, name,
 				     get_server_name(client_p, HIDE_IP));
 
-		sendto_one(client_p, "ERROR :SID already exists.");
+		sendto_one(client_p, POP_QUEUE, "ERROR :SID already exists.");
 		exit_client(client_p, client_p, client_p, "SID Exists");
 		return 0;
 	}
@@ -274,7 +274,7 @@ ms_server(struct Client *client_p, struct Client *source_p, int parc, const char
 		if(irccmp(target_p->name, name) && target_p->from == client_p)
 			return 0;
 
-		sendto_one(client_p, "ERROR :Server %s already exists", name);
+		sendto_one(client_p, POP_QUEUE, "ERROR :Server %s already exists", name);
 
 		sendto_realops_flags(UMODE_ALL, L_ALL,
 				     "Link %s cancelled, server %s already exists",
@@ -295,7 +295,7 @@ ms_server(struct Client *client_p, struct Client *source_p, int parc, const char
 		 * cause a fair bit of confusion. Enough to make it hellish
 		 * for a while and servers to send stuff to the wrong place.
 		 */
-		sendto_one(client_p, "ERROR :Nickname %s already exists!", name);
+		sendto_one(client_p, POP_QUEUE, "ERROR :Nickname %s already exists!", name);
 		sendto_realops_flags(UMODE_ALL, L_ALL,
 				     "Link %s cancelled: Server/nick collision on %s",
 				     get_server_name(client_p, HIDE_IP), name);
@@ -311,7 +311,7 @@ ms_server(struct Client *client_p, struct Client *source_p, int parc, const char
 	 */
 	if(parc == 1 || EmptyString(info))
 	{
-		sendto_one(client_p, "ERROR :No server info specified for %s", name);
+		sendto_one(client_p, POP_QUEUE, "ERROR :No server info specified for %s", name);
 		return 0;
 	}
 
@@ -423,7 +423,7 @@ ms_server(struct Client *client_p, struct Client *source_p, int parc, const char
 			     "Server %s being introduced by %s", target_p->name, source_p->name);
 
 	/* quick, dirty EOB.  you know you love it. */
-	sendto_one(target_p, ":%s PING %s %s",
+	sendto_one(target_p, POP_QUEUE, ":%s PING %s %s",
 			get_id(&me, target_p), me.name, target_p->name);
 
 	hdata.client = source_p;
@@ -448,7 +448,7 @@ ms_sid(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	/* collision on the name? */
 	if((target_p = server_exists(parv[1])) != NULL)
 	{
-		sendto_one(client_p, "ERROR :Server %s already exists", parv[1]);
+		sendto_one(client_p, POP_QUEUE, "ERROR :Server %s already exists", parv[1]);
 		sendto_realops_flags(UMODE_ALL, L_ALL,
 				     "Link %s cancelled, server %s already exists",
 				     get_server_name(client_p, SHOW_IP), parv[1]);
@@ -459,7 +459,7 @@ ms_sid(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	/* collision on the SID? */
 	if((target_p = find_id(parv[3])) != NULL)
 	{
-		sendto_one(client_p, "ERROR :SID %s already exists", parv[3]);
+		sendto_one(client_p, POP_QUEUE, "ERROR :SID %s already exists", parv[3]);
 		sendto_realops_flags(UMODE_ALL, L_ALL,
 				     "Link %s cancelled, SID %s already exists",
 				     get_server_name(client_p, SHOW_IP), parv[3]);
@@ -469,7 +469,7 @@ ms_sid(struct Client *client_p, struct Client *source_p, int parc, const char *p
 
 	if(bogus_host(parv[1]) || strlen(parv[1]) > HOSTLEN)
 	{
-		sendto_one(client_p, "ERROR :Invalid servername");
+		sendto_one(client_p, POP_QUEUE, "ERROR :Invalid servername");
 		sendto_realops_flags(UMODE_ALL, L_ALL,
 				     "Link %s cancelled, servername %s invalid",
 				     get_server_name(client_p, SHOW_IP), parv[1]);
@@ -480,7 +480,7 @@ ms_sid(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	if(!IsDigit(parv[3][0]) || !IsIdChar(parv[3][1]) || 
 	   !IsIdChar(parv[3][2]) || parv[3][3] != '\0')
 	{
-		sendto_one(client_p, "ERROR :Invalid SID");
+		sendto_one(client_p, POP_QUEUE, "ERROR :Invalid SID");
 		sendto_realops_flags(UMODE_ALL, L_ALL,
 				     "Link %s cancelled, SID %s invalid",
 				     get_server_name(client_p, SHOW_IP), parv[3]);
@@ -509,7 +509,7 @@ ms_sid(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	/* no matching hub_mask */
 	if(!hlined)
 	{
-		sendto_one(client_p, "ERROR :No matching hub_mask");
+		sendto_one(client_p, POP_QUEUE, "ERROR :No matching hub_mask");
 		sendto_realops_flags(UMODE_ALL, L_ALL,
 				     "Non-Hub link %s introduced %s.",
 				     get_server_name(client_p, SHOW_IP), parv[1]);
@@ -520,7 +520,7 @@ ms_sid(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	/* matching leaf_mask */
 	if(llined)
 	{
-		sendto_one(client_p, "ERROR :Matching leaf_mask");
+		sendto_one(client_p, POP_QUEUE, "ERROR :Matching leaf_mask");
 		sendto_realops_flags(UMODE_ALL, L_ALL,
 				     "Link %s introduced leafed server %s.",
 				     get_server_name(client_p, SHOW_IP), parv[1]);
@@ -566,7 +566,7 @@ ms_sid(struct Client *client_p, struct Client *source_p, int parc, const char *p
 			     target_p->name, source_p->name);
 
 	/* quick, dirty EOB.  you know you love it. */
-	sendto_one(target_p, ":%s PING %s %s",
+	sendto_one(target_p, POP_QUEUE, ":%s PING %s %s",
 			get_id(&me, target_p), me.name, get_id(target_p, target_p));
 	return 0;
 }
@@ -1029,7 +1029,7 @@ burst_modes_TS5(struct Client *client_p, char *chname, dlink_list *list, char fl
 
 		if((count >= MAXMODEPARAMS) || ((cur_len + tlen + 2) > (BUFSIZE - 3)))
 		{
-			sendto_one(client_p, "%s%s %s", buf, mbuf, pbuf);
+			sendto_one(client_p, POP_QUEUE, "%s%s %s", buf, mbuf, pbuf);
 
 			mp = mbuf;
 			pp = pbuf;
@@ -1045,7 +1045,7 @@ burst_modes_TS5(struct Client *client_p, char *chname, dlink_list *list, char fl
 	}
 
 	if(count != 0)
-		sendto_one(client_p, "%s%s %s", buf, mbuf, pbuf);
+		sendto_one(client_p, POP_QUEUE, "%s%s %s", buf, mbuf, pbuf);
 }
 
 /* burst_modes_TS6()
@@ -1088,7 +1088,7 @@ burst_modes_TS6(struct Client *client_p, struct Channel *chptr,
 
 			/* chop off trailing space and send.. */
 			*(t-1) = '\0';
-			sendto_one(client_p, "%s", buf);
+			sendto_one(client_p, POP_QUEUE, "%s", buf);
 			cur_len = mlen;
 			t = buf + mlen;
 		}
@@ -1102,7 +1102,7 @@ burst_modes_TS6(struct Client *client_p, struct Channel *chptr,
 	 * chop off trailing space and send.
 	 */
 	*(t-1) = '\0';
-	sendto_one(client_p, "%s", buf);
+	sendto_one(client_p, POP_QUEUE, "%s", buf);
 }
 
 /*
@@ -1145,14 +1145,14 @@ burst_TS5(struct Client *client_p)
 			ubuf[1] = '\0';
 		}
 
-		sendto_one(client_p, "NICK %s %d %ld %s %s %s %s :%s",
+		sendto_one(client_p, POP_QUEUE, "NICK %s %d %ld %s %s %s %s :%s",
 			   target_p->name, target_p->hopcount + 1,
 			   (long) target_p->tsinfo, ubuf,
 			   target_p->username, target_p->host,
 			   target_p->user->server, target_p->info);
 
 		if(ConfigFileEntry.burst_away && !EmptyString(target_p->user->away))
-			sendto_one(client_p, ":%s AWAY :%s",
+			sendto_one(client_p, POP_QUEUE, ":%s AWAY :%s",
 				   target_p->name, target_p->user->away);
 
 		hclientinfo.target = target_p;
@@ -1190,7 +1190,7 @@ burst_TS5(struct Client *client_p)
 			{
 				t--;
 				*t = '\0';
-				sendto_one(client_p, "%s", buf);
+				sendto_one(client_p, POP_QUEUE, "%s", buf);
 				cur_len = mlen;
 				t = buf + mlen;
 			}
@@ -1205,7 +1205,7 @@ burst_TS5(struct Client *client_p)
 		/* remove trailing space */
 		t--;
 		*t = '\0';
-		sendto_one(client_p, "%s", buf);
+		sendto_one(client_p, POP_QUEUE, "%s", buf);
 
 		burst_modes_TS5(client_p, chptr->chname, &chptr->banlist, 'b');
 
@@ -1216,7 +1216,7 @@ burst_TS5(struct Client *client_p)
 			burst_modes_TS5(client_p, chptr->chname, &chptr->invexlist, 'I');
 
 		if(IsCapable(client_p, CAP_TB) && chptr->topic != NULL)
-			sendto_one(client_p, ":%s TB %s %ld %s%s:%s",
+			sendto_one(client_p, POP_QUEUE, ":%s TB %s %ld %s%s:%s",
 				   me.name, chptr->chname, (long) chptr->topic_time,
 				   ConfigChannel.burst_topicwho ? chptr->topic_info : "",
 				   ConfigChannel.burst_topicwho ? " " : "",
@@ -1271,7 +1271,7 @@ burst_TS6(struct Client *client_p)
 		}
 
 		if(has_id(target_p))
-			sendto_one(client_p, ":%s UID %s %d %ld %s %s %s %s %s :%s",
+			sendto_one(client_p, POP_QUEUE, ":%s UID %s %d %ld %s %s %s %s %s :%s",
 				   target_p->servptr->id, target_p->name,
 				   target_p->hopcount + 1, 
 				   (long) target_p->tsinfo, ubuf,
@@ -1279,7 +1279,7 @@ burst_TS6(struct Client *client_p)
 				   IsIPSpoof(target_p) ? "0" : target_p->sockhost,
 				   target_p->id, target_p->info);
 		else
-			sendto_one(client_p, "NICK %s %d %ld %s %s %s %s :%s",
+			sendto_one(client_p, POP_QUEUE, "NICK %s %d %ld %s %s %s %s :%s",
 					target_p->name,
 					target_p->hopcount + 1,
 					(long) target_p->tsinfo,
@@ -1288,7 +1288,7 @@ burst_TS6(struct Client *client_p)
 					target_p->user->server, target_p->info);
 
 		if(ConfigFileEntry.burst_away && !EmptyString(target_p->user->away))
-			sendto_one(client_p, ":%s AWAY :%s",
+			sendto_one(client_p, POP_QUEUE, ":%s AWAY :%s",
 				   use_id(target_p),
 				   target_p->user->away);
 
@@ -1326,7 +1326,7 @@ burst_TS6(struct Client *client_p)
 			if(cur_len + tlen >= BUFSIZE - 3)
 			{
 				*(t-1) = '\0';
-				sendto_one(client_p, "%s", buf);
+				sendto_one(client_p, POP_QUEUE, "%s", buf);
 				cur_len = mlen;
 				t = buf + mlen;
 			}
@@ -1340,7 +1340,7 @@ burst_TS6(struct Client *client_p)
 
 		/* remove trailing space */
 		*(t-1) = '\0';
-		sendto_one(client_p, "%s", buf);
+		sendto_one(client_p, POP_QUEUE, "%s", buf);
 
 		if(dlink_list_length(&chptr->banlist) > 0)
 			burst_modes_TS6(client_p, chptr, &chptr->banlist, 'b');
@@ -1354,7 +1354,7 @@ burst_TS6(struct Client *client_p)
 			burst_modes_TS6(client_p, chptr, &chptr->invexlist, 'I');
 
 		if(IsCapable(client_p, CAP_TB) && chptr->topic != NULL)
-			sendto_one(client_p, ":%s TB %s %ld %s%s:%s",
+			sendto_one(client_p, POP_QUEUE, ":%s TB %s %ld %s%s:%s",
 				   me.id, chptr->chname, (long) chptr->topic_time,
 				   ConfigChannel.burst_topicwho ? chptr->topic_info : "",
 				   ConfigChannel.burst_topicwho ? " " : "",
@@ -1420,7 +1420,7 @@ server_estab(struct Client *client_p)
 		if(client_p != serv_list.head->data || serv_list.head->next)
 		{
 			ServerStats.is_ref++;
-			sendto_one(client_p, "ERROR :I'm a leaf not a hub");
+			sendto_one(client_p, POP_QUEUE, "ERROR :I'm a leaf not a hub");
 			return exit_client(client_p, client_p, client_p, "I'm a leaf");
 		}
 	}
@@ -1437,10 +1437,10 @@ server_estab(struct Client *client_p)
 			 * ourselves as being TS6 capable.
 			 */
 			if(ServerInfo.use_ts6)
-				sendto_one(client_p, "PASS %s TS %d :%s", 
+				sendto_one(client_p, POP_QUEUE, "PASS %s TS %d :%s", 
 					   server_p->spasswd, TS_CURRENT, me.id);
 			else
-				sendto_one(client_p, "PASS %s :TS",
+				sendto_one(client_p, POP_QUEUE, "PASS %s :TS",
 					   server_p->spasswd);
 		}
 
@@ -1449,7 +1449,7 @@ server_estab(struct Client *client_p)
 				  | (ServerConfCompressed(server_p) ? CAP_ZIP_SUPPORTED : 0)
 				  | (ServerConfTb(server_p) ? CAP_TB : 0));
 
-		sendto_one(client_p, "SERVER %s 1 :%s%s",
+		sendto_one(client_p, POP_QUEUE, "SERVER %s 1 :%s%s",
 			   me.name,
 			   ConfigServerHide.hidden ? "(H) " : "",
 			   (me.info[0]) ? (me.info) : "IRCers United");
@@ -1475,7 +1475,7 @@ server_estab(struct Client *client_p)
 		SetServlink(client_p);
 	}
 
-	sendto_one(client_p, "SVINFO %d %d 0 :%ld", TS_CURRENT, TS_MIN, CurrentTime);
+	sendto_one(client_p, POP_QUEUE, "SVINFO %d %d 0 :%ld", TS_CURRENT, TS_MIN, CurrentTime);
 
 	client_p->servptr = &me;
 
@@ -1552,24 +1552,24 @@ server_estab(struct Client *client_p)
 
 		if(has_id(target_p) && has_id(client_p))
 		{
-			sendto_one(target_p, ":%s SID %s 2 %s :%s%s",
+			sendto_one(target_p, POP_QUEUE, ":%s SID %s 2 %s :%s%s",
 				   me.id, client_p->name, client_p->id,
 				   IsHidden(client_p) ? "(H) " : "", client_p->info);
 
 			if(IsCapable(target_p, CAP_ENCAP) &&
 			   !EmptyString(client_p->serv->fullcaps))
-				sendto_one(target_p, ":%s ENCAP * GCAP :%s",
+				sendto_one(target_p, POP_QUEUE, ":%s ENCAP * GCAP :%s",
 					client_p->id, client_p->serv->fullcaps);
 		}
 		else
 		{
-			sendto_one(target_p, ":%s SERVER %s 2 :%s%s",
+			sendto_one(target_p, POP_QUEUE, ":%s SERVER %s 2 :%s%s",
 				   me.name, client_p->name,
 				   IsHidden(client_p) ? "(H) " : "", client_p->info);
 
 			if(IsCapable(target_p, CAP_ENCAP) &&
 			   !EmptyString(client_p->serv->fullcaps))
-				sendto_one(target_p, ":%s ENCAP * GCAP :%s",
+				sendto_one(target_p, POP_QUEUE, ":%s ENCAP * GCAP :%s",
 					client_p->name, client_p->serv->fullcaps);
 		}
 	}
@@ -1602,19 +1602,19 @@ server_estab(struct Client *client_p)
 
 		/* presumption, if target has an id, so does its uplink */
 		if(has_id(client_p) && has_id(target_p))
-			sendto_one(client_p, ":%s SID %s %d %s :%s%s",
+			sendto_one(client_p, POP_QUEUE, ":%s SID %s %d %s :%s%s",
 				   target_p->serv->upid, target_p->name,
 				   target_p->hopcount + 1, target_p->id,
 				   IsHidden(target_p) ? "(H) " : "", target_p->info);
 		else
-			sendto_one(client_p, ":%s SERVER %s %d :%s%s",
+			sendto_one(client_p, POP_QUEUE, ":%s SERVER %s %d :%s%s",
 				   target_p->serv->up,
 				   target_p->name, target_p->hopcount + 1,
 				   IsHidden(target_p) ? "(H) " : "", target_p->info);
 
 		if(IsCapable(client_p, CAP_ENCAP) && 
 		   !EmptyString(target_p->serv->fullcaps))
-			sendto_one(client_p, ":%s ENCAP * GCAP :%s",
+			sendto_one(client_p, POP_QUEUE, ":%s ENCAP * GCAP :%s",
 					get_id(target_p, client_p),
 					target_p->serv->fullcaps);
 	}
@@ -1625,7 +1625,7 @@ server_estab(struct Client *client_p)
 		burst_TS5(client_p);
 
 	/* Always send a PING after connect burst is done */
-	sendto_one(client_p, "PING :%s", get_id(&me, client_p));
+	sendto_one(client_p, POP_QUEUE, "PING :%s", get_id(&me, client_p));
 
 	return 0;
 }

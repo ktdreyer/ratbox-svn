@@ -71,7 +71,7 @@ m_oper(struct Client *client_p, struct Client *source_p, int parc, const char *p
 
 	if(IsOper(source_p))
 	{
-		sendto_one(source_p, form_str(RPL_YOUREOPER), me.name, source_p->name);
+		sendto_one(source_p, POP_QUEUE, form_str(RPL_YOUREOPER), me.name, source_p->name);
 		send_oper_motd(source_p);
 		return 0;
 	}
@@ -85,7 +85,7 @@ m_oper(struct Client *client_p, struct Client *source_p, int parc, const char *p
 
 	if(oper_p == NULL)
 	{
-		sendto_one(source_p, form_str(ERR_NOOPERHOST), me.name, source_p->name);
+		sendto_one(source_p, POP_QUEUE, form_str(ERR_NOOPERHOST), me.name, source_p->name);
 		ilog(L_FOPER, "FAILED OPER (%s) by (%s!%s@%s)",
 		     name, source_p->name,
 		     source_p->username, source_p->host);
@@ -110,7 +110,7 @@ m_oper(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	}
 	else
 	{
-		sendto_one(source_p, form_str(ERR_PASSWDMISMATCH),
+		sendto_one(source_p, POP_QUEUE, form_str(ERR_PASSWDMISMATCH),
 			   me.name, source_p->name);
 
 		ilog(L_FOPER, "FAILED OPER (%s) by (%s!%s@%s)",

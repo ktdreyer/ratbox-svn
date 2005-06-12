@@ -71,7 +71,7 @@ m_topic(struct Client *client_p, struct Client *source_p, int parc, const char *
 
 	if(!IsChannelName(parv[1]))
 	{
-		sendto_one_numeric(source_p, ERR_NOSUCHCHANNEL,
+		sendto_one_numeric(source_p, POP_QUEUE, ERR_NOSUCHCHANNEL,
 				   form_str(ERR_NOSUCHCHANNEL), parv[1]);
 		return 0;
 	}
@@ -80,7 +80,7 @@ m_topic(struct Client *client_p, struct Client *source_p, int parc, const char *
 
 	if(chptr == NULL)
 	{
-		sendto_one_numeric(source_p, ERR_NOSUCHCHANNEL,
+		sendto_one_numeric(source_p, POP_QUEUE, ERR_NOSUCHCHANNEL,
 				form_str(ERR_NOSUCHCHANNEL), parv[1]);
 		return 0;
 	}
@@ -92,7 +92,7 @@ m_topic(struct Client *client_p, struct Client *source_p, int parc, const char *
 
 		if(msptr == NULL)
 		{
-			sendto_one_numeric(source_p, ERR_NOTONCHANNEL,
+			sendto_one_numeric(source_p, POP_QUEUE, ERR_NOTONCHANNEL,
 					form_str(ERR_NOTONCHANNEL), parv[1]);
 			return 0;
 		}
@@ -119,26 +119,26 @@ m_topic(struct Client *client_p, struct Client *source_p, int parc, const char *
 					chptr->topic == NULL ? "" : chptr->topic);
 		}
 		else
-			sendto_one(source_p, form_str(ERR_CHANOPRIVSNEEDED),
+			sendto_one(source_p, POP_QUEUE, form_str(ERR_CHANOPRIVSNEEDED),
 					me.name, source_p->name, parv[1]);
 	}
 	else if(MyClient(source_p))
 	{
 		if(!IsMember(source_p, chptr) && SecretChannel(chptr))
 		{
-			sendto_one_numeric(source_p, ERR_NOTONCHANNEL,
+			sendto_one_numeric(source_p, POP_QUEUE, ERR_NOTONCHANNEL,
 					form_str(ERR_NOTONCHANNEL), parv[1]);
 			return 0;
 		}
 		if(chptr->topic == NULL)
-			sendto_one(source_p, form_str(RPL_NOTOPIC),
+			sendto_one(source_p, POP_QUEUE, form_str(RPL_NOTOPIC),
 					me.name, source_p->name, parv[1]);
 		else
 		{
-			sendto_one(source_p, form_str(RPL_TOPIC),
+			sendto_one(source_p, POP_QUEUE, form_str(RPL_TOPIC),
 					me.name, source_p->name, chptr->chname, chptr->topic);
 
-			sendto_one(source_p, form_str(RPL_TOPICWHOTIME),
+			sendto_one(source_p, POP_QUEUE, form_str(RPL_TOPICWHOTIME),
 					me.name, source_p->name, chptr->chname,
 					chptr->topic_info, chptr->topic_time);
 		}

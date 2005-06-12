@@ -331,7 +331,7 @@ verify_access(struct Client *client_p, const char *username)
 	{
 		if(aconf->flags & CONF_FLAGS_REDIR)
 		{
-			sendto_one(client_p, form_str(RPL_REDIR),
+			sendto_one(client_p, POP_QUEUE, form_str(RPL_REDIR),
 					me.name, client_p->name,
 					aconf->name ? aconf->name : "", aconf->port);
 			return (NOT_AUTHORISED);
@@ -378,7 +378,7 @@ verify_access(struct Client *client_p, const char *username)
 	{
 		if(ConfigFileEntry.kline_with_reason)
 		{
-			sendto_one(client_p,
+			sendto_one(client_p, POP_QUEUE, 
 					":%s NOTICE %s :*** Banned %s",
 					me.name, client_p->name, aconf->passwd);
 		}
@@ -386,10 +386,10 @@ verify_access(struct Client *client_p, const char *username)
 	}
 	else if(aconf->status & CONF_GLINE)
 	{
-		sendto_one(client_p, ":%s NOTICE %s :*** G-lined", me.name, client_p->name);
+		sendto_one(client_p, POP_QUEUE, ":%s NOTICE %s :*** G-lined", me.name, client_p->name);
 
 		if(ConfigFileEntry.kline_with_reason)
-			sendto_one(client_p,
+			sendto_one(client_p, POP_QUEUE, 
 					":%s NOTICE %s :*** Banned %s",
 					me.name, client_p->name, aconf->passwd);
 
@@ -597,7 +597,7 @@ attach_conf(struct Client *client_p, struct ConfItem *aconf)
 		}
 		else
 		{
-			sendto_one(client_p, ":%s NOTICE %s :*** I: line is full, but you have an >I: line!", 
+			sendto_one(client_p, POP_QUEUE, ":%s NOTICE %s :*** I: line is full, but you have an >I: line!", 
 			                      me.name, client_p->name);
 			SetExemptLimits(client_p);
 		}
@@ -1347,7 +1347,7 @@ write_confitem(KlineType type, struct Client *source_p, char *user,
 				reason, oper_reason);
 		}
 
-		sendto_one_notice(source_p, ":Added K-Line [%s@%s]",
+		sendto_one_notice(source_p, POP_QUEUE, ":Added K-Line [%s@%s]",
 				  user, host);
 	}
 	else if(type == DLINE_TYPE)
@@ -1371,7 +1371,7 @@ write_confitem(KlineType type, struct Client *source_p, char *user,
 				reason, oper_reason);
 		}
 
-		sendto_one(source_p,
+		sendto_one(source_p, POP_QUEUE,
 			   ":%s NOTICE %s :Added D-Line [%s] to %s", me.name,
 			   source_p->name, host, filename);
 
@@ -1384,7 +1384,7 @@ write_confitem(KlineType type, struct Client *source_p, char *user,
 		ilog(L_KLINE, "R %s 0 %s %s",
 			get_oper_name(source_p), host, reason);
 
-		sendto_one_notice(source_p, ":Added RESV for [%s] [%s]",
+		sendto_one_notice(source_p, POP_QUEUE, ":Added RESV for [%s] [%s]",
 				  host, reason);
 	}
 }

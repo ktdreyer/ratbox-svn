@@ -295,7 +295,7 @@ report_classes(struct Client *source_p)
 	{
 		cltmp = ptr->data;
 
-		sendto_one_numeric(source_p, RPL_STATSYLINE, 
+		sendto_one_numeric(source_p, HOLD_QUEUE, RPL_STATSYLINE, 
 				form_str(RPL_STATSYLINE),
 				ClassName(cltmp), PingFreq(cltmp), 
 				ConFreq(cltmp), MaxUsers(cltmp), 
@@ -306,13 +306,14 @@ report_classes(struct Client *source_p)
 	}
 
 	/* also output the default class */
-	sendto_one_numeric(source_p, RPL_STATSYLINE, form_str(RPL_STATSYLINE),
+	sendto_one_numeric(source_p, HOLD_QUEUE, RPL_STATSYLINE, form_str(RPL_STATSYLINE),
 			ClassName(default_class), PingFreq(default_class), 
 			ConFreq(default_class), MaxUsers(default_class), 
 			MaxSendq(default_class), MaxSendqEob(default_class),
 			MaxLocal(default_class), MaxIdent(default_class),
 			MaxGlobal(default_class), MaxIdent(default_class),
 			CurrUsers(default_class));
+	send_pop_queue(source_p);
 }
 
 /*

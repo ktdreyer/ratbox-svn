@@ -338,7 +338,7 @@ check_pings_list(dlink_list * list)
 				client_p->flags |= FLAGS_PINGSENT;
 				/* not nice but does the job */
 				client_p->localClient->lasttime = CurrentTime - ping;
-				sendto_one(client_p, "PING :%s", me.name);
+				sendto_one(client_p, POP_QUEUE, "PING :%s", me.name);
 			}
 		}
 		/* ping_timeout: */
@@ -408,9 +408,9 @@ notify_banned_client(struct Client *client_p, struct ConfItem *aconf, int ban)
 	}
 
 	if(ban == NOTIFY_BANNED_DLINE && !IsPerson(client_p))
-		sendto_one(client_p, "NOTICE DLINE :*** You have been D-lined");
+		sendto_one(client_p, POP_QUEUE, "NOTICE DLINE :*** You have been D-lined");
 	else
-		sendto_one(client_p, form_str(ERR_YOUREBANNEDCREEP),
+		sendto_one(client_p, POP_QUEUE, form_str(ERR_YOUREBANNEDCREEP),
 			   me.name, client_p->name, reason);
 	
 	exit_client(client_p, client_p, &me, 
@@ -729,7 +729,7 @@ find_chasing(struct Client *source_p, const char *user, int *chasing)
 
 	if(!(who = get_history(user, (long) KILLCHASETIMELIMIT)))
 	{
-		sendto_one_numeric(source_p, ERR_NOSUCHNICK,
+		sendto_one_numeric(source_p, POP_QUEUE, ERR_NOSUCHNICK,
 				   form_str(ERR_NOSUCHNICK), user);
 		return (NULL);
 	}
@@ -977,7 +977,7 @@ recurse_send_quits(struct Client *client_p, struct Client *source_p,
 
 	if(IsCapable(to, CAP_QS))
 	{
-		sendto_one(to, "SQUIT %s :%s",
+		sendto_one(to, POP_QUEUE, "SQUIT %s :%s", 
 			   get_id(source_p, to), me.name);
 	}
 	else
@@ -985,7 +985,7 @@ recurse_send_quits(struct Client *client_p, struct Client *source_p,
 		DLINK_FOREACH_SAFE(ptr, ptr_next, source_p->serv->users.head)
 		{
 			target_p = ptr->data;
-			sendto_one(to, ":%s QUIT :%s", target_p->name, comment);
+			sendto_one(to, POP_QUEUE, ":%s QUIT :%s", target_p->name, comment);
 		}
 		DLINK_FOREACH_SAFE(ptr, ptr_next, source_p->serv->servers.head)
 		{
@@ -993,7 +993,7 @@ recurse_send_quits(struct Client *client_p, struct Client *source_p,
 			recurse_send_quits(client_p, target_p, to, comment, myname);
 		}
 		if(!match(myname, source_p->name))
-			sendto_one(to, "SQUIT %s :%s", source_p->name, me.name);
+			sendto_one(to, POP_QUEUE, "SQUIT %s :%s", source_p->name, me.name);
 	}
 }
 
@@ -1241,7 +1241,7 @@ exit_unknown_client(struct Client *client_p, struct Client *source_p, struct Cli
 	dlinkDelete(&source_p->localClient->tnode, &unknown_list);
 
 	if(!IsIOError(source_p))
-		sendto_one(source_p, "ERROR :Closing Link: 127.0.0.1 (%s)", comment);
+		sendto_one(source_p, POP_QUEUE, "ERROR :Closing Link: 127.0.0.1 (%s)", comment);
 
 	close_connection(source_p);
 
@@ -1283,7 +1283,7 @@ exit_remote_server(struct Client *client_p, struct Client *source_p, struct Clie
 	if(target_p != NULL && IsServer(target_p) && target_p != client_p &&
 	   !IsMe(target_p) && (source_p->flags & FLAGS_KILLED) == 0)
 	{
-		sendto_one(target_p, ":%s SQUIT %s :%s", 
+		sendto_one(target_p, POP_QUEUE, ":%s SQUIT %s :%s", 
 			   get_id(from, target_p), get_id(source_p, target_p),
 			   comment);
 	}
@@ -1344,7 +1344,7 @@ exit_local_server(struct Client *client_p, struct Client *source_p, struct Clien
 
 	if(client_p != NULL && source_p != client_p && !IsIOError(source_p))
 	{
-		sendto_one(source_p, "ERROR :Closing Link: 127.0.0.1 %s (%s)",
+		sendto_one(source_p, POP_QUEUE, "ERROR :Closing Link: 127.0.0.1 %s (%s)",
 			   source_p->name, comment);
 	}
 	
@@ -1438,7 +1438,7 @@ exit_local_client(struct Client *client_p, struct Client *source_p, struct Clien
 		source_p->name, source_p->username, source_p->host,
 		source_p->localClient->sendK, source_p->localClient->receiveK);
 
-	sendto_one(source_p, "ERROR :Closing Link: %s (%s)", source_p->host, comment);
+	sendto_one(source_p, POP_QUEUE, "ERROR :Closing Link: %s (%s)", source_p->host, comment);
 	close_connection(source_p);
 
 	if((source_p->flags & FLAGS_KILLED) == 0)

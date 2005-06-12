@@ -122,7 +122,7 @@ list_quote_commands(struct Client *source_p)
 	int j = 0;
 	const char *names[4];
 
-	sendto_one(source_p, ":%s NOTICE %s :Available QUOTE SET commands:",
+	sendto_one(source_p, POP_QUEUE, ":%s NOTICE %s :Available QUOTE SET commands:",
 		   me.name, source_p->name);
 
 	names[0] = names[1] = names[2] = names[3] = "";
@@ -133,7 +133,7 @@ list_quote_commands(struct Client *source_p)
 
 		if(j > 3)
 		{
-			sendto_one(source_p, ":%s NOTICE %s :%s %s %s %s",
+			sendto_one(source_p, POP_QUEUE, ":%s NOTICE %s :%s %s %s %s",
 				   me.name, source_p->name, names[0], names[1], names[2], names[3]);
 			j = 0;
 			names[0] = names[1] = names[2] = names[3] = "";
@@ -141,7 +141,7 @@ list_quote_commands(struct Client *source_p)
 
 	}
 	if(j)
-		sendto_one(source_p, ":%s NOTICE %s :%s %s %s %s",
+		sendto_one(source_p, POP_QUEUE, ":%s NOTICE %s :%s %s %s %s",
 			   me.name, source_p->name, names[0], names[1], names[2], names[3]);
 }
 
@@ -165,7 +165,7 @@ quote_autoconnall(struct Client *source_p, int newval)
 	}
 	else
 	{
-		sendto_one(source_p, ":%s NOTICE %s :AUTOCONNALL is currently %i",
+		sendto_one(source_p, POP_QUEUE, ":%s NOTICE %s :AUTOCONNALL is currently %i",
 			   me.name, source_p->name, GlobalSetOptions.autoconn);
 	}
 }
@@ -184,7 +184,7 @@ quote_floodcount(struct Client *source_p, int newval)
 	}
 	else
 	{
-		sendto_one(source_p, ":%s NOTICE %s :FLOODCOUNT is currently %i",
+		sendto_one(source_p, POP_QUEUE, ":%s NOTICE %s :FLOODCOUNT is currently %i",
 			   me.name, source_p->name, GlobalSetOptions.floodcount);
 	}
 }
@@ -195,7 +195,7 @@ quote_identtimeout(struct Client *source_p, int newval)
 {
 	if(!IsOperAdmin(source_p))
 	{
-		sendto_one(source_p, form_str(ERR_NOPRIVS),
+		sendto_one(source_p, POP_QUEUE, form_str(ERR_NOPRIVS),
 			   me.name, source_p->name, "admin");
 		return;
 	}
@@ -208,7 +208,7 @@ quote_identtimeout(struct Client *source_p, int newval)
 		GlobalSetOptions.ident_timeout = newval;
 	}
 	else
-		sendto_one(source_p, ":%s NOTICE %s :IDENTTIMEOUT is currently %d",
+		sendto_one(source_p, POP_QUEUE, ":%s NOTICE %s :IDENTTIMEOUT is currently %d",
 			   me.name, source_p->name, GlobalSetOptions.ident_timeout);
 }
 
@@ -234,7 +234,7 @@ quote_idletime(struct Client *source_p, int newval)
 	}
 	else
 	{
-		sendto_one(source_p, ":%s NOTICE %s :IDLETIME is currently %i",
+		sendto_one(source_p, POP_QUEUE, ":%s NOTICE %s :IDLETIME is currently %i",
 			   me.name, source_p->name, GlobalSetOptions.idletime / 60);
 	}
 }
@@ -247,7 +247,7 @@ quote_max(struct Client *source_p, int newval)
 	{
 		if(newval > MASTER_MAX)
 		{
-			sendto_one(source_p,
+			sendto_one(source_p, POP_QUEUE,
 				   ":%s NOTICE %s :You cannot set MAXCLIENTS to > MASTER_MAX (%d)",
 				   me.name, source_p->name, MASTER_MAX);
 			return;
@@ -255,7 +255,7 @@ quote_max(struct Client *source_p, int newval)
 
 		if(newval < 32)
 		{
-			sendto_one(source_p,
+			sendto_one(source_p, POP_QUEUE,
 				   ":%s NOTICE %s :You cannot set MAXCLIENTS to < 32 (%d:%d)",
 				   me.name, source_p->name, GlobalSetOptions.maxclients,
 				   highest_fd);
@@ -274,7 +274,7 @@ quote_max(struct Client *source_p, int newval)
 	}
 	else
 	{
-		sendto_one(source_p, ":%s NOTICE %s :Current Maxclients = %d (%lu)",
+		sendto_one(source_p, POP_QUEUE, ":%s NOTICE %s :Current Maxclients = %d (%lu)",
 			   me.name, source_p->name, GlobalSetOptions.maxclients,
 			   dlink_list_length(&lclient_list));
 	}
@@ -286,7 +286,7 @@ quote_operstring(struct Client *source_p, const char *arg)
 {
 	if(EmptyString(arg))
 	{
-		sendto_one(source_p, ":%s NOTICE %s :OPERSTRING is currently '%s'",
+		sendto_one(source_p, POP_QUEUE, ":%s NOTICE %s :OPERSTRING is currently '%s'",
 			   me.name, source_p->name, GlobalSetOptions.operstring);
 	}
 	else
@@ -306,7 +306,7 @@ quote_adminstring(struct Client *source_p, const char *arg)
 {
 	if(EmptyString(arg))
 	{
-		sendto_one(source_p, ":%s NOTICE %s :ADMINSTRING is currently '%s'",
+		sendto_one(source_p, POP_QUEUE, ":%s NOTICE %s :ADMINSTRING is currently '%s'",
 			   me.name, source_p->name, GlobalSetOptions.adminstring);
 	}
 	else
@@ -346,7 +346,7 @@ quote_spamnum(struct Client *source_p, int newval)
 	}
 	else
 	{
-		sendto_one(source_p, ":%s NOTICE %s :SPAMNUM is currently %i",
+		sendto_one(source_p, POP_QUEUE, ":%s NOTICE %s :SPAMNUM is currently %i",
 			   me.name, source_p->name, GlobalSetOptions.spam_num);
 	}
 }
@@ -370,7 +370,7 @@ quote_spamtime(struct Client *source_p, int newval)
 	}
 	else
 	{
-		sendto_one(source_p, ":%s NOTICE %s :SPAMTIME is currently %i",
+		sendto_one(source_p, POP_QUEUE, ":%s NOTICE %s :SPAMTIME is currently %i",
 			   me.name, source_p->name, GlobalSetOptions.spam_time);
 	}
 }
@@ -446,7 +446,7 @@ quote_splitmode(struct Client *source_p, char *charval)
 		 * pull values back out of, splitmode can be four states - but you can
 		 * only set to three, which means we cant use the same table --fl_
 		 */
-		sendto_one(source_p, ":%s NOTICE %s :SPLITMODE is currently %s",
+		sendto_one(source_p, POP_QUEUE, ":%s NOTICE %s :SPLITMODE is currently %s",
 			   me.name, source_p->name,
 			   splitmode_status[(splitchecking + (splitmode * 2))]);
 }
@@ -465,7 +465,7 @@ quote_splitnum(struct Client *source_p, int newval)
 			check_splitmode(NULL);
 	}
 	else
-		sendto_one(source_p, ":%s NOTICE %s :SPLITNUM is currently %i",
+		sendto_one(source_p, POP_QUEUE, ":%s NOTICE %s :SPLITNUM is currently %i",
 			   me.name, source_p->name, split_servers);
 }
 
@@ -483,7 +483,7 @@ quote_splitusers(struct Client *source_p, int newval)
 			check_splitmode(NULL);
 	}
 	else
-		sendto_one(source_p, ":%s NOTICE %s :SPLITUSERS is currently %i",
+		sendto_one(source_p, POP_QUEUE, ":%s NOTICE %s :SPLITUSERS is currently %i",
 			   me.name, source_p->name, split_users);
 }
 
@@ -528,7 +528,7 @@ mo_set(struct Client *client_p, struct Client *source_p, int parc, const char *p
 
 				if((n - 1) > parc)
 				{
-					sendto_one(source_p,
+					sendto_one(source_p, POP_QUEUE,
 						   ":%s NOTICE %s :SET %s expects (\"%s%s\") args",
 						   me.name, source_p->name,
 						   set_cmd_table[i].name,
@@ -564,7 +564,7 @@ mo_set(struct Client *client_p, struct Client *source_p, int parc, const char *p
 
 					if(newval < 0)
 					{
-						sendto_one(source_p,
+						sendto_one(source_p, POP_QUEUE,
 							   ":%s NOTICE %s :Value less than 0 illegal for %s",
 							   me.name, source_p->name,
 							   set_cmd_table[i].name);
@@ -600,7 +600,7 @@ mo_set(struct Client *client_p, struct Client *source_p, int parc, const char *p
 		 * Code here will be executed when a /QUOTE SET command is not
 		 * found within set_cmd_table.
 		 */
-		sendto_one(source_p, ":%s NOTICE %s :Variable not found.", me.name, parv[0]);
+		sendto_one(source_p, POP_QUEUE, ":%s NOTICE %s :Variable not found.", me.name, parv[0]);
 		return 0;
 	}
 

@@ -37,13 +37,15 @@ extern unsigned long current_serial;
 extern void send_queued_write(int fd, void *data);
 extern void send_queued_slink_write(int fd, void *data);
 
-extern void sendto_one(struct Client *target_p, const char *, ...) AFP(2, 3);
-extern void sendto_one_queue(struct Client *target_p, const char *, ...) AFP(2, 3);
-extern void sendto_one_notice(struct Client *target_p,const char *, ...) AFP(2, 3);
+#define POP_QUEUE 0
+#define HOLD_QUEUE 1
+extern void send_pop_queue(struct Client *);
+extern void sendto_one(struct Client *target_p, int queue, const char *, ...) AFP(3, 4);
+extern void sendto_one_notice(struct Client *target_p, int queue, const char *, ...) AFP(3, 4);
 extern void sendto_one_prefix(struct Client *target_p, struct Client *source_p,
 			      const char *command, const char *, ...) AFP(4, 5);
 extern void sendto_one_numeric(struct Client *target_p,
-			       int numeric, const char *, ...) AFP(3, 4);
+			       int queue, int numeric, const char *, ...) AFP(4, 5);
 
 extern void sendto_server(struct Client *one, struct Channel *chptr,
 			  unsigned long caps, unsigned long nocaps,

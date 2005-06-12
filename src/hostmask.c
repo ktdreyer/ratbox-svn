@@ -711,7 +711,7 @@ report_auth(struct Client *client_p)
 				get_printable_conf(aconf, &name, &host, &pass, &user, &port,
 						   &classname);
 
-				sendto_one_numeric(client_p, RPL_STATSILINE, 
+				sendto_one_numeric(client_p, HOLD_QUEUE, RPL_STATSILINE, 
 						   form_str(RPL_STATSILINE),
 						   name, show_iline_prefix(client_p, aconf, user),
 #ifdef HIDE_SPOOF_IPS
@@ -719,6 +719,7 @@ report_auth(struct Client *client_p)
 #endif
 						   host, port, classname);
 			}
+	send_pop_queue(client_p);
 }
 
 /* report_Klines()
@@ -748,7 +749,7 @@ report_Klines(struct Client *source_p)
 					continue;
 
 				get_printable_kline(source_p, aconf, &host, &pass, &user, &oper_reason);
-				sendto_one_numeric(source_p, RPL_STATSKLINE,
+				sendto_one_numeric(source_p, POP_QUEUE, RPL_STATSKLINE,
 						   form_str(RPL_STATSKLINE),
 						   'K', host, user, pass,
 						   oper_reason ? "|" : "",

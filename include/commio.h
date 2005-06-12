@@ -150,7 +150,7 @@ void fdlist_init(void);
 
 extern void comm_open(int, unsigned int, const char *);
 extern void comm_close(int);
-extern void comm_dump(DUMPCB *, void *data);
+extern void comm_dump(DUMPCB *, void *xdata);
 #ifndef __GNUC__
 extern void comm_note(int fd, const char *format, ...);
 #else

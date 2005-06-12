@@ -75,7 +75,7 @@ m_names(struct Client *client_p, struct Client *source_p, int parc, const char *
 
 		if(!check_channel_name(p))
 		{
-			sendto_one_numeric(source_p, ERR_BADCHANNAME,
+			sendto_one_numeric(source_p, POP_QUEUE, ERR_BADCHANNAME,
 					   form_str(ERR_BADCHANNAME),
 					   (unsigned char *) p);
 			return 0;
@@ -84,7 +84,7 @@ m_names(struct Client *client_p, struct Client *source_p, int parc, const char *
 		if((chptr = find_channel(p)) != NULL)
 			channel_member_names(chptr, source_p, 1);
 		else
-			sendto_one(source_p, form_str(RPL_ENDOFNAMES), 
+			sendto_one(source_p, POP_QUEUE, form_str(RPL_ENDOFNAMES), 
 				   me.name, source_p->name, p);
 	}
 	else
@@ -93,9 +93,9 @@ m_names(struct Client *client_p, struct Client *source_p, int parc, const char *
 		{
 			if((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
 			{
-				sendto_one(source_p, form_str(RPL_LOAD2HI),
+				sendto_one(source_p, POP_QUEUE, form_str(RPL_LOAD2HI),
 					   me.name, source_p->name, "NAMES");
-				sendto_one(source_p, form_str(RPL_ENDOFNAMES),
+				sendto_one(source_p, POP_QUEUE, form_str(RPL_ENDOFNAMES),
 					   me.name, source_p->name, "*");
 				return 0;
 			}
@@ -104,7 +104,7 @@ m_names(struct Client *client_p, struct Client *source_p, int parc, const char *
 		}
 
 		names_global(source_p);
-		sendto_one(source_p, form_str(RPL_ENDOFNAMES), 
+		sendto_one(source_p, POP_QUEUE, form_str(RPL_ENDOFNAMES), 
 			   me.name, source_p->name, "*");
 	}
 
@@ -176,7 +176,7 @@ names_global(struct Client *source_p)
 
 		if((cur_len + NICKLEN + 2) > (BUFSIZE - 3))
 		{
-			sendto_one(source_p, "%s", buf);
+			sendto_one(source_p, POP_QUEUE, "%s", buf);
 			cur_len = mlen;
 			t = buf + mlen;
 		}
@@ -187,5 +187,5 @@ names_global(struct Client *source_p)
 	}
 
 	if(cur_len > mlen)
-		sendto_one(source_p, "%s", buf);
+		sendto_one(source_p, POP_QUEUE, "%s", buf);
 }

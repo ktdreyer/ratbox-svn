@@ -285,19 +285,19 @@ send_user_motd(struct Client *source_p)
 
 	if(user_motd == NULL || dlink_list_length(&user_motd->contents) == 0)
 	{
-		sendto_one(source_p, form_str(ERR_NOMOTD), myname, nick);
+		sendto_one(source_p, POP_QUEUE, form_str(ERR_NOMOTD), myname, nick);
 		return;
 	}
 
-	sendto_one(source_p, form_str(RPL_MOTDSTART), myname, nick, me.name);
+	sendto_one(source_p, HOLD_QUEUE, form_str(RPL_MOTDSTART), myname, nick, me.name);
 
 	DLINK_FOREACH(ptr, user_motd->contents.head)
 	{
 		lineptr = ptr->data;
-		sendto_one(source_p, form_str(RPL_MOTD), myname, nick, lineptr->data);
+		sendto_one(source_p, HOLD_QUEUE, form_str(RPL_MOTD), myname, nick, lineptr->data);
 	}
 
-	sendto_one(source_p, form_str(RPL_ENDOFMOTD), myname, nick);
+	sendto_one(source_p, POP_QUEUE, form_str(RPL_ENDOFMOTD), myname, nick);
 }
 
 /* send_oper_motd()
@@ -315,17 +315,17 @@ send_oper_motd(struct Client *source_p)
 	if(oper_motd == NULL || dlink_list_length(&oper_motd->contents) == 0)
 		return;
 
-	sendto_one(source_p, form_str(RPL_OMOTDSTART), 
+	sendto_one(source_p, HOLD_QUEUE, form_str(RPL_OMOTDSTART), 
 		   me.name, source_p->name);
 
 	DLINK_FOREACH(ptr, oper_motd->contents.head)
 	{
 		lineptr = ptr->data;
-		sendto_one(source_p, form_str(RPL_OMOTD),
+		sendto_one(source_p, HOLD_QUEUE, form_str(RPL_OMOTD),
 			   me.name, source_p->name, lineptr->data);
 	}
 
-	sendto_one(source_p, form_str(RPL_ENDOFOMOTD), 
+	sendto_one(source_p, POP_QUEUE, form_str(RPL_ENDOFOMOTD), 
 		   me.name, source_p->name);
 }
 

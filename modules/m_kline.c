@@ -109,7 +109,7 @@ mo_kline(struct Client *client_p, struct Client *source_p,
 
 	if(!IsOperK(source_p))
 	{
-		sendto_one(source_p, form_str(ERR_NOPRIVS),
+		sendto_one(source_p, POP_QUEUE, form_str(ERR_NOPRIVS),
 			   me.name, source_p->name, "kline");
 		return 0;
 	}
@@ -129,7 +129,7 @@ mo_kline(struct Client *client_p, struct Client *source_p,
 	{
 		if(!IsOperRemoteBan(source_p))
 		{
-			sendto_one(source_p, form_str(ERR_NOPRIVS),
+			sendto_one(source_p, POP_QUEUE, form_str(ERR_NOPRIVS),
 				me.name, source_p->name, "remoteban");
 			return 0;
 		}
@@ -140,7 +140,7 @@ mo_kline(struct Client *client_p, struct Client *source_p,
 
 	if(parc <= loc || EmptyString(parv[loc]))
 	{
-		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
+		sendto_one(source_p, POP_QUEUE, form_str(ERR_NEEDMOREPARAMS),
 			   me.name, source_p->name, "KLINE");
 		return 0;
 	}
@@ -343,7 +343,7 @@ mo_unkline(struct Client *client_p, struct Client *source_p, int parc, const cha
 
 	if(!IsOperUnkline(source_p))
 	{
-		sendto_one(source_p, form_str(ERR_NOPRIVS),
+		sendto_one(source_p, POP_QUEUE, form_str(ERR_NOPRIVS),
 			   me.name, source_p->name, "unkline");
 		return 0;
 	}
@@ -374,7 +374,7 @@ mo_unkline(struct Client *client_p, struct Client *source_p, int parc, const cha
 	}
 	else
 	{
-		sendto_one(source_p, ":%s NOTICE %s :Invalid parameters", me.name, source_p->name);
+		sendto_one(source_p, POP_QUEUE, ":%s NOTICE %s :Invalid parameters", me.name, source_p->name);
 		return 0;
 	}
 
@@ -383,7 +383,7 @@ mo_unkline(struct Client *client_p, struct Client *source_p, int parc, const cha
 	{
 		if(!IsOperRemoteBan(source_p))
 		{
-			sendto_one(source_p, form_str(ERR_NOPRIVS),
+			sendto_one(source_p, POP_QUEUE, form_str(ERR_NOPRIVS),
 				me.name, source_p->name, "remoteban");
 			return 0;
 		}
@@ -400,7 +400,7 @@ mo_unkline(struct Client *client_p, struct Client *source_p, int parc, const cha
 
 	if(remove_temp_kline(user, host))
 	{
-		sendto_one(source_p,
+		sendto_one(source_p, POP_QUEUE, 
 			   ":%s NOTICE %s :Un-klined [%s@%s] from temporary k-lines",
 			   me.name, parv[0], user, host);
 		sendto_realops_flags(UMODE_ALL, L_ALL,
@@ -460,7 +460,7 @@ handle_remote_unkline(struct Client *source_p, const char *user, const char *hos
 
 	if(remove_temp_kline(user, host))
 	{
-		sendto_one_notice(source_p,
+		sendto_one_notice(source_p, POP_QUEUE,
 				":Un-klined [%s@%s] from temporary k-lines",
 				user, host);
 
@@ -527,7 +527,7 @@ apply_tkline(struct Client *source_p, struct ConfItem *aconf,
 			aconf->user, aconf->host, reason, oper_reason);
 	}
 
-	sendto_one_notice(source_p, ":Added temporary %d min. K-Line [%s@%s]",
+	sendto_one_notice(source_p, POP_QUEUE, ":Added temporary %d min. K-Line [%s@%s]",
 			  tkline_time / 60, aconf->user, aconf->host);
 }
 
@@ -584,7 +584,7 @@ valid_user_host(struct Client *source_p, const char *luser, const char *lhost)
 	/* # is invalid, as is '!' (n!u@h kline) */
 	if(strchr(lhost, '#') || strchr(luser, '#') || strchr(luser, '!'))
 	{
-		sendto_one_notice(source_p, ":Invalid K-Line");
+		sendto_one_notice(source_p, POP_QUEUE, ":Invalid K-Line");
 		return 0;
 	}
 
@@ -625,7 +625,7 @@ valid_wild_card(struct Client *source_p, const char *luser, const char *lhost)
 				return 1;
 	}
 
-	sendto_one_notice(source_p,
+	sendto_one_notice(source_p, POP_QUEUE,
 		   	  ":Please include at least %d non-wildcard "
 			  "characters with the user@host",
 			  ConfigFileEntry.min_nonwildcard);
@@ -644,7 +644,7 @@ valid_comment(struct Client *source_p, char *comment)
 {
 	if(strchr(comment, '"'))
 	{
-		sendto_one_notice(source_p, ":Invalid character '\"' in comment");
+		sendto_one_notice(source_p, POP_QUEUE, ":Invalid character '\"' in comment");
 		return 0;
 	}
 
@@ -695,7 +695,7 @@ already_placed_kline(struct Client *source_p, const char *luser, const char *lho
 			{
 				reason = aconf->passwd ? aconf->passwd : "<No Reason>";
 
-				sendto_one_notice(source_p,
+				sendto_one_notice(source_p, POP_QUEUE,
 						  ":[%s@%s] already K-Lined by [%s@%s] - %s",
 						  luser, lhost, aconf->user,
 						  aconf->host, reason);
@@ -731,14 +731,14 @@ remove_permkline_match(struct Client *source_p, const char *host, const char *us
 
 	if((in = fopen(filename, "r")) == 0)
 	{
-		sendto_one_notice(source_p, ":Cannot open %s", filename);
+		sendto_one_notice(source_p, POP_QUEUE, ":Cannot open %s", filename);
 		return;
 	}
 
 	oldumask = umask(0);
 	if((out = fopen(temppath, "w")) == 0)
 	{
-		sendto_one_notice(source_p, ":Cannot open %s", temppath);
+		sendto_one_notice(source_p, POP_QUEUE, ":Cannot open %s", temppath);
 		fclose(in);
 		umask(oldumask);
 		return;
@@ -787,12 +787,12 @@ remove_permkline_match(struct Client *source_p, const char *host, const char *us
 	 */
 	if(error_on_write)
 	{
-		sendto_one_notice(source_p, ":Couldn't write temp kline file, aborted");
+		sendto_one_notice(source_p, POP_QUEUE, ":Couldn't write temp kline file, aborted");
 		return;
 	}
 	else if(!pairme)
 	{
-		sendto_one_notice(source_p, ":No K-Line for %s@%s",
+		sendto_one_notice(source_p, POP_QUEUE, ":No K-Line for %s@%s",
 				  user, host);
 
 		if(temppath != NULL)
@@ -804,7 +804,7 @@ remove_permkline_match(struct Client *source_p, const char *host, const char *us
 	(void) rename(temppath, filename);
 	rehash_bans(0);
 
-	sendto_one_notice(source_p, ":K-Line for [%s@%s] is removed",
+	sendto_one_notice(source_p, POP_QUEUE, ":K-Line for [%s@%s] is removed",
 			  user, host);
 
 	sendto_realops_flags(UMODE_ALL, L_ALL,
@@ -843,7 +843,7 @@ flush_write(struct Client *source_p, FILE * out, const char *buf, const char *te
 
 	if(error_on_write)
 	{
-		sendto_one_notice(source_p, ":Unable to write to %s",
+		sendto_one_notice(source_p, POP_QUEUE, ":Unable to write to %s",
 				  temppath);
 		if(temppath != NULL)
 			(void) unlink(temppath);

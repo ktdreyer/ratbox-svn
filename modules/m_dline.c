@@ -85,7 +85,7 @@ mo_dline(struct Client *client_p, struct Client *source_p,
 
 	if(!IsOperK(source_p))
 	{
-		sendto_one(source_p, form_str(ERR_NOPRIVS),
+		sendto_one(source_p, POP_QUEUE, form_str(ERR_NOPRIVS),
 			   me.name, source_p->name, "kline");
 		return 0;
 	}
@@ -95,7 +95,7 @@ mo_dline(struct Client *client_p, struct Client *source_p,
 
 	if(parc < loc + 1)
 	{
-		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
+		sendto_one(source_p, POP_QUEUE, form_str(ERR_NEEDMOREPARAMS),
 			   me.name, source_p->name, "DLINE");
 		return 0;
 	}
@@ -105,7 +105,7 @@ mo_dline(struct Client *client_p, struct Client *source_p,
 
 	if(!parse_netmask(dlhost, NULL, &bits))
 	{
-		sendto_one(source_p, ":%s NOTICE %s :Invalid D-Line",
+		sendto_one(source_p, POP_QUEUE, ":%s NOTICE %s :Invalid D-Line",
 			   me.name, source_p->name);
 		return 0;
 	}
@@ -119,7 +119,7 @@ mo_dline(struct Client *client_p, struct Client *source_p,
 
 		if(!valid_comment(reason))
 		{
-			sendto_one(source_p,
+			sendto_one(source_p, POP_QUEUE, 
 				   ":%s NOTICE %s :Invalid character '\"' in comment",
 				   me.name, source_p->name);
 			return 0;
@@ -130,7 +130,7 @@ mo_dline(struct Client *client_p, struct Client *source_p,
 	{
 		if(bits < 8)
 		{
-			sendto_one(source_p,
+			sendto_one(source_p, POP_QUEUE, 
 				   ":%s NOTICE %s :For safety, bitmasks less than 8 require conf access.",
 				   me.name, parv[0]);
 			return 0;
@@ -140,7 +140,7 @@ mo_dline(struct Client *client_p, struct Client *source_p,
 	{
 		if(bits < 16)
 		{
-			sendto_one(source_p,
+			sendto_one(source_p, POP_QUEUE, 
 				   ":%s NOTICE %s :Dline bitmasks less than 16 are for admins only.",
 				   me.name, parv[0]);
 			return 0;
@@ -167,11 +167,11 @@ mo_dline(struct Client *client_p, struct Client *source_p,
 			{
 				creason = aconf->passwd ? aconf->passwd : "<No Reason>";
 				if(IsConfExemptKline(aconf))
-					sendto_one(source_p,
+					sendto_one(source_p, POP_QUEUE, 
 						   ":%s NOTICE %s :[%s] is (E)d-lined by [%s] - %s",
 						   me.name, parv[0], dlhost, aconf->host, creason);
 				else
-					sendto_one(source_p,
+					sendto_one(source_p, POP_QUEUE, 
 						   ":%s NOTICE %s :[%s] already D-lined by [%s] - %s",
 						   me.name, parv[0], dlhost, aconf->host, creason);
 				return 0;
@@ -226,7 +226,7 @@ mo_dline(struct Client *client_p, struct Client *source_p,
 				aconf->host, reason, oper_reason);
 		}
 
-		sendto_one(source_p, ":%s NOTICE %s :Added temporary %d min. D-Line for [%s]",
+		sendto_one(source_p, POP_QUEUE, ":%s NOTICE %s :Added temporary %d min. D-Line for [%s]",
 			   me.name, source_p->name, tdline_time / 60, aconf->host);
 	}
 	else
@@ -261,7 +261,7 @@ mo_undline(struct Client *client_p, struct Client *source_p, int parc, const cha
 
 	if(!IsOperUnkline(source_p))
 	{
-		sendto_one(source_p, form_str(ERR_NOPRIVS),
+		sendto_one(source_p, POP_QUEUE, form_str(ERR_NOPRIVS),
 			   me.name, source_p->name, "unkline");
 		return 0;
 	}
@@ -270,14 +270,14 @@ mo_undline(struct Client *client_p, struct Client *source_p, int parc, const cha
 
 	if(parse_netmask(cidr, NULL, NULL) == HM_HOST)
 	{
-		sendto_one(source_p, ":%s NOTICE %s :Invalid D-Line",
+		sendto_one(source_p, POP_QUEUE, ":%s NOTICE %s :Invalid D-Line",
 			   me.name, source_p->name);
 		return 0;
 	}
 
 	if(remove_temp_dline(cidr))
 	{
-		sendto_one(source_p,
+		sendto_one(source_p, POP_QUEUE, 
 			   ":%s NOTICE %s :Un-dlined [%s] from temporary D-lines",
 			   me.name, parv[0], cidr);
 		sendto_realops_flags(UMODE_ALL, L_ALL,
@@ -291,14 +291,14 @@ mo_undline(struct Client *client_p, struct Client *source_p, int parc, const cha
 
 	if((in = fopen(filename, "r")) == 0)
 	{
-		sendto_one(source_p, ":%s NOTICE %s :Cannot open %s", me.name, parv[0], filename);
+		sendto_one(source_p, POP_QUEUE, ":%s NOTICE %s :Cannot open %s", me.name, parv[0], filename);
 		return 0;
 	}
 
 	oldumask = umask(0);
 	if((out = fopen(temppath, "w")) == 0)
 	{
-		sendto_one(source_p, ":%s NOTICE %s :Cannot open %s", me.name, parv[0], temppath);
+		sendto_one(source_p, POP_QUEUE, ":%s NOTICE %s :Cannot open %s", me.name, parv[0], temppath);
 		fclose(in);
 		umask(oldumask);
 		return 0;
@@ -344,14 +344,14 @@ mo_undline(struct Client *client_p, struct Client *source_p, int parc, const cha
 
 	if(error_on_write)
 	{
-		sendto_one(source_p,
+		sendto_one(source_p, POP_QUEUE, 
 			   ":%s NOTICE %s :Couldn't write D-line file, aborted", 
 			   me.name, parv[0]);
 		return 0;
 	}
 	else if(!pairme)
 	{
-		sendto_one(source_p, ":%s NOTICE %s :No D-Line for %s",
+		sendto_one(source_p, POP_QUEUE, ":%s NOTICE %s :No D-Line for %s",
 			   me.name, parv[0], cidr);
 
 		if(temppath != NULL)
@@ -364,7 +364,7 @@ mo_undline(struct Client *client_p, struct Client *source_p, int parc, const cha
 	rehash_bans(0);
 
 
-	sendto_one(source_p, ":%s NOTICE %s :D-Line for [%s] is removed", me.name, parv[0], cidr);
+	sendto_one(source_p, POP_QUEUE, ":%s NOTICE %s :D-Line for [%s] is removed", me.name, parv[0], cidr);
 	sendto_realops_flags(UMODE_ALL, L_ALL,
 			     "%s has removed the D-Line for: [%s]", get_oper_name(source_p), cidr);
 	ilog(L_KLINE, "UD %s %s", get_oper_name(source_p), cidr);
@@ -417,7 +417,7 @@ flush_write(struct Client *source_p, FILE * out, char *buf, char *temppath)
 
 	if(error_on_write)
 	{
-		sendto_one(source_p, ":%s NOTICE %s :Unable to write to %s",
+		sendto_one(source_p, POP_QUEUE, ":%s NOTICE %s :Unable to write to %s",
 			   me.name, source_p->name, temppath);
 		fclose(out);
 		if(temppath != NULL)

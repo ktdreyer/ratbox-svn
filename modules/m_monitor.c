@@ -88,16 +88,16 @@ add_monitor(struct Client *client_p, const char *nicks)
 			char buf[100];
 
 			if(cur_onlen != mlen)
-				sendto_one(client_p, "%s", onbuf);
+				sendto_one(client_p, POP_QUEUE, "%s", onbuf);
 			if(cur_offlen != mlen)
-				sendto_one(client_p, "%s", offbuf);
+				sendto_one(client_p, POP_QUEUE, "%s", offbuf);
 
 			if(p)
 				snprintf(buf, sizeof(buf), "%s,%s", name, p);
 			else
 				snprintf(buf, sizeof(buf), "%s", name);
 
-			sendto_one(client_p, form_str(ERR_MONLISTFULL),
+			sendto_one(client_p, POP_QUEUE, form_str(ERR_MONLISTFULL),
 					me.name, client_p->name,
 					ConfigFileEntry.max_monitor, buf);
 			return;
@@ -117,7 +117,7 @@ add_monitor(struct Client *client_p, const char *nicks)
 			if(cur_onlen + strlen(target_p->name) + 
 			   strlen(target_p->username) + strlen(target_p->host) + 3 >= BUFSIZE-3)
 			{
-				sendto_one(client_p, "%s", onbuf);
+				sendto_one(client_p, POP_QUEUE, "%s", onbuf);
 				cur_onlen = mlen;
 				onptr = onbuf + mlen;
 			}
@@ -135,7 +135,7 @@ add_monitor(struct Client *client_p, const char *nicks)
 		{
 			if(cur_offlen + strlen(name) + 1 >= BUFSIZE-3)
 			{
-				sendto_one(client_p, "%s", offbuf);
+				sendto_one(client_p, POP_QUEUE, "%s", offbuf);
 				cur_offlen = mlen;
 				offptr = offbuf + mlen;
 			}
@@ -150,9 +150,9 @@ add_monitor(struct Client *client_p, const char *nicks)
 	}
 
 	if(cur_onlen != mlen)
-		sendto_one(client_p, "%s", onbuf);
+		sendto_one(client_p, POP_QUEUE, "%s", onbuf);
 	if(cur_offlen != mlen)
-		sendto_one(client_p, "%s", offbuf);
+		sendto_one(client_p, POP_QUEUE, "%s", offbuf);
 }
 
 static void
@@ -193,7 +193,7 @@ list_monitor(struct Client *client_p)
 
 	if(!dlink_list_length(&client_p->localClient->monitor_list))
 	{
-		sendto_one(client_p, form_str(RPL_ENDOFMONLIST),
+		sendto_one(client_p, POP_QUEUE, form_str(RPL_ENDOFMONLIST),
 				me.name, client_p->name);
 		return;
 	}
@@ -208,7 +208,7 @@ list_monitor(struct Client *client_p)
 
 		if(cur_len + strlen(monptr->name) + 1 >= BUFSIZE-3)
 		{
-			sendto_one(client_p, "%s", buf);
+			sendto_one(client_p, HOLD_QUEUE, "%s", buf);
 			nbuf = buf + mlen;
 			cur_len = mlen;
 		}
@@ -220,8 +220,8 @@ list_monitor(struct Client *client_p)
 		nbuf += arglen;
 	}
 
-	sendto_one(client_p, "%s", buf);
-	sendto_one(client_p, form_str(RPL_ENDOFMONLIST), 
+	sendto_one(client_p, POP_QUEUE, "%s", buf);
+	sendto_one(client_p, POP_QUEUE, form_str(RPL_ENDOFMONLIST), 
 			me.name, client_p->name);
 }
 
@@ -253,7 +253,7 @@ show_monitor_status(struct Client *client_p)
 			if(cur_onlen + strlen(target_p->name) + 
 			   strlen(target_p->username) + strlen(target_p->host) + 3 >= BUFSIZE-3)
 			{
-				sendto_one(client_p, "%s", onbuf);
+				sendto_one(client_p, HOLD_QUEUE, "%s", onbuf);
 				cur_onlen = mlen;
 				onptr = onbuf + mlen;
 			}
@@ -271,7 +271,7 @@ show_monitor_status(struct Client *client_p)
 		{
 			if(cur_offlen + strlen(monptr->name) + 1 >= BUFSIZE-3)
 			{
-				sendto_one(client_p, "%s", offbuf);
+				sendto_one(client_p, POP_QUEUE, "%s", offbuf);
 				cur_offlen = mlen;
 				offptr = offbuf + mlen;
 			}
@@ -286,9 +286,9 @@ show_monitor_status(struct Client *client_p)
 	}
 
 	if(cur_onlen != mlen)
-		sendto_one(client_p, "%s", onbuf);
+		sendto_one(client_p, POP_QUEUE, "%s", onbuf);
 	if(cur_offlen != mlen)
-		sendto_one(client_p, "%s", offbuf);
+		sendto_one(client_p, POP_QUEUE, "%s", offbuf);
 }
 
 static int
@@ -299,7 +299,7 @@ m_monitor(struct Client *client_p, struct Client *source_p, int parc, const char
 		case '+':
 			if(parc < 3 || EmptyString(parv[2]))
 			{
-				sendto_one(client_p, form_str(ERR_NEEDMOREPARAMS),
+				sendto_one(client_p, POP_QUEUE, form_str(ERR_NEEDMOREPARAMS),
 						me.name, source_p->name, "MONITOR");
 				return 0;
 			}
@@ -309,7 +309,7 @@ m_monitor(struct Client *client_p, struct Client *source_p, int parc, const char
 		case '-':
 			if(parc < 3 || EmptyString(parv[2]))
 			{
-				sendto_one(client_p, form_str(ERR_NEEDMOREPARAMS),
+				sendto_one(client_p, POP_QUEUE, form_str(ERR_NEEDMOREPARAMS),
 						me.name, source_p->name, "MONITOR");
 				return 0;
 			}

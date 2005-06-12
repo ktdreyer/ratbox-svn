@@ -59,20 +59,20 @@ mo_die(struct Client *client_p __unused, struct Client *source_p, int parc, cons
 
 	if(!IsOperDie(source_p))
 	{
-		sendto_one(source_p, form_str(ERR_NOPRIVS),
+		sendto_one(source_p, POP_QUEUE, form_str(ERR_NOPRIVS),
 			   me.name, source_p->name, "die");
 		return 0;
 	}
 
 	if(parc < 2 || EmptyString(parv[1]))
 	{
-		sendto_one(source_p, ":%s NOTICE %s :Need server name /die %s",
+		sendto_one(source_p, POP_QUEUE, ":%s NOTICE %s :Need server name /die %s",
 			   me.name, source_p->name, me.name);
 		return 0;
 	}
 	else if(irccmp(parv[1], me.name))
 	{
-		sendto_one(source_p, ":%s NOTICE %s :Mismatch on /die %s",
+		sendto_one(source_p, POP_QUEUE, ":%s NOTICE %s :Mismatch on /die %s",
 			   me.name, source_p->name, me.name);
 		return 0;
 	}
@@ -81,7 +81,7 @@ mo_die(struct Client *client_p __unused, struct Client *source_p, int parc, cons
 	{
 		target_p = ptr->data;
 
-		sendto_one(target_p,
+		sendto_one(target_p, POP_QUEUE,
 			   ":%s NOTICE %s :Server Terminating. %s",
 			   me.name, target_p->name, get_client_name(source_p, HIDE_IP));
 	}
@@ -90,7 +90,7 @@ mo_die(struct Client *client_p __unused, struct Client *source_p, int parc, cons
 	{
 		target_p = ptr->data;
 
-		sendto_one(target_p, ":%s ERROR :Terminated by %s",
+		sendto_one(target_p, POP_QUEUE, ":%s ERROR :Terminated by %s",
 			   me.name, get_client_name(source_p, HIDE_IP));
 	}
 

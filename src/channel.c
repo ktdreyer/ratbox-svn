@@ -406,7 +406,7 @@ channel_member_names(struct Channel *chptr, struct Client *client_p, int show_eo
 			if(cur_len + strlen(target_p->name) + 3 >= BUFSIZE-3)
 			{
 				*(t - 1) = '\0';
-				sendto_one(client_p, "%s", lbuf);
+				sendto_one(client_p, HOLD_QUEUE, "%s", lbuf);
 				cur_len = mlen;
 				t = lbuf + mlen;
 			}
@@ -428,13 +428,15 @@ channel_member_names(struct Channel *chptr, struct Client *client_p, int show_eo
 		if(cur_len != mlen)
 		{
 			*(t - 1) = '\0';
-			sendto_one(client_p, "%s", lbuf);
+			sendto_one(client_p, HOLD_QUEUE, "%s", lbuf);
 		}
 	}
 
 	if(show_eon)
-		sendto_one(client_p, form_str(RPL_ENDOFNAMES),
+		sendto_one(client_p, HOLD_QUEUE, form_str(RPL_ENDOFNAMES),
 			   me.name, client_p->name, chptr->chname);
+
+	send_pop_queue(client_p);
 }
 
 /* del_invite()

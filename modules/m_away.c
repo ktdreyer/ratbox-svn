@@ -95,7 +95,7 @@ m_away(struct Client *client_p, struct Client *source_p, int parc, const char *p
 			source_p->user->away = NULL;
 		}
 		if(MyConnect(source_p))
-			sendto_one(source_p, form_str(RPL_UNAWAY),
+			sendto_one(source_p, POP_QUEUE, form_str(RPL_UNAWAY),
 				   me.name, source_p->name);
 		return 0;
 	}
@@ -107,7 +107,7 @@ m_away(struct Client *client_p, struct Client *source_p, int parc, const char *p
 		if(!IsOper(source_p) &&
 		   (CurrentTime - source_p->localClient->last_away) < ConfigFileEntry.pace_wait)
 		{
-			sendto_one(source_p, form_str(RPL_LOAD2HI), 
+			sendto_one(source_p, POP_QUEUE, form_str(RPL_LOAD2HI), 
 				   me.name, source_p->name, "AWAY");
 			return 0;
 		}
@@ -135,7 +135,7 @@ m_away(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	source_p->user->away = away;
 
 	if(MyConnect(source_p))
-		sendto_one(source_p, form_str(RPL_NOWAWAY), me.name, source_p->name);
+		sendto_one(source_p, POP_QUEUE, form_str(RPL_NOWAWAY), me.name, source_p->name);
 
 	return 0;
 }

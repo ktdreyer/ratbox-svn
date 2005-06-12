@@ -67,9 +67,9 @@ m_help(struct Client *client_p, struct Client *source_p, int parc, const char *p
 	if((last_used + ConfigFileEntry.pace_wait_simple) > CurrentTime)
 	{
 		/* safe enough to give this on a local connect only */
-		sendto_one(source_p, form_str(RPL_LOAD2HI), 
+		sendto_one(source_p, HOLD_QUEUE, form_str(RPL_LOAD2HI), 
 			   me.name, source_p->name, "HELP");
-		sendto_one(source_p, form_str(RPL_ENDOFHELP),
+		sendto_one(source_p, POP_QUEUE, form_str(RPL_ENDOFHELP),
 			   me.name, source_p->name,
 			   (parc > 1 && !EmptyString(parv[1])) ? parv[1] : "index");
 		return 0;
@@ -123,7 +123,7 @@ dohelp(struct Client *source_p, int flags, const char *topic)
 
 	if(hptr == NULL)
 	{
-		sendto_one(source_p, form_str(ERR_HELPNOTFOUND),
+		sendto_one(source_p, POP_QUEUE, form_str(ERR_HELPNOTFOUND),
 			   me.name, source_p->name, topic);
 		return;
 	}
@@ -132,18 +132,18 @@ dohelp(struct Client *source_p, int flags, const char *topic)
 	lineptr = fptr->data;
 
 	/* first line cant be empty */
-	sendto_one_queue(source_p, form_str(RPL_HELPSTART),
+	sendto_one(source_p, HOLD_QUEUE, form_str(RPL_HELPSTART),
 		   me.name, source_p->name, topic, lineptr->data);
 
 	DLINK_FOREACH(ptr, fptr->next)
 	{
 		lineptr = ptr->data;
 
-		sendto_one_queue(source_p, form_str(RPL_HELPTXT),
+		sendto_one(source_p, HOLD_QUEUE, form_str(RPL_HELPTXT),
 			   me.name, source_p->name, topic, lineptr->data);
 	}
 
-	sendto_one(source_p, form_str(RPL_ENDOFHELP),
+	sendto_one(source_p, POP_QUEUE, form_str(RPL_ENDOFHELP),
 		   me.name, source_p->name, topic);
 	return;
 }

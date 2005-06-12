@@ -120,7 +120,7 @@ m_trace(struct Client *client_p, struct Client *source_p, int parc, const char *
 			 */
 			if(IsOper(source_p) || IsExemptShide(source_p) ||
 			   !ConfigServerHide.flatten_links)
-				sendto_one_numeric(source_p, RPL_TRACELINK, 
+				sendto_one_numeric(source_p, POP_QUEUE, RPL_TRACELINK, 
 						   form_str(RPL_TRACELINK),
 						   ircd_version, tname,
 						   ac2ptr ? ac2ptr->from->name : "EEK!");
@@ -170,7 +170,7 @@ m_trace(struct Client *client_p, struct Client *source_p, int parc, const char *
 
 		trace_spy(source_p, target_p);
 
-		sendto_one_numeric(source_p, RPL_ENDOFTRACE, 
+		sendto_one_numeric(source_p, POP_QUEUE, RPL_ENDOFTRACE, 
 				   form_str(RPL_ENDOFTRACE), tname);
 		return 0;
 	}
@@ -227,7 +227,7 @@ m_trace(struct Client *client_p, struct Client *source_p, int parc, const char *
 					link_s[target_p->localClient->fd]);
 		}
 
-		sendto_one_numeric(source_p, RPL_ENDOFTRACE, 
+		sendto_one_numeric(source_p, POP_QUEUE, RPL_ENDOFTRACE, 
 				   form_str(RPL_ENDOFTRACE), tname);
 		return 0;
 	}
@@ -284,7 +284,7 @@ m_trace(struct Client *client_p, struct Client *source_p, int parc, const char *
 		 * left here in case that should ever change --fl
 		 */
 		if(!cnt)
-			sendto_one_numeric(source_p, RPL_TRACESERVER, 
+			sendto_one_numeric(source_p, POP_QUEUE, RPL_TRACESERVER, 
 					   form_str(RPL_TRACESERVER),
 					   0, link_s[me.localClient->fd],
 					   link_u[me.localClient->fd], me.name, "*", "*", me.name);
@@ -292,7 +292,7 @@ m_trace(struct Client *client_p, struct Client *source_p, int parc, const char *
 		/* let the user have some idea that its at the end of the
 		 * trace
 		 */
-		sendto_one_numeric(source_p, RPL_ENDOFTRACE, 
+		sendto_one_numeric(source_p, POP_QUEUE, RPL_ENDOFTRACE, 
 				   form_str(RPL_ENDOFTRACE), tname);
 		return 0;
 	}
@@ -304,13 +304,13 @@ m_trace(struct Client *client_p, struct Client *source_p, int parc, const char *
 			cltmp = ptr->data;
 
 			if(CurrUsers(cltmp) > 0)
-				sendto_one_numeric(source_p, RPL_TRACECLASS,
+				sendto_one_numeric(source_p, POP_QUEUE, RPL_TRACECLASS,
 						   form_str(RPL_TRACECLASS), 
 						   ClassName(cltmp), CurrUsers(cltmp));
 		}
 	}
 
-	sendto_one_numeric(source_p, RPL_ENDOFTRACE, form_str(RPL_ENDOFTRACE), tname);
+	sendto_one_numeric(source_p, POP_QUEUE, RPL_ENDOFTRACE, form_str(RPL_ENDOFTRACE), tname);
 
 	return 0;
 }
@@ -347,14 +347,14 @@ report_this_status(struct Client *source_p, struct Client *target_p,
 	switch (target_p->status)
 	{
 	case STAT_CONNECTING:
-		sendto_one_numeric(source_p, RPL_TRACECONNECTING,
+		sendto_one_numeric(source_p, POP_QUEUE, RPL_TRACECONNECTING,
 				form_str(RPL_TRACECONNECTING),
 				class_name, name);
 		cnt++;
 		break;
 
 	case STAT_HANDSHAKE:
-		sendto_one_numeric(source_p, RPL_TRACEHANDSHAKE,
+		sendto_one_numeric(source_p, POP_QUEUE, RPL_TRACEHANDSHAKE,
 				form_str(RPL_TRACEHANDSHAKE),
 				class_name, name);
 		cnt++;
@@ -365,7 +365,7 @@ report_this_status(struct Client *source_p, struct Client *target_p,
 
 	case STAT_UNKNOWN:
 		/* added time -Taner */
-		sendto_one_numeric(source_p, RPL_TRACEUNKNOWN,
+		sendto_one_numeric(source_p, POP_QUEUE, RPL_TRACEUNKNOWN,
 				   form_str(RPL_TRACEUNKNOWN),
 				   class_name, name, ip,
 				   CurrentTime - target_p->localClient->firsttime);
@@ -381,7 +381,7 @@ report_this_status(struct Client *source_p, struct Client *target_p,
 		   || !dow || IsOper(target_p) || (source_p == target_p))
 		{
 			if(IsOper(target_p))
-				sendto_one_numeric(source_p, RPL_TRACEOPERATOR,
+				sendto_one_numeric(source_p, POP_QUEUE, RPL_TRACEOPERATOR,
 						   form_str(RPL_TRACEOPERATOR),
 						   class_name, name,
 #ifndef HIDE_SPOOF_IPS
@@ -392,7 +392,7 @@ report_this_status(struct Client *source_p, struct Client *target_p,
 						   CurrentTime - target_p->localClient->last);
 
 			else
-				sendto_one_numeric(source_p, RPL_TRACEUSER, 
+				sendto_one_numeric(source_p, POP_QUEUE, RPL_TRACEUSER, 
 						   form_str(RPL_TRACEUSER),
 						   class_name, name,
 #ifndef HIDE_SPOOF_IPS
@@ -406,7 +406,7 @@ report_this_status(struct Client *source_p, struct Client *target_p,
 		break;
 
 	case STAT_SERVER:
-		sendto_one_numeric(source_p, RPL_TRACESERVER, form_str(RPL_TRACESERVER),
+		sendto_one_numeric(source_p, POP_QUEUE, RPL_TRACESERVER, form_str(RPL_TRACESERVER),
 				   class_name, link_s_p, link_u_p, name,
 				   *(target_p->serv->by) ? target_p->serv->by : "*", "*",
 				   me.name, CurrentTime - target_p->localClient->lasttime);
@@ -414,7 +414,7 @@ report_this_status(struct Client *source_p, struct Client *target_p,
 		break;
 
 	default:		/* ...we actually shouldn't come here... --msa */
-		sendto_one_numeric(source_p, RPL_TRACENEWTYPE, 
+		sendto_one_numeric(source_p, POP_QUEUE, RPL_TRACENEWTYPE, 
 				   form_str(RPL_TRACENEWTYPE), 
 				   me.name, source_p->name, name);
 		cnt++;

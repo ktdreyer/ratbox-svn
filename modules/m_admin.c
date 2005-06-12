@@ -72,7 +72,7 @@ mr_admin(struct Client *client_p, struct Client *source_p, int parc, const char 
 
 	if((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
 	{
-		sendto_one(source_p, form_str(RPL_LOAD2HI), 
+		sendto_one(source_p, POP_QUEUE, form_str(RPL_LOAD2HI), 
 			   me.name, 
 			   EmptyString(source_p->name) ? "*" : source_p->name, 
 			   "ADMIN");
@@ -100,7 +100,7 @@ m_admin(struct Client *client_p, struct Client *source_p, int parc, const char *
 	{
 		if((last_used + ConfigFileEntry.pace_wait) > CurrentTime)
 		{
-			sendto_one(source_p, form_str(RPL_LOAD2HI),
+			sendto_one(source_p, POP_QUEUE, form_str(RPL_LOAD2HI),
 				   me.name, source_p->name, "ADMIN");
 			return 0;
 		}
@@ -153,13 +153,14 @@ do_admin(struct Client *source_p)
 	myname = get_id(&me, source_p);
 	nick = EmptyString(source_p->name) ? "*" : get_id(source_p, source_p);
 
-	sendto_one(source_p, form_str(RPL_ADMINME), myname, nick, me.name);
+	sendto_one(source_p, HOLD_QUEUE, form_str(RPL_ADMINME), myname, nick, me.name);
 	if(AdminInfo.name != NULL)
-		sendto_one(source_p, form_str(RPL_ADMINLOC1), myname, nick, AdminInfo.name);
+		sendto_one(source_p, HOLD_QUEUE, form_str(RPL_ADMINLOC1), myname, nick, AdminInfo.name);
 	if(AdminInfo.description != NULL)
-		sendto_one(source_p, form_str(RPL_ADMINLOC2), myname, nick, AdminInfo.description);
+		sendto_one(source_p, HOLD_QUEUE, form_str(RPL_ADMINLOC2), myname, nick, AdminInfo.description);
 	if(AdminInfo.email != NULL)
-		sendto_one(source_p, form_str(RPL_ADMINEMAIL), myname, nick, AdminInfo.email);
+		sendto_one(source_p, HOLD_QUEUE, form_str(RPL_ADMINEMAIL), myname, nick, AdminInfo.email);
+	send_pop_queue(source_p);
 }
 
 /* admin_spy()

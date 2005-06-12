@@ -102,7 +102,7 @@ mo_resv(struct Client *client_p, struct Client *source_p, int parc, const char *
 	{
 		if(!IsOperRemoteBan(source_p))
 		{
-			sendto_one(source_p, form_str(ERR_NOPRIVS),
+			sendto_one(source_p, POP_QUEUE, form_str(ERR_NOPRIVS),
 				me.name, source_p->name, "remoteban");
 			return 0;
 		}
@@ -113,7 +113,7 @@ mo_resv(struct Client *client_p, struct Client *source_p, int parc, const char *
 
 	if(parc <= loc || EmptyString(parv[loc]))
 	{
-		sendto_one(source_p, form_str(ERR_NEEDMOREPARAMS),
+		sendto_one(source_p, POP_QUEUE, form_str(ERR_NEEDMOREPARAMS),
 			   me.name, source_p->name, "RESV");
 		return 0;
 	}
@@ -197,7 +197,7 @@ parse_resv(struct Client *source_p, const char *name,
 	{
 		if(hash_find_resv(name))
 		{
-			sendto_one_notice(source_p,
+			sendto_one_notice(source_p, POP_QUEUE,
 					":A RESV has already been placed on channel: %s",
 					name);
 			return;
@@ -205,14 +205,14 @@ parse_resv(struct Client *source_p, const char *name,
 
 		if(strlen(name) > CHANNELLEN)
 		{
-			sendto_one_notice(source_p, ":Invalid RESV length: %s",
+			sendto_one_notice(source_p, POP_QUEUE, ":Invalid RESV length: %s",
 					  name);
 			return;
 		}
 
 		if(strchr(reason, '"'))
 		{
-			sendto_one_notice(source_p,
+			sendto_one_notice(source_p, POP_QUEUE,
 					":Invalid character '\"' in comment");
 			return;
 		}
@@ -235,7 +235,7 @@ parse_resv(struct Client *source_p, const char *name,
 			ilog(L_KLINE, "R %s %d %s %s",
 				get_oper_name(source_p), temp_time / 60,
 				name, reason);
-			sendto_one_notice(source_p, ":Added temporary %d min. RESV [%s]",
+			sendto_one_notice(source_p, POP_QUEUE, ":Added temporary %d min. RESV [%s]",
 					temp_time / 60, name);
 		}
 		else
@@ -246,21 +246,21 @@ parse_resv(struct Client *source_p, const char *name,
 	{
 		if(strlen(name) > NICKLEN*2)
 		{
-			sendto_one_notice(source_p, ":Invalid RESV length: %s",
+			sendto_one_notice(source_p, POP_QUEUE, ":Invalid RESV length: %s",
 					   name);
 			return;
 		}
 
 		if(strchr(reason, '"'))
 		{
-			sendto_one_notice(source_p,
+			sendto_one_notice(source_p, POP_QUEUE,
 					":Invalid character '\"' in comment");
 			return;
 		}
 
 		if(!valid_wild_card_simple(name))
 		{
-			sendto_one_notice(source_p,
+			sendto_one_notice(source_p, POP_QUEUE,
 					   ":Please include at least %d non-wildcard "
 					   "characters with the resv",
 					   ConfigFileEntry.min_nonwildcard_simple);
@@ -269,7 +269,7 @@ parse_resv(struct Client *source_p, const char *name,
 
 		if(find_nick_resv(name))
 		{
-			sendto_one_notice(source_p,
+			sendto_one_notice(source_p, POP_QUEUE,
 					   ":A RESV has already been placed on nick: %s",
 					   name);
 			return;
@@ -293,7 +293,7 @@ parse_resv(struct Client *source_p, const char *name,
 			ilog(L_KLINE, "R %s %d %s %s",
 				get_oper_name(source_p), temp_time / 60,
 				name, reason);
-			sendto_one_notice(source_p, ":Added temporary %d min. RESV [%s]",
+			sendto_one_notice(source_p, POP_QUEUE, ":Added temporary %d min. RESV [%s]",
 					temp_time / 60, name);
 		}
 		else
@@ -301,7 +301,7 @@ parse_resv(struct Client *source_p, const char *name,
 					aconf->passwd, NULL, NULL, 0);
 	}
 	else
-		sendto_one_notice(source_p,
+		sendto_one_notice(source_p, POP_QUEUE,
 				  ":You have specified an invalid resv: [%s]",
 				  name);
 }
@@ -377,7 +377,7 @@ mo_unresv(struct Client *client_p, struct Client *source_p, int parc, const char
 	{
 		if(!IsOperRemoteBan(source_p))
 		{
-			sendto_one(source_p, form_str(ERR_NOPRIVS),
+			sendto_one(source_p, POP_QUEUE, form_str(ERR_NOPRIVS),
 				me.name, source_p->name, "remoteban");
 			return 0;
 		}
@@ -492,7 +492,7 @@ remove_temp_resv(struct Client *source_p, const char *name)
 		free_conf(aconf);
 	}
 
-	sendto_one_notice(source_p, ":RESV for [%s] is removed", name);
+	sendto_one_notice(source_p, POP_QUEUE, ":RESV for [%s] is removed", name);
 	sendto_realops_flags(UMODE_ALL, L_ALL,
 			"%s has removed the RESV for: [%s]", 
 			get_oper_name(source_p), name);
@@ -526,7 +526,7 @@ remove_resv(struct Client *source_p, const char *name)
 
 	if((in = fopen(filename, "r")) == NULL)
 	{
-		sendto_one_notice(source_p, ":Cannot open %s", filename);
+		sendto_one_notice(source_p, POP_QUEUE, ":Cannot open %s", filename);
 		return;
 	}
 
@@ -534,7 +534,7 @@ remove_resv(struct Client *source_p, const char *name)
 
 	if((out = fopen(temppath, "w")) == NULL)
 	{
-		sendto_one_notice(source_p, ":Cannot open %s", temppath);
+		sendto_one_notice(source_p, POP_QUEUE, ":Cannot open %s", temppath);
 		fclose(in);
 		umask(oldumask);
 		return;
@@ -586,12 +586,12 @@ remove_resv(struct Client *source_p, const char *name)
 
 	if(error_on_write)
 	{
-		sendto_one_notice(source_p, ":Couldn't write temp resv file, aborted");
+		sendto_one_notice(source_p, POP_QUEUE, ":Couldn't write temp resv file, aborted");
 		return;
 	}
 	else if(!found_resv)
 	{
-		sendto_one_notice(source_p, ":No RESV for %s", name);
+		sendto_one_notice(source_p, POP_QUEUE, ":No RESV for %s", name);
 
 		if(temppath != NULL)
 			(void) unlink(temppath);
@@ -602,7 +602,7 @@ remove_resv(struct Client *source_p, const char *name)
 	(void) rename(temppath, filename);
 	rehash_bans(0);
 
-	sendto_one_notice(source_p, ":RESV for [%s] is removed", name);
+	sendto_one_notice(source_p, POP_QUEUE, ":RESV for [%s] is removed", name);
 	sendto_realops_flags(UMODE_ALL, L_ALL,
 			     "%s has removed the RESV for: [%s]", get_oper_name(source_p), name);
 	ilog(L_KLINE, "UR %s %s", get_oper_name(source_p), name);

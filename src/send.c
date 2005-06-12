@@ -113,6 +113,13 @@ _send_linebuf(struct Client *to, buf_head_t *linebuf, int queue)
 	return 0;
 }
 
+void
+send_pop_queue(struct Client *to)
+{
+	if(linebuf_len(&to->localClient->buf_sendq) > 0)
+		send_queued_write(to->localClient->fd, to);
+}
+
 /* send_linebuf_remote()
  *
  * inputs	- client to attach to, sender, linebuf
@@ -292,7 +299,7 @@ send_queued_slink_write(int fd, void *data)
  * side effects - 
  */
 void
-sendto_one(struct Client *target_p, const char *pattern, ...)
+sendto_one(struct Client *target_p, int queue, const char *pattern, ...)
 {
 	va_list args;
 	buf_head_t linebuf;
@@ -310,41 +317,12 @@ sendto_one(struct Client *target_p, const char *pattern, ...)
 	linebuf_putmsg(&linebuf, pattern, &args, NULL);
 	va_end(args);
 
-	_send_linebuf(target_p, &linebuf, 0);
+	_send_linebuf(target_p, &linebuf, queue);
 
 	linebuf_donebuf(&linebuf);
 
 }
 
-/* sendto_one()
- *
- * inputs	- client to send to, va_args
- * outputs	- client has message put into its queue
- * side effects - 
- */
-void
-sendto_one_queue(struct Client *target_p, const char *pattern, ...)
-{
-	va_list args;
-	buf_head_t linebuf;
-
-	/* send remote if to->from non NULL */
-	if(target_p->from != NULL)
-		target_p = target_p->from;
-
-	if(IsIOError(target_p))
-		return;
-
-	linebuf_newbuf(&linebuf);
-
-	va_start(args, pattern);
-	linebuf_putmsg(&linebuf, pattern, &args, NULL);
-	va_end(args);
-
-	_send_linebuf(target_p, &linebuf, 1);
-	linebuf_donebuf(&linebuf);
-
-}
 
 /* sendto_one_prefix()
  *
@@ -394,7 +372,7 @@ sendto_one_prefix(struct Client *target_p, struct Client *source_p,
  * side effects - source(us)/target is chosen based on TS6 capability
  */
 void
-sendto_one_notice(struct Client *target_p, const char *pattern, ...)
+sendto_one_notice(struct Client *target_p, int queue, const char *pattern, ...)
 {
 	struct Client *dest_p;
 	va_list args;
@@ -422,7 +400,7 @@ sendto_one_notice(struct Client *target_p, const char *pattern, ...)
 		       get_id(&me, target_p), get_id(target_p, target_p));
 	va_end(args);
 
-	_send_linebuf(dest_p, &linebuf, 0);
+	_send_linebuf(dest_p, &linebuf, queue);
 	linebuf_donebuf(&linebuf);
 }
 
@@ -434,7 +412,7 @@ sendto_one_notice(struct Client *target_p, const char *pattern, ...)
  * side effects - source/target is chosen based on TS6 capability
  */
 void
-sendto_one_numeric(struct Client *target_p, int numeric, const char *pattern, ...)
+sendto_one_numeric(struct Client *target_p, int queue, int numeric, const char *pattern, ...)
 {
 	struct Client *dest_p;
 	va_list args;
@@ -463,7 +441,7 @@ sendto_one_numeric(struct Client *target_p, int numeric, const char *pattern, ..
 		       numeric, get_id(target_p, target_p));
 	va_end(args);
 
-	_send_linebuf(dest_p, &linebuf, 0);
+	_send_linebuf(dest_p, &linebuf, queue);
 	linebuf_donebuf(&linebuf);
 }
 

@@ -66,7 +66,7 @@ m_map(struct Client *client_p, struct Client *source_p, int parc, const char *pa
 	}
 
 	dump_map(client_p, &me, buf);
-	sendto_one(client_p, form_str(RPL_MAPEND), me.name, client_p->name);
+	sendto_one(client_p, POP_QUEUE, form_str(RPL_MAPEND), me.name, client_p->name);
 	return 0;
 }
 
@@ -78,7 +78,7 @@ static int
 mo_map(struct Client *client_p, struct Client *source_p, int parc, const char *parv[])
 {
 	dump_map(client_p, &me, buf);
-	sendto_one(client_p, form_str(RPL_MAPEND), me.name, client_p->name);
+	sendto_one(client_p, POP_QUEUE, form_str(RPL_MAPEND), me.name, client_p->name);
 
 	return 0;
 }
@@ -86,6 +86,7 @@ mo_map(struct Client *client_p, struct Client *source_p, int parc, const char *p
 /*
 ** dump_map
 **   dumps server map, called recursively.
+*    you must pop the sendq after this is done..with the MAPEND numeric
 */
 static void
 dump_map(struct Client *client_p, struct Client *root_p, char *pbuf)
@@ -117,7 +118,7 @@ dump_map(struct Client *client_p, struct Client *root_p, char *pbuf)
 		 " | Users: %5lu (%4.1f%%)", dlink_list_length(&root_p->serv->users),
 		 100 * (float) dlink_list_length(&root_p->serv->users) / (float) Count.total);
 
-	sendto_one_queue(client_p, form_str(RPL_MAP), me.name, client_p->name, buf);
+	sendto_one(client_p, HOLD_QUEUE, form_str(RPL_MAP), me.name, client_p->name, buf);
 
 	if(root_p->serv->servers.head != NULL)
 	{
