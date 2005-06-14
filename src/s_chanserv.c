@@ -2014,8 +2014,11 @@ s_chan_unsuspend(struct client *client_p, struct lconn *conn_p, const char *parv
 static int
 s_chan_clearmodes(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
+	static const char def_wild[] = "*";
 	struct member_reg *mreg_p;
 	struct channel *chptr;
+	const char *modev[3];
+	char modestr[10];
 
 	if((mreg_p = verify_member_reg_name(client_p, &chptr, parv[0], S_C_CLEAR)) == NULL)
 		return 1;
@@ -2032,12 +2035,15 @@ s_chan_clearmodes(struct client *client_p, struct lconn *conn_p, const char *par
 		client_p->user->mask, client_p->user->user_reg->name,
 		parv[0]);
 
-	sendto_server(":%s MODE %s -%s%s%s%s",
-			chanserv_p->name, chptr->name,
+	snprintf(modestr, sizeof(modestr), "-%s%s%s",
 			(chptr->mode.mode & MODE_INVITEONLY) ? "i" : "",
 			chptr->mode.limit ? "l" : "",
-			chptr->mode.key ? "k " : "",
-			chptr->mode.key ? chptr->mode.key : "");
+			chptr->mode.key[0] ? "k" : "");
+	modev[0] = modestr;
+	modev[1] = chptr->mode.key[0] ? def_wild : NULL;
+	modev[2] = NULL;
+
+	parse_full_mode(chptr, chanserv_p, modev, chptr->mode.key[0] ? 2 : 1, 0);
 
 	service_error(chanserv_p, client_p, "Channel %s modes cleared",
 			chptr->name);
