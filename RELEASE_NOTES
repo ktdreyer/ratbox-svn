@@ -1,6 +1,24 @@
 
 This is the current beta version of ratbox-services.
 
+-- ratbox-services-1.0rc1
+- added new ban service
+
+  IMPORTANT: if banserv is not disabled in configure via --disable-banserv
+  you MUST update your services database with the new banserv table.
+
+  Once it has been installed, edit the schema.txt file, removing the other
+  CREATE TABLE commands, apart from the CREATE TABLE operbans command.  Then
+  run: sqlite services.sb < schema.txt
+
+- fix server/host ordering on jupe notices
+- fix missing parameter in chanserv::set
+- fix various compile warnings
+- fix refcounting of oper blocks for /ctcp chat
+- make chanserv::clearmodes update internal state
+- tidy up some sql statements
+
+
 -- ratbox-services-1.0beta3
 - reorganised the directory structure
 
