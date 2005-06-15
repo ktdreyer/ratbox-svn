@@ -1,3 +1,21 @@
+androsyn    2005/06/15 18:53:20 UTC	(20050615_0)
+
+  Modified files:
+    modules              m_time.c 
+  Log:
+  Fix the December 31st /TIME bug.  It would output fun things like the
+  following:
+  
+  Saturday December 31 2005 -- 20:46:40 +43:00
+  
+  Somebody along the way never though to check if the years were the same or
+  not. This is probably one of the oldest bugs in an ircd I've ever found.
+  
+  Revision  Changes    Path
+  1.55      +2 -2      ircd-ratbox/modules/m_time.c
+
+
+
 androsyn    2005/06/12 09:21:49 UTC	(20050612_1)
 
   Modified files:
