@@ -1,3 +1,19 @@
+leeh        2005/06/15 16:30:34 UTC	(20050615_1)
+
+  Modified files:
+    .                    README RELEASE_NOTES 
+    include              config.h 
+  Log:
+  - update RELEASE_NOTES
+  - revved patchlevel to 1.0rc1
+  
+  Revision  Changes    Path
+  1.6       +2 -2      rserv/README
+  1.4       +18 -0     rserv/RELEASE_NOTES
+  1.29      +1 -1      rserv/include/config.h
+
+
+
 leeh        2005/06/15 15:21:40 UTC	(20050615_0)
 
   Modified files:
