@@ -7,7 +7,7 @@
 # If the second line is marked [ADMIN] it goes in index-admin
 # index first gets the contents of the "general" file.
 
-SUBDIRS="alis operbot chanserv userserv jupeserv operserv nickserv global"
+SUBDIRS="alis operbot chanserv userserv jupeserv operserv nickserv global banserv"
 
 for i in $SUBDIRS; do
 	rm -f $i/index;

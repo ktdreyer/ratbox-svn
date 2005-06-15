@@ -1,0 +1,10 @@
+ FINDKLINE     - Finds all matching klines
+ FINDRESV      - Finds all matching resvs
+ FINDXLINE     - Finds all matching xlines
+ KLINE         - Issues a kline on the given mask.
+ RESV          - Sets a resv on the given mask
+ SYNC          - Syncs the current bans with the given server
+ UNKLINE       - Removes a kline on the given mask
+ UNRESV        - Removes a resv on the given mask
+ UNXLINE       - Removes the xline on the given mask
+ XLINE         - Sets an xline on the given mask
