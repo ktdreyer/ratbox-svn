@@ -146,10 +146,12 @@ free_user_reg(struct user_reg *ureg_p)
 		free_member_reg(ptr->data, 1);
 	}
 
+#ifdef ENABLE_NICKSERV
 	DLINK_FOREACH_SAFE(ptr, next_ptr, ureg_p->nicks.head)
 	{
 		free_nick_reg(ptr->data);
 	}
+#endif
 			
 	loc_sqlite_exec(NULL, "DELETE FROM users WHERE username = %Q",
 			ureg_p->name);
