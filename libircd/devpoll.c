@@ -29,21 +29,8 @@
 #include <sys/devpoll.h>
 #include "tools.h"
 #include "commio.h"
-#include "class.h"
-#include "irc_string.h"
-#include "ircd.h"
-#include "listener.h"
-#include "numeric.h"
-#include "packet.h"
-#include "restart.h"
-#include "s_auth.h"
-#include "s_conf.h"
-#include "s_log.h"
-#include "s_serv.h"
-#include "s_stats.h"
-#include "send.h"
-#include "commio.h"
-#include "memory.h"
+#include "ircd_memory.h"
+
 
 #define POLL_LENGTH	HARD_FDLIMIT
 
@@ -79,8 +66,7 @@ devpoll_write_update(int fd, int events)
 	/* Write the thing to our poll fd */
 	retval = write(dpfd, &pollfds[0], sizeof(struct pollfd));
 	if(retval != sizeof(struct pollfd))
-		ilog(L_IOERROR,
-		     "devpoll_write_update: dpfd write failed %d: %s", errno, strerror(errno));
+		lib_ilog("devpoll_write_update: dpfd write failed %d: %s", errno, strerror(errno));
 	/* Done! */
 }
 
@@ -112,9 +98,6 @@ devpoll_update_events(int fd, short filter, PF * handler)
 			fdmask[fd] |= POLLRDNORM;
 		break;
 	default:
-#ifdef NOTYET
-		ilog(L_IOERROR, "devpoll_update_events called with unknown filter: %hd", filter);
-#endif
 		return;
 		break;
 	}
@@ -268,10 +251,6 @@ comm_select(unsigned long delay)
 					devpoll_update_events(fd,
 							      COMM_SELECT_READ, F->read_handler);
 				}
-				else
-					ilog(L_IOERROR,
-					     "comm_select: Unhandled read event: fdmask: %x",
-					     fdmask[fd]);
 			}
 
 			if(F->flags.open == 0)
@@ -289,15 +268,7 @@ comm_select(unsigned long delay)
 					devpoll_update_events(fd,
 							      COMM_SELECT_WRITE, F->write_handler);
 				}
-				else
-					ilog(L_IOERROR,
-					     "comm_select: Unhandled write event: fdmask: %x",
-					     fdmask[fd]);
 
-			}
-			if(dopoll.dp_fds[i].revents & POLLNVAL)
-			{
-				ilog(L_IOERROR, "revents was Invalid for %d", fd);
 			}
 		}
 		return COMM_OK;

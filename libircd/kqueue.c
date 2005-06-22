@@ -28,21 +28,9 @@
 #include "stdinc.h"
 #include <sys/event.h>
 #include "tools.h"
-#include "class.h"
-#include "irc_string.h"
-#include "ircd.h"
-#include "listener.h"
-#include "numeric.h"
-#include "restart.h"
-#include "s_auth.h"
-#include "s_conf.h"
-#include "s_log.h"
-#include "s_serv.h"
-#include "s_stats.h"
-#include "send.h"
 #include "commio.h"
-#include "packet.h"
-#include "memory.h"
+#include "ircd_memory.h"
+
 
 
 #define KE_LENGTH	128
@@ -120,7 +108,7 @@ kq_update_events(fde_t * F, short filter, PF * handler)
 			/* jdc -- someone needs to do error checking... */
 			if(ret == -1)
 			{
-				ilog(L_IOERROR, "kq_update_events(): kevent(): %s", strerror(errno));
+				lib_ilog("kq_update_events(): kevent(): %s", strerror(errno));
 				return;
 			}
 			kqoff = 0;
@@ -150,7 +138,7 @@ init_netio(void)
 	kq = kqueue();
 	if(kq < 0)
 	{
-		ilog(L_IOERROR, "init_netio: Couldn't open kqueue fd!\n");
+		lib_ilog("init_netio: Couldn't open kqueue fd!\n");
 		exit(115);	/* Whee! */
 	}
 	kqmax = getdtablesize();
