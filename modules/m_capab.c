@@ -29,10 +29,10 @@
 #include "struct.h"
 #include "client.h"
 #include "irc_string.h"
+#include "ircd_memory.h"
 #include "s_serv.h"
 #include "parse.h"
 #include "modules.h"
-#include "memory.h"
 
 static int mr_capab(struct Client *, struct Client *, int, const char **);
 static int me_gcap(struct Client *, struct Client *, int, const char **);

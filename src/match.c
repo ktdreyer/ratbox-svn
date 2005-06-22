@@ -20,7 +20,7 @@
  *
  */
 #include "stdinc.h"
-#include "tools.h"
+#include "ircd_lib.h"
 #include "ircd.h"
 #include "irc_string.h"
 

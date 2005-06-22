@@ -25,7 +25,7 @@
  */
 
 #include "stdinc.h"
-#include "sprintf_irc.h"
+#include "snprintf.h"
 #include "tools.h"
 #include "struct.h"
 #include "channel.h"

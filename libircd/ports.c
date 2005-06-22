@@ -44,7 +44,6 @@
 #include "send.h"
 #include "commio.h"
 #include "packet.h"
-#include "memory.h"
 
 #define PE_LENGTH	128
 

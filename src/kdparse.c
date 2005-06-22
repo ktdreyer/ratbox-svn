@@ -31,7 +31,7 @@
 #include "s_newconf.h"
 #include "hostmask.h"
 #include "irc_string.h"
-#include "memory.h"
+#include "ircd_memory.h"
 #include "hash.h"
 #include "channel.h"
 

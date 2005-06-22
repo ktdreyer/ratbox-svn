@@ -8,7 +8,7 @@ automoduledir   = @moduledir@/autoload
 INSTALL         = @INSTALL@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 
-INCLUDES = -I../adns -I../include $(INCLTDL)
+INCLUDES = -I../adns -I../include -I../src/lib $(INCLTDL)
 
 CORE_SRCS = \
   core/m_die.c \

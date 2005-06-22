@@ -36,7 +36,7 @@
 #include "struct.h"
 #include "s_log.h"
 #include "s_conf.h"
-#include "sprintf_irc.h"
+#include "snprintf.h"
 #include "send.h"
 #include "client.h"
 #include "s_serv.h"

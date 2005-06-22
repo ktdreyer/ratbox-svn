@@ -34,7 +34,7 @@
 #include "send.h"
 #include "parse.h"
 #include "modules.h"
-#include "sprintf_irc.h"
+#include "snprintf.h"
 
 static int m_time(struct Client *, struct Client *, int, const char **);
 static char *date(void);

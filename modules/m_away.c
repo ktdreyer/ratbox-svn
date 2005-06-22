@@ -28,6 +28,7 @@
 #include "tools.h"
 #include "struct.h"
 #include "client.h"
+#include "ircd_memory.h"
 #include "irc_string.h"
 #include "ircd.h"
 #include "numeric.h"
@@ -36,7 +37,6 @@
 #include "modules.h"
 #include "s_conf.h"
 #include "s_serv.h"
-#include "memory.h"
 
 static int m_away(struct Client *, struct Client *, int, const char **);
 

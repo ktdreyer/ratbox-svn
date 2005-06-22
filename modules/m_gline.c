@@ -30,7 +30,7 @@
 #include "s_gline.h"
 #include "client.h"
 #include "irc_string.h"
-#include "sprintf_irc.h"
+#include "snprintf.h"
 #include "ircd.h"
 #include "hostmask.h"
 #include "numeric.h"
@@ -43,7 +43,6 @@
 #include "parse.h"
 #include "modules.h"
 #include "s_log.h"
-#include "memory.h"
 #include "event.h"
 
 static int mo_gline(struct Client *, struct Client *, int, const char **);

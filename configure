@@ -26544,7 +26544,7 @@ fi
 
 
 
-                                                                                                              ac_config_files="$ac_config_files Makefile adns/Makefile servlink/Makefile contrib/Makefile src/Makefile src/ident/Makefile src/resolver/Makefile modules/Makefile tools/Makefile doc/Makefile help/Makefile"
+                                                                                                                        ac_config_files="$ac_config_files Makefile libircd/Makefile adns/Makefile servlink/Makefile contrib/Makefile src/Makefile src/ident/Makefile src/resolver/Makefile modules/Makefile tools/Makefile doc/Makefile help/Makefile"
 
 
 cat >confcache <<\_ACEOF
@@ -27132,6 +27132,7 @@ do
   case "$ac_config_target" in
   # Handling of arguments.
   "Makefile" ) CONFIG_FILES="$CONFIG_FILES Makefile" ;;
+  "libircd/Makefile" ) CONFIG_FILES="$CONFIG_FILES libircd/Makefile" ;;
   "adns/Makefile" ) CONFIG_FILES="$CONFIG_FILES adns/Makefile" ;;
   "servlink/Makefile" ) CONFIG_FILES="$CONFIG_FILES servlink/Makefile" ;;
   "contrib/Makefile" ) CONFIG_FILES="$CONFIG_FILES contrib/Makefile" ;;

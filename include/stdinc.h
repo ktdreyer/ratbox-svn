@@ -157,5 +157,28 @@ extern int errno;
 # define INADDR_NONE ((in_addr_t) 0xffffffff)
 #endif
 
+#ifdef HAVE_WRITEV
+#ifndef UIO_MAXIOV
+# if defined(__FreeBSD__) || defined(__APPLE__) || defined(__NetBSD__)
+/* FreeBSD 4.7 defines it in sys/uio.h only if _KERNEL is specified */ 
+#  define UIO_MAXIOV 1024
+# elif defined(__sgi)
+/* IRIX 6.5 has sysconf(_SC_IOV_MAX) which might return 512 or bigger */
+#  define UIO_MAXIOV 512
+# elif defined(__sun)
+/* Solaris (and SunOS?) defines IOV_MAX instead */
+#  ifndef IOV_MAX  
+#   define UIO_MAXIOV 16
+#  else
+#   define UIO_MAXIOV IOV_MAX
+#  endif
+# elif defined(IOV_MAX)
+#  define UIO_MAXIOV IOV_MAX
+# else
+#  error UIO_MAXIOV nor IOV_MAX are defined
+# endif
+#endif
+#endif
+
 #include "ircd_defs.h"
 #include "common.h"

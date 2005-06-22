@@ -29,6 +29,7 @@
 #include "struct.h"
 #include "client.h"
 #include "irc_string.h"
+#include "ircd_memory.h"
 #include "ircd.h"
 #include "s_gline.h"
 #include "numeric.h"
@@ -44,7 +45,6 @@
 #include "reject.h"
 #include "hash.h"
 #include "cache.h"
-#include "memory.h"
 #include "s_auth.h"
 
 static int mo_rehash(struct Client *, struct Client *, int, const char **);

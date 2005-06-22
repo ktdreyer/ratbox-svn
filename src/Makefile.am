@@ -6,7 +6,7 @@ SUBDIRS = ident resolver
 
 bin_PROGRAMS = ircd
 
-INCLUDES = -I../adns $(INCLTDL)
+INCLUDES = -I../adns $(INCLTDL) -I../libircd/ 
 
 version.c: 
 	$(SHELL) ./version.c.SH 
@@ -28,13 +28,10 @@ lex.yy.c: ircd_lexer.l y.tab.c
 	
 ircd_SOURCES =                     \
   dns.c                        \
-  balloc.c                      \
   cache.c                       \
   channel.c                     \
   class.c                       \
   client.c                      \
-  commio.c                      \
-  event.c                       \
   getopt.c                      \
   hash.c                        \
   hook.c                        \
@@ -43,10 +40,8 @@ ircd_SOURCES =                     \
   ircd.c                        \
   ircd_signal.c                 \
   kdparse.c                     \
-  linebuf.c                     \
   listener.c                    \
   match.c                       \
-  memory.c                      \
   modules.c                     \
   monitor.c                     \
   newconf.c                     \
@@ -64,11 +59,8 @@ ircd_SOURCES =                     \
   s_user.c                      \
   scache.c                      \
   send.c                        \
-  snprintf.c                    \
-  tools.c                       \
   whowas.c			\
-  version.c			\
-  @SELECT_TYPE@.c		
+  version.c			
 
 if STATIC_MODULES
 ircd_LDADD = lex.yy.o y.tab.o @SSL_LIBS@ ../modules/libmodules.a @CRYPT_LIB@
@@ -76,7 +68,7 @@ else
 ircd_LDADD = lex.yy.o y.tab.o $(LIBLTDL) @SSL_LIBS@ @CRYPT_LIB@
 endif
 
-ircd_LDFLAGS = -export-dynamic
+ircd_LDFLAGS = -export-dynamic -L../libircd -lircd
 
 if STATIC_MODULES
 ircd_DEPENDENCIES = version.o ../modules/libmodules.a  lex.yy.o y.tab.o

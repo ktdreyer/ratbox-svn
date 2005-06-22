@@ -38,7 +38,7 @@
 #include "event.h"
 #include "hash.h"
 #include "irc_string.h"
-#include "sprintf_irc.h"
+#include "snprintf.h"
 #include "ircd.h"
 #include "numeric.h"
 #include "commio.h"
@@ -51,7 +51,6 @@
 #include "scache.h"
 #include "send.h"
 #include "client.h"
-#include "memory.h"
 #include "channel.h"		/* chcap_usage_counts stuff... */
 #include "hook.h"
 #include "parse.h"

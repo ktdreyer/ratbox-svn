@@ -29,7 +29,7 @@
 #include "struct.h"
 #include "client.h"
 #include "irc_string.h"
-#include "sprintf_irc.h"
+#include "snprintf.h"
 #include "ircd.h"
 #include "hostmask.h"
 #include "numeric.h"
@@ -41,7 +41,6 @@
 #include "parse.h"
 #include "modules.h"
 #include "event.h"
-#include "memory.h"
 
 static int mo_kline(struct Client *, struct Client *, int, const char **);
 static int ms_kline(struct Client *, struct Client *, int, const char **);

@@ -28,6 +28,7 @@
 #define READBUF_SIZE    16384
 
 #include "setup.h"     
+#include "ircd_lib.h"
 #include "memory.h"    
 #include "tools.h"     
 #include "balloc.h"    
@@ -36,7 +37,6 @@
 #include "event.h"
 #include "adns.h"
 
-int ignoreErrno(int ierrno);
 
 /* data fd from ircd */
 int ifd = -1;
@@ -57,15 +57,15 @@ int ofd = -1;
 
 #define EmptyString(x) (!(x) || (*(x) == '\0'))
 
-void set_time(void);
-void ilog(char *errstr, ...);
-void restart(char *msg);
+int comm_can_writev(int fd);
+int comm_write(int fd, void *buf, int len);
+int comm_writev(int fd, struct iovec *vec, int count);
+
 
 static char readBuf[READBUF_SIZE];
 static void resolve_ip(char **parv);
 static void resolve_host(char **parv);
 static int io_to_array(char *string, char **parv);
-struct timeval SystemTime;
 
 buf_head_t sendq;
 buf_head_t recvq;
@@ -111,12 +111,6 @@ setup_signals(void)
         act.sa_handler = restart_resolver;
         sigaddset(&act.sa_mask, SIGHUP);
         sigaction(SIGHUP, &act, 0);
-}
-
-void
-set_time(void)
-{
-	gettimeofday(&SystemTime, NULL);
 }
 
 
@@ -615,34 +609,3 @@ int main(int argc, char **argv)
 }
 
 
-int
-ignoreErrno(int ierrno)
-{
-        switch (ierrno)
-        {
-        case EINPROGRESS:
-        case EWOULDBLOCK:
-#if EAGAIN != EWOULDBLOCK
-        case EAGAIN:
-#endif
-        case EALREADY:
-        case EINTR:
-#ifdef ERESTART
-        case ERESTART:
-#endif
-                return 1;
-        default:
-                return 0;
-        }
-}
-
-/* compatability for ircd included stuff */
-void ilog(char *errstr, ...)
-{
-        exit(2);
-}
-
-void restart(char *msg)
-{
-        exit(1);   
-}

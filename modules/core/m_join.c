@@ -38,7 +38,7 @@
 #include "s_conf.h"
 #include "parse.h"
 #include "modules.h"
-#include "sprintf_irc.h"
+#include "snprintf.h"
 
 static int m_join(struct Client *, struct Client *, int, const char **);
 static int ms_join(struct Client *, struct Client *, int, const char **);

@@ -36,7 +36,7 @@
 #include "hash.h"
 #include "irc_string.h"
 #include "ircd_signal.h"
-#include "sprintf_irc.h"
+#include "ircd_lib.h"
 #include "hostmask.h"
 #include "numeric.h"
 #include "parse.h"
@@ -52,7 +52,6 @@
 #include "whowas.h"
 #include "hook.h"
 #include "modules.h"
-#include "memory.h"
 #include "ircd_getopt.h"
 #include "balloc.h"
 #include "newconf.h"
@@ -251,31 +250,6 @@ struct lgetopt myopts[] = {
 	{NULL, NULL, STRING, NULL},
 };
 
-void
-set_time(void)
-{
-	struct timeval newtime;
-	newtime.tv_sec = 0;
-	newtime.tv_usec = 0;
-#ifdef HAVE_GETTIMEOFDAY
-	if(gettimeofday(&newtime, NULL) == -1)
-	{
-		ilog(L_MAIN, "Clock Failure (%d)", errno);
-		sendto_realops_flags(UMODE_ALL, L_ALL,
-				     "Clock Failure (%d), TS can be corrupted", errno);
-
-		restart("Clock Failure");
-	}
-#else
-	newtime.tv_sec = time(NULL);
-	
-#endif
-	if(newtime.tv_sec < CurrentTime)
-		set_back_events(CurrentTime - newtime.tv_sec);
-
-	SystemTime.tv_sec = newtime.tv_sec;
-	SystemTime.tv_usec = newtime.tv_usec;
-}
 
 static void
 io_loop(void)

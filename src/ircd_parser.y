@@ -18,7 +18,7 @@
 #include "setup.h"
 #include "tools.h"
 #include "struct.h"
-#include "memory.h"
+#include "ircd_lib.h"
 #include "common.h"
 #include "ircd_defs.h"
 #include "client.h"

@@ -31,7 +31,7 @@
 #include "numeric.h"
 #include "send.h"
 #include "scache.h"
-#include "memory.h"
+#include "ircd_memory.h"
 
 
 /*

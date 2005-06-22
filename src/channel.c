@@ -32,7 +32,7 @@
 #include "hash.h"
 #include "hook.h"
 #include "irc_string.h"
-#include "sprintf_irc.h"
+#include "snprintf.h"
 #include "ircd.h"
 #include "numeric.h"
 #include "s_serv.h"		/* captab */
@@ -42,7 +42,6 @@
 #include "s_conf.h"		/* ConfigFileEntry, ConfigChannel */
 #include "s_newconf.h"
 #include "event.h"
-#include "memory.h"
 #include "balloc.h"
 #include "s_log.h"
 

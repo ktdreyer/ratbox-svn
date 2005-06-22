@@ -35,7 +35,6 @@
 #include "s_stats.h"
 #include "ircd.h"
 #include "commio.h"
-#include "memory.h"
 #include "send.h"
 #include "parse.h"
 

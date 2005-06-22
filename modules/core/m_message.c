@@ -40,7 +40,6 @@
 #include "event.h"
 #include "patricia.h"
 #include "s_newconf.h"
-#include "memory.h"
 
 static int m_message(int, const char *, struct Client *, struct Client *, int, const char **);
 static int m_privmsg(struct Client *, struct Client *, int, const char **);

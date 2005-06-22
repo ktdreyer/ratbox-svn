@@ -443,13 +443,20 @@ stats_exempt(struct Client *source_p)
 						   'e', host, pass, "", "");
 			}
 		}
-	}}
+	}
+}
 
+static void
+stats_events_cb(char *str, void *ptr)
+{
+	sendto_one_numeric(ptr, HOLD_QUEUE, RPL_STATSDEBUG, "E: %s", str);
+}
 
 static void
 stats_events (struct Client *source_p)
 {
-	show_events (source_p);
+	dump_events(stats_events_cb, source_p);
+	send_pop_queue(source_p);
 }
 
 /* stats_pending_glines()

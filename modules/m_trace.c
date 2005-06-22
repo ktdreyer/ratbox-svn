@@ -32,6 +32,7 @@
 #include "client.h"
 #include "hash.h"
 #include "irc_string.h"
+#include "ircd_lib.h"
 #include "ircd.h"
 #include "numeric.h"
 #include "s_serv.h"

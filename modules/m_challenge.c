@@ -38,14 +38,13 @@
 
 #include "tools.h"
 #include "struct.h"
-#include "memory.h"
 #include "client.h"
 #include "ircd.h"
 #include "modules.h"
 #include "numeric.h"
 #include "send.h"
 #include "s_conf.h"
-
+#include "ircd_memory.h"
 #include "parse.h"
 #include "irc_string.h"
 #include "s_log.h"

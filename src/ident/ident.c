@@ -28,17 +28,9 @@
 #include <ctype.h>
 #include <errno.h>
 
-struct timeval SystemTime;
 
 #include "setup.h"
-#include "memory.h"
-#include "defs.h"
-#include "commio.h"
-#include "tools.h"
-#include "balloc.h"
-#include "linebuf.h"
-#include "irc_string.h"
-#include "event.h"
+#include "ircd_lib.h"
 #define USERLEN 10
 
 /* data fd from ircd */
@@ -59,9 +51,6 @@ int irc_ofd;
 #define FWDHOST 4
 
 #define EmptyString(x) (!(x) || (*(x) == '\0'))
-
-void ilog(char *errstr, ...);
-void restart(char *msg);
 
 struct auth_request
 {
@@ -89,16 +78,6 @@ send_sprintf(int fd, const char *format, ...)
         vsprintf(buf, format, args);
         va_end(args); 
         return(send(fd, buf, strlen(buf), 0));
-}
-
-void ilog(char *errstr, ...)
-{
-	exit(2);
-}
-
-void restart(char *msg)
-{
-	exit(1);
 }
 
 
@@ -393,12 +372,6 @@ read_auth_request(int fd, void *data)
                 exit(1);
 
         comm_setselect(irc_ifd, FDLIST_SERVICE, COMM_SELECT_READ, read_auth_request, NULL, 0);
-}
-
-void
-set_time(void)
-{
-	gettimeofday(&SystemTime, 0);
 }
 
 int main(int argc, char **argv)

@@ -37,7 +37,7 @@
  * $Id$
  */
 #include "stdinc.h"
-#include "memory.h"
+#include "ircd_memory.h"
 #include "tools.h"
 #include "hook.h"
 #include "irc_string.h"

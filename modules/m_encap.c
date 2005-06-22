@@ -38,7 +38,7 @@
 #include "hash.h"
 #include "parse.h"
 #include "modules.h"
-#include "sprintf_irc.h"
+#include "snprintf.h"
 #include "irc_string.h"
 
 static int ms_encap(struct Client *client_p, struct Client *source_p,

@@ -156,5 +156,18 @@
 #endif
 #endif
 
+#ifndef INADDRSZ
+#define INADDRSZ 4
+#endif
+
+#ifdef IPV6
+#ifndef IN6ADDRSZ
+#define IN6ADDRSZ 16
+#endif
+#endif 
+  
+#ifndef INT16SZ
+#define INT16SZ 2
+#endif
 
 #endif /* INCLUDED_ircd_defs_h */

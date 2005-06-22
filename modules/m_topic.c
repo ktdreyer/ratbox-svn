@@ -31,7 +31,7 @@
 #include "client.h"
 #include "hash.h"
 #include "irc_string.h"
-#include "sprintf_irc.h"
+#include "snprintf.h"
 #include "ircd.h"
 #include "numeric.h"
 #include "send.h"

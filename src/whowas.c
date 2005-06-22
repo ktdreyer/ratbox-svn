@@ -36,7 +36,6 @@
 #include "s_user.h"
 #include "send.h"
 #include "s_conf.h"
-#include "memory.h"
 
 /* internally defined function */
 static void add_whowas_to_clist(struct Whowas **, struct Whowas *);

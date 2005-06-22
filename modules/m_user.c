@@ -34,8 +34,7 @@
 #include "send.h"
 #include "parse.h"
 #include "modules.h"
-#include "sprintf_irc.h"
-#include "memory.h"
+#include "ircd_lib.h"
 
 static int mr_user(struct Client *, struct Client *, int, const char **);
 

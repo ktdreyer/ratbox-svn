@@ -31,7 +31,7 @@
 #include "numeric.h"
 #include "send.h"
 #include "s_conf.h"
-#include "sprintf_irc.h"
+#include "snprintf.h"
 #include "ircd.h"
 #include "irc_string.h"
 

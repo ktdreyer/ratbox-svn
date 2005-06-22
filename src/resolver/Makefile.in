@@ -53,25 +53,13 @@ CONFIG_CLEAN_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
-am_resolver_OBJECTS = resolver-resolver.$(OBJEXT) \
-	resolver-snprintf.$(OBJEXT) resolver-irc_string.$(OBJEXT) \
-	resolver-match.$(OBJEXT) resolver-memory.$(OBJEXT) \
-	resolver-linebuf.$(OBJEXT) resolver-balloc.$(OBJEXT) \
-	resolver-tools.$(OBJEXT) resolver-event.$(OBJEXT)
+am_resolver_OBJECTS = resolver-resolver.$(OBJEXT)
 resolver_OBJECTS = $(am_resolver_OBJECTS)
 resolver_DEPENDENCIES =
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)/include
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
-@AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/resolver-balloc.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/resolver-event.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/resolver-irc_string.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/resolver-linebuf.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/resolver-match.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/resolver-memory.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/resolver-resolver.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/resolver-snprintf.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/resolver-tools.Po
+@AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/resolver-resolver.Po
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) \
@@ -223,21 +211,12 @@ subdirs = @subdirs@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 AUTOMAKE_OPTIONS = foreign
-resolver_CFLAGS = -DNO_IRCD -I../../adns -I../../include
+resolver_CFLAGS = -DNO_IRCD -I../../adns -I../../include -I../../libircd
 # we recycle a lot of code from ircd itself..
 # perhaps we should move this stuff into a lib someday
 # oh well...
-resolver_SOURCES = resolver.c 		\
-		../snprintf.c 		\
-		../irc_string.c 	\
-		../match.c 		\
-		../memory.c 		\
-		../linebuf.c 		\
-		../balloc.c		\
-		../tools.c		\
-		../event.c
-
-resolver_LDADD = -L../../adns -ladns
+resolver_SOURCES = resolver.c 
+resolver_LDADD = -L../../adns -ladns -L../../libircd -lircd
 all: all-am
 
 .SUFFIXES:
@@ -309,15 +288,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/resolver-balloc.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/resolver-event.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/resolver-irc_string.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/resolver-linebuf.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/resolver-match.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/resolver-memory.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/resolver-resolver.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/resolver-snprintf.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/resolver-tools.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
@@ -366,198 +337,6 @@ resolver-resolver.lo: resolver.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/resolver-resolver.Plo' tmpdepfile='$(DEPDIR)/resolver-resolver.TPlo' @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(resolver_CFLAGS) $(CFLAGS) -c -o resolver-resolver.lo `test -f 'resolver.c' || echo '$(srcdir)/'`resolver.c
-
-resolver-snprintf.o: ../snprintf.c
-@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(resolver_CFLAGS) $(CFLAGS) -MT resolver-snprintf.o -MD -MP -MF "$(DEPDIR)/resolver-snprintf.Tpo" -c -o resolver-snprintf.o `test -f '../snprintf.c' || echo '$(srcdir)/'`../snprintf.c; \
-@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/resolver-snprintf.Tpo" "$(DEPDIR)/resolver-snprintf.Po"; else rm -f "$(DEPDIR)/resolver-snprintf.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='../snprintf.c' object='resolver-snprintf.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/resolver-snprintf.Po' tmpdepfile='$(DEPDIR)/resolver-snprintf.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(resolver_CFLAGS) $(CFLAGS) -c -o resolver-snprintf.o `test -f '../snprintf.c' || echo '$(srcdir)/'`../snprintf.c
-
-resolver-snprintf.obj: ../snprintf.c
-@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(resolver_CFLAGS) $(CFLAGS) -MT resolver-snprintf.obj -MD -MP -MF "$(DEPDIR)/resolver-snprintf.Tpo" -c -o resolver-snprintf.obj `if test -f '../snprintf.c'; then $(CYGPATH_W) '../snprintf.c'; else $(CYGPATH_W) '$(srcdir)/../snprintf.c'; fi`; \
-@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/resolver-snprintf.Tpo" "$(DEPDIR)/resolver-snprintf.Po"; else rm -f "$(DEPDIR)/resolver-snprintf.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='../snprintf.c' object='resolver-snprintf.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/resolver-snprintf.Po' tmpdepfile='$(DEPDIR)/resolver-snprintf.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(resolver_CFLAGS) $(CFLAGS) -c -o resolver-snprintf.obj `if test -f '../snprintf.c'; then $(CYGPATH_W) '../snprintf.c'; else $(CYGPATH_W) '$(srcdir)/../snprintf.c'; fi`
-
-resolver-snprintf.lo: ../snprintf.c
-@am__fastdepCC_TRUE@	if $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(resolver_CFLAGS) $(CFLAGS) -MT resolver-snprintf.lo -MD -MP -MF "$(DEPDIR)/resolver-snprintf.Tpo" -c -o resolver-snprintf.lo `test -f '../snprintf.c' || echo '$(srcdir)/'`../snprintf.c; \
-@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/resolver-snprintf.Tpo" "$(DEPDIR)/resolver-snprintf.Plo"; else rm -f "$(DEPDIR)/resolver-snprintf.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='../snprintf.c' object='resolver-snprintf.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/resolver-snprintf.Plo' tmpdepfile='$(DEPDIR)/resolver-snprintf.TPlo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(resolver_CFLAGS) $(CFLAGS) -c -o resolver-snprintf.lo `test -f '../snprintf.c' || echo '$(srcdir)/'`../snprintf.c
-
-resolver-irc_string.o: ../irc_string.c
-@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(resolver_CFLAGS) $(CFLAGS) -MT resolver-irc_string.o -MD -MP -MF "$(DEPDIR)/resolver-irc_string.Tpo" -c -o resolver-irc_string.o `test -f '../irc_string.c' || echo '$(srcdir)/'`../irc_string.c; \
-@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/resolver-irc_string.Tpo" "$(DEPDIR)/resolver-irc_string.Po"; else rm -f "$(DEPDIR)/resolver-irc_string.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='../irc_string.c' object='resolver-irc_string.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/resolver-irc_string.Po' tmpdepfile='$(DEPDIR)/resolver-irc_string.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(resolver_CFLAGS) $(CFLAGS) -c -o resolver-irc_string.o `test -f '../irc_string.c' || echo '$(srcdir)/'`../irc_string.c
-
-resolver-irc_string.obj: ../irc_string.c
-@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(resolver_CFLAGS) $(CFLAGS) -MT resolver-irc_string.obj -MD -MP -MF "$(DEPDIR)/resolver-irc_string.Tpo" -c -o resolver-irc_string.obj `if test -f '../irc_string.c'; then $(CYGPATH_W) '../irc_string.c'; else $(CYGPATH_W) '$(srcdir)/../irc_string.c'; fi`; \
-@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/resolver-irc_string.Tpo" "$(DEPDIR)/resolver-irc_string.Po"; else rm -f "$(DEPDIR)/resolver-irc_string.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='../irc_string.c' object='resolver-irc_string.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/resolver-irc_string.Po' tmpdepfile='$(DEPDIR)/resolver-irc_string.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(resolver_CFLAGS) $(CFLAGS) -c -o resolver-irc_string.obj `if test -f '../irc_string.c'; then $(CYGPATH_W) '../irc_string.c'; else $(CYGPATH_W) '$(srcdir)/../irc_string.c'; fi`
-
-resolver-irc_string.lo: ../irc_string.c
-@am__fastdepCC_TRUE@	if $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(resolver_CFLAGS) $(CFLAGS) -MT resolver-irc_string.lo -MD -MP -MF "$(DEPDIR)/resolver-irc_string.Tpo" -c -o resolver-irc_string.lo `test -f '../irc_string.c' || echo '$(srcdir)/'`../irc_string.c; \
-@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/resolver-irc_string.Tpo" "$(DEPDIR)/resolver-irc_string.Plo"; else rm -f "$(DEPDIR)/resolver-irc_string.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='../irc_string.c' object='resolver-irc_string.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/resolver-irc_string.Plo' tmpdepfile='$(DEPDIR)/resolver-irc_string.TPlo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(resolver_CFLAGS) $(CFLAGS) -c -o resolver-irc_string.lo `test -f '../irc_string.c' || echo '$(srcdir)/'`../irc_string.c
-
-resolver-match.o: ../match.c
-@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(resolver_CFLAGS) $(CFLAGS) -MT resolver-match.o -MD -MP -MF "$(DEPDIR)/resolver-match.Tpo" -c -o resolver-match.o `test -f '../match.c' || echo '$(srcdir)/'`../match.c; \
-@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/resolver-match.Tpo" "$(DEPDIR)/resolver-match.Po"; else rm -f "$(DEPDIR)/resolver-match.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='../match.c' object='resolver-match.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/resolver-match.Po' tmpdepfile='$(DEPDIR)/resolver-match.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(resolver_CFLAGS) $(CFLAGS) -c -o resolver-match.o `test -f '../match.c' || echo '$(srcdir)/'`../match.c
-
-resolver-match.obj: ../match.c
-@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(resolver_CFLAGS) $(CFLAGS) -MT resolver-match.obj -MD -MP -MF "$(DEPDIR)/resolver-match.Tpo" -c -o resolver-match.obj `if test -f '../match.c'; then $(CYGPATH_W) '../match.c'; else $(CYGPATH_W) '$(srcdir)/../match.c'; fi`; \
-@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/resolver-match.Tpo" "$(DEPDIR)/resolver-match.Po"; else rm -f "$(DEPDIR)/resolver-match.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='../match.c' object='resolver-match.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/resolver-match.Po' tmpdepfile='$(DEPDIR)/resolver-match.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(resolver_CFLAGS) $(CFLAGS) -c -o resolver-match.obj `if test -f '../match.c'; then $(CYGPATH_W) '../match.c'; else $(CYGPATH_W) '$(srcdir)/../match.c'; fi`
-
-resolver-match.lo: ../match.c
-@am__fastdepCC_TRUE@	if $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(resolver_CFLAGS) $(CFLAGS) -MT resolver-match.lo -MD -MP -MF "$(DEPDIR)/resolver-match.Tpo" -c -o resolver-match.lo `test -f '../match.c' || echo '$(srcdir)/'`../match.c; \
-@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/resolver-match.Tpo" "$(DEPDIR)/resolver-match.Plo"; else rm -f "$(DEPDIR)/resolver-match.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='../match.c' object='resolver-match.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/resolver-match.Plo' tmpdepfile='$(DEPDIR)/resolver-match.TPlo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(resolver_CFLAGS) $(CFLAGS) -c -o resolver-match.lo `test -f '../match.c' || echo '$(srcdir)/'`../match.c
-
-resolver-memory.o: ../memory.c
-@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(resolver_CFLAGS) $(CFLAGS) -MT resolver-memory.o -MD -MP -MF "$(DEPDIR)/resolver-memory.Tpo" -c -o resolver-memory.o `test -f '../memory.c' || echo '$(srcdir)/'`../memory.c; \
-@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/resolver-memory.Tpo" "$(DEPDIR)/resolver-memory.Po"; else rm -f "$(DEPDIR)/resolver-memory.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='../memory.c' object='resolver-memory.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/resolver-memory.Po' tmpdepfile='$(DEPDIR)/resolver-memory.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(resolver_CFLAGS) $(CFLAGS) -c -o resolver-memory.o `test -f '../memory.c' || echo '$(srcdir)/'`../memory.c
-
-resolver-memory.obj: ../memory.c
-@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(resolver_CFLAGS) $(CFLAGS) -MT resolver-memory.obj -MD -MP -MF "$(DEPDIR)/resolver-memory.Tpo" -c -o resolver-memory.obj `if test -f '../memory.c'; then $(CYGPATH_W) '../memory.c'; else $(CYGPATH_W) '$(srcdir)/../memory.c'; fi`; \
-@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/resolver-memory.Tpo" "$(DEPDIR)/resolver-memory.Po"; else rm -f "$(DEPDIR)/resolver-memory.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='../memory.c' object='resolver-memory.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/resolver-memory.Po' tmpdepfile='$(DEPDIR)/resolver-memory.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(resolver_CFLAGS) $(CFLAGS) -c -o resolver-memory.obj `if test -f '../memory.c'; then $(CYGPATH_W) '../memory.c'; else $(CYGPATH_W) '$(srcdir)/../memory.c'; fi`
-
-resolver-memory.lo: ../memory.c
-@am__fastdepCC_TRUE@	if $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(resolver_CFLAGS) $(CFLAGS) -MT resolver-memory.lo -MD -MP -MF "$(DEPDIR)/resolver-memory.Tpo" -c -o resolver-memory.lo `test -f '../memory.c' || echo '$(srcdir)/'`../memory.c; \
-@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/resolver-memory.Tpo" "$(DEPDIR)/resolver-memory.Plo"; else rm -f "$(DEPDIR)/resolver-memory.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='../memory.c' object='resolver-memory.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/resolver-memory.Plo' tmpdepfile='$(DEPDIR)/resolver-memory.TPlo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(resolver_CFLAGS) $(CFLAGS) -c -o resolver-memory.lo `test -f '../memory.c' || echo '$(srcdir)/'`../memory.c
-
-resolver-linebuf.o: ../linebuf.c
-@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(resolver_CFLAGS) $(CFLAGS) -MT resolver-linebuf.o -MD -MP -MF "$(DEPDIR)/resolver-linebuf.Tpo" -c -o resolver-linebuf.o `test -f '../linebuf.c' || echo '$(srcdir)/'`../linebuf.c; \
-@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/resolver-linebuf.Tpo" "$(DEPDIR)/resolver-linebuf.Po"; else rm -f "$(DEPDIR)/resolver-linebuf.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='../linebuf.c' object='resolver-linebuf.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/resolver-linebuf.Po' tmpdepfile='$(DEPDIR)/resolver-linebuf.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(resolver_CFLAGS) $(CFLAGS) -c -o resolver-linebuf.o `test -f '../linebuf.c' || echo '$(srcdir)/'`../linebuf.c
-
-resolver-linebuf.obj: ../linebuf.c
-@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(resolver_CFLAGS) $(CFLAGS) -MT resolver-linebuf.obj -MD -MP -MF "$(DEPDIR)/resolver-linebuf.Tpo" -c -o resolver-linebuf.obj `if test -f '../linebuf.c'; then $(CYGPATH_W) '../linebuf.c'; else $(CYGPATH_W) '$(srcdir)/../linebuf.c'; fi`; \
-@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/resolver-linebuf.Tpo" "$(DEPDIR)/resolver-linebuf.Po"; else rm -f "$(DEPDIR)/resolver-linebuf.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='../linebuf.c' object='resolver-linebuf.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/resolver-linebuf.Po' tmpdepfile='$(DEPDIR)/resolver-linebuf.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(resolver_CFLAGS) $(CFLAGS) -c -o resolver-linebuf.obj `if test -f '../linebuf.c'; then $(CYGPATH_W) '../linebuf.c'; else $(CYGPATH_W) '$(srcdir)/../linebuf.c'; fi`
-
-resolver-linebuf.lo: ../linebuf.c
-@am__fastdepCC_TRUE@	if $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(resolver_CFLAGS) $(CFLAGS) -MT resolver-linebuf.lo -MD -MP -MF "$(DEPDIR)/resolver-linebuf.Tpo" -c -o resolver-linebuf.lo `test -f '../linebuf.c' || echo '$(srcdir)/'`../linebuf.c; \
-@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/resolver-linebuf.Tpo" "$(DEPDIR)/resolver-linebuf.Plo"; else rm -f "$(DEPDIR)/resolver-linebuf.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='../linebuf.c' object='resolver-linebuf.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/resolver-linebuf.Plo' tmpdepfile='$(DEPDIR)/resolver-linebuf.TPlo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(resolver_CFLAGS) $(CFLAGS) -c -o resolver-linebuf.lo `test -f '../linebuf.c' || echo '$(srcdir)/'`../linebuf.c
-
-resolver-balloc.o: ../balloc.c
-@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(resolver_CFLAGS) $(CFLAGS) -MT resolver-balloc.o -MD -MP -MF "$(DEPDIR)/resolver-balloc.Tpo" -c -o resolver-balloc.o `test -f '../balloc.c' || echo '$(srcdir)/'`../balloc.c; \
-@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/resolver-balloc.Tpo" "$(DEPDIR)/resolver-balloc.Po"; else rm -f "$(DEPDIR)/resolver-balloc.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='../balloc.c' object='resolver-balloc.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/resolver-balloc.Po' tmpdepfile='$(DEPDIR)/resolver-balloc.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(resolver_CFLAGS) $(CFLAGS) -c -o resolver-balloc.o `test -f '../balloc.c' || echo '$(srcdir)/'`../balloc.c
-
-resolver-balloc.obj: ../balloc.c
-@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(resolver_CFLAGS) $(CFLAGS) -MT resolver-balloc.obj -MD -MP -MF "$(DEPDIR)/resolver-balloc.Tpo" -c -o resolver-balloc.obj `if test -f '../balloc.c'; then $(CYGPATH_W) '../balloc.c'; else $(CYGPATH_W) '$(srcdir)/../balloc.c'; fi`; \
-@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/resolver-balloc.Tpo" "$(DEPDIR)/resolver-balloc.Po"; else rm -f "$(DEPDIR)/resolver-balloc.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='../balloc.c' object='resolver-balloc.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/resolver-balloc.Po' tmpdepfile='$(DEPDIR)/resolver-balloc.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(resolver_CFLAGS) $(CFLAGS) -c -o resolver-balloc.obj `if test -f '../balloc.c'; then $(CYGPATH_W) '../balloc.c'; else $(CYGPATH_W) '$(srcdir)/../balloc.c'; fi`
-
-resolver-balloc.lo: ../balloc.c
-@am__fastdepCC_TRUE@	if $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(resolver_CFLAGS) $(CFLAGS) -MT resolver-balloc.lo -MD -MP -MF "$(DEPDIR)/resolver-balloc.Tpo" -c -o resolver-balloc.lo `test -f '../balloc.c' || echo '$(srcdir)/'`../balloc.c; \
-@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/resolver-balloc.Tpo" "$(DEPDIR)/resolver-balloc.Plo"; else rm -f "$(DEPDIR)/resolver-balloc.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='../balloc.c' object='resolver-balloc.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/resolver-balloc.Plo' tmpdepfile='$(DEPDIR)/resolver-balloc.TPlo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(resolver_CFLAGS) $(CFLAGS) -c -o resolver-balloc.lo `test -f '../balloc.c' || echo '$(srcdir)/'`../balloc.c
-
-resolver-tools.o: ../tools.c
-@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(resolver_CFLAGS) $(CFLAGS) -MT resolver-tools.o -MD -MP -MF "$(DEPDIR)/resolver-tools.Tpo" -c -o resolver-tools.o `test -f '../tools.c' || echo '$(srcdir)/'`../tools.c; \
-@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/resolver-tools.Tpo" "$(DEPDIR)/resolver-tools.Po"; else rm -f "$(DEPDIR)/resolver-tools.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='../tools.c' object='resolver-tools.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/resolver-tools.Po' tmpdepfile='$(DEPDIR)/resolver-tools.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(resolver_CFLAGS) $(CFLAGS) -c -o resolver-tools.o `test -f '../tools.c' || echo '$(srcdir)/'`../tools.c
-
-resolver-tools.obj: ../tools.c
-@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(resolver_CFLAGS) $(CFLAGS) -MT resolver-tools.obj -MD -MP -MF "$(DEPDIR)/resolver-tools.Tpo" -c -o resolver-tools.obj `if test -f '../tools.c'; then $(CYGPATH_W) '../tools.c'; else $(CYGPATH_W) '$(srcdir)/../tools.c'; fi`; \
-@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/resolver-tools.Tpo" "$(DEPDIR)/resolver-tools.Po"; else rm -f "$(DEPDIR)/resolver-tools.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='../tools.c' object='resolver-tools.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/resolver-tools.Po' tmpdepfile='$(DEPDIR)/resolver-tools.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(resolver_CFLAGS) $(CFLAGS) -c -o resolver-tools.obj `if test -f '../tools.c'; then $(CYGPATH_W) '../tools.c'; else $(CYGPATH_W) '$(srcdir)/../tools.c'; fi`
-
-resolver-tools.lo: ../tools.c
-@am__fastdepCC_TRUE@	if $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(resolver_CFLAGS) $(CFLAGS) -MT resolver-tools.lo -MD -MP -MF "$(DEPDIR)/resolver-tools.Tpo" -c -o resolver-tools.lo `test -f '../tools.c' || echo '$(srcdir)/'`../tools.c; \
-@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/resolver-tools.Tpo" "$(DEPDIR)/resolver-tools.Plo"; else rm -f "$(DEPDIR)/resolver-tools.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='../tools.c' object='resolver-tools.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/resolver-tools.Plo' tmpdepfile='$(DEPDIR)/resolver-tools.TPlo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(resolver_CFLAGS) $(CFLAGS) -c -o resolver-tools.lo `test -f '../tools.c' || echo '$(srcdir)/'`../tools.c
-
-resolver-event.o: ../event.c
-@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(resolver_CFLAGS) $(CFLAGS) -MT resolver-event.o -MD -MP -MF "$(DEPDIR)/resolver-event.Tpo" -c -o resolver-event.o `test -f '../event.c' || echo '$(srcdir)/'`../event.c; \
-@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/resolver-event.Tpo" "$(DEPDIR)/resolver-event.Po"; else rm -f "$(DEPDIR)/resolver-event.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='../event.c' object='resolver-event.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/resolver-event.Po' tmpdepfile='$(DEPDIR)/resolver-event.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(resolver_CFLAGS) $(CFLAGS) -c -o resolver-event.o `test -f '../event.c' || echo '$(srcdir)/'`../event.c
-
-resolver-event.obj: ../event.c
-@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(resolver_CFLAGS) $(CFLAGS) -MT resolver-event.obj -MD -MP -MF "$(DEPDIR)/resolver-event.Tpo" -c -o resolver-event.obj `if test -f '../event.c'; then $(CYGPATH_W) '../event.c'; else $(CYGPATH_W) '$(srcdir)/../event.c'; fi`; \
-@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/resolver-event.Tpo" "$(DEPDIR)/resolver-event.Po"; else rm -f "$(DEPDIR)/resolver-event.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='../event.c' object='resolver-event.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/resolver-event.Po' tmpdepfile='$(DEPDIR)/resolver-event.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(resolver_CFLAGS) $(CFLAGS) -c -o resolver-event.obj `if test -f '../event.c'; then $(CYGPATH_W) '../event.c'; else $(CYGPATH_W) '$(srcdir)/../event.c'; fi`
-
-resolver-event.lo: ../event.c
-@am__fastdepCC_TRUE@	if $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(resolver_CFLAGS) $(CFLAGS) -MT resolver-event.lo -MD -MP -MF "$(DEPDIR)/resolver-event.Tpo" -c -o resolver-event.lo `test -f '../event.c' || echo '$(srcdir)/'`../event.c; \
-@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/resolver-event.Tpo" "$(DEPDIR)/resolver-event.Plo"; else rm -f "$(DEPDIR)/resolver-event.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='../event.c' object='resolver-event.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/resolver-event.Plo' tmpdepfile='$(DEPDIR)/resolver-event.TPlo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(resolver_CFLAGS) $(CFLAGS) -c -o resolver-event.lo `test -f '../event.c' || echo '$(srcdir)/'`../event.c
 
 mostlyclean-libtool:
 	-rm -f *.lo

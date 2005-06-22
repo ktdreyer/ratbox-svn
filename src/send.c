@@ -37,12 +37,11 @@
 #include "numeric.h"
 #include "commio.h"
 #include "s_serv.h"
-#include "sprintf_irc.h"
+#include "snprintf.h"
 #include "s_conf.h"
 #include "s_newconf.h"
 #include "linebuf.h"
 #include "s_log.h"
-#include "memory.h"
 #include "hook.h"
 
 #define LOG_BUFSIZE 2048

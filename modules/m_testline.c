@@ -39,7 +39,7 @@
 #include "numeric.h"
 #include "s_conf.h"
 #include "s_newconf.h"
-#include "sprintf_irc.h"
+#include "snprintf.h"
 #include "irc_string.h"
 #include "ircd.h"
 

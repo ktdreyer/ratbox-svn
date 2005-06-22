@@ -35,7 +35,7 @@
 #include "s_newconf.h"
 #include "send.h"
 #include "irc_string.h"
-#include "memory.h"
+#include "ircd_memory.h"
 #include "patricia.h"
 
 #define BAD_CONF_CLASS          -1

@@ -37,7 +37,6 @@
 #include <arpa/inet.h>
 
 #include "internal.h"
-#include "sprintf_irc.h"
 
 #define LOG_BUFSIZE 512
 
@@ -85,43 +84,45 @@ void adns__vdiag(adns_state ads, const char *pfx, adns_initflags prevent,
 #endif
 }
 
-void adns__debug(adns_state ads, int serv, adns_query qu, const char *fmt, ...) {
+void adns__debug(adns_state ads, int serv, adns_query qu, const char *fmt, ...) 
+{
+#if 0
   char    buf[LOG_BUFSIZE];
   va_list al;
 
   va_start(al,fmt);
   vsnprintf(buf, LOG_BUFSIZE, fmt, al);
-#if 0
   adns__vdiag(ads," debug",0,serv,qu,fmt,al);
-#endif
   va_end(al);
 /*  putlog(LOG_DEBUG, "*", "%s", buf); */
+#endif
 }
 
-void adns__warn(adns_state ads, int serv, adns_query qu, const char *fmt, ...) {
+void adns__warn(adns_state ads, int serv, adns_query qu, const char *fmt, ...) 
+{
+#if 0
   char    buf[LOG_BUFSIZE];
   va_list al;
 
   va_start(al,fmt);
   vsnprintf(buf, LOG_BUFSIZE, fmt, al);
-#if 0
   adns__vdiag(ads," warning",adns_if_noerrprint|adns_if_noserverwarn,serv,qu,fmt,al);
-#endif
   va_end(al);
 /*  putlog(LOG_DEBUG, "*", "%s", buf); */
+#endif
 }
 
 void adns__diag(adns_state ads, int serv, adns_query qu, const char *fmt, ...) {
+#if 0
   char    buf[LOG_BUFSIZE];
   va_list al;
 
   va_start(al,fmt);
   vsnprintf(buf, LOG_BUFSIZE, fmt, al);
-#if 0
   adns__vdiag(ads,"",adns_if_noerrprint,serv,qu,fmt,al);
-#endif
   va_end(al);
 /*  putlog(LOG_DEBUG, "*", "%s", buf); */
+#endif
 }
 
 /* vbuf functions */

@@ -38,8 +38,8 @@
 #include "numeric.h"
 #include "parse.h"
 #include "irc_string.h"
-#include "memory.h"
-#include "sprintf_irc.h"
+#include "ircd_memory.h"
+#include "snprintf.h"
 #include "ltdl.h"
 
 

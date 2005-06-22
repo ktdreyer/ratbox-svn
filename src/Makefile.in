@@ -53,47 +53,40 @@ CONFIG_CLEAN_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
-am_ircd_OBJECTS = dns.$(OBJEXT) balloc.$(OBJEXT) cache.$(OBJEXT) \
-	channel.$(OBJEXT) class.$(OBJEXT) client.$(OBJEXT) \
-	commio.$(OBJEXT) event.$(OBJEXT) getopt.$(OBJEXT) \
+am_ircd_OBJECTS = dns.$(OBJEXT) cache.$(OBJEXT) channel.$(OBJEXT) \
+	class.$(OBJEXT) client.$(OBJEXT) getopt.$(OBJEXT) \
 	hash.$(OBJEXT) hook.$(OBJEXT) hostmask.$(OBJEXT) \
 	irc_string.$(OBJEXT) ircd.$(OBJEXT) ircd_signal.$(OBJEXT) \
-	kdparse.$(OBJEXT) linebuf.$(OBJEXT) listener.$(OBJEXT) \
-	match.$(OBJEXT) memory.$(OBJEXT) modules.$(OBJEXT) \
-	monitor.$(OBJEXT) newconf.$(OBJEXT) numeric.$(OBJEXT) \
-	packet.$(OBJEXT) parse.$(OBJEXT) patricia.$(OBJEXT) \
-	reject.$(OBJEXT) restart.$(OBJEXT) s_auth.$(OBJEXT) \
-	s_conf.$(OBJEXT) s_newconf.$(OBJEXT) s_log.$(OBJEXT) \
-	s_serv.$(OBJEXT) s_user.$(OBJEXT) scache.$(OBJEXT) \
-	send.$(OBJEXT) snprintf.$(OBJEXT) tools.$(OBJEXT) \
-	whowas.$(OBJEXT) version.$(OBJEXT) @SELECT_TYPE@.$(OBJEXT)
+	kdparse.$(OBJEXT) listener.$(OBJEXT) match.$(OBJEXT) \
+	modules.$(OBJEXT) monitor.$(OBJEXT) newconf.$(OBJEXT) \
+	numeric.$(OBJEXT) packet.$(OBJEXT) parse.$(OBJEXT) \
+	patricia.$(OBJEXT) reject.$(OBJEXT) restart.$(OBJEXT) \
+	s_auth.$(OBJEXT) s_conf.$(OBJEXT) s_newconf.$(OBJEXT) \
+	s_log.$(OBJEXT) s_serv.$(OBJEXT) s_user.$(OBJEXT) \
+	scache.$(OBJEXT) send.$(OBJEXT) whowas.$(OBJEXT) \
+	version.$(OBJEXT)
 ircd_OBJECTS = $(am_ircd_OBJECTS)
 am__DEPENDENCIES_1 =
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)/include
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
-@AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/@SELECT_TYPE@.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/balloc.Po ./$(DEPDIR)/cache.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/channel.Po ./$(DEPDIR)/class.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/client.Po ./$(DEPDIR)/commio.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/dns.Po ./$(DEPDIR)/event.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/getopt.Po ./$(DEPDIR)/hash.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/hook.Po ./$(DEPDIR)/hostmask.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/irc_string.Po ./$(DEPDIR)/ircd.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/ircd_signal.Po ./$(DEPDIR)/kdparse.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/linebuf.Po ./$(DEPDIR)/listener.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/match.Po ./$(DEPDIR)/memory.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/modules.Po ./$(DEPDIR)/monitor.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/newconf.Po ./$(DEPDIR)/numeric.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/packet.Po ./$(DEPDIR)/parse.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/patricia.Po ./$(DEPDIR)/reject.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/restart.Po ./$(DEPDIR)/s_auth.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/s_conf.Po ./$(DEPDIR)/s_log.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/s_newconf.Po ./$(DEPDIR)/s_serv.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/s_user.Po ./$(DEPDIR)/scache.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/send.Po ./$(DEPDIR)/snprintf.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/tools.Po ./$(DEPDIR)/version.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/whowas.Po
+@AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/cache.Po ./$(DEPDIR)/channel.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/class.Po ./$(DEPDIR)/client.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dns.Po ./$(DEPDIR)/getopt.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/hash.Po ./$(DEPDIR)/hook.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/hostmask.Po ./$(DEPDIR)/irc_string.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/ircd.Po ./$(DEPDIR)/ircd_signal.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/kdparse.Po ./$(DEPDIR)/listener.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/match.Po ./$(DEPDIR)/modules.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/monitor.Po ./$(DEPDIR)/newconf.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/numeric.Po ./$(DEPDIR)/packet.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/parse.Po ./$(DEPDIR)/patricia.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/reject.Po ./$(DEPDIR)/restart.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/s_auth.Po ./$(DEPDIR)/s_conf.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/s_log.Po ./$(DEPDIR)/s_newconf.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/s_serv.Po ./$(DEPDIR)/s_user.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/scache.Po ./$(DEPDIR)/send.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/version.Po ./$(DEPDIR)/whowas.Po
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) \
@@ -253,16 +246,13 @@ sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 AUTOMAKE_OPTIONS = foreign
 SUBDIRS = ident resolver
-INCLUDES = -I../adns $(INCLTDL)
+INCLUDES = -I../adns $(INCLTDL) -I../libircd/ 
 ircd_SOURCES = \
   dns.c                        \
-  balloc.c                      \
   cache.c                       \
   channel.c                     \
   class.c                       \
   client.c                      \
-  commio.c                      \
-  event.c                       \
   getopt.c                      \
   hash.c                        \
   hook.c                        \
@@ -271,10 +261,8 @@ ircd_SOURCES = \
   ircd.c                        \
   ircd_signal.c                 \
   kdparse.c                     \
-  linebuf.c                     \
   listener.c                    \
   match.c                       \
-  memory.c                      \
   modules.c                     \
   monitor.c                     \
   newconf.c                     \
@@ -292,15 +280,12 @@ ircd_SOURCES = \
   s_user.c                      \
   scache.c                      \
   send.c                        \
-  snprintf.c                    \
-  tools.c                       \
   whowas.c			\
-  version.c			\
-  @SELECT_TYPE@.c		
+  version.c			
 
 @STATIC_MODULES_FALSE@ircd_LDADD = lex.yy.o y.tab.o $(LIBLTDL) @SSL_LIBS@ @CRYPT_LIB@
 @STATIC_MODULES_TRUE@ircd_LDADD = lex.yy.o y.tab.o @SSL_LIBS@ ../modules/libmodules.a @CRYPT_LIB@
-ircd_LDFLAGS = -export-dynamic
+ircd_LDFLAGS = -export-dynamic -L../libircd -lircd
 @STATIC_MODULES_FALSE@ircd_DEPENDENCIES = $(LIBLTDLC) version.o lex.yy.o y.tab.o
 @STATIC_MODULES_TRUE@ircd_DEPENDENCIES = version.o ../modules/libmodules.a  lex.yy.o y.tab.o
 all: all-recursive
@@ -374,15 +359,11 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/@SELECT_TYPE@.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/balloc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cache.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/channel.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/class.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/client.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/commio.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dns.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/event.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/getopt.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hash.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hook.Po@am__quote@
@@ -391,10 +372,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ircd.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ircd_signal.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/kdparse.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/linebuf.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/listener.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/match.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/memory.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/modules.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/monitor.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/newconf.Po@am__quote@
@@ -412,8 +391,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/s_user.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/scache.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/send.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/snprintf.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tools.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/version.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/whowas.Po@am__quote@
 

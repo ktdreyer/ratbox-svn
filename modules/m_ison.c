@@ -28,7 +28,7 @@
 #include "tools.h"
 #include "struct.h"
 #include "irc_string.h"
-#include "sprintf_irc.h"
+#include "snprintf.h"
 #include "ircd.h"
 #include "numeric.h"
 #include "send.h"

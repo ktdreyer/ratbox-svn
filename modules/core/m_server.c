@@ -41,11 +41,10 @@
 #include "parse.h"
 #include "hook.h"
 #include "modules.h"
-#include "memory.h"
 #include "s_stats.h"
 #include "commio.h"
 #include "packet.h"
-#include "sprintf_irc.h"
+#include "snprintf.h"
 #include "linebuf.h"
 #include "s_user.h"
 

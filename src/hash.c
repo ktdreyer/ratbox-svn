@@ -35,7 +35,7 @@
 #include "ircd.h"
 #include "numeric.h"
 #include "send.h"
-#include "memory.h"
+#include "ircd_memory.h"
 #include "cache.h"
 #include "s_newconf.h"
 

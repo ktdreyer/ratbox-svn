@@ -32,7 +32,7 @@
 #include "event.h"
 #include "hash.h"
 #include "irc_string.h"
-#include "sprintf_irc.h"
+#include "snprintf.h"
 #include "ircd.h"
 #include "s_gline.h"
 #include "numeric.h"
@@ -48,7 +48,6 @@
 #include "whowas.h"
 #include "s_user.h"
 #include "hash.h"
-#include "memory.h"
 #include "hostmask.h"
 #include "balloc.h"
 #include "listener.h"
@@ -1237,7 +1236,7 @@ exit_unknown_client(struct Client *client_p, struct Client *source_p, struct Cli
 		  const char *comment)
 {
 	delete_auth_queries(source_p);
-	client_flush_input(source_p);
+	linebuf_donebuf(&client_p->localClient->buf_recvq);
 	dlinkDelete(&source_p->localClient->tnode, &unknown_list);
 
 	if(!IsIOError(source_p))
@@ -1406,7 +1405,7 @@ exit_local_client(struct Client *client_p, struct Client *source_p, struct Clien
 	clear_monitor(source_p);
 
 	s_assert(IsPerson(source_p));
-	client_flush_input(source_p);
+	linebuf_donebuf(&client_p->localClient->buf_recvq);
 	dlinkDelete(&source_p->localClient->tnode, &lclient_list);
 	dlinkDelete(&source_p->lnode, &me.serv->users);
 
