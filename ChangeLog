@@ -1,3 +1,30 @@
+androsyn    2005/06/22 06:37:11 UTC	(20050622_5)
+
+  Modified files:
+    .                    Makefile.in 
+    adns                 Makefile.in 
+    libircd              Makefile.in 
+    modules              Makefile.am Makefile.in 
+    src                  Makefile.in 
+    src/ident            Makefile.in 
+    src/resolver         Makefile.in 
+    tools                Makefile.in 
+  Log:
+  Fix an include path
+  
+  Revision  Changes    Path
+  7.72      +1 -1      ircd-ratbox/Makefile.in
+  1.34      +0 -0      ircd-ratbox/adns/Makefile.in
+  7.2       +1 -1      ircd-ratbox/libircd/Makefile.in
+  1.7       +1 -1      ircd-ratbox/modules/Makefile.am
+  1.142     +2 -2      ircd-ratbox/modules/Makefile.in
+  7.178     +1 -1      ircd-ratbox/src/Makefile.in
+  1.11      +1 -1      ircd-ratbox/src/ident/Makefile.in
+  1.5       +1 -1      ircd-ratbox/src/resolver/Makefile.in
+  7.60      +0 -0      ircd-ratbox/tools/Makefile.in
+
+
+
 androsyn    2005/06/22 01:01:09 UTC	(20050622_4)
 
   Modified files:
