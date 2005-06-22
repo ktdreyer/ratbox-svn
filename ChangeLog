@@ -1,3 +1,37 @@
+androsyn    2005/06/22 00:25:46 UTC	(20050622_0)
+
+  Modified files:
+    libircd              balloc.c commio.c commio.h epoll.c 
+                         event.c event.h ircd_memory.c 
+                         ircd_memory.h linebuf.c snprintf.c 
+                         snprintf.h tools.c tools.h 
+  Added files:
+    libircd              Makefile.am Makefile.in ircd_lib.c 
+                         ircd_lib.h 
+  Log:
+  part one of my ircd library commit
+  
+  Revision  Changes    Path
+  7.1       +20 -0     ircd-ratbox/libircd/Makefile.am (new)
+  7.1       +492 -0    ircd-ratbox/libircd/Makefile.in (new)
+  7.93      +9 -12     ircd-ratbox/libircd/balloc.c
+  1.44      +608 -25   ircd-ratbox/libircd/commio.c
+  1.29      +14 -0     ircd-ratbox/libircd/commio.h
+  1.44      +6 -19     ircd-ratbox/libircd/epoll.c
+  7.58      +21 -47    ircd-ratbox/libircd/event.c
+  1.25      +2 -2      ircd-ratbox/libircd/event.h
+  7.1       +86 -0     ircd-ratbox/libircd/ircd_lib.c (new)
+  7.1       +57 -0     ircd-ratbox/libircd/ircd_lib.h (new)
+  7.54      +4 -9      ircd-ratbox/libircd/ircd_memory.c
+  7.57      +0 -0      ircd-ratbox/libircd/ircd_memory.h
+  7.136     +70 -91    ircd-ratbox/libircd/linebuf.c
+  1.17      +1 -1      ircd-ratbox/libircd/snprintf.c
+  7.23      +0 -0      ircd-ratbox/libircd/snprintf.h
+  7.53      +34 -3     ircd-ratbox/libircd/tools.c
+  1.59      +9 -0      ircd-ratbox/libircd/tools.h
+
+
+
 androsyn    2005/06/20 07:08:39 UTC	(20050620_0)
 
   ircd-ratbox/libircd - New directory
