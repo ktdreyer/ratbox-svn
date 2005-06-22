@@ -1,3 +1,18 @@
+androsyn    2005/06/22 00:56:52 UTC	(20050622_3)
+
+  Modified files:
+    libircd              devpoll.c kqueue.c poll.c sigio.c 
+  Log:
+  I think this should make these compile
+  
+  Revision  Changes    Path
+  7.45      +3 -32     ircd-ratbox/libircd/devpoll.c
+  1.60      +4 -16     ircd-ratbox/libircd/kqueue.c
+  7.92      +2 -14     ircd-ratbox/libircd/poll.c
+  7.53      +2 -16     ircd-ratbox/libircd/sigio.c
+
+
+
 androsyn    2005/06/22 00:52:37 UTC	(20050622_2)
 
   Removed files:
