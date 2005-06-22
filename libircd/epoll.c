@@ -30,20 +30,7 @@
 #include <sys/epoll.h>
 #include "tools.h"
 #include "commio.h"
-#include "class.h"
-#include "irc_string.h"
-#include "ircd.h"
-#include "listener.h"
-#include "numeric.h"
-#include "restart.h"
-#include "s_auth.h"
-#include "s_conf.h"
-#include "s_log.h"
-#include "s_serv.h"
-#include "s_stats.h"
-#include "send.h"
-#include "packet.h"
-#include "memory.h"
+#include "ircd_memory.h"
 
 
 
@@ -147,7 +134,7 @@ comm_setselect(int fd, fdlist_t list, unsigned int type, PF * handler,
 
 	if(epoll_ctl(ep, op, fd, &ep_event) != 0)
 	{
-		ilog(L_IOERROR, "Xcomm_setselect(): epoll_ctl failed: %s", strerror(errno));
+		lib_ilog("Xcomm_setselect(): epoll_ctl failed: %s", strerror(errno));
 		abort();
 	}
 
@@ -194,7 +181,7 @@ comm_select(unsigned long delay)
 				hdl(F->fd, data);
 			}
 			else
-				ilog(L_IOERROR, "epoll.c: NULL read handler called");
+				lib_ilog("epoll.c: NULL read handler called");
 
 		}
 
@@ -212,7 +199,7 @@ comm_select(unsigned long delay)
 				hdl(F->fd, data);
 			}
 			else
-				ilog(L_IOERROR, "epoll.c: NULL write handler called");
+				lib_ilog("epoll.c: NULL write handler called");
 		}
 		
 		if(F->flags.open == 0)
@@ -238,7 +225,7 @@ comm_select(unsigned long delay)
 				
 			if(epoll_ctl(ep, op, F->fd, &ep_event) != 0)
 			{
-				ilog(L_IOERROR, "comm_setselect(): epoll_ctl failed: %s", strerror(errno));
+				lib_ilog("comm_setselect(): epoll_ctl failed: %s", strerror(errno));
 			}
 		}
 					

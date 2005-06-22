@@ -52,15 +52,9 @@
 
 #include "stdinc.h"
 #include "tools.h"
-#include "struct.h"
-#include "ircd.h"
-#include "event.h"
-#include "client.h"
-#include "send.h"
-#include "memory.h"
-#include "s_log.h"
-#include "numeric.h"
 #include "commio.h"
+#include "event.h"
+#include "snprintf.h"
 
 static const char *last_event_ran = NULL;
 struct ev_entry event_table[MAX_EVENTS];
@@ -122,10 +116,6 @@ eventAdd(const char *name, EVH * func, void *arg, time_t when)
 			return;
 		}
 	}
-#ifndef NO_IRCD
-	/* erk! couldnt add to event table */
-	sendto_realops_flags(UMODE_DEBUG, L_ALL, "Unable to add event [%s] to event table", name);
-#endif
 }
 
 void
@@ -154,12 +144,6 @@ eventAddOnce(const char *name, EVH *func, void *arg, time_t when)
 			return;
 		}
 	}
-
-#ifndef NO_IRCD
-	/* erk! couldnt add to event table */
-	sendto_realops_flags(UMODE_DEBUG, L_ALL,
-			     "Unable to add event [%s] to event table", name);
-#endif
 }
 
 /*
@@ -311,40 +295,30 @@ eventFind(EVH * func, void *arg)
 	return -1;
 }
 
-#ifndef NO_IRCD
-/* 
- * void show_events(struct Client *source_p)
- *
- * Input: Client requesting the event
- * Output: List of events
- * Side Effects: None
- */
-void
-show_events(struct Client *source_p)
+int
+dump_events(void (*func)(char *, void *), void *ptr)
 {
-	int i;
-
-	if(last_event_ran)
-		sendto_one_numeric(source_p, HOLD_QUEUE, RPL_STATSDEBUG, 
-				   "E :Last event to run: %s",
-				   last_event_ran);
-
-	sendto_one_numeric(source_p, HOLD_QUEUE, RPL_STATSDEBUG,
-			   "E :Operation                    Next Execution");
-
-	for (i = 0; i < MAX_EVENTS; i++)
-	{
-		if(event_table[i].active)
-		{
-			sendto_one_numeric(source_p, HOLD_QUEUE, RPL_STATSDEBUG, 
-					   "E :%-28s %-4d seconds",
-					   event_table[i].name, 
-					   (int)(event_table[i].when - CurrentTime));
-		}
+	int len, i;
+	char buf[512];
+	len = sizeof(buf);
+	if(last_event_ran) {
+		ircsnprintf(buf, len, "Last event to run: %s", last_event_ran);
+		func(buf, ptr);
 	}
-	send_pop_queue(source_p);
+	strlcpy(buf, "Operation                    Next Execution", len);
+	func(buf, ptr);
+
+	for(i = 0; i < MAX_EVENTS;i++)
+	{
+		if(event_table[i].active) {
+			ircsnprintf(buf, len, "%-28s %-4d seconds", event_table[i].name,
+				    (int)(event_table[i].when - CurrentTime));
+			func(buf, ptr);
+		}
+	}	
+	return i;
 }
-#endif
+
 /* 
  * void set_back_events(time_t by)
  * Input: Time to set back events by.

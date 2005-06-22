@@ -26,14 +26,12 @@
 
 #include "stdinc.h"
 #include "tools.h"
-#include "struct.h"
 #include "linebuf.h"
 #include "memory.h"
 #include "event.h"
 #include "balloc.h"
-#include "hook.h"
 #include "commio.h"
-#include "sprintf_irc.h"
+#include "snprintf.h"
 
 #ifdef STRING_WITH_STRINGS
 # include <string.h>
@@ -202,25 +200,6 @@ linebuf_newbuf(buf_head_t * bufhead)
 	/* not much to do right now :) */
 	memset(bufhead, 0, sizeof(buf_head_t));
 }
-
-/*
- * client_flush_input
- *
- * inputs	- pointer to client
- * output	- none
- * side effects - all input line bufs are flushed 
- */
-void
-client_flush_input(struct Client *client_p)
-{
-	/* This way, it can be called for remote client as well */
-
-	if(client_p->localClient == NULL)
-		return;
-
-	linebuf_donebuf(&client_p->localClient->buf_recvq);
-}
-
 
 /*
  * linebuf_donebuf
@@ -695,91 +674,92 @@ linebuf_flush(int fd, buf_head_t * bufhead)
 	buf_line_t *bufline;
 	int retval;
 
-#ifdef HAVE_WRITEV
-	dlink_node *ptr;
-	int x = 0, y;
-	int xret;
-#ifndef UIO_MAXIOV
-#define UIO_MAXIOV 16
-#endif
-	static struct iovec vec[UIO_MAXIOV];
-
-	/* Check we actually have a first buffer */
-	if(bufhead->list.head == NULL)
+	if(comm_can_writev(fd))
 	{
-		/* nope, so we return none .. */
-		errno = EWOULDBLOCK;
-		return -1;
-	}
+		dlink_node *ptr;
+		int x = 0, y;
+		int xret;
+		static struct iovec vec[UIO_MAXIOV];
 
-	ptr = bufhead->list.head;
+		/* Check we actually have a first buffer */
+		if(bufhead->list.head == NULL)
+		{
+			/* nope, so we return none .. */
+			errno = EWOULDBLOCK;
+			return -1;
+		}
+
+		ptr = bufhead->list.head;
 	
-	bufline = ptr->data;
-	if(!bufline->terminated)
-	{
-		errno = EWOULDBLOCK;
-		return -1;
-	}
-
-	do
-	{
-		if(ptr == NULL)
-			break;
-
 		bufline = ptr->data;
-
 		if(!bufline->terminated)
-			break;
+		{
+			errno = EWOULDBLOCK;
+			return -1;
+		}
+
+		do
+		{
+			if(ptr == NULL)
+				break;
+
+			bufline = ptr->data;
+
+			if(!bufline->terminated)
+				break;
 		
-		if(!bufline->flushing)
-		{
-			bufhead->writeofs = 0;
-		}
+			if(!bufline->flushing)
+			{
+				bufhead->writeofs = 0;
+			}
 
-		vec[x].iov_base = bufline->buf + bufhead->writeofs;
-		vec[x].iov_len = bufline->len - bufhead->writeofs;
-		ptr = ptr->next;
-	} while(++x < UIO_MAXIOV);
-
-	if(x == 0)
-	{
-		errno = EWOULDBLOCK;
-		return -1;
-	}
-
-	xret = retval = writev(fd, vec, x);
-	if(retval <= 0)
-		return retval;
-
-	ptr = bufhead->list.head;
-
-	for(y = 0; y < x; y++)
-	{
-		bufline = ptr->data;
-
-		if((bufline->flushing == 0 && xret >= bufline->len)
-		   || (bufline->flushing == 1 && xret >= bufline->len - bufhead->writeofs))
-		{
-			bufhead->writeofs = 0;
-			if(bufline->flushing == 0)
-				xret -= bufline->len;
-			else
-				xret -= bufhead->writeofs;
-
+			vec[x].iov_base = bufline->buf + bufhead->writeofs;
+			vec[x].iov_len = bufline->len - bufhead->writeofs;
 			ptr = ptr->next;
-			s_assert(bufhead->len >= 0);
-			linebuf_done_line(bufhead, bufline, bufhead->list.head);
-		}
-		else
+		} while(++x < UIO_MAXIOV);
+
+		if(x == 0)
 		{
-			bufline->flushing = 1;
-			bufhead->writeofs += xret;
-			break;
+			errno = EWOULDBLOCK;
+			return -1;
 		}
+
+		xret = retval = comm_writev(fd, vec, x);
+		if(retval <= 0)
+			return retval;
+
+		ptr = bufhead->list.head;
+
+		for(y = 0; y < x; y++)
+		{
+			bufline = ptr->data;
+
+			if((bufline->flushing == 0 && xret >= bufline->len)
+			   || (bufline->flushing == 1 && xret >= bufline->len - bufhead->writeofs))
+			{
+				bufhead->writeofs = 0;
+				if(bufline->flushing == 0)
+					xret -= bufline->len;
+				else
+					xret -= bufhead->writeofs;
+
+				ptr = ptr->next;
+				s_assert(bufhead->len >= 0);
+				linebuf_done_line(bufhead, bufline, bufhead->list.head);
+			}
+			else
+			{
+				bufline->flushing = 1;
+				bufhead->writeofs += xret;
+				break;
+			}
+		}
+
+		return retval;
 	}
 
-
-#else /* HAVE_WRITEV */
+	/* this is the non-writev case */	
+	
 	/* Check we actually have a first buffer */
 	if(bufhead->list.head == NULL)
 	{
@@ -805,7 +785,7 @@ linebuf_flush(int fd, buf_head_t * bufhead)
 	}
 
 	/* Now, try writing data */
-	retval = write(fd, bufline->buf + bufhead->writeofs, bufline->len - bufhead->writeofs);
+	retval = comm_write(fd, bufline->buf + bufhead->writeofs, bufline->len - bufhead->writeofs);
 
 	if(retval <= 0)
 		return retval;
@@ -823,7 +803,6 @@ linebuf_flush(int fd, buf_head_t * bufhead)
 	}
 
 	/* Return line length */
-#endif
 	return retval;
 }
 

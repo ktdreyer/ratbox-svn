@@ -27,14 +27,9 @@
 
 #define WE_ARE_MEMORY_C
 
+#include "setup.h"
 #include "stdinc.h"
-#include "tools.h"
-#include "ircd.h"
-#include "irc_string.h"
-#include "memory.h"
-#include "send.h"
-#include "s_log.h"
-#include "restart.h"
+#include "ircd_lib.h"
 
 
 /*
@@ -79,6 +74,6 @@ outofmemory()
 
 	was_here = 1;
 
-	ilog(L_MAIN, "Out of memory: restarting server...");
-	restart("Out of Memory");
+	lib_ilog("Out of memory: restarting server...");
+	lib_restart("Out of Memory");
 }

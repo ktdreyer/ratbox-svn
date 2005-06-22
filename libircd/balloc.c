@@ -59,16 +59,13 @@
 
 #include "stdinc.h"
 #include "tools.h"
-
-#define WE_ARE_MEMORY_C
 #include "balloc.h"
+
 #ifndef NOBALLOC
 
-#include "ircd.h"
-#include "memory.h"
-#include "irc_string.h"
+#include "ircd_lib.h"
+#include "ircd_memory.h"
 #include "tools.h"
-#include "s_log.h"
 #include "event.h"
 
 #ifdef HAVE_MMAP		/* We've got mmap() that is good */
@@ -95,7 +92,7 @@ static int zero_fd = -1;
 static void
 _blockheap_fail(const char *reason, const char *file, int line)
 {
-	ilog(L_MAIN, "Blockheap failure: %s (%s:%d)", reason, file, line);
+	lib_ilog("Blockheap failure: %s (%s:%d)", reason, file, line);
 	abort();
 }
                 
@@ -359,7 +356,7 @@ BlockHeapCreate(size_t elemsize, int elemsperblock)
 	bh = (BlockHeap *) calloc(1, sizeof(BlockHeap));
 	if(bh == NULL)
 	{
-		ilog(L_MAIN, "Attempt to calloc() failed: (%s:%d)", __FILE__, __LINE__);
+		lib_ilog("Attempt to calloc() failed: (%s:%d)", __FILE__, __LINE__);
 		outofmemory();	/* die.. out of memory */
 	}
 
@@ -381,7 +378,7 @@ BlockHeapCreate(size_t elemsize, int elemsperblock)
 	{
 		if(bh != NULL)
 			free(bh);
-		ilog(L_MAIN, "newblock() failed");
+		lib_ilog("newblock() failed");
 		outofmemory();	/* die.. out of memory */
 	}
 
@@ -428,7 +425,7 @@ BlockHeapAlloc(BlockHeap * bh)
 			BlockHeapGarbageCollect(bh);
 			if(bh->freeElems == 0)
 			{
-				ilog(L_MAIN, "newblock() failed and garbage collection didn't help");
+				lib_ilog("newblock() failed and garbage collection didn't help");
 				outofmemory();	/* Well that didn't work either...bail */
 			}
 		}
@@ -489,13 +486,13 @@ BlockHeapFree(BlockHeap * bh, void *ptr)
 	if(bh == NULL)
 	{
 
-		ilog(L_MAIN, "balloc.c:BlockHeapFree() bh == NULL");
+		lib_ilog("balloc.c:BlockHeapFree() bh == NULL");
 		return (1);
 	}
 
 	if(ptr == NULL)
 	{
-		ilog(L_MAIN, "balloc.BlockHeapFree() ptr == NULL");
+		lib_ilog("balloc.BlockHeapFree() ptr == NULL");
 		return (1);
 	}
 

@@ -62,7 +62,7 @@ extern void eventInit(void);
 extern void eventDelete(EVH * func, void *);
 extern int eventFind(EVH * func, void *);
 extern void set_back_events(time_t);
+int dump_events(void (*func)(char *, void *), void *ptr);
 
-extern void show_events(struct Client *source_p);
 
 #endif /* INCLUDED_event_h */

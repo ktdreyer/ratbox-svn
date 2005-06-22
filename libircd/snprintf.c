@@ -15,7 +15,7 @@
 #include <sys/types.h>
 #include <ctype.h>
 #include "setup.h"
-#include "sprintf_irc.h"
+#include "snprintf.h"
 
 /*
  *  This table is arranged in chronological order from 0-999,

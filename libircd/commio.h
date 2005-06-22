@@ -28,6 +28,7 @@
 #define INCLUDED_commio_h
 
 #include "setup.h"
+#include "ircd_lib.h"
 
 #if defined(HAVE_PORTS) && !defined(NO_IRCD)
 # define COMM_DOES_EVENTS
@@ -141,6 +142,9 @@ struct _fde
 	}
 	connect;
 	int pflags;
+#ifdef SSL_ENABLED
+	SSL *ssl;
+#endif
 };
 
 
@@ -202,6 +206,9 @@ extern int comm_socket(int family, int sock_type, int proto, const char *note);
 extern int comm_socketpair(int family, int sock_type, int proto, int *nfd, const char *note);
 
 extern int comm_accept(int fd, struct sockaddr *pn, socklen_t *addrlen);
+extern ssize_t comm_write(int fd, void *buf, int count);
+extern ssize_t comm_writev(int fd, struct iovec *vector, int count);
+extern int comm_can_writev(int fd);
 extern int comm_pipe(int *fd, const char *desc);
 
 /* These must be defined in the network IO loop code of your choice */
@@ -212,6 +219,13 @@ extern int read_message(time_t, unsigned char);
 extern int comm_select(unsigned long);
 extern int disable_sock_options(int);
 extern int setup_sigio_fd(int fd);
+
+const char *inetntoa(const char *in_addr);
+const char *inetntop(int af, const void *src, char *dst, unsigned int size);
+int inetpton(int af, const char *src, void *dst);
+const char *inetntop_sock(struct sockaddr *src, char *dst, unsigned int size);
+int inetpton_sock(const char *src, struct sockaddr *dst);
+
 #ifdef IPV6
 extern void mangle_mapped_sockaddr(struct sockaddr *in);
 #else
