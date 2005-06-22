@@ -1,3 +1,15 @@
+androsyn    2005/06/22 01:01:09 UTC	(20050622_4)
+
+  Modified files:
+    libircd              ports.c 
+  Log:
+  this should compile as well i think
+  
+  Revision  Changes    Path
+  1.6       +2 -13     ircd-ratbox/libircd/ports.c
+
+
+
 androsyn    2005/06/22 00:56:52 UTC	(20050622_3)
 
   Modified files:
