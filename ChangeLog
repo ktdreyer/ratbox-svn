@@ -1,3 +1,27 @@
+androsyn    2005/06/23 01:18:56 UTC	(20050623_0)
+
+  Modified files:
+    libircd              commio.c commio.h ircd_lib.c ircd_lib.h 
+    src                  dns.c ircd.c packet.c s_auth.c 
+    src/ident            ident.c 
+    src/resolver         resolver.c 
+  Log:
+  Various library related cleanups.
+  
+  Revision  Changes    Path
+  1.45      +14 -2     ircd-ratbox/libircd/commio.c
+  1.30      +1 -0      ircd-ratbox/libircd/commio.h
+  7.2       +10 -2     ircd-ratbox/libircd/ircd_lib.c
+  7.2       +1 -1      ircd-ratbox/libircd/ircd_lib.h
+  7.15      +1 -1      ircd-ratbox/src/dns.c
+  1.17      +2 -5      ircd-ratbox/src/ident/ident.c
+  7.389     +21 -8     ircd-ratbox/src/ircd.c
+  7.149     +4 -4      ircd-ratbox/src/packet.c
+  1.7       +3 -13     ircd-ratbox/src/resolver/resolver.c
+  7.223     +1 -1      ircd-ratbox/src/s_auth.c
+
+
+
 androsyn    2005/06/22 06:37:11 UTC	(20050622_5)
 
   Modified files:
