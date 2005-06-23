@@ -443,6 +443,26 @@ setup_corefile(void)
 #endif
 }
 
+static void
+ilogcb(const char *buf)
+{
+	ilog(L_MAIN, "%s", buf);
+}
+
+static void
+restartcb(const char *buf)
+{
+	restart(buf);
+}
+
+static void
+diecb(const char *buf)
+{
+	if(buf != NULL)
+		ilog(L_MAIN, "%s", buf);
+	outofmemory();	
+}
+
 int
 main(int argc, char *argv[])
 {
@@ -543,20 +563,13 @@ main(int argc, char *argv[])
 			print_startup(getpid());
 	}
 
-	init_netio();		/* This needs to be setup early ! -- adrian */
-
-	/* Init the event subsystem */
-	eventInit();
 	init_sys();
-
+	ircd_lib(ilogcb, restartcb, diecb);
 	init_main_logfile();
-	initBlockHeap();
-	init_dlink_nodes();
 	init_patricia();
 	newconf_init();
 	init_s_conf();
 	init_s_newconf();
-	linebuf_init();		/* set up some linebuf stuff to control paging */
 	init_hash();
 	clear_scache_hash_table();	/* server cache name table */
 	init_host_hash();

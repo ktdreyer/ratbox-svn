@@ -780,7 +780,18 @@ comm_can_writev(int fd)
 ssize_t
 comm_read(int fd, void *buf, int count)
 {
-	return(read(fd, buf, count));
+	fde_t *F = &fd_table[fd];
+	if(F == NULL)
+		return 0;
+
+	switch(F->type)
+	{
+		case FD_SOCKET:
+			return recv(fd, buf, count, 0);
+		case FD_PIPE:
+		default:
+			return read(fd, buf, count);
+	}
 }
 
 ssize_t
@@ -791,7 +802,8 @@ comm_write(int fd, void *buf, int count)
 		return 0;	
 	switch(F->type)
 	{
-#ifdef USE_SSL
+#if 0
+	/* i'll finish this some day */
 		case FD_SSL:
 		{
 			r = SSL_write(F->ssl, buf, count);

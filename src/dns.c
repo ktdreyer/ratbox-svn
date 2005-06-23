@@ -283,7 +283,7 @@ read_dns(int fd, void *data)
 {
         int length;
 
-        while((length = read(dns_ifd, dnsBuf, sizeof(dnsBuf))) > 0)
+        while((length = comm_read(dns_ifd, dnsBuf, sizeof(dnsBuf))) > 0)
         {
                 linebuf_parse(&dns_recvq, dnsBuf, length, 0);
                 parse_dns_reply();

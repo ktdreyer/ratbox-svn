@@ -29,12 +29,6 @@
 
 #include "setup.h"     
 #include "ircd_lib.h"
-#include "memory.h"    
-#include "tools.h"     
-#include "balloc.h"    
-#include "linebuf.h"   
-#include "irc_string.h"
-#include "event.h"
 #include "adns.h"
 
 
@@ -56,10 +50,6 @@ int ofd = -1;
 #define FWDHOST 4
 
 #define EmptyString(x) (!(x) || (*(x) == '\0'))
-
-int comm_can_writev(int fd);
-int comm_write(int fd, void *buf, int len);
-int comm_writev(int fd, struct iovec *vec, int count);
 
 
 static char readBuf[READBUF_SIZE];
@@ -560,9 +550,9 @@ int main(int argc, char **argv)
                 exit(1);
         ifd = atoi(tifd);
         ofd = atoi(tofd);
-        init_dlink_nodes();
-        initBlockHeap();
-        linebuf_init();
+
+        ircd_lib(NULL, NULL, NULL); /* XXX fix me */
+
         linebuf_newbuf(&sendq);
         linebuf_newbuf(&recvq);
 

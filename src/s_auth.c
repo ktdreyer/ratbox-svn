@@ -560,7 +560,7 @@ read_auth_reply(int fd, void *data)
 {
 	int length;
 
-	while((length = read(auth_ifd, authBuf, sizeof(authBuf))) > 0)
+	while((length = comm_read(auth_ifd, authBuf, sizeof(authBuf))) > 0)
 	{
 		linebuf_parse(&auth_recvq, authBuf, length, 0);
 		parse_auth_reply();

@@ -20,6 +20,8 @@ void
 lib_ilog(const char *format, ...)
 {
 	va_list args;
+	if(ircd_log == NULL)
+		return;
 	va_start(args, format);
 	ircvsnprintf(errbuf, sizeof(errbuf), format,  args);
 	va_end(args);
@@ -30,20 +32,24 @@ void
 lib_die(const char *format, ...)
 {
 	va_list args;
+	if(ircd_die == NULL)
+		return;
 	va_start(args, format);
 	ircvsnprintf(errbuf, sizeof(errbuf), format,  args);
 	va_end(args);
-	ircd_restart(errbuf);
+	ircd_die(errbuf);
 }
 
 void
 lib_restart(const char *format, ...)
 {
 	va_list args;
+	if(ircd_restart == NULL)
+		return;
 	va_start(args, format);
 	ircvsnprintf(errbuf, sizeof(errbuf), format,  args);
 	va_end(args);
-	ircd_die(errbuf);
+	ircd_restart(errbuf);
 }
 
 
@@ -82,5 +88,7 @@ ircd_lib(log_cb *ilog, restart_cb *irestart, die_cb *idie)
 	init_netio();
 	eventInit();
 	initBlockHeap();
+	init_dlink_nodes();
+	linebuf_init();
 }
 

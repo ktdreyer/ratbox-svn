@@ -379,17 +379,14 @@ int main(int argc, char **argv)
 	char *tifd;
 	char *tofd;
 	time_t delay;
-	fdlist_init();
-	init_netio();	
 	tifd = getenv("IFD");
 	tofd = getenv("OFD");
 	if(tifd == NULL || tofd == NULL)
 		exit(1);
 	irc_ifd = atoi(tifd);
 	irc_ofd = atoi(tofd);
-	init_dlink_nodes();
-	initBlockHeap();
-	linebuf_init();	
+
+	ircd_lib(NULL, NULL, NULL); /* XXX fix me */
 	linebuf_newbuf(&sendq);
 	linebuf_newbuf(&recvq);
 	authheap = BlockHeapCreate(sizeof(struct auth_request), 2048);

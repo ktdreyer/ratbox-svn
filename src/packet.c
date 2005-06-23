@@ -217,7 +217,7 @@ read_ctrl_packet(int fd, void *data)
 		reply->readdata = 0;
 		reply->data = NULL;
 
-		length = read(fd, tmp, 1);
+		length = comm_read(fd, tmp, 1);
 
 		if(length <= 0)
 		{
@@ -243,7 +243,7 @@ read_ctrl_packet(int fd, void *data)
 	if((replydef->flags & SLINKRPL_FLAG_DATA) && (reply->gotdatalen < 2))
 	{
 		/* we need a datalen u16 which we don't have yet... */
-		length = read(fd, len, (2 - reply->gotdatalen));
+		length = comm_read(fd, len, (2 - reply->gotdatalen));
 		if(length <= 0)
 		{
 			if((length == -1) && ignoreErrno(errno))
@@ -273,7 +273,7 @@ read_ctrl_packet(int fd, void *data)
 
 	if(reply->readdata < reply->datalen)	/* try to get any remaining data */
 	{
-		length = read(fd, (reply->data + reply->readdata),
+		length = comm_read(fd, (reply->data + reply->readdata),
 			      (reply->datalen - reply->readdata));
 		if(length <= 0)
 		{
@@ -339,7 +339,7 @@ read_packet(int fd, void *data)
 		 * I personally think it makes the code too hairy to make sane.
 		 *     -- adrian
 		 */
-		length = read(client_p->localClient->fd, readBuf, READBUF_SIZE);
+		length = comm_read(client_p->localClient->fd, readBuf, READBUF_SIZE);
 
 		if(length < 0)
 		{
