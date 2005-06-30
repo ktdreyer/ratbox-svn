@@ -1,3 +1,18 @@
+leeh        2005/06/30 21:23:57 UTC	(20050630_0)
+
+  Modified files:
+    .                    RELEASE_NOTES 
+    include              config.h 
+  Log:
+  - update RELEASE_NOTES
+  - revved patchlevel to 1.0
+  
+  Revision  Changes    Path
+  1.5       +4 -1      rserv/RELEASE_NOTES
+  1.30      +1 -1      rserv/include/config.h
+
+
+
 leeh        2005/06/20 19:17:25 UTC	(20050620_0)
 
   Modified files:
