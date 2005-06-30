@@ -1,5 +1,8 @@
 
-This is the current beta version of ratbox-services.
+This is the current version of ratbox-services.
+
+-- ratbox-services-1.0
+- fix build when nickserv is disabled
 
 -- ratbox-services-1.0rc1
 - added new ban service
