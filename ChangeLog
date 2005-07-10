@@ -1,3 +1,12 @@
+leeh        2005/07/10 17:17:54 UTC	(20050710_0-20561)
+  Log:
+  - fix an sql statement in operserv::osjoin
+  
+
+  Modified:
+	rserv/trunk/src/s_operserv.c (File Modified) 
+
+
 androsyn    2005/07/07 20:45:28 UTC	(20050707_1-20540)
   Log:
   test commit
