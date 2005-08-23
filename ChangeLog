@@ -1,3 +1,14 @@
+leeh        2005/08/23 20:41:19 UTC	(20050823_1-20680)
+  Log:
+  - update RELNOTES
+  - revved patchlevel to 1.0.1
+  
+
+  Modified:
+	rserv/trunk/RELEASE_NOTES (File Modified) 
+	rserv/trunk/include/config.h (File Modified) 
+
+
 leeh        2005/08/23 20:31:30 UTC	(20050823_0-20678)
   Log:
   - swap CVS-Access for SVN-Access
