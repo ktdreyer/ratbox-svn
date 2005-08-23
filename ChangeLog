@@ -1,3 +1,13 @@
+leeh        2005/08/23 20:31:30 UTC	(20050823_0-20678)
+  Log:
+  - swap CVS-Access for SVN-Access
+  
+
+  Modified:
+	rserv/trunk/CVS-Access (File Deleted) 
+	rserv/trunk/SVN-Access (File Added) 
+
+
 leeh        2005/07/10 17:17:54 UTC	(20050710_0-20561)
   Log:
   - fix an sql statement in operserv::osjoin
