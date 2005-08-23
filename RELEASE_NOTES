@@ -1,6 +1,9 @@
 
 This is the current version of ratbox-services.
 
+-- ratbox-services-1.0.1
+- fix sql statement on operserv::osjoin which caused a core
+
 -- ratbox-services-1.0
 - fix build when nickserv is disabled
 
