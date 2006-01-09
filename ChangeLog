@@ -1,3 +1,12 @@
+jilles      2006/01/09 12:51:12 UTC	(20060109_0-21606)
+  Log:
+  Describe necessary ircd configuration.
+  
+
+  Modified:
+	rserv/trunk/INSTALL (File Modified) 
+
+
 leeh        2005/08/23 20:41:19 UTC	(20050823_1-20680)
   Log:
   - update RELNOTES
