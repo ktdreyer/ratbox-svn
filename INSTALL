@@ -85,9 +85,20 @@ ratbox-services installation guide
    If you are converting from hybserv, see the website for further
    instructions: http://services.ircd-ratbox.org/
 
-10. Run sbin/ratbox-services
+9. On the ircd ratbox-services will connect to, add a connect{} block (or
+   C:/N:/H: lines for older ircds). This should have services's server
+   name (name in serverinfo{} in ratbox-services.conf) and no autoconnect.
+   send_password and accept_password should be equal and flags=encrypted
+   should not be used.
 
-11. Investigate PREFIX/bin/ircd-shortcut.pl if you wish to install command
+10. On all ircds on the network, some configuration may be necessary.
+    If you use the ratbox-services compatibility code in ircd-ratbox,
+    all servers need service { name = "<ratbox-services's server name>"; };
+    If you want to use BanServ, all servers need a shared{} block.
+
+11. Run sbin/ratbox-services
+
+12. Investigate PREFIX/bin/ircd-shortcut.pl if you wish to install command
     shortcuts for your services in your ircd, eg /chanserv etc.
 
 
