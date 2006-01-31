@@ -375,7 +375,7 @@ o_banserv_kline(struct client *client_p, struct lconn *conn_p, const char *parv[
 
 		if(client_p)
 		{
-			if(!(client_p->user->oper->flags & CONF_OPER_BAN_PERM))
+			if(!(client_p->user->oper->sflags & CONF_OPER_BAN_PERM))
 				hit++;
 		}
 		else if(!conn_p->sprivs & CONF_OPER_BAN_PERM)
@@ -463,7 +463,7 @@ o_banserv_xline(struct client *client_p, struct lconn *conn_p, const char *parv[
 
 		if(client_p)
 		{
-			if(!(client_p->user->oper->flags & CONF_OPER_BAN_PERM))
+			if(!(client_p->user->oper->sflags & CONF_OPER_BAN_PERM))
 				hit++;
 		}
 		else if(!conn_p->sprivs & CONF_OPER_BAN_PERM)
@@ -542,7 +542,7 @@ o_banserv_resv(struct client *client_p, struct lconn *conn_p, const char *parv[]
 
 		if(client_p)
 		{
-			if(!(client_p->user->oper->flags & CONF_OPER_BAN_PERM))
+			if(!(client_p->user->oper->sflags & CONF_OPER_BAN_PERM))
 				hit++;
 		}
 		else if(!conn_p->sprivs & CONF_OPER_BAN_PERM)
@@ -613,7 +613,7 @@ o_banserv_unkline(struct client *client_p, struct lconn *conn_p, const char *par
 
 		if(client_p)
 		{
-			if(!(client_p->user->oper->flags & CONF_OPER_BAN_REMOVE))
+			if(!(client_p->user->oper->sflags & CONF_OPER_BAN_REMOVE))
 				hit++;
 		}
 		else if(!conn_p->sprivs & CONF_OPER_BAN_REMOVE)
@@ -668,7 +668,7 @@ o_banserv_unxline(struct client *client_p, struct lconn *conn_p, const char *par
 
 		if(client_p)
 		{
-			if(!(client_p->user->oper->flags & CONF_OPER_BAN_REMOVE))
+			if(!(client_p->user->oper->sflags & CONF_OPER_BAN_REMOVE))
 				hit++;
 		}
 		else if(!conn_p->sprivs & CONF_OPER_BAN_REMOVE)
@@ -716,7 +716,7 @@ o_banserv_unresv(struct client *client_p, struct lconn *conn_p, const char *parv
 
 		if(client_p)
 		{
-			if(!(client_p->user->oper->flags & CONF_OPER_BAN_REMOVE))
+			if(!(client_p->user->oper->sflags & CONF_OPER_BAN_REMOVE))
 				hit++;
 		}
 		else if(!conn_p->sprivs & CONF_OPER_BAN_REMOVE)
@@ -758,7 +758,7 @@ o_banserv_sync(struct client *client_p, struct lconn *conn_p, const char *parv[]
 
 		if(client_p)
 		{
-			if(!(client_p->user->oper->flags & CONF_OPER_BAN_SYNC))
+			if(!(client_p->user->oper->sflags & CONF_OPER_BAN_SYNC))
 				hit++;
 		}
 		else if(!conn_p->sprivs & CONF_OPER_BAN_SYNC)
