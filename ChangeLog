@@ -1,3 +1,13 @@
+leeh        2006/01/31 20:02:06 UTC	(20060131_0-21814)
+  Log:
+  - banserv was testing ->flags instead of ->sflags, which broke permissions
+    on permanent bans and removing stuff.
+  
+
+  Modified:
+	rserv/trunk/src/s_banserv.c (File Modified) 
+
+
 jilles      2006/01/09 12:51:12 UTC	(20060109_0-21606)
   Log:
   Describe necessary ircd configuration.
