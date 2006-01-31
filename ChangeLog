@@ -1,3 +1,12 @@
+leeh        2006/01/31 21:54:33 UTC	(20060131_1-21818)
+  Log:
+  - fix suspensions on usernames not disallowing a LOGIN on them
+  
+
+  Modified:
+	rserv/trunk/src/s_userserv.c (File Modified) 
+
+
 leeh        2006/01/31 20:02:06 UTC	(20060131_0-21814)
   Log:
   - banserv was testing ->flags instead of ->sflags, which broke permissions
