@@ -842,6 +842,13 @@ s_user_login(struct client *client_p, struct lconn *conn_p, const char *parv[], 
 	if((reg_p = find_user_reg(client_p, parv[0])) == NULL)
 		return 1;
 
+	if(reg_p->flags & US_FLAGS_SUSPENDED)
+	{
+		service_error(userserv_p, client_p,
+			"Login failed, username has been suspended");
+		return 1;
+	}
+
 	if(config_file.umax_logins && 
 	   dlink_list_length(&reg_p->users) >= config_file.umax_logins)
 	{
