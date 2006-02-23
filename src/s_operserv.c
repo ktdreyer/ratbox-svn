@@ -33,6 +33,7 @@
 #include "stdinc.h"
 
 #ifdef ENABLE_OPERSERV
+#include "rsdb.h"
 #include "client.h"
 #include "service.h"
 #include "channel.h"

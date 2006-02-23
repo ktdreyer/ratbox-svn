@@ -663,7 +663,10 @@ handle_service(struct client *service_p, struct client *client_p,
 				return;
 			}
 			else
+			{
 				client_p->user->user_reg->last_time = CURRENT_TIME;
+				client_p->user->user_reg->flags |= US_FLAGS_NEEDUPDATE;
+			}
 		}
 #endif
 

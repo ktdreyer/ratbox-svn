@@ -32,6 +32,7 @@
  */
 #include "stdinc.h"
 
+#include "rsdb.h"
 #include "service.h"
 #include "client.h"
 #include "channel.h"
