@@ -445,7 +445,7 @@ verify_member_reg_name(struct client *client_p, struct channel **chptr,
 }
 
 static int
-channel_db_callback(void *db, int argc, char **argv, char **colnames)
+channel_db_callback(int argc, char **argv, char **colnames)
 {
 	struct chan_reg *reg_p;
 	struct chmode mode;
@@ -508,7 +508,7 @@ channel_db_callback(void *db, int argc, char **argv, char **colnames)
 }
 
 static int
-member_db_callback(void *db, int argc, char **argv, char **colnames)
+member_db_callback(int argc, char **argv, char **colnames)
 {
 	struct chan_reg *chreg_p;
 	struct user_reg *ureg_p;
@@ -575,7 +575,7 @@ find_ban_reg(struct chan_reg *chreg_p, const char *mask)
 }
 
 static int
-ban_db_callback(void *db, int argc, char **argv, char **colnames)
+ban_db_callback(int argc, char **argv, char **colnames)
 {
 	struct chan_reg *chreg_p;
 	struct ban_reg *banreg_p;
@@ -597,14 +597,14 @@ ban_db_callback(void *db, int argc, char **argv, char **colnames)
 static void
 load_channel_db(void)
 {
-	loc_sqlite_exec(channel_db_callback, 
+	rsdb_exec(channel_db_callback, 
 			"SELECT chname, topic, url, createmodes, "
 			"enforcemodes, tsinfo, reg_time, last_time, "
 			"flags, suspender FROM channels");
-	loc_sqlite_exec(member_db_callback, 
+	rsdb_exec(member_db_callback, 
 			"SELECT chname, username, lastmod, level, "
 			"flags, suspend FROM members");
-	loc_sqlite_exec(ban_db_callback, 
+	rsdb_exec(ban_db_callback, 
 			"SELECT chname, mask, reason, username, "
 			"level, hold FROM bans");
 }

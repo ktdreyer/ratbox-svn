@@ -77,21 +77,21 @@ static struct service_handler operbot_service = {
 	operbot_command, sizeof(operbot_command), operbot_ucommand, NULL
 };
 
-static int operbot_db_callback(void *db, int, char **, char **);
+static int operbot_db_callback(int, char **, char **);
 
 void
 init_s_operbot(void)
 {
 	operbot_p = add_service(&operbot_service);
 
-	loc_sqlite_exec(operbot_db_callback,
+	rsdb_exec(operbot_db_callback,
 			"SELECT chname, tsinfo FROM operbot");
 
 	hook_add(h_operbot_sjoin_lowerts, HOOK_SJOIN_LOWERTS);
 }
 
 static int
-operbot_db_callback(void *db, int argc, char **argv, char **colnames)
+operbot_db_callback(int argc, char **argv, char **colnames)
 {
 	join_service(operbot_p, argv[0], atol(argv[1]), NULL);
 	return 0;

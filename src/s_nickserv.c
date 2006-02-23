@@ -87,7 +87,7 @@ static struct service_handler nick_service = {
 	nickserv_command, sizeof(nickserv_command), nickserv_ucommand, NULL
 };
 
-static int nick_db_callback(void *, int, char **, char **);
+static int nick_db_callback(int, char **, char **);
 
 void
 init_s_nickserv(void)
@@ -96,7 +96,7 @@ init_s_nickserv(void)
 
 	nick_reg_heap = BlockHeapCreate(sizeof(struct nick_reg), HEAP_NICK_REG);
 
-	loc_sqlite_exec(nick_db_callback, 
+	rsdb_exec(nick_db_callback, 
 			"SELECT nickname, username, reg_time, last_time, flags FROM nicks");
 
 	hook_add(h_nick_warn_client, HOOK_NEW_CLIENT);
@@ -146,7 +146,7 @@ find_nick_reg(struct client *client_p, const char *name)
 }
 
 static int
-nick_db_callback(void *db, int argc, char **argv, char **colnames)
+nick_db_callback(int argc, char **argv, char **colnames)
 {
 	struct nick_reg *nreg_p;
 	struct user_reg *ureg_p;

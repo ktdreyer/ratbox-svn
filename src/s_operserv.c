@@ -77,21 +77,21 @@ static struct service_handler operserv_service = {
 	60, 80, operserv_command, sizeof(operserv_command), operserv_ucommand, NULL
 };
 
-static int operserv_db_callback(void *db, int, char **, char **);
+static int operserv_db_callback(int, char **, char **);
 
 void
 init_s_operserv(void)
 {
 	operserv_p = add_service(&operserv_service);
 
-	loc_sqlite_exec(operserv_db_callback, 
+	rsdb_exec(operserv_db_callback, 
 			"SELECT chname, tsinfo FROM operserv");
 
 	hook_add(h_operserv_sjoin_lowerts, HOOK_SJOIN_LOWERTS);
 }
 
 static int
-operserv_db_callback(void *db, int argc, char **argv, char **colnames)
+operserv_db_callback(int argc, char **argv, char **colnames)
 {
 	join_service(operserv_p, argv[0], atol(argv[1]), NULL);
 	return 0;

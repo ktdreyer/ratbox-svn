@@ -92,7 +92,7 @@ static struct service_handler jupe_service = {
 	jupeserv_command, sizeof(jupeserv_command), jupeserv_ucommand, NULL
 };
 
-static int jupe_db_callback(void *db, int argc, char **argv, char **colnames);
+static int jupe_db_callback(int argc, char **argv, char **colnames);
 static int h_jupeserv_squit(void *name, void *unused);
 static int h_jupeserv_finburst(void *unused, void *unused2);
 static void e_jupeserv_expire(void *unused);
@@ -106,7 +106,7 @@ init_s_jupeserv(void)
 	hook_add(h_jupeserv_finburst, HOOK_FINISHED_BURSTING);
 	eventAdd("e_jupeserv_expire", e_jupeserv_expire, NULL, 60);
 
-	loc_sqlite_exec(jupe_db_callback, "SELECT servername, reason FROM jupes");
+	rsdb_exec(jupe_db_callback, "SELECT servername, reason FROM jupes");
 }
 
 static struct server_jupe *
@@ -187,7 +187,7 @@ e_jupeserv_expire(void *unused)
 }	
 
 static int
-jupe_db_callback(void *db, int argc, char **argv, char **colnames)
+jupe_db_callback(int argc, char **argv, char **colnames)
 {
 	struct server_jupe *jupe_p;
 
