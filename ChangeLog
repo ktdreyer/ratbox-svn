@@ -1,3 +1,25 @@
+leeh        2006/02/23 20:32:56 UTC	(20060223_0-21897)
+  Log:
+  - move all the database headers into rsdb.h
+  - move all the sqlite stuff into rsdb_sqlite.c
+  - add in a generic rsdb_init(), rsdb_shutdown()
+  - add in a generic rsdb_exec() with callback support
+  
+
+  Modified:
+	rserv/trunk/include/rserv.h (File Modified) 
+	rserv/trunk/src/Makefile.in (File Modified) 
+	rserv/trunk/src/rserv.c (File Modified) 
+	rserv/trunk/src/s_banserv.c (File Modified) 
+	rserv/trunk/src/s_chanserv.c (File Modified) 
+	rserv/trunk/src/s_jupeserv.c (File Modified) 
+	rserv/trunk/src/s_nickserv.c (File Modified) 
+	rserv/trunk/src/s_operbot.c (File Modified) 
+	rserv/trunk/src/s_operserv.c (File Modified) 
+	rserv/trunk/src/s_userserv.c (File Modified) 
+	rserv/trunk/src/service.c (File Modified) 
+
+
 leeh        2006/01/31 21:54:33 UTC	(20060131_1-21818)
   Log:
   - fix suspensions on usernames not disallowing a LOGIN on them
