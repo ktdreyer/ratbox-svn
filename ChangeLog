@@ -1,3 +1,18 @@
+leeh        2006/02/23 22:24:05 UTC	(20060223_1-21899)
+  Log:
+  - move some simple loc_sqlite_exec() calls over to rsdb_exec()
+  
+
+  Modified:
+	rserv/trunk/src/s_banserv.c (File Modified) 
+	rserv/trunk/src/s_chanserv.c (File Modified) 
+	rserv/trunk/src/s_jupeserv.c (File Modified) 
+	rserv/trunk/src/s_nickserv.c (File Modified) 
+	rserv/trunk/src/s_operbot.c (File Modified) 
+	rserv/trunk/src/s_operserv.c (File Modified) 
+	rserv/trunk/src/s_userserv.c (File Modified) 
+
+
 leeh        2006/02/23 20:32:56 UTC	(20060223_0-21897)
   Log:
   - move all the database headers into rsdb.h
