@@ -139,7 +139,7 @@ free_user_reg(struct user_reg *ureg_p)
 
 	dlink_delete(&ureg_p->node, &user_reg_table[hashv]);
 
-	loc_sqlite_exec(NULL, "DELETE FROM members WHERE username = %Q",
+	rsdb_exec(NULL, "DELETE FROM members WHERE username = %Q",
 			ureg_p->name);
 
 	DLINK_FOREACH_SAFE(ptr, next_ptr, ureg_p->channels.head)
@@ -154,7 +154,7 @@ free_user_reg(struct user_reg *ureg_p)
 	}
 #endif
 			
-	loc_sqlite_exec(NULL, "DELETE FROM users WHERE username = %Q",
+	rsdb_exec(NULL, "DELETE FROM users WHERE username = %Q",
 			ureg_p->name);
 
 	my_free(ureg_p->password);
@@ -376,7 +376,7 @@ o_user_userregister(struct client *client_p, struct lconn *conn_p, const char *p
 
 	add_user_reg(reg_p);
 
-	loc_sqlite_exec(NULL, "INSERT INTO users (username, password, email, reg_time, last_time, flags) "
+	rsdb_exec(NULL, "INSERT INTO users (username, password, email, reg_time, last_time, flags) "
 			"VALUES(%Q, %Q, %Q, %lu, %lu, %u)",
 			reg_p->name, reg_p->password, 
 			EmptyString(reg_p->email) ? "" : reg_p->email, 
@@ -438,7 +438,7 @@ o_user_usersuspend(struct client *client_p, struct lconn *conn_p, const char *pa
 	reg_p->flags |= US_FLAGS_SUSPENDED;
 	reg_p->suspender = my_strdup(OPER_NAME(client_p, conn_p));
 
-	loc_sqlite_exec(NULL, "UPDATE users SET flags=%d, suspender=%Q WHERE username=%Q",
+	rsdb_exec(NULL, "UPDATE users SET flags=%d, suspender=%Q WHERE username=%Q",
 			reg_p->flags, reg_p->suspender, reg_p->name);
 
 	service_send(userserv_p, client_p, conn_p,
@@ -472,7 +472,7 @@ o_user_userunsuspend(struct client *client_p, struct lconn *conn_p, const char *
 	my_free(reg_p->suspender);
 	reg_p->suspender = NULL;
 
-	loc_sqlite_exec(NULL, "UPDATE users SET flags=%d, suspender=NULL WHERE username=%Q",
+	rsdb_exec(NULL, "UPDATE users SET flags=%d, suspender=NULL WHERE username=%Q",
 			reg_p->flags, reg_p->name);
 
 	service_send(userserv_p, client_p, conn_p,
@@ -651,7 +651,7 @@ o_user_usersetpass(struct client *client_p, struct lconn *conn_p, const char *pa
 	my_free(ureg_p->password);
 	ureg_p->password = my_strdup(password);
 
-	loc_sqlite_exec(NULL, "UPDATE users SET password=%Q WHERE username=%Q", 
+	rsdb_exec(NULL, "UPDATE users SET password=%Q WHERE username=%Q", 
 			password, ureg_p->name);
 
 	service_send(userserv_p, client_p, conn_p,
@@ -811,7 +811,7 @@ s_user_register(struct client *client_p, struct lconn *conn_p, const char *parv[
 	client_p->user->user_reg = reg_p;
 	add_user_reg(reg_p);
 
-	loc_sqlite_exec(NULL, "INSERT INTO users (username, password, email, reg_time, last_time, flags) "
+	rsdb_exec(NULL, "INSERT INTO users (username, password, email, reg_time, last_time, flags) "
 			"VALUES(%Q, %Q, %Q, %lu, %lu, %u)",
 			reg_p->name, reg_p->password, 
 			EmptyString(reg_p->email) ? "" : reg_p->email, 
@@ -946,7 +946,7 @@ s_user_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 		my_free(ureg_p->password);
 		ureg_p->password = my_strdup(password);
 
-		loc_sqlite_exec(NULL, "UPDATE users SET password=%Q "
+		rsdb_exec(NULL, "UPDATE users SET password=%Q "
 				"WHERE username=%Q", password, ureg_p->name);
 
 		service_error(userserv_p, client_p,
@@ -983,7 +983,7 @@ s_user_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 		my_free(ureg_p->email);
 		ureg_p->email = my_strdup(arg);
 
-		loc_sqlite_exec(NULL, "UPDATE users SET email=%Q "
+		rsdb_exec(NULL, "UPDATE users SET email=%Q "
 				"WHERE username=%Q", arg, ureg_p->name);
 
 		service_error(userserv_p, client_p,
@@ -1012,7 +1012,7 @@ s_user_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 			ureg_p->name,
 			(ureg_p->flags & US_FLAGS_PRIVATE) ? "ON" : "OFF");
 
-		loc_sqlite_exec(NULL, "UPDATE users SET flags=%d "
+		rsdb_exec(NULL, "UPDATE users SET flags=%d "
 				"WHERE username=%Q",
 				ureg_p->flags, ureg_p->name);
 		return 1;

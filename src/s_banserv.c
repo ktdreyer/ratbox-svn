@@ -120,7 +120,7 @@ e_banserv_expire(void *unused)
 	/* these bans are temp, so they will expire automatically on 
 	 * servers
 	 */
-	loc_sqlite_exec(NULL, "DELETE FROM operbans WHERE hold <= %lu",
+	rsdb_exec(NULL, "DELETE FROM operbans WHERE hold <= %lu",
 			CURRENT_TIME);
 }
 
@@ -411,14 +411,14 @@ o_banserv_kline(struct client *client_p, struct lconn *conn_p, const char *parv[
 	}
 
 	if(res)
-		loc_sqlite_exec(NULL, "UPDATE operbans SET reason=%Q, "
+		rsdb_exec(NULL, "UPDATE operbans SET reason=%Q, "
 				"hold=%ld, oper=%Q, remove=0 WHERE "
 				"type='K' AND mask='%q'",
 				reason,
 				temptime ? CURRENT_TIME + temptime : 0,
 				OPER_NAME(client_p, conn_p), mask);
 	else
-		loc_sqlite_exec(NULL, "INSERT INTO operbans "
+		rsdb_exec(NULL, "INSERT INTO operbans "
 				"(type, mask, reason, hold, create_time, "
 				"oper, remove, flags) "
 				"VALUES('K', %Q, %Q, %lu, %lu, %Q, 0, 0)",
@@ -490,14 +490,14 @@ o_banserv_xline(struct client *client_p, struct lconn *conn_p, const char *parv[
 	}
 
 	if(res)
-		loc_sqlite_exec(NULL, "UPDATE operbans SET reason=%Q, "
+		rsdb_exec(NULL, "UPDATE operbans SET reason=%Q, "
 				"hold=%ld, oper=%Q, remove=0 WHERE "
 				"type='X' AND mask=%Q",
 				reason,
 				temptime ? CURRENT_TIME + temptime : 0,
 				OPER_NAME(client_p, conn_p), gecos);
 	else
-		loc_sqlite_exec(NULL, "INSERT INTO operbans "
+		rsdb_exec(NULL, "INSERT INTO operbans "
 				"(type, mask, reason, hold, create_time, "
 				"oper, remove, flags) "
 				"VALUES('X', %Q, %Q, %lu, %lu, %Q, 0, 0)",
@@ -569,14 +569,14 @@ o_banserv_resv(struct client *client_p, struct lconn *conn_p, const char *parv[]
 	}
 
 	if(res)
-		loc_sqlite_exec(NULL, "UPDATE operbans SET reason=%Q, "
+		rsdb_exec(NULL, "UPDATE operbans SET reason=%Q, "
 				"hold=%ld, oper=%Q, remove=0 WHERE "
 				"type='R' AND mask=%Q",
 				reason,
 				temptime ? CURRENT_TIME + temptime : 0,
 				OPER_NAME(client_p, conn_p), mask);
 	else
-		loc_sqlite_exec(NULL, "INSERT INTO operbans "
+		rsdb_exec(NULL, "INSERT INTO operbans "
 				"(type, mask, reason, hold, create_time, "
 				"oper, remove, flags) "
 				"VALUES('R', %Q, %Q, %lu, %lu, %Q, 0, 0)",
@@ -635,7 +635,7 @@ o_banserv_unkline(struct client *client_p, struct lconn *conn_p, const char *par
 		return 0;
 	}
 
-	loc_sqlite_exec(NULL, "UPDATE operbans SET remove=1, hold=%lu "
+	rsdb_exec(NULL, "UPDATE operbans SET remove=1, hold=%lu "
 			"WHERE mask=%Q AND type='K'",
 			CURRENT_TIME + config_file.bs_unban_time, parv[0]);
 
@@ -683,7 +683,7 @@ o_banserv_unxline(struct client *client_p, struct lconn *conn_p, const char *par
 		}
 	}
 
-	loc_sqlite_exec(NULL, "UPDATE operbans SET remove=1, hold=%lu "
+	rsdb_exec(NULL, "UPDATE operbans SET remove=1, hold=%lu "
 			"WHERE mask=%Q AND type='X'",
 			CURRENT_TIME + config_file.bs_unban_time, parv[0]);
 
@@ -731,7 +731,7 @@ o_banserv_unresv(struct client *client_p, struct lconn *conn_p, const char *parv
 		}
 	}
 
-	loc_sqlite_exec(NULL, "UPDATE operbans SET remove=1, hold=%lu "
+	rsdb_exec(NULL, "UPDATE operbans SET remove=1, hold=%lu "
 			"WHERE mask=%Q AND type='R'",
 			CURRENT_TIME + config_file.bs_unban_time, parv[0]);
 

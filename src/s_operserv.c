@@ -106,7 +106,7 @@ h_operserv_sjoin_lowerts(void *v_chptr, void *unused)
 		return 0;
 
 	/* Save the new TS for later -- jilles */
-	loc_sqlite_exec(NULL, "UPDATE operserv SET tsinfo = %lu "
+	rsdb_exec(NULL, "UPDATE operserv SET tsinfo = %lu "
 			"WHERE chname = %Q",
 			chptr->tsinfo, chptr->name);
 	return 0;
@@ -281,7 +281,7 @@ o_oper_osjoin(struct client *client_p, struct lconn *conn_p, const char *parv[],
 
 	tsinfo = chptr != NULL ? chptr->tsinfo : CURRENT_TIME;
 
-	loc_sqlite_exec(NULL, "INSERT INTO operserv (chname, tsinfo, oper) VALUES(%Q, %lu, %Q)",
+	rsdb_exec(NULL, "INSERT INTO operserv (chname, tsinfo, oper) VALUES(%Q, %lu, %Q)",
 			parv[0], tsinfo, OPER_NAME(client_p, conn_p));
 
 	join_service(operserv_p, parv[0], tsinfo, NULL);
@@ -299,7 +299,7 @@ o_oper_ospart(struct client *client_p, struct lconn *conn_p, const char *parv[],
 		slog(operserv_p, 1, "%s - OSPART %s", 
 			OPER_NAME(client_p, conn_p), parv[0]);
 
-		loc_sqlite_exec(NULL, "DELETE FROM operserv WHERE "
+		rsdb_exec(NULL, "DELETE FROM operserv WHERE "
 				"chname = %Q", parv[0]);
 		service_send(operserv_p, client_p, conn_p,
 				"%s removed from %s",
