@@ -1,3 +1,15 @@
+leeh        2006/02/24 11:37:42 UTC	(20060224_0-21903)
+  Log:
+  - add rsdb_transaction(), to deal with transactions
+  - move remaining loc_sqlite_exec() over to rsdb_exec()
+  - remove loc_sqlite_exec()
+  
+
+  Modified:
+	rserv/trunk/src/s_chanserv.c (File Modified) 
+	rserv/trunk/src/s_userserv.c (File Modified) 
+
+
 leeh        2006/02/23 22:55:38 UTC	(20060223_2-21901)
   Log:
   - move the callback functions over to rsdb_exec()
