@@ -309,7 +309,7 @@ e_user_expire(void *unused)
 	int i;
 
 	/* Start a transaction, we're going to make a lot of changes */
-	loc_sqlite_exec(NULL, "BEGIN TRANSACTION");
+	rsdb_transaction(RSDB_TRANS_START);
 
 	HASH_WALK_SAFE(i, MAX_NAME_HASH, ptr, next_ptr, user_reg_table)
 	{
@@ -325,7 +325,7 @@ e_user_expire(void *unused)
 		if(ureg_p->flags & US_FLAGS_NEEDUPDATE)
 		{
 			ureg_p->flags &= ~US_FLAGS_NEEDUPDATE;
-			loc_sqlite_exec(NULL, "UPDATE users SET last_time=%lu"
+			rsdb_exec(NULL, "UPDATE users SET last_time=%lu"
 					" WHERE username=%Q",
 			ureg_p->last_time, ureg_p->name);
 		}
@@ -336,7 +336,8 @@ e_user_expire(void *unused)
 		free_user_reg(ureg_p);
 	}
 	HASH_WALK_END
-	loc_sqlite_exec(NULL, "COMMIT TRANSACTION");
+
+	rsdb_transaction(RSDB_TRANS_END);
 }
 
 static int
