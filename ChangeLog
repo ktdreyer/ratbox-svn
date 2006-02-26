@@ -1,3 +1,14 @@
+leeh        2006/02/26 21:16:46 UTC	(20060226_3-21913)
+  Log:
+  - add missing #include "rsdb.h" to tools.c
+  - make sqlite wrapper use rs_vsnprintf()
+  
+
+  Modified:
+	rserv/trunk/src/rsdb_sqlite.c (File Modified) 
+	rserv/trunk/src/tools.c (File Modified) 
+
+
 leeh        2006/02/26 21:13:24 UTC	(20060226_2-21911)
   Log:
   - add in rs_snprintf() and rs_vsnprintf(), custom snprintfs that handle %Q
