@@ -133,7 +133,7 @@ rsdb_step(int *ncol, const char ***coldata, const char ***colnames)
 	if((i = sqlite_step(rsdb_step_vm, ncol, coldata, colnames)))
 	{
 		if(i == SQLITE_DONE)
-			loc_sqlite_finalize(rsdb_step_vm);
+			rsdb_step_end();
 		else if(i == SQLITE_ROW)
 			return 1;
 		else
@@ -160,65 +160,4 @@ rsdb_step_end(void)
 	}
 }
 	
-void *
-loc_sqlite_compile(const char *format, ...)
-{
-	char *buf;
-	sqlite_vm *sql_vm;
-	va_list args;
-	const char *tail;
-	char *errmsg;
-	int i;
-	
-	va_start(args, format);
-	buf = sqlite_vmprintf(format, args);
-	va_end(args);
-
-	if((i = sqlite_compile(rserv_db, buf, &tail, &sql_vm, &errmsg)))
-	{
-		mlog("fatal eror: problem with compiling sql: %s", errmsg);
-		die("problem with compiling sql statement");
-	}
-
-	sqlite_freemem(buf);
-	return((void *) sql_vm);
-}
-
-int
-loc_sqlite_step(void *sql_vm, int *ncol, const char ***coldata, 
-		const char ***colnames)
-{
-	int i;
-
-	if((i = sqlite_step((sqlite_vm *) sql_vm, ncol, coldata, colnames)))
-	{
-		if(i == SQLITE_DONE)
-			loc_sqlite_finalize(sql_vm);
-		else if(i == SQLITE_ROW)
-			return 1;
-		else
-		{
-			mlog("fatal error: problem with sql step: %d", i);
-			die("problem with sql step");
-		}
-	}
-
-	/* shouldnt hit */
-	return 0;
-}
-
-void
-loc_sqlite_finalize(void *sql_vm)
-{
-	char *errmsg;
-	int i;
-
-	if((i = sqlite_finalize((sqlite_vm *) sql_vm, &errmsg)))
-	{
-		mlog("fatal error: problem with finalizing sql: %s",
-			errmsg);
-		die("problem with finalising sql statement");
-	}
-}
-		
 

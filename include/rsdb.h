@@ -21,10 +21,4 @@ void rsdb_step_init(const char *format, ...);
 int rsdb_step(int *, const char ***, const char ***);
 void rsdb_step_end(void);
 
-/* XXX REMOVE */
-void *loc_sqlite_compile(const char *format, ...);
-int loc_sqlite_step(void *, int *, const char ***, const char ***);
-void loc_sqlite_finalize(void *);
-
-
 #endif

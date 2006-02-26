@@ -175,24 +175,22 @@ split_ban(const char *mask, char **user, char **host)
 static int
 find_ban(const char *mask, char type)
 {
-	void *sql_vm;
 	const char **coldata;
 	const char **colnames;
 	int ncol;
 	
-	sql_vm = loc_sqlite_compile("SELECT remove FROM operbans WHERE "
-					"type='%c' AND mask=%Q",
-					type, mask);
+	rsdb_step_init("SELECT remove FROM operbans WHERE type='%c' AND mask=%Q",
+			type, mask);
 
-	if(loc_sqlite_step(sql_vm, &ncol, &coldata, &colnames))
+	if(rsdb_step(&ncol, &coldata, &colnames))
 	{
 		if(atoi(coldata[0]) == 1)
 		{
-			loc_sqlite_finalize(sql_vm);
+			rsdb_step_end();
 			return -1;
 		}
 
-		loc_sqlite_finalize(sql_vm);
+		rsdb_step_end();
 		return 1;
 	}
 
@@ -210,26 +208,24 @@ static const char *
 find_ban_remove(const char *mask, char type)
 {
 	static char buf[BUFSIZE];
-	void *sql_vm;
 	const char **coldata;
 	const char **colnames;
 	int ncol;
 	
-	sql_vm = loc_sqlite_compile("SELECT remove, oper FROM operbans WHERE "
-					"type='%c' AND mask=%Q",
-					type, mask);
+	rsdb_step_init("SELECT remove, oper FROM operbans WHERE type='%c' AND mask=%Q",
+			type, mask);
 
-	if(loc_sqlite_step(sql_vm, &ncol, &coldata, &colnames))
+	if(rsdb_step(&ncol, &coldata, &colnames))
 	{
 		/* check this ban isnt already marked as removed */
 		if(atoi(coldata[0]) == 1)
 		{
-			loc_sqlite_finalize(sql_vm);
+			rsdb_step_end();
 			return NULL;
 		}
 
 		strlcpy(buf, coldata[1], sizeof(buf));
-		loc_sqlite_finalize(sql_vm);
+		rsdb_step_end();
 		return buf;
 	}
 
@@ -297,22 +293,21 @@ push_unban(const char *target, char type, const char *mask)
 static void
 sync_bans(const char *target, char banletter)
 {
-	void *sql_vm;
 	const char **coldata;
 	const char **colnames;
 	int ncol;
 
 	/* first is temporary bans */
 	if(banletter)
-		sql_vm = loc_sqlite_compile("SELECT type, mask, reason, hold FROM operbans "
-					"WHERE hold > %lu AND remove=0 AND type='%c'",
-					CURRENT_TIME, banletter);
+		rsdb_step_init("SELECT type, mask, reason, hold FROM operbans "
+				"WHERE hold > %lu AND remove=0 AND type='%c'",
+				CURRENT_TIME, banletter);
 	else
-		sql_vm = loc_sqlite_compile("SELECT type, mask, reason, hold FROM operbans "
+		rsdb_step_init("SELECT type, mask, reason, hold FROM operbans "
 					"WHERE hold > %lu AND remove=0",
 					CURRENT_TIME);
 
-	while(loc_sqlite_step(sql_vm, &ncol, &coldata, &colnames))
+	while(rsdb_step(&ncol, &coldata, &colnames))
 	{
 		push_ban(target, coldata[0][0], coldata[1], coldata[2],
 			(unsigned long) (atol(coldata[3]) - CURRENT_TIME));
@@ -320,30 +315,30 @@ sync_bans(const char *target, char banletter)
 
 	/* permanent bans */
 	if(banletter)
-		sql_vm = loc_sqlite_compile("SELECT type, mask, reason, hold FROM operbans "
-					"WHERE hold=0 AND remove=0 AND type='%c'",
-					CURRENT_TIME, banletter);
+		rsdb_step_init("SELECT type, mask, reason, hold FROM operbans "
+				"WHERE hold=0 AND remove=0 AND type='%c'",
+				CURRENT_TIME, banletter);
 	else
-		sql_vm = loc_sqlite_compile("SELECT type, mask, reason, hold FROM operbans "
-					"WHERE hold=0 AND remove=0",
-					CURRENT_TIME);
+		rsdb_step_init("SELECT type, mask, reason, hold FROM operbans "
+				"WHERE hold=0 AND remove=0",
+				CURRENT_TIME);
 
-	while(loc_sqlite_step(sql_vm, &ncol, &coldata, &colnames))
+	while(rsdb_step(&ncol, &coldata, &colnames))
 	{
 		push_ban(target, coldata[0][0], coldata[1], coldata[2], 0);
 	}
 
 	/* bans to remove */
 	if(banletter)
-		sql_vm = loc_sqlite_compile("SELECT type, mask FROM operbans "
-					"WHERE hold > %lu AND remove=1 AND type='%c'",
-					CURRENT_TIME, banletter);
+		rsdb_step_init("SELECT type, mask FROM operbans "
+				"WHERE hold > %lu AND remove=1 AND type='%c'",
+				CURRENT_TIME, banletter);
 	else
-		sql_vm = loc_sqlite_compile("SELECT type, mask FROM operbans "
-					"WHERE hold > %lu AND remove=1",
-					CURRENT_TIME);
+		rsdb_step_init("SELECT type, mask FROM operbans "
+				"WHERE hold > %lu AND remove=1",
+				CURRENT_TIME);
 
-	while(loc_sqlite_step(sql_vm, &ncol, &coldata, &colnames))
+	while(rsdb_step(&ncol, &coldata, &colnames))
 	{
 		push_unban(target, coldata[0][0], coldata[1]);
 	}
@@ -822,13 +817,12 @@ static void
 list_bans(struct client *client_p, struct lconn *conn_p, 
 		const char *mask, char type)
 {
-	void *sql_vm;
 	const char **coldata;
 	const char **colnames;
 	int ncol;
 	time_t duration;
 
-	sql_vm = loc_sqlite_compile("SELECT mask, reason, operreason, hold, oper "
+	rsdb_step_init("SELECT mask, reason, operreason, hold, oper "
 			"FROM operbans WHERE type='%c' AND remove=0 AND "
 			"hold > %lu",
 			type, (unsigned long) CURRENT_TIME);
@@ -836,7 +830,7 @@ list_bans(struct client *client_p, struct lconn *conn_p,
 	service_send(banserv_p, client_p, conn_p,
 			"Ban list matching %s", mask);
 
-	while(loc_sqlite_step(sql_vm, &ncol, &coldata, &colnames))
+	while(rsdb_step(&ncol, &coldata, &colnames))
 	{
 		if(!match(mask, coldata[0]))
 			continue;
