@@ -14,6 +14,8 @@ rsdb_transtype;
 void rsdb_init();
 void rsdb_shutdown();
 
+const char *rsdb_quote(const char *src);
+
 void rsdb_exec(rsdb_callback cb, const char *format, ...);
 void rsdb_transaction(rsdb_transtype type);
 

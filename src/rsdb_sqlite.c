@@ -66,6 +66,28 @@ rsdb_shutdown(void)
 		sqlite_close(rserv_db);
 }
 
+const char *
+rsdb_quote(const char *src)
+{
+	static char buf[BUFSIZE*4];
+	char *p = buf;
+
+	/* cheap and dirty length check.. */
+	if(strlen(src) >= (sizeof(buf) / 2))
+		return NULL;
+
+	while(*src)
+	{
+		if(*src == '\'')
+			*p++ = '\'';
+
+		*p++ = *src++;
+	}
+
+	*p = '\0';
+	return buf;
+}
+
 static int
 rsdb_callback_func(void *cbfunc, int argc, char **argv, char **colnames)
 {
