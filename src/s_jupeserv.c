@@ -294,7 +294,7 @@ o_jupeserv_jupe(struct client *client_p, struct lconn *conn_p, const char *parv[
 	else
 		jupe_p->reason = my_strdup(reason);
 
-	rsdb_exec(NULL, "INSERT INTO jupes (servername, reason) VALUES(%Q, %Q)",
+	rsdb_exec(NULL, "INSERT INTO jupes (servername, reason) VALUES('%Q', '%Q')",
 			jupe_p->name, jupe_p->reason);
 
 	if(client_p)
@@ -331,7 +331,7 @@ o_jupeserv_unjupe(struct client *client_p, struct lconn *conn_p, const char *par
 	slog(jupeserv_p, 1, "%s - UNJUPE %s", 
 		OPER_NAME(client_p, conn_p), jupe_p->name);
 
-	rsdb_exec(NULL, "DELETE FROM jupes WHERE servername = %Q",
+	rsdb_exec(NULL, "DELETE FROM jupes WHERE servername = '%Q'",
 			jupe_p->name);
 
 	if(client_p)
@@ -420,7 +420,7 @@ s_jupeserv_calljupe(struct client *client_p, struct lconn *conn_p, const char *p
 				client_p->user->username, client_p->user->host, 
 				client_p->user->servername, jupe_p->reason);
 
-		rsdb_exec(NULL, "INSERT INTO jupes (servername, reason) VALUES(%Q, %Q)",
+		rsdb_exec(NULL, "INSERT INTO jupes (servername, reason) VALUES('%Q', '%Q')",
 				jupe_p->name, jupe_p->reason);
 
 		add_jupe(jupe_p);
@@ -474,7 +474,7 @@ s_jupeserv_callunjupe(struct client *client_p, struct lconn *conn_p, const char 
 				client_p->user->username, client_p->user->host, 
 				client_p->user->servername);
 
-		rsdb_exec(NULL, "DELETE FROM jupes WHERE servername = %Q",
+		rsdb_exec(NULL, "DELETE FROM jupes WHERE servername = '%Q'",
 				jupe_p->name);
 
 		sendto_server("SQUIT %s :Unjuped", jupe_p->name);

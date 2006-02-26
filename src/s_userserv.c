@@ -139,7 +139,7 @@ free_user_reg(struct user_reg *ureg_p)
 
 	dlink_delete(&ureg_p->node, &user_reg_table[hashv]);
 
-	rsdb_exec(NULL, "DELETE FROM members WHERE username = %Q",
+	rsdb_exec(NULL, "DELETE FROM members WHERE username = '%Q'",
 			ureg_p->name);
 
 	DLINK_FOREACH_SAFE(ptr, next_ptr, ureg_p->channels.head)
@@ -154,7 +154,7 @@ free_user_reg(struct user_reg *ureg_p)
 	}
 #endif
 			
-	rsdb_exec(NULL, "DELETE FROM users WHERE username = %Q",
+	rsdb_exec(NULL, "DELETE FROM users WHERE username = '%Q'",
 			ureg_p->name);
 
 	my_free(ureg_p->password);
@@ -326,7 +326,7 @@ e_user_expire(void *unused)
 		{
 			ureg_p->flags &= ~US_FLAGS_NEEDUPDATE;
 			rsdb_exec(NULL, "UPDATE users SET last_time=%lu"
-					" WHERE username=%Q",
+					" WHERE username='%Q'",
 			ureg_p->last_time, ureg_p->name);
 		}
 
@@ -378,7 +378,7 @@ o_user_userregister(struct client *client_p, struct lconn *conn_p, const char *p
 	add_user_reg(reg_p);
 
 	rsdb_exec(NULL, "INSERT INTO users (username, password, email, reg_time, last_time, flags) "
-			"VALUES(%Q, %Q, %Q, %lu, %lu, %u)",
+			"VALUES('%Q', '%Q', '%Q', %lu, %lu, %u)",
 			reg_p->name, reg_p->password, 
 			EmptyString(reg_p->email) ? "" : reg_p->email, 
 			reg_p->reg_time, reg_p->last_time, reg_p->flags);
@@ -439,7 +439,7 @@ o_user_usersuspend(struct client *client_p, struct lconn *conn_p, const char *pa
 	reg_p->flags |= US_FLAGS_SUSPENDED;
 	reg_p->suspender = my_strdup(OPER_NAME(client_p, conn_p));
 
-	rsdb_exec(NULL, "UPDATE users SET flags=%d, suspender=%Q WHERE username=%Q",
+	rsdb_exec(NULL, "UPDATE users SET flags=%d, suspender='%Q' WHERE username='%Q'",
 			reg_p->flags, reg_p->suspender, reg_p->name);
 
 	service_send(userserv_p, client_p, conn_p,
@@ -473,7 +473,7 @@ o_user_userunsuspend(struct client *client_p, struct lconn *conn_p, const char *
 	my_free(reg_p->suspender);
 	reg_p->suspender = NULL;
 
-	rsdb_exec(NULL, "UPDATE users SET flags=%d, suspender=NULL WHERE username=%Q",
+	rsdb_exec(NULL, "UPDATE users SET flags=%d, suspender=NULL WHERE username='%Q'",
 			reg_p->flags, reg_p->name);
 
 	service_send(userserv_p, client_p, conn_p,
@@ -652,7 +652,7 @@ o_user_usersetpass(struct client *client_p, struct lconn *conn_p, const char *pa
 	my_free(ureg_p->password);
 	ureg_p->password = my_strdup(password);
 
-	rsdb_exec(NULL, "UPDATE users SET password=%Q WHERE username=%Q", 
+	rsdb_exec(NULL, "UPDATE users SET password='%Q' WHERE username='%Q'", 
 			password, ureg_p->name);
 
 	service_send(userserv_p, client_p, conn_p,
@@ -813,7 +813,7 @@ s_user_register(struct client *client_p, struct lconn *conn_p, const char *parv[
 	add_user_reg(reg_p);
 
 	rsdb_exec(NULL, "INSERT INTO users (username, password, email, reg_time, last_time, flags) "
-			"VALUES(%Q, %Q, %Q, %lu, %lu, %u)",
+			"VALUES('%Q', '%Q', '%Q', %lu, %lu, %u)",
 			reg_p->name, reg_p->password, 
 			EmptyString(reg_p->email) ? "" : reg_p->email, 
 			reg_p->reg_time, reg_p->last_time, reg_p->flags);
@@ -947,8 +947,8 @@ s_user_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 		my_free(ureg_p->password);
 		ureg_p->password = my_strdup(password);
 
-		rsdb_exec(NULL, "UPDATE users SET password=%Q "
-				"WHERE username=%Q", password, ureg_p->name);
+		rsdb_exec(NULL, "UPDATE users SET password='%Q' "
+				"WHERE username='%Q'", password, ureg_p->name);
 
 		service_error(userserv_p, client_p,
 				"Username %s PASSWORD set", ureg_p->name);
@@ -984,8 +984,8 @@ s_user_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 		my_free(ureg_p->email);
 		ureg_p->email = my_strdup(arg);
 
-		rsdb_exec(NULL, "UPDATE users SET email=%Q "
-				"WHERE username=%Q", arg, ureg_p->name);
+		rsdb_exec(NULL, "UPDATE users SET email='%Q' "
+				"WHERE username='%Q'", arg, ureg_p->name);
 
 		service_error(userserv_p, client_p,
 				"Username %s EMAIL set %s",
@@ -1014,7 +1014,7 @@ s_user_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 			(ureg_p->flags & US_FLAGS_PRIVATE) ? "ON" : "OFF");
 
 		rsdb_exec(NULL, "UPDATE users SET flags=%d "
-				"WHERE username=%Q",
+				"WHERE username='%Q'",
 				ureg_p->flags, ureg_p->name);
 		return 1;
 	}
