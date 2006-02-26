@@ -1,3 +1,13 @@
+leeh        2006/02/26 18:13:22 UTC	(20060226_0-21907)
+  Log:
+  - add in missing rsdb files
+  
+
+  Modified:
+	rserv/trunk/include/rsdb.h (File Added) 
+	rserv/trunk/src/rsdb_sqlite.c (File Added) 
+
+
 leeh        2006/02/24 11:37:42 UTC	(20060224_0-21903)
   Log:
   - add rsdb_transaction(), to deal with transactions
