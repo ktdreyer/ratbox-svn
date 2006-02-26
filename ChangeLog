@@ -1,3 +1,15 @@
+leeh        2006/02/26 18:31:34 UTC	(20060226_1-21909)
+  Log:
+  - move the single stepping select stuff over to rsdb_step*
+  - remove the remaining loc_sqlite* step functions
+  
+
+  Modified:
+	rserv/trunk/include/rsdb.h (File Modified) 
+	rserv/trunk/src/rsdb_sqlite.c (File Modified) 
+	rserv/trunk/src/s_banserv.c (File Modified) 
+
+
 leeh        2006/02/26 18:13:22 UTC	(20060226_0-21907)
   Log:
   - add in missing rsdb files
