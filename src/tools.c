@@ -32,6 +32,7 @@
  */
 #include "stdinc.h"
 #include "rserv.h"
+#include "rsdb.h"
 #include "balloc.h"
 
 static BlockHeap *dlinknode_heap;

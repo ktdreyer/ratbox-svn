@@ -99,17 +99,26 @@ rsdb_callback_func(void *cbfunc, int argc, char **argv, char **colnames)
 void
 rsdb_exec(rsdb_callback cb, const char *format, ...)
 {
+	static char buf[BUFSIZE*4];
 	va_list args;
 	char *errmsg;
 	int i;
 
 	va_start(args, format);
-	if((i = sqlite_exec_vprintf(rserv_db, format, (cb ? rsdb_callback_func : NULL), cb, &errmsg, args)))
+	i = rs_vsnprintf(buf, sizeof(buf), format, args);
+	va_end(args);
+
+	if(i >= sizeof(buf))
+	{
+		mlog("fatal error: length problem with compiling sql");
+		die("problem with compiling sql statement");
+	}
+
+	if((i = sqlite_exec(rserv_db, buf, (cb ? rsdb_callback_func : NULL), cb, &errmsg)))
 	{
 		mlog("fatal error: problem with db file: %s", errmsg);
 		die("problem with db file");
 	}
-	va_end(args);
 }
 
 void
@@ -131,7 +140,7 @@ rsdb_step_init(const char *format, ...)
 	va_list args;
 
 	va_start(args, format);
-	i = vsnprintf(buf, sizeof(buf), format, args);
+	i = rs_vsnprintf(buf, sizeof(buf), format, args);
 	va_end(args);
 
 	if(i >= sizeof(buf))
