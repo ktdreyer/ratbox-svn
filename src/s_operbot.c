@@ -118,6 +118,13 @@ o_operbot_objoin(struct client *client_p, struct lconn *conn_p, const char *parv
 	struct channel *chptr;
 	time_t tsinfo;
 
+	if(strlen(parv[0]) > CHANNELLEN)
+	{
+		service_send(operbot_p, client_p, conn_p,
+				"Invalid channel %s", parv[0]);
+		return 0;
+	}
+
 	if((chptr = find_channel(parv[0])) && 
 	   dlink_find(operbot_p, &chptr->services))
 	{
