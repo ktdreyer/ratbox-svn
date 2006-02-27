@@ -36,6 +36,7 @@
 #include "rsdb.h"
 #include "service.h"
 #include "client.h"
+#include "channel.h"
 #include "io.h"
 #include "rserv.h"
 #include "c_init.h"
@@ -350,7 +351,8 @@ sync_bans(const char *target, char banletter)
 static int
 o_banserv_kline(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
-	const char *mask, *reason;
+	const char *mask;
+	char *reason;
 	time_t temptime = 0;
 	int para = 0;
 	int res;
@@ -440,7 +442,8 @@ o_banserv_kline(struct client *client_p, struct lconn *conn_p, const char *parv[
 static int
 o_banserv_xline(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
-	const char *gecos, *reason;
+	const char *gecos;
+	char *reason;
 	time_t temptime = 0;
 	int para = 0;
 	int res;
@@ -483,7 +486,7 @@ o_banserv_xline(struct client *client_p, struct lconn *conn_p, const char *parv[
 	if(strlen(gecos) > NICKUSERHOSTLEN)
 	{
 		service_send(banserv_p, client_p, conn_p,
-				"Invalid xline %s", mask);
+				"Invalid xline %s", gecos);
 		return 0;
 	}
 
@@ -530,7 +533,8 @@ o_banserv_xline(struct client *client_p, struct lconn *conn_p, const char *parv[
 static int
 o_banserv_resv(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
-	const char *mask, *reason;
+	const char *mask;
+	char *reason;
 	time_t temptime = 0;
 	int para = 0;
 	int res;

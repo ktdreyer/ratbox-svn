@@ -108,6 +108,8 @@ static void e_user_expire(void *unused);
 
 static void dump_user_info(struct client *, struct lconn *, struct user_reg *);
 
+static int valid_email(const char *email);
+
 void
 init_s_userserv(void)
 {
@@ -360,6 +362,13 @@ o_user_userregister(struct client *client_p, struct lconn *conn_p, const char *p
 		return 0;
 	}
 
+	if(strlen(parv[1]) > PASSWDLEN)
+	{
+		service_send(userserv_p, client_p, conn_p,
+				"Password too long");
+		return 0;
+	}
+
 	slog(userserv_p, 2, "%s - USERREGISTER %s %s",
 		OPER_NAME(client_p, conn_p), parv[0], 
 		EmptyString(parv[2]) ? "-" : parv[2]);
@@ -371,7 +380,12 @@ o_user_userregister(struct client *client_p, struct lconn *conn_p, const char *p
 	reg_p->password = my_strdup(password);
 
 	if(!EmptyString(parv[2]))
-		reg_p->email = my_strdup(parv[2]);
+	{
+		if(valid_email(parv[2]))
+			reg_p->email = my_strdup(parv[2]);
+		else
+			service_send(userserv_p, client_p, conn_p, "Email %s invalid, ignoring", parv[2]);
+	}
 
 	reg_p->reg_time = reg_p->last_time = CURRENT_TIME;
 
@@ -645,6 +659,13 @@ o_user_usersetpass(struct client *client_p, struct lconn *conn_p, const char *pa
 		return 0;
 	}
 
+	if(strlen(parv[0]) > PASSWDLEN)
+	{
+		service_send(userserv_p, client_p, conn_p,
+				"Password too long");
+		return 0;
+	}
+
 	slog(userserv_p, 1, "%s - USERSETPASS %s",
 		OPER_NAME(client_p, conn_p), ureg_p->name);
 
@@ -664,6 +685,9 @@ static int
 valid_email(const char *email)
 {
 	char *p;
+
+	if(strlen(email) > EMAILLEN)
+		return 0;
 
 	/* no username, or no '@' */
 	if(*email == '@' || (p = strchr(email, '@')) == NULL)
@@ -721,6 +745,13 @@ s_user_register(struct client *client_p, struct lconn *conn_p, const char *parv[
 	{
 		service_error(userserv_p, client_p, "Username %s invalid", parv[0]);
 		return 1;
+	}
+
+	if(strlen(parv[1]) > PASSWDLEN)
+	{
+		service_send(userserv_p, client_p, conn_p,
+				"Password too long");
+		return 0;
 	}
 
 	if(parc < 3 || EmptyString(parv[2]))
@@ -930,6 +961,13 @@ s_user_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 				"Insufficient parameters to %s::SET::PASSWORD",
 				userserv_p->name);
 			return 1;
+		}
+
+		if(strlen(parv[2]) > PASSWDLEN)
+		{
+			service_send(userserv_p, client_p, conn_p,
+					"Password too long");
+			return 0;
 		}
 
 		password = get_crypt(parv[1], ureg_p->password);

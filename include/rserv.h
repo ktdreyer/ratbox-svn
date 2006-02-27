@@ -7,6 +7,9 @@
 
 #define MAX_DATE_STRING	32
 
+#define PASSWDLEN	30
+#define EMAILLEN	100
+
 int current_mark;
 int testing_conf;
 
