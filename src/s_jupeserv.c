@@ -244,6 +244,9 @@ valid_jupe(const char *servername)
 	   !irccmp(servername, MYNAME))
 		return 0;
 
+	if(strlen(servername) > HOSTLEN)
+		return 0;
+
 	/* cant jupe our uplink */
 	if(server_p && !irccmp(servername, server_p->name))
 		return 0;

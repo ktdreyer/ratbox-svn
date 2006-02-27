@@ -163,6 +163,9 @@ split_ban(const char *mask, char **user, char **host)
 	if(EmptyString(buf) || EmptyString(p))
 		return 0;
 
+	if(strlen(buf) > USERLEN || strlen(p) > HOSTLEN)
+		return 0;
+
 	if(user)
 		*user = buf;
 
@@ -387,7 +390,6 @@ o_banserv_kline(struct client *client_p, struct lconn *conn_p, const char *parv[
 
 	mask = parv[para++];
 
-
 	if(!split_ban(mask, NULL, NULL))
 	{
 		service_send(banserv_p, client_p, conn_p,
@@ -404,6 +406,9 @@ o_banserv_kline(struct client *client_p, struct lconn *conn_p, const char *parv[
 				banserv_p->name);
 		return 0;
 	}
+
+	if(strlen(reason) > REASONLEN)
+		reason[REASONLEN] = '\0';
 
 	if(res)
 		rsdb_exec(NULL, "UPDATE operbans SET reason='%Q', "
@@ -474,6 +479,14 @@ o_banserv_xline(struct client *client_p, struct lconn *conn_p, const char *parv[
 	}
 
 	gecos = parv[para++];
+
+	if(strlen(gecos) > NICKUSERHOSTLEN)
+	{
+		service_send(banserv_p, client_p, conn_p,
+				"Invalid xline %s", mask);
+		return 0;
+	}
+
 	reason = rebuild_params(parv, parc, para);
 
 	if(EmptyString(reason))
@@ -483,6 +496,9 @@ o_banserv_xline(struct client *client_p, struct lconn *conn_p, const char *parv[
 				banserv_p->name);
 		return 0;
 	}
+
+	if(strlen(reason) > REASONLEN)
+		reason[REASONLEN] = '\0';
 
 	if(res)
 		rsdb_exec(NULL, "UPDATE operbans SET reason='%Q', "
@@ -553,6 +569,14 @@ o_banserv_resv(struct client *client_p, struct lconn *conn_p, const char *parv[]
 	}
 
 	mask = parv[para++];
+
+	if(strlen(mask) > CHANNELLEN)
+	{
+		service_send(banserv_p, client_p, conn_p,
+				"Invalid resv %s", mask);
+		return 0;
+	}
+
 	reason = rebuild_params(parv, parc, para);
 
 	if(EmptyString(reason))
@@ -562,6 +586,9 @@ o_banserv_resv(struct client *client_p, struct lconn *conn_p, const char *parv[]
 				banserv_p->name);
 		return 0;
 	}
+
+	if(strlen(reason) > REASONLEN)
+		reason[REASONLEN] = '\0';
 
 	if(res)
 		rsdb_exec(NULL, "UPDATE operbans SET reason='%Q', "
