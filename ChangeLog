@@ -1,3 +1,13 @@
+leeh        2006/02/27 19:05:22 UTC	(20060227_1-21919)
+  Log:
+  - add length checking of channels to operbot/operserv
+  
+
+  Modified:
+	rserv/trunk/src/s_operbot.c (File Modified) 
+	rserv/trunk/src/s_operserv.c (File Modified) 
+
+
 leeh        2006/02/27 19:00:40 UTC	(20060227_0-21917)
   Log:
   - add length checking of fields to jupeserv and banserv
