@@ -502,6 +502,10 @@ c_nick(struct client *client_p, const char *parv[], int parc)
 		uplink_p = find_server(parv[6]);
 		newts = atol(parv[1]);
 
+		if(strlen(parv[0]) > NICKLEN)
+			die("Compiled NICKLEN appears to be wrong (nick %s (%d > %d).  Read INSTALL.",
+				parv[0], strlen(parv[0]), NICKLEN);
+
                 /* something already exists with this nick */
 		if(target_p != NULL)
 		{
@@ -572,6 +576,10 @@ c_nick(struct client *client_p, const char *parv[], int parc)
 
                 if(!IsUser(client_p))
                         return;
+
+		if(strlen(parv[0]) > NICKLEN)
+			die("Compiled NICKLEN appears to be wrong (nick %s (%d > %d).  Read INSTALL.",
+				parv[0], strlen(parv[0]), NICKLEN);
 
 		del_client(client_p);
 		strlcpy(client_p->name, parv[0], sizeof(client_p->name));
@@ -676,6 +684,12 @@ c_server(struct client *client_p, const char *parv[], int parc)
 
 	if(parc < 3)
 		return;
+
+	if(strlen(parv[0]) > HOSTLEN)
+	{
+		die("Compiled HOSTLEN appears to be wrong, received %s (%d > %d)",
+			parv[0], strlen(parv[0]), HOSTLEN);
+	}
 
         /* our uplink introducing themselves */
         if(client_p == NULL)

@@ -530,6 +530,14 @@ conf_end_connect(struct TopConf *tc)
                 return 0;
         }
 
+	if(strlen(yy_server->name) > HOSTLEN)
+	{
+		conf_report_error("Ignoring connect block, servername length invalid.");
+		my_free(yy_server);
+		yy_server = NULL;
+		return 0;
+	}
+
         dlink_add_tail_alloc(yy_server, &conf_server_list);
 
         yy_server = NULL;
