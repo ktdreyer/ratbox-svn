@@ -1,3 +1,13 @@
+leeh        2006/02/27 19:00:40 UTC	(20060227_0-21917)
+  Log:
+  - add length checking of fields to jupeserv and banserv
+  
+
+  Modified:
+	rserv/trunk/src/s_banserv.c (File Modified) 
+	rserv/trunk/src/s_jupeserv.c (File Modified) 
+
+
 leeh        2006/02/26 21:19:59 UTC	(20060226_4-21915)
   Log:
   - unify the things that need to be escaped in sql to '%Q'
