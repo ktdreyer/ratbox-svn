@@ -82,7 +82,7 @@ valid_ban(const char *banstr)
 {
 	char *tmp = LOCAL_COPY(banstr);
 	char *nick, *user, *host;
-	char *p;
+	const char *p;
 
 	for(p = banstr; *p; p++)
 	{

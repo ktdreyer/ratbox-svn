@@ -2,14 +2,13 @@
 #ifndef INCLUDED_s_userserv_h
 #define INCLUDED_s_userserv_h
 
-#define USERREGNAME_LEN	10
 #define MAX_USER_REG_HASH	65536
 
 struct client;
 
 struct user_reg
 {
-	char name[USERREGNAME_LEN+1];
+	char name[USERREGNAME_LEN];
 	char *password;
 	char *email;
 	char *suspender;

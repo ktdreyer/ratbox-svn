@@ -99,3 +99,6 @@
 /* Topic Length */
 #undef TOPICLEN
 
+/* Registered Username Length */
+#undef USERREGNAME_LEN
+
