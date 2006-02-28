@@ -1,3 +1,12 @@
+leeh        2006/02/28 21:59:05 UTC	(20060228_8-21949)
+  Log:
+  - make generate-schema.pl executable (I hope..)
+  
+
+  Modified:
+	rserv/trunk/doc/generate-schema.pl  (Property Modified)
+
+
 leeh        2006/02/28 21:55:10 UTC	(20060228_7-21947)
   Log:
   - add require_shortcut flag to service {};, which requires the commands come
