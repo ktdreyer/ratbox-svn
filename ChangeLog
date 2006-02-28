@@ -1,3 +1,18 @@
+leeh        2006/02/28 21:55:10 UTC	(20060228_7-21947)
+  Log:
+  - add require_shortcut flag to service {};, which requires the commands come
+    in over ENCAP (ie command shortcuts) rather than msg
+  
+
+  Modified:
+	rserv/trunk/doc/example.conf (File Modified) 
+	rserv/trunk/include/client.h (File Modified) 
+	rserv/trunk/include/service.h (File Modified) 
+	rserv/trunk/src/newconf.c (File Modified) 
+	rserv/trunk/src/scommand.c (File Modified) 
+	rserv/trunk/src/service.c (File Modified) 
+
+
 leeh        2006/02/28 21:30:41 UTC	(20060228_6-21945)
   Log:
   - add a base mysql schema
