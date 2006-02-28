@@ -77,6 +77,40 @@ valid_key(const char *data)
 	return buf;
 }
 
+int
+valid_ban(const char *banstr)
+{
+	char *tmp = LOCAL_COPY(banstr);
+	char *nick, *user, *host;
+	char *p;
+
+	for(p = banstr; *p; p++)
+	{
+		if(!IsBanChar(*p))
+			return 0;
+	}
+
+	nick = tmp;
+
+	if((user = strchr(nick, '!')) == NULL)
+		return 0;
+
+	*user++ = '\0';
+
+	if((host = strchr(nick, '@')) == NULL)
+		return 0;
+
+	*host++ = '\0';
+
+	if(EmptyString(nick) || EmptyString(user) || EmptyString(host))
+		return 0;
+
+	if(strlen(nick) > NICKLEN || strlen(user) > USERLEN || strlen(host) > HOSTLEN)
+		return 0;
+
+	return 1;
+}
+
 static void
 add_ban(const char *banstr, dlink_list *list)
 {

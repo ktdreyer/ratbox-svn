@@ -2713,7 +2713,6 @@ s_chan_addban(struct client *client_p, struct lconn *conn_p, const char *parv[],
 	struct ban_reg *banreg_p;
 	dlink_node *ptr, *next_ptr;
 	const char *mask;
-	const char *p;
 	char *endptr;
 	int duration;
 	int level;
@@ -2739,18 +2738,11 @@ s_chan_addban(struct client *client_p, struct lconn *conn_p, const char *parv[],
 		return 1;
 	}
 
-	p = mask;
-
-	while(*p)
+	if(!valid_ban(mask))
 	{
-		if(!IsBanChar(*p))
-		{
-			service_error(chanserv_p, client_p, "Ban %s invalid",
-					mask);
-			return 1;
-		}
-
-		p++;
+		service_error(chanserv_p, client_p, "Ban %s invalid",
+				mask);
+		return 1;
 	}
 
 	if((banreg_p = find_ban_reg(mreg_p->channel_reg, mask)) != NULL)

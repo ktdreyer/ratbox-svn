@@ -101,6 +101,8 @@ extern int part_service(struct client *service_p, const char *chname);
 extern void rejoin_service(struct client *service_p, struct channel *chptr, int reop);
 
 /* c_mode.c */
+int valid_ban(const char *banstr);
+
 int parse_simple_mode(struct chmode *, const char **, int, int);
 void parse_full_mode(struct channel *, struct client *, const char **, int, int);
 
