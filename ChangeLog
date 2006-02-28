@@ -1,3 +1,18 @@
+leeh        2006/02/28 08:44:59 UTC	(20060228_0-21925)
+  Log:
+  - add valid_chname(), ensures length <= CHANNELLEN and the channel begins
+    with '#'
+  - disallow osjoin/objoin to invalid channels
+  - ignore sjoins for invalid channels
+  
+
+  Modified:
+	rserv/trunk/include/channel.h (File Modified) 
+	rserv/trunk/src/channel.c (File Modified) 
+	rserv/trunk/src/s_operbot.c (File Modified) 
+	rserv/trunk/src/s_operserv.c (File Modified) 
+
+
 leeh        2006/02/27 20:43:26 UTC	(20060227_3-21923)
   Log:
   - restrict passwords/email addys in userserv to 30/100 chars respectively
