@@ -488,12 +488,12 @@ handle_service_msg(struct client *service_p, struct client *client_p, char *text
 	        parc = string_to_array(p, parv);
 	}
 
-	handle_service(service_p, client_p, text, parc, (const char **) parv);
+	handle_service(service_p, client_p, text, parc, (const char **) parv, 1);
 }
 
 void
 handle_service(struct client *service_p, struct client *client_p, 
-		const char *command, int parc, const char *parv[])
+		const char *command, int parc, const char *parv[], int msg)
 {
 	struct service_command *cmd_entry;
         int retval;
@@ -529,6 +529,20 @@ handle_service(struct client *service_p, struct client *client_p,
 			service_p->service->paced_count++;
 			return;
 		}
+	}
+
+	if(msg && ServiceShortcut(service_p))
+	{
+		if(ServiceStealth(service_p) && !client_p->user->oper && !is_oper(client_p))
+			return;
+
+		client_p->user->flood_count += 1;
+                service_p->service->flood += 1;
+
+		service_error(service_p, client_p,
+				"Commands to this service must be issued via /%s instead of by name.",
+				service_p->name);
+		return;
 	}
 
         if(!strcasecmp(command, "HELP"))

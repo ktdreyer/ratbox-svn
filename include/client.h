@@ -142,6 +142,7 @@ struct host_entry
 #define SERVICE_STEALTH		0x010 /* ignores non-opers */
 #define SERVICE_LOGINHELP	0x020 /* needs to be logged in with userserv */
 #define SERVICE_WALLOPADM	0x040 /* sends wallops for admin commands */
+#define SERVICE_SHORTCUT	0x080 /* privmsg disabled, /service commands required */
 
 #define ServiceOpered(x)	((x)->service->flags & SERVICE_OPERED)
 #define ServiceMsgSelf(x)	((x)->service->flags & SERVICE_MSGSELF)
@@ -150,6 +151,7 @@ struct host_entry
 #define ServiceStealth(x)	((x)->service->flags & SERVICE_STEALTH)
 #define ServiceLoginHelp(x)	((x)->service->flags & SERVICE_LOGINHELP)
 #define ServiceWallopAdm(x)	((x)->service->flags & SERVICE_WALLOPADM)
+#define ServiceShortcut(x)	((x)->service->flags & SERVICE_SHORTCUT)
 
 #define SERVICE_INTRODUCED	0x001 /* service has been introduced */
 #define SERVICE_REINTRODUCE	0x002 /* service needs reintroducing */

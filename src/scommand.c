@@ -324,7 +324,7 @@ c_encap(struct client *client_p, const char *parv[], int parc)
 		if((service_p = find_service(parv[2])) == NULL)
 			return;
 
-		handle_service(service_p, client_p, parv[3], parc-4, parv+4);
+		handle_service(service_p, client_p, parv[3], parc-4, parv+4, 0);
 	}
 }
 
