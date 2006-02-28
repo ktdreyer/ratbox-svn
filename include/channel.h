@@ -74,6 +74,8 @@ extern void init_channel(void);
 
 unsigned int hash_channel(const char *p);
 
+int valid_chname(const char *name);
+
 extern void add_channel(struct channel *chptr);
 extern void del_channel(struct channel *chptr);
 extern void free_channel(struct channel *chptr);

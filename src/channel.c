@@ -99,6 +99,18 @@ hash_channel(const char *p)
 	return(h & (MAX_CHANNEL_TABLE-1));
 }
 
+int
+valid_chname(const char *name)
+{
+	if(strlen(name) > CHANNELLEN)
+		return 0;
+
+	if(name[0] != '#')
+		return 0;
+
+	return 1;
+}
+
 /* add_channel()
  *   adds a channel to the internal hash, and channel_list
  *
@@ -655,6 +667,9 @@ c_sjoin(struct client *client_p, const char *parv[], int parc)
 
 	/* :<server> SJOIN <TS> <#channel> +[modes [key][limit]] :<nicks> */
 	if(parc < 4 || EmptyString(parv[3]))
+		return;
+
+	if(!valid_chname(parv[1]))
 		return;
 
 	if((chptr = find_channel(parv[1])) == NULL)

@@ -268,7 +268,7 @@ o_oper_osjoin(struct client *client_p, struct lconn *conn_p, const char *parv[],
 	struct channel *chptr;
 	time_t tsinfo;
 
-	if(strlen(parv[0]) > CHANNELLEN)
+	if(!valid_chname(parv[0]))
 	{
 		service_send(operserv_p, client_p, conn_p,
 				"Invalid channel %s", parv[0]);
