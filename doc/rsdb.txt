@@ -1,0 +1,77 @@
+-       ratbox-services database abstraction         -
+- Copyright (C) 2006 Lee Hardy <lee -at- leeh.co.uk> -
+- Copyright (C) 2006 ircd-ratbox development team    -
+------------------------------------------------------
+
+This document describes the database abstraction layer contained in
+ratbox-services, allowing the code to be database agnostic and tie in to
+different database software.
+
+- void rsdb_init(void) -
+------------------------
+
+This function is called to initialise the database so it is ready for use.
+
+- void rsdb_shutdown(void) -
+----------------------------
+
+This function is called on termination to close the database safely.
+
+- const char *rsdb_quote(const char *src) -
+-------------------------------------------
+
+This function is called when a string taken from user input needs to be
+safely quoted to avoid SQL injection.  rsdb_quote() will not be called more
+than once in a single function call, as such it is assumed it will return a
+static string that does not need any memory cleaned up.
+
+rsdb_quote() is generally called only from the custom rs_snprintf()
+function, where the "%Q" modifier has been added to quote strings inline.
+
+- void rsdb_exec(rsdb_callback cb, const char *format, ...) -
+-------------------------------------------------------------
+
+This function is called to execute an SQL statement with an optional
+callback.  The format accepts the string modifier "%Q" to pass input through
+rsdb_quote() so it is safe.
+
+When passed a callback function, this should be called by rsdb_exec() for
+each row returned by the query.  This callback function takes three
+arguments, an int containing the number of fields, a char ** array
+containing each of the field values, and a char ** array containing the
+field names.
+
+- void rsdb_step_init(const char *format, ...) -
+------------------------------------------------
+
+This function is called to execute an SQL statement that returns data,
+without using a callback.  The format accepts the string modifier "%Q" to
+pass input through rsdb_quote() so it is safe.
+
+- int rsdb_step(int *ncol, char ***coldata, char ***colnames) -
+---------------------------------------------------------------
+
+This function is called iteratively to retrieve a single row of data from
+the SQL statement submitted earlier.  rsdb_step() should build a list of
+column data and column names and store these along with the number of
+columns into the pointers.
+
+rsdb_step() must return 1 when it actually returns a row of data, and 0 when
+there is no more data to be returned.  When rsdb_step() has no more data, it
+must clean up after itself and perform the same actions as in
+rsdb_step_end().
+
+- void rsdb_step_end() -
+------------------------
+
+This function is called to clean up the step handler, as the remaining rows
+of data are no longer needed.  This function will never be called by a
+parent handler when it has stepped through all the rows.
+
+- void rsdb_transaction(rsdb_transtype type) -
+----------------------------------------------
+
+This function is used primarily for sqlite, to group a large number of
+queries together for efficiency.  It is passed either RSDB_TRANS_START or
+RSDB_TRANS_END.
+
