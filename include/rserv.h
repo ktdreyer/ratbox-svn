@@ -9,6 +9,7 @@
 
 #define PASSWDLEN	30
 #define EMAILLEN	100
+#define OPERNAMELEN	30
 
 int current_mark;
 int testing_conf;

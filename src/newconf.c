@@ -616,8 +616,17 @@ conf_end_operator(struct TopConf *tc)
                 yy_oper->name = my_strdup(conf_cur_block_name);
 
         if(EmptyString(yy_oper->name) || EmptyString(yy_oper->pass))
+	{
+		conf_report_error("Error -- missing name/password");
                 return 0;
+	}
 
+	if(strlen(yy_oper->name) > OPERNAMELEN)
+	{
+		conf_report_error("Error -- oper name is excessively long");
+		return 0;
+	}
+		
 	DLINK_FOREACH_SAFE(ptr, next_ptr, yy_oper_list.head)
 	{
 		yy_tmpoper = ptr->data;

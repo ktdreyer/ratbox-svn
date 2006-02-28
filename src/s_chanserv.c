@@ -58,6 +58,11 @@
 #define S_C_REGULAR	10
 #define S_C_USER	1
 
+/* Note: There is NO automatic changing of DB structures to deal with the
+ * size of this value changing.
+ *
+ * It is modified at your own risk.
+ */
 #define REASON_MAGIC	50
 
 static struct client *chanserv_p;
