@@ -1,3 +1,12 @@
+leeh        2006/02/28 18:15:03 UTC	(20060228_2-21929)
+  Log:
+  - add documentation on the db abstraction layer
+  
+
+  Modified:
+	rserv/trunk/doc/rsdb.txt (File Added) 
+
+
 leeh        2006/02/28 09:15:17 UTC	(20060228_1-21927)
   Log:
   - add a more robust function for checking bans are valid
