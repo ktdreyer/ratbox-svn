@@ -1,3 +1,16 @@
+leeh        2006/02/28 19:42:50 UTC	(20060228_5-21943)
+  Log:
+  - add OPERNAMELEN, default 30, restricts how long an opers name in the
+    config can be
+  
+
+  Modified:
+	rserv/trunk/doc/base/ (File Added) 
+	rserv/trunk/include/rserv.h (File Modified) 
+	rserv/trunk/src/newconf.c (File Modified) 
+	rserv/trunk/src/s_chanserv.c (File Modified) 
+
+
 leeh        2006/02/28 18:26:37 UTC	(20060228_4-21933)
   Log:
   - add --with-userreglen=LENGTH to configure, to alter the maximum length of
