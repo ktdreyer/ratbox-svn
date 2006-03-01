@@ -943,6 +943,14 @@ static struct ConfEntry conf_serverinfo_table[] =
 	{ "\0", 0, NULL, 0, NULL }
 };
 
+static struct ConfEntry conf_database_table[] =
+{
+	{ "name",	CF_QSTRING,	NULL, 0, &config_file.db_name		},
+	{ "username",	CF_QSTRING,	NULL, 0, &config_file.db_username	},
+	{ "password",	CF_QSTRING,	NULL, 0, &config_file.db_password	},
+	{ "\0", 0, NULL, 0, NULL }
+};
+
 static struct ConfEntry conf_admin_table[] =
 {
 	{ "name",		CF_QSTRING, NULL, 0, &config_file.admin1	},
@@ -1054,6 +1062,7 @@ void
 newconf_init()
 {
 	add_top_conf("serverinfo", NULL, NULL, conf_serverinfo_table);
+	add_top_conf("database", NULL, NULL, conf_database_table);
         add_top_conf("admin", NULL, NULL, conf_admin_table);
         add_top_conf("connect", conf_begin_connect, conf_end_connect, conf_connect_table);
         add_top_conf("operator", conf_begin_operator, conf_end_operator, 

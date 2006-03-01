@@ -36,6 +36,10 @@ struct _config_file
 	char *admin2;
 	char *admin3;
 
+	char *db_name;
+	char *db_username;
+	char *db_password;
+
 	/* userserv */
 	int disable_uregister;
 	char *uregister_url;
