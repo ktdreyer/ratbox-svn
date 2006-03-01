@@ -1,3 +1,14 @@
+leeh        2006/03/01 22:22:47 UTC	(20060301_1-21965)
+  Log:
+  - add db_host too, to specify hostname to connect to
+  
+
+  Modified:
+	rserv/trunk/doc/example.conf (File Modified) 
+	rserv/trunk/include/conf.h (File Modified) 
+	rserv/trunk/src/newconf.c (File Modified) 
+
+
 leeh        2006/03/01 18:21:04 UTC	(20060301_0-21955)
   Log:
   - add in new database {}; section, to control how we connect to the backened
