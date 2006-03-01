@@ -945,6 +945,7 @@ static struct ConfEntry conf_serverinfo_table[] =
 
 static struct ConfEntry conf_database_table[] =
 {
+	{ "host",	CF_QSTRING,	NULL, 0, &config_file.db_host		},
 	{ "name",	CF_QSTRING,	NULL, 0, &config_file.db_name		},
 	{ "username",	CF_QSTRING,	NULL, 0, &config_file.db_username	},
 	{ "password",	CF_QSTRING,	NULL, 0, &config_file.db_password	},
