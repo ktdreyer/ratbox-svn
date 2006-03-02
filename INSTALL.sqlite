@@ -1,0 +1,11 @@
+sqlite database backend
+-----------------------
+
+PREFIX here is the path of the prefix to which ratbox-services installed to.
+SOURCE here is the path to the ratbox-services directory it was compiled from.
+
+If ratbox-services compiled sqlite itself, the sqlite binary can be
+found in PREFIX/bin.
+
+To initialise the database:
+	sqlite PREFIX/etc/ratbox-services.db < SOURCE/doc/schema-sqlite.txt

@@ -76,11 +76,9 @@ ratbox-services installation guide
 8. Edit etc/example.conf and save it as etc/ratbox-services.conf.
 
 9. Initialise your database, this must be done even if you are converting
-   from hybserv:
-	sqlite etc/ratbox-services.db < etc/schema.txt
+   from hybserv.
 
-   If ratbox-services compiled sqlite itself, the sqlite binary can be
-   found in PREFIX/bin.
+   Instructions for this are contained in INSTALL.<database_backend>
 
    If you are converting from hybserv, see the website for further
    instructions: http://services.ircd-ratbox.org/

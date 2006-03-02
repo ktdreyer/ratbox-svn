@@ -157,6 +157,7 @@ rsdb_exec(rsdb_callback cb, const char *format, ...)
 void
 rsdb_transaction(rsdb_transtype type)
 {
+	/* XXX */
 	if(type == RSDB_TRANS_START)
 		;
 	else if(type == RSDB_TRANS_END)

@@ -1,0 +1,24 @@
+mysql database backend
+----------------------
+
+You must first, as a user with the appropriate access, create the database
+ratbox-services will use, and the user it will connect as.
+
+Create the database via:
+	CREATE DATABASE ratbox_services;
+
+Add the user via:
+	GRANT ALL PRIVILEGES ON ratbox_services TO 'rserv' IDENTIFIED BY
+	'password';
+The password here should just be random.
+
+The schema must then be generated as it depends on length values set at
+compile time:
+	cd /path/to/source/doc/
+	./generate-schema.pl
+
+Then initialise the database:
+	mysql -u rserv -p < /path/to/source/doc/schema-mysql.txt
+
+The username (default: rserv), database name (default: ratbox_services) and
+password must be set in the config for ratbox-services to work.
