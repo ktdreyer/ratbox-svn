@@ -1,3 +1,12 @@
+leeh        2006/03/02 21:15:34 UTC	(20060302_4-21975)
+  Log:
+  - remove doc/schema.txt from this Makefile.in
+  
+
+  Modified:
+	rserv/trunk/Makefile.in (File Modified) 
+
+
 leeh        2006/03/02 20:03:44 UTC	(20060302_3-21973)
   Log:
   - add a variety of warnings that the db tables shouldnt be modified
