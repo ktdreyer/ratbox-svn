@@ -1,3 +1,19 @@
+leeh        2006/03/02 16:01:34 UTC	(20060302_0-21967)
+  Log:
+  - make the database callbacks use (const char **)
+  
+
+  Modified:
+	rserv/trunk/include/rsdb.h (File Modified) 
+	rserv/trunk/src/rsdb_sqlite.c (File Modified) 
+	rserv/trunk/src/s_chanserv.c (File Modified) 
+	rserv/trunk/src/s_jupeserv.c (File Modified) 
+	rserv/trunk/src/s_nickserv.c (File Modified) 
+	rserv/trunk/src/s_operbot.c (File Modified) 
+	rserv/trunk/src/s_operserv.c (File Modified) 
+	rserv/trunk/src/s_userserv.c (File Modified) 
+
+
 leeh        2006/03/01 22:22:47 UTC	(20060301_1-21965)
   Log:
   - add db_host too, to specify hostname to connect to
