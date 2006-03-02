@@ -24,9 +24,6 @@ extern const char *ucase(const char *);
 
 __inline int string_to_array(char *string, char *parv[]);
 
-int rs_snprintf(char *, const size_t, const char *, ...);
-int rs_vsnprintf(char *, const size_t, const char *, va_list);
-
 #ifndef HAVE_STRLCAT
 extern size_t strlcat(char *dst, const char *src, size_t siz);
 #endif

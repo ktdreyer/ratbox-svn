@@ -270,69 +270,6 @@ string_to_array(char *string, char *parv[])
         return x;
 }
 
-int
-rs_snprintf(char *dest, const size_t bytes, const char *format, ...)
-{
-	va_list args;
-	int count;
-
-	va_start(args, format);
-	count = rs_vsnprintf(dest, bytes, format, args);
-	va_end(args);
-
-	return count;
-}
-
-int
-rs_vsnprintf(char *dest, const size_t bytes, const char *format, va_list args)
-{
-	char ch;
-	int written = 0;
-	int maxbytes = (bytes - 1);
-
-	while((ch = *format++) && (written < maxbytes))
-	{
-		if(ch == '%')
-		{
-			ch = *format++;
-
-			if(ch == 'Q')
-			{
-				const char *str = rsdb_quote(va_arg(args, const char *));
-
-				while((*dest = *str))
-				{
-					dest++;
-					str++;
-
-					if(++written >= maxbytes)
-						break;
-				}
-
-				continue;
-			}
-
-			if(ch != '%')
-			{
-				int ret;
-
-				format -= 2;
-				ret = vsnprintf(dest, maxbytes - written, format, args);
-				dest += ret;
-				written += ret;
-
-				break;
-			}
-		}
-
-		*dest++ = ch;
-		written++;
-	}
-
-	*dest = '\0';
-	return written;
-}
-
 /*
  * strlcat and strlcpy were ripped from openssh 2.5.1p2
  * They had the following Copyright info: 

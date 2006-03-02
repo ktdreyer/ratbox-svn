@@ -47,6 +47,7 @@ BSRCS = 		\
 	rserv.c		\
 	scommand.c	\
 	service.c	\
+	snprintf.c	\
 	tools.c		\
         u_stats.c       \
 	ucommand.c

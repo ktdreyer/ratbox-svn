@@ -29,4 +29,8 @@ char *rebuild_params(const char **, int, int);
 
 int valid_servername(const char *);
 
+/* snprintf.c */
+int rs_snprintf(char *, const size_t, const char *, ...);
+int rs_vsnprintf(char *, const size_t, const char *, va_list);
+
 #endif
