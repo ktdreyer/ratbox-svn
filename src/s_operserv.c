@@ -77,7 +77,7 @@ static struct service_handler operserv_service = {
 	60, 80, operserv_command, sizeof(operserv_command), operserv_ucommand, NULL
 };
 
-static int operserv_db_callback(int, char **, char **);
+static int operserv_db_callback(int, const char **, const char **);
 
 void
 init_s_operserv(void)
@@ -91,7 +91,7 @@ init_s_operserv(void)
 }
 
 static int
-operserv_db_callback(int argc, char **argv, char **colnames)
+operserv_db_callback(int argc, const char **argv, const char **colnames)
 {
 	join_service(operserv_p, argv[0], atol(argv[1]), NULL);
 	return 0;

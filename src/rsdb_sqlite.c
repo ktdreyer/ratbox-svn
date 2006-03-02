@@ -92,7 +92,7 @@ static int
 rsdb_callback_func(void *cbfunc, int argc, char **argv, char **colnames)
 {
 	rsdb_callback cb = cbfunc;
-	(cb)(argc, argv, colnames);
+	(cb)(argc, (const char **) argv, (const char **) colnames);
 	return 0;
 }
 

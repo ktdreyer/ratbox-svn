@@ -102,7 +102,7 @@ static struct service_handler userserv_service = {
 	30, 50, userserv_command, sizeof(userserv_command), userserv_ucommand, NULL
 };
 
-static int user_db_callback(int argc, char **argv, char **colnames);
+static int user_db_callback(int argc, const char **argv, const char **colnames);
 static int h_user_burst_login(void *, void *);
 static void e_user_expire(void *unused);
 
@@ -164,7 +164,7 @@ free_user_reg(struct user_reg *ureg_p)
 }
 
 static int
-user_db_callback(int argc, char **argv, char **colnames)
+user_db_callback(int argc, const char **argv, const char **colnames)
 {
 	struct user_reg *reg_p;
 

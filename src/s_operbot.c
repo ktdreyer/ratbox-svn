@@ -77,7 +77,7 @@ static struct service_handler operbot_service = {
 	operbot_command, sizeof(operbot_command), operbot_ucommand, NULL
 };
 
-static int operbot_db_callback(int, char **, char **);
+static int operbot_db_callback(int, const char **, const char **);
 
 void
 init_s_operbot(void)
@@ -91,7 +91,7 @@ init_s_operbot(void)
 }
 
 static int
-operbot_db_callback(int argc, char **argv, char **colnames)
+operbot_db_callback(int argc, const char **argv, const char **colnames)
 {
 	join_service(operbot_p, argv[0], atol(argv[1]), NULL);
 	return 0;
