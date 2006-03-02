@@ -1,3 +1,16 @@
+leeh        2006/03/02 19:58:31 UTC	(20060302_2-21971)
+  Log:
+  - add another XXX in rsdb_mysql.c where I need to fix something
+  - add in specific install files for the database backends
+  
+
+  Modified:
+	rserv/trunk/INSTALL (File Modified) 
+	rserv/trunk/INSTALL.mysql (File Added) 
+	rserv/trunk/INSTALL.sqlite (File Added) 
+	rserv/trunk/src/rsdb_mysql.c (File Modified) 
+
+
 leeh        2006/03/02 19:31:01 UTC	(20060302_1-21969)
   Log:
   - add in the mysql database backend
