@@ -1,3 +1,17 @@
+leeh        2006/03/02 19:31:01 UTC	(20060302_1-21969)
+  Log:
+  - add in the mysql database backend
+  - update configure so it takes --enable-mysql and --enable-sqlite to choose
+    the database backend
+  
+
+  Modified:
+	rserv/trunk/autoconf/configure.in (File Modified) 
+	rserv/trunk/configure (File Modified) 
+	rserv/trunk/src/Makefile.in (File Modified) 
+	rserv/trunk/src/rsdb_mysql.c (File Added) 
+
+
 leeh        2006/03/02 16:01:34 UTC	(20060302_0-21967)
   Log:
   - make the database callbacks use (const char **)
