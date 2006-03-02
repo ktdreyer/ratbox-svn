@@ -192,31 +192,41 @@ else
 	AC_MSG_RESULT(no)
 fi
 
+ac_cv_sqlite_val=""
+ac_cv_mysql_val=""
+ac_cv_sqlite_path=""
+ac_cv_mysql_path=""
 ac_cv_found_sqlite_inc="no"
 ac_cv_found_sqlite_lib="no"
+ac_cv_found_mysql_inc="no"
+ac_cv_found_mysql_lib="no"
+ac_cv_database=""
 
-SQLITE_LIB="-lsqlite"
+
+
+DB_INCLUDES=""
+
+
 
 dnl Try to find SQLite.
-SQLITE_INCLUDES=""
-
 AC_ARG_WITH([sqlitebuild],
 [ --with-sqlitebuild        Forces packaged sqlite to be used for build],
 [ac_cv_sqlitebuild=$withval], [ac_cv_sqlitebuild=no])
 
-AC_ARG_WITH([sqlite],
-[ --with-sqlite=DIR         Path to search for sqlite], 
-[SQLITE_DIR=$withval], [SQLITE_DIR="/usr"])
+AC_ARG_ENABLE(sqlite,
+[ --enable-sqlite[=DIR]     Enable sqlite backend, optionally search 
+                           DIR/include/ for headers and DIR/lib/ for libs],
+[ac_cv_sqlite_val=$enableval], [])
 
 AC_CHECK_HEADER(sqlite.h, 
 [
 	ac_cv_found_sqlite_inc="yes"
 ], [
 	AC_MSG_CHECKING(for sqlite.h in given path)
-	if test -f "$SQLITE_DIR/include/sqlite.h"; then
-		SQLITE_INCLUDES="-I $SQLITE_DIR/include/"
+	if test -f "$ac_cv_sqlite_val/include/sqlite.h"; then
 		AC_MSG_RESULT(yes)
 		ac_cv_found_sqlite_inc="yes"
+		ac_cv_sqlite_path="$ac_cv_sqlite_val"
 	else
 		AC_MSG_RESULT(no)
 	fi
@@ -226,11 +236,8 @@ AC_CHECK_LIB([sqlite], [main],
 [
 	ac_cv_found_sqlite_lib="yes"
 ], [
-	AC_MSG_CHECKING(for main in -lsqlite in given path)
-
-	if test -e "$SQLITE_DIR/lib/libsqlite.so"; then
-		LDFLAGS="$LDFLAGS -L$SQLITE_DIR/lib/"
-		LIBS="$LIBS -lsqlite"
+	AC_MSG_CHECKING(for -lsqlite in given path)
+	if test -e "$ac_cv_sqlite_path/lib/libsqlite.so"; then
 		AC_MSG_RESULT(yes)
 		ac_cv_found_sqlite_lib="yes"
 	else
@@ -238,29 +245,82 @@ AC_CHECK_LIB([sqlite], [main],
 	fi
 ])
 
-AC_MSG_CHECKING(sqlite was found)
+dnl Check for mysql
+AC_ARG_ENABLE(mysql,
+[ --enable-mysql[=DIR]      Enable mysql backend, optionally search
+                           DIR/include/ for headers and DIR/lib/ for libs],
+[ac_cv_mysql_val=$enableval], [])
 
-if test "X$ac_cv_found_sqlite_inc" != "Xyes" ||  
-   test "X$ac_cv_found_sqlite_lib" != "Xyes" || 
-   test "X$ac_cv_sqlitebuild" = "Xyes"; then
-	AC_CONFIG_SUBDIRS(sqlite)
-	AC_DEFINE(SQLITE_BUILD, 1, Build packaged sqlite)
-	SQLITE_INCLUDES="-I ../sqlite/"
-	SQLITE_SUBDIR="sqlite"
-	SQLITE_LIB="../sqlite/libsqlite.a"
-
-	if test "X$ac_cv_sqlitebuild" = "Xyes"; then
-		AC_MSG_RESULT("yes.. building anyway")
+AC_CHECK_HEADER(mysql/mysql.h,
+[
+	ac_cv_found_mysql_inc="yes"
+], [
+	AC_MSG_CHECKING(for mysql/mysql.h in given path)
+	if test -f "$ac_cv_mysql_val/include/mysql/mysql.h"; then
+		AC_MSG_RESULT(yes)
+		ac_cv_found_mysql_inc="yes"
+		ac_cv_mysql_path="$ac_cv_mysql_val"
 	else
 		AC_MSG_RESULT(no)
 	fi
-else
-	AC_MSG_RESULT(yes)
-	SQLITE_SUBDIR=""
-	dnl dont go into sqlite/ if we dont need to.
-	no_recursion="yes"
-fi
+], [])
 
+AC_CHECK_LIB([mysqlclient], [mysql_init],
+[
+	ac_cv_found_mysql_lib="yes"
+], [
+	AC_MSG_CHECKING(for -lmysqlclient in given path)
+	if test -e "$ac_cv_mysql_path/lib/libmysqlclient.so"; then
+		AC_MSG_RESULT(yes)
+		ac_cv_found_mysql_lib="yes"
+	else
+		AC_MSG_RESULT(no)
+	fi
+], [])
+
+dnl dont go into sqlite/ if we dont need to.
+dnl This is here to work round autoconf2.1.x
+no_recursion="yes"
+
+AC_MSG_CHECKING(which database to use)
+
+if test "X$ac_cv_mysql_val" != "X" &&
+   test "X$ac_cv_found_mysql_inc" == "Xyes" &&
+   test "X$ac_cv_found_mysql_lib" == "Xyes"; then
+	AC_MSG_RESULT(mysql)
+	DB_BACKEND="mysql"
+
+	DB_LIBS="$DB_LIBS -lmysqlclient"
+
+	if test "X$ac_cv_mysql_path" != "X"; then
+		DB_INCLUDES="$DB_INCLUDES -I $ac_cv_mysql_path/include/"
+		LDFLAGS="$LDFLAGS -L $ac_cv_mysql_path/lib/"
+	fi
+else
+	if test "X$ac_cv_found_sqlite_inc" == "Xyes" &&
+	   test "X$ac_cv_found_sqlite_lib" == "Xyes"; then
+		AC_MSG_RESULT(sqlite)
+		DB_BACKEND="sqlite"
+
+		DB_LIBS="$DB_LIBS -lsqlite"
+
+		if test "X$ac_cv_sqlite_path" != "X"; then
+			DB_INCLUDES="$DB_INCLUDES -I $ac_cv_sqlite_path/include/"
+			LDFLAGS="$LDFLAGS -L $ac_cv_sqlite_path/lib/"
+		fi
+	else
+		AC_MSG_RESULT(internal packaged sqlite)
+		DB_BACKEND="sqlite"
+		no_recursion="no"
+
+		AC_CONFIG_SUBDIRS(sqlite)
+		AC_DEFINE(SQLITE_BUILD, 1, Build packaged sqlite)
+		SQLITE_SUBDIR="sqlite"
+		DB_INCLUDES="$DB_INCLUDES -I ../sqlite/"
+		DB_LIBS="$DB_LIBS ../sqlite/libsqlite.a"
+	fi
+fi
+	
 AC_ARG_WITH([nicklen],
 [ --with-nicklen=LENGTH     Sets nick length to LENGTH],
 [ac_cv_nicklen=$withval], [ac_cv_nicklen="9"])
@@ -282,9 +342,11 @@ AC_ARG_WITH([userreglen],
 AC_MSG_RESULT("checking registered username length... $ac_cv_userreglen")
 AC_DEFINE_UNQUOTED(USERREGNAME_LEN, (${ac_cv_userreglen}+1), Registered Username Length)
 
-AC_SUBST(SQLITE_INCLUDES)
+AC_SUBST(DB_INCLUDES)
+AC_SUBST(DB_LIBS)
 AC_SUBST(SQLITE_SUBDIR)
-AC_SUBST(SQLITE_LIB)
+
+AC_SUBST(DB_BACKEND)
 
 AC_SUBST(S_NICKSERV)
 AC_SUBST(S_CHANSERV)
@@ -305,6 +367,8 @@ AC_OUTPUT(			\
 echo
 echo Compiling ratbox-services
 echo Installing into: $prefix
+echo
+echo Database backend ........... $DB_BACKEND
 echo
 echo Nickname Services .......... $cf_enable_nickserv
 echo User Services .............. $cf_enable_userserv

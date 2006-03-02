@@ -8,10 +8,10 @@ LEX=@LEX@
 LEXLIB=@LEXLIB@
 YACC=@YACC@
 BIN=ratbox-services@EXEEXT@
-INCLUDES=-I ../include/ @SQLITE_INCLUDES@
+INCLUDES=-I ../include/ @DB_INCLUDES@
 LDFLAGS=@LDFLAGS@
 LIBS=@LIBS@
-SQLITE_LIB=@SQLITE_LIB@
+DB_LIBS=@DB_LIBS@
 MAKE = make
 
 prefix=@prefix@
@@ -52,14 +52,14 @@ BSRCS = 		\
 	ucommand.c
 
 SRCS = ${BSRCS} @S_NICKSERV@ @S_USERSERV@ @S_CHANSERV@ @S_OPERSERV@ @S_ALIS@\
-	@S_OPERBOT@ @S_JUPESERV@ @S_GLOBAL@ @S_BANSERV@ rsdb_sqlite.c
+	@S_OPERBOT@ @S_JUPESERV@ @S_GLOBAL@ @S_BANSERV@ rsdb_@DB_BACKEND@.c
 
 OBJS=$(SRCS:.c=.o)
 
 all: $(BIN)
 
 $(BIN): $(OBJS) y.tab.o lex.yy.o
-	${CC} ${CFLAGS} ${LDFLAGS} -o $@ ${OBJS} y.tab.o lex.yy.o $(SQLITE_LIB) $(LIBS) $(LEXLIB)
+	${CC} ${CFLAGS} ${LDFLAGS} -o $@ ${OBJS} y.tab.o lex.yy.o $(DB_LIBS) $(LIBS) $(LEXLIB)
 
 .c.o:
 	${CC} $(INCLUDES) ${CFLAGS} -c $<
