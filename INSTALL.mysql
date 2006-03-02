@@ -1,6 +1,11 @@
 mysql database backend
 ----------------------
 
+**************************************************************
+* EVEN THOUGH YOU ARE USING MYSQL, DO NOT ALTER ANY DATABASE *
+* TABLES WITHOUT FIRST READING doc/database_mod.txt          *
+**************************************************************
+
 You must first, as a user with the appropriate access, create the database
 ratbox-services will use, and the user it will connect as.
 

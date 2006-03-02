@@ -3,6 +3,15 @@ $Id$
 ratbox-services installation guide
 ----------------------------------
 
+IMPORTANT: ratbox-services maintains a large amount of state in RAM.  See
+doc/database_mod.txt for more information.
+
+
+*********************************************************
+* MOST TABLES MUST NOT BE MODIFIED WHILST IT IS RUNNING *
+*********************************************************
+
+
 1. Decide which services you dont want compiled in.  By default all 
    will be compiled in, as they can be disabled in the config file.
    These can be listed via ./configure --help
