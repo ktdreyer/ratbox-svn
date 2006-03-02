@@ -1,3 +1,17 @@
+leeh        2006/03/02 21:58:56 UTC	(20060302_5-21977)
+  Log:
+  - port over the full vsnprintf() from ircd-ratbox, and make this die() if it
+    gets a format string it cant handle
+  
+
+  Modified:
+	rserv/trunk/include/rserv.h (File Modified) 
+	rserv/trunk/include/tools.h (File Modified) 
+	rserv/trunk/src/Makefile.in (File Modified) 
+	rserv/trunk/src/snprintf.c (File Added) 
+	rserv/trunk/src/tools.c (File Modified) 
+
+
 leeh        2006/03/02 21:15:34 UTC	(20060302_4-21975)
   Log:
   - remove doc/schema.txt from this Makefile.in
