@@ -79,12 +79,6 @@ rsdb_quote(const char *src)
 	return buf;
 }
 
-static int
-rsdb_callback_func(void *cbfunc, int argc, char **argv, char **colnames)
-{
-	rsdb_callback cb = cbfunc;
-}
-
 void
 rsdb_exec(rsdb_callback cb, const char *format, ...)
 {
@@ -114,9 +108,7 @@ rsdb_exec(rsdb_callback cb, const char *format, ...)
 	field_count = mysql_field_count(rsdb_database);
 
 	if(field_count > RSDB_MAXCOLS)
-	{
-		die("foo"); /* XXX */
-	}
+		die("too many columns in result set -- contact the ratbox team"); /* XXX */
 
 	if(!field_count || !cb)
 		return;
@@ -139,7 +131,6 @@ rsdb_exec(rsdb_callback cb, const char *format, ...)
 
 	while((row = mysql_fetch_row(rsdb_result)))
 	{
-		/* const char ** cast? */
 		for(i = 0; i < field_count; i++)
 		{
 			coldata[i] = row[i];
@@ -149,7 +140,12 @@ rsdb_exec(rsdb_callback cb, const char *format, ...)
 		(cb)((int) field_count, coldata, colnames);
 	}
 
-	/* XXX error? */
+	if(mysql_errno(rsdb_database))
+	{
+		mlog("fatal error: problem with db file: %s",
+			mysql_error(rsdb_database));
+		die("problem with db file");
+	}
 
 	mysql_free_result(rsdb_result);
 }
@@ -221,7 +217,6 @@ rsdb_step(int *ncol, const char ***coldata, const char ***colnames)
 
 	while((row = mysql_fetch_row(rsdb_result)))
 	{
-		/* const char ** cast? */
 		for(i = 0; i < rsdb_field_count; i++)
 		{
 			*coldata[i] = row[i];
@@ -229,13 +224,20 @@ rsdb_step(int *ncol, const char ***coldata, const char ***colnames)
 		*coldata[i] = NULL;
 	}
 
-	/* xxx error check */
+	if(mysql_errno(rsdb_database))
+	{
+		mlog("fatal error: problem with db file: %s",
+			mysql_error(rsdb_database));
+		die("problem with db file");
+	}
+
 	return 1;
 }
 
 void
 rsdb_step_end(void)
 {
+	/* skip any remaining rows.. */
 	while(mysql_fetch_row(rsdb_result))
 		;
 
