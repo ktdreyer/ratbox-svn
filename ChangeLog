@@ -1,3 +1,12 @@
+leeh        2006/03/03 21:17:10 UTC	(20060303_0-21979)
+  Log:
+  - add in some error checking and tidy up the code a bit
+  
+
+  Modified:
+	rserv/trunk/src/rsdb_mysql.c (File Modified) 
+
+
 leeh        2006/03/02 21:58:56 UTC	(20060302_5-21977)
   Log:
   - port over the full vsnprintf() from ircd-ratbox, and make this die() if it
