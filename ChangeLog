@@ -1,3 +1,28 @@
+leeh        2006/03/04 21:53:09 UTC	(20060304_2-21985)
+  Log:
+  - conf parser depends on having services client pointers, so load these
+    before we parse the conf.  database depends on conf, so do that after and
+    then call a post init function in services.
+  
+
+  Modified:
+	rserv/trunk/include/c_init.h (File Modified) 
+	rserv/trunk/include/client.h (File Modified) 
+	rserv/trunk/include/service.h (File Modified) 
+	rserv/trunk/src/rsdb_mysql.c (File Modified) 
+	rserv/trunk/src/rserv.c (File Modified) 
+	rserv/trunk/src/s_alis.c (File Modified) 
+	rserv/trunk/src/s_banserv.c (File Modified) 
+	rserv/trunk/src/s_chanserv.c (File Modified) 
+	rserv/trunk/src/s_global.c (File Modified) 
+	rserv/trunk/src/s_jupeserv.c (File Modified) 
+	rserv/trunk/src/s_nickserv.c (File Modified) 
+	rserv/trunk/src/s_operbot.c (File Modified) 
+	rserv/trunk/src/s_operserv.c (File Modified) 
+	rserv/trunk/src/s_userserv.c (File Modified) 
+	rserv/trunk/src/service.c (File Modified) 
+
+
 leeh        2006/03/04 21:49:34 UTC	(20060304_1-21983)
   Log:
   - dont attempt to do anything to a channels modestrings if they dont
