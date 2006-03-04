@@ -1,3 +1,13 @@
+leeh        2006/03/04 21:40:44 UTC	(20060304_0-21981)
+  Log:
+  - make configure properly follow --with-sqlitebuild
+  
+
+  Modified:
+	rserv/trunk/autoconf/configure.in (File Modified) 
+	rserv/trunk/configure (File Modified) 
+
+
 leeh        2006/03/03 21:17:10 UTC	(20060303_0-21979)
   Log:
   - add in some error checking and tidy up the code a bit
