@@ -940,6 +940,9 @@ static struct ConfEntry conf_serverinfo_table[] =
 	{ "ping_time",		CF_TIME,    NULL, 0, &config_file.ping_time	},
 	{ "ratbox",		CF_YESNO,   NULL, 0, &config_file.ratbox	},
 	{ "name",		CF_QSTRING, conf_set_serverinfo_name, 0, NULL	},
+	{ "email_program",	CF_QSTRING, NULL, 0, &config_file.email_program },
+	{ "email_name",		CF_QSTRING, NULL, 0, &config_file.email_name	},
+	{ "email_address",	CF_QSTRING, NULL, 0, &config_file.email_address },
 	{ "\0", 0, NULL, 0, NULL }
 };
 

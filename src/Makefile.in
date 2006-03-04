@@ -37,6 +37,7 @@ BSRCS = 		\
 	client.c	\
 	crypt.c		\
 	conf.c		\
+	email.c		\
 	event.c		\
 	hook.c		\
 	io.c		\

@@ -41,6 +41,10 @@ struct _config_file
 	char *db_username;
 	char *db_password;
 
+	char *email_program;
+	char *email_name;
+	char *email_address;
+
 	/* userserv */
 	int disable_uregister;
 	char *uregister_url;
