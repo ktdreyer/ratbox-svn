@@ -470,32 +470,38 @@ channel_db_callback(int argc, const char **argv, const char **colnames)
 	if(!EmptyString(argv[2]))
 		reg_p->url = my_strdup(argv[2]);
 
-	memset(&mode, 0, sizeof(struct chmode));
-	tmpmode = LOCAL_COPY(argv[3]);
-	modec = string_to_array(tmpmode, modev);
-
-	if(parse_simple_mode(&mode, (const char **) modev, modec, 0))
+	if(!EmptyString(argv[3]))
 	{
-		reg_p->cmode.mode = mode.mode;
-		reg_p->cmode.limit = mode.limit;
+		memset(&mode, 0, sizeof(struct chmode));
+		tmpmode = LOCAL_COPY(argv[3]);
+		modec = string_to_array(tmpmode, modev);
 
-		if(mode.key[0])
-			strlcpy(reg_p->cmode.key, mode.key,
-				sizeof(reg_p->cmode.key));
+		if(parse_simple_mode(&mode, (const char **) modev, modec, 0))
+		{
+			reg_p->cmode.mode = mode.mode;
+			reg_p->cmode.limit = mode.limit;
+
+			if(mode.key[0])
+				strlcpy(reg_p->cmode.key, mode.key,
+					sizeof(reg_p->cmode.key));
+		}
 	}
 
-	memset(&mode, 0, sizeof(struct chmode));
-	tmpmode = LOCAL_COPY(argv[4]);
-	modec = string_to_array(tmpmode, modev);
-
-	if(parse_simple_mode(&mode, (const char **) modev, modec, 0))
+	if(!EmptyString(argv[4]))
 	{
-		reg_p->emode.mode = mode.mode;
-		reg_p->emode.limit = mode.limit;
+		memset(&mode, 0, sizeof(struct chmode));
+		tmpmode = LOCAL_COPY(argv[4]);
+		modec = string_to_array(tmpmode, modev);
 
-		if(mode.key[0])
-			strlcpy(reg_p->emode.key, mode.key,
-				sizeof(reg_p->emode.key));
+		if(parse_simple_mode(&mode, (const char **) modev, modec, 0))
+		{
+			reg_p->emode.mode = mode.mode;
+			reg_p->emode.limit = mode.limit;
+
+			if(mode.key[0])
+				strlcpy(reg_p->emode.key, mode.key,
+					sizeof(reg_p->emode.key));
+		}
 	}
 
 	reg_p->tsinfo = atol(argv[5]);
