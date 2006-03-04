@@ -58,11 +58,11 @@ static struct service_command alis_command[] =
 
 static struct service_handler alis_service = {
 	"ALIS", "ALIS", "alis", "services.int", "Advanced List Service",
-        60, 80, alis_command, sizeof(alis_command), NULL, NULL
+        60, 80, alis_command, sizeof(alis_command), NULL, NULL, NULL
 };
 
 void
-init_s_alis(void)
+preinit_s_alis(void)
 {
 	alis_p = add_service(&alis_service);
 }

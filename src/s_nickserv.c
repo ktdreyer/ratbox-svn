@@ -47,6 +47,8 @@
 #include "balloc.h"
 #include "hook.h"
 
+static void init_s_nickserv(void);
+
 static struct client *nickserv_p;
 static BlockHeap *nick_reg_heap;
 
@@ -84,16 +86,20 @@ static struct ucommand_handler nickserv_ucommand[] =
 static struct service_handler nick_service = {
 	"NICKSERV", "NICKSERV", "nickserv", "services.int",
 	"Nickname Registration Service", 60, 80, 
-	nickserv_command, sizeof(nickserv_command), nickserv_ucommand, NULL
+	nickserv_command, sizeof(nickserv_command), nickserv_ucommand, init_s_nickserv, NULL
 };
 
 static int nick_db_callback(int, const char **, const char **);
 
 void
-init_s_nickserv(void)
+preinit_s_nickserv(void)
 {
 	nickserv_p = add_service(&nick_service);
+}
 
+static void
+init_s_nickserv(void)
+{
 	nick_reg_heap = BlockHeapCreate(sizeof(struct nick_reg), HEAP_NICK_REG);
 
 	rsdb_exec(nick_db_callback, 

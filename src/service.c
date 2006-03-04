@@ -50,6 +50,21 @@
 
 dlink_list service_list;
 
+void
+init_services(void)
+{
+	struct client *service_p;
+	dlink_node *ptr;
+
+	DLINK_FOREACH(ptr, service_list.head)
+	{
+		service_p = ptr->data;
+
+		if(service_p->service->init)
+			(service_p->service->init)();
+	}
+}
+
 typedef int (*bqcmp)(const void *, const void *);
 static int
 scmd_sort(struct service_command *one, struct service_command *two)
@@ -226,6 +241,7 @@ add_service(struct service_handler *service)
 	client_p->service->command = service->command;
 	client_p->service->command_size = service->command_size;
         client_p->service->ucommand = service->ucommand;
+	client_p->service->init = service->init;
         client_p->service->stats = service->stats;
 	client_p->service->loglevel = 1;
 

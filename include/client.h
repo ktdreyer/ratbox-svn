@@ -98,6 +98,8 @@ struct service
 
 	struct cachefile *help;
 	struct cachefile *helpadmin;
+
+	void (*init)(void);
         void (*stats)(struct lconn *, const char **, int);
 };
 

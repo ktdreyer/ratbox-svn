@@ -297,8 +297,6 @@ main(int argc, char *argv[])
 	/* tools requires balloc */
 	init_tools();
 
-	rsdb_init();
-
 	/* commands require cache */
 	init_cache();
 	init_scommand();
@@ -306,41 +304,43 @@ main(int argc, char *argv[])
 	init_client();
 	init_channel();
 
+	/* pre initialise our services so the conf parser is ok, these
+	 * require the balloc, events and init_client()
+	 */
+#ifdef ENABLE_ALIS
+	preinit_s_alis();
+#endif
+#ifdef ENABLE_OPERBOT
+	preinit_s_operbot();
+#endif
+#ifdef ENABLE_USERSERV
+	preinit_s_userserv();
+#ifdef ENABLE_CHANSERV
+	preinit_s_chanserv();
+#endif
+#ifdef ENABLE_NICKSERV
+	preinit_s_nickserv();
+#endif
+#endif
+#ifdef ENABLE_OPERSERV
+	preinit_s_operserv();
+#endif
+#ifdef ENABLE_JUPESERV
+	preinit_s_jupeserv();
+#endif
+#ifdef ENABLE_GLOBAL
+	preinit_s_global();
+#endif
+#ifdef ENABLE_BANSERV
+	preinit_s_banserv();
+#endif
+
 	/* load specific commands */
         add_scommand_handler(&error_command);
 	add_scommand_handler(&mode_command);
 	add_scommand_handler(&privmsg_command);
 
         add_ucommand_handler(NULL, &stats_ucommand);
-
-	/* load our services.. */
-#ifdef ENABLE_ALIS
-	init_s_alis();
-#endif
-#ifdef ENABLE_OPERBOT
-	init_s_operbot();
-#endif
-#ifdef ENABLE_USERSERV
-	init_s_userserv();
-#ifdef ENABLE_CHANSERV
-	init_s_chanserv();
-#endif
-#ifdef ENABLE_NICKSERV
-	init_s_nickserv();
-#endif
-#endif
-#ifdef ENABLE_OPERSERV
-	init_s_operserv();
-#endif
-#ifdef ENABLE_JUPESERV
-	init_s_jupeserv();
-#endif
-#ifdef ENABLE_GLOBAL
-	init_s_global();
-#endif
-#ifdef ENABLE_BANSERV
-	init_s_banserv();
-#endif
 
 	first_time = CURRENT_TIME;
 
@@ -357,6 +357,12 @@ main(int argc, char *argv[])
 		fprintf(stderr, "\nConf check finished\n");
 		exit(0);
 	}
+
+	/* must be done after parsing the config, for database {}; */
+	rsdb_init();
+
+	/* db must be done before this */
+	init_services();
 
 	eventAdd("update_service_floodcount", update_service_floodcount, 
 		NULL, 1);

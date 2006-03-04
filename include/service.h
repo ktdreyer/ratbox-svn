@@ -40,6 +40,7 @@ struct service_handler
 	unsigned long command_size;
         struct ucommand_handler *ucommand;
 
+	void (*init)(void);
         void (*stats)(struct lconn *, const char **, int);
 };
 
@@ -48,6 +49,8 @@ extern dlink_list service_list;
 #define OPER_NAME(client_p, conn_p) ((conn_p) ? (conn_p)->name : (client_p)->user->oper->name)
 
 extern void rehash_help(void);
+
+void init_services(void);
 
 extern struct client *add_service();
 extern struct client *find_service_id(const char *name);

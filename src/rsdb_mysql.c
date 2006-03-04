@@ -48,6 +48,12 @@ unsigned int rsdb_field_count;
 void
 rsdb_init(void)
 {
+	if(EmptyString(config_file.db_name) || EmptyString(config_file.db_host) ||
+	   EmptyString(config_file.db_username) || EmptyString(config_file.db_password))
+	{
+		die("Missing conf options in database {};");
+	}
+
 	if((rsdb_database = mysql_init(NULL)) == NULL)
 		die("Out of memory -- failed to initialise mysql pointer");
 

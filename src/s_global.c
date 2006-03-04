@@ -60,11 +60,11 @@ static struct ucommand_handler global_ucommand[] =
 static struct service_handler global_service = {
 	"GLOBAL", "GLOBAL", "global", "services.int",
 	"Network Message Service", 60, 80, 
-	global_command, sizeof(global_command), global_ucommand, NULL
+	global_command, sizeof(global_command), global_ucommand, NULL, NULL
 };
 
 void
-init_s_global(void)
+preinit_s_global(void)
 {
 	global_p = add_service(&global_service);
 

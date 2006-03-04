@@ -11,15 +11,15 @@ extern struct scommand_handler privmsg_command;
 /* c_mode.c */
 extern struct scommand_handler mode_command;
 
-void init_s_alis(void);
-void init_s_operbot(void);
-void init_s_userserv(void);
-void init_s_chanserv(void);
-void init_s_jupeserv(void);
-void init_s_operserv(void);
-void init_s_nickserv(void);
-void init_s_global(void);
-void init_s_banserv(void);
+void preinit_s_alis(void);
+void preinit_s_operbot(void);
+void preinit_s_userserv(void);
+void preinit_s_chanserv(void);
+void preinit_s_jupeserv(void);
+void preinit_s_operserv(void);
+void preinit_s_nickserv(void);
+void preinit_s_global(void);
+void preinit_s_banserv(void);
 
 /* u_stats.c */
 extern struct ucommand_handler stats_ucommand;

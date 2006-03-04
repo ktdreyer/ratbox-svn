@@ -46,6 +46,8 @@
 #include "modebuild.h"
 #include "log.h"
 
+static void init_s_operserv(void);
+
 static struct client *operserv_p;
 
 static int o_oper_takeover(struct client *, struct lconn *, const char **, int);
@@ -74,16 +76,20 @@ static struct ucommand_handler operserv_ucommand[] =
 
 static struct service_handler operserv_service = {
 	"OPERSERV", "OPERSERV", "operserv", "services.int", "Oper Services",
-	60, 80, operserv_command, sizeof(operserv_command), operserv_ucommand, NULL
+	60, 80, operserv_command, sizeof(operserv_command), operserv_ucommand, init_s_operserv, NULL
 };
 
 static int operserv_db_callback(int, const char **, const char **);
 
 void
-init_s_operserv(void)
+preinit_s_operserv(void)
 {
 	operserv_p = add_service(&operserv_service);
+}
 
+static void
+init_s_operserv(void)
+{
 	rsdb_exec(operserv_db_callback, 
 			"SELECT chname, tsinfo FROM operserv");
 

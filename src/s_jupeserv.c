@@ -61,6 +61,8 @@ struct server_jupe
 static dlink_list pending_jupes;
 static dlink_list active_jupes;
 
+static void init_s_jupeserv(void);
+
 static struct client *jupeserv_p;
 
 static int o_jupeserv_jupe(struct client *, struct lconn *, const char **, int);
@@ -89,7 +91,7 @@ static struct ucommand_handler jupeserv_ucommand[] =
 static struct service_handler jupe_service = {
 	"JUPESERV", "jupeserv", "jupeserv", "services.int",
 	"Jupe Services", 60, 80,
-	jupeserv_command, sizeof(jupeserv_command), jupeserv_ucommand, NULL
+	jupeserv_command, sizeof(jupeserv_command), jupeserv_ucommand, init_s_jupeserv, NULL
 };
 
 static int jupe_db_callback(int argc, const char **argv, const char **colnames);
@@ -98,10 +100,14 @@ static int h_jupeserv_finburst(void *unused, void *unused2);
 static void e_jupeserv_expire(void *unused);
 
 void
-init_s_jupeserv(void)
+preinit_s_jupeserv(void)
 {
 	jupeserv_p = add_service(&jupe_service);
+}
 
+static void
+init_s_jupeserv(void)
+{
 	hook_add(h_jupeserv_squit, HOOK_SQUIT_UNKNOWN);
 	hook_add(h_jupeserv_finburst, HOOK_FINISHED_BURSTING);
 	eventAdd("e_jupeserv_expire", e_jupeserv_expire, NULL, 60);

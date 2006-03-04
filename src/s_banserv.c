@@ -90,7 +90,7 @@ static struct ucommand_handler banserv_ucommand[] =
 static struct service_handler banserv_service = {
 	"BANSERV", "BANSERV", "banserv", "services.int",
 	"Global Ban Service", 60, 80, 
-	banserv_command, sizeof(banserv_command), banserv_ucommand, NULL
+	banserv_command, sizeof(banserv_command), banserv_ucommand, NULL, NULL
 };
 
 static void e_banserv_expire(void *unused);
@@ -100,7 +100,7 @@ static void push_unban(const char *target, char type, const char *mask);
 static void sync_bans(const char *target, char banletter);
 
 void
-init_s_banserv(void)
+preinit_s_banserv(void)
 {
 	banserv_p = add_service(&banserv_service);
 

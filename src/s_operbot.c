@@ -46,6 +46,8 @@
 #include "ucommand.h"
 #include "newconf.h"
 
+static void init_s_operbot(void);
+
 static struct client *operbot_p;
 
 static int o_operbot_objoin(struct client *, struct lconn *, const char **, int);
@@ -74,16 +76,20 @@ static struct ucommand_handler operbot_ucommand[] =
 static struct service_handler operbot_service = {
 	"OPERBOT", "operbot", "operbot", "services.int",
 	"Oper invitation/op services", 60, 80, 
-	operbot_command, sizeof(operbot_command), operbot_ucommand, NULL
+	operbot_command, sizeof(operbot_command), operbot_ucommand, init_s_operbot, NULL
 };
 
 static int operbot_db_callback(int, const char **, const char **);
 
 void
-init_s_operbot(void)
+preinit_s_operbot(void)
 {
 	operbot_p = add_service(&operbot_service);
+}
 
+static void
+init_s_operbot(void)
+{
 	rsdb_exec(operbot_db_callback,
 			"SELECT chname, tsinfo FROM operbot");
 

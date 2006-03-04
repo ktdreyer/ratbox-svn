@@ -65,6 +65,8 @@
  */
 #define REASON_MAGIC	50
 
+static void init_s_chanserv(void);
+
 static struct client *chanserv_p;
 static BlockHeap *channel_reg_heap;
 static BlockHeap *member_reg_heap;
@@ -149,7 +151,7 @@ static struct ucommand_handler chanserv_ucommand[] =
 
 static struct service_handler chanserv_service = {
 	"CHANSERV", "CHANSERV", "chanserv", "services.int", "Channel Service",
-	30, 50, chanserv_command, sizeof(chanserv_command), chanserv_ucommand, NULL
+	30, 50, chanserv_command, sizeof(chanserv_command), chanserv_ucommand, init_s_chanserv, NULL
 };
 
 static void load_channel_db(void);
@@ -170,13 +172,18 @@ static void dump_info_extended(struct client *, struct lconn *, struct chan_reg 
 static void dump_info_accesslist(struct client *, struct lconn *, struct chan_reg *);
 
 void
+preinit_s_chanserv(void)
+{
+	chanserv_p = add_service(&chanserv_service);
+}
+
+static void
 init_s_chanserv(void)
 {
 	channel_reg_heap = BlockHeapCreate(sizeof(struct chan_reg), HEAP_CHANNEL_REG);
 	member_reg_heap = BlockHeapCreate(sizeof(struct member_reg), HEAP_MEMBER_REG);
 	ban_reg_heap = BlockHeapCreate(sizeof(struct ban_reg), HEAP_BAN_REG);
 
-	chanserv_p = add_service(&chanserv_service);
 	load_channel_db();
 
 	hook_add(h_chanserv_join, HOOK_JOIN_CHANNEL);

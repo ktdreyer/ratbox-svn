@@ -50,6 +50,8 @@
 #include "event.h"
 #include "hook.h"
 
+static void init_s_userserv(void);
+
 static struct client *userserv_p;
 static BlockHeap *user_reg_heap;
 
@@ -99,7 +101,7 @@ static struct ucommand_handler userserv_ucommand[] =
 
 static struct service_handler userserv_service = {
 	"USERSERV", "USERSERV", "userserv", "services.int", "User Auth Services",
-	30, 50, userserv_command, sizeof(userserv_command), userserv_ucommand, NULL
+	30, 50, userserv_command, sizeof(userserv_command), userserv_ucommand, init_s_userserv, NULL
 };
 
 static int user_db_callback(int argc, const char **argv, const char **colnames);
@@ -111,11 +113,15 @@ static void dump_user_info(struct client *, struct lconn *, struct user_reg *);
 static int valid_email(const char *email);
 
 void
+preinit_s_userserv(void)
+{
+	userserv_p = add_service(&userserv_service);
+}
+
+static void
 init_s_userserv(void)
 {
 	user_reg_heap = BlockHeapCreate(sizeof(struct user_reg), HEAP_USER_REG);
-
-	userserv_p = add_service(&userserv_service);
 
 	rsdb_exec(user_db_callback, 
 			"SELECT username, password, email, suspender, "
