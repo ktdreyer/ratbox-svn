@@ -2392,7 +2392,8 @@ echo "configure:2392: checking which database to use" >&5
 
 if test "X$ac_cv_mysql_val" != "X" &&
    test "X$ac_cv_found_mysql_inc" == "Xyes" &&
-   test "X$ac_cv_found_mysql_lib" == "Xyes"; then
+   test "X$ac_cv_found_mysql_lib" == "Xyes" &&
+   test "X$ac_cv_sqlitebuild" != "Xyes"; then
 	echo "$ac_t""mysql" 1>&6
 	DB_BACKEND="mysql"
 
@@ -2404,7 +2405,8 @@ if test "X$ac_cv_mysql_val" != "X" &&
 	fi
 else
 	if test "X$ac_cv_found_sqlite_inc" == "Xyes" &&
-	   test "X$ac_cv_found_sqlite_lib" == "Xyes"; then
+	   test "X$ac_cv_found_sqlite_lib" == "Xyes" &&
+	   test "X$ac_cv_sqlitebuild" != "Xyes"; then
 		echo "$ac_t""sqlite" 1>&6
 		DB_BACKEND="sqlite"
 
