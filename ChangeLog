@@ -1,3 +1,13 @@
+leeh        2006/03/04 21:49:34 UTC	(20060304_1-21983)
+  Log:
+  - dont attempt to do anything to a channels modestrings if they dont
+    actually exist
+  
+
+  Modified:
+	rserv/trunk/src/s_chanserv.c (File Modified) 
+
+
 leeh        2006/03/04 21:40:44 UTC	(20060304_0-21981)
   Log:
   - make configure properly follow --with-sqlitebuild
