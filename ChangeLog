@@ -1,3 +1,12 @@
+leeh        2006/03/04 22:02:54 UTC	(20060304_3-21987)
+  Log:
+  - fix rsdb_step() so it actually works on real memory
+  
+
+  Modified:
+	rserv/trunk/src/rsdb_mysql.c (File Modified) 
+
+
 leeh        2006/03/04 21:53:09 UTC	(20060304_2-21985)
   Log:
   - conf parser depends on having services client pointers, so load these
