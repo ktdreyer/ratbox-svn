@@ -1,3 +1,17 @@
+leeh        2006/03/04 23:48:02 UTC	(20060304_5-21991)
+  Log:
+  - add code for sending emails
+  
+
+  Modified:
+	rserv/trunk/doc/example.conf (File Modified) 
+	rserv/trunk/include/conf.h (File Modified) 
+	rserv/trunk/include/email.h (File Added) 
+	rserv/trunk/src/Makefile.in (File Modified) 
+	rserv/trunk/src/email.c (File Added) 
+	rserv/trunk/src/newconf.c (File Modified) 
+
+
 leeh        2006/03/04 22:10:30 UTC	(20060304_4-21989)
   Log:
   - rsdb_step() shouldnt be using a while() loop, and def shouldnt be
