@@ -1,3 +1,13 @@
+leeh        2006/03/04 22:10:30 UTC	(20060304_4-21989)
+  Log:
+  - rsdb_step() shouldnt be using a while() loop, and def shouldnt be
+    returning 1 when there isnt a row left..
+  
+
+  Modified:
+	rserv/trunk/src/rsdb_mysql.c (File Modified) 
+
+
 leeh        2006/03/04 22:02:54 UTC	(20060304_3-21987)
   Log:
   - fix rsdb_step() so it actually works on real memory
