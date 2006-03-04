@@ -114,7 +114,7 @@ rsdb_exec(rsdb_callback cb, const char *format, ...)
 	field_count = mysql_field_count(rsdb_database);
 
 	if(field_count > RSDB_MAXCOLS)
-		die("too many columns in result set -- contact the ratbox team"); /* XXX */
+		die("too many columns in result set -- contact the ratbox team");
 
 	if(!field_count || !cb)
 		return;
@@ -215,7 +215,14 @@ rsdb_step(int *ncol, const char ***cb_coldata, const char ***cb_colnames)
 	if(!rsdb_field_count)
 		return 0;
 
+	*ncol = rsdb_field_count;
+	*cb_coldata = coldata;
+	*cb_colnames = colnames;
+
 	fields = mysql_fetch_fields(rsdb_result);
+
+	if(rsdb_field_count > RSDB_MAXCOLS)
+		die("too many columns in result set -- contact the ratbox team");
 
 	for(i = 0; i < rsdb_field_count; i++)
 	{
@@ -223,13 +230,15 @@ rsdb_step(int *ncol, const char ***cb_coldata, const char ***cb_colnames)
 	}
 	colnames[i] = NULL;
 
-	while((row = mysql_fetch_row(rsdb_result)))
+	if((row = mysql_fetch_row(rsdb_result)))
 	{
 		for(i = 0; i < rsdb_field_count; i++)
 		{
 			coldata[i] = row[i];
 		}
 		coldata[i] = NULL;
+
+		return 1;
 	}
 
 	if(mysql_errno(rsdb_database))
@@ -239,11 +248,7 @@ rsdb_step(int *ncol, const char ***cb_coldata, const char ***cb_colnames)
 		die("problem with db file");
 	}
 
-	*ncol = fields;
-	*cb_coldata = coldata;
-	*cb_colnames = colnames;
-
-	return 1;
+	return 0;
 }
 
 void
