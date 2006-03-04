@@ -204,8 +204,10 @@ rsdb_step_init(const char *format, ...)
 }
 
 int
-rsdb_step(int *ncol, const char ***coldata, const char ***colnames)
+rsdb_step(int *ncol, const char ***cb_coldata, const char ***cb_colnames)
 {
+	static const char *colnames[RSDB_MAXCOLS+1];
+	static const char *coldata[RSDB_MAXCOLS+1];
 	MYSQL_ROW row;
 	MYSQL_FIELD *fields;
 	int i;
@@ -217,17 +219,17 @@ rsdb_step(int *ncol, const char ***coldata, const char ***colnames)
 
 	for(i = 0; i < rsdb_field_count; i++)
 	{
-		*colnames[i] = fields[i].name;
+		colnames[i] = fields[i].name;
 	}
-	*colnames[i] = NULL;
+	colnames[i] = NULL;
 
 	while((row = mysql_fetch_row(rsdb_result)))
 	{
 		for(i = 0; i < rsdb_field_count; i++)
 		{
-			*coldata[i] = row[i];
+			coldata[i] = row[i];
 		}
-		*coldata[i] = NULL;
+		coldata[i] = NULL;
 	}
 
 	if(mysql_errno(rsdb_database))
@@ -236,6 +238,10 @@ rsdb_step(int *ncol, const char ***coldata, const char ***colnames)
 			mysql_error(rsdb_database));
 		die("problem with db file");
 	}
+
+	*ncol = fields;
+	*cb_coldata = coldata;
+	*cb_colnames = colnames;
 
 	return 1;
 }
