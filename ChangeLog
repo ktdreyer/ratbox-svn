@@ -1,3 +1,25 @@
+leeh        2006/03/05 14:10:06 UTC	(20060305_0-21993)
+  Log:
+  - add dlink_add_before(), to add a node before another one in a given list
+  - add welcome messages to the global service, messages sent whenever a user
+    connects to the network.
+  
+
+  Modified:
+	rserv/trunk/help/global/addwelcome (File Added) 
+	rserv/trunk/help/global/delwelcome (File Added) 
+	rserv/trunk/help/global/general (File Modified) 
+	rserv/trunk/help/global/index (File Modified) 
+	rserv/trunk/help/global/index-admin (File Modified) 
+	rserv/trunk/help/global/u-addwelcome (File Added) 
+	rserv/trunk/help/global/u-delwelcome (File Added) 
+	rserv/trunk/include/conf.h (File Modified) 
+	rserv/trunk/include/tools.h (File Modified) 
+	rserv/trunk/src/newconf.c (File Modified) 
+	rserv/trunk/src/s_global.c (File Modified) 
+	rserv/trunk/src/tools.c (File Modified) 
+
+
 leeh        2006/03/04 23:48:02 UTC	(20060304_5-21991)
   Log:
   - add code for sending emails
