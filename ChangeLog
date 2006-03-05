@@ -1,3 +1,15 @@
+leeh        2006/03/05 14:12:20 UTC	(20060305_1-21995)
+  Log:
+  - add global welcome priv to example.conf
+  - update schema with global_welcome table
+  
+
+  Modified:
+	rserv/trunk/doc/base/schema-mysql.txt (File Modified) 
+	rserv/trunk/doc/example.conf (File Modified) 
+	rserv/trunk/doc/schema-sqlite.txt (File Modified) 
+
+
 leeh        2006/03/05 14:10:06 UTC	(20060305_0-21993)
   Log:
   - add dlink_add_before(), to add a node before another one in a given list
