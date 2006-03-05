@@ -84,6 +84,7 @@ static struct mode_table operbot_table[] = {
 
 static struct mode_table global_table[] = {
 	{ "netmsg",	CONF_OPER_GLOB_NETMSG	},
+	{ "welcome",	CONF_OPER_GLOB_WELCOME	},
 	{ "\0",		0			}
 };
 

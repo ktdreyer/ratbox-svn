@@ -101,6 +101,7 @@ extern void free_dlink_node(dlink_node *lp);
 extern void dlink_move_node(dlink_node * m, dlink_list * oldlist, dlink_list * newlist);
 extern void dlink_add(void *data, dlink_node * m, dlink_list * list);
 extern void dlink_add_tail(void *data, dlink_node * m, dlink_list * list);
+void dlink_add_before(void *data, dlink_node *m, dlink_node *pos, dlink_list *list);
 extern void dlink_delete(dlink_node * m, dlink_list * list);
 extern void dlink_move_list(dlink_list * from, dlink_list * to);
 

@@ -432,6 +432,36 @@ dlink_add_tail(void *data, dlink_node * m, dlink_list * list)
 }
 
 void
+dlink_add_before(void *data, dlink_node *m, dlink_node *pos, dlink_list *list)
+{
+	dlink_node *prev;
+
+	if(pos)
+	{
+		prev = pos->prev;
+
+		if(prev)
+		{
+			m->data = data;
+
+			prev->next = m;
+			m->prev = prev;
+
+			pos->prev = m;
+			m->next = pos;
+
+			list->length++;
+		}
+		/* adding to front of list, shortcut this */
+		else
+			dlink_add(data, m, list);
+	}
+	/* adding to tail of list, shortcut this too */
+	else
+		dlink_add_tail(data, m, list);
+}
+
+void
 dlink_delete(dlink_node * m, dlink_list * list)
 {
 	/* Assumption: If m->next == NULL, then list->tail == m
