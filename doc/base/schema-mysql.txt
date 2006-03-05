@@ -90,3 +90,10 @@ CREATE TABLE operbans (
 	flags INT UNSIGNED,
 	PRIMARY KEY(type, mask)
 );
+
+CREATE TABLE global_welcome (
+	id INT UNSIGNED,
+	priority INT UNSIGNED,
+	text TEXT,
+	PRIMARY KEY(id)
+);
