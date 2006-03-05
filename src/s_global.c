@@ -47,15 +47,19 @@
 /* maximum length of a welcome message */
 #define WELCOME_MAGIC	400
 
+/* maximum number of welcomes */
+#define WELCOME_MAX	6
+
 static struct client *global_p;
 
 static void init_s_global(void);
 
-static dlink_list global_welcome_list;
+static char *global_welcome_list[WELCOME_MAX];
 
 static int o_global_netmsg(struct client *, struct lconn *, const char **, int);
 static int o_global_addwelcome(struct client *, struct lconn *, const char **, int);
 static int o_global_delwelcome(struct client *, struct lconn *, const char **, int);
+static int o_global_listwelcome(struct client *, struct lconn *, const char **, int);
 
 static int h_global_send_welcome(void *target_p, void *unused);
 
@@ -63,7 +67,8 @@ static struct service_command global_command[] =
 {
 	{ "NETMSG",	&o_global_netmsg,	1, NULL, 1, 0L, 0, 0, CONF_OPER_GLOB_NETMSG, 0 },
 	{ "ADDWELCOME",	&o_global_addwelcome,	2, NULL, 1, 0L, 0, 0, CONF_OPER_GLOB_WELCOME, 0 },
-	{ "DELWELCOME", &o_global_delwelcome,	1, NULL, 1, 0L, 0, 0, CONF_OPER_GLOB_WELCOME, 0 }
+	{ "DELWELCOME", &o_global_delwelcome,	1, NULL, 1, 0L, 0, 0, CONF_OPER_GLOB_WELCOME, 0 },
+	{ "LISTWELCOME",&o_global_listwelcome,	0, NULL, 1, 0L, 0, 0, CONF_OPER_GLOB_WELCOME, 0 }
 };
 
 static struct ucommand_handler global_ucommand[] =
@@ -71,6 +76,7 @@ static struct ucommand_handler global_ucommand[] =
 	{ "netmsg",	o_global_netmsg,	0, CONF_OPER_GLOB_NETMSG, 1, 1, NULL },
 	{ "addwelcome",	o_global_addwelcome,	0, CONF_OPER_GLOB_WELCOME, 2, 1, NULL },
 	{ "delwelcome",	o_global_delwelcome,	0, CONF_OPER_GLOB_WELCOME, 1, 1, NULL },
+	{ "listwelcome",o_global_listwelcome,	0, CONF_OPER_GLOB_WELCOME, 0, 1, NULL },
 	{ "\0", NULL, 0, 0, 0, 0, NULL }
 };
 
@@ -78,14 +84,6 @@ static struct service_handler global_service = {
 	"GLOBAL", "GLOBAL", "global", "services.int",
 	"Network Message Service", 60, 80, 
 	global_command, sizeof(global_command), global_ucommand, init_s_global, NULL
-};
-
-struct global_welcome_msg
-{
-	unsigned int id;
-	unsigned int priority;
-	char *text;
-	dlink_node ptr;
 };
 
 void
@@ -102,24 +100,24 @@ preinit_s_global(void)
 static void
 init_s_global(void)
 {
-	struct global_welcome_msg *welcome;
 	const char **coldata;
 	const char **colnames;
+	unsigned int pos;
 	int ncol;
 
-	rsdb_step_init("SELECT id, priority, text FROM global_welcome WHERE 1 ORDER BY priority ASC");
+	rsdb_step_init("SELECT id, text FROM global_welcome WHERE 1");
 
 	while(rsdb_step(&ncol, &coldata, &colnames))
 	{
-		if(ncol < 3)
+		if(ncol < 2)
 			continue;
 
-		welcome = my_malloc(sizeof(struct global_welcome_msg));
-		welcome->id = (unsigned int) atoi(coldata[0]);
-		welcome->priority = (unsigned int) atoi(coldata[1]);
-		welcome->text = my_strdup(coldata[2]);
+		pos = atoi(coldata[0]);
 
-		dlink_add_tail(welcome, &welcome->ptr, &global_welcome_list);
+		if(pos >= WELCOME_MAX)
+			continue;
+
+		global_welcome_list[pos] = my_strdup(coldata[1]);
 	}
 
 	hook_add(h_global_send_welcome, HOOK_NEW_CLIENT);
@@ -148,37 +146,15 @@ o_global_netmsg(struct client *client_p, struct lconn *conn_p, const char *parv[
 	return 0;
 }
 
-static struct global_welcome_msg *
-find_welcome(unsigned int id)
-{
-	struct global_welcome_msg *welcome;
-	dlink_node *ptr;
-
-	DLINK_FOREACH(ptr, global_welcome_list.head)
-	{
-		welcome = ptr->data;
-
-		if(welcome->id == id)
-			return welcome;
-	}
-
-	return NULL;
-}
-
 static int
 h_global_send_welcome(void *target_p, void *unused)
 {
-	struct global_welcome_msg *welcome;
-	dlink_node *ptr;
+	unsigned int i;
 
-	if(!dlink_list_length(&global_welcome_list))
-		return 0;
-
-	DLINK_FOREACH(ptr, global_welcome_list.head)
+	for(i = 0; i < WELCOME_MAX; i++)
 	{
-		welcome = ptr->data;
-
-		service_error(global_p, target_p, "%s", welcome->text);
+		if(!EmptyString(global_welcome_list[i]))
+			service_error(global_p, target_p, "%s", global_welcome_list[i]);
 	}
 
 	return 0;
@@ -187,13 +163,10 @@ h_global_send_welcome(void *target_p, void *unused)
 static int
 o_global_addwelcome(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
-	static int i=0;		/* XXX */
-	struct global_welcome_msg *welcome;
 	const char *data;
-	unsigned int priority;
-	dlink_node *listpos;
+	unsigned int id;
 
-	priority = atoi(parv[0]);
+	id = atoi(parv[0]);
 	data = rebuild_params(parv, parc, 1);
 
 	if(strlen(data) > WELCOME_MAGIC)
@@ -204,27 +177,30 @@ o_global_addwelcome(struct client *client_p, struct lconn *conn_p, const char *p
 		return 0;
 	}
 
-	/* find where in the list we want to add this.. */
-	DLINK_FOREACH(listpos, global_welcome_list.head)
+	if(id >= WELCOME_MAX)
 	{
-		welcome = listpos->data;
-
-		if(welcome->priority > priority)
-			break;
+		service_send(global_p, client_p, conn_p,
+				"Welcome id invalid (%u >= %u)",
+				id, WELCOME_MAX);
+		return 0;
 	}
 
-	welcome = my_malloc(sizeof(struct global_welcome_msg));
-	welcome->id = i++; /* XXX */
-	welcome->priority = priority;
-	welcome->text = my_strdup(data);
+	if(global_welcome_list[id])
+	{
+		my_free(global_welcome_list[id]);
 
-	dlink_add_before(welcome, &welcome->ptr, listpos, &global_welcome_list);
+		rsdb_exec(NULL, "DELETE FROM global_welcome WHERE id='%u'", id);
+	}
+
+	global_welcome_list[id] = my_strdup(data);
+
+	rsdb_exec(NULL, "INSERT INTO global_welcome (id, text) VALUES('%u', '%Q')",
+			id, data);
 
 	service_send(global_p, client_p, conn_p,
-			"Welcome message %u added with priority %u",
-			welcome->id, welcome->priority);
-	slog(global_p, 1, "%s - ADDWELCOME %u %u %s",
-		OPER_NAME(client_p, conn_p), welcome->id, welcome->priority, welcome->text);
+			"Welcome message %u set", id);
+	slog(global_p, 1, "%s - ADDWELCOME %u %s",
+		OPER_NAME(client_p, conn_p), id, data);
 
 	return 0;
 }
@@ -232,12 +208,11 @@ o_global_addwelcome(struct client *client_p, struct lconn *conn_p, const char *p
 static int
 o_global_delwelcome(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
-	struct global_welcome_msg *welcome;
 	unsigned int id;
 
 	id = atoi(parv[0]);
 
-	if((welcome = find_welcome(id)) == NULL)
+	if(global_welcome_list[id] == NULL)
 	{
 		service_send(global_p, client_p, conn_p,
 				"Welcome message %u not found", id);
@@ -246,14 +221,32 @@ o_global_delwelcome(struct client *client_p, struct lconn *conn_p, const char *p
 
 	rsdb_exec(NULL, "DELETE FROM global_welcome WHERE id='%u'", id);
 
-	dlink_delete(&welcome->ptr, &global_welcome_list);
-	my_free(welcome->text);
-	my_free(welcome);
+	my_free(global_welcome_list[id]);
+	global_welcome_list[id] = NULL;
 
 	service_send(global_p, client_p, conn_p,
 			"Welcome message %u deleted", id);
 	slog(global_p, 1, "%s - DELWELCOME %u",
 		OPER_NAME(client_p, conn_p), id);
+
+	return 0;
+}
+
+static int
+o_global_listwelcome(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
+{
+	unsigned int i;
+
+	service_send(global_p, client_p, conn_p, "Welcome messages:");
+
+	for(i = 0; i < WELCOME_MAX; i++)
+	{
+		service_send(global_p, client_p, conn_p,
+				"    %u: %s",
+				i, EmptyString(global_welcome_list[i]) ? "" : global_welcome_list[i]);
+	}
+
+	service_send(global_p, client_p, conn_p, "End of welcome messages");
 
 	return 0;
 }

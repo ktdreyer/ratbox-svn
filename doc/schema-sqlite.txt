@@ -86,7 +86,6 @@ CREATE TABLE operbans (
 
 CREATE TABLE global_welcome (
 	id INTEGER,
-	priority INTEGER,
 	text TEXT,
 	PRIMARY KEY(id)
 );

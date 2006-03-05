@@ -1,6 +1,4 @@
-addwelcome <priority> <message>
+addwelcome <id> <message>
 Adds a welcome message sent when users connect to IRC
-  <priority>: Order this message is sent in, in relation to
-              other welcome messages.  Lower numbers are sent
-              earlier
+  <id>     : Position in list to set welcome message to.
   <message> : The message to send
