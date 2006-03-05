@@ -1,3 +1,12 @@
+leeh        2006/03/05 20:22:13 UTC	(20060305_3-22001)
+  Log:
+  - better make this 1.1.0beta
+  
+
+  Modified:
+	rserv/trunk/include/config.h (File Modified) 
+
+
 leeh        2006/03/05 19:48:08 UTC	(20060305_2-21997)
   Log:
   - do welcome messages a bit differently, just have 0-5 places to store them
