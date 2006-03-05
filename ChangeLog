@@ -1,3 +1,21 @@
+leeh        2006/03/05 19:48:08 UTC	(20060305_2-21997)
+  Log:
+  - do welcome messages a bit differently, just have 0-5 places to store them
+    and use an array
+  - add GLOBAL::LISTWELCOME
+  
+
+  Modified:
+	rserv/trunk/doc/base/schema-mysql.txt (File Modified) 
+	rserv/trunk/doc/schema-sqlite.txt (File Modified) 
+	rserv/trunk/help/global/addwelcome (File Modified) 
+	rserv/trunk/help/global/index-admin (File Modified) 
+	rserv/trunk/help/global/listwelcome (File Added) 
+	rserv/trunk/help/global/u-addwelcome (File Modified) 
+	rserv/trunk/help/global/u-listwelcome (File Added) 
+	rserv/trunk/src/s_global.c (File Modified) 
+
+
 leeh        2006/03/05 14:12:20 UTC	(20060305_1-21995)
   Log:
   - add global welcome priv to example.conf
