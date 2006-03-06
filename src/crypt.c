@@ -32,40 +32,43 @@ static char saltChars[] =
        "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
        /* 0 .. 63, ascii - 64 */
 
-static char *
-generate_poor_salt(char *salt)
+static void
+init_crypt_poorseed(void)
 {
-	int i;
-
-	srandom(CURRENT_TIME);
-
-	for(i = 0; i < 8; i++)
-	{
-		salt[i] = saltChars[random() % 64];
-	}
-
-	return salt;
+	srand((unsigned int) (system_time.tv_sec ^ (system_time.tv_usec | (getpid() << 20))));
 }
 
-static char *
-generate_random_salt(char *salt)
+void
+init_crypt_seed(void)
 {
-	static char buf[9];
-	int fd, i;
+	char *buf;
+	int fd;
 
-	if((fd = open("/dev/random", O_RDONLY)) < 0)
+	if((fd = open("/dev/urandom", O_RDONLY)) < 0)
 	{
-		return generate_poor_salt(salt);
+		init_crypt_poorseed();
+		return;
 	}
 
-	if(read(fd, buf, 8) != 8)
+	buf = my_malloc(sizeof(int));
+
+	if(read(fd, buf, sizeof(int)) != sizeof(int))
 	{
-		return generate_poor_salt(salt);
+		init_crypt_poorseed();
+		return;
 	}
 
-	for(i = 0; i < 8; i++)
+	srand((unsigned int) buf);
+}
+       
+static char *
+generate_salt(char *salt, unsigned int len)
+{
+	unsigned int i;
+
+	for(i = 0; i < len; i++)
 	{
-		salt[i] = saltChars[abs(buf[i]) % 64];
+		salt[i] = saltChars[rand() % 64];
 	}
 
 	return salt;
@@ -79,7 +82,7 @@ make_md5_salt(void)
 	salt[0] = '$';
 	salt[1] = '1';
 	salt[2] = '$';
-	generate_random_salt(&salt[3]);
+	generate_salt(&salt[3], 8);
 	salt[11] = '$';
 	salt[12] = '\0';
 
@@ -89,9 +92,9 @@ make_md5_salt(void)
 static char *
 make_des_salt()
 {
-	static char salt[9];
+	static char salt[3];
 
-	generate_random_salt(salt);
+	generate_salt(salt, 2);
 	salt[2] = '\0';
 
 	return salt;
