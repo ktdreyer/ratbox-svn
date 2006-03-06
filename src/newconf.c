@@ -1013,6 +1013,7 @@ static struct ConfEntry conf_userserv_table[] =
 	{ "host_register_amount",CF_INT,  NULL, 0, &config_file.uhregister_amount	},
 	{ "expire_time",	CF_TIME,  NULL, 0, &config_file.uexpire_time		},
 	{ "allow_set_password",	CF_YESNO, NULL, 0, &config_file.allow_set_password	},
+	{ "allow_resetpass",	CF_YESNO, NULL, 0, &config_file.allow_resetpass		},
 	{ "allow_set_email",	CF_YESNO, NULL, 0, &config_file.allow_set_email		},
 	{ "max_logins",		CF_INT,   NULL, 0, &config_file.umax_logins		},
 	{ "\0", 0, NULL, 0, NULL }

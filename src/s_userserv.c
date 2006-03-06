@@ -49,6 +49,7 @@
 #include "io.h"
 #include "event.h"
 #include "hook.h"
+#include "email.h"
 
 static void init_s_userserv(void);
 
@@ -68,6 +69,7 @@ static int o_user_usersetpass(struct client *, struct lconn *, const char **, in
 static int s_user_register(struct client *, struct lconn *, const char **, int);
 static int s_user_login(struct client *, struct lconn *, const char **, int);
 static int s_user_logout(struct client *, struct lconn *, const char **, int);
+static int s_user_resetpass(struct client *, struct lconn *, const char **, int);
 static int s_user_set(struct client *, struct lconn *, const char **, int);
 static int s_user_info(struct client *, struct lconn *, const char **, int);
 
@@ -83,6 +85,7 @@ static struct service_command userserv_command[] =
 	{ "REGISTER",	&s_user_register,	2, NULL, 1, 0L, 0, 0, 0, 0 },
 	{ "LOGIN",	&s_user_login,		2, NULL, 1, 0L, 0, 0, 0, 0 },
 	{ "LOGOUT",	&s_user_logout,		0, NULL, 1, 0L, 1, 0, 0, 0 },
+	{ "RESETPASS",	&s_user_resetpass,	1, NULL, 1, 0L, 0, 0, 0, 0 },
 	{ "SET",	&s_user_set,		1, NULL, 1, 0L, 1, 0, 0, 0 },
 	{ "INFO",	&s_user_info,		1, NULL, 1, 0L, 1, 0, 0, 0 }
 };
@@ -941,6 +944,129 @@ s_user_logout(struct client *client_p, struct lconn *conn_p, const char *parv[],
 }
 
 static int
+s_user_resetpass(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
+{
+	struct user_reg *reg_p;
+	const char **coldata;
+	const char **colnames;
+	int ncol;
+
+	if(!config_file.allow_resetpass)
+	{
+		service_error(userserv_p, client_p,
+			"%s::RESETPASS is disabled", userserv_p->name);
+		return 1;
+	}
+
+	if(client_p->user->user_reg != NULL)
+	{
+		service_error(userserv_p, client_p, "You cannot request a password reset whilst logged in");
+		return 1;
+	}
+
+	if((reg_p = find_user_reg(client_p, parv[0])) == NULL)
+		return 1;
+
+	/* initial password reset */
+	if(EmptyString(parv[1]))
+	{
+		const char *token = "foo";	/* XXX */
+
+		if(EmptyString(reg_p->email))
+		{
+			service_error(userserv_p, client_p,
+					"Username %s does not have an email address set",
+					reg_p->name);
+			return 1;
+		}
+
+		rsdb_step_init("SELECT username FROM users_resetpass WHERE username='%Q' AND time > '%lu'",
+				reg_p->name, CURRENT_TIME - 86400);
+
+		/* already issued one within the past day.. */
+		/* XXX - day */
+		if(rsdb_step(&ncol, &coldata, &colnames))
+		{
+			service_error(userserv_p, client_p,
+					"Username %s already has a pending password reset",
+					reg_p->name);
+			rsdb_step_end();
+			return 1;
+		}
+
+		rsdb_step_end();
+
+		slog(userserv_p, 3, "%s - RESETPASS %s",
+			client_p->user->mask, reg_p->name);
+
+		/* XXX token = generate_password(); */
+		rsdb_exec(NULL, "INSERT INTO users_resetpass (username, token, time) VALUES('%Q', '%Q', '%lu')",
+				reg_p->name, token, CURRENT_TIME);
+
+		if(!send_email(reg_p->email, "Password reset",
+				"%s!%s@%s has requested a password reset for username %s which "
+				"is registered to this email address.\n\n"
+				"To authenticate this request, send %s RESETPASS %s\n\n"
+				"If you did not request this, simply ignore this message, no "
+				"action will be taken on your account and your password will "
+				"NOT be reset.\n",
+				client_p->name, client_p->user->username, client_p->user->host,
+				reg_p->name, userserv_p->name, token))
+		{
+			service_error(userserv_p, client_p,
+					"Unable to issue password reset due to problems sending email");
+		}
+		else
+		{
+			service_error(userserv_p, client_p,
+					"Username %s has been sent an email to confirm the password reset",
+					reg_p->name);
+		}
+
+		
+			
+		return 2;
+	}
+
+	slog(userserv_p, 3, "%s - RESETPASS %s (auth)",
+		client_p->user->mask, reg_p->name);
+
+	/* authenticating a password reset */
+	rsdb_step_init("SELECT token FROM users_resetpass WHERE username='%Q' AND time > '%lu'",
+			reg_p->name, CURRENT_TIME - 86400);
+
+	/* ok, found the entry.. */
+	if(rsdb_step(&ncol, &coldata, &colnames))
+	{
+		if(strcmp(coldata[0], parv[1]) == 0)
+		{
+			/* need to execute another query.. */
+			rsdb_step_end();
+
+			rsdb_exec(NULL, "UPDATE users SET password='%Q' WHERE username='%Q'",
+					parv[1], reg_p->name);
+
+			service_error(userserv_p, client_p,
+					"Username %s password reset to %s",
+					reg_p->name, parv[1]);
+
+			return 1;
+		}
+		else
+			service_error(userserv_p, client_p,
+					"Username %s password reset tokens do not match",
+					reg_p->name);
+	}
+	else
+		service_error(userserv_p, client_p,
+				"Username %s does not have a pending password reset",
+				reg_p->name);
+
+	rsdb_step_end();
+	return 1;
+}
+
+static int
 s_user_set(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct user_reg *ureg_p;
@@ -957,7 +1083,8 @@ s_user_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 		if(!config_file.allow_set_password)
 		{
 			service_error(userserv_p, client_p,
-				"%s::SET::PASS is disabled", userserv_p->name);
+				"%s::SET::PASSWORD is disabled", 
+				userserv_p->name);
 			return 1;
 		}
 

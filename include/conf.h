@@ -55,6 +55,7 @@ struct _config_file
 	int uregister_email;
 	int uexpire_time;
 	int allow_set_password;
+	int allow_resetpass;
 	int allow_set_email;
 	int umax_logins;
 

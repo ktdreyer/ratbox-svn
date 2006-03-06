@@ -77,6 +77,7 @@ set_default_conf(void)
 	config_file.uregister_email = 0;
 	config_file.uexpire_time = 2419200;	/* 4 weeks */
 	config_file.allow_set_password = 1;
+	config_file.allow_resetpass = 0;
 	config_file.allow_set_email = 1;
 	config_file.umax_logins = 5;
 
