@@ -92,7 +92,7 @@ static int
 rsdb_callback_func(void *cbfunc, int argc, char **argv, char **colnames)
 {
 	rsdb_callback cb = cbfunc;
-	(cb)(argc, (const char **) argv, (const char **) colnames);
+	(cb)(argc, (const char **) argv);
 	return 0;
 }
 
@@ -157,11 +157,12 @@ rsdb_step_init(const char *format, ...)
 }
 
 int
-rsdb_step(int *ncol, const char ***coldata, const char ***colnames)
+rsdb_step(int *ncol, const char ***coldata)
 {
+	static const char **colnames;
 	int i;
 
-	if((i = sqlite_step(rsdb_step_vm, ncol, coldata, colnames)))
+	if((i = sqlite_step(rsdb_step_vm, ncol, coldata, &colnames)))
 	{
 		if(i == SQLITE_DONE)
 			rsdb_step_end();

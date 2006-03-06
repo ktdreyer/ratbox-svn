@@ -2,7 +2,7 @@
 #ifndef INCLUDED_rsdb_h
 #define INCLUDED_rsdb_h
 
-typedef int (*rsdb_callback) (int, const char **, const char **);
+typedef int (*rsdb_callback) (int, const char **);
 
 typedef enum rsdb_transtype
 {
@@ -20,7 +20,7 @@ void rsdb_exec(rsdb_callback cb, const char *format, ...);
 void rsdb_transaction(rsdb_transtype type);
 
 void rsdb_step_init(const char *format, ...);
-int rsdb_step(int *, const char ***, const char ***);
+int rsdb_step(int *, const char ***);
 void rsdb_step_end(void);
 
 #endif

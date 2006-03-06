@@ -89,10 +89,8 @@ void
 rsdb_exec(rsdb_callback cb, const char *format, ...)
 {
 	static char buf[BUFSIZE*4];
-	static const char *colnames[RSDB_MAXCOLS+1];
 	static const char *coldata[RSDB_MAXCOLS+1];
 	MYSQL_ROW row;
-	MYSQL_FIELD *fields;
 	va_list args;
 	unsigned int field_count;
 	int i;
@@ -126,14 +124,6 @@ rsdb_exec(rsdb_callback cb, const char *format, ...)
 			mysql_error(rsdb_database));
 		die("problem with db file");
 	}
-
-	fields = mysql_fetch_fields(rsdb_result);
-
-	for(i = 0; i < field_count; i++)
-	{
-		colnames[i] = fields[i].name;
-	}
-	colnames[i] = NULL;
 
 	while((row = mysql_fetch_row(rsdb_result)))
 	{
@@ -204,12 +194,10 @@ rsdb_step_init(const char *format, ...)
 }
 
 int
-rsdb_step(int *ncol, const char ***cb_coldata, const char ***cb_colnames)
+rsdb_step(int *ncol, const char ***cb_coldata)
 {
-	static const char *colnames[RSDB_MAXCOLS+1];
 	static const char *coldata[RSDB_MAXCOLS+1];
 	MYSQL_ROW row;
-	MYSQL_FIELD *fields;
 	int i;
 
 	if(!rsdb_field_count)
@@ -217,18 +205,9 @@ rsdb_step(int *ncol, const char ***cb_coldata, const char ***cb_colnames)
 
 	*ncol = rsdb_field_count;
 	*cb_coldata = coldata;
-	*cb_colnames = colnames;
-
-	fields = mysql_fetch_fields(rsdb_result);
 
 	if(rsdb_field_count > RSDB_MAXCOLS)
 		die("too many columns in result set -- contact the ratbox team");
-
-	for(i = 0; i < rsdb_field_count; i++)
-	{
-		colnames[i] = fields[i].name;
-	}
-	colnames[i] = NULL;
 
 	if((row = mysql_fetch_row(rsdb_result)))
 	{

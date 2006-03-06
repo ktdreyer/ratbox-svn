@@ -101,13 +101,12 @@ static void
 init_s_global(void)
 {
 	const char **coldata;
-	const char **colnames;
 	unsigned int pos;
 	int ncol;
 
 	rsdb_step_init("SELECT id, text FROM global_welcome WHERE 1");
 
-	while(rsdb_step(&ncol, &coldata, &colnames))
+	while(rsdb_step(&ncol, &coldata))
 	{
 		if(ncol < 2)
 			continue;

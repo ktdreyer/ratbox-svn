@@ -94,7 +94,7 @@ static struct service_handler jupe_service = {
 	jupeserv_command, sizeof(jupeserv_command), jupeserv_ucommand, init_s_jupeserv, NULL
 };
 
-static int jupe_db_callback(int argc, const char **argv, const char **colnames);
+static int jupe_db_callback(int argc, const char **argv);
 static int h_jupeserv_squit(void *name, void *unused);
 static int h_jupeserv_finburst(void *unused, void *unused2);
 static void e_jupeserv_expire(void *unused);
@@ -193,7 +193,7 @@ e_jupeserv_expire(void *unused)
 }	
 
 static int
-jupe_db_callback(int argc, const char **argv, const char **colnames)
+jupe_db_callback(int argc, const char **argv)
 {
 	struct server_jupe *jupe_p;
 

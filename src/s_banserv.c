@@ -180,13 +180,12 @@ static int
 find_ban(const char *mask, char type)
 {
 	const char **coldata;
-	const char **colnames;
 	int ncol;
 	
 	rsdb_step_init("SELECT remove FROM operbans WHERE type='%c' AND mask='%Q'",
 			type, mask);
 
-	if(rsdb_step(&ncol, &coldata, &colnames))
+	if(rsdb_step(&ncol, &coldata))
 	{
 		if(atoi(coldata[0]) == 1)
 		{
@@ -213,13 +212,12 @@ find_ban_remove(const char *mask, char type)
 {
 	static char buf[BUFSIZE];
 	const char **coldata;
-	const char **colnames;
 	int ncol;
 	
 	rsdb_step_init("SELECT remove, oper FROM operbans WHERE type='%c' AND mask='%Q'",
 			type, mask);
 
-	if(rsdb_step(&ncol, &coldata, &colnames))
+	if(rsdb_step(&ncol, &coldata))
 	{
 		/* check this ban isnt already marked as removed */
 		if(atoi(coldata[0]) == 1)
@@ -298,7 +296,6 @@ static void
 sync_bans(const char *target, char banletter)
 {
 	const char **coldata;
-	const char **colnames;
 	int ncol;
 
 	/* first is temporary bans */
@@ -311,7 +308,7 @@ sync_bans(const char *target, char banletter)
 					"WHERE hold > %lu AND remove=0",
 					CURRENT_TIME);
 
-	while(rsdb_step(&ncol, &coldata, &colnames))
+	while(rsdb_step(&ncol, &coldata))
 	{
 		push_ban(target, coldata[0][0], coldata[1], coldata[2],
 			(unsigned long) (atol(coldata[3]) - CURRENT_TIME));
@@ -327,7 +324,7 @@ sync_bans(const char *target, char banletter)
 				"WHERE hold=0 AND remove=0",
 				CURRENT_TIME);
 
-	while(rsdb_step(&ncol, &coldata, &colnames))
+	while(rsdb_step(&ncol, &coldata))
 	{
 		push_ban(target, coldata[0][0], coldata[1], coldata[2], 0);
 	}
@@ -342,7 +339,7 @@ sync_bans(const char *target, char banletter)
 				"WHERE hold > %lu AND remove=1",
 				CURRENT_TIME);
 
-	while(rsdb_step(&ncol, &coldata, &colnames))
+	while(rsdb_step(&ncol, &coldata))
 	{
 		push_unban(target, coldata[0][0], coldata[1]);
 	}
@@ -849,7 +846,6 @@ list_bans(struct client *client_p, struct lconn *conn_p,
 		const char *mask, char type)
 {
 	const char **coldata;
-	const char **colnames;
 	int ncol;
 	time_t duration;
 
@@ -861,7 +857,7 @@ list_bans(struct client *client_p, struct lconn *conn_p,
 	service_send(banserv_p, client_p, conn_p,
 			"Ban list matching %s", mask);
 
-	while(rsdb_step(&ncol, &coldata, &colnames))
+	while(rsdb_step(&ncol, &coldata))
 	{
 		if(!match(mask, coldata[0]))
 			continue;

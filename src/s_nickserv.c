@@ -89,7 +89,7 @@ static struct service_handler nick_service = {
 	nickserv_command, sizeof(nickserv_command), nickserv_ucommand, init_s_nickserv, NULL
 };
 
-static int nick_db_callback(int, const char **, const char **);
+static int nick_db_callback(int, const char **);
 
 void
 preinit_s_nickserv(void)
@@ -152,7 +152,7 @@ find_nick_reg(struct client *client_p, const char *name)
 }
 
 static int
-nick_db_callback(int argc, const char **argv, const char **colnames)
+nick_db_callback(int argc, const char **argv)
 {
 	struct nick_reg *nreg_p;
 	struct user_reg *ureg_p;

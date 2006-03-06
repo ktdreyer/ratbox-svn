@@ -457,7 +457,7 @@ verify_member_reg_name(struct client *client_p, struct channel **chptr,
 }
 
 static int
-channel_db_callback(int argc, const char **argv, const char **colnames)
+channel_db_callback(int argc, const char **argv)
 {
 	struct chan_reg *reg_p;
 	struct chmode mode;
@@ -529,7 +529,7 @@ channel_db_callback(int argc, const char **argv, const char **colnames)
 }
 
 static int
-member_db_callback(int argc, const char **argv, const char **colnames)
+member_db_callback(int argc, const char **argv)
 {
 	struct chan_reg *chreg_p;
 	struct user_reg *ureg_p;
@@ -596,7 +596,7 @@ find_ban_reg(struct chan_reg *chreg_p, const char *mask)
 }
 
 static int
-ban_db_callback(int argc, const char **argv, const char **colnames)
+ban_db_callback(int argc, const char **argv)
 {
 	struct chan_reg *chreg_p;
 	struct ban_reg *banreg_p;

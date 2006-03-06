@@ -107,7 +107,7 @@ static struct service_handler userserv_service = {
 	30, 50, userserv_command, sizeof(userserv_command), userserv_ucommand, init_s_userserv, NULL
 };
 
-static int user_db_callback(int argc, const char **argv, const char **colnames);
+static int user_db_callback(int argc, const char **argv);
 static int h_user_burst_login(void *, void *);
 static void e_user_expire(void *unused);
 
@@ -173,7 +173,7 @@ free_user_reg(struct user_reg *ureg_p)
 }
 
 static int
-user_db_callback(int argc, const char **argv, const char **colnames)
+user_db_callback(int argc, const char **argv)
 {
 	struct user_reg *reg_p;
 
@@ -948,7 +948,6 @@ s_user_resetpass(struct client *client_p, struct lconn *conn_p, const char *parv
 {
 	struct user_reg *reg_p;
 	const char **coldata;
-	const char **colnames;
 	int ncol;
 
 	if(!config_file.allow_resetpass)
@@ -985,7 +984,7 @@ s_user_resetpass(struct client *client_p, struct lconn *conn_p, const char *parv
 
 		/* already issued one within the past day.. */
 		/* XXX - day */
-		if(rsdb_step(&ncol, &coldata, &colnames))
+		if(rsdb_step(&ncol, &coldata))
 		{
 			service_error(userserv_p, client_p,
 					"Username %s already has a pending password reset",
@@ -1036,7 +1035,7 @@ s_user_resetpass(struct client *client_p, struct lconn *conn_p, const char *parv
 			reg_p->name, CURRENT_TIME - 86400);
 
 	/* ok, found the entry.. */
-	if(rsdb_step(&ncol, &coldata, &colnames))
+	if(rsdb_step(&ncol, &coldata))
 	{
 		if(strcmp(coldata[0], parv[1]) == 0)
 		{
