@@ -1,3 +1,16 @@
+leeh        2006/03/06 21:16:39 UTC	(20060306_2-22015)
+  Log:
+  - add the beginnings of USERSERV::RESETPASS, to email users a password reset
+  
+
+  Modified:
+	rserv/trunk/doc/example.conf (File Modified) 
+	rserv/trunk/include/conf.h (File Modified) 
+	rserv/trunk/src/conf.c (File Modified) 
+	rserv/trunk/src/newconf.c (File Modified) 
+	rserv/trunk/src/s_userserv.c (File Modified) 
+
+
 leeh        2006/03/06 21:16:09 UTC	(20060306_1-22013)
   Log:
   - port those crypt.c fixes over here
