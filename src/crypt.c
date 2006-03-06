@@ -118,3 +118,14 @@ get_crypt(const char *password, const char *csalt)
 	result = crypt(password, salt);
 	return result;
 }
+
+const char *
+get_password(void)
+{
+	static char buf[9];
+
+	generate_salt(buf, 8);
+	buf[8] = '\0';
+
+	return buf;
+}

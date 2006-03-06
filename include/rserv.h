@@ -23,7 +23,9 @@ extern void PRINTFLIKE(1, 2) die(const char *format, ...);
 
 extern int have_md5_crypt;
 
+void init_crypt_seed(void);
 const char *get_crypt(const char *password, const char *csalt);
+const char *get_password(void);
 
 char *rebuild_params(const char **, int, int);
 

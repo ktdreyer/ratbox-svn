@@ -970,7 +970,7 @@ s_user_resetpass(struct client *client_p, struct lconn *conn_p, const char *parv
 	/* initial password reset */
 	if(EmptyString(parv[1]))
 	{
-		const char *token = "foo";	/* XXX */
+		const char *token;
 
 		if(EmptyString(reg_p->email))
 		{
@@ -999,7 +999,7 @@ s_user_resetpass(struct client *client_p, struct lconn *conn_p, const char *parv
 		slog(userserv_p, 3, "%s - RESETPASS %s",
 			client_p->user->mask, reg_p->name);
 
-		/* XXX token = generate_password(); */
+		token = get_password();
 		rsdb_exec(NULL, "INSERT INTO users_resetpass (username, token, time) VALUES('%Q', '%Q', '%lu')",
 				reg_p->name, token, CURRENT_TIME);
 
