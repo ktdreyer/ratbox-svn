@@ -1,3 +1,12 @@
+leeh        2006/03/06 21:16:09 UTC	(20060306_1-22013)
+  Log:
+  - port those crypt.c fixes over here
+  
+
+  Modified:
+	rserv/trunk/src/crypt.c (File Modified) 
+
+
 androsyn    2006/03/06 20:33:37 UTC	(20060306_0-22011)
   Log:
   - add postgresql schema
