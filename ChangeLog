@@ -1,3 +1,16 @@
+leeh        2006/03/06 21:25:32 UTC	(20060306_3-22017)
+  Log:
+  - actually call init_crypt_seed()
+  - make USERSERV::REGISTER use crypt.c stuff to generate random passwords
+  
+
+  Modified:
+	rserv/trunk/include/rserv.h (File Modified) 
+	rserv/trunk/src/crypt.c (File Modified) 
+	rserv/trunk/src/rserv.c (File Modified) 
+	rserv/trunk/src/s_userserv.c (File Modified) 
+
+
 leeh        2006/03/06 21:16:39 UTC	(20060306_2-22015)
   Log:
   - add the beginnings of USERSERV::RESETPASS, to email users a password reset
