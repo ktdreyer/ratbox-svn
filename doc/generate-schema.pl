@@ -25,7 +25,7 @@ my %lengths = (
 
 my @srcs = ("setup.h", "rserv.h", "channel.h", "client.h");
 
-my @schemas = ("schema-mysql.txt");
+my @schemas = ("schema-mysql.txt", "schema-pgsql.txt");
 
 foreach my $i (@srcs)
 {
