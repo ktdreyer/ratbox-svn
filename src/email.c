@@ -40,11 +40,13 @@ int
 send_email(const char *address, const char *subject, const char *format, ...)
 {
 	static char buf[BUFSIZE*4];
-	static char databuf[BUFSIZE*4];
-	static char cmdbuf[BUFSIZE];
 	FILE *out;
 	va_list args;
+	pid_t childpid;
+	int pfd[2];
+	int retval;
 
+/*
 	if(EmptyString(config_file.email_program))
 	{
 		mlog("warning: unable to send email, email program is not set");
@@ -56,14 +58,48 @@ send_email(const char *address, const char *subject, const char *format, ...)
 		mlog("warning: unable to send email, email address is not set");
 		return 0;
 	}
+*/
 
-	snprintf(cmdbuf, sizeof(cmdbuf), "%s", config_file.email_program);
-
-	if((out = popen(cmdbuf, "w")) == NULL)
+	if(pipe(pfd) == -1)
 	{
-		mlog("warning: unable to send email, cannot execute email program");
+		mlog("warning: unable to send email, cannot pipe(): %s",
+			strerror(errno));
 		return 0;
 	}
+
+	if((out = fdopen(pfd[1], "w")) == NULL)
+	{
+		mlog("warning: unable to send email, cannot fdopen(): %s",
+			strerror(errno));
+		return 0;
+	}
+
+	childpid = fork();
+
+	switch(childpid)
+	{
+		case -1:
+			mlog("warning: unable to send email, cannot fork(): %s",
+				strerror(errno));
+			return 0;
+
+		/* child process, break out of here and send the email */
+		case 0:
+			if(execl("/usr/sbin/sendmail", "-t") < 0)
+			{
+				mlog("warning: unable to send email, cannot execute email program: %s",
+					strerror(errno));
+				exit(1);
+			}
+
+			exit(0);
+
+		/* parent process.. wait for the child to exit */
+		default:
+			break;
+	}
+
+	waitpid(childpid, &retval, 0);
 
 	snprintf(buf, sizeof(buf),
 		"From: %s <%s>\n"
@@ -73,14 +109,15 @@ send_email(const char *address, const char *subject, const char *format, ...)
 		config_file.email_address,
 		address, subject);
 
+	fputs(buf, out);
+
 	va_start(args, format);
-	vsnprintf(databuf, sizeof(databuf), format, args);
+	vsnprintf(buf, sizeof(buf), format, args);
 	va_end(args);
 
 	fputs(buf, out);
-	fputs(databuf, out);
 
-	pclose(out);
+	fclose(out);
 
-	return 1;
+	exit(0);
 }
