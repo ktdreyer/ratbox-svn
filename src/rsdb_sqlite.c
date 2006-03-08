@@ -122,6 +122,63 @@ rsdb_exec(rsdb_callback cb, const char *format, ...)
 }
 
 void
+rsdb_exec_fetch(struct rsdb_table *table, const char *format, ...)
+{
+	static char buf[BUFSIZE*4];
+	va_list args;
+	char *errmsg;
+	char **data;
+	int pos;
+	int i, j;
+
+	va_start(args, format);
+	i = rs_vsnprintf(buf, sizeof(buf), format, args);
+	va_end(args);
+
+	if(i >= sizeof(buf))
+	{
+		mlog("fatal error: length problem with compiling sql");
+		die("problem with compiling sql statement");
+	}
+
+	if(sqlite_get_table(rserv_db, buf, &data, &table->row_count, &table->col_count, &errmsg))
+	{
+		mlog("fatal error: problem with db file: %s", errmsg);
+		die("problem with db file");
+	}
+
+	/* we need to be able to free data afterward */
+	table->arg = data;
+
+	/* sqlite puts the column names as the first row */
+	pos = table->col_count;
+	table->row = my_malloc(sizeof(char **) * table->row_count);
+	for(i = 0; i < table->row_count; i++)
+	{
+		table->row[i] = my_malloc(sizeof(char *) * table->col_count);
+
+		for(j = 0; j < table->col_count; j++)
+		{
+			table->row[i][j] = data[pos++];
+		}
+	}
+}
+
+void
+rsdb_exec_fetch_end(struct rsdb_table *table)
+{
+	int i;
+
+	for(i = 0; i < table->row_count; i++)
+	{
+		my_free(table->row[i]);
+	}
+	my_free(table->row);
+
+	sqlite_free_table((char **) table->arg);
+}
+
+void
 rsdb_transaction(rsdb_transtype type)
 {
 	if(type == RSDB_TRANS_START)
@@ -191,5 +248,5 @@ rsdb_step_end(void)
 		die("problem with finalising sql statement");
 	}
 }
-	
+
 

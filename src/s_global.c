@@ -100,24 +100,27 @@ preinit_s_global(void)
 static void
 init_s_global(void)
 {
-	const char **coldata;
+	struct rsdb_table *data;
 	unsigned int pos;
-	int ncol;
+	int i;
 
-	rsdb_step_init("SELECT id, text FROM global_welcome WHERE 1");
+	/* we will only ever use this once, so malloc() it */
+	data = my_malloc(sizeof(struct rsdb_table));
 
-	while(rsdb_step(&ncol, &coldata))
+	rsdb_exec_fetch(data, "SELECT id, text FROM global_welcome WHERE 1");
+
+	for(i = 0; i < data->row_count; i++)
 	{
-		if(ncol < 2)
-			continue;
-
-		pos = atoi(coldata[0]);
+		pos = atoi(data->row[i][0]);
 
 		if(pos >= WELCOME_MAX)
 			continue;
 
-		global_welcome_list[pos] = my_strdup(coldata[1]);
+		global_welcome_list[pos] = my_strdup(data->row[i][1]);
 	}
+
+	rsdb_exec_fetch_end(data);
+	my_free(data);
 
 	hook_add(h_global_send_welcome, HOOK_NEW_CLIENT);
 }

@@ -11,12 +11,24 @@ typedef enum rsdb_transtype
 } 
 rsdb_transtype;
 
+struct rsdb_table
+{
+	char ***row;
+	int row_count;
+	int col_count;
+	void *arg;
+};
+
 void rsdb_init(void);
 void rsdb_shutdown(void);
 
 const char *rsdb_quote(const char *src);
 
 void rsdb_exec(rsdb_callback cb, const char *format, ...);
+
+void rsdb_exec_fetch(struct rsdb_table *data, const char *format, ...);
+void rsdb_exec_fetch_end(struct rsdb_table *data);
+
 void rsdb_transaction(rsdb_transtype type);
 
 void rsdb_step_init(const char *format, ...);
