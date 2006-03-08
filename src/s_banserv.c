@@ -179,25 +179,25 @@ split_ban(const char *mask, char **user, char **host)
 static int
 find_ban(const char *mask, char type)
 {
-	const char **coldata;
-	int ncol;
-	
-	rsdb_step_init("SELECT remove FROM operbans WHERE type='%c' AND mask='%Q'",
+	struct rsdb_table data;
+	int retval;
+
+	rsdb_exec_fetch(&data, "SELECT remove FROM operbans WHERE type='%c' AND mask='%Q' LIMIT 1",
 			type, mask);
 
-	if(rsdb_step(&ncol, &coldata))
+	if(data.row_count)
 	{
-		if(atoi(coldata[0]) == 1)
-		{
-			rsdb_step_end();
-			return -1;
-		}
-
-		rsdb_step_end();
-		return 1;
+		if(atoi(data.row[0][0]) == 1)
+			retval = -1;
+		else
+			retval = 1;
 	}
+	else
+		retval = 0;
 
-	return 0;
+	rsdb_exec_fetch_end(&data);
+
+	return retval;
 }
 
 /* find_ban_remove()
@@ -211,27 +211,23 @@ static const char *
 find_ban_remove(const char *mask, char type)
 {
 	static char buf[BUFSIZE];
-	const char **coldata;
-	int ncol;
-	
-	rsdb_step_init("SELECT remove, oper FROM operbans WHERE type='%c' AND mask='%Q'",
+	struct rsdb_table data;
+	const char *retval;
+
+	rsdb_exec_fetch(&data, "SELECT remove, oper FROM operbans WHERE type='%c' AND mask='%Q' LIMIT 1",
 			type, mask);
 
-	if(rsdb_step(&ncol, &coldata))
+	if(data.row_count && (atoi(data.row[0][0]) == 0))
 	{
-		/* check this ban isnt already marked as removed */
-		if(atoi(coldata[0]) == 1)
-		{
-			rsdb_step_end();
-			return NULL;
-		}
-
-		strlcpy(buf, coldata[1], sizeof(buf));
-		rsdb_step_end();
-		return buf;
+		strlcpy(buf, data.row[0][1], sizeof(buf));
+		retval = buf;
 	}
+	else
+		retval = NULL;
 
-	return NULL;
+	rsdb_exec_fetch_end(&data);
+
+	return retval;
 }
 
 static void
@@ -295,54 +291,60 @@ push_unban(const char *target, char type, const char *mask)
 static void
 sync_bans(const char *target, char banletter)
 {
-	const char **coldata;
-	int ncol;
+	struct rsdb_table data;
+	int i;
 
 	/* first is temporary bans */
 	if(banletter)
-		rsdb_step_init("SELECT type, mask, reason, hold FROM operbans "
-				"WHERE hold > %lu AND remove=0 AND type='%c'",
+		rsdb_exec_fetch(&data, "SELECT type, mask, reason, hold FROM operbans "
+					"WHERE hold > %lu AND remove=0 AND type='%c'",
 				CURRENT_TIME, banletter);
 	else
-		rsdb_step_init("SELECT type, mask, reason, hold FROM operbans "
+		rsdb_exec_fetch(&data, "SELECT type, mask, reason, hold FROM operbans "
 					"WHERE hold > %lu AND remove=0",
-					CURRENT_TIME);
+				CURRENT_TIME);
 
-	while(rsdb_step(&ncol, &coldata))
+	for(i = 0; i < data.row_count; i++)
 	{
-		push_ban(target, coldata[0][0], coldata[1], coldata[2],
-			(unsigned long) (atol(coldata[3]) - CURRENT_TIME));
+		push_ban(target, data.row[i][0][0], data.row[i][1], data.row[i][2],
+			(unsigned long) (atol(data.row[i][3]) - CURRENT_TIME));
 	}
+
+	rsdb_exec_fetch_end(&data);
 
 	/* permanent bans */
 	if(banletter)
-		rsdb_step_init("SELECT type, mask, reason, hold FROM operbans "
-				"WHERE hold=0 AND remove=0 AND type='%c'",
+		rsdb_exec_fetch(&data, "SELECT type, mask, reason, hold FROM operbans "
+					"WHERE hold=0 AND remove=0 AND type='%c'",
 				CURRENT_TIME, banletter);
 	else
-		rsdb_step_init("SELECT type, mask, reason, hold FROM operbans "
-				"WHERE hold=0 AND remove=0",
+		rsdb_exec_fetch(&data, "SELECT type, mask, reason, hold FROM operbans "
+					"WHERE hold=0 AND remove=0",
 				CURRENT_TIME);
 
-	while(rsdb_step(&ncol, &coldata))
+	for(i = 0; i < data.row_count; i++)
 	{
-		push_ban(target, coldata[0][0], coldata[1], coldata[2], 0);
+		push_ban(target, data.row[i][0][0], data.row[i][1], data.row[i][2], 0);
 	}
+
+	rsdb_exec_fetch_end(&data);
 
 	/* bans to remove */
 	if(banletter)
-		rsdb_step_init("SELECT type, mask FROM operbans "
-				"WHERE hold > %lu AND remove=1 AND type='%c'",
+		rsdb_exec_fetch(&data, "SELECT type, mask FROM operbans "
+					"WHERE hold > %lu AND remove=1 AND type='%c'",
 				CURRENT_TIME, banletter);
 	else
-		rsdb_step_init("SELECT type, mask FROM operbans "
-				"WHERE hold > %lu AND remove=1",
+		rsdb_exec_fetch(&data, "SELECT type, mask FROM operbans "
+					"WHERE hold > %lu AND remove=1",
 				CURRENT_TIME);
 
-	while(rsdb_step(&ncol, &coldata))
+	for(i = 0; i < data.row_count; i++)
 	{
-		push_unban(target, coldata[0][0], coldata[1]);
+		push_unban(target, data.row[i][0][0], data.row[i][1]);
 	}
+
+	rsdb_exec_fetch_end(&data);
 }
 
 static int
@@ -845,31 +847,32 @@ static void
 list_bans(struct client *client_p, struct lconn *conn_p, 
 		const char *mask, char type)
 {
-	const char **coldata;
-	int ncol;
+	struct rsdb_table data;
 	time_t duration;
+	int i;
 
-	rsdb_step_init("SELECT mask, reason, operreason, hold, oper "
-			"FROM operbans WHERE type='%c' AND remove=0 AND "
-			"hold > %lu",
+	rsdb_exec_fetch(&data, "SELECT mask, reason, operreason, hold, oper "
+				"FROM operbans WHERE type='%c' AND remove=0 AND hold > %lu",
 			type, (unsigned long) CURRENT_TIME);
 
 	service_send(banserv_p, client_p, conn_p,
 			"Ban list matching %s", mask);
 
-	while(rsdb_step(&ncol, &coldata))
+	for(i = 0; i < data.row_count; i++)
 	{
-		if(!match(mask, coldata[0]))
+		if(!match(mask, data.row[i][0]))
 			continue;
 
-		duration = ((unsigned long) atol(coldata[3]) - CURRENT_TIME);
+		duration = ((unsigned long) atol(data.row[i][3]) - CURRENT_TIME);
 
 		service_send(banserv_p, client_p, conn_p,
 				"  %-30s exp:%s oper:%s [%s%s]",
-				coldata[0], get_short_duration(duration),
-				coldata[4], coldata[1],
-				EmptyString(coldata[2]) ? "" : coldata[2]);
+				data.row[i][0], get_short_duration(duration),
+				data.row[i][4], data.row[i][1],
+				EmptyString(data.row[i][2]) ? "" : data.row[i][2]);
 	}
+
+	rsdb_exec_fetch_end(&data);
 
 	service_send(banserv_p, client_p, conn_p, "End of ban list");
 }

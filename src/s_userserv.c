@@ -946,9 +946,8 @@ s_user_logout(struct client *client_p, struct lconn *conn_p, const char *parv[],
 static int
 s_user_resetpass(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
+	struct rsdb_table data;
 	struct user_reg *reg_p;
-	const char **coldata;
-	int ncol;
 
 	if(!config_file.allow_resetpass)
 	{
@@ -979,21 +978,21 @@ s_user_resetpass(struct client *client_p, struct lconn *conn_p, const char *parv
 			return 1;
 		}
 
-		rsdb_step_init("SELECT username FROM users_resetpass WHERE username='%Q' AND time > '%lu'",
+		/* XXX - day */
+		rsdb_exec_fetch(&data, "SELECT COUNT(username) FROM users_resetpass WHERE username='%Q' AND time > '%lu'",
 				reg_p->name, CURRENT_TIME - 86400);
 
 		/* already issued one within the past day.. */
-		/* XXX - day */
-		if(rsdb_step(&ncol, &coldata))
+		if(atoi(data.row[0][0]))
 		{
 			service_error(userserv_p, client_p,
 					"Username %s already has a pending password reset",
 					reg_p->name);
-			rsdb_step_end();
+			rsdb_exec_fetch_end(&data);
 			return 1;
 		}
 
-		rsdb_step_end();
+		rsdb_exec_fetch_end(&data);
 
 		slog(userserv_p, 3, "%s - RESETPASS %s",
 			client_p->user->mask, reg_p->name);
@@ -1031,16 +1030,16 @@ s_user_resetpass(struct client *client_p, struct lconn *conn_p, const char *parv
 		client_p->user->mask, reg_p->name);
 
 	/* authenticating a password reset */
-	rsdb_step_init("SELECT token FROM users_resetpass WHERE username='%Q' AND time > '%lu'",
+	rsdb_exec_fetch(&data, "SELECT token FROM users_resetpass WHERE username='%Q' AND time > '%lu'",
 			reg_p->name, CURRENT_TIME - 86400);
 
 	/* ok, found the entry.. */
-	if(rsdb_step(&ncol, &coldata))
+	if(data.row_count)
 	{
-		if(strcmp(coldata[0], parv[1]) == 0)
+		if(strcmp(data.row[0][0], parv[1]) == 0)
 		{
 			/* need to execute another query.. */
-			rsdb_step_end();
+			rsdb_exec_fetch_end(&data);
 
 			rsdb_exec(NULL, "UPDATE users SET password='%Q' WHERE username='%Q'",
 					parv[1], reg_p->name);
@@ -1061,7 +1060,7 @@ s_user_resetpass(struct client *client_p, struct lconn *conn_p, const char *parv
 				"Username %s does not have a pending password reset",
 				reg_p->name);
 
-	rsdb_step_end();
+	rsdb_exec_fetch_end(&data);
 	return 1;
 }
 
