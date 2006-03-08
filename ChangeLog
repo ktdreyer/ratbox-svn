@@ -1,3 +1,12 @@
+leeh        2006/03/08 20:50:54 UTC	(20060308_1-22025)
+  Log:
+  - make rsdb_exec_fetch() handle no rows being returned properly
+  
+
+  Modified:
+	rserv/trunk/src/rsdb_sqlite.c (File Modified) 
+
+
 leeh        2006/03/08 20:28:26 UTC	(20060308_0-22023)
   Log:
   - add in rsdb_exec_fetch(), which allocates an entire result set into memory
