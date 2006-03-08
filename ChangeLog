@@ -1,3 +1,13 @@
+leeh        2006/03/08 21:19:16 UTC	(20060308_2-22027)
+  Log:
+  - remove usage of rsdb_step(), opting instead for rsdb_exec_fetch()
+  
+
+  Modified:
+	rserv/trunk/src/s_banserv.c (File Modified) 
+	rserv/trunk/src/s_userserv.c (File Modified) 
+
+
 leeh        2006/03/08 20:50:54 UTC	(20060308_1-22025)
   Log:
   - make rsdb_exec_fetch() handle no rows being returned properly
