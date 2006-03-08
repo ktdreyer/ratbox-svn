@@ -1,3 +1,14 @@
+leeh        2006/03/08 21:20:39 UTC	(20060308_3-22029)
+  Log:
+  - remove rsdb_step() and friends
+  
+
+  Modified:
+	rserv/trunk/include/rsdb.h (File Modified) 
+	rserv/trunk/src/rsdb_mysql.c (File Modified) 
+	rserv/trunk/src/rsdb_sqlite.c (File Modified) 
+
+
 leeh        2006/03/08 21:19:16 UTC	(20060308_2-22027)
   Log:
   - remove usage of rsdb_step(), opting instead for rsdb_exec_fetch()
