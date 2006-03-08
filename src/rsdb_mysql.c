@@ -98,6 +98,7 @@ rsdb_exec(rsdb_callback cb, const char *format, ...)
 	i = rs_vsnprintf(buf, sizeof(buf), format, args);
 	va_end(args);
 
+	/* XXX assert */
 	if(i >= sizeof(buf))
 		die("length problem compiling sql statement");
 
@@ -132,7 +133,7 @@ rsdb_exec(rsdb_callback cb, const char *format, ...)
 		}
 		coldata[i] = NULL;
 
-		(cb)((int) field_count, coldata, colnames);
+		(cb)((int) field_count, coldata);
 	}
 
 	if(mysql_errno(rsdb_database))
@@ -143,6 +144,81 @@ rsdb_exec(rsdb_callback cb, const char *format, ...)
 	}
 
 	mysql_free_result(rsdb_result);
+}
+
+void
+rsdb_exec_fetch(struct rsdb_table *table, const char *format, ...)
+{
+	static char buf[BUFSIZE*4];
+	MYSQL_RES *rsdb_result;
+	MYSQL_ROW row;
+	va_list args;
+	int i, j;
+
+	va_start(args, format);
+	i = rs_vsnprintf(buf, sizeof(buf), format, args);
+	va_end(args);
+
+	/* XXX assert() */
+	if(i >= sizeof(buf))
+		die("length problem compiling sql statement");
+
+	if(mysql_query(rsdb_database, buf))
+	{
+		mlog("fatal error: problem with db file: %s",
+				mysql_error(rsdb_database));
+		die("problem with db file");
+	}
+
+	if((rsdb_result = mysql_use_result(rsdb_database)) == NULL)
+	{
+		// XXX error
+		mlog("fatal error: problem with db file: %s",
+			mysql_error(rsdb_database));
+		die("problem with db file");
+	}
+
+	table->row_count = (unsigned int) mysql_num_rows(rsdb_result);
+	table->col_count = mysql_field_count(rsdb_database);
+	table->arg = rsdb_result;
+
+	if(!table->row_count || !table->col_count)
+	{
+		table->row = NULL;
+		return;
+	}
+
+	table->row = my_malloc(sizeof(char **) * table->row_count);
+
+	for(i = 0; row; i++, row = mysql_fetch_row(rsdb_result))
+	{
+		table->row[i] = my_malloc(sizeof(char *) * table->col_count);
+
+		for(j = 0; j < table->col_count; j++)
+		{
+			table->row[i][j] = row[j] ? strdup(row[j]) : NULL;	// XXX - available?
+		}
+	}
+}
+
+void
+rsdb_exec_fetch_end(struct rsdb_table *table)
+{
+	int i, j;
+
+	for(i = 0; i < table->row_count; i++)
+	{
+		for(j = 0; j < table->col_count; j++)
+		{
+			my_free(table->row[i][j]);
+		}
+
+		my_free(table->row[i]);
+	}
+
+	my_free(table->row);
+
+	mysql_free_result((MYSQL_RES *) table->arg);
 }
 
 void

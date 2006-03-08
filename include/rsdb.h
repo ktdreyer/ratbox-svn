@@ -14,8 +14,8 @@ rsdb_transtype;
 struct rsdb_table
 {
 	char ***row;
-	int row_count;
-	int col_count;
+	unsigned int row_count;
+	unsigned int col_count;
 	void *arg;
 };
 
