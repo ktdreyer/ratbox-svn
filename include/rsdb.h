@@ -31,8 +31,4 @@ void rsdb_exec_fetch_end(struct rsdb_table *data);
 
 void rsdb_transaction(rsdb_transtype type);
 
-void rsdb_step_init(const char *format, ...);
-int rsdb_step(int *, const char ***);
-void rsdb_step_end(void);
-
 #endif

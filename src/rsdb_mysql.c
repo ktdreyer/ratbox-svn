@@ -40,8 +40,6 @@
 #define RSDB_MAXCOLS 30
 
 MYSQL *rsdb_database;
-MYSQL_RES *rsdb_result;
-unsigned int rsdb_field_count;
 
 /* rsdb_init()
  */
@@ -90,6 +88,7 @@ rsdb_exec(rsdb_callback cb, const char *format, ...)
 {
 	static char buf[BUFSIZE*4];
 	static const char *coldata[RSDB_MAXCOLS+1];
+	MYSQL_RES *rsdb_result;
 	MYSQL_ROW row;
 	va_list args;
 	unsigned int field_count;
@@ -155,89 +154,4 @@ rsdb_transaction(rsdb_transtype type)
 	else if(type == RSDB_TRANS_END)
 		;
 }
-
-void
-rsdb_step_init(const char *format, ...)
-{
-	static char buf[BUFSIZE*4];
-	int i;
-	va_list args;
-
-	va_start(args, format);
-	i = rs_vsnprintf(buf, sizeof(buf), format, args);
-	va_end(args);
-
-	if(i >= sizeof(buf))
-		die("length problem compiling sql statement");
-
-	if(mysql_query(rsdb_database, buf))
-	{
-		mlog("fatal error: problem with db file: %s",
-			mysql_error(rsdb_database));
-		die("problem with db file");
-	}
-
-	rsdb_field_count = mysql_field_count(rsdb_database);
-
-	if(rsdb_field_count > RSDB_MAXCOLS)
-	{
-		die("foo"); /* XXX */
-	}
-
-	if((rsdb_result = mysql_use_result(rsdb_database)) == NULL)
-	{
-		// CR_SERVER_LOST?
-		mlog("fatal error: problem with db file: %s",
-			mysql_error(rsdb_database));
-		die("problem with db file");
-	}
-}
-
-int
-rsdb_step(int *ncol, const char ***cb_coldata)
-{
-	static const char *coldata[RSDB_MAXCOLS+1];
-	MYSQL_ROW row;
-	int i;
-
-	if(!rsdb_field_count)
-		return 0;
-
-	*ncol = rsdb_field_count;
-	*cb_coldata = coldata;
-
-	if(rsdb_field_count > RSDB_MAXCOLS)
-		die("too many columns in result set -- contact the ratbox team");
-
-	if((row = mysql_fetch_row(rsdb_result)))
-	{
-		for(i = 0; i < rsdb_field_count; i++)
-		{
-			coldata[i] = row[i];
-		}
-		coldata[i] = NULL;
-
-		return 1;
-	}
-
-	if(mysql_errno(rsdb_database))
-	{
-		mlog("fatal error: problem with db file: %s",
-			mysql_error(rsdb_database));
-		die("problem with db file");
-	}
-
-	return 0;
-}
-
-void
-rsdb_step_end(void)
-{
-	/* skip any remaining rows.. */
-	while(mysql_fetch_row(rsdb_result))
-		;
-
-	mysql_free_result(rsdb_result);
-}
-	
 

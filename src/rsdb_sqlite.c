@@ -44,8 +44,6 @@
 
 struct sqlite *rserv_db;
 
-sqlite_vm *rsdb_step_vm;
-
 /* rsdb_init()
  */
 void
@@ -192,67 +190,4 @@ rsdb_transaction(rsdb_transtype type)
 	else if(type == RSDB_TRANS_END)
 		rsdb_exec(NULL, "COMMIT TRANSACTION");
 }
-
-void
-rsdb_step_init(const char *format, ...)
-{
-	static char buf[BUFSIZE*4];
-	const char *tail;
-	char *errmsg;
-	int i;
-	va_list args;
-
-	va_start(args, format);
-	i = rs_vsnprintf(buf, sizeof(buf), format, args);
-	va_end(args);
-
-	if(i >= sizeof(buf))
-	{
-		mlog("fatal error: length problem with compiling sql");
-		die("problem with compiling sql statement");
-	}
-
-	if((i = sqlite_compile(rserv_db, buf, &tail, &rsdb_step_vm, &errmsg)))
-	{
-		mlog("fatal eror: problem with compiling sql: %s", errmsg);
-		die("problem with compiling sql statement");
-	}
-}
-
-int
-rsdb_step(int *ncol, const char ***coldata)
-{
-	static const char **colnames;
-	int i;
-
-	if((i = sqlite_step(rsdb_step_vm, ncol, coldata, &colnames)))
-	{
-		if(i == SQLITE_DONE)
-			rsdb_step_end();
-		else if(i == SQLITE_ROW)
-			return 1;
-		else
-		{
-			mlog("fatal error: problem with sql step: %d", i);
-			die("problem with sql step");
-		}
-	}
-
-	return 0;
-}
-
-void
-rsdb_step_end(void)
-{
-	char *errmsg;
-	int i;
-
-	if((i = sqlite_finalize(rsdb_step_vm, &errmsg)))
-	{
-		mlog("fatal error: problem with finalizing sql: %s",
-			errmsg);
-		die("problem with finalising sql statement");
-	}
-}
-
 
