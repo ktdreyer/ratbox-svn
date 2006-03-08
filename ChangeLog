@@ -1,3 +1,15 @@
+leeh        2006/03/08 20:28:26 UTC	(20060308_0-22023)
+  Log:
+  - add in rsdb_exec_fetch(), which allocates an entire result set into memory
+  - make the global code use rsdb_exec_fetch()
+  
+
+  Modified:
+	rserv/trunk/include/rsdb.h (File Modified) 
+	rserv/trunk/src/rsdb_sqlite.c (File Modified) 
+	rserv/trunk/src/s_global.c (File Modified) 
+
+
 leeh        2006/03/06 21:53:02 UTC	(20060306_4-22019)
   Log:
   - remove colnames from the db interface.. we dont use it and it will make
