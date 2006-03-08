@@ -1,3 +1,13 @@
+leeh        2006/03/08 22:27:54 UTC	(20060308_5-22033)
+  Log:
+  - dont use popen() when sending emails, but do the sockets ourselves
+    - This code is broken, needs fixing.
+  
+
+  Modified:
+	rserv/trunk/src/email.c (File Modified) 
+
+
 leeh        2006/03/08 21:52:59 UTC	(20060308_4-22031)
   Log:
   - add in the mysql implementation of mysql_exec_fetch()
