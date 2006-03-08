@@ -150,6 +150,12 @@ rsdb_exec_fetch(struct rsdb_table *table, const char *format, ...)
 	/* we need to be able to free data afterward */
 	table->arg = data;
 
+	if(table->row_count == 0)
+	{
+		table->row = NULL;
+		return;
+	}
+
 	/* sqlite puts the column names as the first row */
 	pos = table->col_count;
 	table->row = my_malloc(sizeof(char **) * table->row_count);
