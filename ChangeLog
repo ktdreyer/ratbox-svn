@@ -1,3 +1,14 @@
+leeh        2006/03/08 21:52:59 UTC	(20060308_4-22031)
+  Log:
+  - add in the mysql implementation of mysql_exec_fetch()
+  - make col_count and row_count in struct rsdb_table unsigned
+  
+
+  Modified:
+	rserv/trunk/include/rsdb.h (File Modified) 
+	rserv/trunk/src/rsdb_mysql.c (File Modified) 
+
+
 leeh        2006/03/08 21:20:39 UTC	(20060308_3-22029)
   Log:
   - remove rsdb_step() and friends
