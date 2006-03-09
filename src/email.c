@@ -91,7 +91,7 @@ send_email(const char *address, const char *subject, const char *format, ...)
 		case 0:
 			close(pfd[1]);
 			dup2(pfd[0], 0);
-			if(execl("/usr/sbin/sendmail", "sendmail", "-t") < 0)
+			if(execl("/usr/sbin/sendmail", "sendmail", "-t", NULL) < 0)
 			{
 				mlog("warning: unable to send email, cannot execute email program: %s",
 					strerror(errno));
