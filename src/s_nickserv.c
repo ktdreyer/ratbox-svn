@@ -69,7 +69,7 @@ static int h_nick_server_eob(void *client_p, void *unused);
 static struct service_command nickserv_command[] =
 {
 	{ "NICKDROP",	&o_nick_nickdrop, 1, NULL, 1, 0L, 0, 0, CONF_OPER_NS_DROP, 0 },
-	{ "REGISTER",	&s_nick_register, 0, NULL, 1, 0L, 1, 0, 0, 0	},
+	{ "REGISTER",	&s_nick_register, 0, NULL, 1, 0L, 0, 0, 0, 0	},
 	{ "DROP",	&s_nick_drop,     1, NULL, 1, 0L, 1, 0, 0, 0	},
 	{ "RELEASE",	&s_nick_release,  1, NULL, 1, 0L, 1, 0, 0, 0	},
 	{ "REGAIN",	&s_nick_regain,   1, NULL, 1, 0L, 1, 0, 0, 0	},
@@ -255,6 +255,19 @@ s_nick_register(struct client *client_p, struct lconn *conn_p, const char *parv[
 {
 	struct nick_reg *nreg_p;
 	struct user_reg *ureg_p = client_p->user->user_reg;
+	struct client *userserv_p;
+
+	/* Hack: give better error message -- jilles */
+	if (ureg_p == NULL)
+	{
+		userserv_p = find_service_id("USERSERV");
+		service_error(nickserv_p, client_p,
+				"You must register a username with %s and log in before you can register your nickname",
+				userserv_p != NULL ? userserv_p->name : "???");
+		return 1;
+	}
+	else
+		ureg_p->last_time = CURRENT_TIME;
 
 	if(dlink_list_length(&ureg_p->nicks) >= config_file.nmax_nicks)
 	{
