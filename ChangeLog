@@ -1,3 +1,13 @@
+jilles      2006/03/09 09:34:05 UTC	(20060309_1-22037)
+  Log:
+  Be a little more friendly to users who try to register
+  a nick without a registered username.
+  
+
+  Modified:
+	rserv/trunk/src/s_nickserv.c (File Modified) 
+
+
 jilles      2006/03/09 09:24:21 UTC	(20060309_0-22035)
   Log:
   Bring email sending code closer to working.
