@@ -1,3 +1,14 @@
+leeh        2006/03/09 18:26:33 UTC	(20060309_2-22043)
+  Log:
+  - update schemas with users_resetpass
+  
+
+  Modified:
+	rserv/trunk/doc/base/schema-mysql.txt (File Modified) 
+	rserv/trunk/doc/base/schema-pgsql.txt (File Modified) 
+	rserv/trunk/doc/schema-sqlite.txt (File Modified) 
+
+
 jilles      2006/03/09 09:34:05 UTC	(20060309_1-22037)
   Log:
   Be a little more friendly to users who try to register
