@@ -29,6 +29,7 @@
 #include <fcntl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/wait.h>
 #include <limits.h>
 
 #ifdef HAVE_ERRNO_H

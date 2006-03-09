@@ -69,6 +69,8 @@ send_email(const char *address, const char *subject, const char *format, ...)
 
 	if((out = fdopen(pfd[1], "w")) == NULL)
 	{
+		close(pfd[0]);
+		close(pfd[1]);
 		mlog("warning: unable to send email, cannot fdopen(): %s",
 			strerror(errno));
 		return 0;
@@ -79,13 +81,17 @@ send_email(const char *address, const char *subject, const char *format, ...)
 	switch(childpid)
 	{
 		case -1:
+			close(pfd[0]);
+			close(pfd[1]);
 			mlog("warning: unable to send email, cannot fork(): %s",
 				strerror(errno));
 			return 0;
 
 		/* child process, break out of here and send the email */
 		case 0:
-			if(execl("/usr/sbin/sendmail", "-t") < 0)
+			close(pfd[1]);
+			dup2(pfd[0], 0);
+			if(execl("/usr/sbin/sendmail", "sendmail", "-t") < 0)
 			{
 				mlog("warning: unable to send email, cannot execute email program: %s",
 					strerror(errno));
@@ -99,8 +105,7 @@ send_email(const char *address, const char *subject, const char *format, ...)
 			break;
 	}
 
-	waitpid(childpid, &retval, 0);
-
+	close(pfd[0]);
 	snprintf(buf, sizeof(buf),
 		"From: %s <%s>\n"
 		"To: %s\n"
@@ -119,5 +124,6 @@ send_email(const char *address, const char *subject, const char *format, ...)
 
 	fclose(out);
 
-	exit(0);
+	waitpid(childpid, &retval, 0);
+	return WIFEXITED(retval) && WEXITSTATUS(retval) == 0;
 }
