@@ -20,6 +20,13 @@ CREATE TABLE users (
 	PRIMARY KEY(username)
 );
 
+CREATE TABLE users_resetpass (
+	username TEXT,
+	token TEXT,
+	time INTEGER,
+	PRIMARY KEY(username)
+);
+
 CREATE TABLE channels (
 	chname TEXT,
 	topic TEXT,

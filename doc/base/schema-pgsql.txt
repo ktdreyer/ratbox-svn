@@ -11,6 +11,13 @@ CREATE TABLE users (
 	PRIMARY KEY(username)
 );
 
+CREATE TABLE users_resetpass (
+	username VARCHAR(USERREGNAME_LEN) NOT NULL,
+	token VARCHAR(10),
+	time INTEGER,
+	PRIMARY KEY(username)
+);
+
 CREATE TABLE nicks (
 	nickname VARCHAR(NICKLEN) NOT NULL,
 	username VARCHAR(USERREGNAME_LEN) NOT NULL,
