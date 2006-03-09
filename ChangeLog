@@ -1,3 +1,12 @@
+leeh        2006/03/09 18:42:54 UTC	(20060309_3-22045)
+  Log:
+  - add NULL terminator to the sendmail args
+  
+
+  Modified:
+	rserv/trunk/src/email.c (File Modified) 
+
+
 leeh        2006/03/09 18:26:33 UTC	(20060309_2-22043)
   Log:
   - update schemas with users_resetpass
