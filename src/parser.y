@@ -113,6 +113,8 @@ conf_parm_t *	cur_list = NULL;
 
 static void	add_cur_list_cpt(conf_parm_t *new)
 {
+	conf_parm_t *end;
+
 	if (cur_list == NULL)
 	{
 		cur_list = my_malloc(sizeof(conf_parm_t));
@@ -121,8 +123,11 @@ static void	add_cur_list_cpt(conf_parm_t *new)
 	}
 	else
 	{
-		new->next = cur_list->v.list;
-		cur_list->v.list = new;
+		for(end = cur_list->v.list; end->next; end = end->next)
+			;
+
+		end->next = new;
+		new->next = NULL;
 	}
 }
 

@@ -501,6 +501,32 @@ conf_set_serverinfo_name(void *data)
 	}
 }
 
+static void
+conf_set_serverinfo_email_program(void *data)
+{
+	conf_parm_t *args = data;
+	int i = 0;
+
+	for(; args; args = args->next)
+	{
+		if((args->type & CF_MTYPE) != CF_QSTRING)
+		{
+			conf_report_error("Warning -- email_program is not a quoted string; ignoring further parameters");
+			break;
+		}
+
+		config_file.email_program[i++] = my_strdup(args->v.string);
+
+		if(i >= MAX_EMAIL_PROGRAM_ARGS)
+		{
+			conf_report_error("Warning -- email_program has too many arguments; ignoring further parameters");
+			break;
+		}
+	}
+
+	config_file.email_program[i] = NULL;
+}
+		
 static int
 conf_begin_connect(struct TopConf *tc)
 {
@@ -941,7 +967,7 @@ static struct ConfEntry conf_serverinfo_table[] =
 	{ "ping_time",		CF_TIME,    NULL, 0, &config_file.ping_time	},
 	{ "ratbox",		CF_YESNO,   NULL, 0, &config_file.ratbox	},
 	{ "name",		CF_QSTRING, conf_set_serverinfo_name, 0, NULL	},
-	{ "email_program",	CF_QSTRING, NULL, 0, &config_file.email_program },
+	{ "email_program",	CF_QSTRING|CF_FLIST, conf_set_serverinfo_email_program, 0, NULL },
 	{ "email_name",		CF_QSTRING, NULL, 0, &config_file.email_name	},
 	{ "email_address",	CF_QSTRING, NULL, 0, &config_file.email_address },
 	{ "\0", 0, NULL, 0, NULL }

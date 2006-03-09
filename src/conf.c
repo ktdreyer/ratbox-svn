@@ -149,6 +149,13 @@ clear_old_conf(void)
 	struct conf_oper *oper_p;
 	dlink_node *ptr;
 	dlink_node *next_ptr;
+	int i;
+
+	for(i = 0; config_file.email_program[i]; i++)
+	{
+		my_free(config_file.email_program[i]);
+		config_file.email_program[i] = NULL;
+	}
 
 	DLINK_FOREACH_SAFE(ptr, next_ptr, conf_oper_list.head)
 	{

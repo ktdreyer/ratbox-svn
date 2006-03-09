@@ -11,6 +11,8 @@ struct FileBuf;
 #define DEFAULT_EXPIREBAN_FREQUENCY	900	/* 15 mins */
 #define DEFAULT_AUTOSYNC_FREQUENCY	604800	/* 1 week */
 
+#define MAX_EMAIL_PROGRAM_ARGS		10
+
 extern time_t first_time;
 
 struct _config_file
@@ -41,7 +43,7 @@ struct _config_file
 	char *db_username;
 	char *db_password;
 
-	char *email_program;
+	char *email_program[MAX_EMAIL_PROGRAM_ARGS+1];
 	char *email_name;
 	char *email_address;
 

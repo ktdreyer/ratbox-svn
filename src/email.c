@@ -46,19 +46,11 @@ send_email(const char *address, const char *subject, const char *format, ...)
 	int pfd[2];
 	int retval;
 
-/*
-	if(EmptyString(config_file.email_program))
+	if(EmptyString(config_file.email_program[0]))
 	{
 		mlog("warning: unable to send email, email program is not set");
 		return 0;
 	}
-
-	if(EmptyString(config_file.email_address))
-	{
-		mlog("warning: unable to send email, email address is not set");
-		return 0;
-	}
-*/
 
 	if(pipe(pfd) == -1)
 	{
@@ -87,11 +79,11 @@ send_email(const char *address, const char *subject, const char *format, ...)
 				strerror(errno));
 			return 0;
 
-		/* child process, break out of here and send the email */
+		/* child process, become the process to deal with sending the email */
 		case 0:
 			close(pfd[1]);
 			dup2(pfd[0], 0);
-			if(execl("/usr/sbin/sendmail", "sendmail", "-t", NULL) < 0)
+			if(execv(config_file.email_program[0], config_file.email_program) < 0)
 			{
 				mlog("warning: unable to send email, cannot execute email program: %s",
 					strerror(errno));
