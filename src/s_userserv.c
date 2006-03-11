@@ -978,9 +978,9 @@ s_user_resetpass(struct client *client_p, struct lconn *conn_p, const char *parv
 			return 1;
 		}
 
-		/* XXX - day */
+		/* XXX - another var? */
 		rsdb_exec_fetch(&data, "SELECT COUNT(username) FROM users_resetpass WHERE username='%Q' AND time > '%lu'",
-				reg_p->name, CURRENT_TIME - 86400);
+				reg_p->name, CURRENT_TIME - config_file.uresetpass_duration);
 
 		/* already issued one within the past day.. */
 		if(atoi(data.row[0][0]))
@@ -1031,7 +1031,7 @@ s_user_resetpass(struct client *client_p, struct lconn *conn_p, const char *parv
 
 	/* authenticating a password reset */
 	rsdb_exec_fetch(&data, "SELECT token FROM users_resetpass WHERE username='%Q' AND time > '%lu'",
-			reg_p->name, CURRENT_TIME - 86400);
+			reg_p->name, CURRENT_TIME - config_file.uresetpass_duration);
 
 	/* ok, found the entry.. */
 	if(data.row_count)
