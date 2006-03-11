@@ -1,3 +1,13 @@
+leeh        2006/03/11 19:17:25 UTC	(20060311_2-22061)
+  Log:
+  - fix operator::user in conf parser to deal with the fact lists are now
+    ordered correctly
+  
+
+  Modified:
+	rserv/trunk/src/newconf.c (File Modified) 
+
+
 leeh        2006/03/11 18:48:10 UTC	(20060311_1-22055)
   Log:
   - the omode priv listed here is actually osmode
