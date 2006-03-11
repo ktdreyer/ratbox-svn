@@ -121,7 +121,7 @@ e_banserv_expire(void *unused)
 	/* these bans are temp, so they will expire automatically on 
 	 * servers
 	 */
-	rsdb_exec(NULL, "DELETE FROM operbans WHERE hold <= %lu",
+	rsdb_exec(NULL, "DELETE FROM operbans WHERE hold != 0 AND hold <= %lu",
 			CURRENT_TIME);
 }
 
