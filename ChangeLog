@@ -1,3 +1,25 @@
+leeh        2006/03/11 23:25:53 UTC	(20060311_7-22073)
+  Log:
+  - handle short reads properly, we were treating a recv() of part of a line
+    as an entire line, then ignoring the remainder the next time we pulled a
+    line.
+  
+    We now store buffers for each connection and keep appending to this buffer
+    until either we get a full line, or we've read BUFSIZE without a \n, at
+    which point we parse.
+  
+
+  Modified:
+	rserv/trunk/include/io.h (File Modified) 
+	rserv/trunk/src/c_error.c (File Modified) 
+	rserv/trunk/src/c_message.c (File Modified) 
+	rserv/trunk/src/io.c (File Modified) 
+	rserv/trunk/src/s_alis.c (File Modified) 
+	rserv/trunk/src/s_global.c (File Modified) 
+	rserv/trunk/src/s_operbot.c (File Modified) 
+	rserv/trunk/src/s_operserv.c (File Modified) 
+
+
 leeh        2006/03/11 21:32:51 UTC	(20060311_6-22071)
   Log:
   - port 22069
