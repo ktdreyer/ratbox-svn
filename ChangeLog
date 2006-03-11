@@ -1,3 +1,17 @@
+leeh        2006/03/11 19:30:22 UTC	(20060311_3-22063)
+  Log:
+  - add resetpass_duration = <time>; to userserv {};, controls how long
+    resetpass requests are kept around waiting for confirmation
+  
+
+  Modified:
+	rserv/trunk/doc/example.conf (File Modified) 
+	rserv/trunk/include/conf.h (File Modified) 
+	rserv/trunk/src/conf.c (File Modified) 
+	rserv/trunk/src/newconf.c (File Modified) 
+	rserv/trunk/src/s_userserv.c (File Modified) 
+
+
 leeh        2006/03/11 19:17:25 UTC	(20060311_2-22061)
   Log:
   - fix operator::user in conf parser to deal with the fact lists are now
