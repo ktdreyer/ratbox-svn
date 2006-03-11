@@ -31,13 +31,14 @@
  * $Id$
  */
 #include "stdinc.h"
+#include "rserv.h"
+#include "io.h"
 #include "service.h"
 #include "client.h"
 #include "conf.h"
 #include "scommand.h"
 #include "c_init.h"
 #include "log.h"
-#include "io.h"
 
 static void c_message(struct client *, const char *parv[], int parc);
 

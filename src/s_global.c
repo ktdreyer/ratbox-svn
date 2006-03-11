@@ -34,10 +34,10 @@
 
 #ifdef ENABLE_GLOBAL
 #include "rsdb.h"
+#include "rserv.h"
+#include "io.h"
 #include "service.h"
 #include "client.h"
-#include "io.h"
-#include "rserv.h"
 #include "c_init.h"
 #include "conf.h"
 #include "ucommand.h"

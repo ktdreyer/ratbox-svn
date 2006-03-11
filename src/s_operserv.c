@@ -34,11 +34,11 @@
 
 #ifdef ENABLE_OPERSERV
 #include "rsdb.h"
+#include "rserv.h"
+#include "io.h"
 #include "client.h"
 #include "service.h"
 #include "channel.h"
-#include "io.h"
-#include "rserv.h"
 #include "c_init.h"
 #include "conf.h"
 #include "hook.h"

@@ -31,6 +31,9 @@ struct lconn
 	int (*io_write)(struct lconn *);
 	void (*io_close)(struct lconn *);
 
+	char recvbuf[BUFSIZE+1];
+	int recvbuf_offset;
+
 	dlink_list sendq;
 };
 

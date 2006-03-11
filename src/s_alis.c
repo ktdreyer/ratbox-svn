@@ -34,9 +34,10 @@
 
 #ifdef ENABLE_ALIS
 #include "service.h"
+#include "rserv.h"
+#include "io.h"
 #include "client.h"
 #include "channel.h"
-#include "io.h"
 #include "c_init.h"
 #include "log.h"
 #include "conf.h"

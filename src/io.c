@@ -108,13 +108,15 @@ ignore_errno(int ierrno)
  * outputs	- characters read
  */
 static int
-get_line(struct lconn *conn_p, char *buf, int bufsize)
+get_line(struct lconn *conn_p)
 {
 	char *p;
 	int n;
 	int term;
-	
-	if((n = recv(conn_p->fd, buf, bufsize, MSG_PEEK)) <= 0)
+	int buflen;
+
+	if((n = recv(conn_p->fd, conn_p->recvbuf + conn_p->recvbuf_offset, 
+			sizeof(conn_p->recvbuf) - conn_p->recvbuf_offset, MSG_PEEK)) <= 0)
 	{
 		if(n == -1 && ignore_errno(errno))
 			return 0;
@@ -122,34 +124,56 @@ get_line(struct lconn *conn_p, char *buf, int bufsize)
 		return -1;
 	}
 
-	if((p = memchr(buf, '\n', n)) != NULL)
+	/* if we found a '\n', set n to the position of it in the stream,
+	 * that way the following read() call will only read a single line
+	 */
+	if((p = memchr(conn_p->recvbuf, '\n', conn_p->recvbuf_offset + n)) != NULL)
+		n = p - conn_p->recvbuf - conn_p->recvbuf_offset + 1;
+
+	if((n = read(conn_p->fd, conn_p->recvbuf + conn_p->recvbuf_offset, n)) <= 0)
 	{
-		n = p - buf + 1;
-		term = 1;
+		if(n == -1 && ignore_errno(errno))
+			return 0;
+
+		return -1;
 	}
+
+	buflen = conn_p->recvbuf_offset + n;
+
+	/* for sanity reasons, this makes sure that when recv() told us we
+	 * were getting a '\n', we actually did from read() --fl
+	 */
+	if(memchr(conn_p->recvbuf, '\n', buflen))
+		term = 1;
 	else
 		term = 0;
 
-	if((n = read(conn_p->fd, buf, n)) <= 0)
+	/* if this isnt terminated, and is still under the length limit then
+	 * we likely have a short read and more data is coming.
+	 *
+	 * update the offset so we dont trash the recvbuf and return a
+	 * non-fatal error
+	 */
+	if(!term && (buflen < sizeof(conn_p->recvbuf)))
 	{
-		if(n == -1 && ignore_errno(errno))
-			return 0;
-
-		return -1;
+		conn_p->recvbuf_offset += n;
+		return 0;
 	}
+	else
+		conn_p->recvbuf_offset = 0;
 
 	/* we're allowed to parse this line.. */
 	if((conn_p->flags & CONN_FLAGS_UNTERMINATED) == 0)
 	{
-		if(n >= BUFSIZE)
-			buf[BUFSIZE-1] = '\0';
+		if(buflen >= sizeof(conn_p->recvbuf))
+			conn_p->recvbuf[sizeof(conn_p->recvbuf) - 1] = '\0';
 		else
-			buf[n] = '\0';
+			conn_p->recvbuf[buflen] = '\0';
 
 		if(!term)
 			conn_p->flags |= CONN_FLAGS_UNTERMINATED;
 
-		return n;
+		return buflen;
 	}
 
 	/* found a \n, can begin parsing again.. */
@@ -757,11 +781,10 @@ signoff_server(struct lconn *conn_p)
 static void
 read_server(struct lconn *conn_p)
 {
-	static char buf[BUFSIZE*2];
 	int n;
 
-	if((n = get_line(server_p, buf, sizeof(buf))) > 0)
-		parse_server(buf, n);
+	if((n = get_line(server_p)) > 0)
+		parse_server(server_p->recvbuf, n);
 
         /* we had a fatal error.. close the socket */
 	else if(n < 0)
@@ -797,11 +820,10 @@ read_server(struct lconn *conn_p)
 static void
 read_client(struct lconn *conn_p)
 {
-	static char buf[BUFSIZE*2];
 	int n;
 
-	if((n = get_line(conn_p, buf, sizeof(buf))) > 0)
-		parse_client(conn_p, buf, n);
+	if((n = get_line(conn_p)) > 0)
+		parse_client(conn_p, conn_p->recvbuf, n);
 
         /* fatal error */
 	else if(n < 0)

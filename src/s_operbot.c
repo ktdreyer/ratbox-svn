@@ -34,11 +34,11 @@
 
 #ifdef ENABLE_OPERBOT
 #include "rsdb.h"
+#include "rserv.h"
+#include "io.h"
 #include "service.h"
 #include "client.h"
 #include "channel.h"
-#include "io.h"
-#include "rserv.h"
 #include "c_init.h"
 #include "log.h"
 #include "conf.h"

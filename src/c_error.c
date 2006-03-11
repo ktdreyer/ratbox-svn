@@ -32,10 +32,11 @@
  */
 #include "stdinc.h"
 #include "c_init.h"
+#include "rserv.h"
+#include "io.h"
 #include "scommand.h"
 #include "client.h"
 #include "log.h"
-#include "io.h"
 
 static void c_error(struct client *, const char *parv[], int parc);
 struct scommand_handler error_command = { "ERROR", c_error, FLAGS_UNKNOWN, DLINK_EMPTY };
