@@ -676,9 +676,13 @@ conf_end_operator(struct TopConf *tc)
 static void
 conf_set_oper_user(void *data)
 {
-	conf_parm_t *args = data;
+	conf_parm_t *args;
+	conf_parm_t *args_server;
 	const char *username;
 	const char *host;
+
+	args = data;
+	args_server = args->next;
 
 	if(yy_tmpoper != NULL)
 	{
@@ -688,22 +692,21 @@ conf_set_oper_user(void *data)
 
 	yy_tmpoper = my_malloc(sizeof(struct conf_oper));
 
-	/* args points to servername.. */
-	if(args->next != NULL)
+	/* we have a servername.. */
+	if(args_server != NULL)
 	{
-		if((args->type & CF_MTYPE) != CF_QSTRING)
+		if((args_server->type & CF_MTYPE) != CF_QSTRING)
 		{
 			conf_report_error("Warning -- server is not a qstring; ignoring.");
 			return;
 		}
 
-		yy_tmpoper->server = my_strdup(args->v.string);
-		args = args->next;
+		yy_tmpoper->server = my_strdup(args_server->v.string);
 	}
 
 	if((args->type & CF_MTYPE) != CF_QSTRING)
 	{
-		conf_report_error("Warning -- server is not a qstring; ignoring.");
+		conf_report_error("Warning -- user@host is not a qstring; ignoring.");
 		return;
 	}
 
