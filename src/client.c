@@ -499,8 +499,14 @@ c_nick(struct client *client_p, const char *parv[], int parc)
 	if(parc == 8)
 	{
 		target_p = find_client(parv[0]);
-		uplink_p = find_server(parv[6]);
 		newts = atol(parv[1]);
+
+		if((uplink_p = find_server(parv[6])) == NULL)
+		{
+			mlog("PROTO: NICK %s introduced on non-existant server %s",
+				parv[0], parv[6]);
+			return;
+		}
 
 		if(strlen(parv[0]) > NICKLEN)
 			die("Compiled NICKLEN appears to be wrong (nick %s (%d > %d).  Read INSTALL.",
