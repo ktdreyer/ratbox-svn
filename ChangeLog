@@ -1,3 +1,14 @@
+leeh        2006/03/11 21:32:51 UTC	(20060311_6-22071)
+  Log:
+  - port 22069
+    - give a warning when a users introduced on a non-existant server, rather
+      than coring
+  
+
+  Modified:
+	rserv/trunk/src/client.c (File Modified) 
+
+
 leeh        2006/03/11 19:52:09 UTC	(20060311_5-22067)
   Log:
   - move email configuration into its own email {}; block
