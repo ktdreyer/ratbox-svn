@@ -1,3 +1,13 @@
+leeh        2006/03/11 18:35:13 UTC	(20060311_0-22053)
+  Log:
+  - port r22051
+    - fix banserv losing permanent bans
+  
+
+  Modified:
+	rserv/trunk/src/s_banserv.c (File Modified) 
+
+
 leeh        2006/03/09 19:36:19 UTC	(20060309_5-22049)
   Log:
   - rework the email conf options so they take a list of quoted strings
