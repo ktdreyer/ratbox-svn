@@ -502,7 +502,7 @@ conf_set_serverinfo_name(void *data)
 }
 
 static void
-conf_set_serverinfo_email_program(void *data)
+conf_set_email_program(void *data)
 {
 	conf_parm_t *args = data;
 	int i = 0;
@@ -970,7 +970,13 @@ static struct ConfEntry conf_serverinfo_table[] =
 	{ "ping_time",		CF_TIME,    NULL, 0, &config_file.ping_time	},
 	{ "ratbox",		CF_YESNO,   NULL, 0, &config_file.ratbox	},
 	{ "name",		CF_QSTRING, conf_set_serverinfo_name, 0, NULL	},
-	{ "email_program",	CF_QSTRING|CF_FLIST, conf_set_serverinfo_email_program, 0, NULL },
+	{ "\0", 0, NULL, 0, NULL }
+};
+
+static struct ConfEntry conf_email_table[] =
+{
+	{ "disable_email",	CF_YESNO,   NULL, 0, &config_file.disable_email },
+	{ "email_program",	CF_QSTRING|CF_FLIST, conf_set_email_program, 0, NULL },
 	{ "email_name",		CF_QSTRING, NULL, 0, &config_file.email_name	},
 	{ "email_address",	CF_QSTRING, NULL, 0, &config_file.email_address },
 	{ "\0", 0, NULL, 0, NULL }
@@ -1099,6 +1105,7 @@ newconf_init()
 {
 	add_top_conf("serverinfo", NULL, NULL, conf_serverinfo_table);
 	add_top_conf("database", NULL, NULL, conf_database_table);
+	add_top_conf("email", NULL, NULL, conf_email_table);
         add_top_conf("admin", NULL, NULL, conf_admin_table);
         add_top_conf("connect", conf_begin_connect, conf_end_connect, conf_connect_table);
         add_top_conf("operator", conf_begin_operator, conf_end_operator, 

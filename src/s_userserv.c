@@ -958,7 +958,7 @@ s_user_resetpass(struct client *client_p, struct lconn *conn_p, const char *parv
 	struct rsdb_table data;
 	struct user_reg *reg_p;
 
-	if(!config_file.allow_resetpass)
+	if(config_file.disable_email || !config_file.allow_resetpass)
 	{
 		service_error(userserv_p, client_p,
 			"%s::RESETPASS is disabled", userserv_p->name);

@@ -46,6 +46,10 @@ send_email(const char *address, const char *subject, const char *format, ...)
 	int pfd[2];
 	int retval;
 
+	/* master override is enabled.. cant send emails */
+	if(config_file.disable_email)
+		return 0;
+
 	if(EmptyString(config_file.email_program[0]))
 	{
 		mlog("warning: unable to send email, email program is not set");

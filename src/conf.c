@@ -68,7 +68,9 @@ set_default_conf(void)
 	config_file.client_flood_max_ignore = 30;
 	config_file.client_flood_ignore_time = 300;
 	config_file.client_flood_time = 60;
-	
+
+	config_file.disable_email = 1;
+
 	config_file.disable_uregister = 0;
 	config_file.uregister_time = 60;
 	config_file.uregister_amount = 5;
