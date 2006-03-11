@@ -110,6 +110,7 @@ static struct service_handler userserv_service = {
 static int user_db_callback(int argc, const char **argv);
 static int h_user_burst_login(void *, void *);
 static void e_user_expire(void *unused);
+static void e_user_expire_resetpass(void *unused);
 
 static void dump_user_info(struct client *, struct lconn *, struct user_reg *);
 
@@ -133,6 +134,7 @@ init_s_userserv(void)
 	hook_add(h_user_burst_login, HOOK_BURST_LOGIN);
 
 	eventAdd("userserv_expire", e_user_expire, NULL, 43200);
+	eventAdd("userserv_expire_resetpass", e_user_expire_resetpass, NULL, 3600);
 }
 
 static void
@@ -349,6 +351,13 @@ e_user_expire(void *unused)
 	HASH_WALK_END
 
 	rsdb_transaction(RSDB_TRANS_END);
+}
+
+static void
+e_user_expire_resetpass(void *unused)
+{
+	rsdb_exec(NULL, "DELETE FROM users_resetpass WHERE time <= '%lu'",
+			CURRENT_TIME - config_file.uresetpass_duration);
 }
 
 static int
