@@ -1,3 +1,12 @@
+leeh        2006/03/11 19:35:46 UTC	(20060311_4-22065)
+  Log:
+  - add an event in to expire things from users_resetpass
+  
+
+  Modified:
+	rserv/trunk/src/s_userserv.c (File Modified) 
+
+
 leeh        2006/03/11 19:30:22 UTC	(20060311_3-22063)
   Log:
   - add resetpass_duration = <time>; to userserv {};, controls how long
