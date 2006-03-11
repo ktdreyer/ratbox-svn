@@ -1,3 +1,19 @@
+leeh        2006/03/11 19:52:09 UTC	(20060311_5-22067)
+  Log:
+  - move email configuration into its own email {}; block
+  - add in disable_email = yes|no; to email {};, which will stop us ever
+    sending emails.
+  
+
+  Modified:
+	rserv/trunk/doc/example.conf (File Modified) 
+	rserv/trunk/include/conf.h (File Modified) 
+	rserv/trunk/src/conf.c (File Modified) 
+	rserv/trunk/src/email.c (File Modified) 
+	rserv/trunk/src/newconf.c (File Modified) 
+	rserv/trunk/src/s_userserv.c (File Modified) 
+
+
 leeh        2006/03/11 19:35:46 UTC	(20060311_4-22065)
   Log:
   - add an event in to expire things from users_resetpass
