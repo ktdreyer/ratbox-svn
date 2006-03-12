@@ -1,3 +1,16 @@
+leeh        2006/03/12 16:10:42 UTC	(20060312_6-22091)
+  Log:
+  - clear any pending resetpass stuff from the db when we drop users
+  - send email to parv[2] rather than reg_p->email, which doesnt exist yet
+  - dont log users in when verification is needed to register
+  - we should be storing crypted versions of the passwords when resetting
+    passwords, not plaintext
+  
+
+  Modified:
+	rserv/trunk/src/s_userserv.c (File Modified) 
+
+
 leeh        2006/03/12 16:08:23 UTC	(20060312_5-22089)
   Log:
   - port 22087
