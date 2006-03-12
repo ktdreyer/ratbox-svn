@@ -184,33 +184,6 @@ SRC = \
   $(TOP)/src/vdbeInt.h \
   $(TOP)/src/where.c
 
-# Source code to the test files.
-#
-TESTSRC = \
-  $(TOP)/src/btree.c \
-  $(TOP)/src/date.c \
-  $(TOP)/src/func.c \
-  $(TOP)/src/os.c \
-  $(TOP)/src/os_unix.c \
-  $(TOP)/src/os_win.c \
-  $(TOP)/src/pager.c \
-  $(TOP)/src/pragma.c \
-  $(TOP)/src/printf.c \
-  $(TOP)/src/test1.c \
-  $(TOP)/src/test2.c \
-  $(TOP)/src/test3.c \
-  $(TOP)/src/test4.c \
-  $(TOP)/src/test5.c \
-  $(TOP)/src/test6.c \
-  $(TOP)/src/test7.c \
-  $(TOP)/src/test_async.c \
-  $(TOP)/src/test_md5.c \
-  $(TOP)/src/test_server.c \
-  $(TOP)/src/utf.c \
-  $(TOP)/src/util.c \
-  $(TOP)/src/vdbe.c \
-  $(TOP)/src/where.c
-
 # Header files used by all library source files.
 #
 HDR = \
@@ -438,31 +411,6 @@ tclsqlite3:	tclsqlite-shell.lo libsqlite3.la
 	$(LTLINK) -o tclsqlite3 tclsqlite-shell.lo \
 		 libsqlite3.la $(LIBTCL)
 
-testfixture$(TEXE):	$(TOP)/src/tclsqlite.c libsqlite3.la $(TESTSRC)
-	$(LTLINK) -DTCLSH=1 -DSQLITE_TEST=1 -DSQLITE_CRASH_TEST=1 \
-		$(TEMP_STORE) -o testfixture $(TESTSRC) $(TOP)/src/tclsqlite.c \
-		libsqlite3.la $(LIBTCL)
-
-
-fulltest:	testfixture$(TEXE) sqlite3$(TEXE)
-	./testfixture $(TOP)/test/all.test
-
-test:	testfixture$(TEXE) sqlite3$(TEXE)
-	./testfixture $(TOP)/test/quick.test
-
-sqlite3_analyzer$(TEXE):	$(TOP)/src/tclsqlite.c libtclsqlite3.la \
-				$(TESTSRC) $(TOP)/tool/spaceanal.tcl
-	sed \
-	  -e '/^#/d' \
-	  -e 's,\\,\\\\,g' \
-	  -e 's,",\\",g' \
-	  -e 's,^,",' \
-	  -e 's,$$,\\n",' \
-	  $(TOP)/tool/spaceanal.tcl >spaceanal_tcl.h
-	$(LTLINK) -DTCLSH=2 -DSQLITE_TEST=1 $(TEMP_STORE)\
-                -o sqlite3_analyzer$(EXE) $(TESTSRC) $(TOP)/src/tclsqlite.c \
-		libtclsqlite3.la $(LIBTCL)
-
 install:	sqlite3 libsqlite3.la sqlite3.h ${HAVE_TCL:1=tcl_install}
 	$(INSTALL) -d $(DESTDIR)$(libdir)
 	$(LTINSTALL) libsqlite3.la $(DESTDIR)$(libdir)
@@ -484,7 +432,6 @@ clean:
 	rm -f mkkeywordhash$(BEXE) keywordhash.h
 	rm -f $(PUBLISH)
 	rm -f *.da *.bb *.bbg gmon.out
-	rm -f testfixture$(TEXE) test.db
 	rm -f common.tcl
 	rm -f sqlite3.dll sqlite3.lib
 

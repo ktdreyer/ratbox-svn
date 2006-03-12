@@ -117,33 +117,6 @@ SRC = \
   $(TOP)/src/vdbeInt.h \
   $(TOP)/src/where.c
 
-# Source code to the test files.
-#
-TESTSRC = \
-  $(TOP)/src/btree.c \
-  $(TOP)/src/date.c \
-  $(TOP)/src/func.c \
-  $(TOP)/src/os.c \
-  $(TOP)/src/os_unix.c \
-  $(TOP)/src/os_win.c \
-  $(TOP)/src/pager.c \
-  $(TOP)/src/pragma.c \
-  $(TOP)/src/printf.c \
-  $(TOP)/src/test1.c \
-  $(TOP)/src/test2.c \
-  $(TOP)/src/test3.c \
-  $(TOP)/src/test4.c \
-  $(TOP)/src/test5.c \
-  $(TOP)/src/test6.c \
-  $(TOP)/src/test7.c \
-  $(TOP)/src/test_async.c \
-  $(TOP)/src/test_md5.c \
-  $(TOP)/src/test_server.c \
-  $(TOP)/src/utf.c \
-  $(TOP)/src/util.c \
-  $(TOP)/src/vdbe.c \
-  $(TOP)/src/where.c
-
 # Header files used by all library source files.
 #
 HDR = \
@@ -358,31 +331,6 @@ where.o:	$(TOP)/src/where.c $(HDR)
 tclsqlite3:	$(TOP)/src/tclsqlite.c libsqlite3.a
 	$(TCCX) $(TCL_FLAGS) -DTCLSH=1 -o tclsqlite3 \
 		$(TOP)/src/tclsqlite.c libsqlite3.a $(LIBTCL) $(THREADLIB)
-
-testfixture$(EXE):	$(TOP)/src/tclsqlite.c libsqlite3.a $(TESTSRC)
-	$(TCCX) $(TCL_FLAGS) -DTCLSH=1 -DSQLITE_TEST=1 -DSQLITE_CRASH_TEST=1 \
-		-DSQLITE_SERVER=1 -o testfixture$(EXE) \
-		$(TESTSRC) $(TOP)/src/tclsqlite.c \
-		libsqlite3.a $(LIBTCL) $(THREADLIB)
-
-fulltest:	testfixture$(EXE) sqlite3$(EXE)
-	./testfixture$(EXE) $(TOP)/test/all.test
-
-test:	testfixture$(EXE) sqlite3$(EXE)
-	./testfixture$(EXE) $(TOP)/test/quick.test
-
-sqlite3_analyzer$(EXE):	$(TOP)/src/tclsqlite.c libsqlite3.a $(TESTSRC) \
-			$(TOP)/tool/spaceanal.tcl
-	sed \
-	  -e '/^#/d' \
-	  -e 's,\\,\\\\,g' \
-	  -e 's,",\\",g' \
-	  -e 's,^,",' \
-	  -e 's,$$,\\n",' \
-	  $(TOP)/tool/spaceanal.tcl >spaceanal_tcl.h
-	$(TCCX) $(TCL_FLAGS) -DTCLSH=2 -DSQLITE_TEST=1 -DSQLITE_DEBUG=1 -o \
- 		sqlite3_analyzer$(EXE) $(TESTSRC) $(TOP)/src/tclsqlite.c \
-		libsqlite3.a $(LIBTCL) $(THREADLIB)
 
 # Standard install and cleanup targets
 #
