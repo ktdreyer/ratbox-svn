@@ -1,3 +1,13 @@
+leeh        2006/03/12 11:38:00 UTC	(20060312_0-22077)
+  Log:
+  - fix include ordering so these two compile
+  
+
+  Modified:
+	rserv/trunk/src/s_banserv.c (File Modified) 
+	rserv/trunk/src/s_nickserv.c (File Modified) 
+
+
 leeh        2006/03/11 23:25:53 UTC	(20060311_7-22073)
   Log:
   - handle short reads properly, we were treating a recv() of part of a line
