@@ -468,9 +468,6 @@ sqlite3_analyzer$(TEXE):	$(TOP)/src/tclsqlite.c libtclsqlite3.la \
 arch.html:	$(TOP)/www/arch.tcl
 	tclsh $(TOP)/www/arch.tcl >arch.html
 
-arch2.gif:	$(TOP)/www/arch2.gif
-	cp $(TOP)/www/arch2.gif .
-
 autoinc.html:	$(TOP)/www/autoinc.tcl
 	tclsh $(TOP)/www/autoinc.tcl >autoinc.html
 
@@ -553,14 +550,8 @@ mingw.html:	$(TOP)/www/mingw.tcl
 nulls.html:	$(TOP)/www/nulls.tcl
 	tclsh $(TOP)/www/nulls.tcl >nulls.html
 
-quickstart.html:	$(TOP)/www/quickstart.tcl
-	tclsh $(TOP)/www/quickstart.tcl >quickstart.html
-
 speed.html:	$(TOP)/www/speed.tcl
 	tclsh $(TOP)/www/speed.tcl >speed.html
-
-sqlite.gif:	$(TOP)/art/SQLite.gif
-	cp $(TOP)/art/SQLite.gif sqlite.gif
 
 sqlite.html:	$(TOP)/www/sqlite.tcl
 	tclsh $(TOP)/www/sqlite.tcl >sqlite.html
@@ -582,7 +573,6 @@ version3.html:	$(TOP)/www/version3.tcl
 #
 DOC = \
   arch.html \
-  arch2.gif \
   autoinc.html \
   c_interface.html \
   capi3.html \
@@ -609,9 +599,7 @@ DOC = \
   omitted.html \
   opcode.html \
   pragma.html \
-  quickstart.html \
   speed.html \
-  sqlite.gif \
   sqlite.html \
   support.html \
   tclsqlite.html \

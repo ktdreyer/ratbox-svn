@@ -483,9 +483,6 @@ optimizer.html:	$(TOP)/www/optimizer.tcl
 optoverview.html:	$(TOP)/www/optoverview.tcl
 	tclsh $(TOP)/www/optoverview.tcl >optoverview.html
 
-quickstart.html:	$(TOP)/www/quickstart.tcl
-	tclsh $(TOP)/www/quickstart.tcl >quickstart.html
-
 speed.html:	$(TOP)/www/speed.tcl
 	tclsh $(TOP)/www/speed.tcl >speed.html
 
@@ -541,7 +538,6 @@ DOC = \
   optimizer.html \
   optoverview.html \
   pragma.html \
-  quickstart.html \
   sharedcache.html \
   speed.html \
   sqlite.html \
@@ -554,7 +550,6 @@ DOC = \
 doc:	common.tcl $(DOC)
 	mkdir -p doc
 	mv $(DOC) doc
-	cp $(TOP)/www/*.gif $(TOP)/art/*.gif doc
 
 # Standard install and cleanup targets
 #
