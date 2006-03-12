@@ -1,3 +1,12 @@
+leeh        2006/03/12 17:42:25 UTC	(20060312_8-22099)
+  Log:
+  - update rsdb.txt with the db changes
+  
+
+  Modified:
+	rserv/trunk/doc/rsdb.txt (File Modified) 
+
+
 leeh        2006/03/12 17:33:51 UTC	(20060312_7-22097)
   Log:
   - add verify_token to users table
