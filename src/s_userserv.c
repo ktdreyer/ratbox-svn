@@ -965,6 +965,13 @@ s_user_resetpass(struct client *client_p, struct lconn *conn_p, const char *parv
 		return 1;
 	}
 
+	if(!can_send_email())
+	{
+		service_error(userserv_p, client_p,
+			"Temporarily unable to send email, please try later");
+		return 1;
+	}
+
 	if(client_p->user->user_reg != NULL)
 	{
 		service_error(userserv_p, client_p, "You cannot request a password reset whilst logged in");

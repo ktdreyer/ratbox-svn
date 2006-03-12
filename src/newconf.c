@@ -979,6 +979,8 @@ static struct ConfEntry conf_email_table[] =
 	{ "email_program",	CF_QSTRING|CF_FLIST, conf_set_email_program, 0, NULL },
 	{ "email_name",		CF_QSTRING, NULL, 0, &config_file.email_name	},
 	{ "email_address",	CF_QSTRING, NULL, 0, &config_file.email_address },
+	{ "email_number",	CF_INT,     NULL, 0, &config_file.email_number	},
+	{ "email_duration",	CF_TIME,    NULL, 0, &config_file.email_duration },
 	{ "\0", 0, NULL, 0, NULL }
 };
 

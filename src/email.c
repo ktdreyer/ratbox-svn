@@ -36,6 +36,26 @@
 #include "log.h"
 #include "email.h"
 
+static time_t email_last;
+static int email_count;
+
+int
+can_send_email(void)
+{
+	if(email_last + config_file.email_duration < CURRENT_TIME)
+	{
+		email_last = CURRENT_TIME;
+		email_count = 0;
+
+		return 1;
+	}
+
+	if(email_count < config_file.email_number)
+		return 1;
+
+	return 0;
+}
+
 int
 send_email(const char *address, const char *subject, const char *format, ...)
 {
@@ -49,6 +69,11 @@ send_email(const char *address, const char *subject, const char *format, ...)
 	/* master override is enabled.. cant send emails */
 	if(config_file.disable_email)
 		return 0;
+
+	if(!can_send_email())
+		return 0;
+
+	email_count++;
 
 	if(EmptyString(config_file.email_program[0]))
 	{

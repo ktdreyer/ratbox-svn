@@ -70,6 +70,8 @@ set_default_conf(void)
 	config_file.client_flood_time = 60;
 
 	config_file.disable_email = 1;
+	config_file.email_number = 15;
+	config_file.email_duration = 60;
 
 	config_file.disable_uregister = 0;
 	config_file.uregister_time = 60;

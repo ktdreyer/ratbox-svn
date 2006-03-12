@@ -47,6 +47,8 @@ struct _config_file
 	char *email_program[MAX_EMAIL_PROGRAM_ARGS+1];
 	char *email_name;
 	char *email_address;
+	int email_number;
+	int email_duration;
 
 	/* userserv */
 	int disable_uregister;
