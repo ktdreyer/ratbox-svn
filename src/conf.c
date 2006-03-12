@@ -79,7 +79,9 @@ set_default_conf(void)
 	config_file.uhregister_time = 86400;	/* 1 day */
 	config_file.uhregister_amount = 2;
 	config_file.uregister_email = 0;
+	config_file.uregister_verify = 0;
 	config_file.uexpire_time = 2419200;	/* 4 weeks */
+	config_file.uexpire_unverified_time = 86400;	/* 1 day */
 	config_file.allow_set_password = 1;
 	config_file.allow_resetpass = 0;
 	config_file.uresetpass_duration = 86400;	/* 1 day */
@@ -146,6 +148,10 @@ validate_conf(void)
 
 	if(config_file.umax_logins < 0)
 		config_file.umax_logins = 0;
+
+	/* email verification requires we're given an email address */
+	if(config_file.uregister_verify)
+		config_file.uregister_email = 1;
 }
 
 static void

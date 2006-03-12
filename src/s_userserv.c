@@ -133,7 +133,7 @@ init_s_userserv(void)
 
 	hook_add(h_user_burst_login, HOOK_BURST_LOGIN);
 
-	eventAdd("userserv_expire", e_user_expire, NULL, 43200);
+	eventAdd("userserv_expire", e_user_expire, NULL, 21600);
 	eventAdd("userserv_expire_resetpass", e_user_expire_resetpass, NULL, 3600);
 }
 
@@ -328,13 +328,21 @@ e_user_expire(void *unused)
 	{
 		ureg_p = ptr->data;
 
+		/* nuke unverified accounts first */
+		if(ureg_p->flags & US_FLAGS_NEVERLOGGEDIN &&
+		   (ureg_p->reg_time + config_file.uexpire_unverified_time) <= CURRENT_TIME)
+		{
+			free_user_reg(ureg_p);
+			continue;
+		}
+				
 		/* if they're logged in, reset the expiry */
 		if(dlink_list_length(&ureg_p->users))
 		{
 			ureg_p->last_time = CURRENT_TIME;
 			ureg_p->flags |= US_FLAGS_NEEDUPDATE;
 		}
-		
+
 		if(ureg_p->flags & US_FLAGS_NEEDUPDATE)
 		{
 			ureg_p->flags &= ~US_FLAGS_NEEDUPDATE;
@@ -730,6 +738,7 @@ static int
 s_user_register(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct user_reg *reg_p;
+	struct host_entry *hent = NULL;
 	const char *password;
 
 	if(config_file.disable_uregister)
@@ -765,7 +774,7 @@ s_user_register(struct client *client_p, struct lconn *conn_p, const char *parv[
 		return 1;
 	}
 
-	if(strlen(parv[1]) > PASSWDLEN)
+	if(!config_file.uregister_verify && strlen(parv[1]) > PASSWDLEN)
 	{
 		service_send(userserv_p, client_p, conn_p,
 				"Password too long");
@@ -814,7 +823,7 @@ s_user_register(struct client *client_p, struct lconn *conn_p, const char *parv[
 	/* check per host registration limits */
 	if(config_file.uhregister_time && config_file.uhregister_amount)
 	{
-		struct host_entry *hent = find_host(client_p->user->host);
+		hent = find_host(client_p->user->host);
 
 		/* this host has gone over the limits.. */
 		if(hent->uregister >= config_file.uhregister_amount &&
@@ -833,8 +842,50 @@ s_user_register(struct client *client_p, struct lconn *conn_p, const char *parv[
 			hent->uregister = 0;
 		}
 
-		hent->uregister++;
+		/* dont penalise the individual user just because we cant send emails, so
+		 * raise hent lower down..
+		 */
 	}
+
+	if(config_file.uregister_verify)
+	{
+		if(config_file.disable_email)
+		{
+			service_error(userserv_p, client_p,
+				"%s::REGISTER is disabled as it cannot send emails",
+				userserv_p->name);
+			return 1;
+		}
+
+		if(!can_send_email())
+		{
+			service_error(userserv_p, client_p,
+				"Temporarily unable to send email, please try later");
+			return 1;
+		}
+
+		password = get_password();
+
+		if(!send_email(reg_p->email, "Username registration verification",
+				"The username %s has been registered to this email address "
+				"by %s!%s@%s\n\n"
+				"Your automatically generated password is: %s\n\n"
+				"To activate this account you must login with the given "
+				"username and password within %s.\n",
+				parv[0], client_p->name, client_p->user->username,
+				client_p->user->host, password,
+				get_short_duration(config_file.uexpire_unverified_time)))
+		{
+			service_error(userserv_p, client_p,
+				"Unable to register username due to problems sending email");
+			return 1;
+		}
+	}
+	else
+		password = get_crypt(parv[1], NULL);
+
+	if(hent)
+		hent->uregister++;
 
 	/* we need to mask the password */
 	sendto_all(UMODE_REGISTER, "#:%s!%s@%s# REGISTER %s %s",
@@ -848,14 +899,15 @@ s_user_register(struct client *client_p, struct lconn *conn_p, const char *parv[
 
 	reg_p = BlockHeapAlloc(user_reg_heap);
 	strcpy(reg_p->name, parv[0]);
-
-	password = get_crypt(parv[1], NULL);
 	reg_p->password = my_strdup(password);
 
 	if(!EmptyString(parv[2]))
 		reg_p->email = my_strdup(parv[2]);
 
 	reg_p->reg_time = reg_p->last_time = CURRENT_TIME;
+
+	if(config_file.uregister_verify)
+		reg_p->flags |= US_FLAGS_NEVERLOGGEDIN;
 
 	dlink_add_alloc(client_p, &reg_p->users);
 	client_p->user->user_reg = reg_p;
@@ -870,7 +922,12 @@ s_user_register(struct client *client_p, struct lconn *conn_p, const char *parv[
 	sendto_server(":%s ENCAP * SU %s %s", 
 			MYNAME, client_p->name, reg_p->name);
 
-	service_error(userserv_p, client_p, "Username %s registered", parv[0]);
+	if(config_file.uregister_verify)
+		service_error(userserv_p, client_p, 
+				"Username %s registered, your password has been emailed",
+				parv[0]);
+	else
+		service_error(userserv_p, client_p, "Username %s registered", parv[0]);
 
 	hook_call(HOOK_USER_LOGIN, client_p, NULL);
 
@@ -918,6 +975,9 @@ s_user_login(struct client *client_p, struct lconn *conn_p, const char *parv[], 
 	}
 
 	slog(userserv_p, 5, "%s - LOGIN %s", client_p->user->mask, parv[0]);
+
+	if(reg_p->flags & US_FLAGS_NEVERLOGGEDIN)
+		reg_p->flags &= ~US_FLAGS_NEVERLOGGEDIN;
 
 	DLINK_FOREACH(ptr, reg_p->users.head)
 	{
