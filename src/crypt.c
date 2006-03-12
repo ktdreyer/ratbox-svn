@@ -32,35 +32,12 @@ static char saltChars[] =
        "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
        /* 0 .. 63, ascii - 64 */
 
-static void
-init_crypt_poorseed(void)
+void
+init_crypt_seed(void)
 {
 	srand((unsigned int) (system_time.tv_sec ^ (system_time.tv_usec | (getpid() << 20))));
 }
 
-void
-init_crypt_seed(void)
-{
-	char *buf;
-	int fd;
-
-	if((fd = open("/dev/urandom", O_RDONLY)) < 0)
-	{
-		init_crypt_poorseed();
-		return;
-	}
-
-	buf = my_malloc(sizeof(int));
-
-	if(read(fd, buf, sizeof(int)) != sizeof(int))
-	{
-		init_crypt_poorseed();
-		return;
-	}
-
-	srand((unsigned int) buf);
-}
-       
 static char *
 generate_salt(char *salt, unsigned int len)
 {
