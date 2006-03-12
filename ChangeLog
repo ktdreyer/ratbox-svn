@@ -1,3 +1,14 @@
+leeh        2006/03/12 20:00:42 UTC	(20060312_16-22117)
+  Log:
+  - notes is empty
+  - doc might as well be empty
+  
+
+  Modified:
+	rserv/trunk/sqlite3/doc/ (File Deleted) 
+	rserv/trunk/sqlite3/notes/ (File Deleted) 
+
+
 leeh        2006/03/12 19:58:16 UTC	(20060312_15-22115)
   Log:
   - remove documentation
