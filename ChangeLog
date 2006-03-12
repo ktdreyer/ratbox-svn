@@ -1,3 +1,12 @@
+leeh        2006/03/12 19:35:30 UTC	(20060312_9-22101)
+  Log:
+  - raise PASSWDLEN so it accomodates md5 hashes
+  
+
+  Modified:
+	rserv/trunk/include/rserv.h (File Modified) 
+
+
 leeh        2006/03/12 17:42:25 UTC	(20060312_8-22099)
   Log:
   - update rsdb.txt with the db changes
