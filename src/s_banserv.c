@@ -852,7 +852,7 @@ list_bans(struct client *client_p, struct lconn *conn_p,
 	int i;
 
 	rsdb_exec_fetch(&data, "SELECT mask, reason, operreason, hold, oper "
-				"FROM operbans WHERE type='%c' AND remove=0 AND hold > %lu",
+				"FROM operbans WHERE type='%c' AND remove=0 AND (hold=0 OR hold > %lu)",
 			type, (unsigned long) CURRENT_TIME);
 
 	service_send(banserv_p, client_p, conn_p,
