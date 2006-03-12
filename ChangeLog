@@ -1,3 +1,14 @@
+leeh        2006/03/12 19:52:24 UTC	(20060312_13-22111)
+  Log:
+  - remove some unneeded stuff
+  
+
+  Modified:
+	rserv/trunk/sqlite3/Makefile.linux-gcc (File Deleted) 
+	rserv/trunk/sqlite3/mkdll.sh (File Deleted) 
+	rserv/trunk/sqlite3/publish.sh (File Deleted) 
+
+
 leeh        2006/03/12 19:48:07 UTC	(20060312_12-22107)
   Log:
   - fix banserv::findkline etc ignoring permanent bans
