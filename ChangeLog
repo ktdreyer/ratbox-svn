@@ -1,3 +1,14 @@
+leeh        2006/03/12 20:05:20 UTC	(20060312_17-22119)
+  Log:
+  - remove support for the tests
+  
+
+  Modified:
+	rserv/trunk/sqlite3/Makefile.in (File Modified) 
+	rserv/trunk/sqlite3/main.mk (File Modified) 
+	rserv/trunk/sqlite3/test/ (File Deleted) 
+
+
 leeh        2006/03/12 20:00:42 UTC	(20060312_16-22117)
   Log:
   - notes is empty
