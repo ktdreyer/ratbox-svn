@@ -1,3 +1,14 @@
+leeh        2006/03/12 19:55:36 UTC	(20060312_14-22113)
+  Log:
+  - remove references to art/
+  
+
+  Modified:
+	rserv/trunk/sqlite3/Makefile.in (File Modified) 
+	rserv/trunk/sqlite3/art/ (File Deleted) 
+	rserv/trunk/sqlite3/main.mk (File Modified) 
+
+
 leeh        2006/03/12 19:52:24 UTC	(20060312_13-22111)
   Log:
   - remove some unneeded stuff
