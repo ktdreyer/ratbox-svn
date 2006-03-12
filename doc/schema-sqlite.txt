@@ -6,6 +6,7 @@ CREATE TABLE nicks (
 	reg_time INTEGER,
 	last_time INTEGER,
 	flags INTEGER,
+	verify_token TEXT,
 	PRIMARY KEY(nickname)
 );
 

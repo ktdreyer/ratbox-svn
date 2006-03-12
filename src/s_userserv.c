@@ -67,6 +67,7 @@ static int o_user_userinfo(struct client *, struct lconn *, const char **, int);
 static int o_user_usersetpass(struct client *, struct lconn *, const char **, int);
 
 static int s_user_register(struct client *, struct lconn *, const char **, int);
+static int s_user_activate(struct client *, struct lconn *, const char **, int);
 static int s_user_login(struct client *, struct lconn *, const char **, int);
 static int s_user_logout(struct client *, struct lconn *, const char **, int);
 static int s_user_resetpass(struct client *, struct lconn *, const char **, int);
@@ -83,6 +84,7 @@ static struct service_command userserv_command[] =
 	{ "USERINFO",		&o_user_userinfo,	0, NULL, 1, 0L, 0, 0, CONF_OPER_US_INFO, 0 },
 	{ "USERSETPASS",	&o_user_usersetpass,	2, NULL, 1, 0L, 0, 0, CONF_OPER_US_SETPASS, 0 },
 	{ "REGISTER",	&s_user_register,	2, NULL, 1, 0L, 0, 0, 0, 0 },
+	{ "ACTIVATE",	&s_user_activate,	2, NULL, 1, 0L, 0, 0, 0, 0 },
 	{ "LOGIN",	&s_user_login,		2, NULL, 1, 0L, 0, 0, 0, 0 },
 	{ "LOGOUT",	&s_user_logout,		0, NULL, 1, 0L, 1, 0, 0, 0 },
 	{ "RESETPASS",	&s_user_resetpass,	1, NULL, 1, 0L, 0, 0, 0, 0 },
@@ -743,6 +745,7 @@ s_user_register(struct client *client_p, struct lconn *conn_p, const char *parv[
 	struct user_reg *reg_p;
 	struct host_entry *hent = NULL;
 	const char *password;
+	const char *token = NULL;
 
 	if(config_file.disable_uregister)
 	{
@@ -777,7 +780,7 @@ s_user_register(struct client *client_p, struct lconn *conn_p, const char *parv[
 		return 1;
 	}
 
-	if(!config_file.uregister_verify && strlen(parv[1]) > PASSWDLEN)
+	if(strlen(parv[1]) > PASSWDLEN)
 	{
 		service_send(userserv_p, client_p, conn_p,
 				"Password too long");
@@ -867,28 +870,23 @@ s_user_register(struct client *client_p, struct lconn *conn_p, const char *parv[
 			return 1;
 		}
 
-		password = get_password();
+		token = get_password();
 
 		if(!send_email(parv[2], "Username registration verification",
 				"The username %s has been registered to this email address "
 				"by %s!%s@%s\n\n"
-				"Your automatically generated password is: %s\n\n"
-				"To activate this account you must login with the given "
-				"username and password within %s.\n",
+				"Your verification token is: %s\n\n"
+				"To activate this account you must send %s ACTIVATE %s %s "
+				"within %s\n",
 				parv[0], client_p->name, client_p->user->username,
-				client_p->user->host, password,
+				client_p->user->host, token, userserv_p->name, parv[0], token,
 				get_short_duration(config_file.uexpire_unverified_time)))
 		{
 			service_error(userserv_p, client_p,
 				"Unable to register username due to problems sending email");
 			return 1;
 		}
-
-		/* need the crypted version for the database */
-		password = get_crypt(password, NULL);
 	}
-	else
-		password = get_crypt(parv[1], NULL);
 
 	if(hent)
 		hent->uregister++;
@@ -902,6 +900,8 @@ s_user_register(struct client *client_p, struct lconn *conn_p, const char *parv[
 	slog(userserv_p, 2, "%s - REGISTER %s %s",
 		client_p->user->mask, parv[0], 
 		EmptyString(parv[2]) ? "" : parv[2]);
+
+	password = get_crypt(parv[1], NULL);
 
 	reg_p = BlockHeapAlloc(user_reg_heap);
 	strcpy(reg_p->name, parv[0]);
@@ -917,11 +917,12 @@ s_user_register(struct client *client_p, struct lconn *conn_p, const char *parv[
 
 	add_user_reg(reg_p);
 
-	rsdb_exec(NULL, "INSERT INTO users (username, password, email, reg_time, last_time, flags) "
-			"VALUES('%Q', '%Q', '%Q', %lu, %lu, %u)",
+	rsdb_exec(NULL, "INSERT INTO users (username, password, email, reg_time, last_time, flags, verify_token) "
+			"VALUES('%Q', '%Q', '%Q', %lu, %lu, %u, '%Q')",
 			reg_p->name, reg_p->password, 
 			EmptyString(reg_p->email) ? "" : reg_p->email, 
-			reg_p->reg_time, reg_p->last_time, reg_p->flags);
+			reg_p->reg_time, reg_p->last_time, reg_p->flags, 
+			EmptyString(token) ? "" : token);
 
 	if(!config_file.uregister_verify)
 	{
@@ -937,10 +938,63 @@ s_user_register(struct client *client_p, struct lconn *conn_p, const char *parv[
 	}
 	else
 		service_error(userserv_p, client_p, 
-				"Username %s registered, your password has been emailed",
+				"Username %s registered, your activation token has been emailed",
 				parv[0]);
 
 	return 5;
+}
+
+static int
+s_user_activate(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
+{
+	struct user_reg *ureg_p;
+	struct rsdb_table data;
+
+	if(client_p->user->user_reg != NULL)
+	{
+		service_error(userserv_p, client_p, "You are already logged in");
+		return 1;
+	}
+
+	if((ureg_p = find_user_reg(client_p, parv[0])) == NULL)
+		return 1;
+
+	if((ureg_p->flags & US_FLAGS_NEVERLOGGEDIN) == 0)
+	{
+		service_error(userserv_p, client_p, "Username %s has already been activated",
+				ureg_p->name);
+		return 1;
+	}
+
+	rsdb_exec_fetch(&data, "SELECT verify_token FROM users WHERE username='%Q' LIMIT 1",
+			ureg_p->name);
+
+	if(!data.row_count || EmptyString(data.row[0][0]))
+	{
+		service_error(userserv_p, client_p, "Username %s verification token is malformed",
+				ureg_p->name);
+		return 1;
+	}
+
+	if(strcmp(data.row[0][0], parv[1]))
+	{
+		service_error(userserv_p, client_p, "Username %s activation tokens do not match",
+				ureg_p->name);
+		rsdb_exec_fetch_end(&data);
+		return 1;
+	}
+
+	rsdb_exec_fetch_end(&data);
+
+	slog(userserv_p, 5, "%s - ACTIVATE %s", client_p->user->mask, parv[0]);
+
+	ureg_p->flags &= ~US_FLAGS_NEVERLOGGEDIN;
+	ureg_p->flags |= US_FLAGS_NEEDUPDATE;
+
+	service_error(userserv_p, client_p, "Username %s activated, you may now LOGIN",
+			ureg_p->name);
+
+	return 1;
 }
 
 static int
@@ -966,6 +1020,14 @@ s_user_login(struct client *client_p, struct lconn *conn_p, const char *parv[], 
 		return 1;
 	}
 
+	if(reg_p->flags & US_FLAGS_NEVERLOGGEDIN)
+	{
+		service_error(userserv_p, client_p,
+			"Login failed, username has not been activated.  Use %s::ACTIVATE first.",
+			userserv_p->name);
+		return 1;
+	}
+
 	if(config_file.umax_logins && 
 	   dlink_list_length(&reg_p->users) >= config_file.umax_logins)
 	{
@@ -984,9 +1046,6 @@ s_user_login(struct client *client_p, struct lconn *conn_p, const char *parv[], 
 	}
 
 	slog(userserv_p, 5, "%s - LOGIN %s", client_p->user->mask, parv[0]);
-
-	if(reg_p->flags & US_FLAGS_NEVERLOGGEDIN)
-		reg_p->flags &= ~US_FLAGS_NEVERLOGGEDIN;
 
 	DLINK_FOREACH(ptr, reg_p->users.head)
 	{
