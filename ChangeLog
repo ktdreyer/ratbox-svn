@@ -1,3 +1,21 @@
+leeh        2006/03/12 20:06:45 UTC	(20060312_18-22121)
+  Log:
+  - remove these unused test sources
+  
+
+  Modified:
+	rserv/trunk/sqlite3/src/test1.c (File Deleted) 
+	rserv/trunk/sqlite3/src/test2.c (File Deleted) 
+	rserv/trunk/sqlite3/src/test3.c (File Deleted) 
+	rserv/trunk/sqlite3/src/test4.c (File Deleted) 
+	rserv/trunk/sqlite3/src/test5.c (File Deleted) 
+	rserv/trunk/sqlite3/src/test6.c (File Deleted) 
+	rserv/trunk/sqlite3/src/test7.c (File Deleted) 
+	rserv/trunk/sqlite3/src/test_async.c (File Deleted) 
+	rserv/trunk/sqlite3/src/test_md5.c (File Deleted) 
+	rserv/trunk/sqlite3/src/test_server.c (File Deleted) 
+
+
 leeh        2006/03/12 20:05:20 UTC	(20060312_17-22119)
   Log:
   - remove support for the tests
