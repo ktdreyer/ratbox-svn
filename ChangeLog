@@ -1,3 +1,12 @@
+leeh        2006/03/12 12:44:48 UTC	(20060312_2-22081)
+  Log:
+  - prune changelog to purely 1.1
+  
+
+  Modified:
+	rserv/trunk/ChangeLog (File Modified) 
+
+
 leeh        2006/03/12 12:11:07 UTC	(20060312_1-22079)
   Log:
   - add email_number and email_duration to email {};, giving an upper limit on
