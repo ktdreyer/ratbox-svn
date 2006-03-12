@@ -1,3 +1,18 @@
+leeh        2006/03/12 13:51:36 UTC	(20060312_3-22083)
+  Log:
+  - add optional email verification for USERSERV::REGISTER, this will email
+    users a password instead that they need to login with
+  
+
+  Modified:
+	rserv/trunk/doc/example.conf (File Modified) 
+	rserv/trunk/include/conf.h (File Modified) 
+	rserv/trunk/include/s_userserv.h (File Modified) 
+	rserv/trunk/src/conf.c (File Modified) 
+	rserv/trunk/src/newconf.c (File Modified) 
+	rserv/trunk/src/s_userserv.c (File Modified) 
+
+
 leeh        2006/03/12 12:44:48 UTC	(20060312_2-22081)
   Log:
   - prune changelog to purely 1.1
