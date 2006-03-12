@@ -1,3 +1,12 @@
+leeh        2006/03/12 19:48:07 UTC	(20060312_12-22107)
+  Log:
+  - fix banserv::findkline etc ignoring permanent bans
+  
+
+  Modified:
+	rserv/trunk/src/s_banserv.c (File Modified) 
+
+
 leeh        2006/03/12 19:39:07 UTC	(20060312_11-22105)
   Log:
   - add in the sqlite3 sources.. these need pruning
