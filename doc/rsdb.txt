@@ -41,32 +41,33 @@ arguments, an int containing the number of fields, a char ** array
 containing each of the field values, and a char ** array containing the
 field names.
 
-- void rsdb_step_init(const char *format, ...) -
-------------------------------------------------
+- struct rsdb_table -
+---------------------
 
-This function is called to execute an SQL statement that returns data,
-without using a callback.  The format accepts the string modifier "%Q" to
-pass input through rsdb_quote() so it is safe.
+This struct is used when returning an entire table worth of data.  It
+comprises the following members:
+	char ***row	- An array of the rows and columns in the result
+			  set, row[row_position][column_position]
+	int row_count	- Number of rows in the result set
+	int col_count	- Number of columns in the result set
+	void *arg	- Generic storage for rsdb_exec_fetch_end()
 
-- int rsdb_step(int *ncol, char ***coldata, char ***colnames) -
----------------------------------------------------------------
+- void rsdb_exec_fetch(struct rsdb_table *data, const char *format, ...) -
+--------------------------------------------------------------------------
 
-This function is called iteratively to retrieve a single row of data from
-the SQL statement submitted earlier.  rsdb_step() should build a list of
-column data and column names and store these along with the number of
-columns into the pointers.
+This function is called to execute an SQL statement without using a
+callback, it will return the entire result set.  The format accepts the
+string modifier "%Q" to pass input through rsdb_quote().
 
-rsdb_step() must return 1 when it actually returns a row of data, and 0 when
-there is no more data to be returned.  When rsdb_step() has no more data, it
-must clean up after itself and perform the same actions as in
-rsdb_step_end().
+The rsdb_table struct passed to this function does not need to be memset
+before use, as rsdb_exec_fetch() will reset the struct itself.  Anything
+calling rsdb_exec_fetch() must also call rsdb_exec_fetch_end() to cleanup.
 
-- void rsdb_step_end() -
-------------------------
+- void rsdb_exec_fetch_end(struct rsdb_table *data) -
+-----------------------------------------------------
 
-This function is called to clean up the step handler, as the remaining rows
-of data are no longer needed.  This function will never be called by a
-parent handler when it has stepped through all the rows.
+This function is called to cleanup the memory allocated by the database and
+ratbox-services for the query.
 
 - void rsdb_transaction(rsdb_transtype type) -
 ----------------------------------------------
