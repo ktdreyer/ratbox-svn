@@ -152,6 +152,9 @@ free_user_reg(struct user_reg *ureg_p)
 
 	dlink_delete(&ureg_p->node, &user_reg_table[hashv]);
 
+	rsdb_exec(NULL, "DELETE FROM users_resetpass WHERE username = '%Q'",
+			ureg_p->name);
+
 	rsdb_exec(NULL, "DELETE FROM members WHERE username = '%Q'",
 			ureg_p->name);
 
@@ -866,7 +869,7 @@ s_user_register(struct client *client_p, struct lconn *conn_p, const char *parv[
 
 		password = get_password();
 
-		if(!send_email(reg_p->email, "Username registration verification",
+		if(!send_email(parv[2], "Username registration verification",
 				"The username %s has been registered to this email address "
 				"by %s!%s@%s\n\n"
 				"Your automatically generated password is: %s\n\n"
@@ -880,6 +883,9 @@ s_user_register(struct client *client_p, struct lconn *conn_p, const char *parv[
 				"Unable to register username due to problems sending email");
 			return 1;
 		}
+
+		/* need the crypted version for the database */
+		password = get_crypt(password, NULL);
 	}
 	else
 		password = get_crypt(parv[1], NULL);
@@ -909,8 +915,6 @@ s_user_register(struct client *client_p, struct lconn *conn_p, const char *parv[
 	if(config_file.uregister_verify)
 		reg_p->flags |= US_FLAGS_NEVERLOGGEDIN;
 
-	dlink_add_alloc(client_p, &reg_p->users);
-	client_p->user->user_reg = reg_p;
 	add_user_reg(reg_p);
 
 	rsdb_exec(NULL, "INSERT INTO users (username, password, email, reg_time, last_time, flags) "
@@ -919,17 +923,22 @@ s_user_register(struct client *client_p, struct lconn *conn_p, const char *parv[
 			EmptyString(reg_p->email) ? "" : reg_p->email, 
 			reg_p->reg_time, reg_p->last_time, reg_p->flags);
 
-	sendto_server(":%s ENCAP * SU %s %s", 
-			MYNAME, client_p->name, reg_p->name);
+	if(!config_file.uregister_verify)
+	{
+		dlink_add_alloc(client_p, &reg_p->users);
+		client_p->user->user_reg = reg_p;
 
-	if(config_file.uregister_verify)
+		sendto_server(":%s ENCAP * SU %s %s", 
+				MYNAME, client_p->name, reg_p->name);
+
+		service_error(userserv_p, client_p, "Username %s registered, you are now logged in", parv[0]);
+
+		hook_call(HOOK_USER_LOGIN, client_p, NULL);
+	}
+	else
 		service_error(userserv_p, client_p, 
 				"Username %s registered, your password has been emailed",
 				parv[0]);
-	else
-		service_error(userserv_p, client_p, "Username %s registered", parv[0]);
-
-	hook_call(HOOK_USER_LOGIN, client_p, NULL);
 
 	return 5;
 }
@@ -1080,12 +1089,12 @@ s_user_resetpass(struct client *client_p, struct lconn *conn_p, const char *parv
 		if(!send_email(reg_p->email, "Password reset",
 				"%s!%s@%s has requested a password reset for username %s which "
 				"is registered to this email address.\n\n"
-				"To authenticate this request, send %s RESETPASS %s\n\n"
+				"To authenticate this request, send %s RESETPASS %s %s <new_password>\n\n"
 				"If you did not request this, simply ignore this message, no "
 				"action will be taken on your account and your password will "
 				"NOT be reset.\n",
 				client_p->name, client_p->user->username, client_p->user->host,
-				reg_p->name, userserv_p->name, token))
+				reg_p->name, userserv_p->name, reg_p->name, token))
 		{
 			service_error(userserv_p, client_p,
 					"Unable to issue password reset due to problems sending email");
@@ -1122,11 +1131,18 @@ s_user_resetpass(struct client *client_p, struct lconn *conn_p, const char *parv
 	{
 		if(strcmp(data.row[0][0], parv[1]) == 0)
 		{
+			const char *password = get_crypt(parv[2], NULL);
+
 			/* need to execute another query.. */
 			rsdb_exec_fetch_end(&data);
 
+			rsdb_exec(NULL, "DELETE FROM users_resetpass WHERE username='%Q'",
+					reg_p->name);
 			rsdb_exec(NULL, "UPDATE users SET password='%Q' WHERE username='%Q'",
-					parv[2], reg_p->name);
+					password, reg_p->name);
+
+			my_free(reg_p->password);
+			reg_p->password = strdup(password);
 
 			service_error(userserv_p, client_p,
 					"Username %s password reset", reg_p->name);
