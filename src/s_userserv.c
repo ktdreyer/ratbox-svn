@@ -1025,13 +1025,6 @@ s_user_resetpass(struct client *client_p, struct lconn *conn_p, const char *parv
 		return 1;
 	}
 
-	if(!can_send_email())
-	{
-		service_error(userserv_p, client_p,
-			"Temporarily unable to send email, please try later");
-		return 1;
-	}
-
 	if(client_p->user->user_reg != NULL)
 	{
 		service_error(userserv_p, client_p, "You cannot request a password reset whilst logged in");
@@ -1070,6 +1063,13 @@ s_user_resetpass(struct client *client_p, struct lconn *conn_p, const char *parv
 
 		rsdb_exec_fetch_end(&data);
 
+		if(!can_send_email())
+		{
+			service_error(userserv_p, client_p,
+				"Temporarily unable to send email, please try later");
+			return 1;
+		}
+
 		slog(userserv_p, 3, "%s - RESETPASS %s",
 			client_p->user->mask, reg_p->name);
 
@@ -1102,6 +1102,14 @@ s_user_resetpass(struct client *client_p, struct lconn *conn_p, const char *parv
 		return 2;
 	}
 
+	if(EmptyString(parv[2]))
+	{
+		service_error(userserv_p, client_p,
+				"Insufficient parameters to %s::RESETPASS, new password not specified",
+				userserv_p->name);
+		return 1;
+	}
+
 	slog(userserv_p, 3, "%s - RESETPASS %s (auth)",
 		client_p->user->mask, reg_p->name);
 
@@ -1118,11 +1126,10 @@ s_user_resetpass(struct client *client_p, struct lconn *conn_p, const char *parv
 			rsdb_exec_fetch_end(&data);
 
 			rsdb_exec(NULL, "UPDATE users SET password='%Q' WHERE username='%Q'",
-					parv[1], reg_p->name);
+					parv[2], reg_p->name);
 
 			service_error(userserv_p, client_p,
-					"Username %s password reset to %s",
-					reg_p->name, parv[1]);
+					"Username %s password reset", reg_p->name);
 
 			return 1;
 		}
