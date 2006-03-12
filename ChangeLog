@@ -1,3 +1,18 @@
+leeh        2006/03/12 17:33:51 UTC	(20060312_7-22097)
+  Log:
+  - add verify_token to users table
+  - alter the way registration verification works, let them specify their own
+    password, and just email them a token they need to use with
+    USERSERV::ACTIVATE
+  
+
+  Modified:
+	rserv/trunk/doc/base/schema-mysql.txt (File Modified) 
+	rserv/trunk/doc/base/schema-pgsql.txt (File Modified) 
+	rserv/trunk/doc/schema-sqlite.txt (File Modified) 
+	rserv/trunk/src/s_userserv.c (File Modified) 
+
+
 leeh        2006/03/12 16:10:42 UTC	(20060312_6-22091)
   Log:
   - clear any pending resetpass stuff from the db when we drop users
