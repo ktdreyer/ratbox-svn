@@ -1,3 +1,14 @@
+leeh        2006/03/12 19:36:09 UTC	(20060312_10-22103)
+  Log:
+  - add support for sqlite3 db backend
+  
+
+  Modified:
+	rserv/trunk/autoconf/configure.in (File Modified) 
+	rserv/trunk/configure (File Modified) 
+	rserv/trunk/src/rsdb_sqlite3.c (File Added) 
+
+
 leeh        2006/03/12 19:35:30 UTC	(20060312_9-22101)
   Log:
   - raise PASSWDLEN so it accomodates md5 hashes
