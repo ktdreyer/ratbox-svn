@@ -1,3 +1,15 @@
+leeh        2006/03/12 15:22:09 UTC	(20060312_4-22085)
+  Log:
+  - make USERSERV::RESETPASS take a new password as the third argument,
+    instead of using the one that was emailed to them.
+  - in USERSERV::RESETPASS, only check can_send_email() when we actually
+    need to send an email
+  
+
+  Modified:
+	rserv/trunk/src/s_userserv.c (File Modified) 
+
+
 leeh        2006/03/12 13:51:36 UTC	(20060312_3-22083)
   Log:
   - add optional email verification for USERSERV::REGISTER, this will email
