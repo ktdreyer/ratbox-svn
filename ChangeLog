@@ -1,3 +1,19 @@
+leeh        2006/03/12 12:11:07 UTC	(20060312_1-22079)
+  Log:
+  - add email_number and email_duration to email {};, giving an upper limit on
+    how many emails we will send in a given duration
+  
+
+  Modified:
+	rserv/trunk/doc/example.conf (File Modified) 
+	rserv/trunk/include/conf.h (File Modified) 
+	rserv/trunk/include/email.h (File Modified) 
+	rserv/trunk/src/conf.c (File Modified) 
+	rserv/trunk/src/email.c (File Modified) 
+	rserv/trunk/src/newconf.c (File Modified) 
+	rserv/trunk/src/s_userserv.c (File Modified) 
+
+
 leeh        2006/03/12 11:38:00 UTC	(20060312_0-22077)
   Log:
   - fix include ordering so these two compile
