@@ -1,3 +1,33 @@
+leeh        2006/03/13 21:50:20 UTC	(20060313_1-22133)
+  Log:
+  - update some copyrights..
+  
+
+  Modified:
+	rserv/trunk/LICENSE (File Modified) 
+	rserv/trunk/src/c_error.c (File Modified) 
+	rserv/trunk/src/c_message.c (File Modified) 
+	rserv/trunk/src/c_mode.c (File Modified) 
+	rserv/trunk/src/channel.c (File Modified) 
+	rserv/trunk/src/client.c (File Modified) 
+	rserv/trunk/src/conf.c (File Modified) 
+	rserv/trunk/src/crypt.c (File Modified) 
+	rserv/trunk/src/io.c (File Modified) 
+	rserv/trunk/src/rserv.c (File Modified) 
+	rserv/trunk/src/s_alis.c (File Modified) 
+	rserv/trunk/src/s_banserv.c (File Modified) 
+	rserv/trunk/src/s_chanserv.c (File Modified) 
+	rserv/trunk/src/s_global.c (File Modified) 
+	rserv/trunk/src/s_jupeserv.c (File Modified) 
+	rserv/trunk/src/s_nickserv.c (File Modified) 
+	rserv/trunk/src/s_operbot.c (File Modified) 
+	rserv/trunk/src/s_operserv.c (File Modified) 
+	rserv/trunk/src/s_userserv.c (File Modified) 
+	rserv/trunk/src/scommand.c (File Modified) 
+	rserv/trunk/src/service.c (File Modified) 
+	rserv/trunk/src/tools.c (File Modified) 
+
+
 leeh        2006/03/13 21:46:39 UTC	(20060313_0-22131)
   Log:
   - set Id keyword on these
