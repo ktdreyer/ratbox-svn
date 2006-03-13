@@ -1,3 +1,15 @@
+leeh        2006/03/13 21:56:29 UTC	(20060313_2-22135)
+  Log:
+  - remove old .cvsignore files
+  
+
+  Modified:
+	rserv/trunk/.cvsignore (File Deleted) 
+	rserv/trunk/help/.cvsignore (File Deleted) 
+	rserv/trunk/include/.cvsignore (File Deleted) 
+	rserv/trunk/src/.cvsignore (File Deleted) 
+
+
 leeh        2006/03/13 21:50:20 UTC	(20060313_1-22133)
   Log:
   - update some copyrights..
