@@ -1,8 +1,8 @@
 /* src/service.c
  *   Contains code for handling interaction with our services.
  *  
- * Copyright (C) 2003-2005 Lee Hardy <leeh@leeh.co.uk>
- * Copyright (C) 2003-2005 ircd-ratbox development team
+ * Copyright (C) 2003-2006 Lee Hardy <leeh@leeh.co.uk>
+ * Copyright (C) 2003-2006 ircd-ratbox development team
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
