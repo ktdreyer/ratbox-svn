@@ -39,12 +39,12 @@ ac_help="$ac_help
 ac_help="$ac_help
  --disable-banserv         Disable ban service"
 ac_help="$ac_help
- --with-sqlitebuild        Forces packaged sqlite to be used for build"
+ --with-sqlitebuild        Forces packaged sqlite3 to be used for build"
 ac_help="$ac_help
- --enable-sqlite[=DIR]     Enable sqlite backend, optionally search 
+ --enable-sqlite[=DIR]     DEPRECATED: Enable sqlite backend, optionally search 
                            DIR/include/ for headers and DIR/lib/ for libs"
 ac_help="$ac_help
- --enable-sqlite3[=DIR]    Enable sqlite3 backend, optionally search
+ --enable-sqlite3[=DIR]    Default: Enable sqlite3 backend, optionally search
                            DIR/include/ for headers and DIR/lib/ for libs"
 ac_help="$ac_help
  --enable-mysql[=DIR]      Enable mysql backend, optionally search
@@ -2528,7 +2528,8 @@ else
 			LDFLAGS="$LDFLAGS -L $ac_cv_sqlite3_path/lib/"
 		fi
 	else
-	if test "X$ac_cv_found_sqlite_inc" == "Xyes" &&
+	if test "X$ac_cv_sqlite_val" != "X" &&
+	   test "X$ac_cv_found_sqlite_inc" == "Xyes" &&
 	   test "X$ac_cv_found_sqlite_lib" == "Xyes" &&
 	   test "X$ac_cv_sqlitebuild" != "Xyes"; then
 		echo "$ac_t""sqlite" 1>&6
@@ -2541,19 +2542,19 @@ else
 			LDFLAGS="$LDFLAGS -L $ac_cv_sqlite_path/lib/"
 		fi
 	else
-		echo "$ac_t""internal packaged sqlite" 1>&6
-		DB_BACKEND="sqlite"
+		echo "$ac_t""internal packaged sqlite3" 1>&6
+		DB_BACKEND="sqlite3"
 		no_recursion="no"
 
-		subdirs="sqlite"
+		subdirs="sqlite3"
 
 		cat >> confdefs.h <<\EOF
 #define SQLITE_BUILD 1
 EOF
 
-		SQLITE_SUBDIR="sqlite"
-		DB_INCLUDES="$DB_INCLUDES -I ../sqlite/"
-		DB_LIBS="$DB_LIBS ../sqlite/libsqlite.a"
+		SQLITE_SUBDIR="sqlite3"
+		DB_INCLUDES="$DB_INCLUDES -I ../sqlite3/"
+		DB_LIBS="$DB_LIBS ../sqlite3/.libs/libsqlite3.a"
 	fi
 	fi
 fi
@@ -3036,7 +3037,7 @@ if test "$no_recursion" != yes; then
     esac
   done
 
-  for ac_config_dir in sqlite; do
+  for ac_config_dir in sqlite3; do
 
     # Do not complain, so a configure script can configure whichever
     # parts of a large source tree are present.

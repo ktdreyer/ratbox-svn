@@ -214,11 +214,11 @@ DB_INCLUDES=""
 
 dnl Try to find SQLite.
 AC_ARG_WITH([sqlitebuild],
-[ --with-sqlitebuild        Forces packaged sqlite to be used for build],
+[ --with-sqlitebuild        Forces packaged sqlite3 to be used for build],
 [ac_cv_sqlitebuild=$withval], [ac_cv_sqlitebuild=no])
 
 AC_ARG_ENABLE(sqlite,
-[ --enable-sqlite[=DIR]     Enable sqlite backend, optionally search 
+[ --enable-sqlite[=DIR]     DEPRECATED: Enable sqlite backend, optionally search 
                            DIR/include/ for headers and DIR/lib/ for libs],
 [ac_cv_sqlite_val=$enableval], [])
 
@@ -252,7 +252,7 @@ AC_CHECK_LIB([sqlite], [main],
 dnl Check for sqlite3
 
 AC_ARG_ENABLE(sqlite3,
-[ --enable-sqlite3[=DIR]    Enable sqlite3 backend, optionally search
+[ --enable-sqlite3[=DIR]    Default: Enable sqlite3 backend, optionally search
                            DIR/include/ for headers and DIR/lib/ for libs],
 [ac_cv_sqlite3_val=$enableval], [])
 
@@ -349,7 +349,8 @@ else
 			LDFLAGS="$LDFLAGS -L $ac_cv_sqlite3_path/lib/"
 		fi
 	else
-	if test "X$ac_cv_found_sqlite_inc" == "Xyes" &&
+	if test "X$ac_cv_sqlite_val" != "X" &&
+	   test "X$ac_cv_found_sqlite_inc" == "Xyes" &&
 	   test "X$ac_cv_found_sqlite_lib" == "Xyes" &&
 	   test "X$ac_cv_sqlitebuild" != "Xyes"; then
 		AC_MSG_RESULT(sqlite)
@@ -362,15 +363,15 @@ else
 			LDFLAGS="$LDFLAGS -L $ac_cv_sqlite_path/lib/"
 		fi
 	else
-		AC_MSG_RESULT(internal packaged sqlite)
-		DB_BACKEND="sqlite"
+		AC_MSG_RESULT(internal packaged sqlite3)
+		DB_BACKEND="sqlite3"
 		no_recursion="no"
 
-		AC_CONFIG_SUBDIRS(sqlite)
-		AC_DEFINE(SQLITE_BUILD, 1, Build packaged sqlite)
-		SQLITE_SUBDIR="sqlite"
-		DB_INCLUDES="$DB_INCLUDES -I ../sqlite/"
-		DB_LIBS="$DB_LIBS ../sqlite/libsqlite.a"
+		AC_CONFIG_SUBDIRS(sqlite3)
+		AC_DEFINE(SQLITE_BUILD, 1, Build packaged sqlite3)
+		SQLITE_SUBDIR="sqlite3"
+		DB_INCLUDES="$DB_INCLUDES -I ../sqlite3/"
+		DB_LIBS="$DB_LIBS ../sqlite3/.libs/libsqlite3.a"
 	fi
 	fi
 fi
