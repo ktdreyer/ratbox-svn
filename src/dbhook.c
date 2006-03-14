@@ -38,6 +38,8 @@
 #include "log.h"
 #include "event.h"
 
+static dlink_list rsdb_hook_list;
+
 static void rsdb_hook_call(void *dbh);
 
 struct rsdb_hook *
@@ -55,16 +57,33 @@ rsdb_hook_add(const char *table, const char *hook_value,
 	dbh->hook_value = my_strdup(hook_value);
 	dbh->callback = callback;
 
+	dlink_add(dbh, &dbh->ptr, &rsdb_hook_list);
+
 	eventAdd(hook_value, rsdb_hook_call, dbh, frequency);
 
 	return dbh;
 }
 
 void
-rsdb_hook_delete(struct rsdb_hook *dbh)
+rsdb_hook_delete(dbh_callback callback)
 {
+	struct rsdb_hook *dbh;
+	dlink_node *ptr;
+
+	DLINK_FOREACH(ptr, rsdb_hook_list.head)
+	{
+		dbh = ptr->data;
+
+		if(dbh->callback == callback)
+			break;
+
+		dbh = NULL;
+	}
+
 	if(dbh == NULL)
 		return;
+
+	dlink_delete(&dbh->ptr, &rsdb_hook_list);
 
 	eventDelete(rsdb_hook_call, dbh);
 

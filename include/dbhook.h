@@ -18,6 +18,6 @@ void init_rsdb_hook(void);
 
 struct rsdb_hook *rsdb_hook_add(const char *table, const char *hook_value,
 				unsigned int frequency, dbh_callback);
-void rsdb_hook_delete(struct rsdb_hook *dbh);
+void rsdb_hook_delete(dbh_callback);
 
 #endif
