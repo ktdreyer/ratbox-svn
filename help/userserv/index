@@ -1,8 +1,14 @@
 This service allows you to register a username, which is
 a prerequisite for using channel or nick registration.
+
+Some sites may email you a verification token before your
+username can be used.
+
 Available commands:
+ ACTIVATE    - With email verification, activates the given username so it may be used.
  INFO        - Gives information about the given username.
  LOGIN       - Logs in to the given username.
  LOGOUT      - Logs out of services.
  REGISTER    - Registers given username.
+ RESETPASS   - Resets a usernames password through email verification.
  SET         - Sets various username options.
