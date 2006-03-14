@@ -41,19 +41,18 @@
 static void rsdb_hook_call(void *dbh);
 
 struct rsdb_hook *
-rsdb_hook_add(const char *table, const char *hook_value, const char *field, 
+rsdb_hook_add(const char *table, const char *hook_value,
 		unsigned int frequency, dbh_callback callback)
 {
 	struct rsdb_hook *dbh;
 
-	if(EmptyString(table) || EmptyString(hook_value) || EmptyString(field))
+	if(EmptyString(table) || EmptyString(hook_value))
 		return NULL;
 
 	dbh = my_malloc(sizeof(struct rsdb_hook));
 
 	dbh->table = my_strdup(table);
 	dbh->hook_value = my_strdup(hook_value);
-	dbh->field = my_strdup(field);
 	dbh->callback = callback;
 
 	eventAdd(hook_value, rsdb_hook_call, dbh, frequency);
@@ -71,7 +70,6 @@ rsdb_hook_delete(struct rsdb_hook *dbh)
 
 	my_free(dbh->table);
 	my_free(dbh->hook_value);
-	my_free(dbh->field);
 
 	my_free(dbh);
 }
@@ -101,8 +99,8 @@ rsdb_hook_call(void *v_dbh)
 	/* limit our result set to count entries, as we've only allocated
 	 * memory for that many..
 	 */
-	rsdb_exec_fetch(&data, "SELECT id, %s FROM %s WHERE hook = '%Q' LIMIT %u",
-			dbh->field, dbh->table, dbh->hook_value, count);
+	rsdb_exec_fetch(&data, "SELECT id, data FROM %s WHERE hook = '%Q' LIMIT %u",
+			dbh->table, dbh->hook_value, count);
 
 	if(data.row_count)
 	{

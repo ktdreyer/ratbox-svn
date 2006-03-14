@@ -10,7 +10,6 @@ struct rsdb_hook
 {
 	char *table;
 	char *hook_value;
-	char *field;
 	dbh_callback callback;
 	dlink_node ptr;
 };
@@ -18,8 +17,7 @@ struct rsdb_hook
 void init_rsdb_hook(void);
 
 struct rsdb_hook *rsdb_hook_add(const char *table, const char *hook_value,
-				const char *field, unsigned int frequency,
-				dbh_callback);
+				unsigned int frequency, dbh_callback);
 void rsdb_hook_delete(struct rsdb_hook *dbh);
 
 #endif
