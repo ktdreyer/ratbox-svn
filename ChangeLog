@@ -1,3 +1,13 @@
+leeh        2006/03/14 21:34:18 UTC	(20060314_4-22149)
+  Log:
+  - remove 'field', always select 'data' instead
+  
+
+  Modified:
+	rserv/trunk/include/dbhook.h (File Modified) 
+	rserv/trunk/src/dbhook.c (File Modified) 
+
+
 leeh        2006/03/14 21:12:27 UTC	(20060314_3-22147)
   Log:
   - add in a dbhook api
