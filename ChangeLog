@@ -1,3 +1,15 @@
+leeh        2006/03/14 19:19:41 UTC	(20060314_0-22141)
+  Log:
+  - add in anjutas get_temp_time(), which accepts modifiers like "1w" for one
+    week
+  
+
+  Modified:
+	rserv/trunk/help/banserv/general (File Modified) 
+	rserv/trunk/help/banserv/index (File Modified) 
+	rserv/trunk/src/s_banserv.c (File Modified) 
+
+
 leeh        2006/03/13 22:12:03 UTC	(20060313_4-22139)
   Log:
   - dont use sqlite2 db backend unless its forced
