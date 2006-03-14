@@ -270,6 +270,42 @@ string_to_array(char *string, char *parv[])
         return x;
 }
 
+__inline int
+string_to_array_delim(char *string, char *parv[], char delim, int maxpara)
+{
+	static char empty_string[] = "";
+        char *p, *buf = string;
+        int x = 0;
+
+        parv[x] = NULL;
+
+        if(EmptyString(string))
+                return x;
+
+        if(*buf == '\0')
+                return x;
+
+	while((x < maxpara - 1) && (p = strchr(buf, delim)))
+	{
+		/* empty field */
+		if(p == buf)
+		{
+			parv[x++] = empty_string;
+			buf++;
+			continue;
+		}
+
+		*p++ = '\0';
+		parv[x++] = buf;
+		buf = p;
+	}
+
+	parv[x++] = buf;
+	parv[x] = NULL;
+
+	return x;
+}
+
 /*
  * strlcat and strlcpy were ripped from openssh 2.5.1p2
  * They had the following Copyright info: 

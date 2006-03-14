@@ -23,6 +23,7 @@ extern const char *lcase(const char *);
 extern const char *ucase(const char *);
 
 __inline int string_to_array(char *string, char *parv[]);
+__inline int string_to_array_delim(char *string, char *parv[], char delim, int maxpara);
 
 #ifndef HAVE_STRLCAT
 extern size_t strlcat(char *dst, const char *src, size_t siz);
