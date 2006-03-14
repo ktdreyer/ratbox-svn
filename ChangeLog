@@ -1,3 +1,16 @@
+leeh        2006/03/14 19:33:37 UTC	(20060314_1-22143)
+  Log:
+  - add in activate/resetpass help files
+  
+
+  Modified:
+	rserv/trunk/help/userserv/activate (File Added) 
+	rserv/trunk/help/userserv/general (File Modified) 
+	rserv/trunk/help/userserv/index (File Modified) 
+	rserv/trunk/help/userserv/register (File Modified) 
+	rserv/trunk/help/userserv/resetpass (File Added) 
+
+
 leeh        2006/03/14 19:19:41 UTC	(20060314_0-22141)
   Log:
   - add in anjutas get_temp_time(), which accepts modifiers like "1w" for one
