@@ -138,7 +138,26 @@ get_temp_time(const char *duration)
 			result += ((*duration) & 0xF);
 		}
 		else
-			return 0;
+		{
+			if (!result || *(duration+1))
+				return 0;
+			switch (*duration)
+			{
+				case 'h': case 'H':
+					result *= 60; 
+					break;
+				case 'd': case 'D': 
+					result *= 1440; 
+					break;
+				case 'w': case 'W':
+					result *= 10080; 
+					break;
+				case 'm': case 'M': 
+					break;
+				default:
+					return 0;
+			}
+		}
 	}
 
 	/* max at 1 year */
