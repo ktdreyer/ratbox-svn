@@ -1,3 +1,17 @@
+leeh        2006/03/15 20:43:03 UTC	(20060315_1-22157)
+  Log:
+  - add HOOK_DBSYNC, which is called when anything needs a database sync with
+    reality (primarily last time a username/channel was used)
+  - add operserv::dbsync to force a database sync
+  
+
+  Modified:
+	rserv/trunk/include/hook.h (File Modified) 
+	rserv/trunk/src/s_chanserv.c (File Modified) 
+	rserv/trunk/src/s_operserv.c (File Modified) 
+	rserv/trunk/src/s_userserv.c (File Modified) 
+
+
 leeh        2006/03/15 18:54:02 UTC	(20060315_0-22155)
   Log:
   - add a userserv dbhook for registering usernames
