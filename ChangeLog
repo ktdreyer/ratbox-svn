@@ -1,3 +1,12 @@
+leeh        2006/03/15 20:49:31 UTC	(20060315_3-22161)
+  Log:
+  - make .die call HOOK_DBSYNC
+  
+
+  Modified:
+	rserv/trunk/src/ucommand.c (File Modified) 
+
+
 leeh        2006/03/15 20:48:13 UTC	(20060315_2-22159)
   Log:
   - add operserv::rehash
