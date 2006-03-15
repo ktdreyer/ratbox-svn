@@ -43,6 +43,7 @@
 #include "channel.h"
 #include "serno.h"
 #include "cache.h"
+#include "hook.h"
 
 #ifdef HAVE_CRYPT_H
 #include <crypt.h>
@@ -329,6 +330,8 @@ u_die(struct client *unused, struct lconn *conn_p, const char *parv[], int parc)
                 sendto_one(conn_p, "Usage: .die <servername>");
                 return 0;
         }
+
+	hook_call(HOOK_DBSYNC, NULL, NULL);
 
         sendto_all(0, "Services terminated by %s", conn_p->name);
         mlog("ratbox-services terminated by %s", conn_p->name);
