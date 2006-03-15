@@ -1,3 +1,12 @@
+leeh        2006/03/15 18:54:02 UTC	(20060315_0-22155)
+  Log:
+  - add a userserv dbhook for registering usernames
+  
+
+  Modified:
+	rserv/trunk/src/s_userserv.c (File Modified) 
+
+
 leeh        2006/03/14 22:26:27 UTC	(20060314_6-22153)
   Log:
   - add string_to_array_delim() which breaks a string into an array with a
