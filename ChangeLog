@@ -1,3 +1,15 @@
+leeh        2006/03/15 20:53:38 UTC	(20060315_4-22163)
+  Log:
+  - add help files for operserv::dbsync and operserv::rehash
+  
+
+  Modified:
+	rserv/trunk/help/operserv/dbsync (File Added) 
+	rserv/trunk/help/operserv/index-admin (File Modified) 
+	rserv/trunk/help/operserv/rehash (File Added) 
+	rserv/trunk/help/operserv/u-dbsync (File Added) 
+
+
 leeh        2006/03/15 20:49:31 UTC	(20060315_3-22161)
   Log:
   - make .die call HOOK_DBSYNC
