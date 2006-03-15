@@ -1,3 +1,12 @@
+leeh        2006/03/15 20:48:13 UTC	(20060315_2-22159)
+  Log:
+  - add operserv::rehash
+  
+
+  Modified:
+	rserv/trunk/src/s_operserv.c (File Modified) 
+
+
 leeh        2006/03/15 20:43:03 UTC	(20060315_1-22157)
   Log:
   - add HOOK_DBSYNC, which is called when anything needs a database sync with
