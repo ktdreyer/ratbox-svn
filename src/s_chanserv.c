@@ -163,6 +163,7 @@ static int h_chanserv_mode_voice(void *chptr, void *members);
 static int h_chanserv_mode_simple(void *chptr, void *unused);
 static int h_chanserv_sjoin_lowerts(void *chptr, void *unused);
 static int h_chanserv_user_login(void *client, void *unused);
+static int h_chanserv_dbsync(void *unused, void *unusedd);
 static void e_chanserv_updatechan(void *unused);
 static void e_chanserv_expirechan(void *unused);
 static void e_chanserv_expireban(void *unused);
@@ -192,6 +193,7 @@ init_s_chanserv(void)
 	hook_add(h_chanserv_mode_simple, HOOK_MODE_SIMPLE);
 	hook_add(h_chanserv_sjoin_lowerts, HOOK_SJOIN_LOWERTS);
 	hook_add(h_chanserv_user_login, HOOK_USER_LOGIN);
+	hook_add(h_chanserv_dbsync, HOOK_DBSYNC);
 
 	eventAdd("chanserv_updatechan", e_chanserv_updatechan, NULL, 3601);
 	eventAdd("chanserv_expirechan", e_chanserv_expirechan, NULL, 43205);
@@ -733,6 +735,12 @@ access_users_on_channel(struct chan_reg *chreg_p)
 	return 0;
 }
 
+/* e_chanserv_updatechan()
+ *
+ * inputs	-
+ * outputs	-
+ * side effects - any pending updates are written to the database
+ */
 static void
 e_chanserv_updatechan(void *unused)
 {
@@ -758,6 +766,13 @@ e_chanserv_updatechan(void *unused)
 	HASH_WALK_END
 
 	rsdb_transaction(RSDB_TRANS_END);
+}
+
+static int
+h_chanserv_dbsync(void *unused, void *unusedd)
+{
+	e_chanserv_updatechan(NULL);
+	return 0;
 }
 
 static void

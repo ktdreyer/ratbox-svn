@@ -54,6 +54,7 @@ static int o_oper_takeover(struct client *, struct lconn *, const char **, int);
 static int o_oper_osjoin(struct client *, struct lconn *, const char **, int);
 static int o_oper_ospart(struct client *, struct lconn *, const char **, int);
 static int o_oper_omode(struct client *, struct lconn *, const char **, int);
+static int o_oper_dbsync(struct client *, struct lconn *, const char **, int);
 
 static int h_operserv_sjoin_lowerts(void *chptr, void *unused);
 
@@ -62,7 +63,8 @@ static struct service_command operserv_command[] =
 	{ "OSJOIN",	&o_oper_osjoin,		1, NULL, 1, 0L, 0, 0, CONF_OPER_OS_CHANNEL, 0 },
 	{ "OSPART",	&o_oper_ospart,		1, NULL, 1, 0L, 0, 0, CONF_OPER_OS_CHANNEL, 0 },
 	{ "TAKEOVER",	&o_oper_takeover,	1, NULL, 1, 0L, 0, 0, CONF_OPER_OS_TAKEOVER, 0 },
-	{ "OMODE",	&o_oper_omode,		2, NULL, 1, 0L, 0, 0, CONF_OPER_OS_OMODE, 0 }
+	{ "OMODE",	&o_oper_omode,		2, NULL, 1, 0L, 0, 0, CONF_OPER_OS_OMODE, 0 },
+	{ "DBSYNC",	&o_oper_dbsync,		0, NULL, 1, 0L, 0, 0, CONF_OPER_ADMIN, 0 },
 };
 
 static struct ucommand_handler operserv_ucommand[] =
@@ -71,6 +73,7 @@ static struct ucommand_handler operserv_ucommand[] =
 	{ "ospart",	o_oper_ospart,	0, CONF_OPER_OS_CHANNEL, 1, 1, NULL },
 	{ "takeover",	o_oper_takeover,0, CONF_OPER_OS_TAKEOVER, 1, 1, NULL },
 	{ "omode",	o_oper_omode,	0, CONF_OPER_OS_OMODE, 2, 1, NULL },
+	{ "dbsync",	o_oper_dbsync,	0, CONF_OPER_ADMIN, 0, 1, NULL },
 	{ "\0", NULL, 0, 0, 0, 0, NULL }
 };
 
@@ -344,6 +347,17 @@ o_oper_omode(struct client *client_p, struct lconn *conn_p, const char *parv[], 
 			rebuild_params(parv, parc, 1));
 
 	service_send(operserv_p, client_p, conn_p, "OMODE issued");
+	return 0;
+}
+
+static int
+o_oper_dbsync(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
+{
+	hook_call(HOOK_DBSYNC, NULL, NULL);
+
+	slog(operserv_p, 2, "%s - DBSYNC", OPER_NAME(client_p, conn_p));
+
+	service_send(operserv_p, client_p, conn_p, "Databases have been synced");
 	return 0;
 }
 

@@ -113,6 +113,7 @@ static struct service_handler userserv_service = {
 static int user_db_callback(int argc, const char **argv);
 static int dbh_user_register(struct rsdb_hook *, const char *data);
 static int h_user_burst_login(void *, void *);
+static int h_user_dbsync(void *, void *);
 static void e_user_expire(void *unused);
 static void e_user_expire_resetpass(void *unused);
 
@@ -138,6 +139,7 @@ init_s_userserv(void)
 	rsdb_hook_add("users_sync", "REGISTER", 180, dbh_user_register);
 
 	hook_add(h_user_burst_login, HOOK_BURST_LOGIN);
+	hook_add(h_user_dbsync, HOOK_DBSYNC);
 
 	eventAdd("userserv_expire", e_user_expire, NULL, 21600);
 	eventAdd("userserv_expire_resetpass", e_user_expire_resetpass, NULL, 3600);
@@ -355,6 +357,40 @@ h_user_burst_login(void *v_client_p, void *v_username)
 	return 0;
 }
 
+static int
+h_user_dbsync(void *unused, void *unusedd)
+{
+	struct user_reg *ureg_p;
+	dlink_node *ptr;
+	int i;
+
+	rsdb_transaction(RSDB_TRANS_START);
+
+	HASH_WALK(i, MAX_NAME_HASH, ptr, user_reg_table)
+	{
+		ureg_p = ptr->data;
+
+		/* if they're logged in, reset the expiry */
+		if(dlink_list_length(&ureg_p->users))
+		{
+			ureg_p->last_time = CURRENT_TIME;
+			ureg_p->flags |= US_FLAGS_NEEDUPDATE;
+		}
+
+		if(ureg_p->flags & US_FLAGS_NEEDUPDATE)
+		{
+			ureg_p->flags &= ~US_FLAGS_NEEDUPDATE;
+			rsdb_exec(NULL, "UPDATE users SET last_time=%lu WHERE username='%Q'",
+					ureg_p->last_time, ureg_p->name);
+		}
+	}
+	HASH_WALK_END
+
+	rsdb_transaction(RSDB_TRANS_END);
+
+	return 0;
+}
+
 static void
 e_user_expire(void *unused)
 {
@@ -387,9 +423,8 @@ e_user_expire(void *unused)
 		if(ureg_p->flags & US_FLAGS_NEEDUPDATE)
 		{
 			ureg_p->flags &= ~US_FLAGS_NEEDUPDATE;
-			rsdb_exec(NULL, "UPDATE users SET last_time=%lu"
-					" WHERE username='%Q'",
-			ureg_p->last_time, ureg_p->name);
+			rsdb_exec(NULL, "UPDATE users SET last_time=%lu WHERE username='%Q'",
+				ureg_p->last_time, ureg_p->name);
 		}
 
 		if((ureg_p->last_time + config_file.uexpire_time) > CURRENT_TIME)

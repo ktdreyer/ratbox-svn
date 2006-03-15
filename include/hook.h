@@ -16,7 +16,8 @@
 					 */
 #define HOOK_NICKCHANGE		10	/* client changing nick */
 #define HOOK_SERVER_EOB		11	/* specific server sent EOB */
-#define HOOK_LAST_HOOK		12
+#define HOOK_DBSYNC		12
+#define HOOK_LAST_HOOK		13
 
 typedef int (*hook_func)(void *, void *);
 
