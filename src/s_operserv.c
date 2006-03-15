@@ -55,6 +55,7 @@ static int o_oper_osjoin(struct client *, struct lconn *, const char **, int);
 static int o_oper_ospart(struct client *, struct lconn *, const char **, int);
 static int o_oper_omode(struct client *, struct lconn *, const char **, int);
 static int o_oper_dbsync(struct client *, struct lconn *, const char **, int);
+static int o_oper_rehash(struct client *, struct lconn *, const char **, int);
 
 static int h_operserv_sjoin_lowerts(void *chptr, void *unused);
 
@@ -65,6 +66,7 @@ static struct service_command operserv_command[] =
 	{ "TAKEOVER",	&o_oper_takeover,	1, NULL, 1, 0L, 0, 0, CONF_OPER_OS_TAKEOVER, 0 },
 	{ "OMODE",	&o_oper_omode,		2, NULL, 1, 0L, 0, 0, CONF_OPER_OS_OMODE, 0 },
 	{ "DBSYNC",	&o_oper_dbsync,		0, NULL, 1, 0L, 0, 0, CONF_OPER_ADMIN, 0 },
+	{ "REHASH",	&o_oper_rehash,		0, NULL, 1, 0L, 0, 0, CONF_OPER_ADMIN, 0 }
 };
 
 static struct ucommand_handler operserv_ucommand[] =
@@ -358,6 +360,26 @@ o_oper_dbsync(struct client *client_p, struct lconn *conn_p, const char *parv[],
 	slog(operserv_p, 2, "%s - DBSYNC", OPER_NAME(client_p, conn_p));
 
 	service_send(operserv_p, client_p, conn_p, "Databases have been synced");
+	return 0;
+}
+
+static int
+o_oper_rehash(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
+{
+	if(parc > 0 && !irccmp(parv[0], "help"))
+	{
+		mlog("services rehashing: %s reloading help", OPER_NAME(client_p, conn_p));
+		sendto_all(0, "services rehashing: %s reloading help",
+				OPER_NAME(client_p, conn_p));
+
+		rehash_help();
+		return 0;
+	}
+
+	mlog("services rehashing: %s reloading config file", OPER_NAME(client_p, conn_p));
+	sendto_all(0, "services rehashing: %s reloading config file", OPER_NAME(client_p, conn_p));
+
+	rehash(0);
 	return 0;
 }
 
