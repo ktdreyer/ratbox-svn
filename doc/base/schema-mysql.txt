@@ -15,8 +15,15 @@ CREATE TABLE users (
 CREATE TABLE users_resetpass (
 	username VARCHAR(USERREGNAME_LEN) NOT NULL,
 	token VARCHAR(10),
-	time INT UNSIGNED,
+	time INTEGER,
 	PRIMARY KEY(username)
+);
+
+CREATE TABLE users_sync (
+	id INTEGER AUTO_INCREMENT, 
+	hook VARCHAR(50) NOT NULL,
+	data TEXT,
+	PRIMARY KEY(id)
 );
 
 CREATE TABLE nicks (
@@ -100,7 +107,7 @@ CREATE TABLE operbans (
 );
 
 CREATE TABLE global_welcome (
-	id INT UNSIGNED,
+	id INTEGER,
 	text TEXT,
 	PRIMARY KEY(id)
 );

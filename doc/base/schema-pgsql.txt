@@ -19,6 +19,13 @@ CREATE TABLE users_resetpass (
 	PRIMARY KEY(username)
 );
 
+CREATE TABLE users_sync (
+	id SERIAL,
+	hook VARCHAR(50) NOT NULL,
+	data TEXT,
+	PRIMARY KEY(id)
+);
+
 CREATE TABLE nicks (
 	nickname VARCHAR(NICKLEN) NOT NULL,
 	username VARCHAR(USERREGNAME_LEN) NOT NULL,

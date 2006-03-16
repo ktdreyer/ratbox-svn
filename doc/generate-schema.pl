@@ -9,46 +9,19 @@
 #
 # This code is in the public domain.
 
-my %lengths = (
-	"USERREGNAME_LEN" => 1,
-	"PASSWDLEN" => 1,
-	"EMAILLEN" => 1,
-	"OPERNAMELEN" => 1,
-	"NICKLEN" => 1,
-	"USERLEN" => 1,
-	"CHANNELLEN" => 1,
-	"TOPICLEN" => 1,
-	"HOSTLEN" => 1,
-	"REALLEN" => 1,
-	"REASONLEN" => 1
-);
-
-my @srcs = ("setup.h", "rserv.h", "channel.h", "client.h");
+require "../tools/definetolength.pl";
 
 my @schemas = ("schema-mysql.txt", "schema-pgsql.txt");
 
-foreach my $i (@srcs)
+my %vals;
+
+if($ARGV[0])
 {
-	unless(open(INPUT, '<', "../include/$i"))
-	{
-		next;
-	}
-
-	while(<INPUT>)
-	{
-		chomp;
-
-		if($_ =~ /^#define ([A-Z_]+)\s+\(?(\d+)/)
-		{
-			$key = $1;
-			$value = $2;
-
-			$lengths{"$key"} = $value
-				if($lengths{"$key"});
-		}
-	}
-
-	close(INPUT);
+	%vals = &parse_includes("$ARGV[0]");
+}
+else
+{
+	%vals = &parse_includes("../include");
 }
 
 foreach my $i (@schemas)
@@ -68,7 +41,7 @@ foreach my $i (@schemas)
 		exit();
 	}
 
-	while(($key, $value) = each(%lengths))
+	while(($key, $value) = each(%vals))
 	{
 		if($value == 1)
 		{
@@ -80,7 +53,7 @@ foreach my $i (@schemas)
 	}
 
 	# this 
-	$special = $lengths{"NICKLEN"} + $lengths{"USERLEN"} + $lengths{"HOSTLEN"} + 2;
+	$special = $vals{"NICKLEN"} + $vals{"USERLEN"} + $vals{"HOSTLEN"} + 2;
 	$input =~ s/CONVERT_NICK_USER_HOST/$special/g;
 
 	print OUTPUT "$input";
