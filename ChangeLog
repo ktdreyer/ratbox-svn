@@ -1,3 +1,12 @@
+leeh        2006/03/16 22:16:27 UTC	(20060316_5-22179)
+  Log:
+  - add in documentation for the dbhook system
+  
+
+  Modified:
+	rserv/trunk/doc/dbhook.txt (File Added) 
+
+
 leeh        2006/03/16 21:28:36 UTC	(20060316_4-22177)
   Log:
   - add Id property 
