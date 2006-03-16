@@ -1,3 +1,15 @@
+leeh        2006/03/16 19:03:05 UTC	(20060316_1-22171)
+  Log:
+  - add rsdb_hook_schedule(), so sql statements can be scheduled whilst a db
+    hook is running
+  
+
+  Modified:
+	rserv/trunk/include/dbhook.h (File Modified) 
+	rserv/trunk/src/dbhook.c (File Modified) 
+	rserv/trunk/src/s_userserv.c (File Modified) 
+
+
 leeh        2006/03/16 18:48:10 UTC	(20060316_0-22169)
   Log:
   - add SETPASS hook to users_sync for setting passwords
