@@ -39,8 +39,10 @@
 #include "event.h"
 
 static dlink_list rsdb_hook_list;
+static dlink_list dbh_schedule_list;
 
 static void rsdb_hook_call(void *dbh);
+static void rsdb_hook_schedule_execute(void);
 
 struct rsdb_hook *
 rsdb_hook_add(const char *table, const char *hook_value,
@@ -143,7 +145,44 @@ rsdb_hook_call(void *v_dbh)
 					dbh->table, delid[i]);
 	}
 
+	/* execute anything scheduled whilst this hook was running */
+	rsdb_hook_schedule_execute();
+
 	rsdb_transaction(RSDB_TRANS_END);
 
 	my_free(delid);
 }
+
+void
+rsdb_hook_schedule(const char *format, ...)
+{
+	static char buf[BUFSIZE*4];
+	va_list args;
+	int i;
+
+	va_start(args, format);
+	i = rs_vsnprintf(buf, sizeof(buf), format, args);
+	va_end(args);
+
+	if(i >= sizeof(buf))
+	{
+		mlog("fatal error: length problem with compiling sql");
+		die("problem with compiling sql statement");
+	}
+
+	dlink_add_alloc(my_strdup(buf), &dbh_schedule_list);
+}
+
+static void
+rsdb_hook_schedule_execute(void)
+{
+	dlink_node *ptr, *next_ptr;
+
+	DLINK_FOREACH_SAFE(ptr, next_ptr, dbh_schedule_list.head)
+	{
+		rsdb_exec(NULL, "%s", (const char *) ptr->data);
+		my_free(ptr->data);
+		dlink_destroy(ptr, &dbh_schedule_list);
+	}
+}
+
