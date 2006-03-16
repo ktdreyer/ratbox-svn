@@ -1,3 +1,13 @@
+leeh        2006/03/16 21:28:36 UTC	(20060316_4-22177)
+  Log:
+  - add Id property 
+  
+
+  Modified:
+	rserv/trunk/tools/dbupgrade.pl  (Property Modified)
+	rserv/trunk/tools/definetolength.pl  (Property Modified)
+
+
 leeh        2006/03/16 21:24:30 UTC	(20060316_3-22175)
   Log:
   - move the perl code for extracting values from defines into
