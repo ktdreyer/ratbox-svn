@@ -1,3 +1,12 @@
+leeh        2006/03/16 18:48:10 UTC	(20060316_0-22169)
+  Log:
+  - add SETPASS hook to users_sync for setting passwords
+  
+
+  Modified:
+	rserv/trunk/src/s_userserv.c (File Modified) 
+
+
 leeh        2006/03/15 20:53:38 UTC	(20060315_4-22163)
   Log:
   - add help files for operserv::dbsync and operserv::rehash
