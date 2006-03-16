@@ -112,6 +112,7 @@ static struct service_handler userserv_service = {
 
 static int user_db_callback(int argc, const char **argv);
 static int dbh_user_register(struct rsdb_hook *, const char *data);
+static int dbh_user_setpass(struct rsdb_hook *, const char *data);
 static int h_user_burst_login(void *, void *);
 static int h_user_dbsync(void *, void *);
 static void e_user_expire(void *unused);
@@ -136,7 +137,8 @@ init_s_userserv(void)
 			"SELECT username, password, email, suspender, "
 			"reg_time, last_time, flags FROM users");
 
-	rsdb_hook_add("users_sync", "REGISTER", 180, dbh_user_register);
+	rsdb_hook_add("users_sync", "REGISTER", 900, dbh_user_register);
+	rsdb_hook_add("users_sync", "SETPASS", 900, dbh_user_setpass);
 
 	hook_add(h_user_burst_login, HOOK_BURST_LOGIN);
 	hook_add(h_user_dbsync, HOOK_DBSYNC);
@@ -322,6 +324,29 @@ dbh_user_register(struct rsdb_hook *dbh, const char *c_data)
 	ureg_p->reg_time = ureg_p->last_time = CURRENT_TIME;
 
 	add_user_reg(ureg_p);
+
+	return 1;
+}
+
+static int
+dbh_user_setpass(struct rsdb_hook *dbh, const char *c_data)
+{
+	static char *argv[MAXPARA];
+	struct user_reg *ureg_p;
+	char *data;
+	int argc;
+
+	data = LOCAL_COPY(c_data);
+	argc = string_to_array(data, argv);
+
+	if(EmptyString(argv[0]) || EmptyString(argv[1]))
+		return 1;
+
+	if((ureg_p = find_user_reg(NULL, argv[0])) == NULL)
+		return 1;
+
+	my_free(ureg_p->password);
+	ureg_p->password = my_strdup(argv[1]);
 
 	return 1;
 }
