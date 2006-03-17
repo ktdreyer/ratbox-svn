@@ -1,3 +1,14 @@
+leeh        2006/03/17 19:39:56 UTC	(20060317_0-22181)
+  Log:
+  - make banserv use LOWER() for queries on the mask, to avoid problems with
+    having to use the exact case
+  
+
+  Modified:
+	rserv/trunk/src/s_banserv.c (File Modified) 
+	rserv/trunk/tools/dbupgrade.pl (File Modified) 
+
+
 leeh        2006/03/16 22:16:27 UTC	(20060316_5-22179)
   Log:
   - add in documentation for the dbhook system
