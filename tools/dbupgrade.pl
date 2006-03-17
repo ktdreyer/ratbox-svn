@@ -116,6 +116,7 @@ if($currentver < 2)
 	print "    id INTEGER, text TEXT,\n";
 	print "    PRIMARY KEY(id)\n";
 	print ");\n";
+	print "UPDATE operbans SET mask=LOWER(mask) WHERE 1;\n";
 
 	print "\n";
 }

@@ -201,7 +201,7 @@ find_ban(const char *mask, char type)
 	struct rsdb_table data;
 	int retval;
 
-	rsdb_exec_fetch(&data, "SELECT remove FROM operbans WHERE type='%c' AND mask='%Q' LIMIT 1",
+	rsdb_exec_fetch(&data, "SELECT remove FROM operbans WHERE type='%c' AND mask=LOWER('%Q') LIMIT 1",
 			type, mask);
 
 	if(data.row_count)
@@ -233,7 +233,7 @@ find_ban_remove(const char *mask, char type)
 	struct rsdb_table data;
 	const char *retval;
 
-	rsdb_exec_fetch(&data, "SELECT remove, oper FROM operbans WHERE type='%c' AND mask='%Q' LIMIT 1",
+	rsdb_exec_fetch(&data, "SELECT remove, oper FROM operbans WHERE type='%c' AND mask=LOWER('%Q') LIMIT 1",
 			type, mask);
 
 	if(data.row_count && (atoi(data.row[0][0]) == 0))
@@ -433,7 +433,7 @@ o_banserv_kline(struct client *client_p, struct lconn *conn_p, const char *parv[
 	if(res)
 		rsdb_exec(NULL, "UPDATE operbans SET reason='%Q', "
 				"hold=%ld, oper='%Q', remove=0 WHERE "
-				"type='K' AND mask='%Q'",
+				"type='K' AND mask=LOWER('%Q')",
 				reason,
 				temptime ? CURRENT_TIME + temptime : 0,
 				OPER_NAME(client_p, conn_p), mask);
@@ -441,7 +441,7 @@ o_banserv_kline(struct client *client_p, struct lconn *conn_p, const char *parv[
 		rsdb_exec(NULL, "INSERT INTO operbans "
 				"(type, mask, reason, hold, create_time, "
 				"oper, remove, flags) "
-				"VALUES('K', '%Q', '%Q', %lu, %lu, '%Q', 0, 0)",
+				"VALUES('K', LOWER('%Q'), '%Q', %lu, %lu, '%Q', 0, 0)",
 				mask, reason,
 				temptime ? CURRENT_TIME + temptime : 0,
 				CURRENT_TIME, OPER_NAME(client_p, conn_p));
@@ -524,7 +524,7 @@ o_banserv_xline(struct client *client_p, struct lconn *conn_p, const char *parv[
 	if(res)
 		rsdb_exec(NULL, "UPDATE operbans SET reason='%Q', "
 				"hold=%ld, oper='%Q', remove=0 WHERE "
-				"type='X' AND mask='%Q'",
+				"type='X' AND mask=LOWER('%Q')",
 				reason,
 				temptime ? CURRENT_TIME + temptime : 0,
 				OPER_NAME(client_p, conn_p), gecos);
@@ -532,7 +532,7 @@ o_banserv_xline(struct client *client_p, struct lconn *conn_p, const char *parv[
 		rsdb_exec(NULL, "INSERT INTO operbans "
 				"(type, mask, reason, hold, create_time, "
 				"oper, remove, flags) "
-				"VALUES('X', '%Q', '%Q', %lu, %lu, '%Q', 0, 0)",
+				"VALUES('X', LOWER('%Q'), '%Q', %lu, %lu, '%Q', 0, 0)",
 				gecos, reason, 
 				temptime ? CURRENT_TIME + temptime : 0,
 				CURRENT_TIME, OPER_NAME(client_p, conn_p));
@@ -615,7 +615,7 @@ o_banserv_resv(struct client *client_p, struct lconn *conn_p, const char *parv[]
 	if(res)
 		rsdb_exec(NULL, "UPDATE operbans SET reason='%Q', "
 				"hold=%ld, oper='%Q', remove=0 WHERE "
-				"type='R' AND mask='%Q'",
+				"type='R' AND mask=LOWER('%Q')",
 				reason,
 				temptime ? CURRENT_TIME + temptime : 0,
 				OPER_NAME(client_p, conn_p), mask);
@@ -623,7 +623,7 @@ o_banserv_resv(struct client *client_p, struct lconn *conn_p, const char *parv[]
 		rsdb_exec(NULL, "INSERT INTO operbans "
 				"(type, mask, reason, hold, create_time, "
 				"oper, remove, flags) "
-				"VALUES('R', '%Q', '%Q', %lu, %lu, '%Q', 0, 0)",
+				"VALUES('R', LOWER('%Q'), '%Q', %lu, %lu, '%Q', 0, 0)",
 				mask, reason, 
 				temptime ? CURRENT_TIME + temptime : 0,
 				CURRENT_TIME, OPER_NAME(client_p, conn_p));
@@ -680,7 +680,7 @@ o_banserv_unkline(struct client *client_p, struct lconn *conn_p, const char *par
 	}
 
 	rsdb_exec(NULL, "UPDATE operbans SET remove=1, hold=%lu "
-			"WHERE mask='%Q' AND type='K'",
+			"WHERE mask=LOWER('%Q') AND type='K'",
 			CURRENT_TIME + config_file.bs_unban_time, parv[0]);
 
 	service_send(banserv_p, client_p, conn_p,
@@ -728,7 +728,7 @@ o_banserv_unxline(struct client *client_p, struct lconn *conn_p, const char *par
 	}
 
 	rsdb_exec(NULL, "UPDATE operbans SET remove=1, hold=%lu "
-			"WHERE mask='%Q' AND type='X'",
+			"WHERE mask=LOWER('%Q') AND type='X'",
 			CURRENT_TIME + config_file.bs_unban_time, parv[0]);
 
 	service_send(banserv_p, client_p, conn_p,
@@ -776,7 +776,7 @@ o_banserv_unresv(struct client *client_p, struct lconn *conn_p, const char *parv
 	}
 
 	rsdb_exec(NULL, "UPDATE operbans SET remove=1, hold=%lu "
-			"WHERE mask='%Q' AND type='R'",
+			"WHERE mask=LOWER('%Q') AND type='R'",
 			CURRENT_TIME + config_file.bs_unban_time, parv[0]);
 
 	service_send(banserv_p, client_p, conn_p,
