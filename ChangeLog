@@ -1,3 +1,13 @@
+leeh        2006/03/17 21:55:30 UTC	(20060317_5-22191)
+  Log:
+  - add a doc on UPGRADING
+  
+
+  Modified:
+	rserv/trunk/README (File Modified) 
+	rserv/trunk/UPGRADING (File Added) 
+
+
 leeh        2006/03/17 19:58:30 UTC	(20060317_4-22189)
   Log:
   - rerun make depend..
