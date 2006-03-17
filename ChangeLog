@@ -1,3 +1,12 @@
+leeh        2006/03/17 19:45:48 UTC	(20060317_1-22183)
+  Log:
+  - add in the 1.0 release notes here..
+  
+
+  Modified:
+	rserv/trunk/doc/RELEASE_NOTES_1.0 (File Added) 
+
+
 leeh        2006/03/17 19:39:56 UTC	(20060317_0-22181)
   Log:
   - make banserv use LOWER() for queries on the mask, to avoid problems with
