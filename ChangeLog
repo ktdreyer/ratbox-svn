@@ -1,3 +1,13 @@
+leeh        2006/03/17 19:58:30 UTC	(20060317_4-22189)
+  Log:
+  - rerun make depend..
+  
+
+  Modified:
+	rserv/trunk/Makefile.in (File Modified) 
+	rserv/trunk/src/.depend (File Modified) 
+
+
 leeh        2006/03/17 19:53:04 UTC	(20060317_3-22187)
   Log:
   - remove support for sqlite2 -- we need ALTER TABLE
