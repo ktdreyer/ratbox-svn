@@ -1,3 +1,14 @@
+leeh        2006/03/17 19:53:04 UTC	(20060317_3-22187)
+  Log:
+  - remove support for sqlite2 -- we need ALTER TABLE
+  
+
+  Modified:
+	rserv/trunk/autoconf/configure.in (File Modified) 
+	rserv/trunk/configure (File Modified) 
+	rserv/trunk/src/rsdb_sqlite.c (File Deleted) 
+
+
 leeh        2006/03/17 19:51:26 UTC	(20060317_2-22185)
   Log:
   - make this reference sqlite3 instead of sqlite
