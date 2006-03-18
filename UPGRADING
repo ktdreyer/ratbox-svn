@@ -35,3 +35,5 @@ has been done.
 You can extract a complete dump of data in sqlite2 via:	
 	sqlite etc/ratbox-services.db ".dump" > db-dump.txt
 
+You should then follow the instructions in INSTALL.<db-backend>, using this
+database dump instead of the given schema.

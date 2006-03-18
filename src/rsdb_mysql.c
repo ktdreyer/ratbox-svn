@@ -32,6 +32,7 @@
  */
 #include "stdinc.h"
 #include <mysql/mysql.h>
+#include <mysql/errmsg.h>
 #include "rsdb.h"
 #include "rserv.h"
 #include "conf.h"
@@ -40,6 +41,8 @@
 #define RSDB_MAXCOLS 30
 
 MYSQL *rsdb_database;
+
+static int rsdb_connect(int initial);
 
 /* rsdb_init()
  */
@@ -55,17 +58,74 @@ rsdb_init(void)
 	if((rsdb_database = mysql_init(NULL)) == NULL)
 		die("Out of memory -- failed to initialise mysql pointer");
 
-	if(!mysql_real_connect(rsdb_database, config_file.db_host,
+	rsdb_connect(1);
+}
+
+/* rsdb_connect()
+ * attempts to connect to the mysql database
+ *
+ * inputs	- initial, set if we're starting up
+ * outputs	- 0 on success, > 0 on fatal error, < 0 on non-fatal error
+ * side effects - connection to the mysql database is attempted
+ */
+static int
+rsdb_connect(int initial)
+{
+	void *unused = mysql_real_connect(rsdb_database, config_file.db_host,
 				config_file.db_username, config_file.db_password,
-				config_file.db_name, 0, NULL, 0))
+				config_file.db_name, 0, NULL, 0);
+
+	if(unused)
+		return 0;
+
+	/* all errors on startup are fatal */
+	if(initial)
 		die("Unable to connect to mysql database: %s",
 			mysql_error(rsdb_database));
+
+	switch(mysql_errno(rsdb_database))
+	{
+		case CR_SERVER_LOST:
+			return -1;
+
+		default:
+			return 1;
+	}
+
+	/* NOTREACHED */
+	return 1;
 }
 
 void
 rsdb_shutdown(void)
 {
 	mysql_close(rsdb_database);
+}
+
+static void
+rsdb_handle_error(void)
+{
+	switch(mysql_errno(rsdb_database))
+	{
+		case 0:
+			return;
+
+		case CR_SERVER_GONE_ERROR:
+		case CR_SERVER_LOST:
+			/* try to reconnect immediately.. if that fails fall
+			 * into periodic reconnections
+			 */
+			if(!rsdb_connect(0))
+				;	/* XXX */
+
+			break;
+
+		default:
+			mlog("fatal error: problem with db file: %s",
+				mysql_error(rsdb_database));
+			die("problem with db file");
+			return;
+	}
 }
 
 const char *
@@ -98,16 +158,14 @@ rsdb_exec(rsdb_callback cb, const char *format, ...)
 	i = rs_vsnprintf(buf, sizeof(buf), format, args);
 	va_end(args);
 
-	/* XXX assert */
 	if(i >= sizeof(buf))
+	{
+		mlog("fatal error: length problem compiling sql statement: %s", buf);
 		die("length problem compiling sql statement");
+	}
 
 	if(mysql_query(rsdb_database, buf))
-	{
-		mlog("fatal error: problem with db file: %s",
-			mysql_error(rsdb_database));
-		die("problem with db file");
-	}
+		rsdb_handle_error();
 
 	field_count = mysql_field_count(rsdb_database);
 
@@ -117,13 +175,8 @@ rsdb_exec(rsdb_callback cb, const char *format, ...)
 	if(!field_count || !cb)
 		return;
 
-	if((rsdb_result = mysql_use_result(rsdb_database)) == NULL)
-	{
-		// CR_SERVER_LOST?
-		mlog("fatal error: problem with db file: %s",
-			mysql_error(rsdb_database));
-		die("problem with db file");
-	}
+	if((rsdb_result = mysql_store_result(rsdb_database)) == NULL)
+		rsdb_handle_error();
 
 	while((row = mysql_fetch_row(rsdb_result)))
 	{
@@ -134,13 +187,6 @@ rsdb_exec(rsdb_callback cb, const char *format, ...)
 		coldata[i] = NULL;
 
 		(cb)((int) field_count, coldata);
-	}
-
-	if(mysql_errno(rsdb_database))
-	{
-		mlog("fatal error: problem with db file: %s",
-			mysql_error(rsdb_database));
-		die("problem with db file");
 	}
 
 	mysql_free_result(rsdb_result);
@@ -159,24 +205,17 @@ rsdb_exec_fetch(struct rsdb_table *table, const char *format, ...)
 	i = rs_vsnprintf(buf, sizeof(buf), format, args);
 	va_end(args);
 
-	/* XXX assert() */
 	if(i >= sizeof(buf))
+	{
+		mlog("fatal error: length problem compiling sql statement: %s", buf);
 		die("length problem compiling sql statement");
+	}
 
 	if(mysql_query(rsdb_database, buf))
-	{
-		mlog("fatal error: problem with db file: %s",
-				mysql_error(rsdb_database));
-		die("problem with db file");
-	}
+		rsdb_handle_error();
 
-	if((rsdb_result = mysql_use_result(rsdb_database)) == NULL)
-	{
-		// XXX error
-		mlog("fatal error: problem with db file: %s",
-			mysql_error(rsdb_database));
-		die("problem with db file");
-	}
+	if((rsdb_result = mysql_store_result(rsdb_database)) == NULL)
+		rsdb_handle_error();
 
 	table->row_count = (unsigned int) mysql_num_rows(rsdb_result);
 	table->col_count = mysql_field_count(rsdb_database);
