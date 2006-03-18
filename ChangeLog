@@ -1,3 +1,14 @@
+leeh        2006/03/18 19:57:30 UTC	(20060318_1-22195)
+  Log:
+  - add rsdb_try_reconnect() to mysql api, to make it attempt reconnections
+    for a set duration
+  - fix rsdb_exec_fetch() in mysql not initialising row
+  
+
+  Modified:
+	rserv/trunk/src/rsdb_mysql.c (File Modified) 
+
+
 leeh        2006/03/18 18:27:39 UTC	(20060318_0-22193)
   Log:
   - make UPGRADING note INSTALL.<db-schema> is used for converting
