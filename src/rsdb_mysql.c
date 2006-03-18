@@ -38,7 +38,8 @@
 #include "conf.h"
 #include "log.h"
 
-#define RSDB_MAXCOLS 30
+#define RSDB_MAXCOLS			30
+#define RSDB_MAX_RECONNECT_TIME		30
 
 MYSQL *rsdb_database;
 
@@ -103,6 +104,26 @@ rsdb_shutdown(void)
 }
 
 static void
+rsdb_try_reconnect(void)
+{
+	time_t expire_time = CURRENT_TIME + RSDB_MAX_RECONNECT_TIME;
+
+	mlog("Warning: unable to connect to database, stopping all functions until we recover");
+
+	while(CURRENT_TIME < expire_time)
+	{
+		if(!rsdb_connect(0))
+			return;
+
+		sleep(1);
+		set_time();
+	}
+
+	die("Unable to connect to mysql database: %s", mysql_error(rsdb_database));
+}
+
+	
+static void
 rsdb_handle_error(void)
 {
 	switch(mysql_errno(rsdb_database))
@@ -115,8 +136,8 @@ rsdb_handle_error(void)
 			/* try to reconnect immediately.. if that fails fall
 			 * into periodic reconnections
 			 */
-			if(!rsdb_connect(0))
-				;	/* XXX */
+			if(rsdb_connect(0))
+				rsdb_try_reconnect();
 
 			break;
 
@@ -229,7 +250,7 @@ rsdb_exec_fetch(struct rsdb_table *table, const char *format, ...)
 
 	table->row = my_malloc(sizeof(char **) * table->row_count);
 
-	for(i = 0; row; i++, row = mysql_fetch_row(rsdb_result))
+	for(i = 0, row=mysql_fetch_row(rsdb_result); row; i++, row = mysql_fetch_row(rsdb_result))
 	{
 		table->row[i] = my_malloc(sizeof(char *) * table->col_count);
 
