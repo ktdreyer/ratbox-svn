@@ -1,3 +1,16 @@
+leeh        2006/03/18 18:27:39 UTC	(20060318_0-22193)
+  Log:
+  - make UPGRADING note INSTALL.<db-schema> is used for converting
+  - add rsdb_connect() to attempt to connect to the database, and return
+    -1/1/0 on non-fatal errors, fatal errors and success
+  - add rsdb_handle_error() to generically handle any errors mysql gives us
+  
+
+  Modified:
+	rserv/trunk/UPGRADING (File Modified) 
+	rserv/trunk/src/rsdb_mysql.c (File Modified) 
+
+
 leeh        2006/03/17 21:55:30 UTC	(20060317_5-22191)
   Log:
   - add a doc on UPGRADING
