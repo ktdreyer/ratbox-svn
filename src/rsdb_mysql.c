@@ -122,14 +122,21 @@ rsdb_try_reconnect(void)
 	die("Unable to connect to mysql database: %s", mysql_error(rsdb_database));
 }
 
-	
+/* rsdb_handle_error()
+ * Handles an error from the database
+ *
+ * inputs	- result pointer, sql command to execute
+ * outputs	-
+ * side effects - will attempt to deal with non-fatal errors, and reexecute
+ *		  the query if it can
+ */
 static void
-rsdb_handle_error(void)
+rsdb_handle_error(MYSQL_RES **rsdb_result, const char *buf)
 {
 	switch(mysql_errno(rsdb_database))
 	{
 		case 0:
-			return;
+			break;
 
 		case CR_SERVER_GONE_ERROR:
 		case CR_SERVER_LOST:
@@ -146,6 +153,25 @@ rsdb_handle_error(void)
 				mysql_error(rsdb_database));
 			die("problem with db file");
 			return;
+	}
+
+	if(buf)
+	{
+		if(mysql_query(rsdb_database, buf))
+		{
+			mlog("fatal error: problem with db file: %s",
+				mysql_error(rsdb_database));
+			die("problem with db file");
+		}
+	}
+	else if(rsdb_result)
+	{
+		if((*rsdb_result = mysql_store_result(rsdb_database)) == NULL)
+		{
+			mlog("fatal error: problem with db file: %s",
+				mysql_error(rsdb_database));
+			die("problem with db file");
+		}
 	}
 }
 
@@ -186,7 +212,7 @@ rsdb_exec(rsdb_callback cb, const char *format, ...)
 	}
 
 	if(mysql_query(rsdb_database, buf))
-		rsdb_handle_error();
+		rsdb_handle_error(NULL, buf);
 
 	field_count = mysql_field_count(rsdb_database);
 
@@ -197,7 +223,7 @@ rsdb_exec(rsdb_callback cb, const char *format, ...)
 		return;
 
 	if((rsdb_result = mysql_store_result(rsdb_database)) == NULL)
-		rsdb_handle_error();
+		rsdb_handle_error(&rsdb_result, NULL);
 
 	while((row = mysql_fetch_row(rsdb_result)))
 	{
@@ -233,10 +259,10 @@ rsdb_exec_fetch(struct rsdb_table *table, const char *format, ...)
 	}
 
 	if(mysql_query(rsdb_database, buf))
-		rsdb_handle_error();
+		rsdb_handle_error(NULL, buf);
 
 	if((rsdb_result = mysql_store_result(rsdb_database)) == NULL)
-		rsdb_handle_error();
+		rsdb_handle_error(&rsdb_result, NULL);
 
 	table->row_count = (unsigned int) mysql_num_rows(rsdb_result);
 	table->col_count = mysql_field_count(rsdb_database);
@@ -256,7 +282,7 @@ rsdb_exec_fetch(struct rsdb_table *table, const char *format, ...)
 
 		for(j = 0; j < table->col_count; j++)
 		{
-			table->row[i][j] = row[j] ? strdup(row[j]) : NULL;	// XXX - available?
+			table->row[i][j] = row[j];
 		}
 	}
 }
@@ -264,15 +290,10 @@ rsdb_exec_fetch(struct rsdb_table *table, const char *format, ...)
 void
 rsdb_exec_fetch_end(struct rsdb_table *table)
 {
-	int i, j;
+	int i;
 
 	for(i = 0; i < table->row_count; i++)
 	{
-		for(j = 0; j < table->col_count; j++)
-		{
-			my_free(table->row[i][j]);
-		}
-
 		my_free(table->row[i]);
 	}
 
