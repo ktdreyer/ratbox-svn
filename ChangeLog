@@ -1,3 +1,23 @@
+leeh        2006/03/19 10:43:34 UTC	(20060319_4-22205)
+  Log:
+  - add operserv::die to terminate services
+  - add allow_die to operserv service {};, controlling whether die is allowed
+    over irc
+  
+
+  Modified:
+	rserv/trunk/doc/example.conf (File Modified) 
+	rserv/trunk/help/main/u-die (File Deleted) 
+	rserv/trunk/help/operserv/die (File Added) 
+	rserv/trunk/help/operserv/index-admin (File Modified) 
+	rserv/trunk/help/operserv/u-die (File Added) 
+	rserv/trunk/include/conf.h (File Modified) 
+	rserv/trunk/src/conf.c (File Modified) 
+	rserv/trunk/src/newconf.c (File Modified) 
+	rserv/trunk/src/s_operserv.c (File Modified) 
+	rserv/trunk/src/ucommand.c (File Modified) 
+
+
 leeh        2006/03/19 10:29:12 UTC	(20060319_3-22203)
   Log:
   - move 1.0 RELEASE_NOTES into a relnotes dir
