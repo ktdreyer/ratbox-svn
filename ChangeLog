@@ -1,3 +1,15 @@
+leeh        2006/03/19 10:24:22 UTC	(20060319_2-22201)
+  Log:
+  - dont accept a 'm' modifier for banserv temp times, in case some people
+    would think it was months.. we dont particularly need it for minutes
+  
+
+  Modified:
+	rserv/trunk/help/banserv/general (File Modified) 
+	rserv/trunk/help/banserv/index (File Modified) 
+	rserv/trunk/src/s_banserv.c (File Modified) 
+
+
 leeh        2006/03/19 10:20:59 UTC	(20060319_1-22199)
   Log:
   - make userserv::activate do an immediate update to the database so if we
