@@ -1,3 +1,14 @@
+leeh        2006/03/19 09:42:59 UTC	(20060319_0-22197)
+  Log:
+  - rsdb_exec_fetch() doesnt need to reallocate the memory from
+    mysql_fetch_row()
+  - make rsdb_handle_error() reexecute queries if it can
+  
+
+  Modified:
+	rserv/trunk/src/rsdb_mysql.c (File Modified) 
+
+
 leeh        2006/03/18 19:57:30 UTC	(20060318_1-22195)
   Log:
   - add rsdb_try_reconnect() to mysql api, to make it attempt reconnections
