@@ -152,8 +152,6 @@ get_temp_time(const char *duration)
 				case 'w': case 'W':
 					result *= 10080; 
 					break;
-				case 'm': case 'M': 
-					break;
 				default:
 					return 0;
 			}
