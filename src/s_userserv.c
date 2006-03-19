@@ -1092,7 +1092,9 @@ s_user_activate(struct client *client_p, struct lconn *conn_p, const char *parv[
 	slog(userserv_p, 5, "%s - ACTIVATE %s", client_p->user->mask, parv[0]);
 
 	ureg_p->flags &= ~US_FLAGS_NEVERLOGGEDIN;
-	ureg_p->flags |= US_FLAGS_NEEDUPDATE;
+
+	rsdb_exec(NULL, "UPDATE users SET flags='%d' WHERE username='%Q'",
+			ureg_p->flags, ureg_p->name);
 
 	service_error(userserv_p, client_p, "Username %s activated, you may now LOGIN",
 			ureg_p->name);
