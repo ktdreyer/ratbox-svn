@@ -58,7 +58,6 @@ static int u_login(struct client *, struct lconn *, const char **, int);
 
 static int u_boot(struct client *, struct lconn *, const char **, int);
 static int u_connect(struct client *, struct lconn *, const char **, int);
-static int u_die(struct client *, struct lconn *, const char **, int);
 static int u_events(struct client *, struct lconn *, const char **, int);
 static int u_flags(struct client *, struct lconn *conn_p, const char **, int);
 static int u_help(struct client *, struct lconn *, const char **, int);
@@ -72,7 +71,6 @@ static struct ucommand_handler ucommands[] =
 {
 	{ "boot",	u_boot,		CONF_OPER_ADMIN,	0, 1, 1, NULL },
 	{ "connect",	u_connect,	CONF_OPER_ROUTE,	0, 1, 1, NULL },
-	{ "die",	u_die,		CONF_OPER_ADMIN,	0, 1, 1, NULL },
 	{ "events",	u_events,	CONF_OPER_ADMIN,	0, 0, 1, NULL },
 	{ "flags",	u_flags,	0,			0, 0, 0, NULL },
 	{ "help",	u_help,		0,			0, 0, 0, NULL },
@@ -319,23 +317,6 @@ u_connect(struct client *unused, struct lconn *conn_p, const char *parv[], int p
         eventDelete(connect_to_server, NULL);
 
         eventAddOnce("connect_to_server", connect_to_server, conf_p, 2);
-	return 0;
-}
-
-static int
-u_die(struct client *unused, struct lconn *conn_p, const char *parv[], int parc)
-{
-        if(strcasecmp(MYNAME, parv[0]))
-        {
-                sendto_one(conn_p, "Usage: .die <servername>");
-                return 0;
-        }
-
-	hook_call(HOOK_DBSYNC, NULL, NULL);
-
-        sendto_all(0, "Services terminated by %s", conn_p->name);
-        mlog("ratbox-services terminated by %s", conn_p->name);
-        die("Services terminated");
 	return 0;
 }
 

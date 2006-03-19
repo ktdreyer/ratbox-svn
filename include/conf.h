@@ -89,6 +89,9 @@ struct _config_file
 	int unjupe_score;
 	int pending_time;
 
+	/* operserv */
+	int os_allow_die;
+
 	/* banserv */
 	int bs_unban_time;
 	int bs_temp_workaround;

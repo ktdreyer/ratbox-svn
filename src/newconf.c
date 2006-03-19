@@ -1090,6 +1090,12 @@ static struct ConfEntry conf_jupeserv_table[] =
 	{ "\0", 0, NULL, 0, NULL }
 };
 
+static struct ConfEntry conf_operserv_table[] =
+{
+	{ "allow_die",		CF_YESNO, NULL, 0, &config_file.os_allow_die	},
+	{ "\0", 0, NULL, 0, NULL }
+};
+
 static struct ConfEntry conf_alis_table[] =
 {
 	{ "max_matches",	CF_INT, NULL, 0, &config_file.max_matches	},
@@ -1120,6 +1126,7 @@ newconf_init()
 	add_conf_extension("service", "chanserv", conf_chanserv_table);
 	add_conf_extension("service", "nickserv", conf_nickserv_table);
 	add_conf_extension("service", "jupeserv", conf_jupeserv_table);
+	add_conf_extension("service", "operserv", conf_operserv_table);
 	add_conf_extension("service", "alis", conf_alis_table);
 	add_conf_extension("service", "banserv", conf_banserv_table);
 }

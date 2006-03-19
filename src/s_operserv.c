@@ -65,8 +65,9 @@ static struct service_command operserv_command[] =
 	{ "OSPART",	&o_oper_ospart,		1, NULL, 1, 0L, 0, 0, CONF_OPER_OS_CHANNEL, 0 },
 	{ "TAKEOVER",	&o_oper_takeover,	1, NULL, 1, 0L, 0, 0, CONF_OPER_OS_TAKEOVER, 0 },
 	{ "OMODE",	&o_oper_omode,		2, NULL, 1, 0L, 0, 0, CONF_OPER_OS_OMODE, 0 },
-	{ "DBSYNC",	&o_oper_dbsync,		0, NULL, 1, 0L, 0, 0, CONF_OPER_ADMIN, 0 },
-	{ "REHASH",	&o_oper_rehash,		0, NULL, 1, 0L, 0, 0, CONF_OPER_ADMIN, 0 }
+	{ "DBSYNC",	&o_oper_dbsync,		0, NULL, 1, 0L, 0, CONF_OPER_ADMIN, 0, 0 },
+	{ "REHASH",	&o_oper_rehash,		0, NULL, 1, 0L, 0, CONF_OPER_ADMIN, 0, 0 },
+	{ "DIE",	&o_oper_die,		1, NULL, 1, 0L, 0, CONF_OPER_ADMIN, 0, 0 }
 };
 
 static struct ucommand_handler operserv_ucommand[] =
@@ -75,7 +76,8 @@ static struct ucommand_handler operserv_ucommand[] =
 	{ "ospart",	o_oper_ospart,	0, CONF_OPER_OS_CHANNEL, 1, 1, NULL },
 	{ "takeover",	o_oper_takeover,0, CONF_OPER_OS_TAKEOVER, 1, 1, NULL },
 	{ "omode",	o_oper_omode,	0, CONF_OPER_OS_OMODE, 2, 1, NULL },
-	{ "dbsync",	o_oper_dbsync,	0, CONF_OPER_ADMIN, 0, 1, NULL },
+	{ "dbsync",	o_oper_dbsync,	CONF_OPER_ADMIN, 0, 0, 1, NULL },
+	{ "die",	o_oper_die,	CONF_OPER_ADMIN, 0, 1, 1, NULL },
 	{ "\0", NULL, 0, 0, 0, 0, NULL }
 };
 
@@ -380,6 +382,30 @@ o_oper_rehash(struct client *client_p, struct lconn *conn_p, const char *parv[],
 	sendto_all(0, "services rehashing: %s reloading config file", OPER_NAME(client_p, conn_p));
 
 	rehash(0);
+	return 0;
+}
+
+static int
+o_oper_die(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
+{
+	if(parc < 1 || strcasecmp(MYNAME, parv[0]))
+	{
+		service_send(operserv_p, client_p, conn_p, "Servernames do not match");
+		return 0;
+	}
+
+	if(client_p && !config_file.os_allow_die)
+	{
+		service_send(operserv_p, client_p, conn_p,
+				"%s::DIE is disabled", operserv_p->name);
+		return 0;
+	}
+
+	hook_call(HOOK_DBSYNC, NULL, NULL);
+
+	sendto_all(0, "Services terminated by %s", OPER_NAME(client_p, conn_p));
+	mlog("ratbox-services terminated by %s", OPER_NAME(client_p, conn_p));
+	die("Services terminated");
 	return 0;
 }
 

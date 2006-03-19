@@ -101,6 +101,8 @@ set_default_conf(void)
 	config_file.nmax_nicks = 2;
 	config_file.nallow_set_warn = 1;
 
+	config_file.os_allow_die = 1;
+
 	config_file.bs_unban_time = 1209600;	/* 2 weeks */
 	config_file.bs_temp_workaround = 0;
 	config_file.bs_autosync_frequency = DEFAULT_AUTOSYNC_FREQUENCY;
