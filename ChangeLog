@@ -1,3 +1,13 @@
+leeh        2006/03/19 10:20:59 UTC	(20060319_1-22199)
+  Log:
+  - make userserv::activate do an immediate update to the database so if we
+    die unexpectedly users dont have to reactivate
+  
+
+  Modified:
+	rserv/trunk/src/s_userserv.c (File Modified) 
+
+
 leeh        2006/03/19 09:42:59 UTC	(20060319_0-22197)
   Log:
   - rsdb_exec_fetch() doesnt need to reallocate the memory from
