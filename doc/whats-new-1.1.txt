@@ -1,0 +1,34 @@
+Database
+--------
+- Make the code database agnostic so that it does not care about which
+  database is used as the backend.
+- Add support for mysql: --enable-mysql=[PATH]
+- Add support for sqlite3 (default)
+- Remove support for sqlite2
+- Support for database hooks, so external processes can trigger updates done
+  on the information kept in RAM.  See doc/dbhook.txt
+
+Compilation
+-----------
+- New configure option, --with-userreglen=LENGTH, to configure the maximum
+  length of a registered username.
+
+Services
+--------
+- GLOBAL service now supports welcome messages, sent when a user connects to
+  irc.
+- userserv::resetpass added, to email users a confirmation for a password
+  reset.
+- userserv::register can now email users an activation token to confirm
+  registration before the username can be used
+- banserv now accepts time modifiers w/d/h for weeks, days and hours.  These
+  may not be combined -- so "1w" is valid, "1w1d" is not.
+
+Config file
+-----------
+- New service {}; flag, 'require_shortcut', which requires commands to this
+  service are done through command shortcuts rather than msg.
+- New database {}; section, controlling options for databases.
+- New email {}; section, controls options for sending emails.
+- New userserv option, resetpass_duration = <time>; controls how long
+  userserv::resetpass requests are kept around.
