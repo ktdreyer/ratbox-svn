@@ -1,3 +1,16 @@
+leeh        2006/03/19 10:29:12 UTC	(20060319_3-22203)
+  Log:
+  - move 1.0 RELEASE_NOTES into a relnotes dir
+  - add in a whats-new-1.1.txt
+  
+
+  Modified:
+	rserv/trunk/doc/RELEASE_NOTES_1.0 (File Deleted) 
+	rserv/trunk/doc/release_notes/ (File Added) 
+	rserv/trunk/doc/release_notes/RELEASE_NOTES_1.0 (File Added) 
+	rserv/trunk/doc/whats-new-1.1.txt (File Added) 
+
+
 leeh        2006/03/19 10:24:22 UTC	(20060319_2-22201)
   Log:
   - dont accept a 'm' modifier for banserv temp times, in case some people
