@@ -801,7 +801,7 @@ o_banserv_sync(struct client *client_p, struct lconn *conn_p, const char *parv[]
 
 		if(client_p)
 		{
-			if(!(client_p->user->oper->sflags & CONF_OPER_BAN_SYNC))
+			if(!client_p->user->oper || !(client_p->user->oper->sflags & CONF_OPER_BAN_SYNC))
 				hit++;
 		}
 		else if(!conn_p->sprivs & CONF_OPER_BAN_SYNC)
