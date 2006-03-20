@@ -16,6 +16,7 @@ struct lconn
 {
 	struct client *client_p;
 	char *name;
+	char *sid;
         char *pass;
 
 	int fd;

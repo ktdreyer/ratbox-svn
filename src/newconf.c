@@ -504,14 +504,12 @@ conf_set_serverinfo_name(void *data)
 static void
 conf_set_serverinfo_sid(void *data)
 {
-	const char *sid = data;
-
 	if(config_file.sid == NULL)
 	{
-		if(IsDigit(sid[0]) && IsLetter(sid[1]) && IsLetter(sid[2]) && sid[3] == '\0')
-	        	config_file.name = my_strdup(data);
+		if(valid_sid((const char *) data))
+	        	config_file.sid = my_strdup(data);
 		else
-			conf_report_error("Ignoring serverinfo::name -- invalid servername");
+			conf_report_error("Ignoring serverinfo::sid -- invalid sid");
 	}
 }
 

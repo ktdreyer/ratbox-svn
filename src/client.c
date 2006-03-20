@@ -687,7 +687,6 @@ c_uid(struct client *client_p, const char *parv[], int parc)
 {
 	static char buf[BUFSIZE];
 	struct client *target_p;
-	struct client *uplink_p;
 	time_t newts;
 
         s_assert(parc == 9);
@@ -764,7 +763,7 @@ c_uid(struct client *client_p, const char *parv[], int parc)
 	dlink_add(target_p, &target_p->listnode, &user_list);
 	dlink_add(target_p, &target_p->upnode, &client_p->server->users);
 
-	if(IsEOB(uplink_p))
+	if(IsEOB(client_p))
 		hook_call(HOOK_NEW_CLIENT, target_p, NULL);
 }
 
@@ -892,6 +891,9 @@ c_server(struct client *client_p, const char *parv[], int parc)
 	strlcpy(target_p->name, parv[0], sizeof(target_p->name));
 	strlcpy(target_p->info, EmptyString(parv[2]) ? default_gecos : parv[2],
 		sizeof(target_p->info));
+
+	if(!EmptyString(server_p->sid))
+		strlcpy(target_p->uid, server_p->sid, sizeof(target_p->uid));
 
 	target_p->server->hops = atoi(parv[1]);
 

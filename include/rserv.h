@@ -30,6 +30,7 @@ const char *get_password(void);
 char *rebuild_params(const char **, int, int);
 
 int valid_servername(const char *);
+int valid_sid(const char *);
 
 /* snprintf.c */
 int rs_snprintf(char *, const size_t, const char *, ...);

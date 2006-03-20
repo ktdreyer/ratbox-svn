@@ -461,3 +461,12 @@ valid_servername(const char *name)
 	return 1;
 }
 
+int
+valid_sid(const char *name)
+{
+	if(IsDigit(name[0]) && (IsDigit(name[1]) || IsLetter(name[1])) &&
+	   (IsDigit(name[2]) || IsLetter(name[2])) && name[3] == '\0')
+		return 1;
+
+	return 0;
+}

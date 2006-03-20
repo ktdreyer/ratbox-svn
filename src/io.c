@@ -288,6 +288,7 @@ read_io(void)
 				exit_client(server_p->client_p);
 
 			my_free(server_p->name);
+			my_free(server_p->sid);
 			my_free(server_p);
 			server_p = NULL;
 		}
