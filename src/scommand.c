@@ -357,6 +357,10 @@ c_pass(struct client *client_p, const char *parv[], int parc)
 		return;
 	}
 
+	/* XXX valid? */
+	if(parc > 3 && atoi(parv[2]) >= 6)
+		strlcpy(client_p->uid, parv[3], sizeof(client_p->uid));
+
 	SetConnTS(server_p);
 }
 

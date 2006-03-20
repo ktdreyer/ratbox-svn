@@ -353,7 +353,7 @@ s_nick_release(struct client *client_p, struct lconn *conn_p, const char *parv[]
 		return 1;
 	}
 
-	if((target_p = find_user(parv[0])) == NULL)
+	if((target_p = find_user(parv[0], 0)) == NULL)
 	{
 		service_error(nickserv_p, client_p,
 				"Nickname %s is not online", nreg_p->name);
@@ -397,7 +397,7 @@ s_nick_regain(struct client *client_p, struct lconn *conn_p, const char *parv[],
 		return 1;
 	}
 
-	if((target_p = find_user(parv[0])) == NULL)
+	if((target_p = find_user(parv[0], 0)) == NULL)
 	{
 		service_error(nickserv_p, client_p,
 				"Nickname %s is not online", nreg_p->name);

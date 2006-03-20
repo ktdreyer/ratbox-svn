@@ -40,7 +40,11 @@
 #include "modebuild.h"
 
 static void c_mode(struct client *, const char *parv[], int parc);
+static void c_tmode(struct client *, const char *parv[], int parc);
+static void c_bmask(struct client *, const char *parv[], int parc);
 struct scommand_handler mode_command = { "MODE", c_mode, 0, DLINK_EMPTY };
+struct scommand_handler tmode_command = { "TMODE", c_tmode, 0, DLINK_EMPTY };
+struct scommand_handler bmask_command = { "BMASK", c_bmask, 0, DLINK_EMPTY };
 
 /* linked list of services that were deopped */
 static dlink_list deopped_list;
@@ -256,7 +260,7 @@ parse_simple_mode(struct chmode *mode, const char *parv[], int parc, int start)
 		}
 	}
 
-	return 1;
+	return start;
 }
 
 void
@@ -455,7 +459,7 @@ parse_full_mode(struct channel *chptr, struct client *source_p,
 					dlink_add_alloc(target_p, &deopped_list);
 			}
 
-			if((target_p = find_user(nick)) == NULL)
+			if((target_p = find_user(nick, 1)) == NULL)
 				break;
 
 			if((mptr = find_chmember(chptr, target_p)) == NULL)
@@ -559,51 +563,13 @@ parse_full_mode(struct channel *chptr, struct client *source_p,
 		modebuild_finish();
 }
 
-/* c_mode()
- *   the MODE handler
- */
 static void
-c_mode(struct client *client_p, const char *parv[], int parc)
+handle_chmode(struct channel *chptr, int parc, const char **parv)
 {
 	struct client *target_p;
-	struct channel *chptr;
-	struct chmember *msptr;
 	dlink_node *ptr;
 	dlink_node *next_ptr;
 	struct chmode oldmode;
-
-	if(parc < 1 || EmptyString(parv[0]))
-		return;
-
-	/* user setting mode:
-	 * :<user> MODE <user> +<modes>
-	 */
-	if(!IsChanPrefix(parv[0][0]))
-	{
-		if(parc < 2 || EmptyString(parv[1]))
-			return;
-
-		if((target_p = find_user(parv[0])) == NULL)
-			return;
-
-		if(target_p != client_p)
-			return;
-
-		target_p->user->umode = string_to_umode(parv[1], target_p->user->umode);
-		return;
-	}
-
-	/* channel mode, need 3 params */
-	if(parc < 2 || EmptyString(parv[1]))
-		return;
-
-	if((chptr = find_channel(parv[0])) == NULL)
-		return;
-
-	/* user marked as being deopped, bounce mode changes */
-	if(IsUser(client_p) && (msptr = find_chmember(chptr, client_p)) &&
-	   (msptr->flags & MODE_DEOPPED))
-		return;
 
 	oldmode.mode = chptr->mode.mode;
 	oldmode.limit = chptr->mode.limit;
@@ -612,7 +578,7 @@ c_mode(struct client *client_p, const char *parv[], int parc)
 	else
 		strlcpy(oldmode.key, chptr->mode.key, sizeof(chptr->mode.key));
 
-	parse_full_mode(chptr, NULL, (const char **) parv, parc, 1);
+	parse_full_mode(chptr, NULL, (const char **) parv, parc, 0);
 
 	if(dlink_list_length(&opped_list))
 		hook_call(HOOK_MODE_OP, chptr, &opped_list);
@@ -646,3 +612,147 @@ c_mode(struct client *client_p, const char *parv[], int parc)
 		dlink_destroy(ptr, &deopped_list);
 	}
 }
+
+/* c_mode()
+ *   the MODE handler
+ */
+static void
+c_mode(struct client *client_p, const char *parv[], int parc)
+{
+	struct client *target_p;
+	struct channel *chptr;
+	struct chmember *msptr;
+
+	if(parc < 1 || EmptyString(parv[0]))
+		return;
+
+	/* user setting mode:
+	 * :<user> MODE <user> +<modes>
+	 */
+	if(!IsChanPrefix(parv[0][0]))
+	{
+		if(parc < 2 || EmptyString(parv[1]))
+			return;
+
+		if((target_p = find_user(parv[0], 1)) == NULL)
+			return;
+
+		if(target_p != client_p)
+			return;
+
+		target_p->user->umode = string_to_umode(parv[1], target_p->user->umode);
+		return;
+	}
+
+	/* channel mode, need 3 params */
+	if(parc < 2 || EmptyString(parv[1]))
+		return;
+
+	if((chptr = find_channel(parv[0])) == NULL)
+		return;
+
+	/* user marked as being deopped, bounce mode changes */
+	if(IsUser(client_p) && (msptr = find_chmember(chptr, client_p)) &&
+	   (msptr->flags & MODE_DEOPPED))
+		return;
+
+	handle_chmode(chptr, parc - 2, parv + 2);
+}
+
+/* c_tmode()
+ *   the TMODE handler
+ */
+static void
+c_tmode(struct client *client_p, const char *parv[], int parc)
+{
+	struct channel *chptr;
+	struct chmember *msptr;
+
+	if(parc < 3 || EmptyString(parv[2]))
+		return;
+
+	if((chptr = find_channel(parv[1])) == NULL)
+		return;
+
+	if(atol(parv[0]) > chptr->tsinfo)
+		return;
+
+	/* user marked as being deopped, bounce mode changes */
+	if(IsUser(client_p) && (msptr = find_chmember(chptr, client_p)) &&
+	   (msptr->flags & MODE_DEOPPED))
+		return;
+
+	handle_chmode(chptr, parc - 2, parv + 2);
+}
+
+static void
+c_bmask(struct client *client_p, const char *parv[], int parc)
+{
+	struct channel *chptr;
+	dlink_list *banlist;
+	const char *s;
+	char *t;
+
+	if((chptr = find_channel(parv[1])) == NULL)
+		return;
+
+	/* TS is higher, drop it. */
+	if(atol(parv[0]) > chptr->tsinfo)
+		return;
+
+	switch(parv[2][0])
+	{
+		case 'b':
+			banlist = &chptr->bans;
+			break;
+
+		case 'e':
+			banlist = &chptr->excepts;
+			break;
+
+		case 'I':
+			banlist = &chptr->invites;
+			break;
+
+		default:
+			return;
+	}
+
+	s = LOCAL_COPY(parv[3]);
+
+	while(*s == ' ')
+		s++;
+
+	/* next char isnt a space, point t to the next one */
+	if((t = strchr(s, ' ')) != NULL)
+	{
+		*t++ = '\0';
+
+		/* double spaces will break the parser */
+		while(*t == ' ')
+			t++;
+	}
+
+	/* couldve skipped spaces and got nothing.. */
+	while(!EmptyString(s))
+	{
+		/* ban with a leading ':' -- this will break the protocol */
+		if(*s != ':' && valid_ban(s))
+			add_ban(s, banlist);
+
+		s = t;
+
+		if(s != NULL)
+		{
+			if((t = strchr(s, ' ')) != NULL)
+			{
+				*t++ = '\0';
+
+				while(*t == ' ')
+					t++;
+			}
+		}
+	}
+}
+
+

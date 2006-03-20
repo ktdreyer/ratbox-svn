@@ -1,5 +1,6 @@
 /* $Id$ */
 #define USERLEN 10
+#define UIDLEN 9
 #define HOSTLEN 63
 #define REALLEN 50
 #define REASONLEN 50
@@ -24,6 +25,7 @@ struct client
 {
 	char name[HOSTLEN+1];
 	char info[REALLEN+1];
+	char uid[UIDLEN+1];
 	int flags;
 
 	struct server *server;
@@ -32,6 +34,7 @@ struct client
 	struct client *uplink;		/* server this is connected to */
 
 	dlink_node nameptr;		/* dlink_node in name_table */
+	dlink_node uidptr;
 	dlink_node listnode;		/* in client/server/exited_list */
 	dlink_node upnode;		/* in uplinks servers/clients list */
 };
@@ -173,7 +176,9 @@ unsigned int hash_name(const char *p);
 extern void add_client(struct client *target_p);
 extern void del_client(struct client *target_p);
 extern struct client *find_client(const char *name);
-extern struct client *find_user(const char *name);
+extern struct client *find_named_client(const char *name);
+extern struct client *find_user(const char *name, int search_uid);
+extern struct client *find_uid(const char *name);
 extern struct client *find_server(const char *name);
 extern struct client *find_service(const char *name);
 struct host_entry *find_host(const char *name);

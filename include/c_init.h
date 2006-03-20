@@ -10,6 +10,8 @@ extern struct scommand_handler privmsg_command;
 
 /* c_mode.c */
 extern struct scommand_handler mode_command;
+extern struct scommand_handler tmode_command;
+extern struct scommand_handler bmask_command;
 
 void preinit_s_alis(void);
 void preinit_s_operbot(void);

@@ -243,7 +243,7 @@ find_user_reg_nick(struct client *client_p, const char *name)
 	{
 		struct client *target_p;
 		
-		if((target_p = find_user(name+1)) == NULL ||
+		if((target_p = find_user(name+1, 0)) == NULL ||
 		   target_p->user->user_reg == NULL)
 		{
 			if(client_p != NULL)

@@ -23,6 +23,10 @@ Services
   registration before the username can be used
 - banserv now accepts time modifiers w/d/h for weeks, days and hours.  These
   may not be combined -- so "1w" is valid, "1w1d" is not.
+- operserv::rehash added, to rehash services
+- operserv::dbsync added, to force a database sync (primarily of the last
+  time a username/channel was used)
+- operserv::die added, to terminate services.
 
 Config file
 -----------
@@ -32,3 +36,5 @@ Config file
 - New email {}; section, controls options for sending emails.
 - New userserv option, resetpass_duration = <time>; controls how long
   userserv::resetpass requests are kept around.
+- New operserv option, allow_die = <yes|no>; controls whether operserv::die
+  can be issued

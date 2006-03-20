@@ -45,6 +45,7 @@
 #include "conf.h"
 
 static dlink_list name_table[MAX_NAME_HASH];
+static dlink_list uid_table[MAX_NAME_HASH];
 static dlink_list host_table[MAX_HOST_HASH];
 
 dlink_list user_list;
@@ -61,14 +62,18 @@ static void cleanup_host_table(void *);
 
 static void c_kill(struct client *, const char *parv[], int parc);
 static void c_nick(struct client *, const char *parv[], int parc);
+static void c_uid(struct client *, const char *parv[], int parc);
 static void c_quit(struct client *, const char *parv[], int parc);
 static void c_server(struct client *, const char *parv[], int parc);
+static void c_sid(struct client *, const char *parv[], int parc);
 static void c_squit(struct client *, const char *parv[], int parc);
 
 static struct scommand_handler kill_command = { "KILL", c_kill, 0, DLINK_EMPTY };
 static struct scommand_handler nick_command = { "NICK", c_nick, 0, DLINK_EMPTY };
+static struct scommand_handler uid_command = { "UID", c_uid, 0, DLINK_EMPTY };
 static struct scommand_handler quit_command = { "QUIT", c_quit, 0, DLINK_EMPTY };
 static struct scommand_handler server_command = { "SERVER", c_server, FLAGS_UNKNOWN, DLINK_EMPTY};
+static struct scommand_handler sid_command = { "SID", c_sid, FLAGS_UNKNOWN, DLINK_EMPTY};
 static struct scommand_handler squit_command = { "SQUIT", c_squit, 0, DLINK_EMPTY };
 
 /* init_client()
@@ -86,8 +91,10 @@ init_client(void)
 
 	add_scommand_handler(&kill_command);
 	add_scommand_handler(&nick_command);
+	add_scommand_handler(&uid_command);
 	add_scommand_handler(&quit_command);
 	add_scommand_handler(&server_command);
+	add_scommand_handler(&sid_command);
 	add_scommand_handler(&squit_command);
 }
 
@@ -134,6 +141,12 @@ add_client(struct client *target_p)
 {
 	unsigned int hashv = hash_name(target_p->name);
 	dlink_add(target_p, &target_p->nameptr, &name_table[hashv]);
+
+	if(!EmptyString(target_p->uid))
+	{
+		hashv = hash_name(target_p->uid);
+		dlink_add(target_p, &target_p->uidptr, &uid_table[hashv]);
+	}
 }
 
 /* del_client()
@@ -147,6 +160,12 @@ del_client(struct client *target_p)
 {
 	unsigned int hashv = hash_name(target_p->name);
 	dlink_delete(&target_p->nameptr, &name_table[hashv]);
+
+	if(!EmptyString(target_p->uid))
+	{
+		hashv = hash_name(target_p->uid);
+		dlink_delete(&target_p->uidptr, &uid_table[hashv]);
+	}
 }
 
 /* find_client()
@@ -160,13 +179,64 @@ find_client(const char *name)
 {
 	struct client *target_p;
 	dlink_node *ptr;
-	unsigned int hashv = hash_name(name);
+	unsigned int hashv;
+
+	if(IsDigit(*name))
+	{
+		target_p = find_uid(name);
+
+		if(target_p != NULL)
+			return target_p;
+	}
+
+	/* search nicks even if its a uid, as it may be possible for a uid
+	 * to be a nick in the future
+	 */
+	hashv = hash_name(name);
 
 	DLINK_FOREACH(ptr, name_table[hashv].head)
 	{
 		target_p = ptr->data;
 
 		if(!irccmp(target_p->name, name))
+			return target_p;
+	}
+
+	return NULL;
+}
+
+struct client *
+find_named_client(const char *name)
+{
+	struct client *target_p;
+	dlink_node *ptr;
+	unsigned int hashv; 
+
+	hashv = hash_name(name);
+
+	DLINK_FOREACH(ptr, name_table[hashv].head)
+	{
+		target_p = ptr->data;
+
+		if(!irccmp(target_p->name, name))
+			return target_p;
+	}
+
+	return NULL;
+}
+
+struct client *
+find_uid(const char *name)
+{
+	struct client *target_p;
+	dlink_node *ptr;
+	unsigned int hashv = hash_name(name);
+
+	DLINK_FOREACH(ptr, uid_table[hashv].head)
+	{
+		target_p = ptr->data;
+
+		if(!irccmp(target_p->uid, name))
 			return target_p;
 	}
 
@@ -180,9 +250,14 @@ find_client(const char *name)
  * outputs      - struct client of user, or NULL if not found
  */
 struct client *
-find_user(const char *name)
+find_user(const char *name, int search_uid)
 {
-	struct client *target_p = find_client(name);
+	struct client *target_p;
+
+	if(search_uid)
+		target_p = find_client(name);
+	else
+		target_p = find_named_client(name);
 
 	if(target_p != NULL && IsUser(target_p))
 		return target_p;
@@ -480,7 +555,7 @@ umode_to_string(int umode)
 }
 
 /* c_nick()
- *   the NICK handler
+ *   the UID handler
  */
 void
 c_nick(struct client *client_p, const char *parv[], int parc)
@@ -498,7 +573,7 @@ c_nick(struct client *client_p, const char *parv[], int parc)
         /* new client being introduced */
 	if(parc == 8)
 	{
-		target_p = find_client(parv[0]);
+		target_p = find_named_client(parv[0]);
 		newts = atol(parv[1]);
 
 		if((uplink_p = find_server(parv[6])) == NULL)
@@ -602,6 +677,95 @@ c_nick(struct client *client_p, const char *parv[], int parc)
 
 		hook_call(HOOK_NICKCHANGE, client_p, NULL);
 	}
+}
+
+/* c_uid()
+ *   the NICK handler
+ */
+void
+c_uid(struct client *client_p, const char *parv[], int parc)
+{
+	static char buf[BUFSIZE];
+	struct client *target_p;
+	struct client *uplink_p;
+	time_t newts;
+
+        s_assert(parc == 9);
+
+        if(parc != 9)
+                return;
+
+	target_p = find_client(parv[0]);
+	/* XXX UID */
+	newts = atol(parv[1]);
+
+	if(strlen(parv[0]) > NICKLEN)
+		die("Compiled NICKLEN appears to be wrong (nick %s (%d > %d).  Read INSTALL.",
+			parv[0], strlen(parv[0]), NICKLEN);
+
+	/* something already exists with this nick */
+	if(target_p != NULL)
+	{
+		s_assert(!IsServer(target_p));
+
+		if(IsServer(target_p))
+			return;
+
+		if(IsUser(target_p))
+		{
+			/* our uplink shouldve dealt with this. */
+			if(target_p->user->tsinfo < newts)
+			{
+				mlog("PROTO: NICK %s with higher TS introduced causing collision.",
+					target_p->name);
+				return;
+			}
+
+			/* normal nick collision.. exit old */
+			exit_client(target_p);
+		}
+		else if(IsService(target_p))
+		{
+			/* ugh. anything with a ts this low is
+			 * either someone fucking about, or another
+			 * service.  we go byebye.
+			 */
+			if(newts <= 1)
+				die("service fight");
+
+			return;
+		}
+	}
+
+	target_p = BlockHeapAlloc(client_heap);
+	target_p->user = BlockHeapAlloc(user_heap);
+
+	target_p->uplink = client_p;
+
+	strlcpy(target_p->name, parv[0], sizeof(target_p->name));
+	strlcpy(target_p->user->username, parv[4],
+		sizeof(target_p->user->username));
+	strlcpy(target_p->user->host, parv[5], 
+		sizeof(target_p->user->host));
+	/* XXX - parv[6] == ip */
+	strlcpy(target_p->uid, parv[7], sizeof(target_p->uid));
+	strlcpy(target_p->info, parv[8], sizeof(target_p->info));
+
+	target_p->user->servername = client_p->name;
+	target_p->user->tsinfo = newts;
+	target_p->user->umode = string_to_umode(parv[3], 0);
+
+	snprintf(buf, sizeof(buf), "%s!%s@%s",
+		target_p->name, target_p->user->username, 
+		target_p->user->host);
+	target_p->user->mask = my_strdup(buf);
+
+	add_client(target_p);
+	dlink_add(target_p, &target_p->listnode, &user_list);
+	dlink_add(target_p, &target_p->upnode, &client_p->server->users);
+
+	if(IsEOB(uplink_p))
+		hook_call(HOOK_NEW_CLIENT, target_p, NULL);
 }
 
 /* c_quit()
@@ -747,6 +911,44 @@ c_server(struct client *client_p, const char *parv[], int parc)
 		if(ConnCapRSFNC(server_p))
 			target_p->flags |= FLAGS_RSFNC;
 	}
+
+	add_client(target_p);
+	dlink_add(target_p, &target_p->listnode, &server_list);
+
+	sendto_server(":%s PING %s %s", MYNAME, MYNAME, target_p->name);
+}
+
+/* c_sid()
+ *   the SID handler
+ */
+void
+c_sid(struct client *client_p, const char *parv[], int parc)
+{
+	struct client *target_p;
+	static char default_gecos[] = "(Unknown Location)";
+
+	s_assert(parc == 4);
+	if(parc < 4)
+		return;
+
+	if(strlen(parv[0]) > HOSTLEN)
+	{
+		die("Compiled HOSTLEN appears to be wrong, received %s (%d > %d)",
+			parv[0], strlen(parv[0]), HOSTLEN);
+	}
+
+	target_p = BlockHeapAlloc(client_heap);
+	target_p->server = BlockHeapAlloc(server_heap);
+
+	strlcpy(target_p->name, parv[0], sizeof(target_p->name));
+	strlcpy(target_p->uid, parv[2], sizeof(target_p->uid));
+	strlcpy(target_p->info, EmptyString(parv[3]) ? default_gecos : parv[3],
+		sizeof(target_p->info));
+
+	target_p->server->hops = atoi(parv[1]);
+
+	target_p->uplink = client_p;
+	dlink_add(target_p, &target_p->upnode, &client_p->server->servers);
 
 	add_client(target_p);
 	dlink_add(target_p, &target_p->listnode, &server_list);

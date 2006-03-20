@@ -339,6 +339,8 @@ main(int argc, char *argv[])
 	/* load specific commands */
         add_scommand_handler(&error_command);
 	add_scommand_handler(&mode_command);
+	add_scommand_handler(&tmode_command);
+	add_scommand_handler(&bmask_command);
 	add_scommand_handler(&privmsg_command);
 
         add_ucommand_handler(NULL, &stats_ucommand);

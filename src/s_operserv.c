@@ -56,6 +56,7 @@ static int o_oper_ospart(struct client *, struct lconn *, const char **, int);
 static int o_oper_omode(struct client *, struct lconn *, const char **, int);
 static int o_oper_dbsync(struct client *, struct lconn *, const char **, int);
 static int o_oper_rehash(struct client *, struct lconn *, const char **, int);
+static int o_oper_die(struct client *, struct lconn *, const char **, int);
 
 static int h_operserv_sjoin_lowerts(void *chptr, void *unused);
 

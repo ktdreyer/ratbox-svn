@@ -381,31 +381,6 @@ rejoin_service(struct client *service_p, struct channel *chptr, int reop)
 			chmode_to_string(&chptr->mode),  service_p->name);
 }
 
-/* c_join()
- *   the JOIN handler
- */
-static void
-c_join(struct client *client_p, const char *parv[], int parc)
-{
-	dlink_node *ptr;
-	dlink_node *next_ptr;
-
-	if(parc < 0 || EmptyString(parv[0]))
-		return;
-
-	if(!IsUser(client_p))
-		return;
-
-	/* only thing we should ever get here is join 0 */
-	if(parv[0][0] == '0')
-	{
-		DLINK_FOREACH_SAFE(ptr, next_ptr, client_p->user->channels.head)
-		{
-			del_chmember(ptr->data);
-		}
-	}
-}
-
 /* c_kick()
  *   the KICK handler
  */
@@ -428,7 +403,7 @@ c_kick(struct client *client_p, const char *parv[], int parc)
 		return;
 	}
 
-	if((target_p = find_user(parv[1])) == NULL)
+	if((target_p = find_user(parv[1], 1)) == NULL)
 		return;
 
 	if((mptr = find_chmember(chptr, target_p)) == NULL)
@@ -640,7 +615,6 @@ chmode_to_string_simple(struct chmode *mode)
 	return buf;
 }
 
-
 /* c_sjoin()
  *   the SJOIN handler
  */
@@ -698,58 +672,13 @@ c_sjoin(struct client *client_p, const char *parv[], int parc)
 	newmode.key[0] = '\0';
 	newmode.limit = 0;
 
-	s = parv[2];
+	args = parse_simple_mode(&newmode, parv, parc, 2);
 
-	while(*s)
-	{
-		/* skips the leading '+' */
-		switch(*s)
-		{
-		case '+':
-			break;
-		case 'i':
-			newmode.mode |= MODE_INVITEONLY;
-			break;
-		case 'm':
-			newmode.mode |= MODE_MODERATED;
-			break;
-		case 'n':
-			newmode.mode |= MODE_NOEXTERNAL;
-			break;
-		case 'p':
-			newmode.mode |= MODE_PRIVATE;
-			break;
-		case 's':
-			newmode.mode |= MODE_SECRET;
-			break;
-		case 't':
-			newmode.mode |= MODE_TOPIC;
-			break;
-		case 'r':
-			newmode.mode |= MODE_REGONLY;
-			break;
-		case 'k':
-			newmode.mode |= MODE_KEY;
-			strlcpy(newmode.key, parv[3+args], sizeof(newmode.key));
-			args++;
-			
-			if(parc < 4+args)
-				return;
-			break;
-		case 'l':
-			newmode.mode |= MODE_LIMIT;
-			newmode.limit = atoi(parv[3+args]);
-			args++;
-
-			if(parc < 4+args)
-				return;
-			break;
-		default:
-			break;
-		}
-
-		s++;
-	}
+	/* invalid mode */
+	s_assert(args);
+	if(!args)
+		/* XXX ERROR */
+		return;
 
 	if(!keep_old_modes)
 	{
@@ -832,7 +761,7 @@ c_sjoin(struct client *client_p, const char *parv[], int parc)
 				flags = 0;
 		}
 
-		if((target_p = find_user(s)) == NULL)
+		if((target_p = find_user(s, 1)) == NULL)
 			continue;
 
 		if(!is_member(chptr, target_p))
@@ -857,3 +786,128 @@ c_sjoin(struct client *client_p, const char *parv[], int parc)
 		free_dlink_node(ptr);
 	}
 }
+
+/* c_join()
+ *   the JOIN handler
+ */
+static void
+c_join(struct client *client_p, const char *parv[], int parc)
+{
+	struct channel *chptr;
+	struct chmember *member_p;
+	struct chmode newmode;
+	dlink_list joined_members;
+	dlink_node *ptr;
+	dlink_node *next_ptr;
+	time_t newts;
+	int keep_old_modes = 1;
+	int keep_new_modes = 1;
+	int args = 0;
+
+	if(parc < 0 || EmptyString(parv[0]))
+		return;
+
+	if(!IsUser(client_p))
+		return;
+
+	memset(&joined_members, 0, sizeof(dlink_list));
+
+	/* check for join 0 first */
+	if(parc == 1 && parv[0][0] == '0')
+	{
+		DLINK_FOREACH_SAFE(ptr, next_ptr, client_p->user->channels.head)
+		{
+			del_chmember(ptr->data);
+		}
+	}
+
+	/* a TS6 join */
+	if(parc < 3)
+		/* XXX error */
+		return;
+
+	if(!valid_chname(parv[1]))
+		return;
+
+	if((chptr = find_channel(parv[1])) == NULL)
+	{
+		chptr = BlockHeapAlloc(channel_heap);
+
+		strlcpy(chptr->name, parv[1], sizeof(chptr->name));
+		newts = chptr->tsinfo = atol(parv[0]);
+		add_channel(chptr);
+
+		keep_old_modes = 0;
+	}
+	else
+	{
+		newts = atol(parv[0]);
+
+		if(newts == 0 || chptr->tsinfo == 0)
+			chptr->tsinfo = 0;
+		else if(newts < chptr->tsinfo)
+			keep_old_modes = 0;
+		else if(chptr->tsinfo < newts)
+			keep_new_modes = 0;
+	}
+
+	newmode.mode = 0;
+	newmode.key[0] = '\0';
+	newmode.limit = 0;
+
+	args = parse_simple_mode(&newmode, parv, parc, 2);
+
+	/* invalid mode */
+	s_assert(args);
+	if(!args)
+		/* XXX ERROR */
+		return;
+
+	if(!keep_old_modes)
+	{
+		chptr->tsinfo = newts;
+		remove_our_modes(chptr);
+
+		/* services is in there.. rejoin */
+		if(sent_burst)
+		{
+			DLINK_FOREACH(ptr, chptr->services.head)
+			{
+				rejoin_service(ptr->data, chptr, 1);
+			}
+		}
+	}
+
+	if(keep_new_modes)
+	{
+		chptr->mode.mode |= newmode.mode;
+
+		if(!chptr->mode.limit || chptr->mode.limit < newmode.limit)
+			chptr->mode.limit = newmode.limit;
+
+		if(!chptr->mode.key[0] || strcmp(chptr->mode.key, newmode.key) > 0)
+			strlcpy(chptr->mode.key, newmode.key,
+				sizeof(chptr->mode.key));
+
+	}
+
+	/* this must be done after we've updated the modes */
+	if(!keep_old_modes)
+		hook_call(HOOK_SJOIN_LOWERTS, chptr, NULL);
+
+	if(!is_member(chptr, client_p))
+	{
+		member_p = add_chmember(chptr, client_p, 0);
+		dlink_add_alloc(member_p, &joined_members);
+	}
+
+	hook_call(HOOK_JOIN_CHANNEL, chptr, &joined_members);
+
+	DLINK_FOREACH_SAFE(ptr, next_ptr, joined_members.head)
+	{
+		free_dlink_node(ptr);
+	}
+
+}
+
+
