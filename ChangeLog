@@ -1,3 +1,20 @@
+leeh        2006/03/20 22:36:38 UTC	(20060320_3-22213)
+  Log:
+  - store sid in struct lconn, as we dont have client_p yet
+  - add a proper function for testing valid_sid()
+  - fix c_uid() to not use uplink_p, it exists as client_p
+  
+
+  Modified:
+	rserv/trunk/include/io.h (File Modified) 
+	rserv/trunk/include/rserv.h (File Modified) 
+	rserv/trunk/src/client.c (File Modified) 
+	rserv/trunk/src/io.c (File Modified) 
+	rserv/trunk/src/newconf.c (File Modified) 
+	rserv/trunk/src/rserv.c (File Modified) 
+	rserv/trunk/src/scommand.c (File Modified) 
+
+
 leeh        2006/03/20 22:21:55 UTC	(20060320_2-22211)
   Log:
   - introduce ourselves as TS6 capable
