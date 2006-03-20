@@ -1,3 +1,12 @@
+leeh        2006/03/20 20:00:36 UTC	(20060320_0-22207)
+  Log:
+  - fix core in banserv::sync if oper is not logged in
+  
+
+  Modified:
+	rserv/trunk/src/s_banserv.c (File Modified) 
+
+
 leeh        2006/03/19 10:43:34 UTC	(20060319_4-22205)
   Log:
   - add operserv::die to terminate services
