@@ -125,6 +125,9 @@ validate_conf(void)
 	if(EmptyString(config_file.name))
 		die("No servername specified");
 
+	if(EmptyString(config_file.sid))
+		die("No SID specified");
+
 	if(EmptyString(config_file.gecos))
 		config_file.gecos = my_strdup("ratbox services");
 

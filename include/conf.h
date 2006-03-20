@@ -18,6 +18,7 @@ extern time_t first_time;
 struct _config_file
 {
 	char *name;
+	char *sid;
 	char *gecos;
 	char *vhost;
 

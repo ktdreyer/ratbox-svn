@@ -630,7 +630,7 @@ signon_server(struct lconn *conn_p)
 	conn_p->io_write = write_sendq;
 
 	/* ok, if connect() failed, this will cause an error.. */
-	sendto_server("PASS %s TS", conn_p->pass);
+	sendto_server("PASS %s TS 6 %s", conn_p->pass, config_file.sid);
 
 	/* ..so we need to return. */
 	if(ConnDead(conn_p))

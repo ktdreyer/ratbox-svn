@@ -502,6 +502,21 @@ conf_set_serverinfo_name(void *data)
 }
 
 static void
+conf_set_serverinfo_sid(void *data)
+{
+	const char *sid = data;
+
+	if(config_file.sid == NULL)
+	{
+		if(IsDigit(sid[0]) && IsLetter(sid[1]) && IsLetter(sid[2]) && sid[3] == '\0')
+	        	config_file.name = my_strdup(data);
+		else
+			conf_report_error("Ignoring serverinfo::name -- invalid servername");
+	}
+}
+
+
+static void
 conf_set_email_program(void *data)
 {
 	conf_parm_t *args = data;
@@ -970,6 +985,7 @@ static struct ConfEntry conf_serverinfo_table[] =
 	{ "ping_time",		CF_TIME,    NULL, 0, &config_file.ping_time	},
 	{ "ratbox",		CF_YESNO,   NULL, 0, &config_file.ratbox	},
 	{ "name",		CF_QSTRING, conf_set_serverinfo_name, 0, NULL	},
+	{ "sid",		CF_QSTRING, conf_set_serverinfo_sid, 0, NULL	},
 	{ "\0", 0, NULL, 0, NULL }
 };
 
