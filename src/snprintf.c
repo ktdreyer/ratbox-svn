@@ -12,9 +12,6 @@
 #include "stdinc.h"
 #include "rserv.h"
 #include "rsdb.h"
-#include "client.h"
-#include "io.h"
-#include "log.h"
 
 /*
  *  This table is arranged in chronological order from 0-999,
@@ -468,30 +465,6 @@ rs_vsnprintf(char *dest, const size_t bytes, const char *format, va_list args)
 				{
 					++dest;
 					++str;
-
-					if(++written >= maxbytes)
-						break;
-				}
-
-				continue;
-			}
-
-			if(ch == 'C')
-			{
-				struct client *client_p = va_arg(args, struct client *);
-				const char *name;
-
-				s_assert(client_p);
-
-				if(client_p == NULL)
-					continue;
-
-				name = EmptyString(client_p->uid) ? client_p->name : client_p->uid;
-
-				while((*dest = *name))
-				{
-					++dest;
-					++name;
 
 					if(++written >= maxbytes)
 						break;
