@@ -543,7 +543,7 @@ o_banserv_xline(struct client *client_p, struct lconn *conn_p, const char *parv[
 	push_ban("*", 'X', gecos, reason, temptime);
 
 	slog(banserv_p, 1, "%s - XLINE %s %s %s",
-		OPER_NAME(client_p, conn_p)
+		OPER_NAME(client_p, conn_p),
 		temptime ? get_short_duration(temptime) : "perm",
 		gecos, reason);
 
