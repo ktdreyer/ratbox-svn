@@ -1,3 +1,12 @@
+leeh        2006/03/23 18:43:09 UTC	(20060323_1-22219)
+  Log:
+  - revert that, we're not using our custom vsnprintf where we would use %C
+  
+
+  Modified:
+	rserv/trunk/src/snprintf.c (File Modified) 
+
+
 leeh        2006/03/23 18:38:00 UTC	(20060323_0-22217)
   Log:
   - add 'C' modifier to rs_vsnprintf(), which will choose a uid/nick for us,
