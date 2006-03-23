@@ -1,3 +1,12 @@
+leeh        2006/03/23 21:29:47 UTC	(20060323_6-22235)
+  Log:
+  - missing ','
+  
+
+  Modified:
+	rserv/trunk/src/s_banserv.c (File Modified) 
+
+
 leeh        2006/03/23 21:27:47 UTC	(20060323_5-22231)
   Log:
   - make banserv log duration of bans
