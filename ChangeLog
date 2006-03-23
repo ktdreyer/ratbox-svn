@@ -1,3 +1,18 @@
+leeh        2006/03/23 22:02:09 UTC	(20060323_7-22237)
+  Log:
+  - make stats o/O return a list of opers with access
+  - add allow_stats_o=yes|no; to serverinfo {}; controlling whether stats O is
+    allowed or not
+  
+
+  Modified:
+	rserv/trunk/doc/example.conf (File Modified) 
+	rserv/trunk/include/conf.h (File Modified) 
+	rserv/trunk/src/conf.c (File Modified) 
+	rserv/trunk/src/newconf.c (File Modified) 
+	rserv/trunk/src/scommand.c (File Modified) 
+
+
 leeh        2006/03/23 21:29:47 UTC	(20060323_6-22235)
   Log:
   - missing ','
