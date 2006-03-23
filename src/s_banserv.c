@@ -884,7 +884,7 @@ list_bans(struct client *client_p, struct lconn *conn_p,
 
 		service_send(banserv_p, client_p, conn_p,
 				"  %-30s exp:%s oper:%s [%s%s]",
-				data.row[i][0], get_short_duration(duration),
+				data.row[i][0], duration ? get_short_duration(duration) : "never",
 				data.row[i][4], data.row[i][1],
 				EmptyString(data.row[i][2]) ? "" : data.row[i][2]);
 	}
