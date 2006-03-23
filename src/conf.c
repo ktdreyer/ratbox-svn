@@ -63,6 +63,7 @@ set_default_conf(void)
 	config_file.reconnect_time = 300;
 
 	config_file.ratbox = 1;
+	config_file.allow_stats_o = 1;
 
 	config_file.client_flood_max = 20;
 	config_file.client_flood_max_ignore = 30;

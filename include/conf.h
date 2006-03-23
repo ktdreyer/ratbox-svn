@@ -29,6 +29,7 @@ struct _config_file
 	int reconnect_time;
 	int ping_time;
 	int ratbox;
+	int allow_stats_o;
 
 	unsigned int client_flood_time;
 	unsigned int client_flood_ignore_time;

@@ -565,6 +565,28 @@ c_stats(struct client *client_p, const char *parv[], int parc)
                                                    server_p->first_time));
 			break;
 
+		case 'o': case 'O':
+		{
+			struct conf_oper *conf_p;
+			dlink_node *ptr;
+
+			if(!config_file.allow_stats_o)
+				break;
+
+			DLINK_FOREACH(ptr, conf_oper_list.head)
+			{
+				conf_p = ptr->data;
+
+				sendto_server(":%s 243 %s O %s@%s %s %s %s -1",
+						MYNAME, UID(client_p),
+						conf_p->username, conf_p->host,
+						conf_p->server ? conf_p->server : "*",
+						conf_p->name, conf_oper_flags(conf_p->flags));
+			}
+
+			break;
+		}
+
 		default:
 			break;
 	}

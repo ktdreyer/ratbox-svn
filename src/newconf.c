@@ -982,6 +982,7 @@ static struct ConfEntry conf_serverinfo_table[] =
 	{ "reconnect_time",	CF_TIME,    NULL, 0, &config_file.reconnect_time },
 	{ "ping_time",		CF_TIME,    NULL, 0, &config_file.ping_time	},
 	{ "ratbox",		CF_YESNO,   NULL, 0, &config_file.ratbox	},
+	{ "allow_stats_o",	CF_YESNO,   NULL, 0, &config_file.allow_stats_o },
 	{ "name",		CF_QSTRING, conf_set_serverinfo_name, 0, NULL	},
 	{ "sid",		CF_QSTRING, conf_set_serverinfo_sid, 0, NULL	},
 	{ "\0", 0, NULL, 0, NULL }
