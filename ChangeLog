@@ -1,3 +1,13 @@
+leeh        2006/03/23 19:44:01 UTC	(20060323_3-22225)
+  Log:
+  - port r22223
+    - make banserv output "never" for permanent bans when listing them
+  
+
+  Modified:
+	rserv/trunk/src/s_banserv.c (File Modified) 
+
+
 leeh        2006/03/23 19:29:15 UTC	(20060323_2-22221)
   Log:
   - add UID() macro to choose uid/nick of a client
