@@ -880,7 +880,10 @@ list_bans(struct client *client_p, struct lconn *conn_p,
 		if(!match(mask, data.row[i][0]))
 			continue;
 
-		duration = ((unsigned long) atol(data.row[i][3]) - CURRENT_TIME);
+		duration = (unsigned long) atol(data.row[i][3]);
+
+		if(duration)
+			duration -= CURRENT_TIME;
 
 		service_send(banserv_p, client_p, conn_p,
 				"  %-30s exp:%s oper:%s [%s%s]",
