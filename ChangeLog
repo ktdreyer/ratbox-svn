@@ -1,3 +1,13 @@
+leeh        2006/03/23 18:38:00 UTC	(20060323_0-22217)
+  Log:
+  - add 'C' modifier to rs_vsnprintf(), which will choose a uid/nick for us,
+    when given a client pointer
+  
+
+  Modified:
+	rserv/trunk/src/snprintf.c (File Modified) 
+
+
 leeh        2006/03/20 22:36:38 UTC	(20060320_3-22213)
   Log:
   - store sid in struct lconn, as we dont have client_p yet
