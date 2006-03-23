@@ -1,3 +1,12 @@
+leeh        2006/03/23 21:13:24 UTC	(20060323_4-22227)
+  Log:
+  - dont subtract CURRENT_TIME from permanent bans..
+  
+
+  Modified:
+	rserv/trunk/src/s_banserv.c (File Modified) 
+
+
 leeh        2006/03/23 19:44:01 UTC	(20060323_3-22225)
   Log:
   - port r22223
