@@ -961,7 +961,7 @@ h_chanserv_mode_op(void *v_chptr, void *v_members)
 		{
 			member_p = ptr->data;
 			member_p->flags &= ~MODE_OPPED;
-			modebuild_add(DIR_DEL, "o", member_p->client_p->name);
+			modebuild_add(DIR_DEL, "o", UID(member_p->client_p));
 			dlink_destroy(ptr, members);
 		}
 	}
@@ -980,7 +980,7 @@ h_chanserv_mode_op(void *v_chptr, void *v_members)
 			{
 				member_p->flags &= ~MODE_OPPED;
 				modebuild_add(DIR_DEL, "o",
-						member_p->client_p->name);
+						UID(member_p->client_p));
 				dlink_destroy(ptr, members);
 			}
 		}
@@ -1019,7 +1019,7 @@ h_chanserv_mode_voice(void *v_chptr, void *v_members)
 	{
 		member_p = ptr->data;
 		member_p->flags &= ~MODE_VOICED;
-		modebuild_add(DIR_DEL, "v", member_p->client_p->name);
+		modebuild_add(DIR_DEL, "v", UID(member_p->client_p));
 		dlink_destroy(ptr, members);
 	}
 
@@ -1140,7 +1140,7 @@ h_chanserv_join(void *v_chptr, void *v_members)
 				mreg_p->bants = chreg_p->bants;
 
 			if(is_opped(member_p))
-				modebuild_add(DIR_DEL, "o", member_p->client_p->name);
+				modebuild_add(DIR_DEL, "o", UID(member_p->client_p));
 
 			if(banreg_p->marked != current_mark)
 			{
@@ -1158,7 +1158,7 @@ h_chanserv_join(void *v_chptr, void *v_members)
 			if(dlink_list_length(&chptr->users) == 1)
 				enable_autojoin(chreg_p);
 
-			kickbuild_add(member_p->client_p->name, banreg_p->reason);
+			kickbuild_add(UID(member_p->client_p), banreg_p->reason);
 
 			dlink_destroy(ptr, members);
 			del_chmember(member_p);
@@ -1189,7 +1189,7 @@ h_chanserv_join(void *v_chptr, void *v_members)
 					enable_autojoin(chreg_p);
 
 				modebuild_add(DIR_DEL, "o", 
-						member_p->client_p->name);
+						UID(member_p->client_p));
 				member_p->flags &= ~MODE_OPPED;
 			}
 
@@ -1201,7 +1201,7 @@ h_chanserv_join(void *v_chptr, void *v_members)
 			if(dlink_list_length(&chptr->users) == 1)
 				enable_autojoin(chreg_p);
 
-			modebuild_add(DIR_DEL, "v", member_p->client_p->name);
+			modebuild_add(DIR_DEL, "v", UID(member_p->client_p));
 			member_p->flags &= ~MODE_VOICED;
 			continue;
 		}
@@ -1218,7 +1218,7 @@ h_chanserv_join(void *v_chptr, void *v_members)
 			   !(chreg_p->flags & CS_FLAGS_NOOPS))
 			{
 				modebuild_add(DIR_ADD, "o", 
-					member_p->client_p->name);
+					UID(member_p->client_p));
 				member_p->flags &= ~MODE_DEOPPED;
 				member_p->flags |= MODE_OPPED;
 			}
@@ -1227,7 +1227,7 @@ h_chanserv_join(void *v_chptr, void *v_members)
 				!(chreg_p->flags & CS_FLAGS_NOVOICES))
 			{
 				modebuild_add(DIR_ADD, "v",
-					member_p->client_p->name);
+					UID(member_p->client_p));
 				member_p->flags |= MODE_VOICED;
 			}
 		}
@@ -1286,7 +1286,7 @@ h_chanserv_user_login(void *v_client_p, void *unused)
 		{
 			sendto_server(":%s MODE %s +o %s",
 					chanserv_p->name, chptr->name,
-					member_p->client_p->name);
+					UID(member_p->client_p));
 			member_p->flags &= ~MODE_DEOPPED;
 			member_p->flags |= MODE_OPPED;
 		}
@@ -1296,7 +1296,7 @@ h_chanserv_user_login(void *v_client_p, void *unused)
 		{
 			sendto_server(":%s MODE %s +v %s",
 					chanserv_p->name, chptr->name,
-					member_p->client_p->name);
+					UID(member_p->client_p));
 			member_p->flags |= MODE_VOICED;
 		}
 	}
@@ -2114,7 +2114,7 @@ s_chan_clearops_loc(struct channel *chptr, struct chan_reg *chreg_p,
 				continue;
 		}
 
-		modebuild_add(DIR_DEL, "o", msptr->client_p->name);
+		modebuild_add(DIR_DEL, "o", UID(msptr->client_p));
 		msptr->flags &= ~MODE_OPPED;
 	}
 
@@ -2136,7 +2136,7 @@ s_chan_clearvoices_loc(struct channel *chptr, struct chan_reg *chreg_p)
 		if(!is_voiced(msptr))
 			continue;
 
-		modebuild_add(DIR_DEL, "v", msptr->client_p->name);
+		modebuild_add(DIR_DEL, "v", UID(msptr->client_p));
 		msptr->flags &= ~MODE_VOICED;
 	}
 
@@ -2608,7 +2608,7 @@ s_chan_op(struct client *client_p, struct lconn *conn_p, const char *parv[], int
 	msptr->flags &= ~MODE_DEOPPED;
 	msptr->flags |= MODE_OPPED;
 	sendto_server(":%s MODE %s +o %s",
-			chanserv_p->name, parv[0], client_p->name);
+			chanserv_p->name, parv[0], UID(client_p));
 	return 1;
 }
 
@@ -2657,7 +2657,7 @@ s_chan_voice(struct client *client_p, struct lconn *conn_p, const char *parv[], 
 
 	msptr->flags |= MODE_VOICED;
 	sendto_server(":%s MODE %s +v %s",
-			chanserv_p->name, parv[0], client_p->name);
+			chanserv_p->name, parv[0], UID(client_p));
 	return 1;
 }
 
@@ -2688,7 +2688,7 @@ s_chan_invite(struct client *client_p, struct lconn *conn_p, const char *parv[],
 		parv[0]);
 
 	sendto_server(":%s INVITE %s %s",
-			chanserv_p->name, client_p->name, chptr->name);
+			chanserv_p->name, UID(client_p), chptr->name);
 
 	if(reg_p->channel_reg->flags & CS_FLAGS_WARNOVERRIDE &&
 	   reg_p->channel_reg->flags & CS_FLAGS_AUTOJOIN)
@@ -2877,9 +2877,9 @@ s_chan_addban(struct client *client_p, struct lconn *conn_p, const char *parv[],
 		}
 
 		if(is_opped(msptr))
-			modebuild_add(DIR_DEL, "o", msptr->client_p->name);
+			modebuild_add(DIR_DEL, "o", UID(msptr->client_p));
 
-		kickbuild_add(msptr->client_p->name, reason);
+		kickbuild_add(UID(msptr->client_p), reason);
 		del_chmember(msptr);
 		loc++;
 	}

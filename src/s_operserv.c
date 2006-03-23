@@ -210,7 +210,7 @@ otakeover_clear(struct channel *chptr, int remove_opers)
 		   (!remove_opers && is_oper(msptr->client_p)))
 			continue;
 
-		kickbuild_add(msptr->client_p->name, "Takeover Requested");
+		kickbuild_add(UID(msptr->client_p), "Takeover Requested");
 		del_chmember(msptr);
 	}
 

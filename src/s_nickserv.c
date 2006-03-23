@@ -369,7 +369,7 @@ s_nick_release(struct client *client_p, struct lconn *conn_p, const char *parv[]
 	}
 
 	sendto_server("KILL %s :%s (%s: RELEASE by %s)",
-			target_p->name, MYNAME, 
+			UID(target_p), MYNAME, 
 			nickserv_p->name, client_p->name);
 	exit_client(target_p);
 
@@ -421,14 +421,14 @@ s_nick_regain(struct client *client_p, struct lconn *conn_p, const char *parv[],
 	}
 
 	sendto_server("KILL %s :%s (%s: REGAIN by %s)",
-			target_p->name, MYNAME, 
+			UID(target_p), MYNAME, 
 			nickserv_p->name, client_p->name);
 
 	/* send out a forced nick change for the client to their new
 	 * nickname, at a TS of 60 seconds ago to prevent collisions.
 	 */
 	sendto_server("ENCAP %s RSFNC %s %s %lu %lu",
-			client_p->user->servername, client_p->name,
+			client_p->user->servername, UID(client_p),
 			nreg_p->name, (unsigned long)(CURRENT_TIME - 60),
 			(unsigned long)client_p->user->tsinfo);
 

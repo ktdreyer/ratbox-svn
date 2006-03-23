@@ -104,7 +104,7 @@ c_message(struct client *client_p, const char *parv[], int parc)
 		if(oper_p == NULL || !ConfOperDcc(oper_p))
 		{
 			sendto_server(":%s NOTICE %s :No access.",
-					MYNAME, client_p->name);
+					MYNAME, UID(client_p));
 			return;
 		}
 
@@ -130,7 +130,7 @@ c_message(struct client *client_p, const char *parv[], int parc)
 			if((host = strchr(p, ' ')) == NULL)
 			{
 				sendto_server(":%s NOTICE %s :Invalid dcc parameters",
-						MYNAME, client_p->name);
+						MYNAME, UID(client_p));
 				return;
 			}
 
@@ -140,7 +140,7 @@ c_message(struct client *client_p, const char *parv[], int parc)
 			if((cport = strchr(host, ' ')) == NULL)
 			{
 				sendto_server(":%s NOTICE %s :Invalid dcc parameters",
-						MYNAME, client_p->name);
+						MYNAME, UID(client_p));
 				return;
 			}
 
@@ -150,14 +150,14 @@ c_message(struct client *client_p, const char *parv[], int parc)
 			if(strchr(cport, ' ') != NULL)
 			{
 				sendto_server(":%s NOTICE %s :Invalid dcc parameters",
-						MYNAME, client_p->name);
+						MYNAME, UID(client_p));
 				return;
 			}
 
 			if((p = strchr(cport, '\001')) == NULL)
 			{
 				sendto_server(":%s NOTICE %s :Invalid dcc parameters",
-						MYNAME, client_p->name);
+						MYNAME, UID(client_p));
 				return;
 			}
 
@@ -166,7 +166,7 @@ c_message(struct client *client_p, const char *parv[], int parc)
 			if((port = atoi(cport)) <= 1024)
 			{
 				sendto_server(":%s NOTICE %s :Invalid dcc port",
-						MYNAME, client_p->name);
+						MYNAME, UID(client_p));
 				return;
 			}
 

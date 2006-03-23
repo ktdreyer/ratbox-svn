@@ -118,6 +118,8 @@ struct host_entry
 	dlink_node node;
 };
 
+#define UID(x) (EmptyString((x)->uid) ? (x)->name : (x)->uid)
+
 #define IsServer(x) ((x)->server != NULL)
 #define IsUser(x) ((x)->user != NULL)
 #define IsService(x) ((x)->service != NULL)

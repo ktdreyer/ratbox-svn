@@ -595,14 +595,14 @@ handle_service(struct client *service_p, struct client *client_p,
 		if(client_p->user->oper)
 		{
 			sendto_server(":%s NOTICE %s :You are already logged in as an oper",
-					MYNAME, client_p->name);
+					MYNAME, UID(client_p));
 			return;
 		}
 
 		if(parc < 2)
 		{
 			sendto_server(":%s NOTICE %s :Insufficient parameters to %s::OLOGIN",
-					MYNAME, client_p->name, service_p->name);
+					MYNAME, UID(client_p), service_p->name);
 			client_p->user->flood_count++;
 			return;
 		}
@@ -611,7 +611,7 @@ handle_service(struct client *service_p, struct client *client_p,
 						client_p->user->servername)) == NULL)
 		{
 			sendto_server(":%s NOTICE %s :No access to %s::OLOGIN",
-					MYNAME, client_p->name, ucase(service_p->name));
+					MYNAME, UID(client_p), ucase(service_p->name));
 			client_p->user->flood_count++;
 			return;
 		}
@@ -624,14 +624,14 @@ handle_service(struct client *service_p, struct client *client_p,
 		if(strcmp(crpass, oper_p->pass))
 		{
 			sendto_server(":%s NOTICE %s :Invalid password",
-					MYNAME, client_p->name);
+					MYNAME, UID(client_p));
 			return;
 		}
 
 		sendto_all(UMODE_AUTH, "%s:%s has logged in [IRC]",
 				oper_p->name, client_p->user->mask);
 		sendto_server(":%s NOTICE %s :Oper login successful",
-				MYNAME, client_p->name);
+				MYNAME, UID(client_p));
 
 		client_p->user->oper = oper_p;
 		oper_p->refcount++;
@@ -644,7 +644,7 @@ handle_service(struct client *service_p, struct client *client_p,
 		if(client_p->user->oper == NULL)
 		{
 			sendto_server(":%s NOTICE %s :You are not logged in as an oper",
-					MYNAME, client_p->name);
+					MYNAME, UID(client_p));
 			client_p->user->flood_count++;
 			return;
 		}
@@ -657,7 +657,7 @@ handle_service(struct client *service_p, struct client *client_p,
 		dlink_find_destroy(client_p, &oper_list);
 
 		sendto_server(":%s NOTICE %s :Oper logout successful",
-				MYNAME, client_p->name);
+				MYNAME, UID(client_p));
 		return;
 	}
 
@@ -748,7 +748,7 @@ service_send(struct client *service_p, struct client *client_p,
 	if(client_p)
 		sendto_server(":%s NOTICE %s :%s",
 				ServiceMsgSelf(service_p) ? service_p->name : MYNAME, 
-				client_p->name, buf);
+				UID(client_p), buf);
 	else
 		sendto_one(conn_p, "%s", buf);
 }
@@ -766,7 +766,7 @@ service_error(struct client *service_p, struct client *client_p,
 
 	sendto_server(":%s NOTICE %s :%s",
 			ServiceMsgSelf(service_p) ? service_p->name : MYNAME, 
-			client_p->name, buf);
+			UID(client_p), buf);
 }
 
 void

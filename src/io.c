@@ -609,7 +609,7 @@ connect_from_client(struct client *client_p, struct conf_oper *oper_p,
 	local_ip = htonl(local_ip);
 
 	sendto_server(":%s PRIVMSG %s :\001DCC CHAT chat %lu %d\001",
-		      servicenick, client_p->name, local_ip, port);
+		      servicenick, UID(client_p), local_ip, port);
 
 	sendto_all(UMODE_AUTH, "%s:%s has requested a DCC",
 			oper_p->name, client_p->user->mask);

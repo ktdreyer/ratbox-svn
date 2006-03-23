@@ -1,8 +1,8 @@
 /* src/ucommand.c
  *   Contains code for handling of commands received from local users.
  *
- * Copyright (C) 2003-2005 Lee Hardy <leeh@leeh.co.uk>
- * Copyright (C) 2003-2005 ircd-ratbox development team
+ * Copyright (C) 2003-2006 Lee Hardy <leeh@leeh.co.uk>
+ * Copyright (C) 2003-2006 ircd-ratbox development team
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -255,7 +255,7 @@ u_boot(struct client *unused, struct lconn *conn_p, const char *parv[], int parc
 			dlink_destroy(ptr, &oper_list);
 
 			sendto_server(":%s NOTICE %s :Logged out by %s",
-					MYNAME, target_p->name, conn_p->name);
+					MYNAME, UID(target_p), conn_p->name);
 		}
 	}
 
