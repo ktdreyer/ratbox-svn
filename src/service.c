@@ -216,7 +216,7 @@ add_service(struct service_handler *service)
 		else if(IsUser(client_p))
 		{
 			if(client_p->user->tsinfo <= 1)
-				die("services conflict");
+				die(1, "services conflict");
 
 			/* we're about to collide it. */
 			exit_client(client_p);

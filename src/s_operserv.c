@@ -402,11 +402,9 @@ o_oper_die(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 		return 0;
 	}
 
-	hook_call(HOOK_DBSYNC, NULL, NULL);
-
 	sendto_all(0, "Services terminated by %s", OPER_NAME(client_p, conn_p));
 	mlog("ratbox-services terminated by %s", OPER_NAME(client_p, conn_p));
-	die("Services terminated");
+	die(1, "Services terminated");
 	return 0;
 }
 

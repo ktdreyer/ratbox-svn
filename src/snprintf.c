@@ -574,7 +574,7 @@ rs_vsnprintf(char *dest, const size_t bytes, const char *format, va_list args)
 					continue;
 				} else	/* if (*format == 'd') */
 				{
-					die("rs_vsnprintf() got a format handler it couldnt handle");
+					die(0, "rs_vsnprintf() got a format handler it couldnt handle");
 				}
 				
 				
@@ -582,7 +582,7 @@ rs_vsnprintf(char *dest, const size_t bytes, const char *format, va_list args)
 
 			if(ch != '%')
 			{
-				die("rs_vsnprintf() got a format handler it couldnt handle");
+				die(0, "rs_vsnprintf() got a format handler it couldnt handle");
 			}	/* if (ch != '%') */
 		}		/* if (ch == '%') */
 

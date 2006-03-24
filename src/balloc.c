@@ -98,7 +98,7 @@ static int zero_fd = -1;
 static void
 _blockheap_fail(const char *reason, const char *file, int line)
 {
-	die("Blockheap failure: %s (%s:%d)", reason, file, line);
+	die(0, "Blockheap failure: %s (%s:%d)", reason, file, line);
 }
 
 void
@@ -281,7 +281,7 @@ BlockHeapCreate(size_t elemsize, int elemsperblock)
 	bh = (BlockHeap *) calloc(1, sizeof(BlockHeap));
 	if(bh == NULL)
 	{
-		die("Out of memory: Attempt to calloc() failed: (%s:%d)", 
+		die(0, "Out of memory: Attempt to calloc() failed: (%s:%d)", 
 			__FILE__, __LINE__);
 	}
 
@@ -303,7 +303,7 @@ BlockHeapCreate(size_t elemsize, int elemsperblock)
 	{
 		if(bh != NULL)
 			free(bh);
-		die("Out of memory: newblock() failed");
+		die(0, "Out of memory: newblock() failed");
 	}
 
 	if(bh == NULL)
@@ -348,7 +348,7 @@ BlockHeapAlloc(BlockHeap * bh)
 			/* That didn't work..try to garbage collect */
 			BlockHeapGarbageCollect(bh);
 			if(bh->freeElems == 0)
-				die("Out of memory: newblock() failed with GC");
+				die(0, "Out of memory: newblock() failed with GC");
 		}
 	}
 

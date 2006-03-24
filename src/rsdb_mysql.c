@@ -54,11 +54,11 @@ rsdb_init(void)
 	if(EmptyString(config_file.db_name) || EmptyString(config_file.db_host) ||
 	   EmptyString(config_file.db_username) || EmptyString(config_file.db_password))
 	{
-		die("Missing conf options in database {};");
+		die(0, "Missing conf options in database {};");
 	}
 
 	if((rsdb_database = mysql_init(NULL)) == NULL)
-		die("Out of memory -- failed to initialise mysql pointer");
+		die(0, "Out of memory -- failed to initialise mysql pointer");
 
 	rsdb_connect(1);
 }
@@ -82,7 +82,7 @@ rsdb_connect(int initial)
 
 	/* all errors on startup are fatal */
 	if(initial)
-		die("Unable to connect to mysql database: %s",
+		die(0, "Unable to connect to mysql database: %s",
 			mysql_error(rsdb_database));
 
 	switch(mysql_errno(rsdb_database))
@@ -120,7 +120,7 @@ rsdb_try_reconnect(void)
 		set_time();
 	}
 
-	die("Unable to connect to mysql database: %s", mysql_error(rsdb_database));
+	die(0, "Unable to connect to mysql database: %s", mysql_error(rsdb_database));
 }
 
 /* rsdb_handle_error()
@@ -138,7 +138,7 @@ rsdb_handle_error(MYSQL_RES **rsdb_result, const char *buf)
 	{
 		mlog("fatal error: problem with db file during transaction: %s",
 			mysql_error(rsdb_database));
-		die("problem with db file");
+		die(0, "problem with db file");
 		return;
 	}
 	
@@ -160,7 +160,7 @@ rsdb_handle_error(MYSQL_RES **rsdb_result, const char *buf)
 		default:
 			mlog("fatal error: problem with db file: %s",
 				mysql_error(rsdb_database));
-			die("problem with db file");
+			die(0, "problem with db file");
 			return;
 	}
 
@@ -170,7 +170,7 @@ rsdb_handle_error(MYSQL_RES **rsdb_result, const char *buf)
 		{
 			mlog("fatal error: problem with db file: %s",
 				mysql_error(rsdb_database));
-			die("problem with db file");
+			die(0, "problem with db file");
 		}
 	}
 	else if(rsdb_result)
@@ -179,7 +179,7 @@ rsdb_handle_error(MYSQL_RES **rsdb_result, const char *buf)
 		{
 			mlog("fatal error: problem with db file: %s",
 				mysql_error(rsdb_database));
-			die("problem with db file");
+			die(0, "problem with db file");
 		}
 	}
 }
@@ -193,7 +193,7 @@ rsdb_quote(const char *src)
 	length = strlen(src);
 
 	if(length >= (sizeof(buf) / 2))
-		die("length problem compiling sql statement");
+		die(0, "length problem compiling sql statement");
 
 	mysql_real_escape_string(rsdb_database, buf, src, length);
 	return buf;
@@ -217,7 +217,7 @@ rsdb_exec(rsdb_callback cb, const char *format, ...)
 	if(i >= sizeof(buf))
 	{
 		mlog("fatal error: length problem compiling sql statement: %s", buf);
-		die("length problem compiling sql statement");
+		die(0, "length problem compiling sql statement");
 	}
 
 	if(mysql_query(rsdb_database, buf))
@@ -226,7 +226,7 @@ rsdb_exec(rsdb_callback cb, const char *format, ...)
 	field_count = mysql_field_count(rsdb_database);
 
 	if(field_count > RSDB_MAXCOLS)
-		die("too many columns in result set -- contact the ratbox team");
+		die(0, "too many columns in result set -- contact the ratbox team");
 
 	if(!field_count || !cb)
 		return;
@@ -264,7 +264,7 @@ rsdb_exec_fetch(struct rsdb_table *table, const char *format, ...)
 	if(i >= sizeof(buf))
 	{
 		mlog("fatal error: length problem compiling sql statement: %s", buf);
-		die("length problem compiling sql statement");
+		die(0, "length problem compiling sql statement");
 	}
 
 	if(mysql_query(rsdb_database, buf))

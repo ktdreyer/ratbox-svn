@@ -167,7 +167,7 @@ rsdb_hook_schedule(const char *format, ...)
 	if(i >= sizeof(buf))
 	{
 		mlog("fatal error: length problem with compiling sql");
-		die("problem with compiling sql statement");
+		die(0, "problem with compiling sql statement");
 	}
 
 	dlink_add_alloc(my_strdup(buf), &dbh_schedule_list);

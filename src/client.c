@@ -584,7 +584,7 @@ c_nick(struct client *client_p, const char *parv[], int parc)
 		}
 
 		if(strlen(parv[0]) > NICKLEN)
-			die("Compiled NICKLEN appears to be wrong (nick %s (%d > %d).  Read INSTALL.",
+			die(1, "Compiled NICKLEN appears to be wrong (nick %s (%d > %d).  Read INSTALL.",
 				parv[0], strlen(parv[0]), NICKLEN);
 
                 /* something already exists with this nick */
@@ -615,7 +615,7 @@ c_nick(struct client *client_p, const char *parv[], int parc)
 				 * service.  we go byebye.
 				 */
 				if(newts <= 1)
-					die("service fight");
+					die(1, "service fight");
 
 				return;
 			}
@@ -661,7 +661,7 @@ c_nick(struct client *client_p, const char *parv[], int parc)
                         return;
 
 		if(strlen(parv[0]) > NICKLEN)
-			die("Compiled NICKLEN appears to be wrong (nick %s (%d > %d).  Read INSTALL.",
+			die(1, "Compiled NICKLEN appears to be wrong (nick %s (%d > %d).  Read INSTALL.",
 				parv[0], strlen(parv[0]), NICKLEN);
 
 		del_client(client_p);
@@ -701,7 +701,7 @@ c_uid(struct client *client_p, const char *parv[], int parc)
 	newts = atol(parv[1]);
 
 	if(strlen(parv[0]) > NICKLEN)
-		die("Compiled NICKLEN appears to be wrong (nick %s (%d > %d).  Read INSTALL.",
+		die(1, "Compiled NICKLEN appears to be wrong (nick %s (%d > %d).  Read INSTALL.",
 			parv[0], strlen(parv[0]), NICKLEN);
 
 	/* something already exists with this nick */
@@ -732,7 +732,7 @@ c_uid(struct client *client_p, const char *parv[], int parc)
 			 * service.  we go byebye.
 			 */
 			if(newts <= 1)
-				die("service fight");
+				die(1, "service fight");
 
 			return;
 		}
@@ -828,7 +828,7 @@ c_kill(struct client *client_p, const char *parv[], int parc)
 		}
                 /* 20 kills in 20 seconds.. service fight. */
 		else if(num_kill > 20)
-			die("service kill fight!");
+			die(1, "service kill fight!");
 
 		num_kill++;
 
@@ -860,7 +860,7 @@ c_server(struct client *client_p, const char *parv[], int parc)
 
 	if(strlen(parv[0]) > HOSTLEN)
 	{
-		die("Compiled HOSTLEN appears to be wrong, received %s (%d > %d)",
+		die(1, "Compiled HOSTLEN appears to be wrong, received %s (%d > %d)",
 			parv[0], strlen(parv[0]), HOSTLEN);
 	}
 
@@ -939,7 +939,7 @@ c_sid(struct client *client_p, const char *parv[], int parc)
 
 	if(strlen(parv[0]) > HOSTLEN)
 	{
-		die("Compiled HOSTLEN appears to be wrong, received %s (%d > %d)",
+		die(1, "Compiled HOSTLEN appears to be wrong, received %s (%d > %d)",
 			parv[0], strlen(parv[0]), HOSTLEN);
 	}
 

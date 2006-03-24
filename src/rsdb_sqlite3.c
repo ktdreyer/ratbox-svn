@@ -51,7 +51,7 @@ rsdb_init(void)
 {
 	if(sqlite3_open(DB_PATH, &rserv_db))
 	{
-		die("Failed to open db file: %s", sqlite3_errmsg(rserv_db));
+		die(0, "Failed to open db file: %s", sqlite3_errmsg(rserv_db));
 	}
 }
 
@@ -107,13 +107,13 @@ rsdb_exec(rsdb_callback cb, const char *format, ...)
 	if(i >= sizeof(buf))
 	{
 		mlog("fatal error: length problem with compiling sql");
-		die("problem with compiling sql statement");
+		die(0, "problem with compiling sql statement");
 	}
 
 	if((i = sqlite3_exec(rserv_db, buf, (cb ? rsdb_callback_func : NULL), cb, &errmsg)))
 	{
 		mlog("fatal error: problem with db file: %s", errmsg);
-		die("problem with db file");
+		die(0, "problem with db file");
 	}
 }
 
@@ -134,13 +134,13 @@ rsdb_exec_fetch(struct rsdb_table *table, const char *format, ...)
 	if(i >= sizeof(buf))
 	{
 		mlog("fatal error: length problem with compiling sql");
-		die("problem with compiling sql statement");
+		die(0, "problem with compiling sql statement");
 	}
 
 	if(sqlite3_get_table(rserv_db, buf, &data, &table->row_count, &table->col_count, &errmsg))
 	{
 		mlog("fatal error: problem with db file: %s", errmsg);
-		die("problem with db file");
+		die(0, "problem with db file");
 	}
 
 	/* we need to be able to free data afterward */

@@ -124,10 +124,10 @@ static void
 validate_conf(void)
 {
 	if(EmptyString(config_file.name))
-		die("No servername specified");
+		die(0, "No servername specified");
 
 	if(EmptyString(config_file.sid))
-		die("No SID specified");
+		die(0, "No SID specified");
 
 	if(EmptyString(config_file.gecos))
 		config_file.gecos = my_strdup("ratbox services");
@@ -209,7 +209,7 @@ conf_parse(int cold)
 			return;
 		}
 		else
-	                die("Failed to open config file");
+	                die(0, "Failed to open config file");
 	}
 
 	if(!cold)

@@ -57,6 +57,7 @@
 #include "balloc.h"
 #include "cache.h"
 #include "newconf.h"
+#include "hook.h"
 #include "serno.h"
 
 struct timeval system_time;
@@ -73,10 +74,13 @@ static void sig_usr1(int);
 static void check_rehash(void *);
 
 void
-die(const char *format, ...)
+die(int graceful, const char *format, ...)
 {
 	char buf[BUFSIZE];
 	va_list args;
+
+	if(graceful)
+		hook_call(HOOK_DBSYNC, NULL, NULL);
 
 	rsdb_shutdown();
 
@@ -103,7 +107,7 @@ set_time(void)
 	newtime.tv_sec = newtime.tv_usec = 0;
 
 	if(gettimeofday(&newtime, NULL) == -1)
-		die("Clock failure.");
+		die(1, "Clock failure.");
 
 	system_time.tv_sec = newtime.tv_sec;
 	system_time.tv_usec = newtime.tv_usec;
@@ -266,7 +270,7 @@ main(int argc, char *argv[])
 					close(STDOUT_FILENO);
 					close(STDERR_FILENO);
 					if (setsid() == -1)
-						die("setsid() error");
+						die(0, "setsid() error");
 
 					break;
 				default:
@@ -396,7 +400,7 @@ void sig_hup(int sig)
 
 void sig_term(int sig)
 {
-	die("Got signal SIGTERM");
+	die(0, "Got signal SIGTERM");
 }
 
 void sig_usr1(int sig)

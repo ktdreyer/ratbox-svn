@@ -424,7 +424,7 @@ next_autoconn(void)
         dlink_node *ptr;
 
         if(dlink_list_length(&conf_server_list) <= 0)
-                die("No servers to connect to");
+                die(0, "No servers to connect to");
 
         DLINK_FOREACH(ptr, conf_server_list.head)
         {
@@ -469,7 +469,7 @@ connect_to_server(void *target_server)
         {
                 /* no autoconnect? */
                 if((conf_p = next_autoconn()) == NULL)
-                        die("No server to autoconnect to.");
+                        die(1, "No server to autoconnect to.");
         }
         else
                 conf_p = target_server;

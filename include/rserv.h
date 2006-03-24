@@ -19,7 +19,7 @@ extern struct timeval system_time;
 
 extern void set_time(void);
 
-extern void PRINTFLIKE(1, 2) die(const char *format, ...);
+extern void PRINTFLIKE(2, 3) die(int graceful, const char *format, ...);
 
 extern int have_md5_crypt;
 

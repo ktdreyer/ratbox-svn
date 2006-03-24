@@ -54,7 +54,7 @@ my_calloc(int nmemb, size_t size)
     p = calloc(nmemb, size);
 
     if(p == NULL)
-	    die("out of memory");
+	    die(0, "out of memory");
 
     return p;
 }
@@ -80,7 +80,7 @@ my_strdup(const char *s)
     n = strdup(s);
 
     if(n == NULL)
-	    die("out of memory");
+	    die(0, "out of memory");
 
     return n;
 }
@@ -96,7 +96,7 @@ my_strndup(const char *s, size_t len)
 	n = my_malloc(len);
 
 	if(n == NULL)
-		die("out of memory");
+		die(0, "out of memory");
 
 	strlcpy(n, s, len);
 
