@@ -206,6 +206,13 @@ main(int argc, char *argv[])
 		return -1;
 	}
 
+	if(chdir(PREFIX))
+	{
+		printf("ratbox-services terminated: unable to chdir() to %s: %s\n",
+			PREFIX, strerror(errno));
+		return -1;
+	}
+
 	check_md5_crypt();
 
 	setup_corefile();
