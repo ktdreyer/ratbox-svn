@@ -42,6 +42,7 @@
 #define RSDB_MAX_RECONNECT_TIME		30
 
 MYSQL *rsdb_database;
+int rsdb_doing_transaction;
 
 static int rsdb_connect(int initial);
 
@@ -133,6 +134,14 @@ rsdb_try_reconnect(void)
 static void
 rsdb_handle_error(MYSQL_RES **rsdb_result, const char *buf)
 {
+	if(rsdb_doing_transaction)
+	{
+		mlog("fatal error: problem with db file during transaction: %s",
+			mysql_error(rsdb_database));
+		die("problem with db file");
+		return;
+	}
+	
 	switch(mysql_errno(rsdb_database))
 	{
 		case 0:
@@ -305,10 +314,15 @@ rsdb_exec_fetch_end(struct rsdb_table *table)
 void
 rsdb_transaction(rsdb_transtype type)
 {
-	/* XXX */
 	if(type == RSDB_TRANS_START)
-		;
+	{
+		rsdb_exec(NULL, "START TRANSACTION");
+		rsdb_doing_transaction = 1;
+	}
 	else if(type == RSDB_TRANS_END)
-		;
+	{
+		rsdb_exec(NULL, "COMMIT");
+		rsdb_doing_transaction = 0;
+	}
 }
 
