@@ -1,3 +1,13 @@
+leeh        2006/03/24 18:55:09 UTC	(20060324_0-22239)
+  Log:
+  - restrict stats o to ircops/services opers
+  
+
+  Modified:
+	rserv/trunk/doc/example.conf (File Modified) 
+	rserv/trunk/src/scommand.c (File Modified) 
+
+
 leeh        2006/03/23 22:02:09 UTC	(20060323_7-22237)
   Log:
   - make stats o/O return a list of opers with access
