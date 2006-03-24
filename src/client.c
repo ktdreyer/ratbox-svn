@@ -648,6 +648,8 @@ c_nick(struct client *client_p, const char *parv[], int parc)
 
 		if(IsEOB(uplink_p))
 			hook_call(HOOK_NEW_CLIENT, target_p, NULL);
+		else
+			hook_call(HOOK_NEW_CLIENT_BURST, target_p, NULL);
 	}
 
         /* client changing nicks */
@@ -765,6 +767,8 @@ c_uid(struct client *client_p, const char *parv[], int parc)
 
 	if(IsEOB(client_p))
 		hook_call(HOOK_NEW_CLIENT, target_p, NULL);
+	else
+		hook_call(HOOK_NEW_CLIENT_BURST, target_p, NULL);
 }
 
 /* c_quit()
