@@ -1,3 +1,13 @@
+leeh        2006/03/24 21:39:50 UTC	(20060324_3-22245)
+  Log:
+  - make mysql interface do transactions
+  - kill ourselves if we fail during the middle of a transaction
+  
+
+  Modified:
+	rserv/trunk/src/rsdb_mysql.c (File Modified) 
+
+
 leeh        2006/03/24 21:33:13 UTC	(20060324_2-22243)
   Log:
   - chdir() to PREFIX on startup, so cores go in the right place
