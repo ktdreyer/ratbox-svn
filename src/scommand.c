@@ -573,6 +573,12 @@ c_stats(struct client *client_p, const char *parv[], int parc)
 			if(!config_file.allow_stats_o)
 				break;
 
+			/* restrict this to ircops and those logged in as an
+			 * oper --anfl
+			 */
+			if(!is_oper(client_p) && !client_p->user->oper)
+				break;
+
 			DLINK_FOREACH(ptr, conf_oper_list.head)
 			{
 				conf_p = ptr->data;
