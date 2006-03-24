@@ -1,3 +1,13 @@
+leeh        2006/03/24 19:51:18 UTC	(20060324_1-22241)
+  Log:
+  - add a hook for new client introduced during a burst
+  
+
+  Modified:
+	rserv/trunk/include/hook.h (File Modified) 
+	rserv/trunk/src/client.c (File Modified) 
+
+
 leeh        2006/03/24 18:55:09 UTC	(20060324_0-22239)
   Log:
   - restrict stats o to ircops/services opers
