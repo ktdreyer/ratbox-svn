@@ -1,3 +1,12 @@
+leeh        2006/03/24 21:33:13 UTC	(20060324_2-22243)
+  Log:
+  - chdir() to PREFIX on startup, so cores go in the right place
+  
+
+  Modified:
+	rserv/trunk/src/rserv.c (File Modified) 
+
+
 leeh        2006/03/24 19:51:18 UTC	(20060324_1-22241)
   Log:
   - add a hook for new client introduced during a burst
