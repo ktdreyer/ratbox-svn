@@ -1,3 +1,18 @@
+leeh        2006/03/27 19:23:02 UTC	(20060327_0-22249)
+  Log:
+  - remove .who from dcc
+  - add operserv::listopers, to list connected services opers
+  
+
+  Modified:
+	rserv/trunk/help/main/u-who (File Deleted) 
+	rserv/trunk/help/operserv/index-admin (File Modified) 
+	rserv/trunk/help/operserv/listopers (File Added) 
+	rserv/trunk/help/operserv/u-listopers (File Added) 
+	rserv/trunk/src/s_operserv.c (File Modified) 
+	rserv/trunk/src/ucommand.c (File Modified) 
+
+
 leeh        2006/03/24 23:39:15 UTC	(20060324_4-22247)
   Log:
   - make die() take a graceful parameter, to call the dbsync hook
