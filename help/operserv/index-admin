@@ -1,5 +1,6 @@
  DBSYNC        - Forces the database to be synced with reality
  DIE           - Terminates services
+ LISTOPERS     - Lists connected services opers
  OMODE         - Issues the given modestring on the channel
  OSJOIN        - Joins operserv to the given channel
  OSPART        - Parts operserv from the given channel

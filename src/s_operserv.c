@@ -57,6 +57,7 @@ static int o_oper_omode(struct client *, struct lconn *, const char **, int);
 static int o_oper_dbsync(struct client *, struct lconn *, const char **, int);
 static int o_oper_rehash(struct client *, struct lconn *, const char **, int);
 static int o_oper_die(struct client *, struct lconn *, const char **, int);
+static int o_oper_listopers(struct client *, struct lconn *, const char **, int);
 
 static int h_operserv_sjoin_lowerts(void *chptr, void *unused);
 
@@ -68,7 +69,8 @@ static struct service_command operserv_command[] =
 	{ "OMODE",	&o_oper_omode,		2, NULL, 1, 0L, 0, 0, CONF_OPER_OS_OMODE, 0 },
 	{ "DBSYNC",	&o_oper_dbsync,		0, NULL, 1, 0L, 0, CONF_OPER_ADMIN, 0, 0 },
 	{ "REHASH",	&o_oper_rehash,		0, NULL, 1, 0L, 0, CONF_OPER_ADMIN, 0, 0 },
-	{ "DIE",	&o_oper_die,		1, NULL, 1, 0L, 0, CONF_OPER_ADMIN, 0, 0 }
+	{ "DIE",	&o_oper_die,		1, NULL, 1, 0L, 0, CONF_OPER_ADMIN, 0, 0 },
+	{ "LISTOPERS",	&o_oper_listopers,	0, NULL, 1, 0L, 0, 0, 0, 0 }
 };
 
 static struct ucommand_handler operserv_ucommand[] =
@@ -79,6 +81,7 @@ static struct ucommand_handler operserv_ucommand[] =
 	{ "omode",	o_oper_omode,	0, CONF_OPER_OS_OMODE, 2, 1, NULL },
 	{ "dbsync",	o_oper_dbsync,	CONF_OPER_ADMIN, 0, 0, 1, NULL },
 	{ "die",	o_oper_die,	CONF_OPER_ADMIN, 0, 1, 1, NULL },
+	{ "listopers",	o_oper_listopers, 0, 0, 0, 0, NULL },
 	{ "\0", NULL, 0, 0, 0, 0, NULL }
 };
 
@@ -405,6 +408,61 @@ o_oper_die(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 	sendto_all(0, "Services terminated by %s", OPER_NAME(client_p, conn_p));
 	mlog("ratbox-services terminated by %s", OPER_NAME(client_p, conn_p));
 	die(1, "Services terminated");
+	return 0;
+}
+
+static int
+o_oper_listopers(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
+{
+	struct client *target_p;
+	struct lconn *dcc_p;
+	dlink_node *ptr;
+
+	if(client_p && !is_oper(client_p) && !client_p->user->oper)
+	{
+		if(ServiceStealth(operserv_p))
+			return 1;
+
+		service_send(operserv_p, client_p, conn_p,
+				"No access to %s::LISTOPERS", operserv_p->name);
+		return 1;
+	}
+
+	if(!dlink_list_length(&connection_list) && !dlink_list_length(&oper_list))
+	{
+		service_send(operserv_p, client_p, conn_p, "No connections");
+		return 0;
+	}
+
+	if(dlink_list_length(&connection_list))
+	{
+		service_send(operserv_p, client_p, conn_p, "DCC Connections:");
+
+		DLINK_FOREACH(ptr, connection_list.head)
+		{
+			dcc_p = ptr->data;
+
+			service_send(operserv_p, client_p, conn_p, "  %s - %s",
+					dcc_p->name, conf_oper_flags(dcc_p->privs));
+		}
+	}
+
+	if(dlink_list_length(&oper_list))
+	{
+		service_send(operserv_p, client_p, conn_p, "IRC Connections:");
+
+		DLINK_FOREACH(ptr, oper_list.head)
+		{
+			target_p = ptr->data;
+
+			service_send(operserv_p, client_p, conn_p, "  %s %s %s",
+					target_p->user->oper->name, target_p->user->mask,
+					conf_oper_flags(target_p->user->oper->flags));
+		}
+	}
+
+	service_send(operserv_p, client_p, conn_p, "End of connections");
+
 	return 0;
 }
 

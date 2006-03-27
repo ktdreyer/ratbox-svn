@@ -65,7 +65,6 @@ static int u_quit(struct client *, struct lconn *, const char **, int);
 static int u_rehash(struct client *, struct lconn *, const char **, int);
 static int u_service(struct client *, struct lconn *, const char **, int);
 static int u_status(struct client *, struct lconn *, const char **, int);
-static int u_who(struct client *, struct lconn *, const char **, int);
 
 static struct ucommand_handler ucommands[] =
 {
@@ -78,7 +77,6 @@ static struct ucommand_handler ucommands[] =
 	{ "rehash",	u_rehash,	CONF_OPER_ADMIN,	0, 0, 1, NULL },
 	{ "service",	u_service,	0,			0, 0, 1, NULL },
 	{ "status",	u_status,	0,			0, 0, 1, NULL },
-	{ "who",	u_who,		0,			0, 0, 0, NULL },
 	{ "\0",         NULL,		0,			0, 0, 0, NULL }
 };
 
@@ -416,43 +414,6 @@ u_status(struct client *unused, struct lconn *conn_p, const char *parv[], int pa
 			dlink_list_length(&server_list));
         sendto_one(conn_p, "         Channels: %lu Topics: %lu",
 			dlink_list_length(&channel_list), count_topics());
-	return 0;
-}
-
-static int
-u_who(struct client *unused, struct lconn *conn_p, const char *parv[], int parc)
-{
-	struct client *target_p;
-	struct lconn *dcc_p;
-	dlink_node *ptr;
-
-	if(dlink_list_length(&connection_list))
-	{
-		sendto_one(conn_p, "DCC Connections:");
-
-		DLINK_FOREACH(ptr, connection_list.head)
-		{
-			dcc_p = ptr->data;
-
-			sendto_one(conn_p, "  %s - %s",
-				dcc_p->name, conf_oper_flags(dcc_p->privs));
-		}
-	}
-
-	if(dlink_list_length(&oper_list))
-	{
-		sendto_one(conn_p, "IRC Connections:");
-
-		DLINK_FOREACH(ptr, oper_list.head)
-		{
-			target_p = ptr->data;
-
-			sendto_one(conn_p, "  %s %s %s",
-				target_p->user->oper->name, target_p->user->mask,
-				conf_oper_flags(target_p->user->oper->flags));
-		}
-	}
-
 	return 0;
 }
 
