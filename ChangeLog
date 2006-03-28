@@ -1,3 +1,16 @@
+leeh        2006/03/28 21:04:15 UTC	(20060328_1-22253)
+  Log:
+  - update last_time on userserv::userunsuspend
+  - make userserv::usersuspend and userserv::userunsuspend update the
+    last_time in its sql statement
+  
+
+  Modified:
+	rserv/trunk/help/userserv/u-userunsuspend (File Modified) 
+	rserv/trunk/help/userserv/userunsuspend (File Modified) 
+	rserv/trunk/src/s_userserv.c (File Modified) 
+
+
 leeh        2006/03/28 17:36:25 UTC	(20060328_0-22251)
   Log:
   - add expire_suspended_time = <time>; to userserv {};, controls how long a
