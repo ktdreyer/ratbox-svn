@@ -77,6 +77,7 @@ struct _config_file
 	int chregister_time;		/* per host registrations */
 	int chregister_amount;
 	int cexpire_time;
+	int cexpire_suspended_time;
 	int cmax_bans;
 	int cexpireban_frequency;
 	int cenforcetopic_frequency;

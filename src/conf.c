@@ -96,6 +96,7 @@ set_default_conf(void)
 	config_file.chregister_time = 86400;	/* 1 day */
 	config_file.chregister_amount = 4;
 	config_file.cexpire_time = 2419200; 	/* 4 weeks */
+	config_file.cexpire_suspended_time = 2419200; 	/* 4 weeks */
 	config_file.cmax_bans = 50;
 	config_file.cexpireban_frequency = DEFAULT_EXPIREBAN_FREQUENCY;
 	config_file.cenforcetopic_frequency = DEFAULT_ENFORCETOPIC_FREQUENCY;

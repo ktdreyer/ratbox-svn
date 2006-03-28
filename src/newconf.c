@@ -1065,8 +1065,8 @@ static struct ConfEntry conf_userserv_table[] =
 	{ "host_register_time", CF_TIME,  NULL, 0, &config_file.uhregister_time		},
 	{ "host_register_amount",CF_INT,  NULL, 0, &config_file.uhregister_amount	},
 	{ "expire_time",	CF_TIME,  NULL, 0, &config_file.uexpire_time		},
-	{ "expire_suspended_time",CF_TIME,  NULL, 0, &config_file.uexpire_suspended_time },
-	{ "expire_unverified_time",CF_TIME,  NULL, 0, &config_file.uexpire_unverified_time },
+	{ "expire_suspended_time",CF_TIME,NULL, 0, &config_file.uexpire_suspended_time	},
+	{ "expire_unverified_time",CF_TIME, NULL, 0, &config_file.uexpire_unverified_time },
 	{ "allow_set_password",	CF_YESNO, NULL, 0, &config_file.allow_set_password	},
 	{ "allow_resetpass",	CF_YESNO, NULL, 0, &config_file.allow_resetpass		},
 	{ "resetpass_duration",	CF_TIME,  NULL, 0, &config_file.uresetpass_duration	},
@@ -1084,6 +1084,7 @@ static struct ConfEntry conf_chanserv_table[] =
 	{ "host_register_amount",CF_INT,  NULL, 0, &config_file.chregister_amount	},
 	{ "expire_time",	CF_TIME,  NULL, 0, &config_file.cexpire_time		},
 	{ "max_bans",		CF_INT,	  NULL, 0, &config_file.cmax_bans		},
+	{ "expire_suspended_time",CF_TIME,NULL, 0, &config_file.cexpire_suspended_time	},
 	{ "expireban_frequency", CF_TIME,	conf_set_chanserv_expireban, 0, NULL	},
 	{ "enforcetopic_frequency", CF_TIME,	conf_set_chanserv_enforcetopic, 0, NULL },
 	{ "\0", 0, NULL, 0, NULL }

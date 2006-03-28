@@ -789,19 +789,27 @@ e_chanserv_expirechan(void *unused)
 	{
 		chreg_p = ptr->data;
 
-		if((chreg_p->last_time + config_file.cexpire_time) > CURRENT_TIME)
-			continue;
-
-		/* final check: make sure nobody with access is on the
-		 * channel; to save cpu only do this if the channel would
-		 * otherwise expire. */
-		if(access_users_on_channel(chreg_p))
+		if(chreg_p->flags & CS_FLAGS_SUSPENDED)
 		{
-			chreg_p->last_time = CURRENT_TIME;
-			rsdb_exec(NULL, "UPDATE channels "
-					"SET last_time = %lu WHERE chname = '%Q'",
-					chreg_p->last_time, chreg_p->name);
-			continue;
+			if((chreg_p->last_time + config_file.cexpire_suspended_time) > CURRENT_TIME)
+				continue;
+		}
+		else
+		{
+			if((chreg_p->last_time + config_file.cexpire_time) > CURRENT_TIME)
+				continue;
+
+			/* final check: make sure nobody with access is on the
+			 * channel; to save cpu only do this if the channel would
+			 * otherwise expire. */
+			if(access_users_on_channel(chreg_p))
+			{
+				chreg_p->last_time = CURRENT_TIME;
+				rsdb_exec(NULL, "UPDATE channels "
+						"SET last_time = %lu WHERE chname = '%Q'",
+						chreg_p->last_time, chreg_p->name);
+				continue;
+			}
 		}
 
 		destroy_channel_reg(chreg_p);
@@ -1391,9 +1399,10 @@ o_chan_chansuspend(struct client *client_p, struct lconn *conn_p, const char *pa
 
 	reg_p->flags |= CS_FLAGS_SUSPENDED;
 	reg_p->suspender = my_strdup(OPER_NAME(client_p, conn_p));
+	reg_p->last_time = CURRENT_TIME;
 
-	rsdb_exec(NULL, "UPDATE channels SET flags=%d, suspender='%Q' WHERE chname = '%Q'",
-			reg_p->flags, reg_p->suspender, reg_p->name);
+	rsdb_exec(NULL, "UPDATE channels SET flags=%d,suspender='%Q',last_time=%lu WHERE chname = '%Q'",
+			reg_p->flags, reg_p->suspender, reg_p->name, reg_p->last_time);
 
 	service_send(chanserv_p, client_p, conn_p,
 			"Channel %s suspended", parv[0]);
@@ -1425,9 +1434,10 @@ o_chan_chanunsuspend(struct client *client_p, struct lconn *conn_p, const char *
 	reg_p->flags &= ~CS_FLAGS_SUSPENDED;
 	my_free(reg_p->suspender);
 	reg_p->suspender = NULL;
+	reg_p->last_time = CURRENT_TIME;
 
-	rsdb_exec(NULL, "UPDATE channels SET flags = %d, suspender = NULL WHERE chname = '%Q'",
-			reg_p->flags, reg_p->name);
+	rsdb_exec(NULL, "UPDATE channels SET flags=%d,suspender=NULL,last_time=%lu WHERE chname = '%Q'",
+			reg_p->flags, reg_p->name, reg_p->last_time);
 
 	service_send(chanserv_p, client_p, conn_p,
 			"Channel %s unsuspended", reg_p->name);
@@ -1518,7 +1528,8 @@ o_chan_chanlist(struct client *client_p, struct lconn *conn_p, const char *parv[
 
 			if(suspended || !access_users_on_channel(chreg_p))
 			{
-				snprintf(timebuf, sizeof(timebuf), "Last %s",
+				snprintf(timebuf, sizeof(timebuf), "%s %s",
+					suspended ? "Suspended" : "Last",
 					get_short_duration(CURRENT_TIME - chreg_p->last_time));
 				p = timebuf;
 			}
