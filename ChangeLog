@@ -1,3 +1,18 @@
+leeh        2006/03/28 17:36:25 UTC	(20060328_0-22251)
+  Log:
+  - add expire_suspended_time = <time>; to userserv {};, controls how long a
+    suspended username is kept around before its expired.
+  - overload last_time to store the time its been suspended since
+  
+
+  Modified:
+	rserv/trunk/doc/example.conf (File Modified) 
+	rserv/trunk/include/conf.h (File Modified) 
+	rserv/trunk/src/conf.c (File Modified) 
+	rserv/trunk/src/newconf.c (File Modified) 
+	rserv/trunk/src/s_userserv.c (File Modified) 
+
+
 leeh        2006/03/27 19:23:02 UTC	(20060327_0-22249)
   Log:
   - remove .who from dcc
