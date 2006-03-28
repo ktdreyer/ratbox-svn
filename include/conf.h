@@ -62,6 +62,7 @@ struct _config_file
 	int uregister_email;
 	int uregister_verify;
 	int uexpire_time;
+	int uexpire_suspended_time;
 	int uexpire_unverified_time;
 	int allow_set_password;
 	int allow_resetpass;

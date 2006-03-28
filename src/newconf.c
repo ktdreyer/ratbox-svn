@@ -1065,6 +1065,7 @@ static struct ConfEntry conf_userserv_table[] =
 	{ "host_register_time", CF_TIME,  NULL, 0, &config_file.uhregister_time		},
 	{ "host_register_amount",CF_INT,  NULL, 0, &config_file.uhregister_amount	},
 	{ "expire_time",	CF_TIME,  NULL, 0, &config_file.uexpire_time		},
+	{ "expire_suspended_time",CF_TIME,  NULL, 0, &config_file.uexpire_suspended_time },
 	{ "expire_unverified_time",CF_TIME,  NULL, 0, &config_file.uexpire_unverified_time },
 	{ "allow_set_password",	CF_YESNO, NULL, 0, &config_file.allow_set_password	},
 	{ "allow_resetpass",	CF_YESNO, NULL, 0, &config_file.allow_resetpass		},

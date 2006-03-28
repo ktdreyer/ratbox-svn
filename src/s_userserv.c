@@ -459,7 +459,15 @@ e_user_expire(void *unused)
 				ureg_p->last_time, ureg_p->name);
 		}
 
-		if((ureg_p->last_time + config_file.uexpire_time) > CURRENT_TIME)
+		if(ureg_p->flags & US_FLAGS_SUSPENDED)
+		{
+			if(!config_file.uexpire_suspended_time)
+				continue;
+
+			if((ureg_p->last_time + config_file.uexpire_suspended_time) > CURRENT_TIME)
+				continue;
+		}
+		else if((ureg_p->last_time + config_file.uexpire_time) > CURRENT_TIME)
 			continue;
 
 		free_user_reg(ureg_p);
@@ -585,6 +593,7 @@ o_user_usersuspend(struct client *client_p, struct lconn *conn_p, const char *pa
 	logout_user_reg(reg_p);
 
 	reg_p->flags |= US_FLAGS_SUSPENDED;
+	reg_p->last_time = CURRENT_TIME;
 	reg_p->suspender = my_strdup(OPER_NAME(client_p, conn_p));
 
 	rsdb_exec(NULL, "UPDATE users SET flags=%d, suspender='%Q' WHERE username='%Q'",
@@ -713,7 +722,8 @@ o_user_userlist(struct client *client_p, struct lconn *conn_p, const char *parv[
 
 			if(suspended || !dlink_list_length(&ureg_p->users))
 			{
-				snprintf(timebuf, sizeof(timebuf), "Last %s",
+				snprintf(timebuf, sizeof(timebuf), "%s %s",
+					suspended ? "Suspended" : "Last",
 					get_short_duration(CURRENT_TIME - ureg_p->last_time));
 				p = timebuf;
 			}
@@ -1530,15 +1540,18 @@ dump_user_info(struct client *client_p, struct lconn *conn_p, struct user_reg *u
 				"[%s] Email: %s", 
 				ureg_p->name, ureg_p->email);
 
-	service_send(userserv_p, client_p, conn_p,
-			"[%s] Currently logged on via:", ureg_p->name);
-
-	DLINK_FOREACH(ptr, ureg_p->users.head)
+	if(dlink_list_length(&ureg_p->users))
 	{
-		target_p = ptr->data;
-
 		service_send(userserv_p, client_p, conn_p,
-				"[%s]  %s", ureg_p->name, target_p->user->mask);
+				"[%s] Currently logged on via:", ureg_p->name);
+
+		DLINK_FOREACH(ptr, ureg_p->users.head)
+		{
+			target_p = ptr->data;
+
+			service_send(userserv_p, client_p, conn_p,
+					"[%s]  %s", ureg_p->name, target_p->user->mask);
+		}
 	}
 }
 
