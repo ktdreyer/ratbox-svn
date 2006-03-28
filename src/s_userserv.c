@@ -596,8 +596,8 @@ o_user_usersuspend(struct client *client_p, struct lconn *conn_p, const char *pa
 	reg_p->last_time = CURRENT_TIME;
 	reg_p->suspender = my_strdup(OPER_NAME(client_p, conn_p));
 
-	rsdb_exec(NULL, "UPDATE users SET flags=%d, suspender='%Q' WHERE username='%Q'",
-			reg_p->flags, reg_p->suspender, reg_p->name);
+	rsdb_exec(NULL, "UPDATE users SET flags=%d,suspender='%Q',last_time=%lu WHERE username='%Q'",
+			reg_p->flags, reg_p->suspender, reg_p->name, reg_p->last_time);
 
 	service_send(userserv_p, client_p, conn_p,
 			"Username %s suspended", reg_p->name);
@@ -629,9 +629,10 @@ o_user_userunsuspend(struct client *client_p, struct lconn *conn_p, const char *
 	reg_p->flags &= ~US_FLAGS_SUSPENDED;
 	my_free(reg_p->suspender);
 	reg_p->suspender = NULL;
+	reg_p->last_time = CURRENT_TIME;
 
-	rsdb_exec(NULL, "UPDATE users SET flags=%d, suspender=NULL WHERE username='%Q'",
-			reg_p->flags, reg_p->name);
+	rsdb_exec(NULL, "UPDATE users SET flags=%d,suspender=NULL,last_time=%lu WHERE username='%Q'",
+			reg_p->flags, reg_p->name, reg_p->last_time);
 
 	service_send(userserv_p, client_p, conn_p,
 			"Username %s unsuspended", reg_p->name);
