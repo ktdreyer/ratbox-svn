@@ -1,3 +1,19 @@
+leeh        2006/03/28 21:19:04 UTC	(20060328_2-22255)
+  Log:
+  - add expire_suspended_time to chanserv {};, controls when suspended
+    channels expire
+  
+
+  Modified:
+	rserv/trunk/doc/example.conf (File Modified) 
+	rserv/trunk/help/chanserv/chanunsuspend (File Modified) 
+	rserv/trunk/help/chanserv/u-chanunsuspend (File Modified) 
+	rserv/trunk/include/conf.h (File Modified) 
+	rserv/trunk/src/conf.c (File Modified) 
+	rserv/trunk/src/newconf.c (File Modified) 
+	rserv/trunk/src/s_chanserv.c (File Modified) 
+
+
 leeh        2006/03/28 21:04:15 UTC	(20060328_1-22253)
   Log:
   - update last_time on userserv::userunsuspend
