@@ -175,6 +175,8 @@ extern void init_client(void);
 
 unsigned int hash_name(const char *p);
 
+char *generate_uid(void);
+
 extern void add_client(struct client *target_p);
 extern void del_client(struct client *target_p);
 extern struct client *find_client(const char *name);

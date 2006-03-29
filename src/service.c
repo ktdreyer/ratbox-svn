@@ -60,6 +60,9 @@ init_services(void)
 	{
 		service_p = ptr->data;
 
+		/* generate all our services a UID.. */
+		strlcpy(service_p->uid, generate_uid(), sizeof(service_p->uid));
+
 		if(service_p->service->init)
 			(service_p->service->init)();
 	}
@@ -279,10 +282,18 @@ find_service_id(const char *name)
 void
 introduce_service(struct client *target_p)
 {
-	sendto_server("NICK %s 1 1 +iDS%s %s %s %s :%s",
-		      target_p->name, ServiceOpered(target_p) ? "o" : "",
-		      target_p->service->username,
-		      target_p->service->host, MYNAME, target_p->info);
+	if(ConnTS6(server_p))
+		sendto_server("UID %s 1 1 +iDS%s %s %s 0 %s :%s",
+				target_p->name, ServiceOpered(target_p) ? "o" : "",
+				target_p->service->username,
+				target_p->service->host, target_p->uid,
+				target_p->info);
+	else
+		sendto_server("NICK %s 1 1 +iDS%s %s %s %s :%s",
+				target_p->name, ServiceOpered(target_p) ? "o" : "",
+				target_p->service->username,
+				target_p->service->host, MYNAME, target_p->info);
+
 	SetServiceIntroduced(target_p);
 	add_client(target_p);
 }
