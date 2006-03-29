@@ -1,3 +1,19 @@
+leeh        2006/03/29 21:06:01 UTC	(20060329_4-22265)
+  Log:
+  - track when our uplink supports TS6
+  - generate uids for all our services
+  - introduce services through TS6 when possible
+    -- this is broken, as I need to alter the burst order
+  
+
+  Modified:
+	rserv/trunk/include/client.h (File Modified) 
+	rserv/trunk/include/io.h (File Modified) 
+	rserv/trunk/src/client.c (File Modified) 
+	rserv/trunk/src/scommand.c (File Modified) 
+	rserv/trunk/src/service.c (File Modified) 
+
+
 leeh        2006/03/29 19:33:11 UTC	(20060329_3-22263)
   Log:
   - make userserv::userinfo show whether a username is suspended or not
