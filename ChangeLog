@@ -1,3 +1,14 @@
+leeh        2006/03/29 19:17:38 UTC	(20060329_0-22257)
+  Log:
+  - make add_service() use dlink_add_tail(), so that we init the services in
+    the right order
+  
+
+  Modified:
+	rserv/trunk/src/rserv.c (File Modified) 
+	rserv/trunk/src/service.c (File Modified) 
+
+
 leeh        2006/03/28 21:19:04 UTC	(20060328_2-22255)
   Log:
   - add expire_suspended_time to chanserv {};, controls when suspended
