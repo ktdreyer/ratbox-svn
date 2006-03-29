@@ -1,3 +1,4 @@
-usersuspend <username>
+usersuspend <username> <reason>
 Suspends the given usernames registration
   <username>: Username to suspend
+  <reason>  : Reason for suspension

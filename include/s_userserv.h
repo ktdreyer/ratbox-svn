@@ -12,6 +12,7 @@ struct user_reg
 	char *password;
 	char *email;
 	char *suspender;
+	char *suspend_reason;
 
 	time_t reg_time;
 	time_t last_time;

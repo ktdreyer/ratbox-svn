@@ -14,6 +14,7 @@ CREATE TABLE users (
 	password TEXT,
 	email TEXT,
 	suspender TEXT,
+	suspend_reason TEXT,
 	reg_time INTEGER,
 	last_time INTEGER,
 	flags INTEGER,
@@ -39,6 +40,7 @@ CREATE TABLE channels (
 	last_time INTEGER,
 	flags INTEGER,
 	suspender TEXT,
+	suspend_reason TEXT,
 	PRIMARY KEY(chname)
 );
 

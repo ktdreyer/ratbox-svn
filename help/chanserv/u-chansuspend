@@ -1,3 +1,4 @@
-chanunsuspend <channel>
+chanunsuspend <channel> <reason>
 Unsuspends the given channel's registration
   <channel>: Channel to unsuspend 
+  <reason> : Reason for suspension

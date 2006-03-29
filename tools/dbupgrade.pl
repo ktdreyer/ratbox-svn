@@ -86,6 +86,8 @@ if($currentver < 2)
 		print "    id INTEGER PRIMARY KEY, hook TEXT, data TEXT\n";
 		print ");\n";
 		print "ALTER TABLE users ADD COLUMN verify_token TEXT;\n";
+		print "ALTER TABLE users ADD COLUMN suspend_reason TEXT;\n";
+		print "ALTER TABLE channels ADD COLUMN suspend_reason TEXT;\n";
 	}
 	elsif($dbtype eq "mysql")
 	{
@@ -109,6 +111,8 @@ if($currentver < 2)
 		print "    PRIMARY KEY(username)\n";
 		print ");\n";
 		print "ALTER TABLE users ADD COLUMN verify_token VARCHAR(8);\n";
+		print "ALTER TABLE users ADD COLUMN suspend_reason VARCHAR(".$vals{"SUSPENDREASONLEN"}.");\n";
+		print "ALTER TABLE channels ADD COLUMN suspend_reason VARCHAR(".$vals{"SUSPENDREASONLEN"}.");\n";
 	}
 
 

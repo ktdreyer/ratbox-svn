@@ -79,7 +79,7 @@ static struct service_command userserv_command[] =
 {
 	{ "USERREGISTER",	&o_user_userregister,	2, NULL, 1, 0L, 0, 0, CONF_OPER_US_REGISTER, 0 },
 	{ "USERDROP",		&o_user_userdrop,	1, NULL, 1, 0L, 0, 0, CONF_OPER_US_DROP, 0 },
-	{ "USERSUSPEND",	&o_user_usersuspend,	1, NULL, 1, 0L, 0, 0, CONF_OPER_US_SUSPEND, 0 },
+	{ "USERSUSPEND",	&o_user_usersuspend,	2, NULL, 1, 0L, 0, 0, CONF_OPER_US_SUSPEND, 0 },
 	{ "USERUNSUSPEND",	&o_user_userunsuspend,	1, NULL, 1, 0L, 0, 0, CONF_OPER_US_SUSPEND, 0 },
 	{ "USERLIST",		&o_user_userlist,	1, NULL, 1, 0L, 0, 0, CONF_OPER_US_LIST, 0 },
 	{ "USERINFO",		&o_user_userinfo,	0, NULL, 1, 0L, 0, 0, CONF_OPER_US_INFO, 0 },
@@ -96,13 +96,13 @@ static struct service_command userserv_command[] =
 static struct ucommand_handler userserv_ucommand[] =
 {
 	{ "userregister",	o_user_userregister,	0, CONF_OPER_US_REGISTER,	2, 1, NULL },
-	{ "userdrop",		o_user_userdrop,	0, CONF_OPER_US_DROP,	1, 1, NULL },
-	{ "usersuspend",	o_user_usersuspend,	0, CONF_OPER_US_SUSPEND,	1, 1, NULL },
+	{ "userdrop",		o_user_userdrop,	0, CONF_OPER_US_DROP,		1, 1, NULL },
+	{ "usersuspend",	o_user_usersuspend,	0, CONF_OPER_US_SUSPEND,	2, 1, NULL },
 	{ "userunsuspend",	o_user_userunsuspend,	0, CONF_OPER_US_SUSPEND,	1, 1, NULL },
-	{ "userlist",		o_user_userlist,	0, CONF_OPER_US_LIST,	0, 1, NULL },
-	{ "userinfo",		o_user_userinfo,	0, CONF_OPER_US_INFO,	1, 1, NULL },
+	{ "userlist",		o_user_userlist,	0, CONF_OPER_US_LIST,		0, 1, NULL },
+	{ "userinfo",		o_user_userinfo,	0, CONF_OPER_US_INFO,		1, 1, NULL },
 	{ "usersetpass",	o_user_usersetpass,	0, CONF_OPER_US_SETPASS,	2, 1, NULL },
-	{ "\0",			NULL,			0, 0,			0, 0, NULL }
+	{ "\0",			NULL,			0, 0,				0, 0, NULL }
 };
 
 static struct service_handler userserv_service = {
@@ -134,7 +134,7 @@ init_s_userserv(void)
 	user_reg_heap = BlockHeapCreate(sizeof(struct user_reg), HEAP_USER_REG);
 
 	rsdb_exec(user_db_callback, 
-			"SELECT username, password, email, suspender, "
+			"SELECT username, password, email, suspender, suspend_reason, "
 			"reg_time, last_time, flags FROM users");
 
 	rsdb_hook_add("users_sync", "REGISTER", 900, dbh_user_register);
@@ -205,9 +205,12 @@ user_db_callback(int argc, const char **argv)
 	if(!EmptyString(argv[3]))
 		reg_p->suspender = my_strdup(argv[3]);
 
-	reg_p->reg_time = atol(argv[4]);
-	reg_p->last_time = atol(argv[5]);
-	reg_p->flags = atoi(argv[6]);
+	if(!EmptyString(argv[4]))
+		reg_p->suspend_reason = my_strdup(argv[4]);
+
+	reg_p->reg_time = atol(argv[5]);
+	reg_p->last_time = atol(argv[6]);
+	reg_p->flags = atoi(argv[7]);
 
 	add_user_reg(reg_p);
 
@@ -595,9 +598,12 @@ o_user_usersuspend(struct client *client_p, struct lconn *conn_p, const char *pa
 	reg_p->flags |= US_FLAGS_SUSPENDED;
 	reg_p->last_time = CURRENT_TIME;
 	reg_p->suspender = my_strdup(OPER_NAME(client_p, conn_p));
+	reg_p->suspend_reason = my_strndup(parv[1], SUSPENDREASONLEN);
 
-	rsdb_exec(NULL, "UPDATE users SET flags=%d,suspender='%Q',last_time=%lu WHERE username='%Q'",
-			reg_p->flags, reg_p->suspender, reg_p->name, reg_p->last_time);
+	rsdb_exec(NULL, "UPDATE users SET flags=%d, suspender='%Q', "
+			"suspend_reason='%Q',last_time=%lu WHERE username='%Q'",
+			reg_p->flags, reg_p->suspender, reg_p->suspend_reason,
+			reg_p->last_time, reg_p->name);
 
 	service_send(userserv_p, client_p, conn_p,
 			"Username %s suspended", reg_p->name);
@@ -629,9 +635,11 @@ o_user_userunsuspend(struct client *client_p, struct lconn *conn_p, const char *
 	reg_p->flags &= ~US_FLAGS_SUSPENDED;
 	my_free(reg_p->suspender);
 	reg_p->suspender = NULL;
+	my_free(reg_p->suspend_reason);
+	reg_p->suspend_reason = NULL;
 	reg_p->last_time = CURRENT_TIME;
 
-	rsdb_exec(NULL, "UPDATE users SET flags=%d,suspender=NULL,last_time=%lu WHERE username='%Q'",
+	rsdb_exec(NULL, "UPDATE users SET flags=%d,suspender=NULL,suspend_reason=NULL,last_time=%lu WHERE username='%Q'",
 			reg_p->flags, reg_p->name, reg_p->last_time);
 
 	service_send(userserv_p, client_p, conn_p,

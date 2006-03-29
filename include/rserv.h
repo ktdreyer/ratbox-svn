@@ -11,6 +11,8 @@
 #define EMAILLEN	100
 #define OPERNAMELEN	30
 
+#define SUSPENDREASONLEN	200
+
 int current_mark;
 int testing_conf;
 

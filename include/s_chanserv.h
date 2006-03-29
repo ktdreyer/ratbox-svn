@@ -34,6 +34,7 @@ struct chan_reg
 	char *topic;
 	char *url;
 	char *suspender;
+	char *suspend_reason;
 	struct chmode cmode;
 	struct chmode emode;
 

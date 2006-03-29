@@ -1,3 +1,4 @@
-CHANSUSPEND <channel>
+CHANSUSPEND <channel> <reason>
 [ADMIN] Suspends the given channels registration
   <channel>: Channel to suspend 
+  <reason> : Reason for suspension

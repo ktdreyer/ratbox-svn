@@ -5,6 +5,7 @@ CREATE TABLE users (
 	password VARCHAR(PASSWDLEN) NOT NULL,
 	email VARCHAR(EMAILLEN),
 	suspender VARCHAR(OPERNAMELEN),
+	suspend_reason VARCHAR(SUSPENDREASONLEN),
 	reg_time INT UNSIGNED,
 	last_time INT UNSIGNED,
 	flags INT UNSIGNED,
@@ -47,6 +48,7 @@ CREATE TABLE channels (
 	last_time INT UNSIGNED,
 	flags INT UNSIGNED,
 	suspender VARCHAR(OPERNAMELEN),
+	suspend_reason VARCHAR(SUSPENDREASONLEN),
 	PRIMARY KEY(chname)
 );
 

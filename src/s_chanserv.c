@@ -109,7 +109,7 @@ static struct service_command chanserv_command[] =
 {
 	{ "CHANREGISTER",	&o_chan_chanregister,	2, NULL, 1, 0L, 0, 0, CONF_OPER_CS_REGISTER, 0 },
 	{ "CHANDROP",		&o_chan_chandrop,	1, NULL, 1, 0L, 0, 0, CONF_OPER_CS_DROP, 0 },
-	{ "CHANSUSPEND",	&o_chan_chansuspend,	1, NULL, 1, 0L, 0, 0, CONF_OPER_CS_SUSPEND, 0 },
+	{ "CHANSUSPEND",	&o_chan_chansuspend,	2, NULL, 1, 0L, 0, 0, CONF_OPER_CS_SUSPEND, 0 },
 	{ "CHANUNSUSPEND",	&o_chan_chanunsuspend,	1, NULL, 1, 0L, 0, 0, CONF_OPER_CS_SUSPEND, 0 },
 	{ "CHANLIST",		&o_chan_chanlist,	0, NULL, 1, 0L, 0, 0, CONF_OPER_CS_LIST, 0 },
 	{ "CHANINFO",		&o_chan_chaninfo,	1, NULL, 1, 0L, 0, 0, CONF_OPER_CS_INFO, 0 },
@@ -142,7 +142,7 @@ static struct ucommand_handler chanserv_ucommand[] =
 {
 	{ "chanregister",	o_chan_chanregister,	0, CONF_OPER_CS_REGISTER,	2, 1, NULL },
 	{ "chandrop",		o_chan_chandrop,	0, CONF_OPER_CS_DROP,		1, 1, NULL },
-	{ "chansuspend",	o_chan_chansuspend,	0, CONF_OPER_CS_SUSPEND,	1, 1, NULL },
+	{ "chansuspend",	o_chan_chansuspend,	0, CONF_OPER_CS_SUSPEND,	2, 1, NULL },
 	{ "chanunsuspend",	o_chan_chanunsuspend,	0, CONF_OPER_CS_SUSPEND,	1, 1, NULL },
 	{ "chanlist",		o_chan_chanlist,	0, CONF_OPER_CS_LIST,		0, 1, NULL },
 	{ "chaninfo",		o_chan_chaninfo,	0, CONF_OPER_CS_INFO,		1, 1, NULL },
@@ -521,6 +521,12 @@ channel_db_callback(int argc, const char **argv)
 	if(!EmptyString(argv[9]))
 		reg_p->suspender = my_strdup(argv[9]);
 
+	/* note: suspend_reason may be blank even when a channel is
+	 * suspended, as they were introduced in rserv-1.1
+	 */
+	if(!EmptyString(argv[10]))
+		reg_p->suspend_reason = my_strdup(argv[10]);
+
 	add_channel_reg(reg_p);
 
 	if(reg_p->flags & CS_FLAGS_AUTOJOIN)
@@ -623,7 +629,7 @@ load_channel_db(void)
 	rsdb_exec(channel_db_callback, 
 			"SELECT chname, topic, url, createmodes, "
 			"enforcemodes, tsinfo, reg_time, last_time, "
-			"flags, suspender FROM channels");
+			"flags, suspender, suspend_reason FROM channels");
 	rsdb_exec(member_db_callback, 
 			"SELECT chname, username, lastmod, level, "
 			"flags, suspend FROM members");
@@ -1394,15 +1400,18 @@ o_chan_chansuspend(struct client *client_p, struct lconn *conn_p, const char *pa
 		return 0;
 	}
 
-	slog(chanserv_p, 1, "%s - CHANSUSPEND %s",
-		OPER_NAME(client_p, conn_p), parv[0]);
+	slog(chanserv_p, 1, "%s - CHANSUSPEND %s %s",
+		OPER_NAME(client_p, conn_p), parv[0], parv[1]);
 
 	reg_p->flags |= CS_FLAGS_SUSPENDED;
 	reg_p->suspender = my_strdup(OPER_NAME(client_p, conn_p));
+	reg_p->suspend_reason = my_strndup(parv[1], SUSPENDREASONLEN);
 	reg_p->last_time = CURRENT_TIME;
 
-	rsdb_exec(NULL, "UPDATE channels SET flags=%d,suspender='%Q',last_time=%lu WHERE chname = '%Q'",
-			reg_p->flags, reg_p->suspender, reg_p->name, reg_p->last_time);
+	rsdb_exec(NULL, "UPDATE channels SET flags=%d, suspender='%Q', "
+			"suspend_reason='%Q', last_time=%lu WHERE chname = '%Q'",
+			reg_p->flags, reg_p->suspender, reg_p->suspend_reason,
+			reg_p->last_time, reg_p->name);
 
 	service_send(chanserv_p, client_p, conn_p,
 			"Channel %s suspended", parv[0]);
@@ -1434,9 +1443,11 @@ o_chan_chanunsuspend(struct client *client_p, struct lconn *conn_p, const char *
 	reg_p->flags &= ~CS_FLAGS_SUSPENDED;
 	my_free(reg_p->suspender);
 	reg_p->suspender = NULL;
+	my_free(reg_p->suspend_reason);
+	reg_p->suspend_reason = NULL;
 	reg_p->last_time = CURRENT_TIME;
 
-	rsdb_exec(NULL, "UPDATE channels SET flags=%d,suspender=NULL,last_time=%lu WHERE chname = '%Q'",
+	rsdb_exec(NULL, "UPDATE channels SET flags=%d,suspender=NULL,suspend_reason=NULL,last_time=%lu WHERE chname = '%Q'",
 			reg_p->flags, reg_p->name, reg_p->last_time);
 
 	service_send(chanserv_p, client_p, conn_p,
@@ -1587,8 +1598,9 @@ o_chan_chaninfo(struct client *client_p, struct lconn *conn_p, const char *parv[
 
 	if(chreg_p->flags & CS_FLAGS_SUSPENDED)
 		service_send(chanserv_p, client_p, conn_p,
-				"[%s] Suspended by %s",
-				chreg_p->name, chreg_p->suspender);
+				"[%s] Suspended by %s: %s",
+				chreg_p->name, chreg_p->suspender, 
+				chreg_p->suspend_reason ? chreg_p->suspend_reason : "");
 	else
 		dump_info_extended(client_p, conn_p, chreg_p);
 

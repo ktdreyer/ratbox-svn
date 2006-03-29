@@ -17,7 +17,8 @@ my %lengths = (
 	"TOPICLEN" => 1,
 	"HOSTLEN" => 1,
 	"REALLEN" => 1,
-	"REASONLEN" => 1
+	"REASONLEN" => 1,
+	"SUSPENDREASONLEN" => 1
 );
 
 my @srcs = ("setup.h", "rserv.h", "channel.h", "client.h");
