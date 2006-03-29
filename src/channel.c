@@ -712,10 +712,10 @@ c_sjoin(struct client *client_p, const char *parv[], int parc)
 	if(!keep_old_modes)
 		hook_call(HOOK_SJOIN_LOWERTS, chptr, NULL);
 
-	if(EmptyString(parv[3+args]))
+	if(EmptyString(parv[args]))
 		return;
 
-	nicks = LOCAL_COPY(parv[3+args]);
+	nicks = LOCAL_COPY(parv[args]);
 
         /* now parse the nicklist */
 	for(s = nicks; !EmptyString(s); s = p)
