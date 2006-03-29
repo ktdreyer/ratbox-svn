@@ -1,3 +1,13 @@
+leeh        2006/03/29 19:33:11 UTC	(20060329_3-22263)
+  Log:
+  - make userserv::userinfo show whether a username is suspended or not
+  - same for userserv::info
+  
+
+  Modified:
+	rserv/trunk/src/s_userserv.c (File Modified) 
+
+
 leeh        2006/03/29 19:24:24 UTC	(20060329_2-22261)
   Log:
   - add suspend reasons for users/channels
