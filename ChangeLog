@@ -1,3 +1,13 @@
+leeh        2006/03/29 19:19:02 UTC	(20060329_1-22259)
+  Log:
+  - parse_mode_simple() returns the position of the next parameter, not how
+    many it parsed -- fix sjoin to account for this
+  
+
+  Modified:
+	rserv/trunk/src/channel.c (File Modified) 
+
+
 leeh        2006/03/29 19:17:38 UTC	(20060329_0-22257)
   Log:
   - make add_service() use dlink_add_tail(), so that we init the services in
