@@ -795,6 +795,12 @@ o_user_userinfo(struct client *client_p, struct lconn *conn_p, const char *parv[
 			ureg_p->name,
 			get_duration((time_t) (CURRENT_TIME - ureg_p->reg_time)));
 
+	if(ureg_p->flags & US_FLAGS_SUSPENDED)
+		service_send(userserv_p, client_p, conn_p,
+				"[%s] Suspended by %s: %s",
+				ureg_p->name, ureg_p->suspender,
+				ureg_p->suspend_reason ? ureg_p->suspend_reason : "");
+
 	dump_user_info(client_p, conn_p, ureg_p);
 	return 0;
 }
@@ -1577,7 +1583,12 @@ s_user_info(struct client *client_p, struct lconn *conn_p, const char *parv[], i
 			ureg_p->name,
 			get_duration((time_t) (CURRENT_TIME - ureg_p->reg_time)));
 
-	if(ureg_p == client_p->user->user_reg)
+	if(ureg_p->flags & US_FLAGS_SUSPENDED)
+	{
+		service_error(userserv_p, client_p,
+				"[%s] Suspended by services admin", ureg_p->name);
+	}
+	else if(ureg_p == client_p->user->user_reg)
 	{
 		dump_user_info(client_p, NULL, ureg_p);
 		return 3;
