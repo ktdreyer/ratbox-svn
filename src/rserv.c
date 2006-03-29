@@ -319,18 +319,14 @@ main(int argc, char *argv[])
 	/* pre initialise our services so the conf parser is ok, these
 	 * require the balloc, events and init_client()
 	 */
-#ifdef ENABLE_ALIS
-	preinit_s_alis();
-#endif
-#ifdef ENABLE_OPERBOT
-	preinit_s_operbot();
-#endif
 #ifdef ENABLE_USERSERV
 	preinit_s_userserv();
 #ifdef ENABLE_CHANSERV
+	/* requires userserv inited */
 	preinit_s_chanserv();
 #endif
 #ifdef ENABLE_NICKSERV
+	/* requires userserv inited */
 	preinit_s_nickserv();
 #endif
 #endif
@@ -345,6 +341,12 @@ main(int argc, char *argv[])
 #endif
 #ifdef ENABLE_BANSERV
 	preinit_s_banserv();
+#endif
+#ifdef ENABLE_ALIS
+	preinit_s_alis();
+#endif
+#ifdef ENABLE_OPERBOT
+	preinit_s_operbot();
 #endif
 
 	/* load specific commands */

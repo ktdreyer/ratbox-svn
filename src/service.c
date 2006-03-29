@@ -248,7 +248,7 @@ add_service(struct service_handler *service)
         client_p->service->flood_max = service->flood_max;
         client_p->service->flood_max_ignore = service->flood_max_ignore;
 
-	dlink_add(client_p, &client_p->listnode, &service_list);
+	dlink_add_tail(client_p, &client_p->listnode, &service_list);
 
         if(service->ucommand != NULL)
                 add_ucommands(client_p, service->ucommand);
