@@ -1,3 +1,25 @@
+leeh        2006/03/29 19:24:24 UTC	(20060329_2-22261)
+  Log:
+  - add suspend reasons for users/channels
+  
+
+  Modified:
+	rserv/trunk/doc/base/schema-mysql.txt (File Modified) 
+	rserv/trunk/doc/base/schema-pgsql.txt (File Modified) 
+	rserv/trunk/doc/schema-sqlite.txt (File Modified) 
+	rserv/trunk/help/chanserv/chansuspend (File Modified) 
+	rserv/trunk/help/chanserv/u-chansuspend (File Modified) 
+	rserv/trunk/help/userserv/u-usersuspend (File Modified) 
+	rserv/trunk/help/userserv/usersuspend (File Modified) 
+	rserv/trunk/include/rserv.h (File Modified) 
+	rserv/trunk/include/s_chanserv.h (File Modified) 
+	rserv/trunk/include/s_userserv.h (File Modified) 
+	rserv/trunk/src/s_chanserv.c (File Modified) 
+	rserv/trunk/src/s_userserv.c (File Modified) 
+	rserv/trunk/tools/dbupgrade.pl (File Modified) 
+	rserv/trunk/tools/definetolength.pl (File Modified) 
+
+
 leeh        2006/03/29 19:19:02 UTC	(20060329_1-22259)
   Log:
   - parse_mode_simple() returns the position of the next parameter, not how
