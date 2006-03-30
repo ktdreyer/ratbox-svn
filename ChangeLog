@@ -1,3 +1,14 @@
+leeh        2006/03/30 19:26:10 UTC	(20060330_0-22267)
+  Log:
+  - make userserv::userlist show who suspended a username and why
+  - same for chanserv::chanlist
+  
+
+  Modified:
+	rserv/trunk/src/s_chanserv.c (File Modified) 
+	rserv/trunk/src/s_userserv.c (File Modified) 
+
+
 leeh        2006/03/29 21:06:01 UTC	(20060329_4-22265)
   Log:
   - track when our uplink supports TS6
