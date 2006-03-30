@@ -1537,10 +1537,17 @@ o_chan_chanlist(struct client *client_p, struct lconn *conn_p, const char *parv[
 			char timebuf[BUFSIZE];
 			const char *p = last_active;
 
-			if(suspended || !access_users_on_channel(chreg_p))
+			if(suspended)
 			{
-				snprintf(timebuf, sizeof(timebuf), "%s %s",
-					suspended ? "Suspended" : "Last",
+				snprintf(timebuf, sizeof(timebuf),
+					"Suspended by %s: %s",
+					chreg_p->suspender,
+					chreg_p->suspend_reason ? chreg_p->suspend_reason : NULL);
+				p = timebuf;
+			}
+			else if(!access_users_on_channel(chreg_p))
+			{
+				snprintf(timebuf, sizeof(timebuf), "Last %s",
 					get_short_duration(CURRENT_TIME - chreg_p->last_time));
 				p = timebuf;
 			}

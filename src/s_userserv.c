@@ -729,10 +729,17 @@ o_user_userlist(struct client *client_p, struct lconn *conn_p, const char *parv[
 			char timebuf[BUFSIZE];
 			const char *p = last_active;
 
-			if(suspended || !dlink_list_length(&ureg_p->users))
+			if(suspended)
 			{
-				snprintf(timebuf, sizeof(timebuf), "%s %s",
-					suspended ? "Suspended" : "Last",
+				snprintf(timebuf, sizeof(timebuf),
+					"Suspended by %s: %s",
+					ureg_p->suspender,
+					ureg_p->suspend_reason ? ureg_p->suspend_reason : NULL);
+				p = timebuf;
+			}
+			else if(!dlink_list_length(&ureg_p->users))
+			{
+				snprintf(timebuf, sizeof(timebuf), "Last %s",
 					get_short_duration(CURRENT_TIME - ureg_p->last_time));
 				p = timebuf;
 			}
