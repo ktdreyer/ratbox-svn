@@ -1,3 +1,22 @@
+leeh        2006/04/05 19:00:01 UTC	(20060405_0-22269)
+  Log:
+  - add beginnings of WATCHSERV service, so services opers can watch through
+    irc the commands users/opers issue
+  
+
+  Modified:
+	rserv/trunk/autoconf/configure.in (File Modified) 
+	rserv/trunk/configure (File Modified) 
+	rserv/trunk/include/c_init.h (File Modified) 
+	rserv/trunk/include/conf.h (File Modified) 
+	rserv/trunk/include/setup.h.in (File Modified) 
+	rserv/trunk/include/watch.h (File Added) 
+	rserv/trunk/src/Makefile.in (File Modified) 
+	rserv/trunk/src/rserv.c (File Modified) 
+	rserv/trunk/src/s_watchserv.c (File Added) 
+	rserv/trunk/src/service.c (File Modified) 
+
+
 leeh        2006/03/30 19:26:10 UTC	(20060330_0-22267)
   Log:
   - make userserv::userlist show who suspended a username and why
