@@ -785,7 +785,7 @@ service_stats(struct client *service_p, struct lconn *conn_p)
 {
         struct service_command *cmd_table;
         char buf[BUFSIZE];
-        char buf2[20];
+        char buf2[40];
         int i;
         int j = 0;
 

@@ -52,10 +52,10 @@ BSRCS = 		\
 	snprintf.c	\
 	tools.c		\
         u_stats.c       \
-	ucommand.c
+	ucommand.c	
 
 SRCS = ${BSRCS} @S_NICKSERV@ @S_USERSERV@ @S_CHANSERV@ @S_OPERSERV@ @S_ALIS@\
-	@S_OPERBOT@ @S_JUPESERV@ @S_GLOBAL@ @S_BANSERV@ rsdb_@DB_BACKEND@.c
+	@S_OPERBOT@ @S_JUPESERV@ @S_GLOBAL@ @S_BANSERV@ @S_WATCHSERV@ rsdb_@DB_BACKEND@.c
 
 OBJS=$(SRCS:.c=.o)
 

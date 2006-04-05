@@ -58,6 +58,7 @@
 #include "cache.h"
 #include "newconf.h"
 #include "hook.h"
+#include "watch.h"
 #include "serno.h"
 
 struct timeval system_time;
@@ -348,6 +349,9 @@ main(int argc, char *argv[])
 #ifdef ENABLE_OPERBOT
 	preinit_s_operbot();
 #endif
+#ifdef ENABLE_WATCHSERV
+	preinit_s_watchserv();
+#endif
 
 	/* load specific commands */
         add_scommand_handler(&error_command);
@@ -483,3 +487,12 @@ valid_sid(const char *name)
 
 	return 0;
 }
+
+/* This is in s_watchserv.c -- if we dont have that, we cant use it. */
+#ifndef ENABLE_WATCHSERV
+void
+watch_send(unsigned int flag, const char *format, ...)
+{
+}
+#endif
+

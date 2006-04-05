@@ -192,6 +192,20 @@ else
 	AC_MSG_RESULT(no)
 fi
 
+AC_MSG_CHECKING(Watch Service)
+AC_ARG_ENABLE(watchserv,
+[ --disable-watchserv       Disable command watching service],
+ [ cf_enable_watchserv=$enableval ],[ cf_enable_watchserv=yes ])
+
+if test "X$cf_enable_watchserv" = "Xyes"; then
+	S_WATCHSERV="s_watchserv.c"
+	AC_DEFINE(ENABLE_WATCHSERV, 1, Command Watching Service)
+	AC_MSG_RESULT(yes)
+else
+	S_WATCHSERV=""
+	AC_MSG_RESULT(no)
+fi
+
 ac_cv_sqlite3_val=""
 ac_cv_mysql_val=""
 ac_cv_sqlite3_path=""
@@ -361,6 +375,7 @@ AC_SUBST(S_JUPESERV)
 AC_SUBST(S_OPERBOT)
 AC_SUBST(S_GLOBAL)
 AC_SUBST(S_BANSERV)
+AC_SUBST(S_WATCHSERV)
 
 AC_OUTPUT(			\
 	Makefile		\
@@ -383,6 +398,7 @@ echo Oper invite/op bot ......... $cf_enable_operbot
 echo Global Message Service ..... $cf_enable_global
 echo List Service ............... $cf_enable_alis
 echo Ban Service ................ $cf_enable_banserv
+echo Command Watching Service ... $cf_enable_watchserv
 echo
 echo Nick Length ................ $ac_cv_nicklen
 echo Topic Length ............... $ac_cv_topiclen

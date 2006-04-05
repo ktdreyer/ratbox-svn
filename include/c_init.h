@@ -22,6 +22,7 @@ void preinit_s_operserv(void);
 void preinit_s_nickserv(void);
 void preinit_s_global(void);
 void preinit_s_banserv(void);
+void preinit_s_watchserv(void);
 
 /* u_stats.c */
 extern struct ucommand_handler stats_ucommand;
