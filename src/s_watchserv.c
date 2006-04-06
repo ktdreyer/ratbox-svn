@@ -59,9 +59,6 @@ static struct
 	{ NULL, 0 }
 };
 
-static dlink_list watch_list_client;
-static dlink_list watch_list_conn;
-
 static struct client *watchserv_p;
 
 static int o_watch_watch(struct client *, struct lconn *, const char **, int);
@@ -82,30 +79,10 @@ static struct service_handler watchserv_service = {
 	60, 80, watch_command, sizeof(watch_command), watch_ucommand, NULL, NULL
 };
 
-static int h_watchserv_dcc_auth(void *conn_p_v, void *unused);
-static int h_watchserv_dcc_exit(void *conn_p_v, void *unused);
-
 void
 preinit_s_watchserv(void)
 {
 	watchserv_p = add_service(&watchserv_service);
-
-	hook_add(h_watchserv_dcc_auth, HOOK_DCC_AUTH);
-	hook_add(h_watchserv_dcc_exit, HOOK_DCC_EXIT);
-}
-
-static int
-h_watchserv_dcc_auth(void *conn_p_v, void *unused)
-{
-	dlink_add_alloc(conn_p_v, &watch_list_conn);
-	return 0;
-}
-
-static int
-h_watchserv_dcc_exit(void *conn_p_v, void *unused)
-{
-	dlink_find_destroy(conn_p_v, &watch_list_conn);
-	return 0;
 }
 
 static unsigned int
@@ -229,7 +206,7 @@ watch_send(unsigned int flag, const char *format, ...)
 
 	flagname = watch_find_name(flag);
 
-	DLINK_FOREACH(ptr, watch_list_client.head)
+	DLINK_FOREACH(ptr, oper_list.head)
 	{
 		client_p = ptr->data;
 
@@ -242,7 +219,7 @@ watch_send(unsigned int flag, const char *format, ...)
 					"[watch:%s] %s", flagname, buf);
 	}
 
-	DLINK_FOREACH(ptr, watch_list_conn.head)
+	DLINK_FOREACH(ptr, connection_list.head)
 	{
 		conn_p = ptr->data;
 
