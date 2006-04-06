@@ -1,3 +1,14 @@
+leeh        2006/04/06 22:35:06 UTC	(20060406_5-22287)
+  Log:
+  - make LISTOPERS use loglevel 2
+  - note loglevel 2 in operserv is DBSYNC and LISTOPERS
+  
+
+  Modified:
+	rserv/trunk/doc/example.conf (File Modified) 
+	rserv/trunk/src/s_operserv.c (File Modified) 
+
+
 leeh        2006/04/06 22:33:29 UTC	(20060406_4-22285)
   Log:
   - move watchflags into struct user
