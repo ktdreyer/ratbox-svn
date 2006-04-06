@@ -1,3 +1,17 @@
+leeh        2006/04/06 22:33:29 UTC	(20060406_4-22285)
+  Log:
+  - move watchflags into struct user
+  - reset buf_on and buf_off in watch_list(), and send messages from
+    watchserv_p
+  - watch_find_flag() needs !strcasecmp
+  
+
+  Modified:
+	rserv/trunk/include/client.h (File Modified) 
+	rserv/trunk/include/conf.h (File Modified) 
+	rserv/trunk/src/s_watchserv.c (File Modified) 
+
+
 leeh        2006/04/06 22:19:31 UTC	(20060406_3-22283)
   Log:
   - fix PRINTFLIKE() args to watch_send()
