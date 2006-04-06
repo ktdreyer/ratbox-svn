@@ -1,3 +1,12 @@
+leeh        2006/04/06 22:05:18 UTC	(20060406_1-22279)
+  Log:
+  - make watchserv walk the existing lists for clients to message
+  
+
+  Modified:
+	rserv/trunk/src/s_watchserv.c (File Modified) 
+
+
 leeh        2006/04/06 20:56:55 UTC	(20060406_0-22277)
   Log:
   - add watchflags into struct lconn, as we deallocate the oper conf on auth
