@@ -54,6 +54,7 @@ struct user
 
 	struct user_reg *user_reg;
 	struct conf_oper *oper;
+	int watchflags;
 
 	dlink_list channels;
 

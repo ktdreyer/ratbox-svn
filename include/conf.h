@@ -126,7 +126,6 @@ struct conf_oper
 	char *server;
 	unsigned int flags;		/* general flags */
 	unsigned int sflags;		/* individual service flags */
-	unsigned int watchflags;	/* spy flags */
 	int refcount;
 };
 

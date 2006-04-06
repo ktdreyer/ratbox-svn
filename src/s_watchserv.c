@@ -44,11 +44,11 @@
 #include "hook.h"
 
 #define WatchCapable(client_p, conn_p, flag) \
-	((conn_p) ? ((conn_p)->watchflags & flag) : ((client_p)->user->oper->watchflags & flag))
+	((conn_p) ? ((conn_p)->watchflags & flag) : ((client_p)->user->watchflags & flag))
 #define WatchSet(client_p, conn_p, flag) \
-	((conn_p) ? ((conn_p)->watchflags |= flag) : ((client_p)->user->oper->watchflags |= flag))
+	((conn_p) ? ((conn_p)->watchflags |= flag) : ((client_p)->user->watchflags |= flag))
 #define WatchClear(client_p, conn_p, flag) \
-	((conn_p) ? ((conn_p)->watchflags &= ~flag) : ((client_p)->user->oper->watchflags &= ~flag))
+	((conn_p) ? ((conn_p)->watchflags &= ~flag) : ((client_p)->user->watchflags &= ~flag))
 
 static struct
 {
@@ -92,7 +92,7 @@ watch_find_flag(const char *name)
 
 	for(i = 0; watch_flags[i].name; i++)
 	{
-		if(strcasecmp(name, watch_flags[i].name))
+		if(!strcasecmp(name, watch_flags[i].name))
 			return watch_flags[i].flag;
 	}
 
@@ -121,6 +121,8 @@ watch_show(struct client *client_p, struct lconn *conn_p)
 	static char buf_off[BUFSIZE];
 	int i;
 
+	buf_on[0] = buf_off[0] = '\0';
+
 	for(i = 0; watch_flags[i].name; i++)
 	{
 		if(WatchCapable(client_p, conn_p, watch_flags[i].flag))
@@ -137,11 +139,16 @@ watch_show(struct client *client_p, struct lconn *conn_p)
 		
 	}
 
-	/* XXX -- service */
-	service_send(NULL, client_p, conn_p, "Watching:");
-	service_send(NULL, client_p, conn_p, "  %s", buf_on);
-	service_send(NULL, client_p, conn_p, "Available flags:");
-	service_send(NULL, client_p, conn_p, "  %s", buf_off);
+	service_send(watchserv_p, client_p, conn_p, "Watching:");
+
+	if(buf_on[0] != '\0')
+		service_send(watchserv_p, client_p, conn_p, "  %s", buf_on);
+
+	if(buf_off[0] != '\0')
+	{
+		service_send(watchserv_p, client_p, conn_p, "Available flags:");
+		service_send(watchserv_p, client_p, conn_p, "  %s", buf_off);
+	}
 }
 
 int
@@ -151,7 +158,6 @@ o_watch_watch(struct client *client_p, struct lconn *conn_p, const char **parv, 
 	char *p, *next;
 	unsigned int flag;
 	int dir;
-	int i;
 
 	if(parc < 1 || EmptyString(parv[0]))
 	{
@@ -177,9 +183,9 @@ o_watch_watch(struct client *client_p, struct lconn *conn_p, const char **parv, 
 		if(flag)
 		{
 			if(dir)
-				WatchSet(client_p, conn_p, watch_flags[i].flag);
+				WatchSet(client_p, conn_p, flag);
 			else
-				WatchClear(client_p, conn_p, watch_flags[i].flag);
+				WatchClear(client_p, conn_p, flag);
 		}
 
 		p = next;
