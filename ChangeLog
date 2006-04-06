@@ -1,3 +1,16 @@
+leeh        2006/04/06 22:19:31 UTC	(20060406_3-22283)
+  Log:
+  - fix PRINTFLIKE() args to watch_send()
+  - fix double usage of client_p in watch_send()
+  - add watch_send() calls to operserv
+  
+
+  Modified:
+	rserv/trunk/include/watch.h (File Modified) 
+	rserv/trunk/src/s_operserv.c (File Modified) 
+	rserv/trunk/src/s_watchserv.c (File Modified) 
+
+
 leeh        2006/04/06 22:13:13 UTC	(20060406_2-22281)
   Log:
   - add OPER_MASK() to get the n!u@h mask of an oper -- returns "-" for dcc
