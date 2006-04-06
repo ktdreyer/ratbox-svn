@@ -224,11 +224,15 @@ u_login(struct client *unused, struct lconn *conn_p, const char *parv[], int par
         conn_p->flags |= UMODE_DEFAULT;
 	conn_p->privs = oper_p->flags;
 	conn_p->sprivs = oper_p->sflags;
+	conn_p->watchflags = 0;
 
         sendto_one(conn_p, "Login successful, for available commands see .help");
 
 	deallocate_conf_oper(oper_p);
 	conn_p->oper = NULL;
+
+	hook_call(HOOK_DCC_AUTH, conn_p, NULL);
+
 	return 0;
 }
 

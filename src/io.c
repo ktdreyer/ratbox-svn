@@ -48,6 +48,7 @@
 #include "client.h"
 #include "log.h"
 #include "service.h"
+#include "hook.h"
 #include "serno.h"
 
 #define IO_HOST	0
@@ -726,6 +727,8 @@ signoff_client(struct lconn *conn_p)
 {
 	if(ConnDead(conn_p))
 		return;
+
+	hook_call(HOOK_DCC_EXIT, conn_p, NULL);
 
 	/* Mark it as dead right away to avoid infinite calls! -- jilles */
 	SetConnDead(conn_p);

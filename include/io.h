@@ -23,6 +23,7 @@ struct lconn
 	int flags;
 	int privs;		/* privs as an oper */
 	int sprivs;		/* privs on services */
+	int watchflags;
 	time_t first_time;
 	time_t last_time;
 

@@ -41,13 +41,14 @@
 #include "ucommand.h"
 #include "c_init.h"
 #include "watch.h"
+#include "hook.h"
 
 #define WatchCapable(client_p, conn_p, flag) \
-	((conn_p) ? ((conn_p)->oper->watchflags & flag) : ((client_p)->user->oper->flags & flag))
+	((conn_p) ? ((conn_p)->watchflags & flag) : ((client_p)->user->oper->watchflags & flag))
 #define WatchSet(client_p, conn_p, flag) \
-	((conn_p) ? ((conn_p)->oper->watchflags |= flag) : ((client_p)->user->oper->flags |= flag))
+	((conn_p) ? ((conn_p)->watchflags |= flag) : ((client_p)->user->oper->watchflags |= flag))
 #define WatchClear(client_p, conn_p, flag) \
-	((conn_p) ? ((conn_p)->oper->watchflags &= ~flag) : ((client_p)->user->oper->flags &= ~flag))
+	((conn_p) ? ((conn_p)->watchflags &= ~flag) : ((client_p)->user->oper->watchflags &= ~flag))
 
 static struct
 {
@@ -81,10 +82,30 @@ static struct service_handler watchserv_service = {
 	60, 80, watch_command, sizeof(watch_command), watch_ucommand, NULL, NULL
 };
 
+static int h_watchserv_dcc_auth(void *conn_p_v, void *unused);
+static int h_watchserv_dcc_exit(void *conn_p_v, void *unused);
+
 void
 preinit_s_watchserv(void)
 {
 	watchserv_p = add_service(&watchserv_service);
+
+	hook_add(h_watchserv_dcc_auth, HOOK_DCC_AUTH);
+	hook_add(h_watchserv_dcc_exit, HOOK_DCC_EXIT);
+}
+
+static int
+h_watchserv_dcc_auth(void *conn_p_v, void *unused)
+{
+	dlink_add_alloc(conn_p_v, &watch_list_conn);
+	return 0;
+}
+
+static int
+h_watchserv_dcc_exit(void *conn_p_v, void *unused)
+{
+	dlink_find_destroy(conn_p_v, &watch_list_conn);
+	return 0;
 }
 
 static unsigned int
@@ -213,7 +234,7 @@ watch_send(unsigned int flag, const char *format, ...)
 		client_p = ptr->data;
 
 		/* We have to cast NULL here, as my (crap?) macro for
-		 * WatchCapable() would expand to ((void *)0)->oper
+		 * WatchCapable() would expand to ((void *)0)->watchflags
 		 * otherwise.  For obvious reasons that wont compile. --anfl
 		 */
 		if(WatchCapable(client_p, (struct lconn *) NULL, flag))
@@ -227,7 +248,7 @@ watch_send(unsigned int flag, const char *format, ...)
 
 		/* Same cast reason as above */
 		if(WatchCapable((struct client *) NULL, conn_p, flag))
-			;
+			sendto_one(conn_p, "[watch:%s] %s", flagname, buf);
 	}
 }
 
