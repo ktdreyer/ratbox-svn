@@ -470,7 +470,7 @@ o_oper_listopers(struct client *client_p, struct lconn *conn_p, const char *parv
 
 	service_send(operserv_p, client_p, conn_p, "End of connections");
 
-	slog(operserv_p, 1, "%s - LISTOPERS", OPER_NAME(client_p, conn_p));
+	slog(operserv_p, 2, "%s - LISTOPERS", OPER_NAME(client_p, conn_p));
 	watch_send(WATCH_OPERSERV, client_p, conn_p, "LISTOPERS");
 
 	return 0;
