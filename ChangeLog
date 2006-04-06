@@ -1,3 +1,18 @@
+leeh        2006/04/06 20:56:55 UTC	(20060406_0-22277)
+  Log:
+  - add watchflags into struct lconn, as we deallocate the oper conf on auth
+  - add hooks for when a dcc client auths/exits
+  - make watchserv add dcc clients to its list of people to send to
+  
+
+  Modified:
+	rserv/trunk/include/hook.h (File Modified) 
+	rserv/trunk/include/io.h (File Modified) 
+	rserv/trunk/src/io.c (File Modified) 
+	rserv/trunk/src/s_watchserv.c (File Modified) 
+	rserv/trunk/src/ucommand.c (File Modified) 
+
+
 leeh        2006/04/05 19:00:01 UTC	(20060405_0-22269)
   Log:
   - add beginnings of WATCHSERV service, so services opers can watch through
