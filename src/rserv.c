@@ -491,7 +491,8 @@ valid_sid(const char *name)
 /* This is in s_watchserv.c -- if we dont have that, we cant use it. */
 #ifndef ENABLE_WATCHSERV
 void
-watch_send(unsigned int flag, const char *format, ...)
+watch_send(unsigned int flag, struct client *client_p, struct lconn *conn_p,
+		const char *format, ...)
 {
 }
 #endif

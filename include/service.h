@@ -47,6 +47,7 @@ struct service_handler
 extern dlink_list service_list;
 
 #define OPER_NAME(client_p, conn_p) ((conn_p) ? (conn_p)->name : (client_p)->user->oper->name)
+#define OPER_MASK(client_p, conn_p) ((conn_p) ? "-" : (client_p)->user->mask)
 
 extern void rehash_help(void);
 

@@ -45,6 +45,7 @@
 #include "ucommand.h"
 #include "modebuild.h"
 #include "log.h"
+#include "watch.h"
 
 static void init_s_operserv(void);
 

@@ -191,7 +191,8 @@ o_watch_watch(struct client *client_p, struct lconn *conn_p, const char **parv, 
 }
 
 void
-watch_send(unsigned int flag, const char *format, ...)
+watch_send(unsigned int flag, struct client *client_p, struct lconn *conn_p,
+		const char *format, ...)
 {
 	static char buf[BUFSIZE];
 	struct client *client_p;
@@ -216,7 +217,9 @@ watch_send(unsigned int flag, const char *format, ...)
 		 */
 		if(WatchCapable(client_p, (struct lconn *) NULL, flag))
 			service_error(watchserv_p, client_p, 
-					"[watch:%s] %s", flagname, buf);
+					"[watch:%s] [%s:%s] %s", 
+					flagname, OPER_NAME(client_p, conn_p),
+					OPER_MASK(client_p, conn_p), buf);
 	}
 
 	DLINK_FOREACH(ptr, connection_list.head)
@@ -225,7 +228,9 @@ watch_send(unsigned int flag, const char *format, ...)
 
 		/* Same cast reason as above */
 		if(WatchCapable((struct client *) NULL, conn_p, flag))
-			sendto_one(conn_p, "[watch:%s] %s", flagname, buf);
+			sendto_one(conn_p, "[watch:%s] [%s:%s] %s", 
+					OPER_NAME(client_p, conn_p),
+					OPER_MASK(client_p, conn_p), flagname, buf);
 	}
 }
 
