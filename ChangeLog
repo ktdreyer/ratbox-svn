@@ -1,3 +1,14 @@
+leeh        2006/04/07 21:44:32 UTC	(20060407_4-22297)
+  Log:
+  - add watch entries for some chanserv commands
+  
+
+  Modified:
+	rserv/trunk/include/watch.h (File Modified) 
+	rserv/trunk/src/s_chanserv.c (File Modified) 
+	rserv/trunk/src/s_watchserv.c (File Modified) 
+
+
 leeh        2006/04/07 20:16:57 UTC	(20060407_3-22295)
   Log:
   - make watch_send() take an oper parameter, noting whether we're searching
