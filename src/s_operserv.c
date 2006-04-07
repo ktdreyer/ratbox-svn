@@ -274,7 +274,7 @@ o_oper_takeover(struct client *client_p, struct lconn *conn_p, const char *parv[
 
 	slog(operserv_p, 1, "%s - TAKEOVER %s",
 		OPER_NAME(client_p, conn_p), parv[0]);
-	watch_send(WATCH_OPERSERV, client_p, conn_p, "TAKEOVER %s", parv[0]);
+	watch_send(WATCH_OPERSERV, client_p, conn_p, 1, "TAKEOVER %s", parv[0]);
 
 	service_send(operserv_p, client_p, conn_p,
 			"Channel %s has been taken over", chptr->name);
@@ -304,7 +304,7 @@ o_oper_osjoin(struct client *client_p, struct lconn *conn_p, const char *parv[],
 
 	slog(operserv_p, 1, "%s - OSJOIN %s",
 		OPER_NAME(client_p, conn_p), parv[0]);
-	watch_send(WATCH_OPERSERV, client_p, conn_p, "OSJOIN %s", parv[0]);
+	watch_send(WATCH_OPERSERV, client_p, conn_p, 1, "OSJOIN %s", parv[0]);
 
 	tsinfo = chptr != NULL ? chptr->tsinfo : CURRENT_TIME;
 
@@ -325,7 +325,7 @@ o_oper_ospart(struct client *client_p, struct lconn *conn_p, const char *parv[],
 	{
 		slog(operserv_p, 1, "%s - OSPART %s", 
 			OPER_NAME(client_p, conn_p), parv[0]);
-		watch_send(WATCH_OPERSERV, client_p, conn_p, "OSPART %s", parv[0]);
+		watch_send(WATCH_OPERSERV, client_p, conn_p, 1, "OSPART %s", parv[0]);
 
 		rsdb_exec(NULL, "DELETE FROM operserv WHERE "
 				"chname = '%Q'", parv[0]);
@@ -358,7 +358,7 @@ o_oper_omode(struct client *client_p, struct lconn *conn_p, const char *parv[], 
 
 	slog(operserv_p, 1, "%s - OMODE %s %s",
 		OPER_NAME(client_p, conn_p), chptr->name, args);
-	watch_send(WATCH_OPERSERV, client_p, conn_p, "OMODE %s %s", chptr->name, args);
+	watch_send(WATCH_OPERSERV, client_p, conn_p, 1, "OMODE %s %s", chptr->name, args);
 
 	service_send(operserv_p, client_p, conn_p, "OMODE issued");
 	return 0;
@@ -370,7 +370,7 @@ o_oper_dbsync(struct client *client_p, struct lconn *conn_p, const char *parv[],
 	hook_call(HOOK_DBSYNC, NULL, NULL);
 
 	slog(operserv_p, 2, "%s - DBSYNC", OPER_NAME(client_p, conn_p));
-	watch_send(WATCH_OPERSERV, client_p, conn_p, "DBSYNC");
+	watch_send(WATCH_OPERSERV, client_p, conn_p, 1, "DBSYNC");
 
 	service_send(operserv_p, client_p, conn_p, "Databases have been synced");
 	return 0;
@@ -471,7 +471,7 @@ o_oper_listopers(struct client *client_p, struct lconn *conn_p, const char *parv
 	service_send(operserv_p, client_p, conn_p, "End of connections");
 
 	slog(operserv_p, 2, "%s - LISTOPERS", OPER_NAME(client_p, conn_p));
-	watch_send(WATCH_OPERSERV, client_p, conn_p, "LISTOPERS");
+	watch_send(WATCH_OPERSERV, client_p, conn_p, 1, "LISTOPERS");
 
 	return 0;
 }

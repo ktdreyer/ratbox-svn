@@ -145,7 +145,7 @@ o_global_netmsg(struct client *client_p, struct lconn *conn_p, const char *parv[
 
 	slog(global_p, 1, "%s - NETMSG %s", 
 		OPER_NAME(client_p, conn_p), data);
-	watch_send(WATCH_GLOBAL, client_p, conn_p, "NETMSG %s", data);
+	watch_send(WATCH_GLOBAL, client_p, conn_p, 1, "NETMSG %s", data);
 
 	return 0;
 }
@@ -205,7 +205,7 @@ o_global_addwelcome(struct client *client_p, struct lconn *conn_p, const char *p
 			"Welcome message %u set", id);
 	slog(global_p, 1, "%s - ADDWELCOME %u %s",
 		OPER_NAME(client_p, conn_p), id, data);
-	watch_send(WATCH_GLOBAL, client_p, conn_p, "ADDWELCOME %u %s", id, data);
+	watch_send(WATCH_GLOBAL, client_p, conn_p, 1, "ADDWELCOME %u %s", id, data);
 
 	return 0;
 }
@@ -233,7 +233,7 @@ o_global_delwelcome(struct client *client_p, struct lconn *conn_p, const char *p
 			"Welcome message %u deleted", id);
 	slog(global_p, 1, "%s - DELWELCOME %u",
 		OPER_NAME(client_p, conn_p), id);
-	watch_send(WATCH_GLOBAL, client_p, conn_p, "DELWELCOME %u", id);
+	watch_send(WATCH_GLOBAL, client_p, conn_p, 1, "DELWELCOME %u", id);
 
 	return 0;
 }
@@ -254,7 +254,7 @@ o_global_listwelcome(struct client *client_p, struct lconn *conn_p, const char *
 
 	service_send(global_p, client_p, conn_p, "End of welcome messages");
 
-	watch_send(WATCH_GLOBAL, client_p, conn_p, "LISTWELCOME");
+	watch_send(WATCH_GLOBAL, client_p, conn_p, 1, "LISTWELCOME");
 
 	return 0;
 }

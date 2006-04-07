@@ -42,6 +42,7 @@
 #include "c_init.h"
 #include "watch.h"
 #include "hook.h"
+#include "s_userserv.h"
 
 #define WatchCapable(client_p, conn_p, flag) \
 	((conn_p) ? ((conn_p)->watchflags & flag) : ((client_p)->user->watchflags & flag))
@@ -201,12 +202,13 @@ o_watch_watch(struct client *client_p, struct lconn *conn_p, const char **parv, 
 
 void
 watch_send(unsigned int flag, struct client *source_client_p, struct lconn *source_conn_p,
-		const char *format, ...)
+		int oper, const char *format, ...)
 {
 	static char buf[BUFSIZE];
 	struct client *client_p;
 	struct lconn *conn_p;
 	const char *flagname;
+	const char *name;
 	va_list args;
 	dlink_node *ptr;
 
@@ -215,6 +217,11 @@ watch_send(unsigned int flag, struct client *source_client_p, struct lconn *sour
 	va_end(args);
 
 	flagname = watch_find_name(flag);
+
+	if(oper)
+		name = OPER_NAME(source_client_p, source_conn_p);
+	else
+		name = client_p->user->user_reg ? client_p->user->user_reg->name : "-";
 
 	DLINK_FOREACH(ptr, oper_list.head)
 	{
@@ -226,8 +233,8 @@ watch_send(unsigned int flag, struct client *source_client_p, struct lconn *sour
 		 */
 		if(WatchCapable(client_p, (struct lconn *) NULL, flag))
 			service_error(watchserv_p, client_p, 
-					"[watch:%s] [%s:%s] %s", 
-					flagname, OPER_NAME(source_client_p, source_conn_p),
+					"[watch:%s] [%s%s:%s] %s", 
+					flagname, oper ? "*" : "", name,
 					OPER_MASK(source_client_p, source_conn_p), buf);
 	}
 
@@ -237,10 +244,10 @@ watch_send(unsigned int flag, struct client *source_client_p, struct lconn *sour
 
 		/* Same cast reason as above */
 		if(WatchCapable((struct client *) NULL, conn_p, flag))
-			sendto_one(conn_p, "[watch:%s] [%s:%s] %s", 
-					OPER_NAME(source_client_p, source_conn_p),
+			sendto_one(conn_p, "[watch:%s] [%s%s:%s] %s",
+					flagname, oper ? "*" : "", name,
 					OPER_MASK(source_client_p, source_conn_p), 
-					flagname, buf);
+					buf);
 	}
 }
 

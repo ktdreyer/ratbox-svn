@@ -142,7 +142,7 @@ o_operbot_objoin(struct client *client_p, struct lconn *conn_p, const char *parv
 
 	slog(operbot_p, 1, "%s - OBJOIN %s", 
 		OPER_NAME(client_p, conn_p), parv[0]);
-	watch_send(WATCH_OPERBOT, client_p, conn_p, "OBJOIN %s", parv[0]);
+	watch_send(WATCH_OPERBOT, client_p, conn_p, 1, "OBJOIN %s", parv[0]);
 
 	tsinfo = chptr != NULL ? chptr->tsinfo : CURRENT_TIME;
 
@@ -163,7 +163,7 @@ o_operbot_obpart(struct client *client_p, struct lconn *conn_p, const char *parv
 	{
 		slog(operbot_p, 1, "%s - OBPART %s", 
 			OPER_NAME(client_p, conn_p), parv[0]);
-		watch_send(WATCH_OPERBOT, client_p, conn_p, "OBPART %s", parv[0]);
+		watch_send(WATCH_OPERBOT, client_p, conn_p, 1, "OBPART %s", parv[0]);
 
 		rsdb_exec(NULL, "DELETE FROM operbot WHERE chname = '%Q'",
 				parv[0]);

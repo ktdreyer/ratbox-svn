@@ -7,7 +7,7 @@
 #define WATCH_OPERBOT		0x00000004
 #define WATCH_JUPESERV		0x00000008
 
-void PRINTFLIKE(4, 5) watch_send(unsigned int flag, struct client *client_p,
-				struct lconn *conn_p, const char *format, ...);
+void PRINTFLIKE(5, 6) watch_send(unsigned int flag, struct client *client_p,
+				struct lconn *conn_p, int oper, const char *format, ...);
 
 #endif

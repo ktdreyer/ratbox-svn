@@ -492,7 +492,7 @@ valid_sid(const char *name)
 #ifndef ENABLE_WATCHSERV
 void
 watch_send(unsigned int flag, struct client *client_p, struct lconn *conn_p,
-		const char *format, ...)
+		int oper, const char *format, ...)
 {
 }
 #endif
