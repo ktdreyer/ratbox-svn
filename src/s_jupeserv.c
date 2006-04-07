@@ -46,6 +46,7 @@
 #include "newconf.h"
 #include "hook.h"
 #include "event.h"
+#include "watch.h"
 
 struct server_jupe
 {
@@ -417,6 +418,8 @@ s_jupeserv_calljupe(struct client *client_p, struct lconn *conn_p, const char *p
 	slog(jupeserv_p, 1, "%s{%s} - CALLJUPE %s %s",
 		client_p->user->mask, client_p->user->servername,
 		parv[0], jupe_p->reason);
+	watch_send(WATCH_JUPESERV, client_p, conn_p, "CALLJUPE %s %s",
+			parv[0], jupe_p->reason);
 
 	jupe_p->expire = CURRENT_TIME + config_file.pending_time;
 	jupe_p->points += config_file.oper_score;
@@ -426,6 +429,7 @@ s_jupeserv_calljupe(struct client *client_p, struct lconn *conn_p, const char *p
 	{
 		slog(jupeserv_p, 1, "%s{%s} - TRIGGERJUPE %s",
 			client_p->user->mask, client_p->user->servername, parv[0]);
+		watch_send(WATCH_JUPESERV, client_p, conn_p, "TRIGGERJUPE %s", parv[0]);
 
 		sendto_server(":%s WALLOPS :JUPE triggered on %s by %s!%s@%s on %s [%s]",
 				MYNAME, jupe_p->name, client_p->name,
@@ -472,6 +476,7 @@ s_jupeserv_callunjupe(struct client *client_p, struct lconn *conn_p, const char 
 
 	slog(jupeserv_p, 1, "%s{%s} - CALLUNJUPE %s",
 		client_p->user->mask, client_p->user->servername, parv[0]);
+	watch_send(WATCH_JUPESERV, client_p, conn_p, "CALLUNJUPE %s", parv[0]);
 
 	jupe_p->expire = CURRENT_TIME + config_file.pending_time;
 	jupe_p->points -= config_file.oper_score;
@@ -480,6 +485,7 @@ s_jupeserv_callunjupe(struct client *client_p, struct lconn *conn_p, const char 
 	{
 		slog(jupeserv_p, 1, "%s{%s} - TRIGGERUNJUPE %s",
 			client_p->user->mask, client_p->user->servername, parv[0]);
+		watch_send(WATCH_JUPESERV, client_p, conn_p, "TRIGGERUNJUPE %s", parv[0]);
 
 		sendto_server(":%s WALLOPS :UNJUPE triggered on %s by %s!%s@%s on %s",
 				MYNAME, jupe_p->name, client_p->name,
@@ -524,6 +530,7 @@ s_jupeserv_pending(struct client *client_p, struct lconn *conn_p, const char *pa
 
 	slog(jupeserv_p, 3, "%s{%s} - PENDING",
 		client_p->user->mask, client_p->user->servername);
+	watch_send(WATCH_JUPESERV, client_p, conn_p, "PENDING");
 
 	service_error(jupeserv_p, client_p, "Pending jupes:");
 

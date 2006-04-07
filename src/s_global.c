@@ -43,6 +43,7 @@
 #include "ucommand.h"
 #include "log.h"
 #include "hook.h"
+#include "watch.h"
 
 /* maximum length of a welcome message */
 #define WELCOME_MAGIC	400

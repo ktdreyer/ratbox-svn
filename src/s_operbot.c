@@ -45,6 +45,7 @@
 #include "hook.h"
 #include "ucommand.h"
 #include "newconf.h"
+#include "watch.h"
 
 static void init_s_operbot(void);
 
