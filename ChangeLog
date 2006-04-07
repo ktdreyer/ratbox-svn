@@ -1,3 +1,17 @@
+leeh        2006/04/07 20:04:30 UTC	(20060407_2-22293)
+  Log:
+  - make OPER_NAME() safe for none logged in services opers
+  - add remaining watch_send() calls in jupeserv
+  - add #include "watch.h" where its needed
+  
+
+  Modified:
+	rserv/trunk/include/service.h (File Modified) 
+	rserv/trunk/src/s_global.c (File Modified) 
+	rserv/trunk/src/s_jupeserv.c (File Modified) 
+	rserv/trunk/src/s_operbot.c (File Modified) 
+
+
 leeh        2006/04/07 19:57:43 UTC	(20060407_1-22291)
   Log:
   - add watching for global/jupeserv/operbot
