@@ -1,3 +1,16 @@
+leeh        2006/04/07 19:57:43 UTC	(20060407_1-22291)
+  Log:
+  - add watching for global/jupeserv/operbot
+  
+
+  Modified:
+	rserv/trunk/include/watch.h (File Modified) 
+	rserv/trunk/src/s_global.c (File Modified) 
+	rserv/trunk/src/s_jupeserv.c (File Modified) 
+	rserv/trunk/src/s_operbot.c (File Modified) 
+	rserv/trunk/src/s_watchserv.c (File Modified) 
+
+
 leeh        2006/04/07 19:48:55 UTC	(20060407_0-22289)
   Log:
   - add the watchserv entry to example.conf
