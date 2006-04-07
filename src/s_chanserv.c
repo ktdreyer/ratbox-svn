@@ -48,6 +48,7 @@
 #include "modebuild.h"
 #include "hook.h"
 #include "event.h"
+#include "watch.h"
 
 #define S_C_OWNER	200
 #define S_C_MANAGER	190
@@ -1346,6 +1347,8 @@ o_chan_chanregister(struct client *client_p, struct lconn *conn_p, const char *p
 
 	slog(chanserv_p, 1, "%s - CHANREGISTER %s %s",
 		OPER_NAME(client_p, conn_p), parv[0], ureg_p->name);
+	watch_send(WATCH_CSADMIN, client_p, conn_p, 1,
+			"CHANREGISTER %s %s", parv[0], ureg_p->name);
 
 	chreg_p = BlockHeapAlloc(channel_reg_heap);
 	init_channel_reg(chreg_p, parv[0]);
@@ -1373,6 +1376,8 @@ o_chan_chandrop(struct client *client_p, struct lconn *conn_p, const char *parv[
 
 	slog(chanserv_p, 1, "%s - CHANDROP %s", 
 		OPER_NAME(client_p, conn_p), parv[0]);
+	watch_send(WATCH_CSADMIN, client_p, conn_p, 1,
+			"CHANDROP %s", parv[0]);
 
 	destroy_channel_reg(reg_p);
 
@@ -1402,6 +1407,8 @@ o_chan_chansuspend(struct client *client_p, struct lconn *conn_p, const char *pa
 
 	slog(chanserv_p, 1, "%s - CHANSUSPEND %s %s",
 		OPER_NAME(client_p, conn_p), parv[0], parv[1]);
+	watch_send(WATCH_CSADMIN, client_p, conn_p, 1,
+			"CHANSUSPEND %s %s", parv[0], parv[1]);
 
 	reg_p->flags |= CS_FLAGS_SUSPENDED;
 	reg_p->suspender = my_strdup(OPER_NAME(client_p, conn_p));
@@ -1439,6 +1446,8 @@ o_chan_chanunsuspend(struct client *client_p, struct lconn *conn_p, const char *
 
 	slog(chanserv_p, 1, "%s - CHANUNSUSPEND %s",
 		OPER_NAME(client_p, conn_p), reg_p->name);
+	watch_send(WATCH_CSADMIN, client_p, conn_p, 1,
+			"CHANUNSUSPEND %s", reg_p->name);
 
 	reg_p->flags &= ~CS_FLAGS_SUSPENDED;
 	my_free(reg_p->suspender);
@@ -1579,6 +1588,7 @@ o_chan_chanlist(struct client *client_p, struct lconn *conn_p, const char *parv[
 
 	slog(chanserv_p, 1, "%s - CHANLIST %s",
 		OPER_NAME(client_p, conn_p), mask);
+	watch_send(WATCH_CSOPER, client_p, conn_p, 1, "CHANLIST %s", mask);
 
 	return 0;
 }
@@ -1616,6 +1626,10 @@ o_chan_chaninfo(struct client *client_p, struct lconn *conn_p, const char *parv[
 		if(!strcasecmp(parv[1], "-listusers"))
 			dump_info_accesslist(client_p, conn_p, chreg_p);
 	}
+
+	slog(chanserv_p, 1, "%s - CHANINFO %s",
+		OPER_NAME(client_p, conn_p), chreg_p->name);
+	watch_send(WATCH_CSOPER, client_p, conn_p, 1, "CHANINFO %s", chreg_p->name);
 
 	return 0;
 }
@@ -1697,6 +1711,7 @@ s_chan_register(struct client *client_p, struct lconn *conn_p, const char *parv[
 
 	slog(chanserv_p, 2, "%s %s REGISTER %s",
 		client_p->user->mask, client_p->user->user_reg->name, parv[0]);
+	watch_send(WATCH_CSREGISTER, client_p, NULL, 0, "REGISTER %s", chptr->name);
 
 	reg_p = BlockHeapAlloc(channel_reg_heap);
 	init_channel_reg(reg_p, parv[0]);

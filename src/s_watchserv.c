@@ -56,6 +56,9 @@ static struct
 	const char *name;
 	unsigned int flag;
 } watch_flags[] = {
+	{ "csadmin",		WATCH_CSADMIN		},
+	{ "csoper",		WATCH_CSOPER		},
+	{ "csregister",		WATCH_CSREGISTER	},
 	{ "global",		WATCH_GLOBAL		},
 	{ "jupeserv",		WATCH_JUPESERV		},
 	{ "operbot",		WATCH_OPERBOT		},
