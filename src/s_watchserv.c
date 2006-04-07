@@ -55,6 +55,9 @@ static struct
 	const char *name;
 	unsigned int flag;
 } watch_flags[] = {
+	{ "global",		WATCH_GLOBAL		},
+	{ "jupeserv",		WATCH_JUPESERV		},
+	{ "operbot",		WATCH_OPERBOT		},
 	{ "operserv",		WATCH_OPERSERV		},
 	{ NULL, 0 }
 };

@@ -297,6 +297,8 @@ o_jupeserv_jupe(struct client *client_p, struct lconn *conn_p, const char *parv[
 
 	slog(jupeserv_p, 1, "%s - JUPE %s %s", 
 		OPER_NAME(client_p, conn_p), jupe_p->name, reason);
+	watch_send(WATCH_JUPESERV, client_p, conn_p, "JUPE %s %s",
+			jupe_p->name, reason);
 
 	if(EmptyString(reason))
 		jupe_p->reason = my_strdup("No Reason");
@@ -339,6 +341,7 @@ o_jupeserv_unjupe(struct client *client_p, struct lconn *conn_p, const char *par
 
 	slog(jupeserv_p, 1, "%s - UNJUPE %s", 
 		OPER_NAME(client_p, conn_p), jupe_p->name);
+	watch_send(WATCH_JUPESERV, client_p, conn_p, "UNJUPE %s", jupe_p->name);
 
 	rsdb_exec(NULL, "DELETE FROM jupes WHERE servername = '%Q'",
 			jupe_p->name);
