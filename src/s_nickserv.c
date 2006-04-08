@@ -46,6 +46,7 @@
 #include "s_nickserv.h"
 #include "balloc.h"
 #include "hook.h"
+#include "watch.h"
 
 static void init_s_nickserv(void);
 
@@ -245,6 +246,7 @@ o_nick_nickdrop(struct client *client_p, struct lconn *conn_p, const char *parv[
 
 	slog(nickserv_p, 1, "%s - NICKDROP %s",
 		OPER_NAME(client_p, conn_p), nreg_p->name);
+	watch_send(WATCH_NSADMIN, client_p, conn_p, 1, "NICKDROP %s", nreg_p->name);
 
 	free_nick_reg(nreg_p);
 	return 0;
@@ -288,6 +290,7 @@ s_nick_register(struct client *client_p, struct lconn *conn_p, const char *parv[
 	slog(nickserv_p, 2, "%s %s REGISTER %s",
 		client_p->user->mask, client_p->user->user_reg->name,
 		client_p->name);
+	watch_send(WATCH_NSREGISTER, client_p, NULL, 0, "REGISTER %s", client_p->name);
 
 	nreg_p = BlockHeapAlloc(nick_reg_heap);
 

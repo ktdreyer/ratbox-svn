@@ -56,16 +56,32 @@ static struct
 	const char *name;
 	unsigned int flag;
 } watch_flags[] = {
+#ifdef ENABLE_CHANSERV
 	{ "csadmin",		WATCH_CSADMIN		},
 	{ "csoper",		WATCH_CSOPER		},
 	{ "csregister",		WATCH_CSREGISTER	},
+#endif
+#ifdef ENABLE_GLOBAL
 	{ "global",		WATCH_GLOBAL		},
+#endif
+#ifdef ENABLE_JUPESERV
 	{ "jupeserv",		WATCH_JUPESERV		},
+#endif
+#ifdef ENABLE_NICKSERV
+	{ "nsadmin",		WATCH_NSADMIN		},
+	{ "nsregister",		WATCH_NSREGISTER	},
+#endif
+#ifdef ENABLE_OPERBOT
 	{ "operbot",		WATCH_OPERBOT		},
+#endif
+#ifdef ENABLE_OPERSERV
 	{ "operserv",		WATCH_OPERSERV		},
+#endif
+#ifdef ENABLE_USERSERV
 	{ "usadmin",		WATCH_USADMIN		},
 	{ "usoper",		WATCH_USOPER		},
 	{ "usregister",		WATCH_USREGISTER	},
+#endif
 	{ NULL, 0 }
 };
 
