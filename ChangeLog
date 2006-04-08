@@ -1,3 +1,15 @@
+leeh        2006/04/08 21:48:45 UTC	(20060408_8-22315)
+  Log:
+  - remove some spy flags from .flags we no longer need
+  
+
+  Modified:
+	rserv/trunk/include/io.h (File Modified) 
+	rserv/trunk/src/io.c (File Modified) 
+	rserv/trunk/src/s_userserv.c (File Modified) 
+	rserv/trunk/src/ucommand.c (File Modified) 
+
+
 leeh        2006/04/08 21:43:58 UTC	(20060408_7-22313)
   Log:
   - remove spyflags from struct service_command, its handled by watchserv
