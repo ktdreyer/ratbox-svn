@@ -44,6 +44,7 @@
 #include "ucommand.h"
 #include "log.h"
 #include "event.h"
+#include "watch.h"
 
 static struct client *banserv_p;
 
@@ -453,6 +454,10 @@ o_banserv_kline(struct client *client_p, struct lconn *conn_p, const char *parv[
 		OPER_NAME(client_p, conn_p), 
 		temptime ? get_short_duration(temptime) : "perm",
 		mask, reason);
+	watch_send(WATCH_BANSERV, client_p, conn_p, 1,
+			"KLINE %s %s %s",
+			temptime ? get_short_duration(temptime) : "perm",
+			mask, reason);
 
 	return 0;
 }
@@ -546,6 +551,10 @@ o_banserv_xline(struct client *client_p, struct lconn *conn_p, const char *parv[
 		OPER_NAME(client_p, conn_p),
 		temptime ? get_short_duration(temptime) : "perm",
 		gecos, reason);
+	watch_send(WATCH_BANSERV, client_p, conn_p, 1,
+			"XLINE %s %s %s",
+			temptime ? get_short_duration(temptime) : "perm",
+			gecos, reason);
 
 	return 0;
 }
@@ -639,6 +648,10 @@ o_banserv_resv(struct client *client_p, struct lconn *conn_p, const char *parv[]
 		OPER_NAME(client_p, conn_p),
 		temptime ? get_short_duration(temptime) : "perm",
 		mask, reason);
+	watch_send(WATCH_BANSERV, client_p, conn_p, 1,
+			"RESV %s %s %s",
+			temptime ? get_short_duration(temptime) : "perm",
+			mask, reason);
 
 	return 0;
 }
@@ -694,6 +707,7 @@ o_banserv_unkline(struct client *client_p, struct lconn *conn_p, const char *par
 
 	slog(banserv_p, 1, "%s - UNKLINE %s",
 		OPER_NAME(client_p, conn_p), parv[0]);
+	watch_send(WATCH_BANSERV, client_p, conn_p, 1, "UNKLINE %s", parv[0]);
 
 	return 0;
 }
@@ -742,6 +756,7 @@ o_banserv_unxline(struct client *client_p, struct lconn *conn_p, const char *par
 
 	slog(banserv_p, 1, "%s - UNXLINE %s",
 		OPER_NAME(client_p, conn_p), parv[0]);
+	watch_send(WATCH_BANSERV, client_p, conn_p, 1, "UNXLINE %s", parv[0]);
 
 	return 0;
 }
@@ -790,6 +805,7 @@ o_banserv_unresv(struct client *client_p, struct lconn *conn_p, const char *parv
 
 	slog(banserv_p, 1, "%s - UNRESV %s",
 		OPER_NAME(client_p, conn_p), parv[0]);
+	watch_send(WATCH_BANSERV, client_p, conn_p, 1, "UNRESV %s", parv[0]);
 
 	return 0;
 }
@@ -862,6 +878,8 @@ o_banserv_sync(struct client *client_p, struct lconn *conn_p, const char *parv[]
 	slog(banserv_p, 1, "%s - SYNC %s %s",
 		OPER_NAME(client_p, conn_p), parv[0],
 		EmptyString(parv[1]) ? "" : parv[1]);
+	watch_send(WATCH_BANSERV, client_p, conn_p, 1,
+			"SYNC %s %s", parv[0], EmptyString(parv[1]) ? "" : parv[1]);
 
 	return 0;
 }

@@ -14,6 +14,7 @@
 #define WATCH_USREGISTER	0x00000200
 #define WATCH_NSADMIN		0x00000400
 #define WATCH_NSREGISTER	0x00000800
+#define WATCH_BANSERV		0x00001000
 
 void PRINTFLIKE(5, 6) watch_send(unsigned int flag, struct client *client_p,
 				struct lconn *conn_p, int oper, const char *format, ...);

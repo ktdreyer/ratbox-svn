@@ -56,6 +56,9 @@ static struct
 	const char *name;
 	unsigned int flag;
 } watch_flags[] = {
+#ifdef ENABLE_BANSERV
+	{ "banserv",		WATCH_BANSERV		},
+#endif
 #ifdef ENABLE_CHANSERV
 	{ "csadmin",		WATCH_CSADMIN		},
 	{ "csoper",		WATCH_CSOPER		},
