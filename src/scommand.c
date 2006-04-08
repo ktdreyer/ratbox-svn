@@ -384,7 +384,7 @@ c_pong(struct client *client_p, const char *parv[], int parc)
         if(!finished_bursting)
         {
                 mlog("Connection to server %s completed", server_p->name);
-                sendto_all(UMODE_SERVER, "Connection to server %s completed",
+                sendto_all(0, "Connection to server %s completed",
                            server_p->name);
                 SetConnEOB(server_p);
 

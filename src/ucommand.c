@@ -302,7 +302,7 @@ u_connect(struct client *unused, struct lconn *conn_p, const char *parv[], int p
         {
                 (server_p->io_close)(server_p);
 
-                sendto_all(UMODE_SERVER, "Connection to server %s "
+                sendto_all(0, "Connection to server %s "
                            "disconnected by %s: (reroute to %s)",
                            server_p->name, conn_p->name, conf_p->name);
                 mlog("Connection to server %s disconnected by %s: "
@@ -511,10 +511,6 @@ struct _flags_table
 };
 static struct _flags_table flags_table[] = {
         { "chat",       UMODE_CHAT,     },
-        { "server",     UMODE_SERVER,   },
-#ifdef ENABLE_CHANSERV
-	{ "botfight",	UMODE_BOTFIGHT	},
-#endif
         { "\0",         0,              }
 };
 

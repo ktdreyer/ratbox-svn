@@ -97,11 +97,8 @@ extern dlink_list connection_list;
 
 /* usermodes */
 #define UMODE_CHAT              0x0100000
-#define UMODE_SERVER            0x0400000
-#define UMODE_BOTFIGHT		0x8000000
 
-#define UMODE_ALL               (UMODE_CHAT|UMODE_SERVER)
-#define UMODE_DEFAULT           (UMODE_CHAT|UMODE_SERVER|UMODE_BOTFIGHT)
+#define UMODE_DEFAULT           (UMODE_CHAT)
 
 #define IsUmodeChat(x)          ((x)->flags & UMODE_CHAT)
 
