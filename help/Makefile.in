@@ -7,7 +7,7 @@ INSTALL_DATA=@INSTALL_DATA@
 prefix=@prefix@
 helpdir=@helpdir@
 
-SUBDIRS=alis main operbot chanserv userserv jupeserv operserv nickserv global banserv
+SUBDIRS=alis main operbot chanserv userserv jupeserv operserv nickserv global banserv watchserv
 
 install: 
 	$(INSTALL) -m 750 -d $(DESTDIR)$(helpdir)

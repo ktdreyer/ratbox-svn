@@ -156,7 +156,6 @@ watch_show(struct client *client_p, struct lconn *conn_p)
 	{
 		if(WatchCapable(client_p, conn_p, watch_flags[i].flag))
 		{
-			strlcat(buf_on, "+", sizeof(buf_on));
 			strlcat(buf_on, watch_flags[i].name, sizeof(buf_on));
 			strlcat(buf_on, " ", sizeof(buf_on));
 		}
@@ -183,6 +182,7 @@ watch_show(struct client *client_p, struct lconn *conn_p)
 int
 o_watch_watch(struct client *client_p, struct lconn *conn_p, const char **parv, int parc)
 {
+	const char *data;
 	char *buf;
 	char *p, *next;
 	unsigned int flag;
@@ -194,7 +194,8 @@ o_watch_watch(struct client *client_p, struct lconn *conn_p, const char **parv, 
 		return 0;
 	}
 
-	buf = LOCAL_COPY(parv[0]);
+	data = rebuild_params(parv, parc, 0);
+	buf = LOCAL_COPY(data);
 	p = buf;
 
 	while(p)
