@@ -579,6 +579,7 @@ static int
 o_user_usersuspend(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct user_reg *reg_p;
+	const char *reason;
 
 	if((reg_p = find_user_reg(NULL, parv[0])) == NULL)
 	{
@@ -594,16 +595,19 @@ o_user_usersuspend(struct client *client_p, struct lconn *conn_p, const char *pa
 		return 0;
 	}
 
-	slog(userserv_p, 1, "%s - USERSUSPEND %s",
-		OPER_NAME(client_p, conn_p), reg_p->name);
-	watch_send(WATCH_USADMIN, client_p, conn_p, 1, "USERSUSPEND %s", reg_p->name);
+	reason = rebuild_params(parv, parc, 1);
+
+	slog(userserv_p, 1, "%s - USERSUSPEND %s %s",
+		OPER_NAME(client_p, conn_p), reg_p->name, reason);
+	watch_send(WATCH_USADMIN, client_p, conn_p, 1, 
+			"USERSUSPEND %s %s", reg_p->name, reason);
 
 	logout_user_reg(reg_p);
 
 	reg_p->flags |= US_FLAGS_SUSPENDED;
 	reg_p->last_time = CURRENT_TIME;
 	reg_p->suspender = my_strdup(OPER_NAME(client_p, conn_p));
-	reg_p->suspend_reason = my_strndup(parv[1], SUSPENDREASONLEN);
+	reg_p->suspend_reason = my_strndup(reason, SUSPENDREASONLEN);
 
 	rsdb_exec(NULL, "UPDATE users SET flags=%d, suspender='%Q', "
 			"suspend_reason='%Q',last_time=%lu WHERE username='%Q'",
@@ -646,7 +650,7 @@ o_user_userunsuspend(struct client *client_p, struct lconn *conn_p, const char *
 	reg_p->last_time = CURRENT_TIME;
 
 	rsdb_exec(NULL, "UPDATE users SET flags=%d,suspender=NULL,suspend_reason=NULL,last_time=%lu WHERE username='%Q'",
-			reg_p->flags, reg_p->name, reg_p->last_time);
+			reg_p->flags, reg_p->last_time, reg_p->name);
 
 	service_send(userserv_p, client_p, conn_p,
 			"Username %s unsuspended", reg_p->name);

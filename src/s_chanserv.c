@@ -1390,6 +1390,7 @@ static int
 o_chan_chansuspend(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct chan_reg *reg_p;
+	const char *reason;
 
 	if((reg_p = find_channel_reg(NULL, parv[0])) == NULL)
 	{
@@ -1405,14 +1406,16 @@ o_chan_chansuspend(struct client *client_p, struct lconn *conn_p, const char *pa
 		return 0;
 	}
 
+	reason = rebuild_params(parv, parc, 1);
+
 	slog(chanserv_p, 1, "%s - CHANSUSPEND %s %s",
-		OPER_NAME(client_p, conn_p), parv[0], parv[1]);
+		OPER_NAME(client_p, conn_p), parv[0], reason);
 	watch_send(WATCH_CSADMIN, client_p, conn_p, 1,
-			"CHANSUSPEND %s %s", parv[0], parv[1]);
+			"CHANSUSPEND %s %s", parv[0], reason);
 
 	reg_p->flags |= CS_FLAGS_SUSPENDED;
 	reg_p->suspender = my_strdup(OPER_NAME(client_p, conn_p));
-	reg_p->suspend_reason = my_strndup(parv[1], SUSPENDREASONLEN);
+	reg_p->suspend_reason = my_strndup(reason, SUSPENDREASONLEN);
 	reg_p->last_time = CURRENT_TIME;
 
 	rsdb_exec(NULL, "UPDATE channels SET flags=%d, suspender='%Q', "
@@ -1457,7 +1460,7 @@ o_chan_chanunsuspend(struct client *client_p, struct lconn *conn_p, const char *
 	reg_p->last_time = CURRENT_TIME;
 
 	rsdb_exec(NULL, "UPDATE channels SET flags=%d,suspender=NULL,suspend_reason=NULL,last_time=%lu WHERE chname = '%Q'",
-			reg_p->flags, reg_p->name, reg_p->last_time);
+			reg_p->flags, reg_p->last_time, reg_p->name);
 
 	service_send(chanserv_p, client_p, conn_p,
 			"Channel %s unsuspended", reg_p->name);
