@@ -54,7 +54,7 @@ static int s_alis_list(struct client *, struct lconn *, const char **, int);
 
 static struct service_command alis_command[] =
 {
-	{ "LIST",	&s_alis_list,	1, NULL, 1, 0L, 0, 0, 0, UMODE_ALIS }
+	{ "LIST",	&s_alis_list,	1, NULL, 1, 0L, 0, 0, 0 }
 };
 
 static struct service_handler alis_service = {

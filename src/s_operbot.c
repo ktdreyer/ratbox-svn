@@ -61,10 +61,10 @@ static int h_operbot_sjoin_lowerts(void *chptr, void *unused);
 
 static struct service_command operbot_command[] =
 {
-	{ "OBJOIN",	&o_operbot_objoin,	1, NULL, 1, 0L, 0, 0, CONF_OPER_OB_CHANNEL, 0 },
-	{ "OBPART",	&o_operbot_obpart,	1, NULL, 1, 0L, 0, 0, CONF_OPER_OB_CHANNEL, 0 },
-	{ "INVITE",	&s_operbot_invite,	1, NULL, 1, 0L, 0, 1, 0, 0 },
-	{ "OP",		&s_operbot_op,		0, NULL, 1, 0L, 0, 1, 0, 0 }
+	{ "OBJOIN",	&o_operbot_objoin,	1, NULL, 1, 0L, 0, 0, CONF_OPER_OB_CHANNEL },
+	{ "OBPART",	&o_operbot_obpart,	1, NULL, 1, 0L, 0, 0, CONF_OPER_OB_CHANNEL },
+	{ "INVITE",	&s_operbot_invite,	1, NULL, 1, 0L, 0, 1, 0 },
+	{ "OP",		&s_operbot_op,		0, NULL, 1, 0L, 0, 1, 0 }
 };
 
 static struct ucommand_handler operbot_ucommand[] =

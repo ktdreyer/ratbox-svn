@@ -64,14 +64,14 @@ static int h_operserv_sjoin_lowerts(void *chptr, void *unused);
 
 static struct service_command operserv_command[] =
 {
-	{ "OSJOIN",	&o_oper_osjoin,		1, NULL, 1, 0L, 0, 0, CONF_OPER_OS_CHANNEL, 0 },
-	{ "OSPART",	&o_oper_ospart,		1, NULL, 1, 0L, 0, 0, CONF_OPER_OS_CHANNEL, 0 },
-	{ "TAKEOVER",	&o_oper_takeover,	1, NULL, 1, 0L, 0, 0, CONF_OPER_OS_TAKEOVER, 0 },
-	{ "OMODE",	&o_oper_omode,		2, NULL, 1, 0L, 0, 0, CONF_OPER_OS_OMODE, 0 },
-	{ "DBSYNC",	&o_oper_dbsync,		0, NULL, 1, 0L, 0, CONF_OPER_ADMIN, 0, 0 },
-	{ "REHASH",	&o_oper_rehash,		0, NULL, 1, 0L, 0, CONF_OPER_ADMIN, 0, 0 },
-	{ "DIE",	&o_oper_die,		1, NULL, 1, 0L, 0, CONF_OPER_ADMIN, 0, 0 },
-	{ "LISTOPERS",	&o_oper_listopers,	0, NULL, 1, 0L, 0, 0, 0, 0 }
+	{ "OSJOIN",	&o_oper_osjoin,		1, NULL, 1, 0L, 0, 0, CONF_OPER_OS_CHANNEL	},
+	{ "OSPART",	&o_oper_ospart,		1, NULL, 1, 0L, 0, 0, CONF_OPER_OS_CHANNEL	},
+	{ "TAKEOVER",	&o_oper_takeover,	1, NULL, 1, 0L, 0, 0, CONF_OPER_OS_TAKEOVER	},
+	{ "OMODE",	&o_oper_omode,		2, NULL, 1, 0L, 0, 0, CONF_OPER_OS_OMODE	},
+	{ "DBSYNC",	&o_oper_dbsync,		0, NULL, 1, 0L, 0, CONF_OPER_ADMIN, 0	},
+	{ "REHASH",	&o_oper_rehash,		0, NULL, 1, 0L, 0, CONF_OPER_ADMIN, 0	},
+	{ "DIE",	&o_oper_die,		1, NULL, 1, 0L, 0, CONF_OPER_ADMIN, 0	},
+	{ "LISTOPERS",	&o_oper_listopers,	0, NULL, 1, 0L, 0, 0, 0	}
 };
 
 static struct ucommand_handler operserv_ucommand[] =

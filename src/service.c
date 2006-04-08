@@ -720,14 +720,6 @@ handle_service(struct client *service_p, struct client *client_p,
 			return;
 		}
 
-		if(cmd_entry->spyflags)
-			sendto_all(cmd_entry->spyflags, "#%s:%s!%s@%s# %s %s",
-					client_p->user->user_reg ? 
-					client_p->user->user_reg->name : "",
-					client_p->name, client_p->user->username,
-					client_p->user->host, cmd_entry->cmd,
-					rebuild_params((const char **) parv, parc, 0));
-
 		retval = (cmd_entry->func)(client_p, NULL, (const char **) parv, parc);
 
 		client_p->user->flood_count += retval;

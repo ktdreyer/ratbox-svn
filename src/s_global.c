@@ -66,10 +66,10 @@ static int h_global_send_welcome(void *target_p, void *unused);
 
 static struct service_command global_command[] =
 {
-	{ "NETMSG",	&o_global_netmsg,	1, NULL, 1, 0L, 0, 0, CONF_OPER_GLOB_NETMSG, 0 },
-	{ "ADDWELCOME",	&o_global_addwelcome,	2, NULL, 1, 0L, 0, 0, CONF_OPER_GLOB_WELCOME, 0 },
-	{ "DELWELCOME", &o_global_delwelcome,	1, NULL, 1, 0L, 0, 0, CONF_OPER_GLOB_WELCOME, 0 },
-	{ "LISTWELCOME",&o_global_listwelcome,	0, NULL, 1, 0L, 0, 0, CONF_OPER_GLOB_WELCOME, 0 }
+	{ "NETMSG",	&o_global_netmsg,	1, NULL, 1, 0L, 0, 0, CONF_OPER_GLOB_NETMSG	},
+	{ "ADDWELCOME",	&o_global_addwelcome,	2, NULL, 1, 0L, 0, 0, CONF_OPER_GLOB_WELCOME	},
+	{ "DELWELCOME", &o_global_delwelcome,	1, NULL, 1, 0L, 0, 0, CONF_OPER_GLOB_WELCOME	},
+	{ "LISTWELCOME",&o_global_listwelcome,	0, NULL, 1, 0L, 0, 0, CONF_OPER_GLOB_WELCOME	}
 };
 
 static struct ucommand_handler global_ucommand[] =

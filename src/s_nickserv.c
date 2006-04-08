@@ -69,13 +69,13 @@ static int h_nick_server_eob(void *client_p, void *unused);
 
 static struct service_command nickserv_command[] =
 {
-	{ "NICKDROP",	&o_nick_nickdrop, 1, NULL, 1, 0L, 0, 0, CONF_OPER_NS_DROP, 0 },
-	{ "REGISTER",	&s_nick_register, 0, NULL, 1, 0L, 0, 0, 0, 0	},
-	{ "DROP",	&s_nick_drop,     1, NULL, 1, 0L, 1, 0, 0, 0	},
-	{ "RELEASE",	&s_nick_release,  1, NULL, 1, 0L, 1, 0, 0, 0	},
-	{ "REGAIN",	&s_nick_regain,   1, NULL, 1, 0L, 1, 0, 0, 0	},
-	{ "SET",	&s_nick_set,	  2, NULL, 1, 0L, 1, 0, 0, 0	},
-	{ "INFO",	&s_nick_info,     1, NULL, 1, 0L, 1, 0, 0, 0	}
+	{ "NICKDROP",	&o_nick_nickdrop, 1, NULL, 1, 0L, 0, 0, CONF_OPER_NS_DROP },
+	{ "REGISTER",	&s_nick_register, 0, NULL, 1, 0L, 0, 0, 0	},
+	{ "DROP",	&s_nick_drop,     1, NULL, 1, 0L, 1, 0, 0	},
+	{ "RELEASE",	&s_nick_release,  1, NULL, 1, 0L, 1, 0, 0	},
+	{ "REGAIN",	&s_nick_regain,   1, NULL, 1, 0L, 1, 0, 0	},
+	{ "SET",	&s_nick_set,	  2, NULL, 1, 0L, 1, 0, 0	},
+	{ "INFO",	&s_nick_info,     1, NULL, 1, 0L, 1, 0, 0	}
 };
 
 static struct ucommand_handler nickserv_ucommand[] =

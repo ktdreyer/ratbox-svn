@@ -78,20 +78,20 @@ static int s_user_info(struct client *, struct lconn *, const char **, int);
 
 static struct service_command userserv_command[] =
 {
-	{ "USERREGISTER",	&o_user_userregister,	2, NULL, 1, 0L, 0, 0, CONF_OPER_US_REGISTER, 0 },
-	{ "USERDROP",		&o_user_userdrop,	1, NULL, 1, 0L, 0, 0, CONF_OPER_US_DROP, 0 },
-	{ "USERSUSPEND",	&o_user_usersuspend,	2, NULL, 1, 0L, 0, 0, CONF_OPER_US_SUSPEND, 0 },
-	{ "USERUNSUSPEND",	&o_user_userunsuspend,	1, NULL, 1, 0L, 0, 0, CONF_OPER_US_SUSPEND, 0 },
-	{ "USERLIST",		&o_user_userlist,	1, NULL, 1, 0L, 0, 0, CONF_OPER_US_LIST, 0 },
-	{ "USERINFO",		&o_user_userinfo,	0, NULL, 1, 0L, 0, 0, CONF_OPER_US_INFO, 0 },
-	{ "USERSETPASS",	&o_user_usersetpass,	2, NULL, 1, 0L, 0, 0, CONF_OPER_US_SETPASS, 0 },
-	{ "REGISTER",	&s_user_register,	2, NULL, 1, 0L, 0, 0, 0, 0 },
-	{ "ACTIVATE",	&s_user_activate,	2, NULL, 1, 0L, 0, 0, 0, 0 },
-	{ "LOGIN",	&s_user_login,		2, NULL, 1, 0L, 0, 0, 0, 0 },
-	{ "LOGOUT",	&s_user_logout,		0, NULL, 1, 0L, 1, 0, 0, 0 },
-	{ "RESETPASS",	&s_user_resetpass,	1, NULL, 1, 0L, 0, 0, 0, 0 },
-	{ "SET",	&s_user_set,		1, NULL, 1, 0L, 1, 0, 0, 0 },
-	{ "INFO",	&s_user_info,		1, NULL, 1, 0L, 1, 0, 0, 0 }
+	{ "USERREGISTER",	&o_user_userregister,	2, NULL, 1, 0L, 0, 0, CONF_OPER_US_REGISTER	},
+	{ "USERDROP",		&o_user_userdrop,	1, NULL, 1, 0L, 0, 0, CONF_OPER_US_DROP		},
+	{ "USERSUSPEND",	&o_user_usersuspend,	2, NULL, 1, 0L, 0, 0, CONF_OPER_US_SUSPEND	},
+	{ "USERUNSUSPEND",	&o_user_userunsuspend,	1, NULL, 1, 0L, 0, 0, CONF_OPER_US_SUSPEND	},
+	{ "USERLIST",		&o_user_userlist,	1, NULL, 1, 0L, 0, 0, CONF_OPER_US_LIST		},
+	{ "USERINFO",		&o_user_userinfo,	0, NULL, 1, 0L, 0, 0, CONF_OPER_US_INFO		},
+	{ "USERSETPASS",	&o_user_usersetpass,	2, NULL, 1, 0L, 0, 0, CONF_OPER_US_SETPASS	},
+	{ "REGISTER",	&s_user_register,	2, NULL, 1, 0L, 0, 0, 0	},
+	{ "ACTIVATE",	&s_user_activate,	2, NULL, 1, 0L, 0, 0, 0	},
+	{ "LOGIN",	&s_user_login,		2, NULL, 1, 0L, 0, 0, 0	},
+	{ "LOGOUT",	&s_user_logout,		0, NULL, 1, 0L, 1, 0, 0	},
+	{ "RESETPASS",	&s_user_resetpass,	1, NULL, 1, 0L, 0, 0, 0	},
+	{ "SET",	&s_user_set,		1, NULL, 1, 0L, 1, 0, 0	},
+	{ "INFO",	&s_user_info,		1, NULL, 1, 0L, 1, 0, 0	}
 };
 
 static struct ucommand_handler userserv_ucommand[] =

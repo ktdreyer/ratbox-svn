@@ -95,7 +95,7 @@ static int o_watch_watch(struct client *, struct lconn *, const char **, int);
 
 static struct service_command watch_command[] =
 {
-	{ "WATCH",	&o_watch_watch,		0, NULL, 1, 0L, 0, 0, 0, 0 }
+	{ "WATCH",	&o_watch_watch,		0, NULL, 1, 0L, 0, 0, 0 }
 };
 
 static struct ucommand_handler watch_ucommand [] =

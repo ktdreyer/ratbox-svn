@@ -22,7 +22,6 @@ struct service_command
 	int userreg;
 	int operonly;
 	int operflags;
-	int spyflags;
 };
 
 struct service_handler

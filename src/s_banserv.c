@@ -61,16 +61,16 @@ static int o_banserv_findresv(struct client *, struct lconn *, const char **, in
 
 static struct service_command banserv_command[] =
 {
-	{ "KLINE",	&o_banserv_kline,	2, NULL, 1, 0L, 0, 0, CONF_OPER_BAN_KLINE, 0 },
-	{ "XLINE",	&o_banserv_xline,	2, NULL, 1, 0L, 0, 0, CONF_OPER_BAN_XLINE, 0 },
-	{ "RESV",	&o_banserv_resv,	2, NULL, 1, 0L, 0, 0, CONF_OPER_BAN_RESV, 0 },
-	{ "UNKLINE",	&o_banserv_unkline,	1, NULL, 1, 0L, 0, 0, CONF_OPER_BAN_KLINE, 0 },
-	{ "UNXLINE",	&o_banserv_unxline,	1, NULL, 1, 0L, 0, 0, CONF_OPER_BAN_XLINE, 0 },
-	{ "UNRESV",	&o_banserv_unresv,	1, NULL, 1, 0L, 0, 0, CONF_OPER_BAN_RESV, 0 },
-	{ "SYNC",	&o_banserv_sync,	1, NULL, 1, 0L, 0, 0, 0, 0 },
-	{ "FINDKLINE",	&o_banserv_findkline,	1, NULL, 1, 0L, 0, 0, CONF_OPER_BAN_KLINE, 0 },
-	{ "FINDXLINE",	&o_banserv_findxline,	1, NULL, 1, 0L, 0, 0, CONF_OPER_BAN_XLINE, 0 },
-	{ "FINDRESV",	&o_banserv_findresv,	1, NULL, 1, 0L, 0, 0, CONF_OPER_BAN_RESV, 0 }
+	{ "KLINE",	&o_banserv_kline,	2, NULL, 1, 0L, 0, 0, CONF_OPER_BAN_KLINE },
+	{ "XLINE",	&o_banserv_xline,	2, NULL, 1, 0L, 0, 0, CONF_OPER_BAN_XLINE },
+	{ "RESV",	&o_banserv_resv,	2, NULL, 1, 0L, 0, 0, CONF_OPER_BAN_RESV },
+	{ "UNKLINE",	&o_banserv_unkline,	1, NULL, 1, 0L, 0, 0, CONF_OPER_BAN_KLINE },
+	{ "UNXLINE",	&o_banserv_unxline,	1, NULL, 1, 0L, 0, 0, CONF_OPER_BAN_XLINE },
+	{ "UNRESV",	&o_banserv_unresv,	1, NULL, 1, 0L, 0, 0, CONF_OPER_BAN_RESV },
+	{ "SYNC",	&o_banserv_sync,	1, NULL, 1, 0L, 0, 0, 0 },
+	{ "FINDKLINE",	&o_banserv_findkline,	1, NULL, 1, 0L, 0, 0, CONF_OPER_BAN_KLINE },
+	{ "FINDXLINE",	&o_banserv_findxline,	1, NULL, 1, 0L, 0, 0, CONF_OPER_BAN_XLINE },
+	{ "FINDRESV",	&o_banserv_findresv,	1, NULL, 1, 0L, 0, 0, CONF_OPER_BAN_RESV }
 };
 
 static struct ucommand_handler banserv_ucommand[] =
