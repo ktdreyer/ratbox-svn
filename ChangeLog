@@ -1,3 +1,23 @@
+leeh        2006/04/08 22:06:33 UTC	(20060408_10-22319)
+  Log:
+  - remove .flags command, only thing left using it is dcc chat
+    I will add .chat for that
+  - remove the flags parameter from sendto_all(), as nothing is using it now
+  
+
+  Modified:
+	rserv/trunk/help/main/u-flags (File Deleted) 
+	rserv/trunk/include/io.h (File Modified) 
+	rserv/trunk/include/tools.h (File Modified) 
+	rserv/trunk/src/c_error.c (File Modified) 
+	rserv/trunk/src/conf.c (File Modified) 
+	rserv/trunk/src/io.c (File Modified) 
+	rserv/trunk/src/rserv.c (File Modified) 
+	rserv/trunk/src/s_operserv.c (File Modified) 
+	rserv/trunk/src/scommand.c (File Modified) 
+	rserv/trunk/src/ucommand.c (File Modified) 
+
+
 leeh        2006/04/08 21:55:56 UTC	(20060408_9-22317)
   Log:
   - remove unused UMODE_BOTFIGHT
