@@ -1,3 +1,21 @@
+leeh        2006/04/08 21:00:43 UTC	(20060408_4-22307)
+  Log:
+  - dont prefix list of flags being watched with a '+'
+  - make watchserv::watch properly work on multiple flags
+  - add helpfiles for watchserv
+  
+
+  Modified:
+	rserv/trunk/help/Makefile.in (File Modified) 
+	rserv/trunk/help/genindex.sh (File Modified) 
+	rserv/trunk/help/watchserv/ (File Added) 
+	rserv/trunk/help/watchserv/general (File Added) 
+	rserv/trunk/help/watchserv/index (File Added) 
+	rserv/trunk/help/watchserv/index-admin (File Added) 
+	rserv/trunk/help/watchserv/watch (File Added) 
+	rserv/trunk/src/s_watchserv.c (File Modified) 
+
+
 leeh        2006/04/08 20:48:55 UTC	(20060408_3-22305)
   Log:
   - add watch entries for banserv
