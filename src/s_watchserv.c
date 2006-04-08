@@ -100,8 +100,8 @@ static struct service_command watch_command[] =
 
 static struct ucommand_handler watch_ucommand [] =
 {
-	{ "watch",	o_watch_watch,		0, 0, 0, 0, NULL	},
-	{ "\0", NULL, 0, 0, 0, 0, NULL }
+	{ "watch",	o_watch_watch,		0, 0, 0, NULL	},
+	{ "\0", NULL, 0, 0, 0, NULL }
 };
 
 static struct service_handler watchserv_service = {

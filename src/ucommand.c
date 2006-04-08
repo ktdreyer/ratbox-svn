@@ -69,16 +69,16 @@ static int u_status(struct client *, struct lconn *, const char **, int);
 
 static struct ucommand_handler ucommands[] =
 {
-	{ "boot",	u_boot,		CONF_OPER_ADMIN,	0, 1, 1, NULL },
-	{ "connect",	u_connect,	CONF_OPER_ROUTE,	0, 1, 1, NULL },
-	{ "events",	u_events,	CONF_OPER_ADMIN,	0, 0, 1, NULL },
-	{ "flags",	u_flags,	0,			0, 0, 0, NULL },
-	{ "help",	u_help,		0,			0, 0, 0, NULL },
-	{ "quit",	u_quit,		0,			0, 0, 0, NULL },
-	{ "rehash",	u_rehash,	CONF_OPER_ADMIN,	0, 0, 1, NULL },
-	{ "service",	u_service,	0,			0, 0, 1, NULL },
-	{ "status",	u_status,	0,			0, 0, 1, NULL },
-	{ "\0",         NULL,		0,			0, 0, 0, NULL }
+	{ "boot",	u_boot,		CONF_OPER_ADMIN,	0, 1, NULL },
+	{ "connect",	u_connect,	CONF_OPER_ROUTE,	0, 1, NULL },
+	{ "events",	u_events,	CONF_OPER_ADMIN,	0, 0, NULL },
+	{ "flags",	u_flags,	0,			0, 0, NULL },
+	{ "help",	u_help,		0,			0, 0, NULL },
+	{ "quit",	u_quit,		0,			0, 0, NULL },
+	{ "rehash",	u_rehash,	CONF_OPER_ADMIN,	0, 0, NULL },
+	{ "service",	u_service,	0,			0, 0, NULL },
+	{ "status",	u_status,	0,			0, 0, NULL },
+	{ "\0",         NULL,		0,			0, 0, NULL }
 };
 
 void
@@ -152,11 +152,6 @@ handle_ucommand(struct lconn *conn_p, const char *command,
 			sendto_one(conn_p, "Insufficient access");
 			return;
 		}
-
-		if(handler->spy)
-			sendto_all(UMODE_SPY, "#%s# %s %s",
-				conn_p->name, ucase(handler->cmd),
-				rebuild_params((const char **) parv, parc, 1));
 
 		handler->func(NULL, conn_p, parv, parc);
 	}
@@ -518,7 +513,6 @@ static struct _flags_table flags_table[] = {
         { "chat",       UMODE_CHAT,     },
         { "auth",       UMODE_AUTH,     },
         { "server",     UMODE_SERVER,   },
-	{ "spy",	UMODE_SPY	},
 #ifdef ENABLE_USERSERV
 	{ "register",	UMODE_REGISTER	},
 #endif

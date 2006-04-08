@@ -141,13 +141,13 @@ static struct service_command chanserv_command[] =
 
 static struct ucommand_handler chanserv_ucommand[] =
 {
-	{ "chanregister",	o_chan_chanregister,	0, CONF_OPER_CS_REGISTER,	2, 1, NULL },
-	{ "chandrop",		o_chan_chandrop,	0, CONF_OPER_CS_DROP,		1, 1, NULL },
-	{ "chansuspend",	o_chan_chansuspend,	0, CONF_OPER_CS_SUSPEND,	2, 1, NULL },
-	{ "chanunsuspend",	o_chan_chanunsuspend,	0, CONF_OPER_CS_SUSPEND,	1, 1, NULL },
-	{ "chanlist",		o_chan_chanlist,	0, CONF_OPER_CS_LIST,		0, 1, NULL },
-	{ "chaninfo",		o_chan_chaninfo,	0, CONF_OPER_CS_INFO,		1, 1, NULL },
-	{ "\0",			NULL,			0, 0, 0, 0, NULL }
+	{ "chanregister",	o_chan_chanregister,	0, CONF_OPER_CS_REGISTER,	2, NULL },
+	{ "chandrop",		o_chan_chandrop,	0, CONF_OPER_CS_DROP,		1, NULL },
+	{ "chansuspend",	o_chan_chansuspend,	0, CONF_OPER_CS_SUSPEND,	2, NULL },
+	{ "chanunsuspend",	o_chan_chanunsuspend,	0, CONF_OPER_CS_SUSPEND,	1, NULL },
+	{ "chanlist",		o_chan_chanlist,	0, CONF_OPER_CS_LIST,		0, NULL },
+	{ "chaninfo",		o_chan_chaninfo,	0, CONF_OPER_CS_INFO,		1, NULL },
+	{ "\0",			NULL,			0, 0, 0, NULL }
 };
 
 static struct service_handler chanserv_service = {

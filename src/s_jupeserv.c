@@ -84,9 +84,9 @@ static struct service_command jupeserv_command[] =
 
 static struct ucommand_handler jupeserv_ucommand[] =
 {
-	{ "jupe",	o_jupeserv_jupe,	0, CONF_OPER_JS_JUPE, 2, 1, NULL },
-	{ "unjupe",	o_jupeserv_unjupe,	0, CONF_OPER_JS_JUPE, 1, 1, NULL },
-	{ "\0",	NULL, 0, 0, 0, 0, NULL }
+	{ "jupe",	o_jupeserv_jupe,	0, CONF_OPER_JS_JUPE, 2, NULL },
+	{ "unjupe",	o_jupeserv_unjupe,	0, CONF_OPER_JS_JUPE, 1, NULL },
+	{ "\0",	NULL, 0, 0, 0, NULL }
 };
 
 static struct service_handler jupe_service = {

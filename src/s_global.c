@@ -74,11 +74,11 @@ static struct service_command global_command[] =
 
 static struct ucommand_handler global_ucommand[] =
 {
-	{ "netmsg",	o_global_netmsg,	0, CONF_OPER_GLOB_NETMSG, 1, 1, NULL },
-	{ "addwelcome",	o_global_addwelcome,	0, CONF_OPER_GLOB_WELCOME, 2, 1, NULL },
-	{ "delwelcome",	o_global_delwelcome,	0, CONF_OPER_GLOB_WELCOME, 1, 1, NULL },
-	{ "listwelcome",o_global_listwelcome,	0, CONF_OPER_GLOB_WELCOME, 0, 1, NULL },
-	{ "\0", NULL, 0, 0, 0, 0, NULL }
+	{ "netmsg",	o_global_netmsg,	0, CONF_OPER_GLOB_NETMSG, 1, NULL },
+	{ "addwelcome",	o_global_addwelcome,	0, CONF_OPER_GLOB_WELCOME, 2, NULL },
+	{ "delwelcome",	o_global_delwelcome,	0, CONF_OPER_GLOB_WELCOME, 1, NULL },
+	{ "listwelcome",o_global_listwelcome,	0, CONF_OPER_GLOB_WELCOME, 0, NULL },
+	{ "\0", NULL, 0, 0, 0, NULL }
 };
 
 static struct service_handler global_service = {

@@ -38,7 +38,7 @@
 #include "io.h"
 
 static int u_stats(struct client *, struct lconn *, const char **, int);
-struct ucommand_handler stats_ucommand = { "stats", u_stats, 0, 0, 0, 1, NULL };
+struct ucommand_handler stats_ucommand = { "stats", u_stats, 0, 0, 0, NULL };
 
 struct _stats_table
 {

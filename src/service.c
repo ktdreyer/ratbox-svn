@@ -720,11 +720,7 @@ handle_service(struct client *service_p, struct client *client_p,
 			return;
 		}
 
-		if(cmd_entry->operflags)
-			sendto_all(UMODE_SPY, "#%s:%s# %s %s",
-					client_p->user->oper->name, client_p->name,
-					cmd_entry->cmd, rebuild_params((const char **) parv, parc, 0));
-		else if(cmd_entry->spyflags)
+		if(cmd_entry->spyflags)
 			sendto_all(cmd_entry->spyflags, "#%s:%s!%s@%s# %s %s",
 					client_p->user->user_reg ? 
 					client_p->user->user_reg->name : "",
