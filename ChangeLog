@@ -1,3 +1,23 @@
+leeh        2006/04/08 21:43:58 UTC	(20060408_7-22313)
+  Log:
+  - remove spyflags from struct service_command, its handled by watchserv
+  
+
+  Modified:
+	rserv/trunk/include/service.h (File Modified) 
+	rserv/trunk/src/s_alis.c (File Modified) 
+	rserv/trunk/src/s_banserv.c (File Modified) 
+	rserv/trunk/src/s_chanserv.c (File Modified) 
+	rserv/trunk/src/s_global.c (File Modified) 
+	rserv/trunk/src/s_jupeserv.c (File Modified) 
+	rserv/trunk/src/s_nickserv.c (File Modified) 
+	rserv/trunk/src/s_operbot.c (File Modified) 
+	rserv/trunk/src/s_operserv.c (File Modified) 
+	rserv/trunk/src/s_userserv.c (File Modified) 
+	rserv/trunk/src/s_watchserv.c (File Modified) 
+	rserv/trunk/src/service.c (File Modified) 
+
+
 leeh        2006/04/08 21:37:44 UTC	(20060408_6-22311)
   Log:
   - remove the spy parameter from userserv commands, theres watchserv instead
