@@ -224,8 +224,7 @@ read_io(void)
 			{
 				mlog("Connection to server %s lost: (Server exited)",
 					server_p->name);
-				sendto_all(0,
-					"Connection to server %s lost: (Server exited)",
+				sendto_all("Connection to server %s lost: (Server exited)",
 					server_p->name);
 				(server_p->io_close)(server_p);
 			}
@@ -236,8 +235,7 @@ read_io(void)
 			{
 				mlog("Connection to server %s timed out",
 					server_p->name);
-				sendto_all(0,
-					"Connection to server %s timed out",
+				sendto_all("Connection to server %s timed out",
 					server_p->name);
 				(server_p->io_close)(server_p);
 			}
@@ -249,8 +247,7 @@ read_io(void)
 			{
 				mlog("Connection to server %s timed out",
 					server_p->name);
-				sendto_all(0,
-					"Connection to server %s timed out",
+				sendto_all("Connection to server %s timed out",
 					server_p->name);
 				(server_p->io_close)(server_p);
 			}
@@ -262,8 +259,7 @@ read_io(void)
 			{
 				mlog("Connection to server %s lost: (Ping timeout)",
 					server_p->name);
-				sendto_all(0,
-					"Connection to server %s lost: (Ping timeout)",
+				sendto_all("Connection to server %s lost: (Ping timeout)",
 					server_p->name);
 				(server_p->io_close)(server_p);
 			}
@@ -474,7 +470,7 @@ connect_to_server(void *target_server)
 
 	mlog("Connection to server %s/%d activated", 
              conf_p->name, conf_p->port);
-	sendto_all(0, "Connection to server %s/%d activated",
+	sendto_all("Connection to server %s/%d activated",
                    conf_p->name, conf_p->port);
 
 	serv_fd = sock_open(conf_p->host, conf_p->port, conf_p->vhost, IO_HOST);
@@ -630,7 +626,7 @@ signon_server(struct lconn *conn_p)
 		return -1;
 
 	mlog("Connection to server %s established", conn_p->name);
-	sendto_all(0, "Connection to server %s established",
+	sendto_all("Connection to server %s established",
                    conn_p->name);
 
 	sendto_server("CAPAB :QS TB EX IE ENCAP SERVICES");
@@ -787,17 +783,15 @@ read_server(struct lconn *conn_p)
                 if(ignore_errno(errno))
                 {
                         mlog("Connection to server %s lost", conn_p->name);
-                        sendto_all(0,
-                                   "Connection to server %s lost", 
-                                   conn_p->name);
+                        sendto_all("Connection to server %s lost", 
+					conn_p->name);
                 }
                 else
                 {
                         mlog("Connection to server %s lost: (Read error: %s)",
                              conn_p->name, strerror(errno));
-                        sendto_all(0,
-                                   "Connection to server %s lost: (Read error: %s)",
-				   conn_p->name, strerror(errno));
+                        sendto_all("Connection to server %s lost: (Read error: %s)",
+					conn_p->name, strerror(errno));
                 }
 
 		(conn_p->io_close)(conn_p);
@@ -1052,9 +1046,8 @@ sendto_server(const char *format, ...)
 	{
 		mlog("Connection to server %s lost: (Write error: %s)",
 		     server_p->name, strerror(errno));
-		sendto_all(0,
-                           "Connection to server %s lost: (Write error: %s)",
-			   server_p->name, strerror(errno));
+		sendto_all("Connection to server %s lost: (Write error: %s)",
+				server_p->name, strerror(errno));
 		(server_p->io_close)(server_p);
 	}
 }
@@ -1091,7 +1084,7 @@ sendto_one(struct lconn *conn_p, const char *format, ...)
  * outputs      -
  */
 void
-sendto_all(int umode, const char *format, ...)
+sendto_all(const char *format, ...)
 {
         struct lconn *conn_p;
         char buf[BUFSIZE];
@@ -1107,9 +1100,6 @@ sendto_all(int umode, const char *format, ...)
                 conn_p = ptr->data;
 
                 if(!UserAuth(conn_p))
-                        continue;
-
-                if(umode && !(conn_p->flags & umode))
                         continue;
 
                 sendto_one(conn_p, "%s", buf);
@@ -1287,8 +1277,7 @@ sock_open(const char *host, int port, const char *vhost, int type)
 			{
 				mlog("Connection to %s/%d failed: (socket()/fcntl(): %s)",
 				     host, port, strerror(errno));
-				sendto_all(0,
-					   "Connection to %s/%d failed: (socket()/fcntl(): %s)",
+				sendto_all("Connection to %s/%d failed: (socket()/fcntl(): %s)",
 					   host, port, strerror(errno));
 				return -1;
 			}
@@ -1298,10 +1287,8 @@ sock_open(const char *host, int port, const char *vhost, int type)
 				mlog("Connection to %s/%d failed: "
                                      "(unable to bind to %s: %s)",
 				     host, port, vhost, strerror(errno));
-				sendto_all(0,
-                                           "Connection to %s/%d failed: "
-                                           "(unable to bind to %s: %s)",
-				           host, port, vhost, strerror(errno));
+				sendto_all("Connection to %s/%d failed: (unable to bind to %s: %s)",
+						host, port, vhost, strerror(errno));
 				return -1;
 			}
 		}
@@ -1315,9 +1302,8 @@ sock_open(const char *host, int port, const char *vhost, int type)
 			mlog("Connection to %s/%d failed: "
                              "(unable to resolve: %s)",
 			     host, port, host);
-			sendto_all(0,
-                                "Connection to %s/%d failed: (unable to resolve: %s)",
-				host, port, host);
+			sendto_all("Connection to %s/%d failed: (unable to resolve: %s)",
+					host, port, host);
 			return -1;
 		}
 		if(fd < 0)
@@ -1326,9 +1312,8 @@ sock_open(const char *host, int port, const char *vhost, int type)
 		{
 			mlog("Connection to %s/%d failed: (socket()/fcntl(): %s)",
 			     host, port, strerror(errno));
-			sendto_all(0,
-				   "Connection to %s/%d failed: (socket()/fcntl(): %s)",
-				   host, port, strerror(errno));
+			sendto_all("Connection to %s/%d failed: (socket()/fcntl(): %s)",
+					host, port, strerror(errno));
 			return -1;
 		}
 		connect(fd, hostres->ai_addr, hostres->ai_addrlen);
@@ -1346,9 +1331,8 @@ sock_open(const char *host, int port, const char *vhost, int type)
 		{
 			mlog("Connection to %s/%d failed: (socket()/fcntl(): %s)",
 			     host, port, strerror(errno));
-			sendto_all(0,
-				   "Connection to %s/%d failed: (socket()/fcntl(): %s)",
-				   host, port, strerror(errno));
+			sendto_all("Connection to %s/%d failed: (socket()/fcntl(): %s)",
+					host, port, strerror(errno));
 			return -1;
 		}
 		memset(&raddr, 0, sizeof(struct sockaddr_in));
@@ -1381,9 +1365,8 @@ sock_open(const char *host, int port, const char *vhost, int type)
 	{
 		mlog("Connection to %s/%d failed: (socket()/fcntl(): %s)",
 		     host, port, strerror(errno));
-		sendto_all(0,
-                           "Connection to %s/%d failed: (socket()/fcntl(): %s)",
-			   host, port, strerror(errno));
+		sendto_all("Connection to %s/%d failed: (socket()/fcntl(): %s)",
+				host, port, strerror(errno));
 		return -1;
 	}
 
@@ -1408,9 +1391,8 @@ sock_open(const char *host, int port, const char *vhost, int type)
 				mlog("Connection to %s/%d failed: "
                                      "(unable to bind to %s: %s)",
 				     host, port, vhost, strerror(errno));
-				sendto_all(0,
-					"Connection to %s/%d failed: (unable to bind to %s: %s)",
-					host, port, vhost, strerror(errno));
+				sendto_all("Connection to %s/%d failed: (unable to bind to %s: %s)",
+						host, port, vhost, strerror(errno));
 				return -1;
 			}
 		}
@@ -1427,9 +1409,8 @@ sock_open(const char *host, int port, const char *vhost, int type)
 			mlog("Connection to %s/%d failed: "
                              "(unable to resolve: %s)",
 			     host, port, host);
-			sendto_all(0,
-				"Connection to %s/%d failed: (unable to resolve: %s)",
-				host, port, host);
+			sendto_all("Connection to %s/%d failed: (unable to resolve: %s)",
+					host, port, host);
 			return -1;
 		}
 

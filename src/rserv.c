@@ -95,7 +95,7 @@ die(int graceful, const char *format, ...)
 		exit(1);
 	}
 
-	sendto_all(0, "Services terminated: (%s)", buf);
+	sendto_all("Services terminated: (%s)", buf);
 	mlog("ratbox-services terminated: (%s)", buf);
 	exit(1);
 }
@@ -426,7 +426,7 @@ void check_rehash(void *unused)
 	if(need_rehash_help)
 	{
 		mlog("services rehashing: got SIGUSR1, reloading help");
-		sendto_all(0, "services rehashing: got SIGUSR1, reloading help");
+		sendto_all("services rehashing: got SIGUSR1, reloading help");
 		rehash_help();
 		need_rehash_help = 0;
 	}

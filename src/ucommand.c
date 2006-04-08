@@ -60,7 +60,6 @@ static int u_login(struct client *, struct lconn *, const char **, int);
 static int u_boot(struct client *, struct lconn *, const char **, int);
 static int u_connect(struct client *, struct lconn *, const char **, int);
 static int u_events(struct client *, struct lconn *, const char **, int);
-static int u_flags(struct client *, struct lconn *conn_p, const char **, int);
 static int u_help(struct client *, struct lconn *, const char **, int);
 static int u_quit(struct client *, struct lconn *, const char **, int);
 static int u_rehash(struct client *, struct lconn *, const char **, int);
@@ -72,7 +71,6 @@ static struct ucommand_handler ucommands[] =
 	{ "boot",	u_boot,		CONF_OPER_ADMIN,	0, 1, NULL },
 	{ "connect",	u_connect,	CONF_OPER_ROUTE,	0, 1, NULL },
 	{ "events",	u_events,	CONF_OPER_ADMIN,	0, 0, NULL },
-	{ "flags",	u_flags,	0,			0, 0, NULL },
 	{ "help",	u_help,		0,			0, 0, NULL },
 	{ "quit",	u_quit,		0,			0, 0, NULL },
 	{ "rehash",	u_rehash,	CONF_OPER_ADMIN,	0, 0, NULL },
@@ -302,9 +300,8 @@ u_connect(struct client *unused, struct lconn *conn_p, const char *parv[], int p
         {
                 (server_p->io_close)(server_p);
 
-                sendto_all(0, "Connection to server %s "
-                           "disconnected by %s: (reroute to %s)",
-                           server_p->name, conn_p->name, conf_p->name);
+                sendto_all("Connection to server %s disconnected by %s: (reroute to %s)",
+				server_p->name, conn_p->name, conf_p->name);
                 mlog("Connection to server %s disconnected by %s: "
                      "(reroute to %s)",
                      server_p->name, conn_p->name, conf_p->name);
@@ -338,14 +335,14 @@ u_rehash(struct client *unused, struct lconn *conn_p, const char *parv[], int pa
 	if(parc > 0 && !irccmp(parv[0], "help"))
 	{
 		mlog("services rehashing: %s reloading help", conn_p->name);
-		sendto_all(0, "services rehashing: %s reloading help",
+		sendto_all("services rehashing: %s reloading help",
 				conn_p->name);
 		rehash_help();
 		return 0;
 	}
 
 	mlog("services rehashing: %s reloading config file", conn_p->name);
-	sendto_all(0, "services rehashing: %s reloading config file", conn_p->name);
+	sendto_all("services rehashing: %s reloading config file", conn_p->name);
 
 	rehash(0);
 	return 0;
@@ -504,77 +501,3 @@ u_help(struct client *unused, struct lconn *conn_p, const char *parv[], int parc
 	return 0;
 }
 
-struct _flags_table
-{
-        const char *name;
-        int flag;
-};
-static struct _flags_table flags_table[] = {
-        { "chat",       UMODE_CHAT,     },
-        { "\0",         0,              }
-};
-
-static void
-show_flags(struct lconn *conn_p)
-{
-        char buf[BUFSIZE];
-        char *p = buf;
-        int i;
-
-        for(i = 0; flags_table[i].flag; i++)
-        {
-                p += sprintf(p, "%s%s ",
-                             (conn_p->flags & flags_table[i].flag) ? "+" : "-",
-                             flags_table[i].name);
-        }
-
-        sendto_one(conn_p, "Current flags: %s", buf);
-}
-
-static int
-u_flags(struct client *unused, struct lconn *conn_p, const char *parv[], int parc)
-{
-        const char *param;
-        int dir;
-        int i;
-        int j;
-
-        if(parc < 1)
-        {
-                show_flags(conn_p);
-                return 0;
-        }
-
-        for(i = 0; i < parc; i++)
-        {
-                param = parv[i];
-
-                if(*param == '+')
-                {
-                        dir = DIR_ADD;
-                        param++;
-                }
-                else if(*param == '-')
-                {
-                        dir = DIR_DEL;
-                        param++;
-                }
-                else
-                        dir = DIR_ADD;
-
-                for(j = 0; flags_table[j].flag; j++)
-                {
-                        if(!strcasecmp(flags_table[j].name, param))
-                        {
-                                if(dir == DIR_ADD)
-                                        conn_p->flags |= flags_table[j].flag;
-                                else
-                                        conn_p->flags &= ~flags_table[j].flag;
-                                break;
-                        }
-                }
-        }
-
-        show_flags(conn_p);
-	return 0;
-}

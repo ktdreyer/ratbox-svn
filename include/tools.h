@@ -132,7 +132,7 @@ dlink_node *dlink_find_string(const char *data, dlink_list *list);
 	if(!(expr)) {							\
 		mlog("file: %s line: %d (%s): Assertion failed: (%s)",	\
 			__FILE__, __LINE__, __PRETTY_FUNCTION__, #expr); \
-		sendto_all(0, "file: %s line: %d (%s): Assertion failed: (%s)",\
+		sendto_all("file: %s line: %d (%s): Assertion failed: (%s)",\
 			__FILE__, __LINE__, __PRETTY_FUNCTION__, #expr); \
 	}								\
 	while(0)
@@ -141,7 +141,7 @@ dlink_node *dlink_find_string(const char *data, dlink_list *list);
 	if(!(expr)) {							\
 		mlog("file: %s line: %d: Assertion failed: (%s)",	\
 			__FILE__, __LINE__, #expr);                     \
-		sendto_all(0, "file: %s line: %d: Assertion failed: (%s)",\
+		sendto_all("file: %s line: %d: Assertion failed: (%s)",\
 			__FILE__, __LINE__, #expr);                     \
 	}								\
 	while(0)

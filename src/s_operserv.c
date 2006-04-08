@@ -382,7 +382,7 @@ o_oper_rehash(struct client *client_p, struct lconn *conn_p, const char *parv[],
 	if(parc > 0 && !irccmp(parv[0], "help"))
 	{
 		mlog("services rehashing: %s reloading help", OPER_NAME(client_p, conn_p));
-		sendto_all(0, "services rehashing: %s reloading help",
+		sendto_all("services rehashing: %s reloading help",
 				OPER_NAME(client_p, conn_p));
 
 		rehash_help();
@@ -390,7 +390,7 @@ o_oper_rehash(struct client *client_p, struct lconn *conn_p, const char *parv[],
 	}
 
 	mlog("services rehashing: %s reloading config file", OPER_NAME(client_p, conn_p));
-	sendto_all(0, "services rehashing: %s reloading config file", OPER_NAME(client_p, conn_p));
+	sendto_all("services rehashing: %s reloading config file", OPER_NAME(client_p, conn_p));
 
 	rehash(0);
 	return 0;
@@ -412,7 +412,7 @@ o_oper_die(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 		return 0;
 	}
 
-	sendto_all(0, "Services terminated by %s", OPER_NAME(client_p, conn_p));
+	sendto_all("Services terminated by %s", OPER_NAME(client_p, conn_p));
 	mlog("ratbox-services terminated by %s", OPER_NAME(client_p, conn_p));
 	die(1, "Services terminated");
 	return 0;

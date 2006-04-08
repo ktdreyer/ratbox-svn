@@ -49,7 +49,7 @@ c_error(struct client *client_p, const char *parv[], int parc)
 
         mlog("Connection to server %s error: (%s)",
              server_p->name, parv[0]);
-        sendto_all(0, "Connection to server %s error: (%s)",
+        sendto_all("Connection to server %s error: (%s)",
                    server_p->name, parv[0]);
 
         (server_p->io_close)(server_p);

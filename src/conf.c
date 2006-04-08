@@ -207,7 +207,7 @@ conf_parse(int cold)
 		if(!cold)
 		{
 			mlog("Failed to open config file");
-			sendto_all(0, "Failed to open config file");
+			sendto_all("Failed to open config file");
 			return;
 		}
 		else
@@ -258,7 +258,7 @@ rehash(int sig)
 	if(sig)
 	{
 		mlog("services rehashing: got SIGHUP");
-		sendto_all(0, "services rehashing: got SIGHUP");
+		sendto_all("services rehashing: got SIGHUP");
 	}
 
 	reopen_logfiles();
@@ -386,7 +386,7 @@ yyerror(const char *msg)
 
 	strip_tabs(newlinebuf, (const unsigned char *) linebuf, strlen(linebuf));
 
-	sendto_all(0, "\"%s\", line %d: %s at '%s'",
+	sendto_all("\"%s\", line %d: %s at '%s'",
                    conffilebuf, lineno + 1, msg, newlinebuf);
 
 	mlog("conf error: \"%s\", line %d: %s at '%s'", conffilebuf, lineno + 1, msg, newlinebuf);
