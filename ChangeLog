@@ -1,3 +1,15 @@
+leeh        2006/04/08 14:59:32 UTC	(20060408_1-22301)
+  Log:
+  - add watch_send() calls for nickdrop/nickserv::register
+  - wrap each watch handler in #ifdef's for the service being enabled
+  
+
+  Modified:
+	rserv/trunk/include/watch.h (File Modified) 
+	rserv/trunk/src/s_nickserv.c (File Modified) 
+	rserv/trunk/src/s_watchserv.c (File Modified) 
+
+
 leeh        2006/04/08 14:50:49 UTC	(20060408_0-22299)
   Log:
   - add watch entries for various userserv commands
