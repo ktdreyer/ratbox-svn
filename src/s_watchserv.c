@@ -63,6 +63,9 @@ static struct
 	{ "jupeserv",		WATCH_JUPESERV		},
 	{ "operbot",		WATCH_OPERBOT		},
 	{ "operserv",		WATCH_OPERSERV		},
+	{ "usadmin",		WATCH_USADMIN		},
+	{ "usoper",		WATCH_USOPER		},
+	{ "usregister",		WATCH_USREGISTER	},
 	{ NULL, 0 }
 };
 

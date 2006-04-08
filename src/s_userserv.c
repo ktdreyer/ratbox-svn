@@ -51,6 +51,7 @@
 #include "hook.h"
 #include "email.h"
 #include "dbhook.h"
+#include "watch.h"
 
 static void init_s_userserv(void);
 
@@ -517,6 +518,8 @@ o_user_userregister(struct client *client_p, struct lconn *conn_p, const char *p
 	slog(userserv_p, 2, "%s - USERREGISTER %s %s",
 		OPER_NAME(client_p, conn_p), parv[0], 
 		EmptyString(parv[2]) ? "-" : parv[2]);
+	watch_send(WATCH_USADMIN, client_p, conn_p, 1,
+			"USERREGISTER %s %s", parv[0], parv[2]);
 
 	reg_p = BlockHeapAlloc(user_reg_heap);
 	strcpy(reg_p->name, parv[0]);
@@ -561,6 +564,7 @@ o_user_userdrop(struct client *client_p, struct lconn *conn_p, const char *parv[
 
 	slog(userserv_p, 1, "%s - USERDROP %s", 
 		OPER_NAME(client_p, conn_p), ureg_p->name);
+	watch_send(WATCH_USADMIN, client_p, conn_p, 1, "USERDROP %s", ureg_p->name);
 
 	logout_user_reg(ureg_p);
 
@@ -592,6 +596,7 @@ o_user_usersuspend(struct client *client_p, struct lconn *conn_p, const char *pa
 
 	slog(userserv_p, 1, "%s - USERSUSPEND %s",
 		OPER_NAME(client_p, conn_p), reg_p->name);
+	watch_send(WATCH_USADMIN, client_p, conn_p, 1, "USERSUSPEND %s", reg_p->name);
 
 	logout_user_reg(reg_p);
 
@@ -631,6 +636,7 @@ o_user_userunsuspend(struct client *client_p, struct lconn *conn_p, const char *
 
 	slog(userserv_p, 1, "%s - USERUNSUSPEND %s",
 		OPER_NAME(client_p, conn_p), reg_p->name);
+	watch_send(WATCH_USADMIN, client_p, conn_p, 1, "USERUNSUSPEND %s", reg_p->name);
 
 	reg_p->flags &= ~US_FLAGS_SUSPENDED;
 	my_free(reg_p->suspender);
@@ -772,6 +778,7 @@ o_user_userlist(struct client *client_p, struct lconn *conn_p, const char *parv[
 
 	slog(userserv_p, 1, "%s - USERLIST %s",
 		OPER_NAME(client_p, conn_p), mask);
+	watch_send(WATCH_USOPER, client_p, conn_p, 1, "USERLIST %s", mask);
 
 	return 0;
 }
@@ -796,6 +803,7 @@ o_user_userinfo(struct client *client_p, struct lconn *conn_p, const char *parv[
 
 	slog(userserv_p, 1, "%s - USERINFO %s",
 		OPER_NAME(client_p, conn_p), ureg_p->name);
+	watch_send(WATCH_USOPER, client_p, conn_p, 1, "USERINFO %s", ureg_p->name);
 
 	service_send(userserv_p, client_p, conn_p,
 			"[%s] Username registered for %s",
@@ -834,6 +842,7 @@ o_user_usersetpass(struct client *client_p, struct lconn *conn_p, const char *pa
 
 	slog(userserv_p, 1, "%s - USERSETPASS %s",
 		OPER_NAME(client_p, conn_p), ureg_p->name);
+	watch_send(WATCH_USADMIN, client_p, conn_p, 1, "USERSETPASS %s", ureg_p->name);
 
 	password = get_crypt(parv[1], NULL);
 	my_free(ureg_p->password);
@@ -1035,6 +1044,8 @@ s_user_register(struct client *client_p, struct lconn *conn_p, const char *parv[
 	slog(userserv_p, 2, "%s - REGISTER %s %s",
 		client_p->user->mask, parv[0], 
 		EmptyString(parv[2]) ? "" : parv[2]);
+	watch_send(WATCH_USREGISTER, client_p, NULL, 0, 
+			"REGISTER %s %s", parv[0], parv[2]);
 
 	password = get_crypt(parv[1], NULL);
 

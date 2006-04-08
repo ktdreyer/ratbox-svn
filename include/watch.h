@@ -9,6 +9,9 @@
 #define WATCH_CSADMIN		0x00000010
 #define WATCH_CSOPER		0x00000020
 #define WATCH_CSREGISTER	0x00000040
+#define WATCH_USADMIN		0x00000080
+#define WATCH_USOPER		0x00000100
+#define WATCH_USREGISTER	0x00000200
 
 void PRINTFLIKE(5, 6) watch_send(unsigned int flag, struct client *client_p,
 				struct lconn *conn_p, int oper, const char *format, ...);
