@@ -1,3 +1,19 @@
+leeh        2006/04/08 21:27:59 UTC	(20060408_5-22309)
+  Log:
+  - add watchserv flag for services opers authing
+  - add help for ucommand watch
+  
+
+  Modified:
+	rserv/trunk/help/watchserv/u-watch (File Added) 
+	rserv/trunk/help/watchserv/watch (File Modified) 
+	rserv/trunk/include/watch.h (File Modified) 
+	rserv/trunk/src/io.c (File Modified) 
+	rserv/trunk/src/s_watchserv.c (File Modified) 
+	rserv/trunk/src/service.c (File Modified) 
+	rserv/trunk/src/ucommand.c (File Modified) 
+
+
 leeh        2006/04/08 21:00:43 UTC	(20060408_4-22307)
   Log:
   - dont prefix list of flags being watched with a '+'
