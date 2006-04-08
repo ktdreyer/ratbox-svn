@@ -1039,12 +1039,6 @@ s_user_register(struct client *client_p, struct lconn *conn_p, const char *parv[
 	if(hent)
 		hent->uregister++;
 
-	/* we need to mask the password */
-	sendto_all(UMODE_REGISTER, "#:%s!%s@%s# REGISTER %s %s",
-			client_p->name, client_p->user->username,
-			client_p->user->host, parv[0],
-			EmptyString(parv[2]) ? "" : parv[2]);
-			
 	slog(userserv_p, 2, "%s - REGISTER %s %s",
 		client_p->user->mask, parv[0], 
 		EmptyString(parv[2]) ? "" : parv[2]);

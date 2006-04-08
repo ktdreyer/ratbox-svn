@@ -511,19 +511,9 @@ struct _flags_table
 };
 static struct _flags_table flags_table[] = {
         { "chat",       UMODE_CHAT,     },
-        { "auth",       UMODE_AUTH,     },
         { "server",     UMODE_SERVER,   },
-#ifdef ENABLE_USERSERV
-	{ "register",	UMODE_REGISTER	},
-#endif
 #ifdef ENABLE_CHANSERV
 	{ "botfight",	UMODE_BOTFIGHT	},
-#endif
-#ifdef ENABLE_JUPESERV
-	{ "jupes",	UMODE_JUPES	},
-#endif
-#ifdef ENABLE_ALIS
-	{ "alis",	UMODE_ALIS	},
 #endif
         { "\0",         0,              }
 };
