@@ -44,6 +44,7 @@
 #include "serno.h"
 #include "cache.h"
 #include "hook.h"
+#include "watch.h"
 
 #ifdef HAVE_CRYPT_H
 #include <crypt.h>
@@ -216,8 +217,7 @@ u_login(struct client *unused, struct lconn *conn_p, const char *parv[], int par
                 return 0;
         }
 
-        /* newly opered user wont get this. */
-        sendto_all(UMODE_AUTH, "%s has logged in", conn_p->name);
+	watch_send(WATCH_AUTH, NULL, conn_p, 1, "has logged in (dcc)");
 
         /* set them as 'logged in' */
         SetUserAuth(conn_p);

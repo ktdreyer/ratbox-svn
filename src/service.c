@@ -47,6 +47,7 @@
 #include "cache.h"
 #include "channel.h"
 #include "s_userserv.h"
+#include "watch.h"
 
 dlink_list service_list;
 
@@ -639,14 +640,14 @@ handle_service(struct client *service_p, struct client *client_p,
 			return;
 		}
 
-		sendto_all(UMODE_AUTH, "%s:%s has logged in [IRC]",
-				oper_p->name, client_p->user->mask);
 		sendto_server(":%s NOTICE %s :Oper login successful",
 				MYNAME, UID(client_p));
 
 		client_p->user->oper = oper_p;
 		oper_p->refcount++;
 		dlink_add_alloc(client_p, &oper_list);
+
+		watch_send(WATCH_AUTH, client_p, NULL, 1, "has logged in (irc)");
 
 		return;
 	}
@@ -660,8 +661,7 @@ handle_service(struct client *service_p, struct client *client_p,
 			return;
 		}
 
-		sendto_all(UMODE_AUTH, "%s:%s has logged out [IRC]",
-				client_p->user->oper->name, client_p->user->mask);
+		watch_send(WATCH_AUTH, client_p, NULL, 1, "has logged out (irc)");
 
 		deallocate_conf_oper(client_p->user->oper);
 		client_p->user->oper = NULL;

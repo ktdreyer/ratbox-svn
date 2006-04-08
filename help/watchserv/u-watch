@@ -1,5 +1,5 @@
-WATCH [[-]<flags>[ [-]<flags>]*]
-[ADMIN] Modifies the commands to be watched
+watch [[-]<flags>[ [-]<flags>]*]
+Modifies the commands to be watched
   flags: Space seperated list of flags to watch.
          Flags may be prefixed with a '-' to stop watching them.
 	 With no parameters will list flags being watched

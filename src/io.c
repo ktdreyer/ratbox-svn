@@ -50,6 +50,7 @@
 #include "service.h"
 #include "hook.h"
 #include "serno.h"
+#include "watch.h"
 
 #define IO_HOST	0
 #define IO_IP	1
@@ -734,7 +735,7 @@ signoff_client(struct lconn *conn_p)
 	SetConnDead(conn_p);
 
 	if(UserAuth(conn_p))
-                sendto_all(UMODE_AUTH, "%s has logged out", conn_p->name);
+		watch_send(WATCH_AUTH, NULL, conn_p, 1, "has logged out (dcc)");
 
 	if(conn_p->oper != NULL)
 		deallocate_conf_oper(conn_p->oper);
