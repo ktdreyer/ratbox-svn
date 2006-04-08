@@ -1,3 +1,14 @@
+leeh        2006/04/08 14:50:49 UTC	(20060408_0-22299)
+  Log:
+  - add watch entries for various userserv commands
+  
+
+  Modified:
+	rserv/trunk/include/watch.h (File Modified) 
+	rserv/trunk/src/s_userserv.c (File Modified) 
+	rserv/trunk/src/s_watchserv.c (File Modified) 
+
+
 leeh        2006/04/07 21:44:32 UTC	(20060407_4-22297)
   Log:
   - add watch entries for some chanserv commands
