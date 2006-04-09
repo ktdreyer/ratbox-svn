@@ -632,11 +632,6 @@ signon_server(struct lconn *conn_p)
 	sendto_server("CAPAB :QS TB EX IE ENCAP SERVICES");
 	sendto_server("SERVER %s 1 :%s", MYNAME, config_file.gecos);
 
-	introduce_services();
-	introduce_services_channels();
-
-	SetConnSentBurst(conn_p);
-
 	return 1;
 }
 
