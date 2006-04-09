@@ -1,3 +1,18 @@
+leeh        2006/04/09 19:44:53 UTC	(20060409_5-22331)
+  Log:
+  - reorganise things so the schemas are in tools/base/ and generate-schema.pl
+    is in tools/
+  
+
+  Modified:
+	rserv/trunk/doc/base/ (File Deleted) 
+	rserv/trunk/doc/generate-schema.pl (File Deleted) 
+	rserv/trunk/doc/schema-sqlite.txt (File Deleted) 
+	rserv/trunk/tools/base/ (File Added) 
+	rserv/trunk/tools/base/schema-sqlite.txt (File Added) 
+	rserv/trunk/tools/generate-schema.pl (File Added) 
+
+
 leeh        2006/04/09 19:38:12 UTC	(20060409_4-22329)
   Log:
   - fix the sendto_server() calls so they use TS6
