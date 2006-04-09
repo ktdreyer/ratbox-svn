@@ -1,3 +1,13 @@
+leeh        2006/04/09 10:08:10 UTC	(20060409_1-22323)
+  Log:
+  - add hooks for users/servers exiting
+  
+
+  Modified:
+	rserv/trunk/include/hook.h (File Modified) 
+	rserv/trunk/src/client.c (File Modified) 
+
+
 leeh        2006/04/09 10:05:10 UTC	(20060409_0-22321)
   Log:
   - rename sendto_all_butone() to sendto_all_chat()
