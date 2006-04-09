@@ -984,14 +984,13 @@ parse_client(struct lconn *conn_p, char *buf, int len)
                         return;
                 }
 
-                if(!IsUmodeChat(conn_p))
+		if(!UserChat(conn_p))
                 {
-                        sendto_one(conn_p, "You must '.flags +chat' first.");
+                        sendto_one(conn_p, "You must '.chat on' first.");
                         return;
                 }
 
-                sendto_all_butone(conn_p, UMODE_CHAT, "<%s> %s", 
-                                  conn_p->name, ch);
+                sendto_all_chat(conn_p, "<%s> %s", conn_p->name, ch);
                 return;
         }
 
@@ -1106,15 +1105,15 @@ sendto_all(const char *format, ...)
         }
 }
 
-/* sendto_all_butone()
- *   attempts to send the given data to all clients connected but one
+/* sendto_all_chat()
+ *   attempts to send the given chat to all dcc clients except the
+ *   originator
  *
- * inputs       - client not to send to, umode required [0 for none], data
+ * inputs       - client sending this message, data
  * outputs      -
  */
 void
-sendto_all_butone(struct lconn *one, int umode,
-                  const char *format, ...)
+sendto_all_chat(struct lconn *one, const char *format, ...)
 {
         struct lconn *conn_p;
         char buf[BUFSIZE];
@@ -1129,14 +1128,11 @@ sendto_all_butone(struct lconn *one, int umode,
         {
                 conn_p = ptr->data;
 
-                if(!UserAuth(conn_p))
+                if(!UserAuth(conn_p) || !UserChat(conn_p))
                         continue;
 
                 /* the one we shouldnt be sending to.. */
                 if(conn_p == one)
-                        continue;
-
-                if(umode && !(conn_p->flags & umode))
                         continue;
 
                 sendto_one(conn_p, "%s", buf);

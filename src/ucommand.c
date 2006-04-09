@@ -58,6 +58,7 @@ dlink_list ucommand_list;
 static int u_login(struct client *, struct lconn *, const char **, int);
 
 static int u_boot(struct client *, struct lconn *, const char **, int);
+static int u_chat(struct client *, struct lconn *, const char **, int);
 static int u_connect(struct client *, struct lconn *, const char **, int);
 static int u_events(struct client *, struct lconn *, const char **, int);
 static int u_help(struct client *, struct lconn *, const char **, int);
@@ -69,6 +70,7 @@ static int u_status(struct client *, struct lconn *, const char **, int);
 static struct ucommand_handler ucommands[] =
 {
 	{ "boot",	u_boot,		CONF_OPER_ADMIN,	0, 1, NULL },
+	{ "chat",	u_chat,		0,			0, 0, NULL },
 	{ "connect",	u_connect,	CONF_OPER_ROUTE,	0, 1, NULL },
 	{ "events",	u_events,	CONF_OPER_ADMIN,	0, 0, NULL },
 	{ "help",	u_help,		0,			0, 0, NULL },
@@ -214,7 +216,7 @@ u_login(struct client *unused, struct lconn *conn_p, const char *parv[], int par
 
         /* set them as 'logged in' */
         SetUserAuth(conn_p);
-        conn_p->flags |= UMODE_DEFAULT;
+	SetUserChat(conn_p);
 	conn_p->privs = oper_p->flags;
 	conn_p->sprivs = oper_p->sflags;
 	conn_p->watchflags = 0;
@@ -410,6 +412,32 @@ u_status(struct client *unused, struct lconn *conn_p, const char *parv[], int pa
 			dlink_list_length(&server_list));
         sendto_one(conn_p, "         Channels: %lu Topics: %lu",
 			dlink_list_length(&channel_list), count_topics());
+	return 0;
+}
+
+static int      
+u_chat(struct client *unused, struct lconn *conn_p, const char *parv[], int parc)
+{
+	if(parc < 1 || EmptyString(parv[0]))
+	{
+		sendto_one(conn_p, "Chat status is: %s",
+				UserChat(conn_p) ? "on" : "off");
+		return 0;
+	}
+
+	if(!strcasecmp(parv[0], "on"))
+	{
+		SetUserChat(conn_p);
+		sendto_one(conn_p, "Chat status set on");
+	}
+	else if(!strcasecmp(parv[0], "off"))
+	{
+		ClearUserChat(conn_p);
+		sendto_one(conn_p, "Chat status set off");
+	}
+	else
+		sendto_one(conn_p, "Chat status must either be 'on' or 'off'");
+
 	return 0;
 }
 

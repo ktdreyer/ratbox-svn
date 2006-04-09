@@ -91,16 +91,13 @@ extern dlink_list connection_list;
 
 /* user flags */
 #define CONN_FLAGS_AUTH		0x10000
+#define CONN_FLAGS_CHAT		0x20000
 
-#define UserAuth(x)	((x)->flags & CONN_FLAGS_AUTH)
-#define SetUserAuth(x)	((x)->flags |= CONN_FLAGS_AUTH)
-
-/* usermodes */
-#define UMODE_CHAT              0x0100000
-
-#define UMODE_DEFAULT           (UMODE_CHAT)
-
-#define IsUmodeChat(x)          ((x)->flags & UMODE_CHAT)
+#define UserAuth(x)		((x)->flags & CONN_FLAGS_AUTH)
+#define SetUserAuth(x)		((x)->flags |= CONN_FLAGS_AUTH)
+#define UserChat(x)		((x)->flags & CONN_FLAGS_CHAT)
+#define SetUserChat(x)		((x)->flags |= CONN_FLAGS_CHAT)
+#define ClearUserChat(x)	((x)->flags &= ~CONN_FLAGS_CHAT)
 
 extern void read_io(void);
 
@@ -113,8 +110,7 @@ extern void connect_from_client(struct client *client_p, struct conf_oper *oper_
 extern void PRINTFLIKE(1, 2) sendto_server(const char *format, ...);
 extern void PRINTFLIKE(2, 3) sendto_one(struct lconn *, const char *format, ...);
 extern void PRINTFLIKE(1, 2) sendto_all(const char *format, ...);
-extern void PRINTFLIKE(3, 4) sendto_all_butone(struct lconn *, int umode, 
-                              const char *format, ...);
+extern void PRINTFLIKE(2, 3) sendto_all_chat(struct lconn *, const char *format, ...);
 
 extern int sock_create(int);
 extern int sock_open(const char *host, int port, const char *vhost, int type);
