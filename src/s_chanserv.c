@@ -885,7 +885,7 @@ e_chanserv_enforcetopic(void *unused)
 			continue;
 
 		sendto_server(":%s TOPIC %s :%s",
-				chanserv_p->name, chptr->name, chreg_p->topic);
+				SVC_UID(chanserv_p), chptr->name, chreg_p->topic);
 		strlcpy(chptr->topic, chreg_p->topic, sizeof(chptr->topic));
 		strlcpy(chptr->topicwho, MYNAME, sizeof(chptr->topicwho));
 	}
@@ -1091,7 +1091,7 @@ h_chanserv_mode_simple(void *v_chptr, void *v_chreg)
 	/* we simply issue a mode of what it doesnt have in common */
 	if(mode.mode)
 		sendto_server(":%s MODE %s %s",
-				chanserv_p->name, chptr->name,
+				SVC_UID(chanserv_p), chptr->name,
 				chmode_to_string(&mode));
 	return 0;
 }
@@ -1300,7 +1300,7 @@ h_chanserv_user_login(void *v_client_p, void *unused)
 		   !(chreg_p->flags & CS_FLAGS_NOOPS))
 		{
 			sendto_server(":%s MODE %s +o %s",
-					chanserv_p->name, chptr->name,
+					SVC_UID(chanserv_p), chptr->name,
 					UID(member_p->client_p));
 			member_p->flags &= ~MODE_DEOPPED;
 			member_p->flags |= MODE_OPPED;
@@ -1310,7 +1310,7 @@ h_chanserv_user_login(void *v_client_p, void *unused)
 			!(chreg_p->flags & CS_FLAGS_NOVOICES))
 		{
 			sendto_server(":%s MODE %s +v %s",
-					chanserv_p->name, chptr->name,
+					SVC_UID(chanserv_p), chptr->name,
 					UID(member_p->client_p));
 			member_p->flags |= MODE_VOICED;
 		}
@@ -2611,7 +2611,7 @@ s_chan_topic(struct client *client_p, struct lconn *conn_p, const char *parv[], 
 		strlcat(buf, parv[i], sizeof(buf));
 		
 	sendto_server(":%s TOPIC %s :[%s] %s",
-			MYNAME, parv[0], reg_p->user_reg->name, buf);
+			MYUID, parv[0], reg_p->user_reg->name, buf);
 
 	return 1;
 			

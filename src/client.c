@@ -977,7 +977,7 @@ c_server(struct client *client_p, const char *parv[], int parc)
 	add_client(target_p);
 	dlink_add(target_p, &target_p->listnode, &server_list);
 
-	sendto_server(":%s PING %s %s", MYNAME, MYNAME, target_p->name);
+	sendto_server(":%s PING %s %s", MYUID, MYUID, target_p->name);
 }
 
 /* c_sid()
@@ -1015,7 +1015,7 @@ c_sid(struct client *client_p, const char *parv[], int parc)
 	add_client(target_p);
 	dlink_add(target_p, &target_p->listnode, &server_list);
 
-	sendto_server(":%s PING %s %s", MYNAME, MYNAME, target_p->name);
+	sendto_server(":%s PING %s %s", MYUID, MYUID, target_p->name);
 }
 
 /* c_squit()

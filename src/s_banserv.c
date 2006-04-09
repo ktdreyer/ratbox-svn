@@ -271,17 +271,17 @@ push_ban(const char *target, char type, const char *mask,
 			return;
 
 		sendto_server(":%s ENCAP %s KLINE %lu %s %s :%s",
-				banserv_p->name, target,
+				SVC_UID(banserv_p), target,
 				(unsigned long) hold,
 				user, host, reason);
 	}
 	else if(type == 'X')
 		sendto_server(":%s ENCAP %s XLINE %lu %s 2 :%s",
-				banserv_p->name, target,
+				SVC_UID(banserv_p), target,
 				(unsigned long) hold, mask, reason);
 	else if(type == 'R')
 		sendto_server(":%s ENCAP %s RESV %lu %s 0 :%s",
-				banserv_p->name, target,
+				SVC_UID(banserv_p), target,
 				(unsigned long) hold, mask, reason);
 }
 
@@ -296,14 +296,14 @@ push_unban(const char *target, char type, const char *mask)
 			return;
 
 		sendto_server(":%s ENCAP %s UNKLINE %s %s",
-				banserv_p->name, target, user, host);
+				SVC_UID(banserv_p), target, user, host);
 	}
 	else if(type == 'X')
 		sendto_server(":%s ENCAP %s UNXLINE %s",
-				banserv_p->name, target, mask);
+				SVC_UID(banserv_p), target, mask);
 	else if(type == 'R')
 		sendto_server(":%s ENCAP %s UNRESV %s",
-				banserv_p->name, target, mask);
+				SVC_UID(banserv_p), target, mask);
 }
 
 static void

@@ -310,9 +310,9 @@ introduce_service_channels(struct client *target_p)
 		chptr = ptr->data;
 
 		sendto_server(":%s SJOIN %lu %s %s :@%s",
-				MYNAME, (unsigned long) chptr->tsinfo, 
+				MYUID, (unsigned long) chptr->tsinfo, 
 				chptr->name, chmode_to_string(&chptr->mode), 
-				target_p->name);
+				SVC_UID(target_p));
 	}
 }
 
@@ -351,7 +351,7 @@ introduce_services_channels()
 void
 reintroduce_service(struct client *target_p)
 {
-	sendto_server(":%s QUIT :Updating information", target_p->name);
+	sendto_server(":%s QUIT :Updating information", SVC_UID(target_p));
 	del_client(target_p);
 	introduce_service(target_p);
 	introduce_service_channels(target_p);
@@ -362,7 +362,7 @@ reintroduce_service(struct client *target_p)
 void
 deintroduce_service(struct client *target_p)
 {
-	sendto_server(":%s QUIT :Disabled", target_p->name);
+	sendto_server(":%s QUIT :Disabled", SVC_UID(target_p));
 	ClearServiceIntroduced(target_p);
 	del_client(target_p);
 }
@@ -607,14 +607,14 @@ handle_service(struct client *service_p, struct client *client_p,
 		if(client_p->user->oper)
 		{
 			sendto_server(":%s NOTICE %s :You are already logged in as an oper",
-					MYNAME, UID(client_p));
+					MYUID, UID(client_p));
 			return;
 		}
 
 		if(parc < 2)
 		{
 			sendto_server(":%s NOTICE %s :Insufficient parameters to %s::OLOGIN",
-					MYNAME, UID(client_p), service_p->name);
+					MYUID, UID(client_p), service_p->name);
 			client_p->user->flood_count++;
 			return;
 		}
@@ -623,7 +623,7 @@ handle_service(struct client *service_p, struct client *client_p,
 						client_p->user->servername)) == NULL)
 		{
 			sendto_server(":%s NOTICE %s :No access to %s::OLOGIN",
-					MYNAME, UID(client_p), ucase(service_p->name));
+					MYUID, UID(client_p), ucase(service_p->name));
 			client_p->user->flood_count++;
 			return;
 		}
@@ -636,12 +636,12 @@ handle_service(struct client *service_p, struct client *client_p,
 		if(strcmp(crpass, oper_p->pass))
 		{
 			sendto_server(":%s NOTICE %s :Invalid password",
-					MYNAME, UID(client_p));
+					MYUID, UID(client_p));
 			return;
 		}
 
 		sendto_server(":%s NOTICE %s :Oper login successful",
-				MYNAME, UID(client_p));
+				MYUID, UID(client_p));
 
 		client_p->user->oper = oper_p;
 		oper_p->refcount++;
@@ -656,7 +656,7 @@ handle_service(struct client *service_p, struct client *client_p,
 		if(client_p->user->oper == NULL)
 		{
 			sendto_server(":%s NOTICE %s :You are not logged in as an oper",
-					MYNAME, UID(client_p));
+					MYUID, UID(client_p));
 			client_p->user->flood_count++;
 			return;
 		}
@@ -668,7 +668,7 @@ handle_service(struct client *service_p, struct client *client_p,
 		dlink_find_destroy(client_p, &oper_list);
 
 		sendto_server(":%s NOTICE %s :Oper logout successful",
-				MYNAME, UID(client_p));
+				MYUID, UID(client_p));
 		return;
 	}
 
@@ -746,7 +746,7 @@ service_send(struct client *service_p, struct client *client_p,
 
 	if(client_p)
 		sendto_server(":%s NOTICE %s :%s",
-				ServiceMsgSelf(service_p) ? service_p->name : MYNAME, 
+				ServiceMsgSelf(service_p) ? SVC_UID(service_p) : MYUID, 
 				UID(client_p), buf);
 	else
 		sendto_one(conn_p, "%s", buf);
@@ -764,7 +764,7 @@ service_error(struct client *service_p, struct client *client_p,
 	va_end(args);
 
 	sendto_server(":%s NOTICE %s :%s",
-			ServiceMsgSelf(service_p) ? service_p->name : MYNAME, 
+			ServiceMsgSelf(service_p) ? SVC_UID(service_p) : MYUID, 
 			UID(client_p), buf);
 }
 

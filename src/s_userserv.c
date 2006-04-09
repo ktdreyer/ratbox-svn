@@ -293,7 +293,7 @@ logout_user_reg(struct user_reg *ureg_p)
 	{
 		target_p = ptr->data;
 
-		sendto_server(":%s ENCAP * SU %s", MYNAME, UID(target_p));
+		sendto_server(":%s ENCAP * SU %s", MYUID, UID(target_p));
 
 		target_p->user->user_reg = NULL;
 		dlink_destroy(ptr, &ureg_p->users);
@@ -376,7 +376,7 @@ h_user_burst_login(void *v_client_p, void *v_username)
 	/* nickname that isnt actually registered.. log them out */
 	if((ureg_p = find_user_reg(NULL, username)) == NULL)
 	{
-		sendto_server(":%s ENCAP * SU %s", MYNAME, UID(client_p));
+		sendto_server(":%s ENCAP * SU %s", MYUID, UID(client_p));
 		return 0;
 	}
 
@@ -1074,7 +1074,7 @@ s_user_register(struct client *client_p, struct lconn *conn_p, const char *parv[
 		client_p->user->user_reg = reg_p;
 
 		sendto_server(":%s ENCAP * SU %s %s", 
-				MYNAME, UID(client_p), reg_p->name);
+				MYUID, UID(client_p), reg_p->name);
 
 		service_error(userserv_p, client_p, "Username %s registered, you are now logged in", parv[0]);
 
@@ -1201,7 +1201,7 @@ s_user_login(struct client *client_p, struct lconn *conn_p, const char *parv[], 
 	}
 
 	sendto_server(":%s ENCAP * SU %s %s",
-			MYNAME, UID(client_p), reg_p->name);
+			MYUID, UID(client_p), reg_p->name);
 
 	client_p->user->user_reg = reg_p;
 	reg_p->last_time = CURRENT_TIME;
@@ -1221,7 +1221,7 @@ s_user_logout(struct client *client_p, struct lconn *conn_p, const char *parv[],
 	client_p->user->user_reg = NULL;
 	service_error(userserv_p, client_p, "Logout successful");
 
-	sendto_server(":%s ENCAP * SU %s", MYNAME, UID(client_p));
+	sendto_server(":%s ENCAP * SU %s", MYUID, UID(client_p));
 
 	return 1;
 }

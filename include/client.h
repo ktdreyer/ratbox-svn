@@ -120,6 +120,8 @@ struct host_entry
 };
 
 #define UID(x) (EmptyString((x)->uid) ? (x)->name : (x)->uid)
+#define MYUID ((server_p && !EmptyString(server_p->sid)) ? config_file.sid : config_file.name)
+#define SVC_UID(x) ((server_p && !EmptyString(server_p->sid)) ? (x)->uid : (x)->name)
 
 #define IsServer(x) ((x)->server != NULL)
 #define IsUser(x) ((x)->user != NULL)

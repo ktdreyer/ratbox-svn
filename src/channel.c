@@ -330,9 +330,9 @@ join_service(struct client *service_p, const char *chname, time_t tsinfo,
 
 	if(sent_burst)
 		sendto_server(":%s SJOIN %lu %s %s :@%s",
-				MYNAME, (unsigned long) chptr->tsinfo, 
+				MYUID, (unsigned long) chptr->tsinfo, 
 				chptr->name, chmode_to_string(&chptr->mode), 
-				service_p->name);
+				SVC_UID(service_p));
 }
 
 int
@@ -350,7 +350,7 @@ part_service(struct client *service_p, const char *chname)
 	dlink_find_destroy(chptr, &service_p->service->channels);
 
 	if(sent_burst)
-		sendto_server(":%s PART %s", service_p->name, chptr->name);
+		sendto_server(":%s PART %s", SVC_UID(service_p), chptr->name);
 
 	if(dlink_list_length(&chptr->users) == 0 &&
 	   dlink_list_length(&chptr->services) == 0)
@@ -369,16 +369,16 @@ rejoin_service(struct client *service_p, struct channel *chptr, int reop)
 		if(config_file.ratbox)
 		{
 			sendto_server(":%s MODE %s +o %s",
-					MYNAME, chptr->name, service_p->name);
+					MYUID, chptr->name, SVC_UID(service_p));
 			return;
 		}
 
-		sendto_server(":%s PART %s", service_p->name, chptr->name);
+		sendto_server(":%s PART %s", SVC_UID(service_p), chptr->name);
 	}
 
 	sendto_server(":%s SJOIN %lu %s %s :@%s",
-			MYNAME, (unsigned long) chptr->tsinfo, chptr->name, 
-			chmode_to_string(&chptr->mode),  service_p->name);
+			MYUID, (unsigned long) chptr->tsinfo, chptr->name, 
+			chmode_to_string(&chptr->mode),  SVC_UID(service_p));
 }
 
 /* c_kick()

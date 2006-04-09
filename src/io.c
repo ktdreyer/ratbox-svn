@@ -269,7 +269,7 @@ read_io(void)
 				((server_p->last_time + config_file.ping_time) 
 				<= CURRENT_TIME))
 			{
-				sendto_server("PING :%s", MYNAME);
+				sendto_server("PING :%s", MYUID);
 				SetConnSentPing(server_p);
 			}
 		}

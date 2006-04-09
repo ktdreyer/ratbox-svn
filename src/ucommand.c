@@ -252,7 +252,7 @@ u_boot(struct client *unused, struct lconn *conn_p, const char *parv[], int parc
 			dlink_destroy(ptr, &oper_list);
 
 			sendto_server(":%s NOTICE %s :Logged out by %s",
-					MYNAME, UID(target_p), conn_p->name);
+					MYUID, UID(target_p), conn_p->name);
 		}
 	}
 

@@ -140,7 +140,7 @@ o_global_netmsg(struct client *client_p, struct lconn *conn_p, const char *parv[
 		target_p = ptr->data;
 
 		sendto_server(":%s NOTICE $$%s :[NETWORK MESSAGE] %s",
-				global_p->name, target_p->name, data);
+				SVC_UID(global_p), target_p->name, data);
 	}
 
 	slog(global_p, 1, "%s - NETMSG %s", 

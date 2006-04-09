@@ -198,7 +198,7 @@ s_operbot_invite(struct client *client_p, struct lconn *conn_p, const char *parv
 		return 1;
 
 	sendto_server(":%s INVITE %s %s", 
-			operbot_p->name, UID(client_p), chptr->name);
+			SVC_UID(operbot_p), UID(client_p), chptr->name);
 	return 1;
 }
 
@@ -225,7 +225,7 @@ s_operbot_op(struct client *client_p, struct lconn *conn_p, const char *parv[], 
 
 			mptr->flags |= MODE_OPPED;
 			sendto_server(":%s MODE %s +o %s",
-					operbot_p->name, chptr->name, UID(client_p));
+					SVC_UID(operbot_p), chptr->name, UID(client_p));
 		}
 
 		return 1;
@@ -251,7 +251,7 @@ s_operbot_op(struct client *client_p, struct lconn *conn_p, const char *parv[], 
 
 	mptr->flags |= MODE_OPPED;
 	sendto_server(":%s MODE %s +o %s",
-			operbot_p->name, chptr->name, UID(client_p));
+			SVC_UID(operbot_p), chptr->name, UID(client_p));
 	return 1;
 }
 

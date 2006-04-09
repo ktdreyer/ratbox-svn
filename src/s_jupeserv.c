@@ -138,7 +138,7 @@ add_jupe(struct server_jupe *jupe_p)
 
 	if(finished_bursting)
 		sendto_server(":%s SERVER %s 1 :JUPED: %s",
-				MYNAME, jupe_p->name, jupe_p->reason);
+				MYUID, jupe_p->name, jupe_p->reason);
 	dlink_move_node(&jupe_p->node, &pending_jupes, &active_jupes);
 }
 
@@ -213,7 +213,7 @@ h_jupeserv_squit(void *name, void *unused)
 	if((jupe_p = find_jupe(name, &active_jupes)))
 	{
 		sendto_server(":%s SERVER %s 2 :JUPED: %s",
-				MYNAME, jupe_p->name, jupe_p->reason);
+				MYUID, jupe_p->name, jupe_p->reason);
 		return -1;
 	}
 
@@ -238,7 +238,7 @@ h_jupeserv_finburst(void *unused, void *unused2)
 		}
 
 		sendto_server(":%s SERVER %s 2 :JUPED: %s",
-				MYNAME, jupe_p->name, jupe_p->reason);
+				MYUID, jupe_p->name, jupe_p->reason);
 	}
 
 	return 0;
@@ -311,12 +311,12 @@ o_jupeserv_jupe(struct client *client_p, struct lconn *conn_p, const char *parv[
 
 	if(client_p)
 		sendto_server(":%s WALLOPS :JUPE set on %s by %s!%s@%s on %s [%s]",
-				MYNAME, jupe_p->name, client_p->name,
+				MYUID, jupe_p->name, client_p->name,
 				client_p->user->username, client_p->user->host,
 				client_p->user->servername, jupe_p->reason);
 	else
 		sendto_server(":%s WALLOPS :JUPE %s by %s [%s]",
-				MYNAME, jupe_p->name, conn_p->name, jupe_p->reason);
+				MYUID, jupe_p->name, conn_p->name, jupe_p->reason);
 
 	add_jupe(jupe_p);
 	return 0;
@@ -349,11 +349,11 @@ o_jupeserv_unjupe(struct client *client_p, struct lconn *conn_p, const char *par
 
 	if(client_p)
 		sendto_server(":%s WALLOPS :UNJUPE set on %s by %s!%s@%s",
-				MYNAME, jupe_p->name, client_p->name,
+				MYUID, jupe_p->name, client_p->name,
 				client_p->user->username, client_p->user->host);
 	else
 		sendto_server(":%s WALLOPS :UNJUPE %s by %s",
-				MYNAME, jupe_p->name, conn_p->name);
+				MYUID, jupe_p->name, conn_p->name);
 
 	sendto_server("SQUIT %s :Unjuped", jupe_p->name);
 	dlink_delete(&jupe_p->node, &active_jupes);
@@ -432,7 +432,7 @@ s_jupeserv_calljupe(struct client *client_p, struct lconn *conn_p, const char *p
 		watch_send(WATCH_JUPESERV, client_p, conn_p, 1, "TRIGGERJUPE %s", parv[0]);
 
 		sendto_server(":%s WALLOPS :JUPE triggered on %s by %s!%s@%s on %s [%s]",
-				MYNAME, jupe_p->name, client_p->name,
+				MYUID, jupe_p->name, client_p->name,
 				client_p->user->username, client_p->user->host, 
 				client_p->user->servername, jupe_p->reason);
 
@@ -443,7 +443,7 @@ s_jupeserv_calljupe(struct client *client_p, struct lconn *conn_p, const char *p
 	}
 	else
 		sendto_server(":%s WALLOPS :JUPE requested on %s by %s!%s@%s on %s [%s]",
-				MYNAME, jupe_p->name, client_p->name,
+				MYUID, jupe_p->name, client_p->name,
 				client_p->user->username, client_p->user->host, 
 				client_p->user->servername, jupe_p->reason);
 
@@ -488,7 +488,7 @@ s_jupeserv_callunjupe(struct client *client_p, struct lconn *conn_p, const char 
 		watch_send(WATCH_JUPESERV, client_p, conn_p, 1, "TRIGGERUNJUPE %s", parv[0]);
 
 		sendto_server(":%s WALLOPS :UNJUPE triggered on %s by %s!%s@%s on %s",
-				MYNAME, jupe_p->name, client_p->name,
+				MYUID, jupe_p->name, client_p->name,
 				client_p->user->username, client_p->user->host, 
 				client_p->user->servername);
 
@@ -503,7 +503,7 @@ s_jupeserv_callunjupe(struct client *client_p, struct lconn *conn_p, const char 
 	}
 	else
 		sendto_server(":%s WALLOPS :UNJUPE requested on %s by %s!%s@%s on %s",
-				MYNAME, jupe_p->name, client_p->name,
+				MYUID, jupe_p->name, client_p->name,
 				client_p->user->username, client_p->user->host, 
 				client_p->user->servername);
 
