@@ -1,3 +1,27 @@
+leeh        2006/04/09 19:38:12 UTC	(20060409_4-22329)
+  Log:
+  - fix the sendto_server() calls so they use TS6
+  
+
+  Modified:
+	rserv/trunk/include/client.h (File Modified) 
+	rserv/trunk/src/c_message.c (File Modified) 
+	rserv/trunk/src/channel.c (File Modified) 
+	rserv/trunk/src/client.c (File Modified) 
+	rserv/trunk/src/io.c (File Modified) 
+	rserv/trunk/src/log.c (File Modified) 
+	rserv/trunk/src/modebuild.c (File Modified) 
+	rserv/trunk/src/s_banserv.c (File Modified) 
+	rserv/trunk/src/s_chanserv.c (File Modified) 
+	rserv/trunk/src/s_global.c (File Modified) 
+	rserv/trunk/src/s_jupeserv.c (File Modified) 
+	rserv/trunk/src/s_operbot.c (File Modified) 
+	rserv/trunk/src/s_userserv.c (File Modified) 
+	rserv/trunk/src/scommand.c (File Modified) 
+	rserv/trunk/src/service.c (File Modified) 
+	rserv/trunk/src/ucommand.c (File Modified) 
+
+
 leeh        2006/04/09 15:37:53 UTC	(20060409_3-22327)
   Log:
   - add in conf_service_flags(), to list the services specific flags
