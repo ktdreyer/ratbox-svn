@@ -1,3 +1,15 @@
+leeh        2006/04/09 10:17:26 UTC	(20060409_2-22325)
+  Log:
+  - alter the burst order so that we burst our clients once the uplink has
+    finished bursting theirs, so that we know whether our uplink is TS6
+    capable or not
+  
+
+  Modified:
+	rserv/trunk/src/io.c (File Modified) 
+	rserv/trunk/src/scommand.c (File Modified) 
+
+
 leeh        2006/04/09 10:08:10 UTC	(20060409_1-22323)
   Log:
   - add hooks for users/servers exiting
