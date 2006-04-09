@@ -1,3 +1,16 @@
+leeh        2006/04/09 10:05:10 UTC	(20060409_0-22321)
+  Log:
+  - rename sendto_all_butone() to sendto_all_chat()
+  - add .chat [on|off] to enable/disable chat status
+  
+
+  Modified:
+	rserv/trunk/help/main/u-chat (File Added) 
+	rserv/trunk/include/io.h (File Modified) 
+	rserv/trunk/src/io.c (File Modified) 
+	rserv/trunk/src/ucommand.c (File Modified) 
+
+
 leeh        2006/04/08 22:06:33 UTC	(20060408_10-22319)
   Log:
   - remove .flags command, only thing left using it is dcc chat
