@@ -9,9 +9,10 @@
 #
 # This code is in the public domain.
 
-require "../tools/definetolength.pl";
+require "definetolength.pl";
 
 my @schemas = ("schema-mysql.txt", "schema-pgsql.txt");
+my @plain_schemas = ("schema-sqlite.txt");
 
 my %vals;
 
@@ -55,6 +56,28 @@ foreach my $i (@schemas)
 	# this 
 	$special = $vals{"NICKLEN"} + $vals{"USERLEN"} + $vals{"HOSTLEN"} + 2;
 	$input =~ s/CONVERT_NICK_USER_HOST/$special/g;
+
+	print OUTPUT "$input";
+}
+
+foreach my $i (@plain_schemas)
+{
+	# This is done manually, as im not sure if File::Copy will be around
+	# everywhere..
+	unless(open(INPUT, '<', "base/$i"))
+	{
+		print("Unable to open base schema base/$i for reading, aborted.\n");
+		exit();
+	}
+
+	local $/ = undef;
+	my $input = <INPUT>;
+
+	unless(open(OUTPUT, '>', "$i"))
+	{
+		print("Unable to open schema $i for writing, aborted.\n");
+		exit();
+	}
 
 	print OUTPUT "$input";
 }
