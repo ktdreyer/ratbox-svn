@@ -20,7 +20,9 @@
 #define HOOK_NEW_CLIENT_BURST	13	/* new client during burst */
 #define HOOK_DCC_AUTH		14	/* dcc client auths */
 #define HOOK_DCC_EXIT		15	/* dcc client exits */
-#define HOOK_LAST_HOOK		16
+#define HOOK_USER_EXIT		16	/* user exits the network */
+#define HOOK_SERVER_EXIT	17	/* server exits the network */
+#define HOOK_LAST_HOOK		18
 
 typedef int (*hook_func)(void *, void *);
 

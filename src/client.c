@@ -424,6 +424,8 @@ exit_user(struct client *target_p)
 
 	SetDead(target_p);
 
+	hook_call(HOOK_USER_EXIT, target_p, NULL);
+
 #ifdef ENABLE_USERSERV
 	if(target_p->user->user_reg)
 		dlink_find_destroy(target_p, &target_p->user->user_reg->users);
@@ -472,6 +474,9 @@ exit_server(struct client *target_p)
 	{
 		exit_client(ptr->data);
 	}
+
+	/* do this after all its leaf servers have been removed */
+	hook_call(HOOK_SERVER_EXIT, target_p, NULL);
 
 	dlink_move_node(&target_p->listnode, &server_list, &exited_list);
 
