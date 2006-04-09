@@ -449,8 +449,9 @@ o_oper_listopers(struct client *client_p, struct lconn *conn_p, const char *parv
 		{
 			dcc_p = ptr->data;
 
-			service_send(operserv_p, client_p, conn_p, "  %s - %s",
-					dcc_p->name, conf_oper_flags(dcc_p->privs));
+			service_send(operserv_p, client_p, conn_p, "  %s - %s %s",
+					dcc_p->name, conf_oper_flags(dcc_p->privs),
+					conf_service_flags(dcc_p->sprivs));
 		}
 	}
 
@@ -462,9 +463,10 @@ o_oper_listopers(struct client *client_p, struct lconn *conn_p, const char *parv
 		{
 			target_p = ptr->data;
 
-			service_send(operserv_p, client_p, conn_p, "  %s %s %s",
+			service_send(operserv_p, client_p, conn_p, "  %s %s %s %s",
 					target_p->user->oper->name, target_p->user->mask,
-					conf_oper_flags(target_p->user->oper->flags));
+					conf_oper_flags(target_p->user->oper->flags),
+					conf_service_flags(target_p->user->oper->sflags));
 		}
 	}
 

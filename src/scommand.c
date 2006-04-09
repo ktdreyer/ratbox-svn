@@ -594,11 +594,12 @@ c_stats(struct client *client_p, const char *parv[], int parc)
 			{
 				conf_p = ptr->data;
 
-				sendto_server(":%s 243 %s O %s@%s %s %s %s -1",
+				sendto_server(":%s 243 %s O %s@%s %s %s %s -1 :%s",
 						MYNAME, UID(client_p),
 						conf_p->username, conf_p->host,
 						conf_p->server ? conf_p->server : "*",
-						conf_p->name, conf_oper_flags(conf_p->flags));
+						conf_p->name, conf_oper_flags(conf_p->flags),
+						conf_service_flags(conf_p->sflags));
 			}
 
 			break;

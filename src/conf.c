@@ -332,26 +332,13 @@ find_conf_oper(const char *username, const char *host, const char *server)
         return NULL;
 }
 
-struct flag_table
+static struct flag_table
 {
 	char mode;
 	int flag;
-};
-
-static struct flag_table oper_flags[] =
-{
+} oper_flags[] = {
 	{ 'D', CONF_OPER_DCC		},
 	{ 'A', CONF_OPER_ADMIN		},
-#if 0
-	{ 'C', CONF_OPER_CHANSERV	},
-	{ 'c', CONF_OPER_CREGISTER	},
-	{ 'U', CONF_OPER_USERSERV	},
-	{ 'u', CONF_OPER_UREGISTER	},
-	{ 'B', CONF_OPER_OPERBOT	},
-	{ 'J', CONF_OPER_JUPESERV	},
-	{ 'G', CONF_OPER_GLOBAL		},
-	{ 'O', CONF_OPER_OPERSERV	},
-#endif
 	{ '\0',0 }
 };
 
@@ -359,6 +346,7 @@ const char *
 conf_oper_flags(int flags)
 {
 	static char buf[20];
+	static const char *empty_flags = "-";
 	char *p = buf;
 	int i;
 
@@ -369,6 +357,113 @@ conf_oper_flags(int flags)
 	}
 
 	*p = '\0';
+
+	if(EmptyString(buf))
+		return empty_flags;
+
+	return buf;
+}
+
+#undef SERVICE_FLAGS_FULL
+
+static struct sflag_table
+{
+	int serviceid;
+	const char *sname;
+	int flag;
+	const char *name;
+} service_flags[] = {
+#ifdef SERVICE_FLAGS_FULL
+	{ 1, "operserv", CONF_OPER_OS_CHANNEL,	"channel"	},
+	{ 1, "operserv", CONF_OPER_OS_TAKEOVER,	"takeover"	},
+	{ 1, "operserv", CONF_OPER_OS_OMODE,	"omode"		},
+	{ 2, "userserv", CONF_OPER_US_REGISTER,	"register"	},
+	{ 2, "userserv", CONF_OPER_US_SUSPEND,	"suspend"	},
+	{ 2, "userserv", CONF_OPER_US_DROP,	"drop"		},
+	{ 2, "userserv", CONF_OPER_US_SETPASS,	"setpass"	},
+	{ 2, "userserv", CONF_OPER_US_LIST,	"list"		},
+	{ 2, "userserv", CONF_OPER_US_INFO,	"info"		},
+	{ 3, "chanserv", CONF_OPER_CS_REGISTER,	"register"	},
+	{ 3, "chanserv", CONF_OPER_CS_SUSPEND,	"suspend"	},
+	{ 3, "chanserv", CONF_OPER_CS_DROP,	"drop"		},
+	{ 3, "chanserv", CONF_OPER_CS_LIST,	"list"		},
+	{ 3, "chanserv", CONF_OPER_CS_INFO,	"info"		},
+	{ 4, "nickserv", CONF_OPER_NS_DROP,	"drop"		},
+	{ 5, "operbot",  CONF_OPER_OB_CHANNEL,	"channel"	},
+	{ 6, "global",   CONF_OPER_GLOB_NETMSG,	"netmsg"	},
+	{ 6, "global",   CONF_OPER_GLOB_WELCOME,"welcome"	},
+	{ 7, "jupeserv", CONF_OPER_JS_JUPE,	"jupe"		},
+	{ 8, "banserv",  CONF_OPER_BAN_KLINE,	"kline"		},
+	{ 8, "banserv",  CONF_OPER_BAN_XLINE,	"xline"		},
+	{ 8, "banserv",  CONF_OPER_BAN_RESV,	"resv"		},
+	{ 8, "banserv",  CONF_OPER_BAN_PERM,	"perm"		},
+	{ 8, "banserv",  CONF_OPER_BAN_REMOVE,	"remove"	},
+	{ 8, "banserv",  CONF_OPER_BAN_SYNC,	"sync"		},
+#else
+	{ 1, "OS", CONF_OPER_OS_CHANNEL,	"C" },
+	{ 1, "OS", CONF_OPER_OS_TAKEOVER,	"T" },
+	{ 1, "OS", CONF_OPER_OS_OMODE,		"O" },
+	{ 2, "US", CONF_OPER_US_REGISTER,	"R" },
+	{ 2, "US", CONF_OPER_US_SUSPEND,	"S" },
+	{ 2, "US", CONF_OPER_US_DROP,		"D" },
+	{ 2, "US", CONF_OPER_US_SETPASS,	"P" },
+	{ 2, "US", CONF_OPER_US_LIST,		"L" },
+	{ 2, "US", CONF_OPER_US_INFO,		"I" },
+	{ 3, "CS", CONF_OPER_CS_REGISTER,	"R" },
+	{ 3, "CS", CONF_OPER_CS_SUSPEND,	"S" },
+	{ 3, "CS", CONF_OPER_CS_DROP,		"D" },
+	{ 3, "CS", CONF_OPER_CS_LIST,		"L" },
+	{ 3, "CS", CONF_OPER_CS_INFO,		"I" },
+	{ 4, "NS", CONF_OPER_NS_DROP,		"D" },
+	{ 5, "OB", CONF_OPER_OB_CHANNEL,	"C" },
+	{ 6, "GL", CONF_OPER_GLOB_NETMSG,	"N" },
+	{ 6, "GL", CONF_OPER_GLOB_WELCOME,	"W" },
+	{ 7, "JS", CONF_OPER_JS_JUPE,		"J" },
+	{ 8, "BS", CONF_OPER_BAN_KLINE,		"K" },
+	{ 8, "BS", CONF_OPER_BAN_XLINE,		"X" },
+	{ 8, "BS", CONF_OPER_BAN_RESV,		"R" },
+	{ 8, "BS", CONF_OPER_BAN_PERM,		"P" },
+	{ 8, "BS", CONF_OPER_BAN_REMOVE,	"V" },
+	{ 8, "BS", CONF_OPER_BAN_SYNC,		"S" },
+#endif
+	{ 0, NULL, 0, NULL }
+};
+
+const char *
+conf_service_flags(int flags)
+{
+	static char buf[BUFSIZE];
+	static const char *empty_flags = "-";
+	int i;
+	int serviceid = 0;
+
+	buf[0] = '\0';
+
+	for(i = 0; service_flags[i].flag; i++)
+	{
+		if(flags & service_flags[i].flag)
+		{
+			if(serviceid != service_flags[i].serviceid)
+			{
+				if(serviceid)
+					strlcat(buf, " ", sizeof(buf));
+
+				strlcat(buf, service_flags[i].sname, sizeof(buf));
+				strlcat(buf, ":", sizeof(buf));
+
+				serviceid = service_flags[i].serviceid;
+			}
+#ifdef SERVICE_FLAGS_FULL
+			else
+				strlcat(buf, ",", sizeof(buf));
+#endif
+			strlcat(buf, service_flags[i].name, sizeof(buf));
+		}
+	}
+
+	if(EmptyString(buf))
+		return empty_flags;
+
 	return buf;
 }
 
