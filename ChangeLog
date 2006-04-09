@@ -1,3 +1,17 @@
+leeh        2006/04/09 15:37:53 UTC	(20060409_3-22327)
+  Log:
+  - add in conf_service_flags(), to list the services specific flags
+    and use it along with conf_oper_flags()
+  
+
+  Modified:
+	rserv/trunk/include/conf.h (File Modified) 
+	rserv/trunk/src/conf.c (File Modified) 
+	rserv/trunk/src/s_operserv.c (File Modified) 
+	rserv/trunk/src/scommand.c (File Modified) 
+	rserv/trunk/src/u_stats.c (File Modified) 
+
+
 leeh        2006/04/09 10:17:26 UTC	(20060409_2-22325)
   Log:
   - alter the burst order so that we burst our clients once the uplink has
