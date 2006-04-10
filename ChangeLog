@@ -1,3 +1,13 @@
+leeh        2006/04/10 18:56:26 UTC	(20060410_3-22343)
+  Log:
+  - add Id properties
+  
+
+  Modified:
+	rserv/trunk/include/email.h  (Property Modified)
+	rserv/trunk/include/rsdb.h  (Property Modified)
+
+
 leeh        2006/04/10 18:53:23 UTC	(20060410_2-22341)
   Log:
   - fix make install
