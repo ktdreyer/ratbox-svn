@@ -19,30 +19,23 @@ doc/database_mod.txt for more information.
 2. Ensure you have a grammar/lexical parser installed.  Bison and flex are
    recommended, though yacc and lex should do.
 
-3. ratbox-services uses SQLite for storing the database.  SQLite is simply
-   a database interface to a normal file -- it does not run as a seperate
-   daemon.  ratbox-services requires version 2.x of sqlite, it will not
-   work with version 3.x.
+3. ratbox-services can use different database engines for storing the data.
+   It presently supports MySQL and SQLite.  SQLite is the default, it is
+   a database interface to a normal file, meaning it does not require a
+   seperate service to be running.  Only version 3 of SQLite is supported.
 
-   If the configure script cannot find sqlite installed, it will build it
-   itself.  You may also force it to be built via the --with-sqlitebuild
-   option, this is useful when the system-wide install is sqlite 3.x but
-   is picked up by configure:
-   	./configure [other options] --with-sqlitebuild
+   A copy of SQLite is included with ratbox-services, you may force
+   ratbox-services to use this version by passing '--with-sqlitebuild' to
+   configure.
 
-   You may prefer to have sqlite installed system wide.  If that is the case, 
-   you should download sqlite version 2.x and install it yourself from:
-	   http://www.sqlite.org/download.html
+   To choose MySQL you should pass '--enable-mysql' to configure.
 
-   If sqlite is installed system wide but configure does not find it, and
-   you want to use the system version instead, you may use:
-   	./configure [other options] --with-sqlite=PATH
-   configure will search PATH/include and PATH/lib for the needed sqlite
-   parts.
+   If configure cannot find your database engine, you can tell it to look
+   in a specific place.  Eg, for sqlite, '--enable-sqlite=PATH'.  Configure
+   will then look in PATH/include/ and PATH/lib/ for the files it needs.
 
    The sqlite included here is NOT suitable for installation system wide, 
-   only for building ratbox-services.  See sqlite/README_RATBOX for more
-   information.
+   only for building ratbox-services.
 
 4. Run the configure script.  By default it will attempt to install to
    /usr/local/ratbox-services.  If you want it in this directory, then
@@ -55,17 +48,11 @@ doc/database_mod.txt for more information.
 
    If you wish to install it to a different directory include the 
    --prefix option:
-   	./configure --prefix=/home/user/services
+        '--prefix=/home/user/services'
 
    If there are services you dont want compiled in, like the operbot,
    include the relevant option:
-   	./configure --disable-operbot
-
-   If SQLite is installed but configure doesnt find it, and you do not
-   wish ratbox-services to build sqlite itself:
-        ./configure --with-sqlite=PATH
-   configure will search PATH/include and PATH/lib for the needed SQLite
-   parts.
+        '--disable-operbot'
 
    If your nick or topic length set in ircd are different to 9 and 160
    respectively, then:
