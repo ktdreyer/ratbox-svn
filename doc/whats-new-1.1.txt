@@ -8,33 +8,83 @@ Database
 - Support for database hooks, so external processes can trigger updates done
   on the information kept in RAM.  See doc/dbhook.txt
 
+General
+-------
+- TS6 support
+- Make stats o/O return a list of opers with access, can only be issued by
+  ircops and services opers
+- .flags command has gone, it has been replaced with .chat [on|off] and the
+  watchserv system
+
 Compilation
 -----------
 - New configure option, --with-userreglen=LENGTH, to configure the maximum
   length of a registered username.
 
-Services
+Userserv
 --------
-- GLOBAL service now supports welcome messages, sent when a user connects to
-  irc.
 - userserv::resetpass added, to email users a confirmation for a password
   reset.
 - userserv::register can now email users an activation token to confirm
   registration before the username can be used
-- banserv now accepts time modifiers w/d/h for weeks, days and hours.  These
-  may not be combined -- so "1w" is valid, "1w1d" is not.
+- userserv::usersuspend now takes a required suspend reason
+
+Chanserv
+--------
+- chanserv::suspend now takes a required suspend reason
+
+Operserv
+--------
 - operserv::rehash added, to rehash services
 - operserv::dbsync added, to force a database sync (primarily of the last
   time a username/channel was used)
 - operserv::die added, to terminate services.
+- operserv::listopers added, to list connected services opers
+
+Banserv
+-------
+- banserv now accepts time modifiers w/d/h for weeks, days and hours.  These
+  may not be combined -- so "1w" is valid, "1w1d" is not.
+
+Global Service
+--------------
+- GLOBAL now supports welcome messages, sent when a user connects to
+  irc.
+
+Watchserv
+---------
+- A new service which allows services opers to watch through irc/dcc when
+  certain commands are issued to services.
 
 Config file
 -----------
-- New service {}; flag, 'require_shortcut', which requires commands to this
-  service are done through command shortcuts rather than msg.
-- New database {}; section, controlling options for databases.
-- New email {}; section, controls options for sending emails.
-- New userserv option, resetpass_duration = <time>; controls how long
-  userserv::resetpass requests are kept around.
-- New operserv option, allow_die = <yes|no>; controls whether operserv::die
-  can be issued
+- serverinfo {}; 
+  - 'sid = <SID>;', required field for the TS6 SID of services.
+  - 'allow_stats_o = <yes|no>;', controls whether stats o/O is allowed
+- operator {};
+  - New flag to global, 'welcome', grants access to modify welcome
+    messages
+- service {}; 
+  - New flag, 'require_shortcut', which requires commands to this
+    service are done through command shortcuts rather than msg.
+- database {}; 
+  - New section, controlling options for databases.
+- email {}; 
+  - New section, controls options for sending emails.
+- service "userserv" {};
+  - 'register_verify = <yes|no>;', controls whether registered usernames must 
+     be verified through email before use
+  - 'expire_unverified_time = <duration>', controls how long unverified 
+     usernames are kept around before expiry
+  - 'expire_suspended_time = <duration>;', controls how long suspended 
+     usernames are kept around before expiry
+  - 'allow_resetpass = <yes|no>;', 
+  - 'resetpass_duration = <time>;' controls how long userserv::resetpass 
+     requests are kept around.
+- service "chanserv" {};
+  - 'expire_suspended_time = <duration>;', controls how long suspended
+    channels are kept around before expiry
+- service "operserv" {};
+  - 'allow_die = <yes|no>;', whether operserv::die is allowed or not
+- service "watchserv" {};
+  - New section
