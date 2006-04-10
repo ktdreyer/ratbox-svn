@@ -32,7 +32,8 @@ The id column should always be entered as NULL (and not 'NULL') so that an
 id is generated automatically.
 
 The hook column should be the name of the hook, this name correlates with
-the hook in ratbox-services so the right callback is used.
+the hook in ratbox-services so the right callback is used.  This is case
+sensitive.
 
 The data column is a character delimeted text field of the arguments
 ratbox-services needs to deal with the request.  The delimeter can be any
