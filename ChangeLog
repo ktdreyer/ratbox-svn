@@ -1,3 +1,14 @@
+leeh        2006/04/10 18:48:44 UTC	(20060410_1-22339)
+  Log:
+  - add brief documentation on modifying database tables
+  - note database hooks are case sensitive
+  
+
+  Modified:
+	rserv/trunk/doc/database_mod.txt (File Added) 
+	rserv/trunk/doc/dbhook.txt (File Modified) 
+
+
 leeh        2006/04/10 17:45:02 UTC	(20060410_0-22337)
   Log:
   - update the INSTALL documentation
