@@ -412,8 +412,12 @@ o_oper_die(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 		return 0;
 	}
 
+	/* this gives us the operwall if one is needed */
+	slog(operserv_p, 1, "%s - DIE", OPER_NAME(client_p, conn_p));
+
 	sendto_all("Services terminated by %s", OPER_NAME(client_p, conn_p));
 	mlog("ratbox-services terminated by %s", OPER_NAME(client_p, conn_p));
+
 	die(1, "Services terminated");
 	return 0;
 }
