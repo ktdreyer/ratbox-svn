@@ -1,3 +1,13 @@
+leeh        2006/04/11 18:10:39 UTC	(20060411_1-22349)
+  Log:
+  - make operserv::die call slog() as well, so that it will also send wallops
+    on the command if configured to
+  
+
+  Modified:
+	rserv/trunk/src/s_operserv.c (File Modified) 
+
+
 jilles      2006/04/11 14:10:16 UTC	(20060411_0-22347)
   Log:
   Avoid a crash in watch_send() for non-oper commands.
