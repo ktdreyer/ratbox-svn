@@ -1,3 +1,18 @@
+leeh        2006/04/11 18:26:19 UTC	(20060411_2-22351)
+  Log:
+  - operserv::die, operserv::rehash and operserv::dbsync were testing whether
+    a client was opered -- fixed by moving them over to new operserv
+    'maintain' priv
+  
+
+  Modified:
+	rserv/trunk/doc/example.conf (File Modified) 
+	rserv/trunk/include/conf.h (File Modified) 
+	rserv/trunk/src/conf.c (File Modified) 
+	rserv/trunk/src/newconf.c (File Modified) 
+	rserv/trunk/src/s_operserv.c (File Modified) 
+
+
 leeh        2006/04/11 18:10:39 UTC	(20060411_1-22349)
   Log:
   - make operserv::die call slog() as well, so that it will also send wallops
