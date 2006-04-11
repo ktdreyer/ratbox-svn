@@ -248,7 +248,7 @@ watch_send(unsigned int flag, struct client *source_client_p, struct lconn *sour
 	if(oper)
 		name = OPER_NAME(source_client_p, source_conn_p);
 	else
-		name = client_p->user->user_reg ? client_p->user->user_reg->name : "-";
+		name = source_client_p->user->user_reg ? source_client_p->user->user_reg->name : "-";
 
 	DLINK_FOREACH(ptr, oper_list.head)
 	{
