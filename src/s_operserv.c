@@ -68,9 +68,9 @@ static struct service_command operserv_command[] =
 	{ "OSPART",	&o_oper_ospart,		1, NULL, 1, 0L, 0, 0, CONF_OPER_OS_CHANNEL	},
 	{ "TAKEOVER",	&o_oper_takeover,	1, NULL, 1, 0L, 0, 0, CONF_OPER_OS_TAKEOVER	},
 	{ "OMODE",	&o_oper_omode,		2, NULL, 1, 0L, 0, 0, CONF_OPER_OS_OMODE	},
-	{ "DBSYNC",	&o_oper_dbsync,		0, NULL, 1, 0L, 0, CONF_OPER_ADMIN, 0	},
-	{ "REHASH",	&o_oper_rehash,		0, NULL, 1, 0L, 0, CONF_OPER_ADMIN, 0	},
-	{ "DIE",	&o_oper_die,		1, NULL, 1, 0L, 0, CONF_OPER_ADMIN, 0	},
+	{ "DBSYNC",	&o_oper_dbsync,		0, NULL, 1, 0L, 0, 0, CONF_OPER_OS_MAINTAIN	},
+	{ "REHASH",	&o_oper_rehash,		0, NULL, 1, 0L, 0, 0, CONF_OPER_OS_MAINTAIN	},
+	{ "DIE",	&o_oper_die,		1, NULL, 1, 0L, 0, 0, CONF_OPER_OS_MAINTAIN	},
 	{ "LISTOPERS",	&o_oper_listopers,	0, NULL, 1, 0L, 0, 0, 0	}
 };
 
