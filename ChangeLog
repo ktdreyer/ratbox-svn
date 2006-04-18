@@ -1,3 +1,30 @@
+leeh        2006/04/18 18:08:53 UTC	(20060418_0-22353)
+  Log:
+  - add new zlog() function, which will handle building the prefixes for a log
+    and issuing the watch_send() call.
+  - moved all slog() over to zlog()
+  - moved chanserv::listbans down to loglevel 6
+  - log format for opers is now:
+    <time> *<opername> <hostmask> <details>
+  - log format for users is now:
+    <time> <username> <hostmask> <details
+  
+
+  Modified:
+	rserv/trunk/doc/example.conf (File Modified) 
+	rserv/trunk/include/log.h (File Modified) 
+	rserv/trunk/src/log.c (File Modified) 
+	rserv/trunk/src/s_alis.c (File Modified) 
+	rserv/trunk/src/s_banserv.c (File Modified) 
+	rserv/trunk/src/s_chanserv.c (File Modified) 
+	rserv/trunk/src/s_global.c (File Modified) 
+	rserv/trunk/src/s_jupeserv.c (File Modified) 
+	rserv/trunk/src/s_nickserv.c (File Modified) 
+	rserv/trunk/src/s_operbot.c (File Modified) 
+	rserv/trunk/src/s_operserv.c (File Modified) 
+	rserv/trunk/src/s_userserv.c (File Modified) 
+
+
 leeh        2006/04/11 18:26:19 UTC	(20060411_2-22351)
   Log:
   - operserv::die, operserv::rehash and operserv::dbsync were testing whether
