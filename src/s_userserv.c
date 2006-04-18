@@ -515,11 +515,9 @@ o_user_userregister(struct client *client_p, struct lconn *conn_p, const char *p
 		return 0;
 	}
 
-	slog(userserv_p, 2, "%s - USERREGISTER %s %s",
-		OPER_NAME(client_p, conn_p), parv[0], 
-		EmptyString(parv[2]) ? "-" : parv[2]);
-	watch_send(WATCH_USADMIN, client_p, conn_p, 1,
-			"USERREGISTER %s %s", parv[0], parv[2]);
+	zlog(userserv_p, 1, WATCH_USADMIN, 1, client_p, conn_p,
+		"USERREGISTER %s %s",
+		parv[0], EmptyString(parv[2]) ? "-" : parv[2]);
 
 	reg_p = BlockHeapAlloc(user_reg_heap);
 	strcpy(reg_p->name, parv[0]);
@@ -562,9 +560,8 @@ o_user_userdrop(struct client *client_p, struct lconn *conn_p, const char *parv[
 		return 0;
 	}
 
-	slog(userserv_p, 1, "%s - USERDROP %s", 
-		OPER_NAME(client_p, conn_p), ureg_p->name);
-	watch_send(WATCH_USADMIN, client_p, conn_p, 1, "USERDROP %s", ureg_p->name);
+	zlog(userserv_p, 1, WATCH_USADMIN, 1, client_p, conn_p,
+		"USERDROP %s", ureg_p->name);
 
 	logout_user_reg(ureg_p);
 
@@ -597,10 +594,8 @@ o_user_usersuspend(struct client *client_p, struct lconn *conn_p, const char *pa
 
 	reason = rebuild_params(parv, parc, 1);
 
-	slog(userserv_p, 1, "%s - USERSUSPEND %s %s",
-		OPER_NAME(client_p, conn_p), reg_p->name, reason);
-	watch_send(WATCH_USADMIN, client_p, conn_p, 1, 
-			"USERSUSPEND %s %s", reg_p->name, reason);
+	zlog(userserv_p, 1, WATCH_USADMIN, 1, client_p, conn_p,
+		"USERSUSPEND %s %s", reg_p->name, reason);
 
 	logout_user_reg(reg_p);
 
@@ -638,9 +633,8 @@ o_user_userunsuspend(struct client *client_p, struct lconn *conn_p, const char *
 		return 0;
 	}
 
-	slog(userserv_p, 1, "%s - USERUNSUSPEND %s",
-		OPER_NAME(client_p, conn_p), reg_p->name);
-	watch_send(WATCH_USADMIN, client_p, conn_p, 1, "USERUNSUSPEND %s", reg_p->name);
+	zlog(userserv_p, 1, WATCH_USADMIN, 1, client_p, conn_p,
+		"USERUNSUSPEND %s", reg_p->name);
 
 	reg_p->flags &= ~US_FLAGS_SUSPENDED;
 	my_free(reg_p->suspender);
@@ -780,9 +774,8 @@ o_user_userlist(struct client *client_p, struct lconn *conn_p, const char *parv[
 			"End of username list%s",
 			(limit == 1) ? ", limit reached" : "");
 
-	slog(userserv_p, 1, "%s - USERLIST %s",
-		OPER_NAME(client_p, conn_p), mask);
-	watch_send(WATCH_USOPER, client_p, conn_p, 1, "USERLIST %s", mask);
+	zlog(userserv_p, 1, WATCH_USADMIN, 1, client_p, conn_p,
+		"USERLIST %s", mask);
 
 	return 0;
 }
@@ -805,9 +798,8 @@ o_user_userinfo(struct client *client_p, struct lconn *conn_p, const char *parv[
 		return 0;
 	}
 
-	slog(userserv_p, 1, "%s - USERINFO %s",
-		OPER_NAME(client_p, conn_p), ureg_p->name);
-	watch_send(WATCH_USOPER, client_p, conn_p, 1, "USERINFO %s", ureg_p->name);
+	zlog(userserv_p, 1, WATCH_USADMIN, 1, client_p, conn_p,
+		"USERINFO %s", ureg_p->name);
 
 	service_send(userserv_p, client_p, conn_p,
 			"[%s] Username registered for %s",
@@ -844,9 +836,8 @@ o_user_usersetpass(struct client *client_p, struct lconn *conn_p, const char *pa
 		return 0;
 	}
 
-	slog(userserv_p, 1, "%s - USERSETPASS %s",
-		OPER_NAME(client_p, conn_p), ureg_p->name);
-	watch_send(WATCH_USADMIN, client_p, conn_p, 1, "USERSETPASS %s", ureg_p->name);
+	zlog(userserv_p, 1, WATCH_USADMIN, 1, client_p, conn_p,
+		"USERSETPASS %s", ureg_p->name);
 
 	password = get_crypt(parv[1], NULL);
 	my_free(ureg_p->password);
@@ -1039,11 +1030,8 @@ s_user_register(struct client *client_p, struct lconn *conn_p, const char *parv[
 	if(hent)
 		hent->uregister++;
 
-	slog(userserv_p, 2, "%s - REGISTER %s %s",
-		client_p->user->mask, parv[0], 
-		EmptyString(parv[2]) ? "" : parv[2]);
-	watch_send(WATCH_USREGISTER, client_p, NULL, 0, 
-			"REGISTER %s %s", parv[0], parv[2]);
+	zlog(userserv_p, 2, WATCH_USREGISTER, 0, client_p, NULL,
+		"REGISTER %s %s", parv[0], EmptyString(parv[2]) ? "" : parv[2]);
 
 	password = get_crypt(parv[1], NULL);
 
@@ -1130,7 +1118,8 @@ s_user_activate(struct client *client_p, struct lconn *conn_p, const char *parv[
 
 	rsdb_exec_fetch_end(&data);
 
-	slog(userserv_p, 5, "%s - ACTIVATE %s", client_p->user->mask, parv[0]);
+	zlog(userserv_p, 5, 0, 0, client_p, NULL,
+		"ACTIVATE %s", ureg_p->name);
 
 	ureg_p->flags &= ~US_FLAGS_NEVERLOGGEDIN;
 
@@ -1191,7 +1180,8 @@ s_user_login(struct client *client_p, struct lconn *conn_p, const char *parv[], 
 		return 1;
 	}
 
-	slog(userserv_p, 5, "%s - LOGIN %s", client_p->user->mask, parv[0]);
+	zlog(userserv_p, 5, 0, 0, client_p, NULL,
+		"LOGIN %s", reg_p->name);
 
 	DLINK_FOREACH(ptr, reg_p->users.head)
 	{
@@ -1284,8 +1274,8 @@ s_user_resetpass(struct client *client_p, struct lconn *conn_p, const char *parv
 			return 1;
 		}
 
-		slog(userserv_p, 3, "%s - RESETPASS %s",
-			client_p->user->mask, reg_p->name);
+		zlog(userserv_p, 3, 0, 0, client_p, NULL,
+			"RESETPASS %s", reg_p->name);
 
 		token = get_password();
 		rsdb_exec(NULL, "INSERT INTO users_resetpass (username, token, time) VALUES('%Q', '%Q', '%lu')",
@@ -1324,8 +1314,8 @@ s_user_resetpass(struct client *client_p, struct lconn *conn_p, const char *parv
 		return 1;
 	}
 
-	slog(userserv_p, 3, "%s - RESETPASS %s (auth)",
-		client_p->user->mask, reg_p->name);
+	zlog(userserv_p, 3, 0, 0, client_p, NULL,
+		"RESETPASS %s (auth)", reg_p->name);
 
 	/* authenticating a password reset */
 	rsdb_exec_fetch(&data, "SELECT token FROM users_resetpass WHERE username='%Q' AND time > '%lu'",
@@ -1413,8 +1403,7 @@ s_user_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 			return 1;
 		}
 
-		slog(userserv_p, 3, "%s %s SET PASS",
-			client_p->user->mask, ureg_p->name);
+		zlog(userserv_p, 3, 0, 0, client_p, NULL, "SET PASS");
 
 		password = get_crypt(parv[2], NULL);
 		my_free(ureg_p->password);
@@ -1451,8 +1440,8 @@ s_user_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 			return 1;
 		}
 
-		slog(userserv_p, 3, "%s %s SET EMAIL %s",
-			client_p->user->mask, ureg_p->name, arg);
+		zlog(userserv_p, 3, 0, 0, client_p, NULL, 
+			"SET EMAIL %s", arg);
 
 		my_free(ureg_p->email);
 		ureg_p->email = my_strdup(arg);

@@ -342,7 +342,7 @@ s_alis_list(struct client *client_p, struct lconn *conn_p, const char *parv[], i
                         return 1;
         }
 
-	slog(alis_p, 1, "%s - LIST %s", client_p->user->mask, query.mask);
+	zlog(alis_p, 1, 0, 0, client_p, NULL, "LIST %s", query.mask);
 
         service_error(alis_p, client_p, 
 		"Returning maximum of %d channel names matching '%s'",

@@ -296,10 +296,8 @@ o_jupeserv_jupe(struct client *client_p, struct lconn *conn_p, const char *parv[
 	if(strlen(reason) > REASONLEN)
 		reason[REASONLEN] = '\0';
 
-	slog(jupeserv_p, 1, "%s - JUPE %s %s", 
-		OPER_NAME(client_p, conn_p), jupe_p->name, reason);
-	watch_send(WATCH_JUPESERV, client_p, conn_p, 1, "JUPE %s %s",
-			jupe_p->name, reason);
+	zlog(jupeserv_p, 1, WATCH_JUPESERV, 1, client_p, conn_p,
+		"JUPE %s %s", jupe_p->name, reason);
 
 	if(EmptyString(reason))
 		jupe_p->reason = my_strdup("No Reason");
@@ -340,9 +338,8 @@ o_jupeserv_unjupe(struct client *client_p, struct lconn *conn_p, const char *par
 		free_jupe(ajupe_p);
 	}
 
-	slog(jupeserv_p, 1, "%s - UNJUPE %s", 
-		OPER_NAME(client_p, conn_p), jupe_p->name);
-	watch_send(WATCH_JUPESERV, client_p, conn_p, 1, "UNJUPE %s", jupe_p->name);
+	zlog(jupeserv_p, 1, WATCH_JUPESERV, 1, client_p, conn_p,
+		"UNJUPE %s", jupe_p->name);
 
 	rsdb_exec(NULL, "DELETE FROM jupes WHERE servername = '%Q'",
 			jupe_p->name);
@@ -415,11 +412,8 @@ s_jupeserv_calljupe(struct client *client_p, struct lconn *conn_p, const char *p
 		}
 	}
 
-	slog(jupeserv_p, 1, "%s{%s} - CALLJUPE %s %s",
-		client_p->user->mask, client_p->user->servername,
-		parv[0], jupe_p->reason);
-	watch_send(WATCH_JUPESERV, client_p, conn_p, 1, "CALLJUPE %s %s",
-			parv[0], jupe_p->reason);
+	zlog(jupeserv_p, 1, WATCH_JUPESERV, 1, client_p, conn_p,
+		"CALLJUPE %s %s", parv[0], jupe_p->reason);
 
 	jupe_p->expire = CURRENT_TIME + config_file.pending_time;
 	jupe_p->points += config_file.oper_score;
@@ -427,9 +421,8 @@ s_jupeserv_calljupe(struct client *client_p, struct lconn *conn_p, const char *p
 
 	if(jupe_p->points >= config_file.jupe_score)
 	{
-		slog(jupeserv_p, 1, "%s{%s} - TRIGGERJUPE %s",
-			client_p->user->mask, client_p->user->servername, parv[0]);
-		watch_send(WATCH_JUPESERV, client_p, conn_p, 1, "TRIGGERJUPE %s", parv[0]);
+		zlog(jupeserv_p, 1, WATCH_JUPESERV, 1, client_p, conn_p,
+			"TRIGGERJUPE %s", parv[0]);
 
 		sendto_server(":%s WALLOPS :JUPE triggered on %s by %s!%s@%s on %s [%s]",
 				MYUID, jupe_p->name, client_p->name,
@@ -474,18 +467,16 @@ s_jupeserv_callunjupe(struct client *client_p, struct lconn *conn_p, const char 
 		jupe_p->points = config_file.unjupe_score;
 	}
 
-	slog(jupeserv_p, 1, "%s{%s} - CALLUNJUPE %s",
-		client_p->user->mask, client_p->user->servername, parv[0]);
-	watch_send(WATCH_JUPESERV, client_p, conn_p, 1, "CALLUNJUPE %s", parv[0]);
+	zlog(jupeserv_p, 1, WATCH_JUPESERV, 1, client_p, conn_p,
+		"CALLUNJUPE %s", parv[0]);
 
 	jupe_p->expire = CURRENT_TIME + config_file.pending_time;
 	jupe_p->points -= config_file.oper_score;
 
 	if(jupe_p->points <= 0)
 	{
-		slog(jupeserv_p, 1, "%s{%s} - TRIGGERUNJUPE %s",
-			client_p->user->mask, client_p->user->servername, parv[0]);
-		watch_send(WATCH_JUPESERV, client_p, conn_p, 1, "TRIGGERUNJUPE %s", parv[0]);
+		zlog(jupeserv_p, 1, WATCH_JUPESERV, 1, client_p, conn_p,
+			"TRIGGERUNJUPE %s", parv[0]);
 
 		sendto_server(":%s WALLOPS :UNJUPE triggered on %s by %s!%s@%s on %s",
 				MYUID, jupe_p->name, client_p->name,
@@ -528,9 +519,7 @@ s_jupeserv_pending(struct client *client_p, struct lconn *conn_p, const char *pa
 		return 0;
 	}
 
-	slog(jupeserv_p, 3, "%s{%s} - PENDING",
-		client_p->user->mask, client_p->user->servername);
-	watch_send(WATCH_JUPESERV, client_p, conn_p, 1, "PENDING");
+	zlog(jupeserv_p, 3, WATCH_JUPESERV, 1, client_p, conn_p, "PENDING");
 
 	service_error(jupeserv_p, client_p, "Pending jupes:");
 

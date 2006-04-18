@@ -37,6 +37,8 @@
 #include "client.h"
 #include "service.h"
 #include "conf.h"
+#include "watch.h"
+#include "s_userserv.h"
 
 static FILE *logfile;
 
@@ -140,3 +142,40 @@ slog(struct client *service_p, int loglevel, const char *format, ...)
 	fputs(buf2, service_p->service->logfile);
 	fflush(service_p->service->logfile);
 }
+
+void
+zlog(struct client *service_p, int loglevel, int watchlevel, int oper,
+	struct client *client_p, struct lconn *conn_p,
+	const char *format, ...)
+{
+	char buf[BUFSIZE];
+	char buf2[BUFSIZE];
+	va_list args;
+
+	va_start(args, format);
+	vsnprintf(buf, sizeof(buf), format, args);
+	va_end(args);
+
+	if(watchlevel)
+		watch_send(watchlevel, client_p, conn_p, oper, "%s", buf);
+
+	if(service_p->service->logfile == NULL)
+		return;
+
+	if(service_p->service->loglevel < loglevel)
+		return;
+
+	if(oper)
+		snprintf(buf2, sizeof(buf2), "%s *%s %s %s\n", 
+			smalldate(), OPER_NAME(client_p, conn_p), 
+			OPER_MASK(client_p, conn_p), buf);
+	else
+		snprintf(buf2, sizeof(buf2), "%s %s %s %s\n",
+			smalldate(),
+			client_p->user->user_reg ? client_p->user->user_reg->name : "-",
+			OPER_MASK(client_p, conn_p), buf);
+
+	fputs(buf2, service_p->service->logfile);
+	fflush(service_p->service->logfile);
+}
+

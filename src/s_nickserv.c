@@ -244,9 +244,8 @@ o_nick_nickdrop(struct client *client_p, struct lconn *conn_p, const char *parv[
 
 	service_error(nickserv_p, client_p, "Nickname %s dropped", parv[0]);
 
-	slog(nickserv_p, 1, "%s - NICKDROP %s",
-		OPER_NAME(client_p, conn_p), nreg_p->name);
-	watch_send(WATCH_NSADMIN, client_p, conn_p, 1, "NICKDROP %s", nreg_p->name);
+	zlog(nickserv_p, 1, WATCH_NSADMIN, 1, client_p, conn_p,
+		"NICKDROP %s", nreg_p->name);
 
 	free_nick_reg(nreg_p);
 	return 0;
@@ -287,10 +286,8 @@ s_nick_register(struct client *client_p, struct lconn *conn_p, const char *parv[
 		return 1;
 	}
 
-	slog(nickserv_p, 2, "%s %s REGISTER %s",
-		client_p->user->mask, client_p->user->user_reg->name,
-		client_p->name);
-	watch_send(WATCH_NSREGISTER, client_p, NULL, 0, "REGISTER %s", client_p->name);
+	zlog(nickserv_p, 2, WATCH_NSREGISTER, 0, client_p, NULL,
+		"REGISTER %s", client_p->name);
 
 	nreg_p = BlockHeapAlloc(nick_reg_heap);
 
@@ -332,8 +329,7 @@ s_nick_drop(struct client *client_p, struct lconn *conn_p, const char *parv[], i
 
 	service_error(nickserv_p, client_p, "Nickname %s dropped", parv[0]);
 
-	slog(nickserv_p, 3, "%s %s DROP %s",
-		client_p->user->mask, client_p->user->user_reg->name, parv[0]);
+	zlog(nickserv_p, 3, 0, 0, client_p, NULL, "DROP %s", parv[0]);
 
 	free_nick_reg(nreg_p);
 	return 1;
@@ -376,9 +372,7 @@ s_nick_release(struct client *client_p, struct lconn *conn_p, const char *parv[]
 			nickserv_p->name, client_p->name);
 	exit_client(target_p);
 
-	slog(nickserv_p, 4, "%s %s RELEASE %s",
-		client_p->user->mask, client_p->user->user_reg->name,
-		parv[0]);
+	zlog(nickserv_p, 4, 0, 0, client_p, NULL, "RELEASE %s", parv[0]);
 
 	return 1;
 }
@@ -437,9 +431,7 @@ s_nick_regain(struct client *client_p, struct lconn *conn_p, const char *parv[],
 
 	exit_client(target_p);
 
-	slog(nickserv_p, 4, "%s %s REGAIN %s",
-		client_p->user->mask, client_p->user->user_reg->name,
-		parv[0]);
+	zlog(nickserv_p, 4, 0, 0, client_p, NULL, "REGAIN %s", parv[0]);
 
 	return 1;
 }
@@ -543,8 +535,7 @@ s_nick_info(struct client *client_p, struct lconn *conn_p, const char *parv[], i
 			nreg_p->name, 
 			get_duration((time_t) (CURRENT_TIME - nreg_p->reg_time)));
 
-	slog(nickserv_p, 5, "%s %s INFO %s",
-		client_p->user->mask, client_p->user->user_reg->name, parv[0]);
+	zlog(nickserv_p, 5, 0, 0, client_p, NULL, "INFO %s", parv[0]);
 
 	return 1;
 }

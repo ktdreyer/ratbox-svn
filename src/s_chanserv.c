@@ -1345,10 +1345,8 @@ o_chan_chanregister(struct client *client_p, struct lconn *conn_p, const char *p
 		return 0;
 	}
 
-	slog(chanserv_p, 1, "%s - CHANREGISTER %s %s",
-		OPER_NAME(client_p, conn_p), parv[0], ureg_p->name);
-	watch_send(WATCH_CSADMIN, client_p, conn_p, 1,
-			"CHANREGISTER %s %s", parv[0], ureg_p->name);
+	zlog(chanserv_p, 1, WATCH_CSADMIN, 1, client_p, conn_p,
+		"CHANREGISTER %s %s", parv[0], ureg_p->name);
 
 	chreg_p = BlockHeapAlloc(channel_reg_heap);
 	init_channel_reg(chreg_p, parv[0]);
@@ -1374,10 +1372,8 @@ o_chan_chandrop(struct client *client_p, struct lconn *conn_p, const char *parv[
 		return 0;
 	}
 
-	slog(chanserv_p, 1, "%s - CHANDROP %s", 
-		OPER_NAME(client_p, conn_p), parv[0]);
-	watch_send(WATCH_CSADMIN, client_p, conn_p, 1,
-			"CHANDROP %s", parv[0]);
+	zlog(chanserv_p, 1, WATCH_CSADMIN, 1, client_p, conn_p,
+		"CHANDROP %s", parv[0]);
 
 	destroy_channel_reg(reg_p);
 
@@ -1408,10 +1404,8 @@ o_chan_chansuspend(struct client *client_p, struct lconn *conn_p, const char *pa
 
 	reason = rebuild_params(parv, parc, 1);
 
-	slog(chanserv_p, 1, "%s - CHANSUSPEND %s %s",
-		OPER_NAME(client_p, conn_p), parv[0], reason);
-	watch_send(WATCH_CSADMIN, client_p, conn_p, 1,
-			"CHANSUSPEND %s %s", parv[0], reason);
+	zlog(chanserv_p, 1, WATCH_CSADMIN, 1, client_p, conn_p,
+		"CHANSUSPEND %s %s", parv[0], reason);
 
 	reg_p->flags |= CS_FLAGS_SUSPENDED;
 	reg_p->suspender = my_strdup(OPER_NAME(client_p, conn_p));
@@ -1447,10 +1441,8 @@ o_chan_chanunsuspend(struct client *client_p, struct lconn *conn_p, const char *
 		return 0;
 	}
 
-	slog(chanserv_p, 1, "%s - CHANUNSUSPEND %s",
-		OPER_NAME(client_p, conn_p), reg_p->name);
-	watch_send(WATCH_CSADMIN, client_p, conn_p, 1,
-			"CHANUNSUSPEND %s", reg_p->name);
+	zlog(chanserv_p, 1, WATCH_CSADMIN, 1, client_p, conn_p,
+		"CHANUNSUSPEND %s", reg_p->name);
 
 	reg_p->flags &= ~CS_FLAGS_SUSPENDED;
 	my_free(reg_p->suspender);
@@ -1589,9 +1581,8 @@ o_chan_chanlist(struct client *client_p, struct lconn *conn_p, const char *parv[
 			"End of channel list%s",
 			(limit == 1) ? ", limit reached" : "");
 
-	slog(chanserv_p, 1, "%s - CHANLIST %s",
-		OPER_NAME(client_p, conn_p), mask);
-	watch_send(WATCH_CSOPER, client_p, conn_p, 1, "CHANLIST %s", mask);
+	zlog(chanserv_p, 1, WATCH_CSOPER, 1, client_p, conn_p,
+		"CHANLIST %s", mask);
 
 	return 0;
 }
@@ -1630,9 +1621,8 @@ o_chan_chaninfo(struct client *client_p, struct lconn *conn_p, const char *parv[
 			dump_info_accesslist(client_p, conn_p, chreg_p);
 	}
 
-	slog(chanserv_p, 1, "%s - CHANINFO %s",
-		OPER_NAME(client_p, conn_p), chreg_p->name);
-	watch_send(WATCH_CSOPER, client_p, conn_p, 1, "CHANINFO %s", chreg_p->name);
+	zlog(chanserv_p, 1, WATCH_CSOPER, 1, client_p, conn_p,
+		"CHANINFO %s", chreg_p->name);
 
 	return 0;
 }
@@ -1712,9 +1702,8 @@ s_chan_register(struct client *client_p, struct lconn *conn_p, const char *parv[
 		hent->cregister++;
 	}
 
-	slog(chanserv_p, 2, "%s %s REGISTER %s",
-		client_p->user->mask, client_p->user->user_reg->name, parv[0]);
-	watch_send(WATCH_CSREGISTER, client_p, NULL, 0, "REGISTER %s", chptr->name);
+	zlog(chanserv_p, 2, WATCH_CSREGISTER, 0, client_p, NULL,
+		"REGISTER %s", parv[0]);
 
 	reg_p = BlockHeapAlloc(channel_reg_heap);
 	init_channel_reg(reg_p, parv[0]);
@@ -1780,8 +1769,8 @@ s_chan_adduser(struct client *client_p, struct lconn *conn_p, const char *parv[]
 		}
 	}
 
-	slog(chanserv_p, 5, "%s %s ADDUSER %s %s %d %s",
-		client_p->user->mask, client_p->user->user_reg->name,
+	zlog(chanserv_p, 5, 0, 0, client_p, NULL,
+		"ADDUSER %s %s %d %s",
 		parv[0], ureg_p->name, level, flags != 0 ? parv[3] : "NONE");
 
 	mreg_tp = make_member_reg(ureg_p, mreg_p->channel_reg, mreg_p->user_reg->name, level, flags);
@@ -1826,9 +1815,8 @@ s_chan_deluser(struct client *client_p, struct lconn *conn_p, const char *parv[]
 		return 1;
 	}
 
-	slog(chanserv_p, 5, "%s %s DELUSER %s %s",
-		client_p->user->mask, client_p->user->user_reg->name,
-		parv[0], mreg_tp->user_reg->name);
+	zlog(chanserv_p, 5, 0, 0, client_p, NULL,
+		"DELUSER %s %s", parv[0], mreg_tp->user_reg->name);
 
 	service_error(chanserv_p, client_p, "User %s on %s removed",
 			mreg_tp->user_reg->name, chreg_p->name);
@@ -1878,8 +1866,8 @@ s_chan_moduser(struct client *client_p, struct lconn *conn_p, const char *parv[]
 		return 1;
 	}
 
-	slog(chanserv_p, 5, "%s %s MODUSER %s %s %d",
-		client_p->user->mask, client_p->user->user_reg->name,
+	zlog(chanserv_p, 5, 0, 0, client_p, NULL,
+		"MODUSER %s %s %d",
 		parv[0], mreg_tp->user_reg->name, level);
 
 	mreg_tp->level = level;
@@ -1946,8 +1934,8 @@ s_chan_modauto(struct client *client_p, struct lconn *conn_p, const char *parv[]
 		return 1;
 	}
 
-	slog(chanserv_p, 5, "%s %s MODAUTO %s %s %s",
-		client_p->user->mask, client_p->user->user_reg->name,
+	zlog(chanserv_p, 5, 0, 0, client_p, NULL,
+		"MODAUTO %s %s %s",
 		parv[0], mreg_tp->user_reg->name, parv[2]);
 
 	my_free(mreg_tp->lastmod);
@@ -1974,8 +1962,8 @@ s_chan_listusers(struct client *client_p, struct lconn *conn_p, const char *parv
 	if((mreg_p = verify_member_reg_name(client_p, NULL, parv[0], S_C_SUSPEND)) == NULL)
 		return 1;
 
-	slog(chanserv_p, 3, "%s %s LISTUSERS %s",
-		client_p->user->mask, client_p->user->user_reg->name, parv[0]);
+	zlog(chanserv_p, 3, 0, 0, client_p, NULL,
+		"LISTUSERS %s", parv[0]);
 
 	dump_info_accesslist(client_p, NULL, mreg_p->channel_reg);
 
@@ -2028,8 +2016,8 @@ s_chan_suspend(struct client *client_p, struct lconn *conn_p, const char *parv[]
 		return 1;
 	}
 
-	slog(chanserv_p, 6, "%s %s SUSPEND %s %s %d",
-		client_p->user->mask, client_p->user->user_reg->name,
+	zlog(chanserv_p, 6, 0, 0, client_p, NULL,
+		"SUSPEND %s %s %d",
 		parv[0], mreg_tp->user_reg->name, level);
 
 	mreg_tp->suspend = level;
@@ -2077,8 +2065,8 @@ s_chan_unsuspend(struct client *client_p, struct lconn *conn_p, const char *parv
 		return 1;
 	}
 
-	slog(chanserv_p, 6, "%s %s UNSUSPEND %s %s",
-		client_p->user->mask, client_p->user->user_reg->name,
+	zlog(chanserv_p, 6, 0, 0, client_p, NULL,
+		"UNSUSPEND %s %s",
 		parv[0], mreg_tp->user_reg->name);
 
 	mreg_tp->suspend = 0;
@@ -2116,9 +2104,8 @@ s_chan_clearmodes(struct client *client_p, struct lconn *conn_p, const char *par
 		return 1;
 	}
 
-	slog(chanserv_p, 4, "%s %s CLEARMODES %s",
-		client_p->user->mask, client_p->user->user_reg->name,
-		parv[0]);
+	zlog(chanserv_p, 4, 0, 0, client_p, NULL,
+		"CLEARMODES %s", parv[0]);
 
 	snprintf(modestr, sizeof(modestr), "-%s%s%s",
 			(chptr->mode.mode & MODE_INVITEONLY) ? "i" : "",
@@ -2200,9 +2187,8 @@ s_chan_clearops(struct client *client_p, struct lconn *conn_p, const char *parv[
 	if((mreg_p = verify_member_reg_name(client_p, &chptr, parv[0], S_C_CLEAR)) == NULL)
 		return 1;
 
-	slog(chanserv_p, 4, "%s %s CLEAROPS %s",
-		client_p->user->mask, client_p->user->user_reg->name,
-		parv[0]);
+	zlog(chanserv_p, 4, 0, 0, client_p, NULL,
+		"CLEAROPS %s", parv[0]);
 
 	s_chan_clearops_loc(chptr, mreg_p->channel_reg, S_C_OP);
 
@@ -2220,9 +2206,8 @@ s_chan_clearallops(struct client *client_p, struct lconn *conn_p, const char *pa
 	if((mreg_p = verify_member_reg_name(client_p, &chptr, parv[0], S_C_CLEAR)) == NULL)
 		return 1;
 
-	slog(chanserv_p, 4, "%s %s CLEARALLOPS %s",
-		client_p->user->mask, client_p->user->user_reg->name,
-		parv[0]);
+	zlog(chanserv_p, 4, 0, 0, client_p, NULL,
+		"CLEARALLOPS %s", parv[0]);
 
 	s_chan_clearops_loc(chptr, mreg_p->channel_reg, mreg_p->level);
 
@@ -2244,9 +2229,8 @@ s_chan_clearbans(struct client *client_p, struct lconn *conn_p, const char *parv
 	if((mreg_p = verify_member_reg_name(client_p, &chptr, parv[0], S_C_CLEAR)) == NULL)
 		return 1;
 
-	slog(chanserv_p, 4, "%s %s CLEARBANS %s",
-		client_p->user->mask, client_p->user->user_reg->name,
-		parv[0]);
+	zlog(chanserv_p, 4, 0, 0, client_p, NULL,
+		"CLEARBANS %s", parv[0]);
 
 	modebuild_start(chanserv_p, chptr);
 
@@ -2649,9 +2633,7 @@ s_chan_op(struct client *client_p, struct lconn *conn_p, const char *parv[], int
 		return 1;
 	}
 
-	slog(chanserv_p, 6, "%s %s OP %s",
-		client_p->user->mask, client_p->user->user_reg->name,
-		parv[0]);
+	zlog(chanserv_p, 6, 0, 0, client_p, NULL, "OP %s", parv[0]);
 
 	msptr->flags &= ~MODE_DEOPPED;
 	msptr->flags |= MODE_OPPED;
@@ -2699,9 +2681,7 @@ s_chan_voice(struct client *client_p, struct lconn *conn_p, const char *parv[], 
 		return 1;
 	}
 
-	slog(chanserv_p, 6, "%s %s VOICE %s",
-		client_p->user->mask, client_p->user->user_reg->name,
-		parv[0]);
+	zlog(chanserv_p, 6, 0, 0, client_p, NULL, "VOICE %s", parv[0]);
 
 	msptr->flags |= MODE_VOICED;
 	sendto_server(":%s MODE %s +v %s",
@@ -2731,9 +2711,7 @@ s_chan_invite(struct client *client_p, struct lconn *conn_p, const char *parv[],
 		return 1;
 	}
 
-	slog(chanserv_p, 6, "%s %s INVITE %s",
-		client_p->user->mask, client_p->user->user_reg->name,
-		parv[0]);
+	zlog(chanserv_p, 6, 0, 0, client_p, NULL, "INVITE %s", parv[0]);
 
 	sendto_server(":%s INVITE %s %s",
 			chanserv_p->name, UID(client_p), chptr->name);
@@ -2770,9 +2748,7 @@ s_chan_getkey(struct client *client_p, struct lconn *conn_p, const char *parv[],
 		return 1;
 	}
 
-	slog(chanserv_p, 6, "%s %s GETKEY %s",
-		client_p->user->mask, client_p->user->user_reg->name,
-		parv[0]);
+	zlog(chanserv_p, 6, 0, 0, client_p, NULL, "GETKEY %s", parv[0]);
 
 	service_error(chanserv_p, client_p,
 			"Channel %s key is: %s", parv[0], chptr->mode.key);
@@ -2873,9 +2849,8 @@ s_chan_addban(struct client *client_p, struct lconn *conn_p, const char *parv[],
 			strlcat(reason, " ", sizeof(reason));
 	}
 
-	slog(chanserv_p, 6, "%s %s ADDBAN %s %s",
-		client_p->user->mask, client_p->user->user_reg->name,
-		parv[0], mask);
+	zlog(chanserv_p, 6, 0, 0, client_p, NULL,
+		"ADDBAN %s %s", parv[0], mask);
 
 	banreg_p = make_ban_reg(mreg_p->channel_reg, mask, reason, 
 			mreg_p->user_reg->name, level, 
@@ -2973,9 +2948,8 @@ s_chan_delban(struct client *client_p, struct lconn *conn_p, const char *parv[],
 		return 1;
 	}
 
-	slog(chanserv_p, 6, "%s %s DELBAN %s %s",
-		client_p->user->mask, client_p->user->user_reg->name,
-		parv[0], parv[1]);
+	zlog(chanserv_p, 6, 0, 0, client_p, NULL,
+		"DELBAN %s %s", parv[0], parv[1]);
 
 	service_error(chanserv_p, client_p, "Ban %s on %s removed",
 			parv[1], mreg_p->channel_reg->name);
@@ -3077,9 +3051,7 @@ s_chan_listbans(struct client *client_p, struct lconn *conn_p, const char *parv[
 	if((mreg_p = verify_member_reg_name(client_p, NULL, parv[0], S_C_REGULAR)) == NULL)
 		return 1;
 
-	slog(chanserv_p, 3, "%s %s LISTBANS %s",
-		client_p->user->mask, client_p->user->user_reg->name,
-		parv[0]);
+	zlog(chanserv_p, 6, 0, 0, client_p, NULL, "LISTBANS %s", parv[0]);
 
 	service_error(chanserv_p, client_p, "Channel %s ban list:",
 			mreg_p->channel_reg->name);
@@ -3117,9 +3089,7 @@ s_chan_unban(struct client *client_p, struct lconn *conn_p, const char *parv[], 
 	if((mreg_p = verify_member_reg_name(client_p, &chptr, parv[0], S_C_REGULAR)) == NULL)
 		return 1;
 
-	slog(chanserv_p, 6, "%s %s UNBAN %s",
-		client_p->user->mask, client_p->user->user_reg->name,
-		parv[0]);
+	zlog(chanserv_p, 6, 0, 0, client_p, NULL, "UNBAN %s", parv[0]);
 
 	/* cached ban of higher level */
 	if(mreg_p->bants == mreg_p->channel_reg->bants)
