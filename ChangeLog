@@ -1,3 +1,15 @@
+leeh        2006/04/19 17:55:46 UTC	(20060419_0-22355)
+  Log:
+  - fix a few XXX marks to do whats needed there
+  - update whats-new-1.1.txt a bit
+  
+
+  Modified:
+	rserv/trunk/doc/whats-new-1.1.txt (File Modified) 
+	rserv/trunk/src/channel.c (File Modified) 
+	rserv/trunk/src/s_userserv.c (File Modified) 
+
+
 leeh        2006/04/18 18:08:53 UTC	(20060418_0-22353)
   Log:
   - add new zlog() function, which will handle building the prefixes for a log
