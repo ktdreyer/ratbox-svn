@@ -1251,7 +1251,6 @@ s_user_resetpass(struct client *client_p, struct lconn *conn_p, const char *parv
 			return 1;
 		}
 
-		/* XXX - another var? */
 		rsdb_exec_fetch(&data, "SELECT COUNT(username) FROM users_resetpass WHERE username='%Q' AND time > '%lu'",
 				reg_p->name, CURRENT_TIME - config_file.uresetpass_duration);
 

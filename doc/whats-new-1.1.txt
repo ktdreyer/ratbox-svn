@@ -2,7 +2,7 @@ Database
 --------
 - Make the code database agnostic so that it does not care about which
   database is used as the backend.
-- Add support for mysql: --enable-mysql=[PATH]
+- Add support for mysql: --enable-mysql[=PATH]
 - Add support for sqlite3 (default)
 - Remove support for sqlite2
 - Support for database hooks, so external processes can trigger updates done
@@ -15,6 +15,7 @@ General
   ircops and services opers
 - .flags command has gone, it has been replaced with .chat [on|off] and the
   watchserv system
+- Log format altered so that we log nick!user@host mask for oper commands
 
 Compilation
 -----------
@@ -64,6 +65,7 @@ Config file
 - operator {};
   - New flag to global, 'welcome', grants access to modify welcome
     messages
+  - New flag to operserv, 'maintain', grants access to dbsync, rehash and die
 - service {}; 
   - New flag, 'require_shortcut', which requires commands to this
     service are done through command shortcuts rather than msg.

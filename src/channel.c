@@ -677,8 +677,11 @@ c_sjoin(struct client *client_p, const char *parv[], int parc)
 	/* invalid mode */
 	s_assert(args);
 	if(!args)
-		/* XXX ERROR */
+	{
+		mlog("PROTO: SJOIN issued with invalid mode: %s",
+			rebuild_params(parv, parc, 2));
 		return;
+	}
 
 	if(!keep_old_modes)
 	{
@@ -823,8 +826,10 @@ c_join(struct client *client_p, const char *parv[], int parc)
 
 	/* a TS6 join */
 	if(parc < 3)
-		/* XXX error */
+	{
+		mlog("PROTO: JOIN issued with insufficient parameters");
 		return;
+	}
 
 	if(!valid_chname(parv[1]))
 		return;
@@ -860,8 +865,11 @@ c_join(struct client *client_p, const char *parv[], int parc)
 	/* invalid mode */
 	s_assert(args);
 	if(!args)
-		/* XXX ERROR */
+	{
+		mlog("PROTO: JOIN issued with invalid modestring: %s",
+			rebuild_params(parv, parc, 2));
 		return;
+	}
 
 	if(!keep_old_modes)
 	{
