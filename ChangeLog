@@ -1,3 +1,17 @@
+leeh        2006/04/19 19:47:15 UTC	(20060419_1-22357)
+  Log:
+  - base sqlite schema needed users_sync
+  - add in schemas for the 1.0 tree, these will be needed to upgrade properly
+  
+
+  Modified:
+	rserv/trunk/tools/base/schema-sqlite.txt (File Modified) 
+	rserv/trunk/tools/oldschema/ (File Added) 
+	rserv/trunk/tools/oldschema/1.0-mysql-schema.txt (File Added) 
+	rserv/trunk/tools/oldschema/1.0-pgsql-schema.txt (File Added) 
+	rserv/trunk/tools/oldschema/1.0-sqlite-schema.txt (File Added) 
+
+
 leeh        2006/04/19 17:55:46 UTC	(20060419_0-22355)
   Log:
   - fix a few XXX marks to do whats needed there
