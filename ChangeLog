@@ -1,3 +1,13 @@
+leeh        2006/04/19 20:07:35 UTC	(20060419_2-22359)
+  Log:
+  - im on crack.
+  
+
+  Modified:
+	rserv/trunk/tools/oldschema/ (File Deleted) 
+	rserv/trunk/tools/sqlitecheck.pl (File Added) 
+
+
 leeh        2006/04/19 19:47:15 UTC	(20060419_1-22357)
   Log:
   - base sqlite schema needed users_sync
