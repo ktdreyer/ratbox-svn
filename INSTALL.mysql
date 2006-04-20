@@ -23,7 +23,7 @@ compile time:
 	./generate-schema.pl
 
 Then initialise the database:
-	mysql -u rserv -p < /path/to/source/doc/schema-mysql.txt
+	mysql -u rserv -p < /path/to/source/tools/schema-mysql.txt
 
 The username (default: rserv), database name (default: ratbox_services) and
 password must be set in the config for ratbox-services to work.

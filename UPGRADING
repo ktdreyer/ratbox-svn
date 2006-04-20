@@ -1,6 +1,8 @@
 ratbox-services upgrade guide
 -----------------------------
 
+IF YOU ARE UPGRADING FROM 1.0.x, YOU MUST READ THE DBMOVE FILE.
+
 If you are upgrading between major version numbers (eg, 1.0.x -> 1.1.x), you
 should read doc/whats-new-VER.txt.  This file will document the major
 changes between the versions.
@@ -15,6 +17,9 @@ version, but before you have started the new version.
 This upgrade script only accounts for released versions, not for subversion
 copies.
 
+This upgrade script *cannot* cope with moving between different database
+backends.
+
 You should always run the upgrade script with your full version -- keeping
 any "beta", "rc" tags etc.
 
@@ -24,16 +29,6 @@ Eg,
 	./dbupgrade.pl 1.0.3 sqlite
 
 
-If you are upgrading from the 1.0.x series, it is important to note the
-database backend (sqlite2) is no longer supported.  SQLite is still
-supported, but only sqlite3, which is incompatible with sqlite2.
+If you are upgrading from the 1.0.x series, you must read the DBMOVE file
+if you are not moving your database to sqlite3.
 
-To upgrade from 1.0.x, you should extract your data from the database,
-install it into the new database and run the dbupgrade.pl script after this
-has been done.
-
-You can extract a complete dump of data in sqlite2 via:	
-	sqlite etc/ratbox-services.db ".dump" > db-dump.txt
-
-You should then follow the instructions in INSTALL.<db-backend>, using this
-database dump instead of the given schema.

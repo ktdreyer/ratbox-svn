@@ -10,33 +10,33 @@
 # This code is in the public domain.
 
 require "definetolength.pl";
+use File::Basename;
 
-my @schemas = ("schema-mysql.txt", "schema-pgsql.txt");
-my @plain_schemas = ("schema-sqlite.txt");
+my @schemas = ("base/schema-mysql.txt", "base/schema-pgsql.txt");
+my @plain_schemas = ("base/schema-sqlite.txt");
 
-my %vals;
+my %vals = &parse_includes("../include");
 
 if($ARGV[0])
 {
-	%vals = &parse_includes("$ARGV[0]");
-}
-else
-{
-	%vals = &parse_includes("../include");
+	@schemas = ("$ARGV[0]");
+	@plain_schemas = ();
 }
 
 foreach my $i (@schemas)
 {
-	unless(open(INPUT, '<', "base/$i"))
+	my $outputfile = basename($i);
+
+	unless(open(INPUT, '<', "$i"))
 	{
-		print("Unable to open base schema base/$i for reading, aborted.\n");
+		print("Unable to open base schema $i for reading, aborted.\n");
 		exit();
 	}
 
 	local $/ = undef;
 	my $input = <INPUT>;
 
-	unless(open(OUTPUT, '>', "$i"))
+	unless(open(OUTPUT, '>', "$outputfile"))
 	{
 		print("Unable to open schema $i for writing, aborted.\n");
 		exit();
@@ -62,9 +62,11 @@ foreach my $i (@schemas)
 
 foreach my $i (@plain_schemas)
 {
+	my $outputfile = basename($i);
+
 	# This is done manually, as im not sure if File::Copy will be around
 	# everywhere..
-	unless(open(INPUT, '<', "base/$i"))
+	unless(open(INPUT, '<', "$i"))
 	{
 		print("Unable to open base schema base/$i for reading, aborted.\n");
 		exit();
@@ -73,7 +75,7 @@ foreach my $i (@plain_schemas)
 	local $/ = undef;
 	my $input = <INPUT>;
 
-	unless(open(OUTPUT, '>', "$i"))
+	unless(open(OUTPUT, '>', "$outputfile"))
 	{
 		print("Unable to open schema $i for writing, aborted.\n");
 		exit();
