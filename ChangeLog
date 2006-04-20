@@ -1,3 +1,21 @@
+leeh        2006/04/20 20:31:12 UTC	(20060420_0-22361)
+  Log:
+  - add the oldschemas back, we do need these
+  - add in a document on how to move databases
+  - make generate-schema.pl support taking a schema as an argument
+  
+
+  Modified:
+	rserv/trunk/DBMOVE (File Added) 
+	rserv/trunk/INSTALL.mysql (File Modified) 
+	rserv/trunk/UPGRADING (File Modified) 
+	rserv/trunk/tools/generate-schema.pl (File Modified) 
+	rserv/trunk/tools/oldschema/ (File Added) 
+	rserv/trunk/tools/oldschema/1.0-mysql-schema.txt (File Added) 
+	rserv/trunk/tools/oldschema/1.0-pgsql-schema.txt (File Added) 
+	rserv/trunk/tools/oldschema/1.0-sqlite-schema.txt (File Added) 
+
+
 leeh        2006/04/19 20:07:35 UTC	(20060419_2-22359)
   Log:
   - im on crack.
