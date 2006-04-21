@@ -1,3 +1,15 @@
+leeh        2006/04/21 17:48:38 UTC	(20060421_0-22363)
+  Log:
+  - update RELEASE_NOTES
+  - revved patchlevel to 1.1.0beta2
+  
+
+  Modified:
+	rserv/trunk/RELEASE_NOTES (File Modified) 
+	rserv/trunk/UPGRADING (File Modified) 
+	rserv/trunk/include/config.h (File Modified) 
+
+
 leeh        2006/04/20 20:31:12 UTC	(20060420_0-22361)
   Log:
   - add the oldschemas back, we do need these
