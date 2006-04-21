@@ -1,6 +1,16 @@
 
 This is the current development version of ratbox-services.  It may break.
 
+-- ratbox-services-1.1.0beta2
+- fix core in watchserv
+- make operserv::die send wallops if operserv is configured to
+- move operserv::die, operserv::dbsync and operserv::rehash over to new
+  operserv "maintain" priv, fixing a bug which tested the wrong flags for
+  them
+- made the log files more consistent, we now log nick!user@host masks for
+  oper commands, and prefix their username with a '*'
+- add in DBMOVE documentation on how to move to different database software.
+
 -- ratbox-services-1.1.0beta1
 - initial release, read doc/whats-new-1.1.txt
 

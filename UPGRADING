@@ -29,6 +29,5 @@ Eg,
 	./dbupgrade.pl 1.0.3 sqlite
 
 
-If you are upgrading from the 1.0.x series, you must read the DBMOVE file
-if you are not moving your database to sqlite3.
+If you are upgrading from the 1.0.x series, you must read the DBMOVE file.
 
