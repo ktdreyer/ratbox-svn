@@ -526,6 +526,36 @@ remove_our_modes(struct channel *chptr)
 	}
 }
 
+/* remove_bans()
+ *   clears +beI modes from a channel
+ *
+ * inputs	- channel to remove modes from
+ * outputs	-
+ */
+void
+remove_bans(struct channel *chptr)
+{
+	dlink_node *ptr, *next_ptr;
+
+	DLINK_FOREACH_SAFE(ptr, next_ptr, chptr->bans.head)
+	{
+		my_free(ptr->data);
+		dlink_destroy(ptr, &chptr->bans);
+	}
+
+	DLINK_FOREACH_SAFE(ptr, next_ptr, chptr->excepts.head)
+	{
+		my_free(ptr->data);
+		dlink_destroy(ptr, &chptr->excepts);
+	}
+
+	DLINK_FOREACH_SAFE(ptr, next_ptr, chptr->invites.head)
+	{
+		my_free(ptr->data);
+		dlink_destroy(ptr, &chptr->invites);
+	}
+}
+
 /* chmode_to_string()
  *   converts a channels mode into a string
  *
@@ -687,6 +717,9 @@ c_sjoin(struct client *client_p, const char *parv[], int parc)
 	{
 		chptr->tsinfo = newts;
 		remove_our_modes(chptr);
+		/* If the source does TS6, also remove all +beI modes */
+		if (!EmptyString(client_p->uid))
+			remove_bans(chptr);
 
 		/* services is in there.. rejoin */
 		if(sent_burst)
@@ -875,6 +908,7 @@ c_join(struct client *client_p, const char *parv[], int parc)
 	{
 		chptr->tsinfo = newts;
 		remove_our_modes(chptr);
+		/* Note that JOIN does not remove bans */
 
 		/* services is in there.. rejoin */
 		if(sent_burst)

@@ -82,6 +82,7 @@ extern void free_channel(struct channel *chptr);
 extern struct channel *find_channel(const char *name);
 
 void remove_our_modes(struct channel *chptr);
+void remove_bans(struct channel *chptr);
 
 extern const char *chmode_to_string(struct chmode *mode);
 extern const char *chmode_to_string_simple(struct chmode *mode);
