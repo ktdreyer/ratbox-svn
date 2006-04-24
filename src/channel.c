@@ -855,6 +855,7 @@ c_join(struct client *client_p, const char *parv[], int parc)
 		{
 			del_chmember(ptr->data);
 		}
+		return;
 	}
 
 	/* a TS6 join */
