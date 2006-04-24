@@ -1,3 +1,14 @@
+jilles      2006/04/24 23:03:32 UTC	(20060424_1-22369)
+  Log:
+  Add function remove_bans() and use it to clear +beI modes
+  when TS6 SJOIN with lower TS is received.
+  
+
+  Modified:
+	rserv/trunk/include/channel.h (File Modified) 
+	rserv/trunk/src/channel.c (File Modified) 
+
+
 leeh        2006/04/24 19:13:43 UTC	(20060424_0-22365)
   Log:
   - add in the userintro.txt here
