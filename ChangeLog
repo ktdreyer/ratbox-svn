@@ -1,3 +1,12 @@
+jilles      2006/04/24 23:08:24 UTC	(20060424_2-22371)
+  Log:
+  Don't log a protocol error when receiving JOIN 0.
+  
+
+  Modified:
+	rserv/trunk/src/channel.c (File Modified) 
+
+
 jilles      2006/04/24 23:03:32 UTC	(20060424_1-22369)
   Log:
   Add function remove_bans() and use it to clear +beI modes
