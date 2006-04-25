@@ -132,11 +132,37 @@ h_operserv_sjoin_lowerts(void *v_chptr, void *unused)
 
 /* preconditions: TS >= 2 and there is at least one user in the channel */
 static void
-otakeover(struct channel *chptr, int invite)
+otakeover(struct channel *chptr, int invite, int bans)
 {
+	dlink_node *ptr;
+
 	part_service(operserv_p, chptr->name);
 
 	remove_our_modes(chptr);
+
+	if (bans)
+	{
+		if (EmptyString(server_p->sid))
+		{
+			modebuild_start(operserv_p, chptr);
+
+			DLINK_FOREACH(ptr, chptr->bans.head)
+			{
+				modebuild_add(DIR_DEL, "b", ptr->data);
+			}
+			DLINK_FOREACH(ptr, chptr->excepts.head)
+			{
+				modebuild_add(DIR_DEL, "e", ptr->data);
+			}
+			DLINK_FOREACH(ptr, chptr->invites.head)
+			{
+				modebuild_add(DIR_DEL, "I", ptr->data);
+			}
+
+			modebuild_finish();
+		}
+		remove_bans(chptr);
+	}
 
 	if(invite)
 		chptr->mode.mode = MODE_TOPIC|MODE_NOEXTERNAL|MODE_INVITEONLY;
@@ -145,7 +171,19 @@ otakeover(struct channel *chptr, int invite)
 
 	chptr->tsinfo--;
 
-	join_service(operserv_p, chptr->name, chptr->tsinfo, NULL);
+	if (EmptyString(server_p->sid) || bans)
+		join_service(operserv_p, chptr->name, chptr->tsinfo, NULL);
+	else
+	{
+		/* HACK: TS6 takeover, but not removing bans, so use JOIN
+		 * -- jilles */
+		sendto_server(":%s JOIN %lu %s %s",
+				SVC_UID(operserv_p),
+				(unsigned long) chptr->tsinfo, chptr->name,
+				chmode_to_string(&chptr->mode));
+		/* Then op it */
+		rejoin_service(operserv_p, chptr, 1);
+	}
 
 	/* need to reop some services */
 	if(dlink_list_length(&chptr->services) > 1)
@@ -165,37 +203,6 @@ otakeover(struct channel *chptr, int invite)
 
 		modebuild_finish();
 	}
-}
-
-static void
-otakeover_full(struct channel *chptr)
-{
-	dlink_node *ptr, *next_ptr;
-
-	modebuild_start(operserv_p, chptr);
-
-	DLINK_FOREACH_SAFE(ptr, next_ptr, chptr->bans.head)
-	{
-		modebuild_add(DIR_DEL, "b", ptr->data);
-		my_free(ptr->data);
-		dlink_destroy(ptr, &chptr->bans);
-	}
-
-	DLINK_FOREACH_SAFE(ptr, next_ptr, chptr->excepts.head)
-	{
-		modebuild_add(DIR_DEL, "e", ptr->data);
-		my_free(ptr->data);
-		dlink_destroy(ptr, &chptr->excepts);
-	}
-
-	DLINK_FOREACH_SAFE(ptr, next_ptr, chptr->invites.head)
-	{
-		modebuild_add(DIR_DEL, "I", ptr->data);
-		my_free(ptr->data);
-		dlink_destroy(ptr, &chptr->invites);
-	}
-
-	modebuild_finish();
 }
 
 static void
@@ -253,24 +260,21 @@ o_oper_takeover(struct client *client_p, struct lconn *conn_p, const char *parv[
 	{
 		if(!irccmp(parv[1], "-clearall"))
 		{
-			otakeover(chptr, 1);
-			otakeover_full(chptr);
+			otakeover(chptr, 1, 1);
 			otakeover_clear(chptr, 1);
 		}
 		else if(!irccmp(parv[1], "-clear"))
 		{
-			otakeover(chptr, 1);
-			otakeover_full(chptr);
+			otakeover(chptr, 1, 1);
 			otakeover_clear(chptr, 0);
 		}
 		else if(!irccmp(parv[1], "-full"))
 		{
-			otakeover(chptr, 0);
-			otakeover_full(chptr);
+			otakeover(chptr, 0, 1);
 		}
 	}
 	else
-		otakeover(chptr, 0);
+		otakeover(chptr, 0, 0);
 
 	zlog(operserv_p, 1, WATCH_OPERSERV, 1, client_p, conn_p,
 		"TAKEOVER %s", parv[0]);
