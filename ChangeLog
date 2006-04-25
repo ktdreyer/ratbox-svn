@@ -1,3 +1,16 @@
+jilles      2006/04/25 00:12:10 UTC	(20060425_0-22373)
+  Log:
+  Adapt operserv::takeover to the TS6 world.
+  If a non-full takeover is done and the ratbox option
+  is not set, operserv will part/join twice; this can't
+  be fixed other than by not changing the TS or changing
+  semantics to always remove bans.
+  
+
+  Modified:
+	rserv/trunk/src/s_operserv.c (File Modified) 
+
+
 jilles      2006/04/24 23:08:24 UTC	(20060424_2-22371)
   Log:
   Don't log a protocol error when receiving JOIN 0.
