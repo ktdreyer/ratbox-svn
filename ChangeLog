@@ -1,3 +1,12 @@
+jilles      2006/04/25 00:24:38 UTC	(20060425_1-22375)
+  Log:
+  Don't put our uplink's SID on all TS5 servers.
+  
+
+  Modified:
+	rserv/trunk/src/client.c (File Modified) 
+
+
 jilles      2006/04/25 00:12:10 UTC	(20060425_0-22373)
   Log:
   Adapt operserv::takeover to the TS6 world.
