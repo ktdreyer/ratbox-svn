@@ -952,7 +952,8 @@ c_server(struct client *client_p, const char *parv[], int parc)
 	strlcpy(target_p->info, EmptyString(parv[2]) ? default_gecos : parv[2],
 		sizeof(target_p->info));
 
-	if(!EmptyString(server_p->sid))
+	/* local TS6 servers use SERVER and pass the SID on the PASS command */
+	if(!EmptyString(server_p->sid) && client_p == NULL)
 		strlcpy(target_p->uid, server_p->sid, sizeof(target_p->uid));
 
 	target_p->server->hops = atoi(parv[1]);
