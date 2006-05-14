@@ -1,3 +1,11 @@
+androsyn    2006/05/14 01:17:28 UTC	(20060514_0-22483)
+  Log:
+  inital commit of the likely non-functional postgresql code
+
+  Modified:
+	rserv/trunk/src/rsdb_pgsql.c (File Added) 
+
+
 leeh        2006/05/07 14:07:57 UTC	(20060507_0-22401)
   Log:
   - fix PING to use UID properly
