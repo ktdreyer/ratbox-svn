@@ -32,7 +32,11 @@
  * $Id: rsdb_mysql.c 22247 2006-03-24 23:39:15Z leeh $
  */
 #include "stdinc.h"
+#ifdef PGSQL_ALTERNATE_INCLUDE
+#include <postgresql/libpq-fe.h>
+#else
 #include <pgsql/libpq-fe.h>
+#endif
 #include "rsdb.h"
 #include "rserv.h"
 #include "conf.h"

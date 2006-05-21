@@ -93,6 +93,9 @@
 /* Command Watching Service */
 #undef ENABLE_WATCHSERV
 
+/* Use alternate pgsql include path */
+#undef PGSQL_ALTERNATE_INCLUDE
+
 /* Build packaged sqlite3 */
 #undef SQLITE_BUILD
 

@@ -218,6 +218,7 @@ ac_cv_found_mysql_inc="no"
 ac_cv_found_mysql_lib="no"
 ac_cv_found_pgsql_inc="no"
 ac_cv_found_pgsql_lib="no"
+ac_cv_pgsql_altinclude="no"
 ac_cv_database=""
 
 
@@ -315,8 +316,28 @@ AC_CHECK_HEADER(pgsql/libpq-fe.h,
 		ac_cv_pgsql_path="$ac_cv_pgsql_val"
 	else
 		AC_MSG_RESULT(no)
+
+		AC_CHECK_HEADER(postgresql/libpq-fe.h,
+		[
+			ac_cv_found_pgsql_inc="yes"
+			ac_cv_pgsql_altinclude="yes"
+		], [
+			AC_MSG_CHECKING(for postgresql/libpq-fe.h in given path)
+			if test -f "$ac_cv_pgsql_val/include/postgresql/libpq-fe.h"; then
+				AC_MSG_RESULT(yes)
+				ac_cv_found_pgsql_inc="yes"
+				ac_cv_pgsql_altinclude="yes"
+				ac_cv_pgsql_path="$ac_cv_pgsql_val"
+			else
+				AC_MSG_RESULT(no)
+			fi
+		], [])
 	fi
 ], [])
+
+if test "X$ac_cv_pgsql_altinclude" == "Xyes"; then
+	AC_DEFINE(PGSQL_ALTERNATE_INCLUDE, 1, Use alternate pgsql include path)
+fi
 
 AC_CHECK_LIB([pq], [PQconnectdb],
 [
