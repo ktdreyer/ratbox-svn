@@ -1,3 +1,12 @@
+leeh        2006/05/21 15:03:30 UTC	(20060521_3-22605)
+  Log:
+  - fix some pgsql stuff
+  
+
+  Modified:
+	rserv/trunk/src/rsdb_pgsql.c (File Modified) 
+
+
 leeh        2006/05/21 14:55:22 UTC	(20060521_2-22603)
   Log:
   - handle pgsql includes being in postgresql/ as well as pgsql/
