@@ -1,3 +1,13 @@
+leeh        2006/05/21 14:31:05 UTC	(20060521_1-22601)
+  Log:
+  - add autoconf checks for pgsql
+  
+
+  Modified:
+	rserv/trunk/autoconf/configure.in (File Modified) 
+	rserv/trunk/configure (File Modified) 
+
+
 leeh        2006/05/21 14:30:23 UTC	(20060521_0-22599)
   Log:
   - minor formatting change to operguide
