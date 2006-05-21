@@ -1,5 +1,5 @@
-ratbox-services operguide
--------------------------
+- ratbox-services operguide -
+-----------------------------
 
 Opers can interact with services over IRC, and those with the dcc flag in
 their operator {}; may also have a DCC session with services.
