@@ -87,7 +87,7 @@ rsdb_connect(int initial)
 		die(0, "Unable to connect to postgresql database: %s",
 			PQerrorMessage(rsdb_database));
 
-	switch(PQStatus(rsdb_database))
+	switch(PQstatus(rsdb_database))
 	{
 		case CONNECTION_BAD:
 			return -1;
@@ -134,7 +134,7 @@ rsdb_try_reconnect(void)
  *		  the query if it can
  */
 static void
-rsdb_handle_error(PGresult **rsdb_result, const char *buf)
+rsdb_handle_error(PGresult *rsdb_result, const char *buf)
 {
 	if(rsdb_doing_transaction)
 	{
@@ -266,7 +266,7 @@ rsdb_exec_fetch(struct rsdb_table *table, const char *format, ...)
 
 	
 	table->row_count = PQntuples(rsdb_result);
-	table->col_count = PQnfields(rsdb_database);
+	table->col_count = PQnfields(rsdb_result);
 	table->arg = rsdb_result;
 
 	if(!table->row_count || !table->col_count)
