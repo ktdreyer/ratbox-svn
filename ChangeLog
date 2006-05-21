@@ -1,3 +1,13 @@
+leeh        2006/05/21 22:10:43 UTC	(20060521_4-22607)
+  Log:
+  - fix some autoconf lib crap
+  
+
+  Modified:
+	rserv/trunk/autoconf/configure.in (File Modified) 
+	rserv/trunk/configure (File Modified) 
+
+
 leeh        2006/05/21 15:03:30 UTC	(20060521_3-22605)
   Log:
   - fix some pgsql stuff
