@@ -144,6 +144,7 @@ SRC = \
   $(TOP)/src/os_win.c \
   $(TOP)/src/pager.c \
   $(TOP)/src/pager.h \
+  $(TOP)/src/parse.h \
   $(TOP)/src/parse.y \
   $(TOP)/src/pragma.c \
   $(TOP)/src/prepare.c \
@@ -180,7 +181,7 @@ HDR = \
    $(TOP)/src/os_common.h \
    $(TOP)/src/sqliteInt.h  \
    $(TOP)/src/vdbe.h \
-   parse.h
+   $(TOP)/src/parse.h
 
 # Header files used by the VDBE submodule
 #
@@ -218,12 +219,12 @@ sqlite3$(TEXE):	$(TOP)/src/shell.c libsqlite3.la sqlite3.h
 # files are automatically generated.  This target takes care of
 # all that automatic generation.
 #
-target_source:	$(SRC) parse.c opcodes.c keywordhash.h $(VDBEHDR) 
+target_source:	$(SRC) parse.c $(VDBEHDR) 
 	rm -rf tsrc
 	mkdir -p tsrc
 	cp $(SRC) $(VDBEHDR) tsrc
 	rm tsrc/sqlite.h.in tsrc/parse.y
-	cp parse.c opcodes.c keywordhash.h tsrc
+	cp parse.c tsrc
 	cp $(TOP)/sqlite3.def tsrc
 
 # Rules to build the LEMON compiler generator
@@ -286,8 +287,8 @@ main.lo:	$(TOP)/src/main.c $(HDR)
 pager.lo:	$(TOP)/src/pager.c $(HDR) $(TOP)/src/pager.h
 	$(LTCOMPILE) -c $(TOP)/src/pager.c
 
-opcodes.lo:
-	$(LTCOMPILE) -c opcodes.c
+opcodes.lo:	$(TOP)/src/opcodes.c $(HDR) $(TOP)/src/opcodes.h
+	$(LTCOMPILE) -c $(TOP)/src/opcodes.c
 
 os.lo:	$(TOP)/src/os.c $(HDR)
 	$(LTCOMPILE) -c $(TOP)/src/os.c
@@ -301,13 +302,9 @@ os_win.lo:	$(TOP)/src/os_win.c $(HDR)
 parse.lo:	parse.c $(HDR)
 	$(LTCOMPILE) -c parse.c
 
-parse.h:	parse.c
-
-parse.c:	$(TOP)/src/parse.y lemon$(BEXE) $(TOP)/addopcodes.awk
+parse.c:	$(TOP)/src/parse.y lemon$(BEXE)
 	cp $(TOP)/src/parse.y .
 	./lemon $(OPTS) parse.y
-	mv parse.h parse.h.temp
-	awk -f $(TOP)/addopcodes.awk parse.h.temp >parse.h
 
 pragma.lo:	$(TOP)/src/pragma.c $(HDR)
 	$(LTCOMPILE) -c $(TOP)/src/pragma.c
@@ -331,12 +328,8 @@ sqlite3.h:	$(TOP)/src/sqlite.h.in
 table.lo:	$(TOP)/src/table.c $(HDR)
 	$(LTCOMPILE) -c $(TOP)/src/table.c
 
-tokenize.lo:	$(TOP)/src/tokenize.c keywordhash.h $(HDR)
+tokenize.lo:	$(TOP)/src/tokenize.c $(TOP)/src/keywordhash.h $(HDR)
 	$(LTCOMPILE) -c $(TOP)/src/tokenize.c
-
-keywordhash.h:	$(TOP)/tool/mkkeywordhash.c
-	$(BCC) -o mkkeywordhash$(BEXE) $(OPTS) $(TOP)/tool/mkkeywordhash.c
-	./mkkeywordhash$(BEXE) >keywordhash.h
 
 trigger.lo:	$(TOP)/src/trigger.c $(HDR)
 	$(LTCOMPILE) -c $(TOP)/src/trigger.c
@@ -383,10 +376,9 @@ install:	sqlite3 libsqlite3.la sqlite3.h
 
 clean:	
 	rm -f *.lo *.la *.o sqlite3$(TEXE) libsqlite3.la
-	rm -f sqlite3.h opcodes.*
+	rm -f sqlite3.h
 	rm -rf .libs .deps 
 	rm -f lemon$(BEXE) lempar.c parse.* sqlite*.tar.gz
-	rm -f mkkeywordhash$(BEXE) keywordhash.h
 	rm -f $(PUBLISH)
 	rm -f *.da *.bb *.bbg gmon.out
 	rm -f sqlite3.dll sqlite3.lib
