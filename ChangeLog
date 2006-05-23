@@ -1,3 +1,15 @@
+leeh        2006/05/23 19:23:54 UTC	(20060523_1-22635)
+  Log:
+  - remove tcl support
+  
+
+  Modified:
+	rserv/trunk/sqlite3/Makefile.in (File Modified) 
+	rserv/trunk/sqlite3/configure (File Modified) 
+	rserv/trunk/sqlite3/configure.ac (File Modified) 
+	rserv/trunk/sqlite3/src/tclsqlite.c (File Deleted) 
+
+
 leeh        2006/05/23 19:07:46 UTC	(20060523_0-22633)
   Log:
   - remove some crap we dont need from sqlite3 source
