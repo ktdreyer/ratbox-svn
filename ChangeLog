@@ -1,3 +1,17 @@
+leeh        2006/05/23 19:42:52 UTC	(20060523_2-22637)
+  Log:
+  - fix sqlite3 build
+  
+
+  Modified:
+	rserv/trunk/sqlite3/Makefile.in (File Modified) 
+	rserv/trunk/sqlite3/src/keywordhash.h (File Added) 
+	rserv/trunk/sqlite3/src/opcodes.c (File Added) 
+	rserv/trunk/sqlite3/src/opcodes.h (File Added) 
+	rserv/trunk/sqlite3/src/parse.h (File Added) 
+	rserv/trunk/sqlite3/tool/mkkeywordhash.c (File Deleted) 
+
+
 leeh        2006/05/23 19:23:54 UTC	(20060523_1-22635)
   Log:
   - remove tcl support
