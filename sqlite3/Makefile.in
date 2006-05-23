@@ -34,14 +34,6 @@ TCC = @TARGET_CC@ @TARGET_CFLAGS@ -I. -I${TOP}/src
 #
 TCC += @TARGET_DEBUG@ @XTHREADCONNECT@
 
-# Compiler options needed for programs that use the TCL library.
-#
-TCC += @TCL_INCLUDE_SPEC@
-
-# The library that programs using TCL must link against.
-#
-LIBTCL = @TCL_LIB_SPEC@ @TCL_LIBS@
-
 # Compiler options needed for programs that use the readline() library.
 #
 READLINE_FLAGS = -DHAVE_READLINE=@TARGET_HAVE_READLINE@ @TARGET_READLINE_INC@
@@ -83,13 +75,6 @@ RELEASE = @RELEASE@
 #
 BEXE = @BUILD_EXEEXT@
 TEXE = @TARGET_EXEEXT@
-
-# The following variable is "1" if the configure script was able to locate
-# the tclConfig.sh file.  It is an empty string otherwise.  When this
-# variable is "1", the TCL extension library (libtclsqlite3.so) is built
-# and installed.
-#
-HAVE_TCL = @HAVE_TCL@
 
 # The suffix used on shared libraries.  Ex:  ".dll", ".so", ".dylib"
 #
@@ -153,6 +138,7 @@ SRC = \
   $(TOP)/src/insert.c \
   $(TOP)/src/legacy.c \
   $(TOP)/src/main.c \
+  $(TOP)/src/opcodes.h \
   $(TOP)/src/os.c \
   $(TOP)/src/os_unix.c \
   $(TOP)/src/os_win.c \
@@ -168,7 +154,6 @@ SRC = \
   $(TOP)/src/sqlite.h.in \
   $(TOP)/src/sqliteInt.h \
   $(TOP)/src/table.c \
-  $(TOP)/src/tclsqlite.c \
   $(TOP)/src/tokenize.c \
   $(TOP)/src/trigger.c \
   $(TOP)/src/utf.c \
@@ -190,7 +175,7 @@ HDR = \
    sqlite3.h  \
    $(TOP)/src/btree.h \
    $(TOP)/src/hash.h \
-   opcodes.h \
+   $(TOP)/src/opcodes.h \
    $(TOP)/src/os.h \
    $(TOP)/src/os_common.h \
    $(TOP)/src/sqliteInt.h  \
@@ -206,7 +191,7 @@ VDBEHDR = \
 # This is the default Makefile target.  The objects listed here
 # are what get build when you type just "make" with no arguments.
 #
-all:	sqlite3.h libsqlite3.la sqlite3$(TEXE) $(HAVE_TCL:1=libtclsqlite3.la)
+all:	sqlite3.h libsqlite3.la sqlite3$(TEXE)
 
 Makefile: $(TOP)/Makefile.in
 	./config.status
@@ -221,12 +206,6 @@ last_change:	$(SRC)
 libsqlite3.la:	$(LIBOBJ)
 	$(LTLINK) -o libsqlite3.la $(LIBOBJ) $(LIBPTHREAD) \
 		${ALLOWRELEASE} -rpath $(libdir) -version-info "8:6:8"
-
-libtclsqlite3.la:	tclsqlite.lo libsqlite3.la
-	$(LTLINK) -o libtclsqlite3.la tclsqlite.lo \
-		$(LIBOBJ) @TCL_STUB_LIB_SPEC@ $(LIBPTHREAD) \
-                -rpath $(libdir)/sqlite \
-		-version-info "8:6:8"
 
 sqlite3$(TEXE):	$(TOP)/src/shell.c libsqlite3.la sqlite3.h
 	$(LTLINK) $(READLINE_FLAGS) $(LIBPTHREAD) \
@@ -307,14 +286,8 @@ main.lo:	$(TOP)/src/main.c $(HDR)
 pager.lo:	$(TOP)/src/pager.c $(HDR) $(TOP)/src/pager.h
 	$(LTCOMPILE) -c $(TOP)/src/pager.c
 
-opcodes.lo:	opcodes.c
+opcodes.lo:
 	$(LTCOMPILE) -c opcodes.c
-
-opcodes.c:	opcodes.h $(TOP)/mkopcodec.awk
-	sort -n -b +2 opcodes.h | $(NAWK) -f $(TOP)/mkopcodec.awk >opcodes.c
-
-opcodes.h:	parse.h $(TOP)/src/vdbe.c $(TOP)/mkopcodeh.awk
-	cat parse.h $(TOP)/src/vdbe.c | $(NAWK) -f $(TOP)/mkopcodeh.awk >opcodes.h
 
 os.lo:	$(TOP)/src/os.c $(HDR)
 	$(LTCOMPILE) -c $(TOP)/src/os.c
@@ -358,9 +331,6 @@ sqlite3.h:	$(TOP)/src/sqlite.h.in
 table.lo:	$(TOP)/src/table.c $(HDR)
 	$(LTCOMPILE) -c $(TOP)/src/table.c
 
-tclsqlite.lo:	$(TOP)/src/tclsqlite.c $(HDR)
-	$(LTCOMPILE) -c $(TOP)/src/tclsqlite.c
-
 tokenize.lo:	$(TOP)/src/tokenize.c keywordhash.h $(HDR)
 	$(LTCOMPILE) -c $(TOP)/src/tokenize.c
 
@@ -401,17 +371,7 @@ vdbemem.lo:	$(TOP)/src/vdbemem.c $(VDBEHDR)
 where.lo:	$(TOP)/src/where.c $(HDR)
 	$(LTCOMPILE) -c $(TOP)/src/where.c
 
-tclsqlite-shell.lo:	$(TOP)/src/tclsqlite.c $(HDR)
-	$(LTCOMPILE) -DTCLSH=1 -o $@ -c $(TOP)/src/tclsqlite.c
-
-tclsqlite-stubs.lo:	$(TOP)/src/tclsqlite.c $(HDR)
-	$(LTCOMPILE) -DTCL_USE_STUBS=1 -o $@ -c $(TOP)/src/tclsqlite.c
-
-tclsqlite3:	tclsqlite-shell.lo libsqlite3.la
-	$(LTLINK) -o tclsqlite3 tclsqlite-shell.lo \
-		 libsqlite3.la $(LIBTCL)
-
-install:	sqlite3 libsqlite3.la sqlite3.h ${HAVE_TCL:1=tcl_install}
+install:	sqlite3 libsqlite3.la sqlite3.h
 	$(INSTALL) -d $(DESTDIR)$(libdir)
 	$(LTINSTALL) libsqlite3.la $(DESTDIR)$(libdir)
 	$(INSTALL) -d $(DESTDIR)$(exec_prefix)/bin
@@ -421,9 +381,6 @@ install:	sqlite3 libsqlite3.la sqlite3.h ${HAVE_TCL:1=tcl_install}
 	$(INSTALL) -d $(DESTDIR)$(libdir)/pkgconfig; 
 	$(INSTALL) -m 0644 sqlite3.pc $(DESTDIR)$(libdir)/pkgconfig; 
 
-tcl_install:	libtclsqlite3.la
-	tclsh $(TOP)/tclinstaller.tcl $(VERSION)
-
 clean:	
 	rm -f *.lo *.la *.o sqlite3$(TEXE) libsqlite3.la
 	rm -f sqlite3.h opcodes.*
@@ -432,7 +389,6 @@ clean:
 	rm -f mkkeywordhash$(BEXE) keywordhash.h
 	rm -f $(PUBLISH)
 	rm -f *.da *.bb *.bbg gmon.out
-	rm -f common.tcl
 	rm -f sqlite3.dll sqlite3.lib
 
 #
