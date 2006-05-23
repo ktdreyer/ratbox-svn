@@ -1,3 +1,26 @@
+leeh        2006/05/23 19:07:46 UTC	(20060523_0-22633)
+  Log:
+  - remove some crap we dont need from sqlite3 source
+  
+
+  Modified:
+	rserv/trunk/sqlite3/addopcodes.awk (File Deleted) 
+	rserv/trunk/sqlite3/contrib/ (File Deleted) 
+	rserv/trunk/sqlite3/mkopcodec.awk (File Deleted) 
+	rserv/trunk/sqlite3/mkopcodeh.awk (File Deleted) 
+	rserv/trunk/sqlite3/tclinstaller.tcl (File Deleted) 
+	rserv/trunk/sqlite3/tool/memleak.awk (File Deleted) 
+	rserv/trunk/sqlite3/tool/memleak2.awk (File Deleted) 
+	rserv/trunk/sqlite3/tool/memleak3.tcl (File Deleted) 
+	rserv/trunk/sqlite3/tool/mkopts.tcl (File Deleted) 
+	rserv/trunk/sqlite3/tool/omittest.tcl (File Deleted) 
+	rserv/trunk/sqlite3/tool/opcodeDoc.awk (File Deleted) 
+	rserv/trunk/sqlite3/tool/space_used.tcl (File Deleted) 
+	rserv/trunk/sqlite3/tool/spaceanal.tcl (File Deleted) 
+	rserv/trunk/sqlite3/tool/speedtest.tcl (File Deleted) 
+	rserv/trunk/sqlite3/tool/speedtest2.tcl (File Deleted) 
+
+
 leeh        2006/05/21 22:10:43 UTC	(20060521_4-22607)
   Log:
   - fix some autoconf lib crap
