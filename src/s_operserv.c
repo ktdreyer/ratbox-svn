@@ -189,7 +189,6 @@ otakeover(struct channel *chptr, int invite, int bans)
 	if(dlink_list_length(&chptr->services) > 1)
 	{
 		struct client *target_p;
-		dlink_node *ptr;
 
 		modebuild_start(operserv_p, chptr);
 
