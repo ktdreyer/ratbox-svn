@@ -111,7 +111,7 @@
 # you don't need (for example BLT) by erasing or commenting out
 # the corresponding code.
 #
-AC_INIT(src/sqlite.h.in)
+AC_INIT([sqlite],[stable])
 
 dnl Put the RCS revision string after AC_INIT so that it will also
 dnl show in in configure.
