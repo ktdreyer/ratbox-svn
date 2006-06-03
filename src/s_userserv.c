@@ -1254,6 +1254,12 @@ s_user_resetpass(struct client *client_p, struct lconn *conn_p, const char *parv
 		rsdb_exec_fetch(&data, "SELECT COUNT(username) FROM users_resetpass WHERE username='%Q' AND time > '%lu'",
 				reg_p->name, CURRENT_TIME - config_file.uresetpass_duration);
 
+		if(data.row_count == 0)
+		{
+			mlog("fatal error: SELECT COUNT() returned 0 rows in s_user_resetpass()");
+			die(0, "problem with db file");
+		}
+
 		/* already issued one within the past day.. */
 		if(atoi(data.row[0][0]))
 		{

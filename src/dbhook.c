@@ -109,6 +109,13 @@ rsdb_hook_call(void *v_dbh)
 	 */
 	rsdb_exec_fetch(&data, "SELECT COUNT(id) FROM %s WHERE hook = '%Q'",
 			dbh->table, dbh->hook_value);
+
+	if(data.row_count == 0)
+	{
+		mlog("fatal error: SELECT COUNT() returned 0 rows in rsdb_hook_call()");
+		die(0, "problem with db file");
+	}
+
 	count = atoi(data.row[0][0]);
 	rsdb_exec_fetch_end(&data);
 
