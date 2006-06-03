@@ -1,3 +1,15 @@
+leeh        2006/06/03 20:59:44 UTC	(20060603_2-22689)
+  Log:
+  - sqlite3.h doesnt need to be generated per build
+  
+
+  Modified:
+	rserv/trunk/sqlite3/Makefile.in (File Modified) 
+	rserv/trunk/sqlite3/configure (File Modified) 
+	rserv/trunk/sqlite3/configure.ac (File Modified) 
+	rserv/trunk/sqlite3/src/sqlite.h.in (File Modified) 
+
+
 leeh        2006/06/03 16:32:12 UTC	(20060603_1-22687)
   Log:
   - handle SELECT COUNT() returning 0 rows, eg when we dont have access to the
