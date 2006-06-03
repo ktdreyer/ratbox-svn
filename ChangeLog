@@ -1,3 +1,12 @@
+leeh        2006/06/03 11:21:16 UTC	(20060603_0-22685)
+  Log:
+  - dont redeclare ptr here
+  
+
+  Modified:
+	rserv/trunk/src/s_operserv.c (File Modified) 
+
+
 leeh        2006/05/23 19:42:52 UTC	(20060523_2-22637)
   Log:
   - fix sqlite3 build
