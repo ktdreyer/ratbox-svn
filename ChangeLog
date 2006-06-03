@@ -1,3 +1,13 @@
+leeh        2006/06/03 21:00:16 UTC	(20060603_3-22691)
+  Log:
+  - rename sqlite.h.in to sqlite3.h
+  
+
+  Modified:
+	rserv/trunk/sqlite3/src/sqlite.h.in (File Deleted) 
+	rserv/trunk/sqlite3/src/sqlite3.h (File Added) 
+
+
 leeh        2006/06/03 20:59:44 UTC	(20060603_2-22689)
   Log:
   - sqlite3.h doesnt need to be generated per build
