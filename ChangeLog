@@ -1,3 +1,13 @@
+leeh        2006/06/04 12:16:02 UTC	(20060604_1-22695)
+  Log:
+  - update some documentation to reference pgsql
+  
+
+  Modified:
+	rserv/trunk/DBMOVE (File Modified) 
+	rserv/trunk/INSTALL (File Modified) 
+
+
 leeh        2006/06/04 12:09:46 UTC	(20060604_0-22693)
   Log:
   - add installation instructions for pgsql
