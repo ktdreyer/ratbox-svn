@@ -1,3 +1,12 @@
+leeh        2006/06/04 12:09:46 UTC	(20060604_0-22693)
+  Log:
+  - add installation instructions for pgsql
+  
+
+  Modified:
+	rserv/trunk/INSTALL.pgsql (File Added) 
+
+
 leeh        2006/06/03 21:00:16 UTC	(20060603_3-22691)
   Log:
   - rename sqlite.h.in to sqlite3.h
