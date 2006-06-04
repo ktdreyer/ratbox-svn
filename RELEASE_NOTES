@@ -1,6 +1,15 @@
 
 This is the current development version of ratbox-services.  It may break.
 
+-- ratbox-services-1.1.0beta3
+- deal with removing bans under TS6 properly
+- dont log protocol errors for JOIN 0
+- fix operserv::otakeover to be TS6 compatible
+- dont apply our uplinks SID to TS5 servers
+- support for PostgreSQL
+- strip the sqlite3 source somewhat
+- fix a core when SELECT COUNT() returns 0 rows
+
 -- ratbox-services-1.1.0beta2
 - fix core in watchserv
 - make operserv::die send wallops if operserv is configured to
