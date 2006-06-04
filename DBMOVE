@@ -70,3 +70,27 @@ Then import your data:
 You should then follow the instructions in UPGRADING to upgrade your
 database.
 
+- sqlite2 to pgsql -
+--------------------
+
+First extract the data from your sqlite2 database:
+	sqlite etc/ratbox-services.db ".dump" |grep "^INSERT INTO" > db-dump.txt
+
+You then need to create the database table, follow the instructions in
+INSTALL.pgsql but do NOT generate a schema or initialise the database.
+
+Then generate a schema for 1.0:
+	cd /path/to/src/tools/
+	./generate-schema.pl oldschema/1.0-pgsql-schema.txt
+
+Then check your sqlite2 database for length problems, as documented above.
+
+Then initialise your database using this schema:
+	psql -W ratbox_services rserv < /path/to/src/tools/1.0-pgsql-schema.txt
+
+Then import your data:
+	psql -W ratbox_services rserv < db-dump.txt
+
+You should then follow the instructions in UPGRADING to upgrade your
+database.
+

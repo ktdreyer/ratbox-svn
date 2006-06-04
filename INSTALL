@@ -20,8 +20,8 @@ doc/database_mod.txt for more information.
    recommended, though yacc and lex should do.
 
 3. ratbox-services can use different database engines for storing the data.
-   It presently supports MySQL and SQLite.  SQLite is the default, it is
-   a database interface to a normal file, meaning it does not require a
+   It presently supports MySQL, PostgreSQL and SQLite.  SQLite is the default, 
+   it is a database interface to a normal file, meaning it does not require a
    seperate service to be running.  Only version 3 of SQLite is supported.
 
    A copy of SQLite is included with ratbox-services, you may force
@@ -29,6 +29,8 @@ doc/database_mod.txt for more information.
    configure.
 
    To choose MySQL you should pass '--enable-mysql' to configure.
+
+   To choose PostgreSQL you should pass '--enable-pgsql' to configure.
 
    If configure cannot find your database engine, you can tell it to look
    in a specific place.  Eg, for sqlite, '--enable-sqlite=PATH'.  Configure
