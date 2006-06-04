@@ -1,3 +1,14 @@
+leeh        2006/06/04 12:21:19 UTC	(20060604_2-22697)
+  Log:
+  - update RELEASE_NOTES
+  - revved patchlevel to 1.1.0beta3
+  
+
+  Modified:
+	rserv/trunk/RELEASE_NOTES (File Modified) 
+	rserv/trunk/include/config.h (File Modified) 
+
+
 leeh        2006/06/04 12:16:02 UTC	(20060604_1-22695)
   Log:
   - update some documentation to reference pgsql
