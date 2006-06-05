@@ -1,3 +1,20 @@
+leeh        2006/06/05 17:59:08 UTC	(20060605_0-22699)
+  Log:
+  - add in a statically generated parse.c
+  - move sqlite3.h a directory up, so we dont conflict with sqlite includes
+    too
+  
+
+  Modified:
+	rserv/trunk/sqlite3/Makefile.in (File Modified) 
+	rserv/trunk/sqlite3/main.mk (File Modified) 
+	rserv/trunk/sqlite3/sqlite3.h (File Added) 
+	rserv/trunk/sqlite3/src/parse.c (File Added) 
+	rserv/trunk/sqlite3/src/sqlite3.h (File Deleted) 
+	rserv/trunk/sqlite3/tool/lemon.c (File Deleted) 
+	rserv/trunk/sqlite3/tool/lempar.c (File Deleted) 
+
+
 leeh        2006/06/04 12:21:19 UTC	(20060604_2-22697)
   Log:
   - update RELEASE_NOTES
