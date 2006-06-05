@@ -91,7 +91,6 @@ SRC = \
   $(TOP)/src/os_win.c \
   $(TOP)/src/pager.c \
   $(TOP)/src/pager.h \
-  $(TOP)/src/parse.y \
   $(TOP)/src/pragma.c \
   $(TOP)/src/prepare.c \
   $(TOP)/src/printf.c \
@@ -168,7 +167,6 @@ target_source:	$(SRC) $(VDBEHDR) opcodes.c keywordhash.h
 	rm -rf tsrc
 	mkdir tsrc
 	cp $(SRC) $(VDBEHDR) tsrc
-	rm tsrc/sqlite.h.in tsrc/parse.y
 	cp parse.c opcodes.c keywordhash.h tsrc
 	cp $(TOP)/sqlite3.def tsrc
 
@@ -251,14 +249,6 @@ os_win.o:	$(TOP)/src/os_win.c $(HDR)
 
 parse.o:	parse.c $(HDR)
 	$(TCCX) -c parse.c
-
-parse.h:	parse.c
-
-parse.c:	$(TOP)/src/parse.y lemon $(TOP)/addopcodes.awk
-	cp $(TOP)/src/parse.y .
-	./lemon $(OPTS) parse.y
-	mv parse.h parse.h.temp
-	awk -f $(TOP)/addopcodes.awk parse.h.temp >parse.h
 
 pragma.o:	$(TOP)/src/pragma.c $(HDR)
 	$(TCCX) $(TCL_FLAGS) -c $(TOP)/src/pragma.c

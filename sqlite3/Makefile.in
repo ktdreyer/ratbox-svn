@@ -145,7 +145,7 @@ SRC = \
   $(TOP)/src/pager.c \
   $(TOP)/src/pager.h \
   $(TOP)/src/parse.h \
-  $(TOP)/src/parse.y \
+  $(TOP)/src/parse.c \
   $(TOP)/src/pragma.c \
   $(TOP)/src/prepare.c \
   $(TOP)/src/printf.c \
@@ -172,7 +172,7 @@ SRC = \
 # Header files used by all library source files.
 #
 HDR = \
-   $(TOP)/src/sqlite3.h  \
+   $(TOP)/sqlite3.h  \
    $(TOP)/src/btree.h \
    $(TOP)/src/hash.h \
    $(TOP)/src/opcodes.h \
@@ -218,12 +218,10 @@ sqlite3$(TEXE):	$(TOP)/src/shell.c libsqlite3.la
 # files are automatically generated.  This target takes care of
 # all that automatic generation.
 #
-target_source:	$(SRC) parse.c $(VDBEHDR) 
+target_source:	$(SRC) $(VDBEHDR) 
 	rm -rf tsrc
 	mkdir -p tsrc
 	cp $(SRC) $(VDBEHDR) tsrc
-	rm tsrc/parse.y
-	cp parse.c tsrc
 	cp $(TOP)/sqlite3.def tsrc
 
 # Rules to build the LEMON compiler generator
@@ -298,12 +296,8 @@ os_unix.lo:	$(TOP)/src/os_unix.c $(HDR)
 os_win.lo:	$(TOP)/src/os_win.c $(HDR)
 	$(LTCOMPILE) -c $(TOP)/src/os_win.c
 
-parse.lo:	parse.c $(HDR)
-	$(LTCOMPILE) -c parse.c
-
-parse.c:	$(TOP)/src/parse.y lemon$(BEXE)
-	cp $(TOP)/src/parse.y .
-	./lemon $(OPTS) parse.y
+parse.lo:	$(TOP)/src/parse.c $(HDR)
+	$(LTCOMPILE) -c $(TOP)/src/parse.c
 
 pragma.lo:	$(TOP)/src/pragma.c $(HDR)
 	$(LTCOMPILE) -c $(TOP)/src/pragma.c
@@ -365,7 +359,7 @@ install:	sqlite3 libsqlite3.la
 	$(INSTALL) -d $(DESTDIR)$(exec_prefix)/bin
 	$(LTINSTALL) sqlite3 $(DESTDIR)$(exec_prefix)/bin
 	$(INSTALL) -d $(DESTDIR)$(prefix)/include
-	$(INSTALL) -m 0644 $(TOP)/src/sqlite3.h $(DESTDIR)$(prefix)/include
+	$(INSTALL) -m 0644 $(TOP)/sqlite3.h $(DESTDIR)$(prefix)/include
 	$(INSTALL) -d $(DESTDIR)$(libdir)/pkgconfig; 
 	$(INSTALL) -m 0644 sqlite3.pc $(DESTDIR)$(libdir)/pkgconfig; 
 
