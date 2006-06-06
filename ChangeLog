@@ -1,3 +1,15 @@
+jilles      2006/06/06 23:07:58 UTC	(20060606_0-22711)
+  Log:
+  NICK/UID introductions put the hopcount in the TS field,
+  which broke RSFNC (nickserv regain).
+  
+  Found by: ongeboren
+  
+
+  Modified:
+	rserv/trunk/src/client.c (File Modified) 
+
+
 leeh        2006/06/05 17:59:08 UTC	(20060605_0-22699)
   Log:
   - add in a statically generated parse.c
