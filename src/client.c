@@ -630,7 +630,7 @@ c_nick(struct client *client_p, const char *parv[], int parc)
 	if(parc == 8)
 	{
 		target_p = find_named_client(parv[0]);
-		newts = atol(parv[1]);
+		newts = atol(parv[2]);
 
 		if((uplink_p = find_server(parv[6])) == NULL)
 		{
@@ -754,7 +754,7 @@ c_uid(struct client *client_p, const char *parv[], int parc)
 
 	target_p = find_client(parv[0]);
 	/* XXX UID */
-	newts = atol(parv[1]);
+	newts = atol(parv[2]);
 
 	if(strlen(parv[0]) > NICKLEN)
 		die(1, "Compiled NICKLEN appears to be wrong (nick %s (%d > %d).  Read INSTALL.",
