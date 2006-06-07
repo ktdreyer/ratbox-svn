@@ -1,3 +1,14 @@
+leeh        2006/06/07 19:40:19 UTC	(20060607_0-22715)
+  Log:
+  - remove unused slog()
+  - zlog() was missing the wallops it needs to send
+  
+
+  Modified:
+	rserv/trunk/include/log.h (File Modified) 
+	rserv/trunk/src/log.c (File Modified) 
+
+
 jilles      2006/06/06 23:07:58 UTC	(20060606_0-22711)
   Log:
   NICK/UID introductions put the hopcount in the TS field,
