@@ -129,9 +129,9 @@ zlog(struct client *service_p, int loglevel, int watchlevel, int oper,
 	va_end(args);
 
 	if(loglevel == 1 && ServiceWallopAdm(service_p))
-		sendto_server(":%s WALLOPS :%s: %s",
-				MYUID, service_p->name, buf);
-
+		sendto_server(":%s WALLOPS :%s: %s %s %s",
+				MYUID, service_p->name, OPER_NAME(client_p, conn_p),
+				OPER_MASK(client_p, conn_p), buf);
 
 	if(watchlevel)
 		watch_send(watchlevel, client_p, conn_p, oper, "%s", buf);
