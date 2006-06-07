@@ -116,34 +116,6 @@ mlog(const char *format, ...)
 }
 
 void
-slog(struct client *service_p, int loglevel, const char *format, ...)
-{
-	char buf[BUFSIZE];
-	char buf2[BUFSIZE];
-	va_list args;
-
-	va_start(args, format);
-	vsnprintf(buf, sizeof(buf), format, args);
-	va_end(args);
-
-	if(loglevel == 1 && ServiceWallopAdm(service_p))
-	{
-		sendto_server(":%s WALLOPS :%s: %s\n",
-				MYUID, service_p->name, buf);
-	}
-
-	if(service_p->service->logfile == NULL)
-		return;
-
-	if(service_p->service->loglevel < loglevel)
-		return;
-
-	snprintf(buf2, sizeof(buf2), "%s %s\n", smalldate(), buf);
-	fputs(buf2, service_p->service->logfile);
-	fflush(service_p->service->logfile);
-}
-
-void
 zlog(struct client *service_p, int loglevel, int watchlevel, int oper,
 	struct client *client_p, struct lconn *conn_p,
 	const char *format, ...)
@@ -155,6 +127,11 @@ zlog(struct client *service_p, int loglevel, int watchlevel, int oper,
 	va_start(args, format);
 	vsnprintf(buf, sizeof(buf), format, args);
 	va_end(args);
+
+	if(loglevel == 1 && ServiceWallopAdm(service_p))
+		sendto_server(":%s WALLOPS :%s: %s",
+				MYUID, service_p->name, buf);
+
 
 	if(watchlevel)
 		watch_send(watchlevel, client_p, conn_p, oper, "%s", buf);
