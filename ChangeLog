@@ -1,3 +1,16 @@
+leeh        2006/06/08 20:09:27 UTC	(20060608_0-22719)
+  Log:
+  - add in a database table for confirming requests to drop ownership of a
+    channel
+  
+
+  Modified:
+	rserv/trunk/tools/base/schema-mysql.txt (File Modified) 
+	rserv/trunk/tools/base/schema-pgsql.txt (File Modified) 
+	rserv/trunk/tools/base/schema-sqlite.txt (File Modified) 
+	rserv/trunk/tools/dbupgrade.pl (File Modified) 
+
+
 leeh        2006/06/07 19:46:37 UTC	(20060607_1-22717)
   Log:
   - that wallops should include the oper name and mask too
