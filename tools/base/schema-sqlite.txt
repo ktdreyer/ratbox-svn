@@ -50,6 +50,13 @@ CREATE TABLE channels (
 	PRIMARY KEY(chname)
 );
 
+CREATE TABLE channels_dropowner (
+	chname TEXT,
+	token TEXT,
+	time INTEGER,
+	PRIMARY KEY(chname)
+);
+
 CREATE TABLE members (
 	chname TEXT,
 	username TEXT,

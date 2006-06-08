@@ -31,7 +31,10 @@ my %versionlist = (
 	"1.0.0"		=> 1,
 	"1.0.1"		=> 1,
 	"1.0.2"		=> 1,
-	"1.0.3"		=> 1
+	"1.0.3"		=> 1,
+	"1.1.0beta1"	=> 2,
+	"1.1.0beta2"	=> 2,
+	"1.1.0beta3"	=> 2
 );
 
 my $version = $ARGV[0];
@@ -121,6 +124,28 @@ if($currentver < 2)
 	print "    PRIMARY KEY(id)\n";
 	print ");\n";
 	print "UPDATE operbans SET mask=LOWER(mask) WHERE 1;\n";
+
+	print "\n";
+}
+
+if($currentver < 3)
+{
+	print "-- To version 1.1.0beta4\n";
+
+	if($dbtype eq "mysql" || $dbtype eq "pgsql")
+	{
+		print "CREATE TABLE channels_dropowner (\n";
+		print "    chname VARCHAR(".$vals{"CHANNELLEN"}.") NOT NULL, token VARCHAR(10), time INTEGER,\n";
+		print "    PRIMARY KEY(chname)\n";
+		print ");\n";
+	}
+	else
+	{
+		print "CREATE TABLE channels_dropowner (\n";
+		print "    chname TEXT, token TEXT, time INTEGER,\n";
+		print "    PRIMARY KEY(chname)\n";
+		print ");\n";
+	}
 
 	print "\n";
 }

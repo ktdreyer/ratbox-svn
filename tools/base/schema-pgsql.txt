@@ -52,6 +52,13 @@ CREATE TABLE channels (
 	PRIMARY KEY(chname)
 );
 
+CREATE TABLE channels_dropowner (
+	chname VARCHAR(CHANNELLEN) NOT NULL,
+	token VARCHAR(10),
+	time INTEGER,
+	PRIMARY KEY(chname)
+);
+
 CREATE TABLE members (
 	chname VARCHAR(CHANNELLEN) NOT NULL,
 	username VARCHAR(USERREGNAME_LEN) NOT NULL,
