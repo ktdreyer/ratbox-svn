@@ -278,6 +278,14 @@ s_nick_register(struct client *client_p, struct lconn *conn_p, const char *parv[
 		return 1;
 	}
 
+	if(IsDigit(client_p->name[0]))
+	{
+		service_error(nickserv_p, client_p,
+				"You may not register your UID, please change to a real nickname",
+				client_p->name);
+		return 1;
+	}
+
 	if(find_nick_reg(NULL, client_p->name))
 	{
 		service_error(nickserv_p, client_p,
