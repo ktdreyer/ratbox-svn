@@ -86,6 +86,7 @@ static int s_chan_register(struct client *, struct lconn *, const char **, int);
 static int s_chan_set(struct client *, struct lconn *, const char **, int);
 static int s_chan_adduser(struct client *, struct lconn *, const char **, int);
 static int s_chan_deluser(struct client *, struct lconn *, const char **, int);
+static int s_chan_delowner(struct client *, struct lconn *, const char **, int);
 static int s_chan_moduser(struct client *, struct lconn *, const char **, int);
 static int s_chan_modauto(struct client *, struct lconn *, const char **, int);
 static int s_chan_listusers(struct client *, struct lconn *, const char **, int);
@@ -118,6 +119,7 @@ static struct service_command chanserv_command[] =
 	{ "SET",	&s_chan_set,		2, NULL, 1, 0L, 1, 0, 0	},
 	{ "ADDUSER",	&s_chan_adduser,	3, NULL, 1, 0L, 1, 0, 0	},
 	{ "DELUSER",	&s_chan_deluser,	2, NULL, 1, 0L, 1, 0, 0	},
+	{ "DELOWNER",   &s_chan_delowner,	1, NULL, 1, 0L, 1, 0, 0 },
 	{ "MODUSER",	&s_chan_moduser,	3, NULL, 1, 0L, 1, 0, 0	},
 	{ "MODAUTO",	&s_chan_modauto,	3, NULL, 1, 0L, 1, 0, 0	},
 	{ "LISTUSERS",	&s_chan_listusers,	1, NULL, 1, 0L, 1, 0, 0	},
@@ -169,6 +171,7 @@ static void e_chanserv_updatechan(void *unused);
 static void e_chanserv_expirechan(void *unused);
 static void e_chanserv_expireban(void *unused);
 static void e_chanserv_enforcetopic(void *unused);
+static void e_chanserv_expire_delowner(void *unused);
 
 static void dump_info_extended(struct client *, struct lconn *, struct chan_reg *);
 static void dump_info_accesslist(struct client *, struct lconn *, struct chan_reg *);
@@ -206,6 +209,7 @@ init_s_chanserv(void)
 		DEFAULT_EXPIREBAN_FREQUENCY);
 	eventAdd("chanserv_enforcetopic", e_chanserv_enforcetopic, NULL,
 		DEFAULT_ENFORCETOPIC_FREQUENCY);
+	eventAdd("chanserv_expire_delowner", e_chanserv_expire_delowner, NULL, 3600);
 }
 
 void
@@ -890,6 +894,13 @@ e_chanserv_enforcetopic(void *unused)
 		strlcpy(chptr->topicwho, MYNAME, sizeof(chptr->topicwho));
 	}
 	HASH_WALK_END
+}
+
+static void
+e_chanserv_expire_delowner(void *unused)
+{
+	rsdb_exec(NULL, "DELETE FROM chans_delowner WHERE time <= '%lu'",
+			CURRENT_TIME - config_file.cdelowner_duration);
 }
 
 static int
@@ -1815,6 +1826,14 @@ s_chan_deluser(struct client *client_p, struct lconn *conn_p, const char *parv[]
 		return 1;
 	}
 
+	if(mreg_tp->level == S_C_OWNER)
+	{
+		service_error(chanserv_p, client_p,
+				"User %s is the owner of %s. Please use %s::DELOWNER instead",
+				ureg_p->name, chreg_p->name, chanserv_p->name);
+		return 1;
+	}
+
 	zlog(chanserv_p, 5, 0, 0, client_p, NULL,
 		"DELUSER %s %s", parv[0], mreg_tp->user_reg->name);
 
@@ -1825,6 +1844,131 @@ s_chan_deluser(struct client *client_p, struct lconn *conn_p, const char *parv[]
 
 	free_member_reg(mreg_tp, 1);
 
+	return 1;
+}
+
+static int
+s_chan_delowner(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
+{
+	struct member_reg *mreg_p;
+	struct user_reg *ureg_p;
+	struct chan_reg *chreg_p;
+	struct rsdb_table data;
+
+	if((mreg_p = verify_member_reg_name(client_p, NULL, parv[0], S_C_OWNER)) == NULL)
+		return 1;
+
+	ureg_p = client_p->user->user_reg;
+	chreg_p = mreg_p->channel_reg;
+
+	/* just one param. send the token. */
+	if(EmptyString(parv[1]))
+	{
+		const char *token;
+	
+		if(EmptyString(ureg_p->email))
+		{
+			service_error(chanserv_p, client_p,
+					"Username %s does not have an email address set",
+					ureg_p->name);
+			return 1;
+		}
+
+		rsdb_exec_fetch(&data, "SELECT COUNT(chname) FROM channels_dropowner WHERE chname='%Q' AND time > '%lu'",
+				chreg_p->name, CURRENT_TIME - config_file.cdelowner_duration);
+
+		if(data.row_count == 0)
+		{
+			mlog("fatal error: SELECT COUNT() returned 0 rows in s_user_delowner()");
+			die(0, "problem with db file");
+		}
+
+		/* already issued one within the past day.. */
+		if(atoi(data.row[0][0]))
+		{
+			service_error(chanserv_p, client_p,
+					"Channel %s already has a pending owner delete",
+					chreg_p->name);
+			rsdb_exec_fetch_end(&data);
+			return 1;
+		}
+
+		rsdb_exec_fetch_end(&data);
+
+		if(!can_send_email())
+		{
+			service_error(chanserv_p, client_p,
+				"Temporarily unable to send email, please try later");
+			return 1;
+		}
+
+		zlog(chanserv_p, 3, 0, 0, client_p, NULL,
+			"DELOWNER %s %s", chreg_p->name, ureg_p->name);
+
+		token = get_password();
+		rsdb_exec(NULL, "INSERT INTO channels_dropowner (chname, token, time) VALUES('%Q', '%Q', '%lu')",
+				             ureg_p->name, token, CURRENT_TIME);
+
+		if(!send_email(ureg_p->email, "Channel Owner Delete",
+				"%s!%s@%s has requested an owner delete for channel %s which "
+				"is registered to this email address.\n\n"
+				"To authenticate this request, send %s DELOWNER %s %s\n\n"
+				"This action was requested from your account, so if it was not "
+				"requested by yourself you should take appropriate action to "
+				"deal with your account.\n\n"
+				"No action will be taken on the given channel if this email is "
+				"ignored.",
+				client_p->name, client_p->user->username, client_p->user->host,
+				chreg_p->name, chanserv_p->name, chreg_p->name, token))
+		{
+			service_error(chanserv_p, client_p,
+					"Unable to issue owner delete due to problems sending email");
+		}
+		else
+		{
+			service_error(chanserv_p, client_p,
+					"Username %s has been sent an email to confirm the owner delete",
+					ureg_p->name);
+		}
+		
+		return 2;
+	}
+
+	zlog(chanserv_p, 3, 0, 0, client_p, NULL,
+		"DELOWNER %s %s (auth)", chreg_p->name, ureg_p->name);
+
+	/* authenticating a password reset */
+	rsdb_exec_fetch(&data, "SELECT token FROM channels_dropowner WHERE chname='%Q' AND time > '%lu'",
+			ureg_p->name, CURRENT_TIME - config_file.cdelowner_duration);
+
+	/* ok, found the entry.. */
+	if(data.row_count)
+	{
+		if(strcmp(data.row[0][0], parv[1]) == 0)
+		{
+			rsdb_exec_fetch_end(&data);
+
+			rsdb_exec(NULL, "DELETE FROM channels_dropowner WHERE chname='%Q'",
+					ureg_p->name);
+
+			service_error(chanserv_p, client_p,
+					"Channel %s owner deleted", chreg_p->name);
+
+			delete_member_db_entry(mreg_p);
+			free_member_reg(mreg_p, 1);
+			return 1;
+		}
+		else
+			service_error(chanserv_p, client_p,
+					"Channel %s owner delete tokens do not match",
+					chreg_p->name);
+	}
+	else
+		service_error(chanserv_p, client_p,
+				"Channel %s does not have a pending owner delete",
+				chreg_p->name);
+
+	rsdb_exec_fetch_end(&data);
 	return 1;
 }
 

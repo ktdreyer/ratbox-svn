@@ -81,6 +81,8 @@ struct _config_file
 	int cmax_bans;
 	int cexpireban_frequency;
 	int cenforcetopic_frequency;
+	int cdelowner_duration;
+	int cemail_delowner;
 
 	/* nickserv */
 	int nmax_nicks;
