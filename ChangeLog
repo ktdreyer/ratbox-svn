@@ -1,3 +1,20 @@
+leeh        2006/06/11 19:44:07 UTC	(20060611_0-22725)
+  Log:
+  - patch via the BG guys:
+    - add new chanserv::delowner command with optional email verification
+    - chanserv::deluser can no longer be used to remove a channel owner
+  
+
+  Modified:
+	rserv/trunk/doc/example.conf (File Modified) 
+	rserv/trunk/help/chanserv/deluser (File Modified) 
+	rserv/trunk/help/chanserv/index (File Modified) 
+	rserv/trunk/include/conf.h (File Modified) 
+	rserv/trunk/src/conf.c (File Modified) 
+	rserv/trunk/src/newconf.c (File Modified) 
+	rserv/trunk/src/s_chanserv.c (File Modified) 
+
+
 jilles      2006/06/09 18:43:34 UTC	(20060609_0-22721)
   Log:
   Don't allow registering a nick starting with a digit
