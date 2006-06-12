@@ -1,3 +1,16 @@
+leeh        2006/06/12 20:35:50 UTC	(20060612_2-22731)
+  Log:
+  - perform blind deletes on usernames before inserting tokens for
+    resetpass/delowner, in case theres still an unexpired entry around
+  - fix delowner when we dont require email
+  - s/ureg/chreg in s_chanserv.c
+  
+
+  Modified:
+	rserv/trunk/src/s_chanserv.c (File Modified) 
+	rserv/trunk/src/s_userserv.c (File Modified) 
+
+
 leeh        2006/06/12 20:20:34 UTC	(20060612_1-22729)
   Log:
   - add a dbhook to users_sync for SETEMAIL
