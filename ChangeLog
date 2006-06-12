@@ -1,3 +1,17 @@
+leeh        2006/06/12 20:13:37 UTC	(20060612_0-22727)
+  Log:
+  - s_chanserv.c now needs email.h
+  - add time indexes in to users_resetpass and channels_dropowner
+  - via Alexander Kotzev, fix table name mismatch
+  
+
+  Modified:
+	rserv/trunk/src/s_chanserv.c (File Modified) 
+	rserv/trunk/tools/base/schema-mysql.txt (File Modified) 
+	rserv/trunk/tools/base/schema-pgsql.txt (File Modified) 
+	rserv/trunk/tools/dbupgrade.pl (File Modified) 
+
+
 leeh        2006/06/11 19:44:07 UTC	(20060611_0-22725)
   Log:
   - patch via the BG guys:
