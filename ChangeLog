@@ -1,3 +1,12 @@
+leeh        2006/06/12 20:20:34 UTC	(20060612_1-22729)
+  Log:
+  - add a dbhook to users_sync for SETEMAIL
+  
+
+  Modified:
+	rserv/trunk/src/s_userserv.c (File Modified) 
+
+
 leeh        2006/06/12 20:13:37 UTC	(20060612_0-22727)
   Log:
   - s_chanserv.c now needs email.h
