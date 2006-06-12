@@ -1310,6 +1310,12 @@ s_user_resetpass(struct client *client_p, struct lconn *conn_p, const char *parv
 		zlog(userserv_p, 3, 0, 0, client_p, NULL,
 			"RESETPASS %s", reg_p->name);
 
+		/* perform a blind delete here, as there may be an entry
+		 * still in the table, just expired and so uncaught by the
+		 * above select --fl
+		 */
+		rsdb_exec(NULL, "DELETE FROM users_resetpass WHERE username='%Q'", reg_p->name);
+
 		token = get_password();
 		rsdb_exec(NULL, "INSERT INTO users_resetpass (username, token, time) VALUES('%Q', '%Q', '%lu')",
 				reg_p->name, token, CURRENT_TIME);

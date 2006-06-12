@@ -1859,6 +1859,14 @@ s_chan_delowner(struct client *client_p, struct lconn *conn_p, const char *parv[
 	if((mreg_p = verify_member_reg_name(client_p, NULL, parv[0], S_C_OWNER)) == NULL)
 		return 1;
 
+	/* dont require auth */
+	if(!config_file.email_delowner)
+	{
+		delete_member_db_entry(mreg_p);
+		free_member_reg(mreg_p, 1);
+		return 1;
+	}
+
 	ureg_p = client_p->user->user_reg;
 	chreg_p = mreg_p->channel_reg;
 
@@ -1906,9 +1914,15 @@ s_chan_delowner(struct client *client_p, struct lconn *conn_p, const char *parv[
 		zlog(chanserv_p, 3, 0, 0, client_p, NULL,
 			"DELOWNER %s %s", chreg_p->name, ureg_p->name);
 
+		/* perform a blind delete here, as there may be an entry
+		 * still in the table, just expired and so uncaught by the
+		 * above select --fl
+		 */
+		rsdb_exec(NULL, "DELETE FROM channels_dropowner WHERE chname='%Q'", chreg_p->name);
+
 		token = get_password();
 		rsdb_exec(NULL, "INSERT INTO channels_dropowner (chname, token, time) VALUES('%Q', '%Q', '%lu')",
-				             ureg_p->name, token, CURRENT_TIME);
+				             chreg_p->name, token, CURRENT_TIME);
 
 		if(!send_email(ureg_p->email, "Channel Owner Delete",
 				"%s!%s@%s has requested an owner delete for channel %s which "
