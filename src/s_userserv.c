@@ -114,6 +114,7 @@ static struct service_handler userserv_service = {
 static int user_db_callback(int argc, const char **argv);
 static int dbh_user_register(struct rsdb_hook *, const char *data);
 static int dbh_user_setpass(struct rsdb_hook *, const char *data);
+static int dbh_user_setemail(struct rsdb_hook *, const char *data);
 static int h_user_burst_login(void *, void *);
 static int h_user_dbsync(void *, void *);
 static void e_user_expire(void *unused);
@@ -140,6 +141,7 @@ init_s_userserv(void)
 
 	rsdb_hook_add("users_sync", "REGISTER", 900, dbh_user_register);
 	rsdb_hook_add("users_sync", "SETPASS", 900, dbh_user_setpass);
+	rsdb_hook_add("users_sync", "SETEMAIL", 900, dbh_user_setemail);
 
 	hook_add(h_user_burst_login, HOOK_BURST_LOGIN);
 	hook_add(h_user_dbsync, HOOK_DBSYNC);
@@ -358,6 +360,32 @@ dbh_user_setpass(struct rsdb_hook *dbh, const char *c_data)
 
 	rsdb_hook_schedule("UPDATE users SET password='%Q' WHERE username='%Q'",
 			ureg_p->password, ureg_p->name);
+
+	return 1;
+}
+
+static int
+dbh_user_setemail(struct rsdb_hook *dbh, const char *c_data)
+{
+	static char *argv[MAXPARA];
+	struct user_reg *ureg_p;
+	char *data;
+	int argc;
+
+	data = LOCAL_COPY(c_data);
+	argc = string_to_array(data, argv);
+
+	if(EmptyString(argv[0]) || EmptyString(argv[1]))
+		return 1;
+
+	if((ureg_p = find_user_reg(NULL, argv[0])) == NULL)
+		return 1;
+
+	my_free(ureg_p->email);
+	ureg_p->email = my_strdup(argv[1]);
+
+	rsdb_hook_schedule("UPDATE users SET email='%Q' WHERE username='%Q'",
+			ureg_p->email, ureg_p->name);
 
 	return 1;
 }
