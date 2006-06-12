@@ -19,6 +19,7 @@ CREATE TABLE users_resetpass (
 	time INTEGER,
 	PRIMARY KEY(username)
 );
+CREATE INDEX resetpass_time_idx ON users_resetpass (time);
 
 CREATE TABLE users_sync (
 	id SERIAL,
@@ -58,6 +59,7 @@ CREATE TABLE channels_dropowner (
 	time INTEGER,
 	PRIMARY KEY(chname)
 );
+CREATE INDEX dropowner_time_idx ON channels_dropowner (time);
 
 CREATE TABLE members (
 	chname VARCHAR(CHANNELLEN) NOT NULL,

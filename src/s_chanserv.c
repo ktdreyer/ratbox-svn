@@ -49,6 +49,7 @@
 #include "hook.h"
 #include "event.h"
 #include "watch.h"
+#include "email.h"
 
 #define S_C_OWNER	200
 #define S_C_MANAGER	190
@@ -899,7 +900,7 @@ e_chanserv_enforcetopic(void *unused)
 static void
 e_chanserv_expire_delowner(void *unused)
 {
-	rsdb_exec(NULL, "DELETE FROM chans_delowner WHERE time <= '%lu'",
+	rsdb_exec(NULL, "DELETE FROM channels_delowner WHERE time <= '%lu'",
 			CURRENT_TIME - config_file.cdelowner_duration);
 }
 

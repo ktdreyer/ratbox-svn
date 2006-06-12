@@ -147,6 +147,17 @@ if($currentver < 3)
 		print ");\n";
 	}
 
+	if($dbtype eq "mysql")
+	{
+		print "ALTER TABLE channels_dropowner ADD INDEX (time);\n";
+		print "ALTER TABLE users_resetpass ADD INDEX (time);\n";
+	}
+	elsif($dbtype eq "pgsql")
+	{
+		print "CREATE INDEX dropowner_time_idx ON channels_dropowner (time);\n";
+		print "CREATE INDEX resetpass_time_idx ON users_resetpass (time);\n";
+	}
+
 	print "\n";
 }
 
