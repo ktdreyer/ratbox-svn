@@ -73,6 +73,7 @@ static int s_user_activate(struct client *, struct lconn *, const char **, int);
 static int s_user_login(struct client *, struct lconn *, const char **, int);
 static int s_user_logout(struct client *, struct lconn *, const char **, int);
 static int s_user_resetpass(struct client *, struct lconn *, const char **, int);
+static int s_user_resetemail(struct client *, struct lconn *, const char **, int);
 static int s_user_set(struct client *, struct lconn *, const char **, int);
 static int s_user_info(struct client *, struct lconn *, const char **, int);
 
@@ -90,6 +91,7 @@ static struct service_command userserv_command[] =
 	{ "LOGIN",	&s_user_login,		2, NULL, 1, 0L, 0, 0, 0	},
 	{ "LOGOUT",	&s_user_logout,		0, NULL, 1, 0L, 1, 0, 0	},
 	{ "RESETPASS",	&s_user_resetpass,	1, NULL, 1, 0L, 0, 0, 0	},
+	{ "RESETEMAIL",	&s_user_resetemail,	0, NULL, 1, 0L, 1, 0, 0	},
 	{ "SET",	&s_user_set,		1, NULL, 1, 0L, 1, 0, 0	},
 	{ "INFO",	&s_user_info,		1, NULL, 1, 0L, 1, 0, 0	}
 };
@@ -119,6 +121,7 @@ static int h_user_burst_login(void *, void *);
 static int h_user_dbsync(void *, void *);
 static void e_user_expire(void *unused);
 static void e_user_expire_resetpass(void *unused);
+static void e_user_expire_resetemail(void *unused);
 
 static void dump_user_info(struct client *, struct lconn *, struct user_reg *);
 
@@ -514,6 +517,13 @@ e_user_expire_resetpass(void *unused)
 {
 	rsdb_exec(NULL, "DELETE FROM users_resetpass WHERE time <= '%lu'",
 			CURRENT_TIME - config_file.uresetpass_duration);
+}
+
+static void
+e_user_expire_resetemail(void *unused)
+{
+	rsdb_exec(NULL, "DELETE FROM users_resetemail WHERE time <= '%lu'",
+			CURRENT_TIME - config_file.uresetemail_duration);
 }
 
 static int
@@ -1376,7 +1386,7 @@ s_user_resetpass(struct client *client_p, struct lconn *conn_p, const char *parv
 					password, reg_p->name);
 
 			my_free(reg_p->password);
-			reg_p->password = strdup(password);
+			reg_p->password = my_strdup(password);
 
 			service_error(userserv_p, client_p,
 					"Username %s password reset", reg_p->name);
@@ -1394,6 +1404,231 @@ s_user_resetpass(struct client *client_p, struct lconn *conn_p, const char *parv
 				reg_p->name);
 
 	rsdb_exec_fetch_end(&data);
+	return 1;
+}
+
+static int
+s_user_resetemail(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
+{
+	struct rsdb_table data;
+	struct user_reg *reg_p;
+	const char *token;
+
+	reg_p = client_p->user->user_reg;
+
+	if(config_file.disable_email || !config_file.allow_resetemail)
+	{
+		service_error(userserv_p, client_p,
+			"%s::RESETEMAIL is disabled", userserv_p->name);
+		return 1;
+	}
+
+	if(EmptyString(reg_p->email))
+	{
+		service_error(userserv_p, client_p,
+				"Username %s does not have an email address set", reg_p->name);
+		return 1;
+	}
+
+	/* initial email reset. no params. */
+	if(parc == 0)
+	{
+		rsdb_exec_fetch(&data, "SELECT COUNT(username) FROM users_resetemail WHERE username='%Q' AND time > '%lu'",
+				reg_p->name, CURRENT_TIME - config_file.uresetemail_duration);
+
+		if(data.row_count == 0)
+		{
+			mlog("fatal error: SELECT COUNT() returned 0 rows in s_user_resetemail()");
+			die(0, "problem with db file");
+		}
+
+		/* already issued one within the past day.. */
+		if(atoi(data.row[0][0]))
+		{
+			service_error(userserv_p, client_p,
+					"Username %s already has a pending e-mail reset",
+					reg_p->name);
+			rsdb_exec_fetch_end(&data);
+			return 1;
+		}
+
+		rsdb_exec_fetch_end(&data);
+
+		if(!can_send_email())
+		{
+			service_error(userserv_p, client_p,
+				"Temporarily unable to send email, please try later");
+			return 1;
+		}
+
+		zlog(userserv_p, 3, 0, 0, client_p, NULL,
+			"RESETEMAIL", reg_p->name);
+
+		/* may be one still there thats expired */
+		rsdb_exec(NULL, "DELETE FROM users_resetemail WHERE username='%Q'", reg_p->name);
+
+		token = get_password();
+		rsdb_exec(NULL, "INSERT INTO users_resetemail (username, token, time) VALUES('%Q', '%Q', '%lu')",
+				reg_p->name, token, CURRENT_TIME);
+
+		if(!send_email(reg_p->email, "E-Mail reset",
+				"%s!%s@%s has requested a e-mail reset for username %s which "
+				"is registered to this email address.\n\n"
+				"To authenticate this request, send %s RESETEMAIL CONFIRM %s <new_e-mail>\n\n"
+				"If you did not request this, simply ignore this message, no "
+				"action will be taken on your account and your e-mail will "
+				"NOT be reset.\n",
+				client_p->name, client_p->user->username, client_p->user->host,
+				reg_p->name, userserv_p->name, token))
+		{
+			service_error(userserv_p, client_p,
+					"Unable to issue e-mail reset due to problems sending email");
+		}
+		else
+		{
+			service_error(userserv_p, client_p,
+					"Username %s has been sent an email to confirm the e-mail reset",
+					reg_p->name);
+		}
+
+		return 2;
+	}
+	/* confirm from old email */
+	else if(!strcasecmp(parv[0], "CONFIRM"))
+	{
+		if(EmptyString(parv[2]))
+		{
+			service_error(userserv_p, client_p,
+					"Insufficient parameters to %s::RESETEMAIL, new email not specified",
+					userserv_p->name);
+			return 1;
+		}
+
+		if(!valid_email(parv[2]))
+		{
+			service_error(userserv_p, client_p, "Email %s invalid", parv[2]);
+			return 1;
+		}
+
+		rsdb_exec_fetch(&data, "SELECT token FROM users_resetemail WHERE username='%Q' AND time > '%lu'",
+				reg_p->name, CURRENT_TIME - config_file.uresetemail_duration);
+
+		/* ok, found the entry.. */
+		if(data.row_count)
+		{
+			if(strcmp(data.row[0][0], parv[1]) == 0)
+			{
+				const char *email = parv[2];
+				token = get_password();
+
+				rsdb_exec_fetch_end(&data);
+
+				if(!send_email(reg_p->email, "E-Mail reset",
+						"%s!%s@%s has requested an e-mail change for username %s to "
+						"this email address.\n\n"
+						"To authenticate this request, send %s RESETEMAIL AUTH %s\n\n"
+						"If you did not request this, simply ignore this message, no "
+						"action will be taken.\n",
+						client_p->name, client_p->user->username, client_p->user->host,
+						reg_p->name, userserv_p->name, token))
+				{
+					service_error(userserv_p, client_p,
+							"Unable to issue e-mail reset due to problems sending email");
+					return 2;
+				}
+
+				service_error(userserv_p, client_p,
+						"Username %s has been sent an email to confirm the e-mail reset",
+						reg_p->name);
+
+				rsdb_exec(NULL, "DELETE FROM users_resetemail WHERE username='%Q'",
+						reg_p->name);
+				rsdb_exec(NULL, "INSERT INTO users_resetemail (username, token, time, email) VALUES('%Q', '%Q', '%lu', '%s')",
+						reg_p->name, token, CURRENT_TIME, parv[2]);
+
+				zlog(userserv_p, 3, 0, 0, client_p, NULL,
+						"RESETEMAIL %s %s (confirm)", reg_p->name, email);
+				return 2;
+			}
+			else
+			{
+				service_error(userserv_p, client_p,
+						"Username %s email reset tokens do not match",
+						reg_p->name);
+				zlog(userserv_p, 3, 0, 0, client_p, NULL,
+						"RESETEMAIL %s (confirm failed)", reg_p->name);
+			}
+		}
+		else
+		{
+			service_error(userserv_p, client_p,
+					"Username %s does not have a pending email reset",
+					reg_p->name);
+		}
+
+		rsdb_exec_fetch_end(&data);
+		return 2;
+	}
+	/* confirm from new email */
+	else if(!strcasecmp(parv[0], "AUTH"))
+	{
+		if(EmptyString(parv[1]))
+		{
+			service_error(userserv_p, client_p,
+					"Insufficient parameters to %s::RESETEMAIL, auth token not specified",
+					userserv_p->name);
+			return 1;
+		}
+
+		rsdb_exec_fetch(&data, "SELECT token, email FROM users_resetemail WHERE username='%Q' AND time > '%lu'",
+				reg_p->name, CURRENT_TIME - config_file.uresetemail_duration);
+
+		/* ok, found the entry.. */
+		if(data.row_count)
+		{
+			if(strcmp(data.row[0][0], parv[1]) == 0)
+			{
+				const char *email = data.row[0][1];
+				
+				my_free(reg_p->email);
+				reg_p->email = my_strdup(email);
+
+				/* need to execute another query.. */
+				rsdb_exec_fetch_end(&data);
+
+				rsdb_exec(NULL, "DELETE FROM users_resetemail WHERE username='%Q'",
+						reg_p->name);
+				rsdb_exec(NULL, "UPDATE users SET email='%Q' WHERE username='%Q'",
+						reg_p->email, reg_p->name);
+
+				zlog(userserv_p, 3, 0, 0, client_p, NULL,
+						"RESETEMAIL %s (auth)", reg_p->name);
+
+				service_error(userserv_p, client_p,
+						"Username %s email reset", reg_p->name);
+
+				return 1;
+			}
+			else
+			{
+				service_error(userserv_p, client_p,
+						"Username %s email reset tokens do not match",
+						reg_p->name);
+			}
+		}
+		else
+		{
+			service_error(userserv_p, client_p,
+					"Username %s does not have a pending email reset",
+					reg_p->name);
+		}
+
+		rsdb_exec_fetch_end(&data);
+		return 2;
+	}
+
+	service_error(userserv_p, client_p, "%s::RESETEMAIL option invalid",
+			userserv_p->name);
 	return 1;
 }
 

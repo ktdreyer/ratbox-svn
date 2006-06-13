@@ -11,4 +11,5 @@ Available commands:
  LOGOUT      - Logs out of services.
  REGISTER    - Registers given username.
  RESETPASS   - Resets a usernames password through email verification.
+ RESETEMAIL  - Resets a usernames email through email verification.
  SET         - Sets various username options.

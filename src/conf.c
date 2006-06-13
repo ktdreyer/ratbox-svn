@@ -86,7 +86,9 @@ set_default_conf(void)
 	config_file.uexpire_unverified_time = 86400;	/* 1 day */
 	config_file.allow_set_password = 1;
 	config_file.allow_resetpass = 0;
+	config_file.allow_resetemail = 0;
 	config_file.uresetpass_duration = 86400;	/* 1 day */
+	config_file.uresetemail_duration = 86400;    /*1 day */
 	config_file.allow_set_email = 1;
 	config_file.umax_logins = 5;
 
