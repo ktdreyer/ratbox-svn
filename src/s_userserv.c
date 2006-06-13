@@ -1467,8 +1467,9 @@ s_user_resetemail(struct client *client_p, struct lconn *conn_p, const char *par
 		/* may be one still there thats expired */
 		rsdb_exec(NULL, "DELETE FROM users_resetemail WHERE username='%Q'", reg_p->name);
 
+		/* insert email as blank, as we need to check for it in AUTH */
 		token = get_password();
-		rsdb_exec(NULL, "INSERT INTO users_resetemail (username, token, time) VALUES('%Q', '%Q', '%lu')",
+		rsdb_exec(NULL, "INSERT INTO users_resetemail (username, token, time, email) VALUES('%Q', '%Q', '%lu', '')",
 				reg_p->name, token, CURRENT_TIME);
 
 		if(!send_email(reg_p->email, "E-Mail reset",
@@ -1510,7 +1511,7 @@ s_user_resetemail(struct client *client_p, struct lconn *conn_p, const char *par
 			return 1;
 		}
 
-		rsdb_exec_fetch(&data, "SELECT token FROM users_resetemail WHERE username='%Q' AND time > '%lu'",
+		rsdb_exec_fetch(&data, "SELECT token FROM users_resetemail WHERE username='%Q' AND time > '%lu' AND email=''",
 				reg_p->name, CURRENT_TIME - config_file.uresetemail_duration);
 
 		/* ok, found the entry.. */
@@ -1562,7 +1563,7 @@ s_user_resetemail(struct client *client_p, struct lconn *conn_p, const char *par
 		else
 		{
 			service_error(userserv_p, client_p,
-					"Username %s does not have a pending email reset",
+					"Username %s does not have a pending email CONFIRM",
 					reg_p->name);
 		}
 
@@ -1580,7 +1581,7 @@ s_user_resetemail(struct client *client_p, struct lconn *conn_p, const char *par
 			return 1;
 		}
 
-		rsdb_exec_fetch(&data, "SELECT token, email FROM users_resetemail WHERE username='%Q' AND time > '%lu'",
+		rsdb_exec_fetch(&data, "SELECT token, email FROM users_resetemail WHERE username='%Q' AND time > '%lu' AND email != ''",
 				reg_p->name, CURRENT_TIME - config_file.uresetemail_duration);
 
 		/* ok, found the entry.. */
@@ -1619,7 +1620,7 @@ s_user_resetemail(struct client *client_p, struct lconn *conn_p, const char *par
 		else
 		{
 			service_error(userserv_p, client_p,
-					"Username %s does not have a pending email reset",
+					"Username %s does not have a pending email AUTH",
 					reg_p->name);
 		}
 
