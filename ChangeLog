@@ -1,3 +1,19 @@
+leeh        2006/06/13 19:37:25 UTC	(20060613_2-22737)
+  Log:
+  - via Dimitar Terziev
+    - add userserv::resetemail, to allow people to reset their email address
+      with email verification
+  
+
+  Modified:
+	rserv/trunk/doc/example.conf (File Modified) 
+	rserv/trunk/help/userserv/index (File Modified) 
+	rserv/trunk/include/conf.h (File Modified) 
+	rserv/trunk/src/conf.c (File Modified) 
+	rserv/trunk/src/newconf.c (File Modified) 
+	rserv/trunk/src/s_userserv.c (File Modified) 
+
+
 leeh        2006/06/13 19:07:37 UTC	(20060613_1-22735)
   Log:
   - dbupgrade shouldnt create users_resetemail with email NOT NULL
