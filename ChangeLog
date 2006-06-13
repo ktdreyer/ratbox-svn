@@ -1,3 +1,13 @@
+leeh        2006/06/13 19:40:39 UTC	(20060613_3-22739)
+  Log:
+  - add resetemail help
+  
+
+  Modified:
+	rserv/trunk/help/userserv/index (File Modified) 
+	rserv/trunk/help/userserv/resetemail (File Added) 
+
+
 leeh        2006/06/13 19:37:25 UTC	(20060613_2-22737)
   Log:
   - via Dimitar Terziev
