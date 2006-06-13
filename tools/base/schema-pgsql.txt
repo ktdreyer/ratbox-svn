@@ -24,7 +24,7 @@ CREATE INDEX resetpass_time_idx ON users_resetpass (time);
 CREATE TABLE users_resetemail (
 	username VARCHAR(USERREGNAME_LEN) NOT NULL,
 	token VARCHAR(10),
-	email VARCHAR(EMAILLEN),
+	email VARCHAR(EMAILLEN) DEFAULT NULL,
 	time INTEGER,
 	PRIMARY KEY(username)
 );

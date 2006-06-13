@@ -1469,7 +1469,7 @@ s_user_resetemail(struct client *client_p, struct lconn *conn_p, const char *par
 
 		/* insert email as blank, as we need to check for it in AUTH */
 		token = get_password();
-		rsdb_exec(NULL, "INSERT INTO users_resetemail (username, token, time, email) VALUES('%Q', '%Q', '%lu', '')",
+		rsdb_exec(NULL, "INSERT INTO users_resetemail (username, token, time) VALUES('%Q', '%Q', '%lu')",
 				reg_p->name, token, CURRENT_TIME);
 
 		if(!send_email(reg_p->email, "E-Mail reset",
@@ -1511,7 +1511,7 @@ s_user_resetemail(struct client *client_p, struct lconn *conn_p, const char *par
 			return 1;
 		}
 
-		rsdb_exec_fetch(&data, "SELECT token FROM users_resetemail WHERE username='%Q' AND time > '%lu' AND email=''",
+		rsdb_exec_fetch(&data, "SELECT token FROM users_resetemail WHERE username='%Q' AND time > '%lu' AND email is NULL",
 				reg_p->name, CURRENT_TIME - config_file.uresetemail_duration);
 
 		/* ok, found the entry.. */
@@ -1581,7 +1581,7 @@ s_user_resetemail(struct client *client_p, struct lconn *conn_p, const char *par
 			return 1;
 		}
 
-		rsdb_exec_fetch(&data, "SELECT token, email FROM users_resetemail WHERE username='%Q' AND time > '%lu' AND email != ''",
+		rsdb_exec_fetch(&data, "SELECT token, email FROM users_resetemail WHERE username='%Q' AND time > '%lu' AND email is not NULL",
 				reg_p->name, CURRENT_TIME - config_file.uresetemail_duration);
 
 		/* ok, found the entry.. */
