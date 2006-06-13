@@ -21,6 +21,15 @@ CREATE TABLE users_resetpass (
 );
 CREATE INDEX resetpass_time_idx ON users_resetpass (time);
 
+CREATE TABLE users_resetemail (
+	username VARCHAR(USERREGNAME_LEN) NOT NULL,
+	token VARCHAR(10),
+	email VARCHAR(EMAILLEN),
+	time INTEGER,
+	PRIMARY KEY(username)
+);
+CREATE INDEX resetemail_time_idx ON users_resetemail (time);
+
 CREATE TABLE users_sync (
 	id SERIAL,
 	hook VARCHAR(50) NOT NULL,

@@ -21,6 +21,15 @@ CREATE TABLE users_resetpass (
 );
 ALTER TABLE users_resetpass ADD INDEX (time);
 
+CREATE TABLE users_resetemail (
+	username VARCHAR(USERREGNAME_LEN) NOT NULL,
+	token VARCHAR(10),
+	email VARCHAR(EMAILLEN),
+	time INTEGER,
+	PRIMARY KEY(username)
+);
+ALTER TABLE users_resetemail ADD INDEX (time);
+
 CREATE TABLE users_sync (
 	id INTEGER AUTO_INCREMENT, 
 	hook VARCHAR(50) NOT NULL,

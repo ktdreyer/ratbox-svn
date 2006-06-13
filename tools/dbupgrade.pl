@@ -138,6 +138,11 @@ if($currentver < 3)
 		print "    chname VARCHAR(".$vals{"CHANNELLEN"}.") NOT NULL, token VARCHAR(10), time INTEGER,\n";
 		print "    PRIMARY KEY(chname)\n";
 		print ");\n";
+		print "CREATE TABLE users_resetemail (\n";
+		print "    username VARCHAR(".$vals{"USERREGNAME_LEN"}.") NOT NULL, token VARCHAR(10),\n";
+		print "    email VARCHAR(".$vals{"EMAILLEN"}.") NOT NULL, time INTEGER,\n";
+		print "    PRIMARY KEY (username)\n";
+		print ");\n";
 	}
 	else
 	{
@@ -145,17 +150,23 @@ if($currentver < 3)
 		print "    chname TEXT, token TEXT, time INTEGER,\n";
 		print "    PRIMARY KEY(chname)\n";
 		print ");\n";
+		print "CREATE TABLE users_resetemail (\n";
+		print "    username TEXT, token TEXT, email TEXT, time INTEGER,\n";
+		print "    PRIMARY KEY(username)\n";
+		print ");\n";
 	}
 
 	if($dbtype eq "mysql")
 	{
 		print "ALTER TABLE channels_dropowner ADD INDEX (time);\n";
 		print "ALTER TABLE users_resetpass ADD INDEX (time);\n";
+		print "ALTER TABLE users_resetemail ADD INDEX (time);\n";
 	}
 	elsif($dbtype eq "pgsql")
 	{
 		print "CREATE INDEX dropowner_time_idx ON channels_dropowner (time);\n";
 		print "CREATE INDEX resetpass_time_idx ON users_resetpass (time);\n";
+		print "CREATE INDEX resetemail_time_idx ON users_resetemail (time);\n";
 	}
 
 	print "\n";
