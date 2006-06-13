@@ -1,3 +1,13 @@
+leeh        2006/06/13 19:54:00 UTC	(20060613_4-22741)
+  Log:
+  - add some sanity checking for we're at the right place in the chain when
+    dealing with resetemail
+  
+
+  Modified:
+	rserv/trunk/src/s_userserv.c (File Modified) 
+
+
 leeh        2006/06/13 19:40:39 UTC	(20060613_3-22739)
   Log:
   - add resetemail help
