@@ -1,3 +1,12 @@
+leeh        2006/06/13 19:07:37 UTC	(20060613_1-22735)
+  Log:
+  - dbupgrade shouldnt create users_resetemail with email NOT NULL
+  
+
+  Modified:
+	rserv/trunk/tools/dbupgrade.pl (File Modified) 
+
+
 leeh        2006/06/13 13:34:10 UTC	(20060613_0-22733)
   Log:
   - db preparations for resetemail
