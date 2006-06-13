@@ -140,7 +140,7 @@ if($currentver < 3)
 		print ");\n";
 		print "CREATE TABLE users_resetemail (\n";
 		print "    username VARCHAR(".$vals{"USERREGNAME_LEN"}.") NOT NULL, token VARCHAR(10),\n";
-		print "    email VARCHAR(".$vals{"EMAILLEN"}.") NOT NULL, time INTEGER,\n";
+		print "    email VARCHAR(".$vals{"EMAILLEN"}."), time INTEGER,\n";
 		print "    PRIMARY KEY (username)\n";
 		print ");\n";
 	}
