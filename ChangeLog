@@ -1,3 +1,17 @@
+leeh        2006/06/14 21:02:21 UTC	(20060614_4-22755)
+  Log:
+  - move init_crypt_seed() up to after event init
+  - stop banserv/chanserv adding their own deltas to events
+  - make eventAdd() add a delta to each event to space them out a bit
+  
+
+  Modified:
+	rserv/trunk/src/event.c (File Modified) 
+	rserv/trunk/src/rserv.c (File Modified) 
+	rserv/trunk/src/s_banserv.c (File Modified) 
+	rserv/trunk/src/s_chanserv.c (File Modified) 
+
+
 leeh        2006/06/14 20:07:43 UTC	(20060614_3-22753)
   Log:
   - add in missing delowner help
