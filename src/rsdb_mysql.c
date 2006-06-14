@@ -116,7 +116,7 @@ rsdb_try_reconnect(void)
 		if(!rsdb_connect(0))
 			return;
 
-		sleep(1);
+		my_sleep(1, 0);
 		set_time();
 	}
 

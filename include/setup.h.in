@@ -63,6 +63,9 @@
 /* Define if you have the socket library (-lsocket).  */
 #undef HAVE_LIBSOCKET
 
+/* Define if you have nanosleep */
+#undef HAVE_NANOSLEEP
+
 /* Nickname Service */
 #undef ENABLE_NICKSERV
 

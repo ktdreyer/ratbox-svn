@@ -43,6 +43,22 @@ init_tools(void)
 	dlinknode_heap = BlockHeapCreate(sizeof(dlink_node), HEAP_DLINKNODE);
 }
 
+void
+my_sleep(unsigned int seconds, unsigned int microseconds)
+{
+#ifdef HAVE_NANOSLEEP
+	struct timespec tv;
+	tv.tv_nsec = (microseconds * 1000);
+	tv.tv_sec = seconds;
+	nanosleep(&tv, NULL);
+#else 
+	struct timeval tv;
+	tv.tv_sec = seconds;
+	tv.tv_usec = microseconds;
+	select(0, NULL, NULL, NULL, &tv);
+#endif
+}
+
 /* my_calloc()
  *   wrapper for calloc() to detect out of memory
  */
