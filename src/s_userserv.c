@@ -120,8 +120,7 @@ static int dbh_user_setemail(struct rsdb_hook *, const char *data);
 static int h_user_burst_login(void *, void *);
 static int h_user_dbsync(void *, void *);
 static void e_user_expire(void *unused);
-static void e_user_expire_resetpass(void *unused);
-static void e_user_expire_resetemail(void *unused);
+static void e_user_expire_reset(void *unused);
 
 static void dump_user_info(struct client *, struct lconn *, struct user_reg *);
 
@@ -150,7 +149,7 @@ init_s_userserv(void)
 	hook_add(h_user_dbsync, HOOK_DBSYNC);
 
 	eventAdd("userserv_expire", e_user_expire, NULL, 21600);
-	eventAdd("userserv_expire_resetpass", e_user_expire_resetpass, NULL, 3600);
+	eventAdd("userserv_expire_reset", e_user_expire_reset, NULL, 3600);
 }
 
 static void
@@ -170,7 +169,8 @@ free_user_reg(struct user_reg *ureg_p)
 
 	rsdb_exec(NULL, "DELETE FROM users_resetpass WHERE username = '%Q'",
 			ureg_p->name);
-
+	rsdb_exec(NULL, "DELETE FROM users_resetemail WHERE username = '%Q'",
+			ureg_p->name);
 	rsdb_exec(NULL, "DELETE FROM members WHERE username = '%Q'",
 			ureg_p->name);
 
@@ -513,15 +513,10 @@ e_user_expire(void *unused)
 }
 
 static void
-e_user_expire_resetpass(void *unused)
+e_user_expire_reset(void *unused)
 {
 	rsdb_exec(NULL, "DELETE FROM users_resetpass WHERE time <= '%lu'",
 			CURRENT_TIME - config_file.uresetpass_duration);
-}
-
-static void
-e_user_expire_resetemail(void *unused)
-{
 	rsdb_exec(NULL, "DELETE FROM users_resetemail WHERE time <= '%lu'",
 			CURRENT_TIME - config_file.uresetemail_duration);
 }
@@ -1461,8 +1456,7 @@ s_user_resetemail(struct client *client_p, struct lconn *conn_p, const char *par
 			return 1;
 		}
 
-		zlog(userserv_p, 3, 0, 0, client_p, NULL,
-			"RESETEMAIL", reg_p->name);
+		zlog(userserv_p, 3, 0, 0, client_p, NULL, "RESETEMAIL");
 
 		/* may be one still there thats expired */
 		rsdb_exec(NULL, "DELETE FROM users_resetemail WHERE username='%Q'", reg_p->name);

@@ -222,6 +222,8 @@ free_channel_reg(struct chan_reg *reg_p)
 
 	part_service(chanserv_p, reg_p->name);
 
+	rsdb_exec(NULL, "DELETE FROM channels_dropowner WHERE chname='%Q'", reg_p->name);
+
 	rsdb_exec(NULL, "DELETE FROM bans WHERE chname = '%Q'",
 			reg_p->name);
 
@@ -1860,7 +1862,7 @@ s_chan_delowner(struct client *client_p, struct lconn *conn_p, const char *parv[
 		return 1;
 
 	/* dont require auth */
-	if(!config_file.email_delowner)
+	if(!config_file.cemail_delowner)
 	{
 		delete_member_db_entry(mreg_p);
 		free_member_reg(mreg_p, 1);
