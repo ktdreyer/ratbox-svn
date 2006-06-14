@@ -1,3 +1,16 @@
+leeh        2006/06/14 19:38:30 UTC	(20060614_1-22749)
+  Log:
+  - fix a couple of compile errors
+  - merge resetpass/resetemail expiry into one function
+  - delete pending resetemail requests on username deletion
+  - delete pending dropowner requests on channel deletion
+  
+
+  Modified:
+	rserv/trunk/src/s_chanserv.c (File Modified) 
+	rserv/trunk/src/s_userserv.c (File Modified) 
+
+
 leeh        2006/06/14 19:34:15 UTC	(20060614_0-22747)
   Log:
   - remove an unused format argument
