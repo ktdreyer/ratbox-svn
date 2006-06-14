@@ -200,8 +200,8 @@ init_s_chanserv(void)
 	hook_add(h_chanserv_user_login, HOOK_USER_LOGIN);
 	hook_add(h_chanserv_dbsync, HOOK_DBSYNC);
 
-	eventAdd("chanserv_updatechan", e_chanserv_updatechan, NULL, 3601);
-	eventAdd("chanserv_expirechan", e_chanserv_expirechan, NULL, 43205);
+	eventAdd("chanserv_updatechan", e_chanserv_updatechan, NULL, 3600);
+	eventAdd("chanserv_expirechan", e_chanserv_expirechan, NULL, 43200);
 
 	/* we add these with defaults, then update the timers when we parse
 	 * the conf..

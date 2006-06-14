@@ -52,6 +52,28 @@
 struct ev_entry event_table[MAX_EVENTS];
 static time_t event_time_min = -1;
 
+static int
+event_get_delta(time_t duration)
+{
+	int delta;
+	int i;
+
+	if(duration <= 10)
+		return 0;
+
+	if(duration <= 60)
+		delta = 3;
+	else if(duration <= 300)
+		delta = 6;
+	else
+		delta = 10;
+
+	i = 1 + (int) ((delta * 2) * (rand() / (RAND_MAX + 1.0)));
+	i -= delta;
+
+	return i;
+}
+
 /*
  * void eventAdd(const char *name, EVH *func, void *arg, time_t when)
  *
@@ -70,11 +92,13 @@ eventAdd(const char *name, EVH * func, void *arg, time_t when)
 	{
 		if(event_table[i].active == 0)
 		{
+			int delta = event_get_delta(when);
+
 			event_table[i].func = func;
 			event_table[i].name = name;
 			event_table[i].arg = arg;
-			event_table[i].when = CURRENT_TIME + when;
-			event_table[i].frequency = when;
+			event_table[i].when = CURRENT_TIME + when + delta;
+			event_table[i].frequency = when + delta;
 			event_table[i].active = 1;
 
 			if((event_table[i].when < event_time_min) || (event_time_min == -1))

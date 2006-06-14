@@ -105,7 +105,7 @@ preinit_s_banserv(void)
 {
 	banserv_p = add_service(&banserv_service);
 
-	eventAdd("banserv_expire", e_banserv_expire, NULL, 902);
+	eventAdd("banserv_expire", e_banserv_expire, NULL, 900);
 	eventAdd("banserv_autosync", e_banserv_autosync, NULL,
 			DEFAULT_AUTOSYNC_FREQUENCY);
 }

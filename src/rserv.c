@@ -303,13 +303,15 @@ main(int argc, char *argv[])
 
 	init_events();
 
+	/* adding events uses the PRNG */
+	init_crypt_seed();
+
 	/* balloc requires events */
         init_balloc();
 
 	/* tools requires balloc */
 	init_tools();
 
-	init_crypt_seed();
 	/* commands require cache */
 	init_cache();
 	init_scommand();
