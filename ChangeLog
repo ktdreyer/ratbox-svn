@@ -1,3 +1,12 @@
+leeh        2006/06/14 19:34:15 UTC	(20060614_0-22747)
+  Log:
+  - remove an unused format argument
+  
+
+  Modified:
+	rserv/trunk/src/s_nickserv.c (File Modified) 
+
+
 leeh        2006/06/13 20:15:39 UTC	(20060613_6-22745)
   Log:
   - we have a static parse.c, and dont need this.
