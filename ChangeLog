@@ -1,3 +1,12 @@
+leeh        2006/06/14 20:07:43 UTC	(20060614_3-22753)
+  Log:
+  - add in missing delowner help
+  
+
+  Modified:
+	rserv/trunk/help/chanserv/delowner (File Added) 
+
+
 leeh        2006/06/14 19:40:36 UTC	(20060614_2-22751)
   Log:
   - add my_sleep() function, which allows us to sleep a given time in
