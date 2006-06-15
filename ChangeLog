@@ -1,3 +1,14 @@
+leeh        2006/06/15 19:15:25 UTC	(20060615_4-22765)
+  Log:
+  - update RELEASE_NOTES
+  - revved patchlevel to 1.1.0beta4
+  
+
+  Modified:
+	rserv/trunk/RELEASE_NOTES (File Modified) 
+	rserv/trunk/include/config.h (File Modified) 
+
+
 leeh        2006/06/15 18:19:59 UTC	(20060615_3-22763)
   Log:
   - add expiry bonuses for usernames
