@@ -95,7 +95,7 @@ rsdb_callback_func(void *cbfunc, int argc, char **argv, char **colnames)
 void
 rsdb_exec(rsdb_callback cb, const char *format, ...)
 {
-	static const char errmsg_busy[] = "Database file locked";
+	static char errmsg_busy[] = "Database file locked";
 	static char buf[BUFSIZE*4];
 	va_list args;
 	char *errmsg;
@@ -143,7 +143,7 @@ tryexec:
 void
 rsdb_exec_fetch(struct rsdb_table *table, const char *format, ...)
 {
-	static const char errmsg_busy[] = "Database file locked";
+	static char errmsg_busy[] = "Database file locked";
 	static char buf[BUFSIZE*4];
 	va_list args;
 	char *errmsg;
