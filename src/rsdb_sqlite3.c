@@ -95,9 +95,11 @@ rsdb_callback_func(void *cbfunc, int argc, char **argv, char **colnames)
 void
 rsdb_exec(rsdb_callback cb, const char *format, ...)
 {
+	static const char errmsg_busy[] = "Database file locked";
 	static char buf[BUFSIZE*4];
 	va_list args;
 	char *errmsg;
+	int errcount = 0;
 	int i;
 
 	va_start(args, format);
@@ -110,21 +112,44 @@ rsdb_exec(rsdb_callback cb, const char *format, ...)
 		die(0, "problem with compiling sql statement");
 	}
 
+tryexec:
 	if((i = sqlite3_exec(rserv_db, buf, (cb ? rsdb_callback_func : NULL), cb, &errmsg)))
 	{
-		mlog("fatal error: problem with db file: %s", errmsg);
-		die(0, "problem with db file");
+		switch(i)
+		{
+			case SQLITE_BUSY:
+				/* sleep for upto 5 seconds in 10 iterations
+				 * to try and get through..
+				 */
+				errcount++;
+
+				if(errcount <= 10)
+				{
+					my_sleep(0, 500000);
+					goto tryexec;
+				}
+
+				errmsg = errmsg_busy;					
+				/* otherwise fall through */
+
+			default:
+				mlog("fatal error: problem with db file: %s", errmsg);
+				die(0, "problem with db file");
+				break;
+		}
 	}
 }
 
 void
 rsdb_exec_fetch(struct rsdb_table *table, const char *format, ...)
 {
+	static const char errmsg_busy[] = "Database file locked";
 	static char buf[BUFSIZE*4];
 	va_list args;
 	char *errmsg;
 	char **data;
 	int pos;
+	int errcount = 0;
 	int i, j;
 
 	va_start(args, format);
@@ -137,10 +162,31 @@ rsdb_exec_fetch(struct rsdb_table *table, const char *format, ...)
 		die(0, "problem with compiling sql statement");
 	}
 
-	if(sqlite3_get_table(rserv_db, buf, &data, &table->row_count, &table->col_count, &errmsg))
+tryexec:
+	if((i = sqlite3_get_table(rserv_db, buf, &data, &table->row_count, &table->col_count, &errmsg)))
 	{
-		mlog("fatal error: problem with db file: %s", errmsg);
-		die(0, "problem with db file");
+		switch(i)
+		{
+			case SQLITE_BUSY:
+				/* sleep for upto 5 seconds in 10 iterations
+				 * to try and get through..
+				 */
+				errcount++;
+
+				if(errcount <= 10)
+				{
+					my_sleep(0, 500000);
+					goto tryexec;
+				}
+					
+				errmsg = errmsg_busy;					
+				/* otherwise fall through */
+
+			default:
+				mlog("fatal error: problem with db file: %s", errmsg);
+				die(0, "problem with db file");
+				break;
+		}
 	}
 
 	/* we need to be able to free data afterward */
