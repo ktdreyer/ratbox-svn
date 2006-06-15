@@ -1,3 +1,15 @@
+leeh        2006/06/15 18:19:59 UTC	(20060615_3-22763)
+  Log:
+  - add expiry bonuses for usernames
+  
+
+  Modified:
+	rserv/trunk/doc/example.conf (File Modified) 
+	rserv/trunk/include/conf.h (File Modified) 
+	rserv/trunk/src/conf.c (File Modified) 
+	rserv/trunk/src/s_userserv.c (File Modified) 
+
+
 leeh        2006/06/15 17:11:01 UTC	(20060615_2-22761)
   Log:
   - add reset_regtime_duration to userserv {};, duration a username must be
