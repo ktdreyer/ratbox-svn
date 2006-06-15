@@ -64,6 +64,10 @@ struct _config_file
 	int uexpire_time;
 	int uexpire_suspended_time;
 	int uexpire_unverified_time;
+	int uexpire_bonus_regtime;
+	int uexpire_bonus;
+	int uexpire_bonus_per_time;
+	int uexpire_bonus_max;
 	int allow_set_password;
 	int allow_resetpass;
 	int allow_resetemail;

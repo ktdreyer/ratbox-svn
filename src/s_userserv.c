@@ -458,6 +458,26 @@ h_user_dbsync(void *unused, void *unusedd)
 	return 0;
 }
 
+static int
+expire_bonus(time_t duration)
+{
+	unsigned int bonus;
+
+	/* disabled */
+	if(!config_file.uexpire_bonus_per_time || !config_file.uexpire_bonus)
+		return 0;
+
+	if(duration < config_file.uexpire_bonus_regtime)
+		return 0;
+
+	bonus = ((duration / config_file.uexpire_bonus_per_time) * config_file.uexpire_bonus);
+
+	if(config_file.uexpire_bonus_max && (bonus > config_file.uexpire_bonus_max))
+		return config_file.uexpire_bonus_max;
+
+	return bonus;
+}
+
 static void
 e_user_expire(void *unused)
 {
@@ -502,7 +522,7 @@ e_user_expire(void *unused)
 			if((ureg_p->last_time + config_file.uexpire_suspended_time) > CURRENT_TIME)
 				continue;
 		}
-		else if((ureg_p->last_time + config_file.uexpire_time) > CURRENT_TIME)
+		else if((ureg_p->last_time + config_file.uexpire_time + expire_bonus(CURRENT_TIME - ureg_p->reg_time)) > CURRENT_TIME)
 			continue;
 
 		free_user_reg(ureg_p);
