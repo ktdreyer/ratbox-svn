@@ -69,6 +69,7 @@ struct _config_file
 	int allow_resetemail;
 	int uresetpass_duration;
 	int uresetemail_duration;
+	int ureset_regtime_duration;
 	int allow_set_email;
 	int umax_logins;
 

@@ -1271,6 +1271,14 @@ s_user_resetpass(struct client *client_p, struct lconn *conn_p, const char *parv
 	if((reg_p = find_user_reg(client_p, parv[0])) == NULL)
 		return 1;
 
+	if((CURRENT_TIME - reg_p->reg_time) < config_file.ureset_regtime_duration)
+	{
+		service_error(userserv_p, client_p, 
+				"Username %s has not been registered long enough for RESETPASS",
+				reg_p->name);
+		return 1;
+	}
+
 	/* initial password reset */
 	if(EmptyString(parv[1]))
 	{
@@ -1415,6 +1423,14 @@ s_user_resetemail(struct client *client_p, struct lconn *conn_p, const char *par
 	{
 		service_error(userserv_p, client_p,
 			"%s::RESETEMAIL is disabled", userserv_p->name);
+		return 1;
+	}
+
+	if((CURRENT_TIME - reg_p->reg_time) < config_file.ureset_regtime_duration)
+	{
+		service_error(userserv_p, client_p, 
+				"Username %s has not been registered long enough for RESETPASS",
+				reg_p->name);
 		return 1;
 	}
 

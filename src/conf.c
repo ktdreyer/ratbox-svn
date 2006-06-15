@@ -89,6 +89,7 @@ set_default_conf(void)
 	config_file.allow_resetemail = 0;
 	config_file.uresetpass_duration = 86400;	/* 1 day */
 	config_file.uresetemail_duration = 86400;    /*1 day */
+	config_file.ureset_regtime_duration = 1209600; /* 2 weeks */
 	config_file.allow_set_email = 1;
 	config_file.umax_logins = 5;
 
