@@ -1,5 +1,26 @@
 
-This is the current development version of ratbox-services.  It may break.
+This is the current development version of ratbox-services.
+
+-- ratbox-services-1.1.0beta4
+- *** THIS RELEASE REQUIRES A DATABASE UPGRADE ** SEE UPGRADING ***
+
+- fix build when using local sqlite
+- fix RSFNC
+- log entries were missing the wallops they need
+- disallow nickname registration of uids
+- chanserv::deluser can no longer be used to remove a channel owner
+- add chanserv::delowner, command to be used when a channel owner removes
+  themselves, with optional email verification
+- added database hook to userserv for SETEMAIL
+- fix userserv::resetpass potentially trying to insert a duplicate username
+- add userserv::resetemail, to allow users to change their email address
+  through email verification -- both old and new addresses are verified
+- handle the sqlite database being locked
+- add deltas to the event handler to space them out a bit
+- added expiry bonuses for usernames, to reward usernames registered for a
+  long time with extra time before expiry.  See example.conf
+- reset_regtime = <duration>; to userserv {};, controls minimum length of a
+  time a username must be registered before resetpass/resetemail can be used
 
 -- ratbox-services-1.1.0beta3
 - deal with removing bans under TS6 properly
