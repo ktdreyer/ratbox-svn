@@ -1,3 +1,16 @@
+leeh        2006/06/15 17:11:01 UTC	(20060615_2-22761)
+  Log:
+  - add reset_regtime_duration to userserv {};, duration a username must be
+    registered for before resetpass/resetemail can be used
+  
+
+  Modified:
+	rserv/trunk/doc/example.conf (File Modified) 
+	rserv/trunk/include/conf.h (File Modified) 
+	rserv/trunk/src/conf.c (File Modified) 
+	rserv/trunk/src/s_userserv.c (File Modified) 
+
+
 leeh        2006/06/15 16:55:43 UTC	(20060615_1-22759)
   Log:
   - remove those consts.
