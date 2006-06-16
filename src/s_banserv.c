@@ -315,11 +315,11 @@ sync_bans(const char *target, char banletter)
 	/* first is temporary bans */
 	if(banletter)
 		rsdb_exec_fetch(&data, "SELECT type, mask, reason, hold FROM operbans "
-					"WHERE hold > %lu AND remove=0 AND type='%c'",
+					"WHERE hold > %lu AND remove='0' AND type='%c'",
 				CURRENT_TIME, banletter);
 	else
 		rsdb_exec_fetch(&data, "SELECT type, mask, reason, hold FROM operbans "
-					"WHERE hold > %lu AND remove=0",
+					"WHERE hold > %lu AND remove='0'",
 				CURRENT_TIME);
 
 	for(i = 0; i < data.row_count; i++)
@@ -333,11 +333,11 @@ sync_bans(const char *target, char banletter)
 	/* permanent bans */
 	if(banletter)
 		rsdb_exec_fetch(&data, "SELECT type, mask, reason, hold FROM operbans "
-					"WHERE hold=0 AND remove=0 AND type='%c'",
+					"WHERE hold=0 AND remove='0' AND type='%c'",
 				CURRENT_TIME, banletter);
 	else
 		rsdb_exec_fetch(&data, "SELECT type, mask, reason, hold FROM operbans "
-					"WHERE hold=0 AND remove=0",
+					"WHERE hold=0 AND remove='0'",
 				CURRENT_TIME);
 
 	for(i = 0; i < data.row_count; i++)
@@ -350,11 +350,11 @@ sync_bans(const char *target, char banletter)
 	/* bans to remove */
 	if(banletter)
 		rsdb_exec_fetch(&data, "SELECT type, mask FROM operbans "
-					"WHERE hold > %lu AND remove=1 AND type='%c'",
+					"WHERE hold > %lu AND remove='1' AND type='%c'",
 				CURRENT_TIME, banletter);
 	else
 		rsdb_exec_fetch(&data, "SELECT type, mask FROM operbans "
-					"WHERE hold > %lu AND remove=1",
+					"WHERE hold > %lu AND remove='1'",
 				CURRENT_TIME);
 
 	for(i = 0; i < data.row_count; i++)
@@ -431,7 +431,7 @@ o_banserv_kline(struct client *client_p, struct lconn *conn_p, const char *parv[
 
 	if(res)
 		rsdb_exec(NULL, "UPDATE operbans SET reason='%Q', "
-				"hold=%ld, oper='%Q', remove=0 WHERE "
+				"hold=%ld, oper='%Q', remove='0' WHERE "
 				"type='K' AND mask=LOWER('%Q')",
 				reason,
 				temptime ? CURRENT_TIME + temptime : 0,
@@ -440,7 +440,7 @@ o_banserv_kline(struct client *client_p, struct lconn *conn_p, const char *parv[
 		rsdb_exec(NULL, "INSERT INTO operbans "
 				"(type, mask, reason, hold, create_time, "
 				"oper, remove, flags) "
-				"VALUES('K', LOWER('%Q'), '%Q', %lu, %lu, '%Q', 0, 0)",
+				"VALUES('K', LOWER('%Q'), '%Q', %lu, %lu, '%Q', '0', '0')",
 				mask, reason,
 				temptime ? CURRENT_TIME + temptime : 0,
 				CURRENT_TIME, OPER_NAME(client_p, conn_p));
@@ -524,7 +524,7 @@ o_banserv_xline(struct client *client_p, struct lconn *conn_p, const char *parv[
 
 	if(res)
 		rsdb_exec(NULL, "UPDATE operbans SET reason='%Q', "
-				"hold=%ld, oper='%Q', remove=0 WHERE "
+				"hold=%ld, oper='%Q', remove='0' WHERE "
 				"type='X' AND mask=LOWER('%Q')",
 				reason,
 				temptime ? CURRENT_TIME + temptime : 0,
@@ -533,7 +533,7 @@ o_banserv_xline(struct client *client_p, struct lconn *conn_p, const char *parv[
 		rsdb_exec(NULL, "INSERT INTO operbans "
 				"(type, mask, reason, hold, create_time, "
 				"oper, remove, flags) "
-				"VALUES('X', LOWER('%Q'), '%Q', %lu, %lu, '%Q', 0, 0)",
+				"VALUES('X', LOWER('%Q'), '%Q', %lu, %lu, '%Q', '0', '0')",
 				gecos, reason, 
 				temptime ? CURRENT_TIME + temptime : 0,
 				CURRENT_TIME, OPER_NAME(client_p, conn_p));
@@ -617,7 +617,7 @@ o_banserv_resv(struct client *client_p, struct lconn *conn_p, const char *parv[]
 
 	if(res)
 		rsdb_exec(NULL, "UPDATE operbans SET reason='%Q', "
-				"hold=%ld, oper='%Q', remove=0 WHERE "
+				"hold=%ld, oper='%Q', remove='0' WHERE "
 				"type='R' AND mask=LOWER('%Q')",
 				reason,
 				temptime ? CURRENT_TIME + temptime : 0,
@@ -626,7 +626,7 @@ o_banserv_resv(struct client *client_p, struct lconn *conn_p, const char *parv[]
 		rsdb_exec(NULL, "INSERT INTO operbans "
 				"(type, mask, reason, hold, create_time, "
 				"oper, remove, flags) "
-				"VALUES('R', LOWER('%Q'), '%Q', %lu, %lu, '%Q', 0, 0)",
+				"VALUES('R', LOWER('%Q'), '%Q', %lu, %lu, '%Q', '0', '0')",
 				mask, reason, 
 				temptime ? CURRENT_TIME + temptime : 0,
 				CURRENT_TIME, OPER_NAME(client_p, conn_p));
@@ -684,7 +684,7 @@ o_banserv_unkline(struct client *client_p, struct lconn *conn_p, const char *par
 		return 0;
 	}
 
-	rsdb_exec(NULL, "UPDATE operbans SET remove=1, hold=%lu "
+	rsdb_exec(NULL, "UPDATE operbans SET remove='1', hold='%lu' "
 			"WHERE mask=LOWER('%Q') AND type='K'",
 			CURRENT_TIME + config_file.bs_unban_time, parv[0]);
 
@@ -732,7 +732,7 @@ o_banserv_unxline(struct client *client_p, struct lconn *conn_p, const char *par
 		}
 	}
 
-	rsdb_exec(NULL, "UPDATE operbans SET remove=1, hold=%lu "
+	rsdb_exec(NULL, "UPDATE operbans SET remove='1', hold='%lu' "
 			"WHERE mask=LOWER('%Q') AND type='X'",
 			CURRENT_TIME + config_file.bs_unban_time, parv[0]);
 
@@ -780,7 +780,7 @@ o_banserv_unresv(struct client *client_p, struct lconn *conn_p, const char *parv
 		}
 	}
 
-	rsdb_exec(NULL, "UPDATE operbans SET remove=1, hold=%lu "
+	rsdb_exec(NULL, "UPDATE operbans SET remove='1', hold='%lu' "
 			"WHERE mask=LOWER('%Q') AND type='R'",
 			CURRENT_TIME + config_file.bs_unban_time, parv[0]);
 
@@ -876,7 +876,7 @@ list_bans(struct client *client_p, struct lconn *conn_p,
 	int i;
 
 	rsdb_exec_fetch(&data, "SELECT mask, reason, operreason, hold, oper "
-				"FROM operbans WHERE type='%c' AND remove=0 AND (hold=0 OR hold > %lu)",
+				"FROM operbans WHERE type='%c' AND remove='0' AND (hold='0' OR hold > '%lu')",
 			type, (unsigned long) CURRENT_TIME);
 
 	service_send(banserv_p, client_p, conn_p,
