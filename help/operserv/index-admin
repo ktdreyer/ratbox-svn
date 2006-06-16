@@ -5,4 +5,4 @@
  OSJOIN        - Joins operserv to the given channel
  OSPART        - Parts operserv from the given channel
  REHASH        - Forces services to rehash
- TAKEOVER      - Joins channel with TS-1, removing ops and simple modes
+ TAKEOVER      - Joins channel with TS-1, removing ops, modes and +beI lists

@@ -132,7 +132,7 @@ h_operserv_sjoin_lowerts(void *v_chptr, void *unused)
 
 /* preconditions: TS >= 2 and there is at least one user in the channel */
 static void
-otakeover(struct channel *chptr, int invite, int bans)
+otakeover(struct channel *chptr, int invite)
 {
 	dlink_node *ptr;
 
@@ -140,29 +140,25 @@ otakeover(struct channel *chptr, int invite, int bans)
 
 	remove_our_modes(chptr);
 
-	if (bans)
+	if (EmptyString(server_p->sid))
 	{
-		if (EmptyString(server_p->sid))
+		modebuild_start(operserv_p, chptr);
+
+		DLINK_FOREACH(ptr, chptr->bans.head)
 		{
-			modebuild_start(operserv_p, chptr);
-
-			DLINK_FOREACH(ptr, chptr->bans.head)
-			{
-				modebuild_add(DIR_DEL, "b", ptr->data);
-			}
-			DLINK_FOREACH(ptr, chptr->excepts.head)
-			{
-				modebuild_add(DIR_DEL, "e", ptr->data);
-			}
-			DLINK_FOREACH(ptr, chptr->invites.head)
-			{
-				modebuild_add(DIR_DEL, "I", ptr->data);
-			}
-
-			modebuild_finish();
+			modebuild_add(DIR_DEL, "b", ptr->data);
 		}
-		remove_bans(chptr);
+		DLINK_FOREACH(ptr, chptr->excepts.head)
+		{
+			modebuild_add(DIR_DEL, "e", ptr->data);
+		}
+		DLINK_FOREACH(ptr, chptr->invites.head)
+		{
+			modebuild_add(DIR_DEL, "I", ptr->data);
+		}
 	}
+
+	remove_bans(chptr);
 
 	if(invite)
 		chptr->mode.mode = MODE_TOPIC|MODE_NOEXTERNAL|MODE_INVITEONLY;
@@ -171,19 +167,11 @@ otakeover(struct channel *chptr, int invite, int bans)
 
 	chptr->tsinfo--;
 
-	if (EmptyString(server_p->sid) || bans)
-		join_service(operserv_p, chptr->name, chptr->tsinfo, NULL);
-	else
-	{
-		/* HACK: TS6 takeover, but not removing bans, so use JOIN
-		 * -- jilles */
-		sendto_server(":%s JOIN %lu %s %s",
-				SVC_UID(operserv_p),
-				(unsigned long) chptr->tsinfo, chptr->name,
-				chmode_to_string(&chptr->mode));
-		/* Then op it */
-		rejoin_service(operserv_p, chptr, 1);
-	}
+	join_service(operserv_p, chptr->name, chptr->tsinfo, NULL);
+
+	/* apply the -beI if needed, after the join */
+	if(EmptyString(server_p->sid))
+		modebuild_finish();
 
 	/* need to reop some services */
 	if(dlink_list_length(&chptr->services) > 1)
@@ -259,21 +247,22 @@ o_oper_takeover(struct client *client_p, struct lconn *conn_p, const char *parv[
 	{
 		if(!irccmp(parv[1], "-clearall"))
 		{
-			otakeover(chptr, 1, 1);
+			otakeover(chptr, 1);
 			otakeover_clear(chptr, 1);
 		}
 		else if(!irccmp(parv[1], "-clear"))
 		{
-			otakeover(chptr, 1, 1);
+			otakeover(chptr, 1);
 			otakeover_clear(chptr, 0);
 		}
+		/* DEPRECATED */
 		else if(!irccmp(parv[1], "-full"))
 		{
-			otakeover(chptr, 0, 1);
+			otakeover(chptr, 0);
 		}
 	}
 	else
-		otakeover(chptr, 0, 0);
+		otakeover(chptr, 0);
 
 	zlog(operserv_p, 1, WATCH_OPERSERV, 1, client_p, conn_p,
 		"TAKEOVER %s", parv[0]);

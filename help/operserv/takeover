@@ -1,7 +1,6 @@
 TAKEOVER <channel> [-full|-clear|-clearall]
-[ADMIN] Joins channel with TS-1, removing ops and simple modes
+[ADMIN] Joins channel with TS-1, removing ops, modes and +beI lists
   <channel>   : Channel to takeover
-  [-full]     : When specified, also clears +beI lists
   [-clear]    : When specified, implies -full, sets +i and removes non-ircops 
                 and non-services admins.
   [-clearall] : When specified, implies -clear but removes ircops as well.
