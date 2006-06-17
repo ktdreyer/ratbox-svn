@@ -1,3 +1,18 @@
+leeh        2006/06/17 18:05:38 UTC	(20060617_6-22786)
+  Log:
+  - move the sql statements over to a consistent quoting form for all
+    variables (now all wrapped in '')
+  
+
+  Modified:
+	rserv/trunk/src/s_banserv.c (File Modified) 
+	rserv/trunk/src/s_chanserv.c (File Modified) 
+	rserv/trunk/src/s_nickserv.c (File Modified) 
+	rserv/trunk/src/s_operbot.c (File Modified) 
+	rserv/trunk/src/s_operserv.c (File Modified) 
+	rserv/trunk/src/s_userserv.c (File Modified) 
+
+
 leeh        2006/06/17 17:40:11 UTC	(20060617_5-22784)
   Log:
   - fix up the pgsql error checking
