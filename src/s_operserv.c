@@ -364,16 +364,17 @@ o_oper_ospart(struct client *client_p, struct lconn *conn_p, const char *parv[],
 	rsdb_exec_fetch_end(&data);
 
 	part_service(operserv_p, parv[0]);
+	chptr = NULL;	/* part_service() may have destroyed the channel */
 
 	zlog(operserv_p, 1, WATCH_OPERSERV, 1, client_p, conn_p,
 		"OSPART %s", parv[0]);
 
 	if(osjoin)
-		rsdb_exec(NULL, "DELETE FROM operserv WHERE chname=LOWER('%Q')", chptr->name);
+		rsdb_exec(NULL, "DELETE FROM operserv WHERE chname=LOWER('%Q')", parv[0]);
 
 	service_send(operserv_p, client_p, conn_p,
 			"%s removed from %s",
-			operserv_p->name, chptr->name);
+			operserv_p->name, parv[0]);
 
 	return 0;
 }
