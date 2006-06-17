@@ -283,7 +283,7 @@ init_channel_reg(struct chan_reg *chreg_p, const char *name)
 	rsdb_exec(NULL, 
 		"INSERT INTO channels "
 		"(chname, tsinfo, reg_time, last_time, flags, createmodes) "
-		"VALUES('%Q', %lu, %lu, %lu, 0, '%Q')",
+		"VALUES('%Q', '%lu', '%lu', '%lu', '0', '%Q')",
 		chreg_p->name, chreg_p->tsinfo, chreg_p->reg_time,
 		chreg_p->last_time, "+nt");
 }
@@ -379,7 +379,7 @@ free_member_reg(struct member_reg *mreg_p, int upgrade)
 		mreg_top->lastmod = my_strdup(MYNAME);
 
 		rsdb_exec(NULL, 
-				"UPDATE members SET level = %d, suspend = 0, lastmod = '%Q' "
+				"UPDATE members SET level = '%d', suspend = '0', lastmod = '%Q' "
 				"WHERE chname = '%Q' AND username = '%Q'",
 				mreg_top->level, MYNAME, chreg_p->name, 
 				mreg_top->user_reg->name);
@@ -649,8 +649,7 @@ load_channel_db(void)
 static void
 update_chreg_flags(struct chan_reg *chreg_p)
 {
-	rsdb_exec(NULL, "UPDATE channels SET flags = %d "
-			"WHERE chname = '%Q'",
+	rsdb_exec(NULL, "UPDATE channels SET flags = '%d' WHERE chname = '%Q'",
 			chreg_p->flags, chreg_p->name);
 }
 
@@ -682,7 +681,7 @@ static void
 write_member_db_entry(struct member_reg *reg_p)
 {
 	rsdb_exec(NULL, "INSERT INTO members (chname, username, lastmod, level, flags, suspend) "
-			      " VALUES('%Q', '%Q', '%Q', %u, %d, 0)",
+			      " VALUES('%Q', '%Q', '%Q', '%u', '%d', '0')",
 			reg_p->channel_reg->name,
 			reg_p->user_reg->name, reg_p->lastmod, reg_p->level,
 			reg_p->flags);
@@ -699,7 +698,7 @@ static void
 write_ban_db_entry(struct ban_reg *reg_p, const char *chname)
 {
 	rsdb_exec(NULL, "INSERT INTO bans (chname, mask, reason, username, level, hold) " 
-			      "VALUES('%Q', '%Q', '%Q', '%Q', %d, %lu)",
+			      "VALUES('%Q', '%Q', '%Q', '%Q', '%d', '%lu')",
 			chname, reg_p->mask, reg_p->reason, reg_p->username,
 			reg_p->level, reg_p->hold);
 }
@@ -773,7 +772,7 @@ e_chanserv_updatechan(void *unused)
 		{
 			chreg_p->flags &= ~CS_FLAGS_NEEDUPDATE;
 			rsdb_exec(NULL, "UPDATE channels "
-					"SET last_time=%lu, tsinfo=%lu WHERE chname = '%Q'",
+					"SET last_time='%lu', tsinfo='%lu' WHERE chname = '%Q'",
 					chreg_p->last_time, chreg_p->tsinfo, chreg_p->name);
 		}
 	}
@@ -820,7 +819,7 @@ e_chanserv_expirechan(void *unused)
 			{
 				chreg_p->last_time = CURRENT_TIME;
 				rsdb_exec(NULL, "UPDATE channels "
-						"SET last_time = %lu WHERE chname = '%Q'",
+						"SET last_time = '%lu' WHERE chname = '%Q'",
 						chreg_p->last_time, chreg_p->name);
 				continue;
 			}
@@ -1426,8 +1425,8 @@ o_chan_chansuspend(struct client *client_p, struct lconn *conn_p, const char *pa
 	reg_p->suspend_reason = my_strndup(reason, SUSPENDREASONLEN);
 	reg_p->last_time = CURRENT_TIME;
 
-	rsdb_exec(NULL, "UPDATE channels SET flags=%d, suspender='%Q', "
-			"suspend_reason='%Q', last_time=%lu WHERE chname = '%Q'",
+	rsdb_exec(NULL, "UPDATE channels SET flags='%d', suspender='%Q', "
+			"suspend_reason='%Q', last_time='%lu' WHERE chname = '%Q'",
 			reg_p->flags, reg_p->suspender, reg_p->suspend_reason,
 			reg_p->last_time, reg_p->name);
 
@@ -1465,7 +1464,7 @@ o_chan_chanunsuspend(struct client *client_p, struct lconn *conn_p, const char *
 	reg_p->suspend_reason = NULL;
 	reg_p->last_time = CURRENT_TIME;
 
-	rsdb_exec(NULL, "UPDATE channels SET flags=%d,suspender=NULL,suspend_reason=NULL,last_time=%lu WHERE chname = '%Q'",
+	rsdb_exec(NULL, "UPDATE channels SET flags='%d',suspender=NULL,suspend_reason=NULL,last_time='%lu' WHERE chname = '%Q'",
 			reg_p->flags, reg_p->last_time, reg_p->name);
 
 	service_send(chanserv_p, client_p, conn_p,
@@ -2039,7 +2038,7 @@ s_chan_moduser(struct client *client_p, struct lconn *conn_p, const char *parv[]
 			mreg_tp->user_reg->name, mreg_tp->channel_reg->name, level);
 
 	rsdb_exec(NULL, 
-			"UPDATE members SET level = %d, lastmod = '%Q' "
+			"UPDATE members SET level = '%d', lastmod = '%Q' "
 			"WHERE chname = '%Q' AND username = '%Q'",
 			level, mreg_p->user_reg->name, 
 			mreg_tp->channel_reg->name, mreg_tp->user_reg->name);
@@ -2107,7 +2106,7 @@ s_chan_modauto(struct client *client_p, struct lconn *conn_p, const char *parv[]
 			parv[2]);
 
 	rsdb_exec(NULL, 
-			"UPDATE members SET flags = %d, lastmod = '%Q' "
+			"UPDATE members SET flags = '%d', lastmod = '%Q' "
 			"WHERE chname = '%Q' AND username = '%Q'",
 			mreg_tp->flags, mreg_p->user_reg->name, 
 			mreg_tp->channel_reg->name, mreg_tp->user_reg->name);
@@ -2188,7 +2187,7 @@ s_chan_suspend(struct client *client_p, struct lconn *conn_p, const char *parv[]
 	service_error(chanserv_p, client_p, "User %s on %s suspend %d set",
 			mreg_tp->user_reg->name, mreg_tp->channel_reg->name, level);
 
-	rsdb_exec(NULL, "UPDATE members SET suspend = %d, lastmod = '%Q' "
+	rsdb_exec(NULL, "UPDATE members SET suspend = '%d', lastmod = '%Q' "
 			"WHERE chname = '%Q' AND username = '%Q'",
 			level, mreg_p->user_reg->name, 
 			mreg_tp->channel_reg->name, mreg_tp->user_reg->name);
@@ -2237,7 +2236,7 @@ s_chan_unsuspend(struct client *client_p, struct lconn *conn_p, const char *parv
 	service_error(chanserv_p, client_p, "User %s on %s unsuspended",
 			 mreg_tp->user_reg->name, mreg_tp->channel_reg->name);
 
-	rsdb_exec(NULL, "UPDATE members SET suspend = 0, lastmod = '%Q' "
+	rsdb_exec(NULL, "UPDATE members SET suspend = '0', lastmod = '%Q' "
 			"WHERE chname = '%Q' AND username = '%Q'",
 			mreg_p->user_reg->name, 
 			mreg_tp->channel_reg->name, mreg_tp->user_reg->name);
@@ -3192,7 +3191,7 @@ s_chan_modban(struct client *client_p, struct lconn *conn_p, const char *parv[],
 			"Ban %s on %s level %d set",
 			parv[1], mreg_p->channel_reg->name, level);
 
-	rsdb_exec(NULL, "UPDATE bans SET level = %d, username = '%Q' "
+	rsdb_exec(NULL, "UPDATE bans SET level = '%d', username = '%Q' "
 			"WHERE chname = '%Q' AND mask = '%Q'",
 			level, mreg_p->user_reg->name,
 			mreg_p->channel_reg->name, parv[1]);

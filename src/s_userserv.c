@@ -447,7 +447,7 @@ h_user_dbsync(void *unused, void *unusedd)
 		if(ureg_p->flags & US_FLAGS_NEEDUPDATE)
 		{
 			ureg_p->flags &= ~US_FLAGS_NEEDUPDATE;
-			rsdb_exec(NULL, "UPDATE users SET last_time=%lu WHERE username='%Q'",
+			rsdb_exec(NULL, "UPDATE users SET last_time='%lu' WHERE username='%Q'",
 					ureg_p->last_time, ureg_p->name);
 		}
 	}
@@ -510,7 +510,7 @@ e_user_expire(void *unused)
 		if(ureg_p->flags & US_FLAGS_NEEDUPDATE)
 		{
 			ureg_p->flags &= ~US_FLAGS_NEEDUPDATE;
-			rsdb_exec(NULL, "UPDATE users SET last_time=%lu WHERE username='%Q'",
+			rsdb_exec(NULL, "UPDATE users SET last_time='%lu' WHERE username='%Q'",
 				ureg_p->last_time, ureg_p->name);
 		}
 
@@ -591,7 +591,7 @@ o_user_userregister(struct client *client_p, struct lconn *conn_p, const char *p
 	add_user_reg(reg_p);
 
 	rsdb_exec(NULL, "INSERT INTO users (username, password, email, reg_time, last_time, flags) "
-			"VALUES('%Q', '%Q', '%Q', %lu, %lu, %u)",
+			"VALUES('%Q', '%Q', '%Q', '%lu', '%lu', '%u')",
 			reg_p->name, reg_p->password, 
 			EmptyString(reg_p->email) ? "" : reg_p->email, 
 			reg_p->reg_time, reg_p->last_time, reg_p->flags);
@@ -657,8 +657,8 @@ o_user_usersuspend(struct client *client_p, struct lconn *conn_p, const char *pa
 	reg_p->suspender = my_strdup(OPER_NAME(client_p, conn_p));
 	reg_p->suspend_reason = my_strndup(reason, SUSPENDREASONLEN);
 
-	rsdb_exec(NULL, "UPDATE users SET flags=%d, suspender='%Q', "
-			"suspend_reason='%Q',last_time=%lu WHERE username='%Q'",
+	rsdb_exec(NULL, "UPDATE users SET flags='%d', suspender='%Q', "
+			"suspend_reason='%Q',last_time='%lu' WHERE username='%Q'",
 			reg_p->flags, reg_p->suspender, reg_p->suspend_reason,
 			reg_p->last_time, reg_p->name);
 
@@ -696,7 +696,7 @@ o_user_userunsuspend(struct client *client_p, struct lconn *conn_p, const char *
 	reg_p->suspend_reason = NULL;
 	reg_p->last_time = CURRENT_TIME;
 
-	rsdb_exec(NULL, "UPDATE users SET flags=%d,suspender=NULL,suspend_reason=NULL,last_time=%lu WHERE username='%Q'",
+	rsdb_exec(NULL, "UPDATE users SET flags='%d',suspender=NULL,suspend_reason=NULL,last_time='%lu' WHERE username='%Q'",
 			reg_p->flags, reg_p->last_time, reg_p->name);
 
 	service_send(userserv_p, client_p, conn_p,
@@ -1103,7 +1103,7 @@ s_user_register(struct client *client_p, struct lconn *conn_p, const char *parv[
 	add_user_reg(reg_p);
 
 	rsdb_exec(NULL, "INSERT INTO users (username, password, email, reg_time, last_time, flags, verify_token) "
-			"VALUES('%Q', '%Q', '%Q', %lu, %lu, %u, '%Q')",
+			"VALUES('%Q', '%Q', '%Q', '%lu', '%lu', '%u', '%Q')",
 			reg_p->name, reg_p->password, 
 			EmptyString(reg_p->email) ? "" : reg_p->email, 
 			reg_p->reg_time, reg_p->last_time, reg_p->flags, 
@@ -1780,8 +1780,7 @@ s_user_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 			ureg_p->name,
 			(ureg_p->flags & US_FLAGS_PRIVATE) ? "ON" : "OFF");
 
-		rsdb_exec(NULL, "UPDATE users SET flags=%d "
-				"WHERE username='%Q'",
+		rsdb_exec(NULL, "UPDATE users SET flags='%d' WHERE username='%Q'",
 				ureg_p->flags, ureg_p->name);
 		return 1;
 	}

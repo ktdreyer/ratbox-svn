@@ -113,8 +113,7 @@ h_operbot_sjoin_lowerts(void *v_chptr, void *unused)
 		return 0;
 
 	/* Save the new TS for later -- jilles */
-	rsdb_exec(NULL, "UPDATE operbot SET tsinfo = %lu "
-			"WHERE chname = '%Q'",
+	rsdb_exec(NULL, "UPDATE operbot SET tsinfo = '%lu' WHERE chname = '%Q'",
 			chptr->tsinfo, chptr->name);
 	return 0;
 }
@@ -145,7 +144,7 @@ o_operbot_objoin(struct client *client_p, struct lconn *conn_p, const char *parv
 
 	tsinfo = chptr != NULL ? chptr->tsinfo : CURRENT_TIME;
 
-	rsdb_exec(NULL, "INSERT INTO operbot (chname, tsinfo, oper) VALUES('%Q', %lu, '%Q')",
+	rsdb_exec(NULL, "INSERT INTO operbot (chname, tsinfo, oper) VALUES('%Q', '%lu', '%Q')",
 			parv[0], tsinfo, OPER_NAME(client_p, conn_p));
 
 	join_service(operbot_p, parv[0], tsinfo, NULL);

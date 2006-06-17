@@ -310,7 +310,7 @@ s_nick_register(struct client *client_p, struct lconn *conn_p, const char *parv[
 
 	rsdb_exec(NULL, 
 			"INSERT INTO nicks (nickname, username, reg_time, last_time, flags) "
-			"VALUES('%Q', '%Q', %lu, %lu, %u)",
+			"VALUES('%Q', '%Q', '%lu', '%lu', '%u')",
 			nreg_p->name, ureg_p->name, nreg_p->reg_time, 
 			nreg_p->last_time, nreg_p->flags);
 
@@ -458,8 +458,7 @@ s_nick_set_flag(struct client *client_p, struct nick_reg *nreg_p,
 
 		nreg_p->flags |= flag;
 
-		rsdb_exec(NULL, "UPDATE nicks SET flags=%d "
-				"WHERE nickname='%Q'",
+		rsdb_exec(NULL, "UPDATE nicks SET flags='%d' WHERE nickname='%Q'",
 				nreg_p->flags, nreg_p->name);
 
 		return 1;
@@ -474,8 +473,7 @@ s_nick_set_flag(struct client *client_p, struct nick_reg *nreg_p,
 
 		nreg_p->flags &= ~flag;
 
-		rsdb_exec(NULL, "UPDATE nicks SET flags=%d "
-				"WHERE nickname='%Q'",
+		rsdb_exec(NULL, "UPDATE nicks SET flags='%d' WHERE nickname='%Q'",
 				nreg_p->flags, nreg_p->name);
 
 		return -1;
