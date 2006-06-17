@@ -108,7 +108,7 @@ init_s_global(void)
 	/* we will only ever use this once, so malloc() it */
 	data = my_malloc(sizeof(struct rsdb_table));
 
-	rsdb_exec_fetch(data, "SELECT id, text FROM global_welcome WHERE 1");
+	rsdb_exec_fetch(data, "SELECT id, text FROM global_welcome");
 
 	for(i = 0; i < data->row_count; i++)
 	{
