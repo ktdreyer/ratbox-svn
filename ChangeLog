@@ -1,3 +1,12 @@
+leeh        2006/06/17 22:36:01 UTC	(20060617_8-22790)
+  Log:
+  - chptr may no longer be valid after part_service() in ospart
+  
+
+  Modified:
+	rserv/trunk/src/s_operserv.c (File Modified) 
+
+
 leeh        2006/06/17 20:37:48 UTC	(20060617_7-22788)
   Log:
   - remove WHERE 1 from a dbupgrade statement, it wont work on pgsql
