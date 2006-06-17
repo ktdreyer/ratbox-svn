@@ -1,3 +1,13 @@
+leeh        2006/06/17 12:42:55 UTC	(20060617_3-22779)
+  Log:
+  - rsdb_exec_fetch() in pgsql really shouldnt build its array on
+    colcount*colcount instead of rowcount*colcount
+  
+
+  Modified:
+	rserv/trunk/src/rsdb_pgsql.c (File Modified) 
+
+
 leeh        2006/06/17 12:36:45 UTC	(20060617_2-22777)
   Log:
   - s/chname/name, was in ircd mode..
