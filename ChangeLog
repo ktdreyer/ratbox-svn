@@ -1,3 +1,12 @@
+leeh        2006/06/17 12:36:45 UTC	(20060617_2-22777)
+  Log:
+  - s/chname/name, was in ircd mode..
+  
+
+  Modified:
+	rserv/trunk/src/s_operserv.c (File Modified) 
+
+
 leeh        2006/06/17 11:05:45 UTC	(20060617_1-22775)
   Log:
   - modify operserv::ospart so it can be used to remove operserv after a
