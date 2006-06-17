@@ -277,7 +277,7 @@ rsdb_exec_fetch(struct rsdb_table *table, const char *format, ...)
 
 	table->row = my_malloc(sizeof(char **) * table->row_count);
 
-	for(i = 0; i < table->col_count; i++)
+	for(i = 0; i < table->row_count; i++)
 	{
 		table->row[i] = my_malloc(sizeof(char *) * table->col_count);
 
