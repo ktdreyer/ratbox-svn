@@ -115,6 +115,7 @@ rsdb_try_reconnect(void)
 
 	while(CURRENT_TIME < expire_time)
 	{
+		PQfinish(rsdb_database);
 		if(!rsdb_connect(0))
 			return;
 
@@ -125,8 +126,8 @@ rsdb_try_reconnect(void)
 	die(0, "Unable to connect to postgresql database: %s", PQerrorMessage(rsdb_database));
 }
 
-/* rsdb_handle_error()
- * Handles an error from the database
+/* rsdb_handle_connerror()
+ * Handles a connection error from the database
  *
  * inputs	- result pointer, sql command to execute
  * outputs	-
@@ -134,7 +135,7 @@ rsdb_try_reconnect(void)
  *		  the query if it can
  */
 static void
-rsdb_handle_error(PGresult *rsdb_result, const char *buf)
+rsdb_handle_connerror(PGresult **rsdb_result, const char *buf)
 {
 	if(rsdb_doing_transaction)
 	{
@@ -146,19 +147,31 @@ rsdb_handle_error(PGresult *rsdb_result, const char *buf)
 	
 	switch(PQstatus(rsdb_database))
 	{
-		case CONNECTION_OK:
-			break;
+		case CONNECTION_BAD:
+			PQreset(rsdb_database);
 
-		default:
-			/* try to reconnect immediately.. if that fails fall
-			 * into periodic reconnections
-			 */
-			if(rsdb_connect(0))
+			if(PQstatus(rsdb_database) != CONNECTION_OK)
 				rsdb_try_reconnect();
 
 			break;
+
+		default:
+			mlog("fatal error: problem with db file: %s",
+				PQerrorMessage(rsdb_database));
+			die(0, "problem with db file");
+			return;
 	}
-	/* XXX finish me... */
+
+	/* connected back successfully */
+	if(buf)
+	{
+		if((*rsdb_result = PQexec(rsdb_database, buf)) == NULL)
+		{
+			mlog("fatal error: problem with db file: %s",
+				PQerrorMessage(rsdb_database));
+			die(0, "problem with db file");
+		}
+	}
 }
 
 const char *
@@ -198,14 +211,17 @@ rsdb_exec(rsdb_callback cb, const char *format, ...)
 	}
 
 	if((rsdb_result = PQexec(rsdb_database, buf)) == NULL)
-		rsdb_handle_error(NULL, buf);
+		rsdb_handle_connerror(&rsdb_result, buf);
 
 	switch(PQresultStatus(rsdb_result))
 	{
 		case PGRES_FATAL_ERROR:
 		case PGRES_BAD_RESPONSE:
 		case PGRES_EMPTY_QUERY: /* i'm gonna guess this is bad for us too */
-			rsdb_handle_error(rsdb_result, buf); /* need to pass the result here to get the error */
+			mlog("fatal error: problem with db file: %s",
+				PQresultErrorMessage(rsdb_result));
+			die(0, "problem with db file");
+			break;
 		default:
 			break;
 	}
@@ -252,14 +268,16 @@ rsdb_exec_fetch(struct rsdb_table *table, const char *format, ...)
 	}
 
 	if((rsdb_result = PQexec(rsdb_database, buf)) == NULL)
-		rsdb_handle_error(NULL, buf);
+		rsdb_handle_connerror(&rsdb_result, buf);
 
 	switch(PQresultStatus(rsdb_result))
 	{
 		case PGRES_FATAL_ERROR:
 		case PGRES_BAD_RESPONSE:
 		case PGRES_EMPTY_QUERY: /* i'm gonna guess this is bad for us too */
-			rsdb_handle_error(rsdb_result, buf); /* need to pass the result here to get the error */
+			mlog("fatal error: problem with db file: %s",
+				PQresultErrorMessage(rsdb_result));
+			die(0, "problem with db file");
 		default:
 			break;
 	}
