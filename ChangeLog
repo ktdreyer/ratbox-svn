@@ -1,3 +1,15 @@
+leeh        2006/06/17 20:37:48 UTC	(20060617_7-22788)
+  Log:
+  - remove WHERE 1 from a dbupgrade statement, it wont work on pgsql
+  - fix operserv/operbot tables to deal properly with case
+  
+
+  Modified:
+	rserv/trunk/src/s_operbot.c (File Modified) 
+	rserv/trunk/src/s_operserv.c (File Modified) 
+	rserv/trunk/tools/dbupgrade.pl (File Modified) 
+
+
 leeh        2006/06/17 18:05:38 UTC	(20060617_6-22786)
   Log:
   - move the sql statements over to a consistent quoting form for all
