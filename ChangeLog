@@ -1,3 +1,13 @@
+leeh        2006/06/17 12:47:02 UTC	(20060617_4-22781)
+  Log:
+  - this is still b3..
+  
+
+  Modified:
+	rserv/trunk/ChangeLog (File Modified) 
+	rserv/trunk/include/config.h (File Modified) 
+
+
 leeh        2006/06/17 12:42:55 UTC	(20060617_3-22779)
   Log:
   - rsdb_exec_fetch() in pgsql really shouldnt build its array on
