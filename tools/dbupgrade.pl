@@ -123,7 +123,6 @@ if($currentver < 2)
 	print "    id INTEGER, text TEXT,\n";
 	print "    PRIMARY KEY(id)\n";
 	print ");\n";
-	print "UPDATE operbans SET mask=LOWER(mask) WHERE 1;\n";
 
 	print "\n";
 }
@@ -169,6 +168,9 @@ if($currentver < 3)
 		print "CREATE INDEX resetemail_time_idx ON users_resetemail (time);\n";
 	}
 
+	print "UPDATE operserv SET chname=LOWER(chname);\n";
+	print "UPDATE operbot SET chname=LOWER(chname);\n";
+	print "UPDATE operbans SET mask=LOWER(mask);\n";
 	print "\n";
 }
 
