@@ -65,7 +65,7 @@ static int h_operserv_sjoin_lowerts(void *chptr, void *unused);
 static struct service_command operserv_command[] =
 {
 	{ "OSJOIN",	&o_oper_osjoin,		1, NULL, 1, 0L, 0, 0, CONF_OPER_OS_CHANNEL	},
-	{ "OSPART",	&o_oper_ospart,		1, NULL, 1, 0L, 0, 0, CONF_OPER_OS_CHANNEL	},
+	{ "OSPART",	&o_oper_ospart,		1, NULL, 1, 0L, 0, 0, 0				},
 	{ "TAKEOVER",	&o_oper_takeover,	1, NULL, 1, 0L, 0, 0, CONF_OPER_OS_TAKEOVER	},
 	{ "OMODE",	&o_oper_omode,		2, NULL, 1, 0L, 0, 0, CONF_OPER_OS_OMODE	},
 	{ "DBSYNC",	&o_oper_dbsync,		0, NULL, 1, 0L, 0, 0, CONF_OPER_OS_MAINTAIN	},
@@ -311,21 +311,70 @@ o_oper_osjoin(struct client *client_p, struct lconn *conn_p, const char *parv[],
 static int
 o_oper_ospart(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
-	if(part_service(operserv_p, parv[0]))
-	{
-		zlog(operserv_p, 1, WATCH_OPERSERV, 1, client_p, conn_p,
-			"OSPART %s", parv[0]);
+	struct rsdb_table data;
+	struct channel *chptr;
+	int osjoin = 0;
 
-		rsdb_exec(NULL, "DELETE FROM operserv WHERE "
-				"chname = '%Q'", parv[0]);
-		service_send(operserv_p, client_p, conn_p,
-				"%s removed from %s",
-				operserv_p->name, parv[0]);
+	if(!client_p->user->oper)
+	{
+		service_error(operserv_p, client_p, "No access to OPERSERV::OSPART");
+		return 1;
 	}
-	else
+
+	if((chptr = find_channel(parv[0])) == NULL || dlink_find(operserv_p, &chptr->services) == NULL)
+	{
 		service_send(operserv_p, client_p, conn_p,
 				"%s not in channel %s", 
 				operserv_p->name, parv[0]);
+		return 0;
+	}
+
+	/* test privs ourself here, OSPART for channels done through OSJOIN
+	 * is the 'maintain' priv, but through channels joined through
+	 * TAKEOVER, its the 'takeover' priv.
+	 */
+	rsdb_exec_fetch(&data, "SELECT COUNT(chname) FROM operserv WHERE chname='%Q'",
+			chptr->chname);
+
+	if(data.row_count == 0)
+	{
+		mlog("fatal error: SELECT COUNT() returned 0 rows in o_oper_ospart()");
+		die(0, "problem with db file");
+	}
+
+	/* done through OSJOIN */
+	if(atoi(data.row[0][0]) > 0)
+	{
+		if((client_p->user->oper->sflags & CONF_OPER_OS_CHANNEL) == 0)
+		{
+			service_error(operserv_p, client_p, 
+					"No access to OPERSERV::OSPART on channels joined through OSJOIN");
+			return 0;
+		}
+
+		osjoin++;
+	}
+	/* through TAKEOVER */
+	else if((client_p->user->oper->sflags & CONF_OPER_OS_TAKEOVER) == 0)
+	{
+		service_error(operserv_p, client_p, 
+				"No access to OPERSERV::OSPART on channels joined through TAKEOVER");
+		return 0;
+	}
+
+	rsdb_exec_fetch_end(&data);
+
+	part_service(operserv_p, parv[0]);
+
+	zlog(operserv_p, 1, WATCH_OPERSERV, 1, client_p, conn_p,
+		"OSPART %s", parv[0]);
+
+	if(osjoin)
+		rsdb_exec(NULL, "DELETE FROM operserv WHERE chname='%Q'", chptr->chname);
+
+	service_send(operserv_p, client_p, conn_p,
+			"%s removed from %s",
+			operserv_p->name, chptr->chname);
 
 	return 0;
 }
