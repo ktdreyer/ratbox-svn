@@ -1,3 +1,12 @@
+leeh        2006/06/17 17:40:11 UTC	(20060617_5-22784)
+  Log:
+  - fix up the pgsql error checking
+  
+
+  Modified:
+	rserv/trunk/src/rsdb_pgsql.c (File Modified) 
+
+
 leeh        2006/06/17 12:47:02 UTC	(20060617_4-22781)
   Log:
   - this is still b3..
