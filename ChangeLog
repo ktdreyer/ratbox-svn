@@ -1,3 +1,13 @@
+leeh        2006/06/17 10:26:19 UTC	(20060617_0-22773)
+  Log:
+  - psql doesnt like "WHERE 1" as a boolean, but the SELECT clause doesnt need
+    it anyway so just remove the 'WHERE 1'
+  
+
+  Modified:
+	rserv/trunk/src/s_global.c (File Modified) 
+
+
 leeh        2006/06/16 21:37:36 UTC	(20060616_1-22771)
   Log:
   - operserv::takeover without removing bans just doesnt play nicely in the
