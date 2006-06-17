@@ -334,7 +334,7 @@ o_oper_ospart(struct client *client_p, struct lconn *conn_p, const char *parv[],
 	 * TAKEOVER, its the 'takeover' priv.
 	 */
 	rsdb_exec_fetch(&data, "SELECT COUNT(chname) FROM operserv WHERE chname='%Q'",
-			chptr->chname);
+			chptr->name);
 
 	if(data.row_count == 0)
 	{
@@ -370,11 +370,11 @@ o_oper_ospart(struct client *client_p, struct lconn *conn_p, const char *parv[],
 		"OSPART %s", parv[0]);
 
 	if(osjoin)
-		rsdb_exec(NULL, "DELETE FROM operserv WHERE chname='%Q'", chptr->chname);
+		rsdb_exec(NULL, "DELETE FROM operserv WHERE chname='%Q'", chptr->name);
 
 	service_send(operserv_p, client_p, conn_p,
 			"%s removed from %s",
-			operserv_p->name, chptr->chname);
+			operserv_p->name, chptr->name);
 
 	return 0;
 }
