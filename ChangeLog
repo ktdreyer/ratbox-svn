@@ -1,3 +1,13 @@
+leeh        2006/06/18 15:19:14 UTC	(20060618_0-22792)
+  Log:
+  - parse_full_mode() should have a break; after its dealt with +ov directed
+    at services.. (though irrelevant at present)
+  
+
+  Modified:
+	rserv/trunk/src/c_mode.c (File Modified) 
+
+
 leeh        2006/06/17 22:36:01 UTC	(20060617_8-22790)
   Log:
   - chptr may no longer be valid after part_service() in ospart
