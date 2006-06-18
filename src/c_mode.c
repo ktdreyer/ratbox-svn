@@ -658,7 +658,7 @@ c_mode(struct client *client_p, const char *parv[], int parc)
 	   (msptr->flags & MODE_DEOPPED))
 		return;
 
-	handle_chmode(chptr, parc - 2, parv + 2);
+	handle_chmode(chptr, parc - 1, parv + 1);
 }
 
 /* c_tmode()
