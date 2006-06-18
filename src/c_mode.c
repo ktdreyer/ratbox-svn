@@ -457,6 +457,8 @@ parse_full_mode(struct channel *chptr, struct client *source_p,
 				/* this is a -o */
 				else if(dlink_find(target_p, &deopped_list) == NULL)
 					dlink_add_alloc(target_p, &deopped_list);
+
+				break;
 			}
 
 			if((target_p = find_user(nick, 1)) == NULL)
