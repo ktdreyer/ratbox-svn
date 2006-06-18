@@ -1,3 +1,14 @@
+leeh        2006/06/18 15:37:44 UTC	(20060618_2-22796)
+  Log:
+  - update RELEASE_NOTES
+  - revved patchlevel to 1.1.0beta4
+  
+
+  Modified:
+	rserv/trunk/RELEASE_NOTES (File Modified) 
+	rserv/trunk/include/config.h (File Modified) 
+
+
 leeh        2006/06/18 15:24:10 UTC	(20060618_1-22794)
   Log:
   - fix c_mode() call to handle_chmode() stripping out a parameter from the
