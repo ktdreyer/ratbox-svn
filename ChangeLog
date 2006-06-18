@@ -1,3 +1,13 @@
+leeh        2006/06/18 15:24:10 UTC	(20060618_1-22794)
+  Log:
+  - fix c_mode() call to handle_chmode() stripping out a parameter from the
+    beginning of the modestring
+  
+
+  Modified:
+	rserv/trunk/src/c_mode.c (File Modified) 
+
+
 leeh        2006/06/18 15:19:14 UTC	(20060618_0-22792)
   Log:
   - parse_full_mode() should have a break; after its dealt with +ov directed
