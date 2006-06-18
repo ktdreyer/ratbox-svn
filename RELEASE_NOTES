@@ -21,6 +21,12 @@ This is the current development version of ratbox-services.
   long time with extra time before expiry.  See example.conf
 - reset_regtime = <duration>; to userserv {};, controls minimum length of a
   time a username must be registered before resetpass/resetemail can be used
+- fix handling of booleans with pgsql
+- operserv::takeover now always removes +beI
+- allow operserv::ospart to remove operserv after operserv::takeover
+- fix a few bugs in the pgsql implementation
+- fix case sensitivity handling on a few db tables
+- fix handling of TS5 MODE
 
 -- ratbox-services-1.1.0beta3
 - deal with removing bans under TS6 properly
