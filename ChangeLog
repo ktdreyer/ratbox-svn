@@ -1,3 +1,17 @@
+leeh        2006/06/19 19:52:34 UTC	(20060619_0-22799)
+  Log:
+  - add new db table banned_email_domain for banned email domains
+  - have email functions for userserv scan that table
+  
+
+  Modified:
+	rserv/trunk/src/s_userserv.c (File Modified) 
+	rserv/trunk/tools/base/schema-mysql.txt (File Modified) 
+	rserv/trunk/tools/base/schema-pgsql.txt (File Modified) 
+	rserv/trunk/tools/base/schema-sqlite.txt (File Modified) 
+	rserv/trunk/tools/dbupgrade.pl (File Modified) 
+
+
 leeh        2006/06/18 15:37:44 UTC	(20060618_2-22796)
   Log:
   - update RELEASE_NOTES
