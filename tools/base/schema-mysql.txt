@@ -131,3 +131,9 @@ CREATE TABLE global_welcome (
 	text TEXT,
 	PRIMARY KEY(id)
 );
+
+CREATE TABLE email_banned_domain (
+	domain VARCHAR(255) NOT NULL,
+	PRIMARY KEY(domain)
+);
+

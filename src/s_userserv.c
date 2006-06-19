@@ -125,6 +125,7 @@ static void e_user_expire_reset(void *unused);
 static void dump_user_info(struct client *, struct lconn *, struct user_reg *);
 
 static int valid_email(const char *email);
+static int valid_email_domain(const char *email);
 
 void
 preinit_s_userserv(void)
@@ -932,6 +933,31 @@ valid_email(const char *email)
 }
 
 static int
+valid_email_domain(const char *email)
+{
+	struct rsdb_table data;
+	char *p;
+
+	if((p = strchr(email, '@')) == NULL)
+		return 0;
+
+	p++;
+
+	rsdb_exec_fetch(&data, "SELECT COUNT(domain) FROM banned_email_domain WHERE LOWER(domain) = LOWER('%Q')", p);
+
+	if(data.row_count == 0)
+	{
+		mlog("fatal error: SELECT COUNT() returned 0 rows in valid_email_domain()");
+		die(0, "problem with db file");
+	}
+
+	if(atoi(data.row[0][0]) > 0)
+		return 0;
+
+	return 1;
+}
+
+static int
 s_user_register(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct user_reg *reg_p;
@@ -993,6 +1019,11 @@ s_user_register(struct client *client_p, struct lconn *conn_p, const char *parv[
 	{
 		service_error(userserv_p, client_p, "Email %s invalid",
 				parv[2]);
+		return 1;
+	}
+	else if(!valid_email_domain(parv[2]))
+	{
+		service_error(userserv_p, client_p, "Email provider banned");
 		return 1;
 	}
 
@@ -1540,6 +1571,11 @@ s_user_resetemail(struct client *client_p, struct lconn *conn_p, const char *par
 			service_error(userserv_p, client_p, "Email %s invalid", parv[2]);
 			return 1;
 		}
+		else if(!valid_email_domain(parv[2]))
+		{
+			service_error(userserv_p, client_p, "Email provider banned");
+			return 1;
+		}
 
 		rsdb_exec_fetch(&data, "SELECT token FROM users_resetemail WHERE username='%Q' AND time > '%lu' AND email is NULL",
 				reg_p->name, CURRENT_TIME - config_file.uresetemail_duration);
@@ -1742,6 +1778,11 @@ s_user_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 		{
 			service_error(userserv_p, client_p, "Email %s invalid",
 					arg);
+			return 1;
+		}
+		else if(!valid_email_domain(parv[2]))
+		{
+			service_error(userserv_p, client_p, "Email provider banned");
 			return 1;
 		}
 

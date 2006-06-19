@@ -34,7 +34,8 @@ my %versionlist = (
 	"1.0.3"		=> 1,
 	"1.1.0beta1"	=> 2,
 	"1.1.0beta2"	=> 2,
-	"1.1.0beta3"	=> 2
+	"1.1.0beta3"	=> 2,
+	"1.1.0beta4"	=> 3
 );
 
 my $version = $ARGV[0];
@@ -173,5 +174,28 @@ if($currentver < 3)
 	print "UPDATE operbans SET mask=LOWER(mask);\n";
 	print "\n";
 }
+
+if($currentver < 4)
+{
+	print "-- To version 1.1.0beta5\n";
+
+	if($dbtype eq "mysql" || $dbtype eq "pgsql")
+	{
+		print "CREATE TABLE email_banned_domain (\n";
+		print "    domain VARCHAR(255) NOT NULL,\n";
+		print "    PRIMARY KEY(domain)\n";
+		print ");\n";
+	}
+	else
+	{
+		print "CREATE TABLE email_banned_domain (\n";
+		print "    domain TEXT NOT NULL,\n";
+		print "    PRIMARY KEY(domain)\n";
+		print ");\n";
+	}
+
+	print "\n";
+}
+
 
 exit;
