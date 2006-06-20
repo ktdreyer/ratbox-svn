@@ -1,3 +1,12 @@
+leeh        2006/06/20 20:30:47 UTC	(20060620_0-22810)
+  Log:
+  - update whats-new somewhat
+  
+
+  Modified:
+	rserv/trunk/doc/whats-new-1.1.txt (File Modified) 
+
+
 leeh        2006/06/19 19:52:34 UTC	(20060619_0-22799)
   Log:
   - add new db table banned_email_domain for banned email domains
