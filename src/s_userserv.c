@@ -943,7 +943,7 @@ valid_email_domain(const char *email)
 
 	p++;
 
-	rsdb_exec_fetch(&data, "SELECT COUNT(domain) FROM banned_email_domain WHERE LOWER(domain) = LOWER('%Q')", p);
+	rsdb_exec_fetch(&data, "SELECT COUNT(domain) FROM email_banned_domain WHERE LOWER(domain) = LOWER('%Q')", p);
 
 	if(data.row_count == 0)
 	{
