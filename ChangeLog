@@ -1,3 +1,14 @@
+leeh        2006/06/21 17:55:09 UTC	(20060621_0-22816)
+  Log:
+  - update some documentation
+  
+
+  Modified:
+	rserv/trunk/doc/database_mod.txt (File Modified) 
+	rserv/trunk/doc/dbhook_current.txt (File Added) 
+	rserv/trunk/doc/whats-new-1.1.txt (File Modified) 
+
+
 leeh        2006/06/20 20:30:47 UTC	(20060620_0-22810)
   Log:
   - update whats-new somewhat
