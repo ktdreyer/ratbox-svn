@@ -10,9 +10,9 @@ The REGISTER hook in users_sync is used to have rserv register a new
 username.
 
 The data passed should be "<username> <password> [email]":
-  <username>: Username to register
-  <password>: Encrypted password for user
-  [email]   : Email address for user
+	<username>: Username to register
+	<password>: Encrypted password for user
+	[email]   : Email address for user
 
 - users_sync :: SETPASS -
 -------------------------
@@ -20,8 +20,8 @@ The SETPASS hook in users_sync is used to have rserv change a users
 password.
 
 The data passed should be "<username> <password>":
-  <username>: Username to change password for
-  <password>: New encrypted password
+	<username>: Username to change password for
+	<password>: New encrypted password
 
 - users_sync :: SETEMAIL -
 --------------------------
@@ -29,5 +29,5 @@ The SETEMAIL hook in users_sync is used to have rserv change a users email
 address.
 
 The data passed should be "<username> <email>":
-  <username>: Username to change password for
-  <email>   : New email address
+	<username>: Username to change password for
+	<email>   : New email address
