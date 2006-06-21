@@ -57,10 +57,10 @@ This function MUST NOT perform any database queries directly.
 
 This function should then be added as a hook through rsdb_hook_add(), which
 takes four parameters:
-- (const char *) The name of the table to search
-- (const char *) The name of the hook
-- (int) How often to search for entries
-- (dbh_callback) The callback function
+	- (const char *) The name of the table to search
+	- (const char *) The name of the hook
+	- (int) How often to search for entries
+	- (dbh_callback) The callback function
 
 Eg:
 	rsdb_hook_add("sync_table", "HOOKNAME", 900, sync_func);
