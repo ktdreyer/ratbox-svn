@@ -17,6 +17,8 @@ General
 - .flags command has gone, it has been replaced with .chat [on|off] and the
   watchserv system
 - Log format altered so that we log nick!user@host mask for oper commands
+- Ability to send out emails for various things, with a table of banned
+  email domains
 
 Compilation
 -----------
