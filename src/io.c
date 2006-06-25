@@ -476,7 +476,11 @@ connect_to_server(void *target_server)
 	serv_fd = sock_open(conf_p->host, conf_p->port, conf_p->vhost, IO_HOST);
 
 	if(serv_fd < 0)
+	{
+		eventAddOnce("connect_to_server", connect_to_server, NULL,
+				config_file.reconnect_time);
 		return;
+	}
 
 	conn_p = my_malloc(sizeof(struct lconn));
 	conn_p->name = my_strdup(conf_p->name);
