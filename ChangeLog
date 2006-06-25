@@ -1,3 +1,24 @@
+leeh        2006/06/25 18:34:00 UTC	(20060625_0-22828)
+  Log:
+  - fix some minor signedness issues
+  
+
+  Modified:
+	rserv/trunk/include/conf.h (File Modified) 
+	rserv/trunk/include/dbhook.h (File Modified) 
+	rserv/trunk/include/io.h (File Modified) 
+	rserv/trunk/include/log.h (File Modified) 
+	rserv/trunk/include/tools.h (File Modified) 
+	rserv/trunk/src/balloc.c (File Modified) 
+	rserv/trunk/src/conf.c (File Modified) 
+	rserv/trunk/src/dbhook.c (File Modified) 
+	rserv/trunk/src/io.c (File Modified) 
+	rserv/trunk/src/log.c (File Modified) 
+	rserv/trunk/src/newconf.c (File Modified) 
+	rserv/trunk/src/service.c (File Modified) 
+	rserv/trunk/src/tools.c (File Modified) 
+
+
 leeh        2006/06/21 18:01:47 UTC	(20060621_3-22822)
   Log:
   - this should be email_banned_domain
