@@ -1,3 +1,13 @@
+leeh        2006/06/25 18:38:32 UTC	(20060625_1-22830)
+  Log:
+  - ensure we schedule a reconnect when the server connect fails due to a
+    socket error (eg, no dns)
+  
+
+  Modified:
+	rserv/trunk/src/io.c (File Modified) 
+
+
 leeh        2006/06/25 18:34:00 UTC	(20060625_0-22828)
   Log:
   - fix some minor signedness issues
