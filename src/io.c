@@ -113,9 +113,9 @@ static int
 get_line(struct lconn *conn_p)
 {
 	char *p;
-	int n;
+	size_t n;
 	int term;
-	int buflen;
+	size_t buflen;
 
 	if((n = recv(conn_p->fd, conn_p->recvbuf + conn_p->recvbuf_offset, 
 			sizeof(conn_p->recvbuf) - conn_p->recvbuf_offset, MSG_PEEK)) <= 0)
@@ -1210,7 +1210,7 @@ write_sendq(struct lconn *conn_p)
  * outputs	-
  */
 static void
-sendq_add(struct lconn *conn_p, const char *buf, int len, int offset)
+sendq_add(struct lconn *conn_p, const char *buf, size_t len, size_t offset)
 {
 	struct send_queue *sendq = my_calloc(1, sizeof(struct send_queue));
 	sendq->buf = my_strdup(buf);
@@ -1425,9 +1425,9 @@ sock_open(const char *host, int port, const char *vhost, int type)
  * outputs	- -1 on fatal error, 0 on partial write, otherwise 1
  */
 int
-sock_write(struct lconn *conn_p, const char *buf, int len)
+sock_write(struct lconn *conn_p, const char *buf, size_t len)
 {
-	int n;
+	size_t n;
 
 	if(dlink_list_length(&conn_p->sendq) > 0)
 	{

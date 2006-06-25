@@ -21,8 +21,8 @@ struct lconn
 
 	int fd;
 	int flags;
-	int privs;		/* privs as an oper */
-	int sprivs;		/* privs on services */
+	unsigned int privs;		/* privs as an oper */
+	unsigned int sprivs;		/* privs on services */
 	int watchflags;
 	time_t first_time;
 	time_t last_time;
@@ -34,7 +34,7 @@ struct lconn
 	void (*io_close)(struct lconn *);
 
 	char recvbuf[BUFSIZE+1];
-	int recvbuf_offset;
+	size_t recvbuf_offset;
 
 	dlink_list sendq;
 };
@@ -115,7 +115,7 @@ extern void PRINTFLIKE(2, 3) sendto_all_chat(struct lconn *, const char *format,
 extern int sock_create(int);
 extern int sock_open(const char *host, int port, const char *vhost, int type);
 extern void sock_close(struct lconn *conn_p);
-extern int sock_write(struct lconn *conn_p, const char *buf, int len);
+extern int sock_write(struct lconn *conn_p, const char *buf, size_t len);
 
 extern unsigned long get_sendq(struct lconn *conn_p);
 

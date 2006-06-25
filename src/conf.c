@@ -352,7 +352,7 @@ static struct flag_table
 };
 
 const char *
-conf_oper_flags(int flags)
+conf_oper_flags(unsigned int flags)
 {
 	static char buf[20];
 	static const char *empty_flags = "-";
@@ -441,7 +441,7 @@ static struct sflag_table
 };
 
 const char *
-conf_service_flags(int flags)
+conf_service_flags(unsigned int flags)
 {
 	static char buf[BUFSIZE];
 	static const char *empty_flags = "-";

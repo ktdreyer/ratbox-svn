@@ -11,7 +11,7 @@ extern void reopen_logfiles(void);
 
 extern void PRINTFLIKE(1, 2) mlog(const char *format, ...);
 
-extern void PRINTFLIKE(7, 8) zlog(struct client *, int loglevel, int watchlevel, int oper,
+extern void PRINTFLIKE(7, 8) zlog(struct client *, int loglevel, unsigned int watchlevel, int oper,
 					struct client *, struct lconn *,
 					const char *format, ...);
 

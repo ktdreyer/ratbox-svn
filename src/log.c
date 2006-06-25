@@ -116,7 +116,7 @@ mlog(const char *format, ...)
 }
 
 void
-zlog(struct client *service_p, int loglevel, int watchlevel, int oper,
+zlog(struct client *service_p, int loglevel, unsigned int watchlevel, int oper,
 	struct client *client_p, struct lconn *conn_p,
 	const char *format, ...)
 {

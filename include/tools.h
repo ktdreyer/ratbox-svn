@@ -12,7 +12,7 @@ extern void init_tools(void);
 void my_sleep(unsigned int seconds, unsigned int microseconds);
 
 #define my_malloc(x) (my_calloc(1, x))
-extern void *my_calloc(int, size_t);
+extern void *my_calloc(size_t, size_t);
 extern void my_free(void *);
 extern char *my_strdup(const char *s);
 extern char *my_strndup(const char *, size_t);

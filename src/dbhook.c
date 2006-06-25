@@ -46,7 +46,7 @@ static void rsdb_hook_schedule_execute(void);
 
 struct rsdb_hook *
 rsdb_hook_add(const char *table, const char *hook_value,
-		unsigned int frequency, dbh_callback callback)
+		int frequency, dbh_callback callback)
 {
 	struct rsdb_hook *dbh;
 

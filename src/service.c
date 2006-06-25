@@ -197,7 +197,7 @@ struct client *
 add_service(struct service_handler *service)
 {
 	struct client *client_p;
-	int maxlen = service->command_size / sizeof(struct service_command);
+	size_t maxlen = service->command_size / sizeof(struct service_command);
 
 	if(strchr(service->name, '.') != NULL)
 	{

@@ -63,7 +63,7 @@ my_sleep(unsigned int seconds, unsigned int microseconds)
  *   wrapper for calloc() to detect out of memory
  */
 void *
-my_calloc(int nmemb, size_t size)
+my_calloc(size_t nmemb, size_t size)
 {
     void *p;
 

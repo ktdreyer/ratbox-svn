@@ -915,7 +915,7 @@ conf_set_service_loglevel(void *data)
 static void
 conf_set_chanserv_expireban(void *data)
 {
-	unsigned int val = *(unsigned int *) data;
+	time_t val = *(time_t *) data;
 
 	if(val < 60)
 	{
@@ -934,7 +934,7 @@ conf_set_chanserv_expireban(void *data)
 static void
 conf_set_chanserv_enforcetopic(void *data)
 {
-	unsigned int val = *(unsigned int *) data;
+	time_t val = *(time_t *) data;
 
 	if(val < 60)
 	{
@@ -953,7 +953,7 @@ conf_set_chanserv_enforcetopic(void *data)
 static void
 conf_set_banserv_autosync(void *data)
 {
-	unsigned int val = *(unsigned int *) data;
+	time_t val = *(time_t *) data;
 
 	if(val < 60)
 	{
