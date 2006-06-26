@@ -1,3 +1,13 @@
+leeh        2006/06/26 18:22:05 UTC	(20060626_0-22832)
+  Log:
+  - cast uses of strlen() in printf family functions to uint
+  
+
+  Modified:
+	rserv/trunk/src/client.c (File Modified) 
+	rserv/trunk/src/s_global.c (File Modified) 
+
+
 leeh        2006/06/25 18:38:32 UTC	(20060625_1-22830)
   Log:
   - ensure we schedule a reconnect when the server connect fails due to a
