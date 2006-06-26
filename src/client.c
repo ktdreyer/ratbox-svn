@@ -640,8 +640,8 @@ c_nick(struct client *client_p, const char *parv[], int parc)
 		}
 
 		if(strlen(parv[0]) > NICKLEN)
-			die(1, "Compiled NICKLEN appears to be wrong (nick %s (%d > %d).  Read INSTALL.",
-				parv[0], strlen(parv[0]), NICKLEN);
+			die(1, "Compiled NICKLEN appears to be wrong (nick %s (%u > %d).  Read INSTALL.",
+				parv[0], (unsigned int) strlen(parv[0]), NICKLEN);
 
                 /* something already exists with this nick */
 		if(target_p != NULL)
@@ -717,8 +717,8 @@ c_nick(struct client *client_p, const char *parv[], int parc)
                         return;
 
 		if(strlen(parv[0]) > NICKLEN)
-			die(1, "Compiled NICKLEN appears to be wrong (nick %s (%d > %d).  Read INSTALL.",
-				parv[0], strlen(parv[0]), NICKLEN);
+			die(1, "Compiled NICKLEN appears to be wrong (nick %s (%u > %d).  Read INSTALL.",
+				parv[0], (unsigned int) strlen(parv[0]), NICKLEN);
 
 		del_client(client_p);
 		strlcpy(client_p->name, parv[0], sizeof(client_p->name));
@@ -757,8 +757,8 @@ c_uid(struct client *client_p, const char *parv[], int parc)
 	newts = atol(parv[2]);
 
 	if(strlen(parv[0]) > NICKLEN)
-		die(1, "Compiled NICKLEN appears to be wrong (nick %s (%d > %d).  Read INSTALL.",
-			parv[0], strlen(parv[0]), NICKLEN);
+		die(1, "Compiled NICKLEN appears to be wrong (nick %s (%u > %d).  Read INSTALL.",
+			parv[0], (unsigned int) strlen(parv[0]), NICKLEN);
 
 	/* something already exists with this nick */
 	if(target_p != NULL)
@@ -916,8 +916,8 @@ c_server(struct client *client_p, const char *parv[], int parc)
 
 	if(strlen(parv[0]) > HOSTLEN)
 	{
-		die(1, "Compiled HOSTLEN appears to be wrong, received %s (%d > %d)",
-			parv[0], strlen(parv[0]), HOSTLEN);
+		die(1, "Compiled HOSTLEN appears to be wrong, received %s (%u > %d)",
+			parv[0], (unsigned int) strlen(parv[0]), HOSTLEN);
 	}
 
         /* our uplink introducing themselves */
@@ -996,8 +996,8 @@ c_sid(struct client *client_p, const char *parv[], int parc)
 
 	if(strlen(parv[0]) > HOSTLEN)
 	{
-		die(1, "Compiled HOSTLEN appears to be wrong, received %s (%d > %d)",
-			parv[0], strlen(parv[0]), HOSTLEN);
+		die(1, "Compiled HOSTLEN appears to be wrong, received %s (%u > %d)",
+			parv[0], (unsigned int) strlen(parv[0]), HOSTLEN);
 	}
 
 	target_p = BlockHeapAlloc(client_heap);

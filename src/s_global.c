@@ -176,7 +176,7 @@ o_global_addwelcome(struct client *client_p, struct lconn *conn_p, const char *p
 	{
 		service_send(global_p, client_p, conn_p,
 				"Welcome message too long (%u > %u)",
-				strlen(data), WELCOME_MAGIC);
+				(unsigned int) strlen(data), WELCOME_MAGIC);
 		return 0;
 	}
 
