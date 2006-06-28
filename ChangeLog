@@ -1,3 +1,12 @@
+leeh        2006/06/28 17:13:25 UTC	(20060628_0-22834)
+  Log:
+  - via ongeboren, fix password length checking in resetpass
+  
+
+  Modified:
+	rserv/trunk/src/s_userserv.c (File Modified) 
+
+
 leeh        2006/06/26 18:22:05 UTC	(20060626_0-22832)
   Log:
   - cast uses of strlen() in printf family functions to uint
