@@ -1,3 +1,14 @@
+leeh        2006/06/28 21:17:32 UTC	(20060628_1-22836)
+  Log:
+  - update RELEASE_NOTES
+  - revved patchlevel to 1.1.0rc1
+  
+
+  Modified:
+	rserv/trunk/RELEASE_NOTES (File Modified) 
+	rserv/trunk/include/config.h (File Modified) 
+
+
 leeh        2006/06/28 17:13:25 UTC	(20060628_0-22834)
   Log:
   - via ongeboren, fix password length checking in resetpass
