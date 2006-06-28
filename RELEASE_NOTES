@@ -1,6 +1,15 @@
 
 This is the current development version of ratbox-services.
 
+-- ratbox-services-1.1.0rc1
+- *** THIS RELEASE REQUIRES A DATABASE UPGRADE ** SEE UPGRADING ***
+
+- add a new database table, email_banned_domain, a simple list of banned
+  email domains.  This table cannot be modified through services.
+- fix a few minor signedness issues
+- ensure we schedule a reconnect when we get a socket error (eg, failed dns)
+- fix password length checking in userserv::resetpass
+
 -- ratbox-services-1.1.0beta4
 - *** THIS RELEASE REQUIRES A DATABASE UPGRADE ** SEE UPGRADING ***
 
