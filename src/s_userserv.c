@@ -1417,6 +1417,12 @@ s_user_resetpass(struct client *client_p, struct lconn *conn_p, const char *parv
 		return 1;
 	}
 
+	if(strlen(parv[2]) > PASSWDLEN)
+	{
+		service_error(userserv_p, client_p, "Password too long");
+		return 1;
+	}
+
 	zlog(userserv_p, 3, 0, 0, client_p, NULL,
 		"RESETPASS %s (auth)", reg_p->name);
 
