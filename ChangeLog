@@ -1,3 +1,13 @@
+jilles      2006/07/05 14:26:37 UTC	(20060705_1-22852)
+  Log:
+  chanserv::delowner: also confirm success if no email
+  confirmation is necessary.
+  
+
+  Modified:
+	rserv/trunk/src/s_chanserv.c (File Modified) 
+
+
 jilles      2006/07/05 13:52:34 UTC	(20060705_0-22850)
   Log:
   TMODE: no need to check MODE_DEOPPED here
