@@ -233,8 +233,10 @@ rsdb_exec(rsdb_callback cb, const char *format, ...)
 		die(0, "too many columns in result set -- contact the ratbox team");
 
 	if(!field_count || !row_count || !cb)
+	{
+		PQclear(rsdb_result);
 		return;
-		
+	}		
 	
 	for(cur_row = 0; cur_row < row_count; cur_row++)
 	{
