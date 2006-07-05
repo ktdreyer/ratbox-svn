@@ -679,10 +679,8 @@ c_tmode(struct client *client_p, const char *parv[], int parc)
 	if(atol(parv[0]) > chptr->tsinfo)
 		return;
 
-	/* user marked as being deopped, bounce mode changes */
-	if(IsUser(client_p) && (msptr = find_chmember(chptr, client_p)) &&
-	   (msptr->flags & MODE_DEOPPED))
-		return;
+	/* MODE_DEOPPED check removed, this is not possible given the
+	 * TS on the mode is correct -- jilles */
 
 	handle_chmode(chptr, parc - 2, parv + 2);
 }
