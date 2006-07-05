@@ -1860,16 +1860,18 @@ s_chan_delowner(struct client *client_p, struct lconn *conn_p, const char *parv[
 	if((mreg_p = verify_member_reg_name(client_p, NULL, parv[0], S_C_OWNER)) == NULL)
 		return 1;
 
+	ureg_p = client_p->user->user_reg;
+	chreg_p = mreg_p->channel_reg;
+
 	/* dont require auth */
 	if(!config_file.cemail_delowner)
 	{
+		service_error(chanserv_p, client_p,
+				"Channel %s owner deleted", chreg_p->name);
 		delete_member_db_entry(mreg_p);
 		free_member_reg(mreg_p, 1);
 		return 1;
 	}
-
-	ureg_p = client_p->user->user_reg;
-	chreg_p = mreg_p->channel_reg;
 
 	/* just one param. send the token. */
 	if(EmptyString(parv[1]))
