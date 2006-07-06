@@ -1,3 +1,13 @@
+leeh        2006/07/06 08:14:37 UTC	(20060706_0-22856)
+  Log:
+  - fix some minor missing rsdb_exec_fetch_end()
+  
+
+  Modified:
+	rserv/trunk/src/s_operserv.c (File Modified) 
+	rserv/trunk/src/s_userserv.c (File Modified) 
+
+
 androsyn    2006/07/05 18:26:32 UTC	(20060705_2-22854)
   Log:
   fix leak where rsdb_exec doesn't return any field or row count using postgresql
