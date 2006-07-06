@@ -341,8 +341,12 @@ o_oper_ospart(struct client *client_p, struct lconn *conn_p, const char *parv[],
 		die(0, "problem with db file");
 	}
 
+	osjoin = atoi(data.row[0][0]);
+
+	rsdb_exec_fetch_end(&data);
+
 	/* done through OSJOIN */
-	if(atoi(data.row[0][0]) > 0)
+	if(osjoin)
 	{
 		if((client_p->user->oper->sflags & CONF_OPER_OS_CHANNEL) == 0)
 		{
@@ -350,8 +354,6 @@ o_oper_ospart(struct client *client_p, struct lconn *conn_p, const char *parv[],
 					"No access to OPERSERV::OSPART on channels joined through OSJOIN");
 			return 0;
 		}
-
-		osjoin++;
 	}
 	/* through TAKEOVER */
 	else if((client_p->user->oper->sflags & CONF_OPER_OS_TAKEOVER) == 0)
@@ -360,8 +362,6 @@ o_oper_ospart(struct client *client_p, struct lconn *conn_p, const char *parv[],
 				"No access to OPERSERV::OSPART on channels joined through TAKEOVER");
 		return 0;
 	}
-
-	rsdb_exec_fetch_end(&data);
 
 	part_service(operserv_p, parv[0]);
 	chptr = NULL;	/* part_service() may have destroyed the channel */

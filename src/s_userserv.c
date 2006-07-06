@@ -937,6 +937,7 @@ valid_email_domain(const char *email)
 {
 	struct rsdb_table data;
 	char *p;
+	int retval = 1;
 
 	if((p = strchr(email, '@')) == NULL)
 		return 0;
@@ -952,9 +953,11 @@ valid_email_domain(const char *email)
 	}
 
 	if(atoi(data.row[0][0]) > 0)
-		return 0;
+		retval = 0;
 
-	return 1;
+	rsdb_exec_fetch_end(&data);
+
+	return retval;
 }
 
 static int
@@ -1189,6 +1192,7 @@ s_user_activate(struct client *client_p, struct lconn *conn_p, const char *parv[
 	{
 		service_error(userserv_p, client_p, "Username %s verification token is malformed",
 				ureg_p->name);
+		rsdb_exec_fetch_end(&data);
 		return 1;
 	}
 
