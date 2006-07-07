@@ -239,6 +239,9 @@ free_channel_reg(struct chan_reg *reg_p)
 
 	my_free(reg_p->name);
 	my_free(reg_p->topic);
+	my_free(reg_p->url);
+	my_free(reg_p->suspender);
+	my_free(reg_p->suspend_reason);
 
 	BlockHeapFree(channel_reg_heap, reg_p);
 }

@@ -191,6 +191,9 @@ free_user_reg(struct user_reg *ureg_p)
 			ureg_p->name);
 
 	my_free(ureg_p->password);
+	my_free(ureg_p->email);
+	my_free(ureg_p->suspender);
+	my_free(ureg_p->suspend_reason);
 	BlockHeapFree(user_reg_heap, ureg_p);
 }
 
