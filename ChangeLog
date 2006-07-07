@@ -1,3 +1,13 @@
+leeh        2006/07/07 08:21:53 UTC	(20060707_0-22858)
+  Log:
+  - fix some memleaks when destroying usernames/channels
+  
+
+  Modified:
+	rserv/trunk/src/s_chanserv.c (File Modified) 
+	rserv/trunk/src/s_userserv.c (File Modified) 
+
+
 leeh        2006/07/06 08:14:37 UTC	(20060706_0-22856)
   Log:
   - fix some minor missing rsdb_exec_fetch_end()
