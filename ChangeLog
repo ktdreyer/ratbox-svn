@@ -1,3 +1,12 @@
+leeh        2006/07/08 18:26:16 UTC	(20060708_5-22870)
+  Log:
+  - s/chanserv_delowner/chanserv_dropowner
+  
+
+  Modified:
+	rserv/trunk/src/s_chanserv.c (File Modified) 
+
+
 leeh        2006/07/08 12:20:59 UTC	(20060708_4-22868)
   Log:
   - remove unused variable in c_tmode()
