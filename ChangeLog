@@ -1,3 +1,12 @@
+leeh        2006/07/08 12:04:06 UTC	(20060708_0-22860)
+  Log:
+  - fix valid_ban() to test for a '@' in the right string
+  
+
+  Modified:
+	rserv/trunk/src/c_mode.c (File Modified) 
+
+
 leeh        2006/07/07 08:21:53 UTC	(20060707_0-22858)
   Log:
   - fix some memleaks when destroying usernames/channels
