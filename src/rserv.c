@@ -501,10 +501,21 @@ watch_send(unsigned int flag, struct client *client_p, struct lconn *conn_p,
 }
 #endif
 
+static size_t
+count_memory_string(const char *str)
+{
+	if(!EmptyString(str))
+		return(strlen(str) + 1);
+
+	return 0;
+}
+
 void
 count_memory(struct client *client_p)
 {
 	BlockHeap *bh;
+	struct conf_server *sconf;
+	struct conf_oper *oconf;
 	dlink_node *ptr;
 
 	size_t sz_user_reg_password = 0;
@@ -520,6 +531,10 @@ count_memory(struct client *client_p)
 	size_t sz_ban_reg_mask = 0;
 	size_t sz_ban_reg_reason = 0;
 	size_t sz_ban_reg_username = 0;
+
+	size_t sz_hash_overhead = 0;
+
+	size_t sz_conf = 0;
 
 	s_userserv_countmem(&sz_user_reg_password, &sz_user_reg_email, 
 				&sz_user_reg_suspend, &sz_member_reg_lastmod);
@@ -573,5 +588,61 @@ count_memory(struct client *client_p)
 				sz_bh_used, sz_bh_usedmem,
 				sz_bh_free, sz_bh_freemem);
 	}
+
+	sz_hash_overhead += sizeof(dlink_list) * MAX_NAME_HASH;		/* name_table */
+	sz_hash_overhead += sizeof(dlink_list) * MAX_NAME_HASH;		/* uid_table */
+	sz_hash_overhead += sizeof(dlink_list) * MAX_HOST_HASH;		/* host_table */
+	sz_hash_overhead += sizeof(dlink_list) * MAX_CHANNEL_TABLE;	/* channel_table */
+	sz_hash_overhead += sizeof(dlink_list) * MAX_NAME_HASH;		/* user_reg_table */
+	sz_hash_overhead += sizeof(dlink_list) * MAX_CHANNEL_TABLE;	/* chan_reg_table */
+	sz_hash_overhead += sizeof(dlink_list) * MAX_NAME_HASH;		/* nick_reg_table */
+
+	sendto_server(":%s 988 %s :Hash Overhead: %u",
+			MYNAME, client_p->name, (unsigned int) sz_hash_overhead);
+
+	sz_conf += count_memory_string(config_file.name);
+	sz_conf += count_memory_string(config_file.sid);
+	sz_conf += count_memory_string(config_file.gecos);
+	sz_conf += count_memory_string(config_file.vhost);
+	sz_conf += count_memory_string(config_file.dcc_vhost);
+	sz_conf += count_memory_string(config_file.admin1);
+	sz_conf += count_memory_string(config_file.admin2);
+	sz_conf += count_memory_string(config_file.admin3);
+	sz_conf += count_memory_string(config_file.db_host);
+	sz_conf += count_memory_string(config_file.db_name);
+	sz_conf += count_memory_string(config_file.db_username);
+	sz_conf += count_memory_string(config_file.db_password);
+	sz_conf += count_memory_string(config_file.email_name);
+	sz_conf += count_memory_string(config_file.email_address);
+	sz_conf += count_memory_string(config_file.uregister_url);
+	sz_conf += count_memory_string(config_file.nwarn_string);
+
+	DLINK_FOREACH(ptr, conf_server_list.head)
+	{
+		sconf = ptr->data;
+
+		sz_conf += count_memory_string(sconf->name);
+		sz_conf += count_memory_string(sconf->host);
+		sz_conf += count_memory_string(sconf->pass);
+		sz_conf += count_memory_string(sconf->vhost);
+	}
+
+	sz_conf += dlink_list_length(&conf_server_list) * sizeof(struct conf_server);
+
+	DLINK_FOREACH(ptr, conf_oper_list.head)
+	{
+		oconf = ptr->data;
+
+		sz_conf += count_memory_string(oconf->name);
+		sz_conf += count_memory_string(oconf->username);
+		sz_conf += count_memory_string(oconf->host);
+		sz_conf += count_memory_string(oconf->pass);
+		sz_conf += count_memory_string(oconf->server);
+	}
+
+	sz_conf += dlink_list_length(&conf_oper_list) * sizeof(struct conf_oper);
+
+	sendto_server(":%s 988 %s :Config File: %u", 
+			MYNAME, client_p->name, sz_conf);
 }
 
