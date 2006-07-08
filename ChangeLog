@@ -1,3 +1,19 @@
+leeh        2006/07/08 12:04:53 UTC	(20060708_1-22862)
+  Log:
+  - add stats Z to count memory
+  - add memory counting for ram used by services
+  
+
+  Modified:
+	rserv/trunk/include/rserv.h (File Modified) 
+	rserv/trunk/include/s_chanserv.h (File Modified) 
+	rserv/trunk/include/s_userserv.h (File Modified) 
+	rserv/trunk/src/rserv.c (File Modified) 
+	rserv/trunk/src/s_chanserv.c (File Modified) 
+	rserv/trunk/src/s_userserv.c (File Modified) 
+	rserv/trunk/src/scommand.c (File Modified) 
+
+
 leeh        2006/07/08 12:04:06 UTC	(20060708_0-22860)
   Log:
   - fix valid_ban() to test for a '@' in the right string
