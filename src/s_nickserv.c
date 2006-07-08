@@ -101,7 +101,7 @@ preinit_s_nickserv(void)
 static void
 init_s_nickserv(void)
 {
-	nick_reg_heap = BlockHeapCreate(sizeof(struct nick_reg), HEAP_NICK_REG);
+	nick_reg_heap = BlockHeapCreate("Nick Reg", sizeof(struct nick_reg), HEAP_NICK_REG);
 
 	rsdb_exec(nick_db_callback, 
 			"SELECT nickname, username, reg_time, last_time, flags FROM nicks");

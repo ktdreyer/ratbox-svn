@@ -504,6 +504,9 @@ watch_send(unsigned int flag, struct client *client_p, struct lconn *conn_p,
 void
 count_memory(struct client *client_p)
 {
+	BlockHeap *bh;
+	dlink_node *ptr;
+
 	size_t sz_user_reg_password = 0;
 	size_t sz_user_reg_email = 0;
 	size_t sz_user_reg_suspend = 0;
@@ -551,5 +554,24 @@ count_memory(struct client *client_p)
 			MYNAME, client_p->name, (unsigned int) sz_ban_reg_reason);
 	sendto_server(":%s 988 %s :   Ban User  : %u",
 			MYNAME, client_p->name, (unsigned int) sz_ban_reg_username);
+
+	sendto_server(":%s 988 %s :BLOCKHEAP", MYNAME, client_p->name);
+
+	DLINK_FOREACH(ptr, heap_lists.head)
+	{
+		size_t sz_bh_used;
+		size_t sz_bh_free;
+		size_t sz_bh_usedmem;
+		size_t sz_bh_freemem;
+
+		bh = ptr->data;
+
+		BlockHeapUsage(bh, &sz_bh_used, &sz_bh_free, &sz_bh_usedmem, &sz_bh_freemem);
+
+		sendto_server(":%s 988 %s :   %s: %u(%u) %u(%u)",
+				MYNAME, client_p->name, bh->name, 
+				sz_bh_used, sz_bh_usedmem,
+				sz_bh_free, sz_bh_freemem);
+	}
 }
 

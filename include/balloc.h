@@ -54,6 +54,7 @@ typedef struct MemBlock MemBlock;
  */
 struct BlockHeap
 {
+	char *name;
 	dlink_node hlist;
 	size_t elemSize;	/* Size of each element to be stored */
 	unsigned long elemsPerBlock;	/* Number of elements per block */
@@ -63,14 +64,16 @@ struct BlockHeap
 };
 typedef struct BlockHeap BlockHeap;
 
+struct _dlink_list heap_lists;
+
 extern void init_balloc(void);
 
 extern int BlockHeapFree(BlockHeap * bh, void *ptr);
 extern void *BlockHeapAlloc(BlockHeap * bh);
 
-extern BlockHeap *BlockHeapCreate(size_t elemsize, int elemsperblock);
+extern BlockHeap *BlockHeapCreate(const char *name, size_t elemsize, int elemsperblock);
 extern int BlockHeapDestroy(BlockHeap * bh);
 
-extern void BlockHeapUsage(BlockHeap * bh, size_t * bused, size_t * bfree, size_t * bmemusage);
+extern void BlockHeapUsage(BlockHeap * bh, size_t * bused, size_t * bfree, size_t * bmemusage, size_t *bfreemem);
 
 #endif /* INCLUDED_blalloc_h */

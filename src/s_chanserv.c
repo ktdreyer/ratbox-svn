@@ -186,9 +186,9 @@ preinit_s_chanserv(void)
 static void
 init_s_chanserv(void)
 {
-	channel_reg_heap = BlockHeapCreate(sizeof(struct chan_reg), HEAP_CHANNEL_REG);
-	member_reg_heap = BlockHeapCreate(sizeof(struct member_reg), HEAP_MEMBER_REG);
-	ban_reg_heap = BlockHeapCreate(sizeof(struct ban_reg), HEAP_BAN_REG);
+	channel_reg_heap = BlockHeapCreate("Channel Reg", sizeof(struct chan_reg), HEAP_CHANNEL_REG);
+	member_reg_heap = BlockHeapCreate("Member Reg", sizeof(struct member_reg), HEAP_MEMBER_REG);
+	ban_reg_heap = BlockHeapCreate("Ban Reg", sizeof(struct ban_reg), HEAP_BAN_REG);
 
 	load_channel_db();
 

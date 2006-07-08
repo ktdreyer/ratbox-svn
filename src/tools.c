@@ -40,7 +40,7 @@ static BlockHeap *dlinknode_heap;
 void
 init_tools(void)
 {
-	dlinknode_heap = BlockHeapCreate(sizeof(dlink_node), HEAP_DLINKNODE);
+	dlinknode_heap = BlockHeapCreate("DLINK Node", sizeof(dlink_node), HEAP_DLINKNODE);
 }
 
 void

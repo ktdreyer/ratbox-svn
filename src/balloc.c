@@ -86,7 +86,7 @@
 #endif
 
 static void block_heap_gc(void *unused);
-static dlink_list heap_lists;
+dlink_list heap_lists;
 static int BlockHeapGarbageCollect(BlockHeap *);
 
 #if defined(HAVE_MMAP) && !defined(MAP_ANON)
@@ -266,7 +266,7 @@ newblock(BlockHeap * bh)
 /*   Pointer to new BlockHeap, or NULL if unsuccessful                      */
 /* ************************************************************************ */
 BlockHeap *
-BlockHeapCreate(size_t elemsize, int elemsperblock)
+BlockHeapCreate(const char *name, size_t elemsize, int elemsperblock)
 {
 	BlockHeap *bh;
 	s_assert(elemsize > 0 && elemsperblock > 0);
@@ -292,6 +292,7 @@ BlockHeapCreate(size_t elemsize, int elemsperblock)
 		elemsize &= ~(sizeof(void *) - 1);
 	}
 
+	bh->name = my_strdup(name);
 	bh->elemSize = elemsize;
 	bh->elemsPerBlock = elemsperblock;
 	bh->blocksAllocated = 0;
@@ -511,11 +512,13 @@ BlockHeapDestroy(BlockHeap * bh)
 }
 
 void
-BlockHeapUsage(BlockHeap * bh, size_t * bused, size_t * bfree, size_t * bmemusage)
+BlockHeapUsage(BlockHeap * bh, size_t * bused, size_t * bfree, size_t * bmemusage, size_t * bfreemem)
 {
 	size_t used;
 	size_t freem;
 	size_t memusage;
+	size_t freemem;
+
 	if(bh == NULL)
 	{
 		return;
@@ -524,6 +527,7 @@ BlockHeapUsage(BlockHeap * bh, size_t * bused, size_t * bfree, size_t * bmemusag
 	freem = bh->freeElems;
 	used = (bh->blocksAllocated * bh->elemsPerBlock) - bh->freeElems;
 	memusage = used * (bh->elemSize + sizeof(MemBlock));
+	freemem = bh->freeElems * bh->elemSize;
 
 	if(bused != NULL)
 		*bused = used;
@@ -531,4 +535,6 @@ BlockHeapUsage(BlockHeap * bh, size_t * bused, size_t * bfree, size_t * bmemusag
 		*bfree = freem;
 	if(bmemusage != NULL)
 		*bmemusage = memusage;
+	if(bfreemem != NULL)
+		*bfreemem = freemem;
 }

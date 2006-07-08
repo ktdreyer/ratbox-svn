@@ -51,8 +51,8 @@ struct cacheline *emptyline = NULL;
 void
 init_cache(void)
 {
-	cachefile_heap = BlockHeapCreate(sizeof(struct cachefile), HEAP_CACHEFILE);
-	cacheline_heap = BlockHeapCreate(sizeof(struct cacheline), HEAP_CACHELINE);
+	cachefile_heap = BlockHeapCreate("Helpfile Cache", sizeof(struct cachefile), HEAP_CACHEFILE);
+	cacheline_heap = BlockHeapCreate("Helplines Cache", sizeof(struct cacheline), HEAP_CACHELINE);
 
 	/* allocate the emptyline */
 	emptyline = BlockHeapAlloc(cacheline_heap);

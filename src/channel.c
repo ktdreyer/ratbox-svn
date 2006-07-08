@@ -68,8 +68,8 @@ static struct scommand_handler topic_command = { "TOPIC", c_topic, 0, DLINK_EMPT
 void
 init_channel(void)
 {
-        channel_heap = BlockHeapCreate(sizeof(struct channel), HEAP_CHANNEL);
-        chmember_heap = BlockHeapCreate(sizeof(struct chmember), HEAP_CHMEMBER);
+        channel_heap = BlockHeapCreate("Channel", sizeof(struct channel), HEAP_CHANNEL);
+        chmember_heap = BlockHeapCreate("Channel Member", sizeof(struct chmember), HEAP_CHMEMBER);
 
 	add_scommand_handler(&join_command);
 	add_scommand_handler(&kick_command);

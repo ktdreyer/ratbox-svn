@@ -136,7 +136,7 @@ preinit_s_userserv(void)
 static void
 init_s_userserv(void)
 {
-	user_reg_heap = BlockHeapCreate(sizeof(struct user_reg), HEAP_USER_REG);
+	user_reg_heap = BlockHeapCreate("User Reg", sizeof(struct user_reg), HEAP_USER_REG);
 
 	rsdb_exec(user_db_callback, 
 			"SELECT username, password, email, suspender, suspend_reason, "

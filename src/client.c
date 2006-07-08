@@ -82,10 +82,10 @@ static struct scommand_handler squit_command = { "SQUIT", c_squit, 0, DLINK_EMPT
 void
 init_client(void)
 {
-        client_heap = BlockHeapCreate(sizeof(struct client), HEAP_CLIENT);
-        user_heap = BlockHeapCreate(sizeof(struct user), HEAP_USER);
-        server_heap = BlockHeapCreate(sizeof(struct server), HEAP_SERVER);
-	host_heap = BlockHeapCreate(sizeof(struct host_entry), HEAP_HOST);
+        client_heap = BlockHeapCreate("Client", sizeof(struct client), HEAP_CLIENT);
+        user_heap = BlockHeapCreate("User", sizeof(struct user), HEAP_USER);
+        server_heap = BlockHeapCreate("Server", sizeof(struct server), HEAP_SERVER);
+	host_heap = BlockHeapCreate("Hostname", sizeof(struct host_entry), HEAP_HOST);
 
 	eventAdd("cleanup_host_table", cleanup_host_table, NULL, 3600);
 
