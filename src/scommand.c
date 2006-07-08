@@ -605,6 +605,13 @@ c_stats(struct client *client_p, const char *parv[], int parc)
 			break;
 		}
 
+		case 'Z': case 'z':
+			if(!is_oper(client_p) && !client_p->user->oper)
+				break;
+
+			count_memory(client_p);
+			break;
+
 		default:
 			break;
 	}

@@ -60,6 +60,8 @@
 #include "hook.h"
 #include "watch.h"
 #include "serno.h"
+#include "s_userserv.h"
+#include "s_chanserv.h"
 
 struct timeval system_time;
 
@@ -498,4 +500,56 @@ watch_send(unsigned int flag, struct client *client_p, struct lconn *conn_p,
 {
 }
 #endif
+
+void
+count_memory(struct client *client_p)
+{
+	size_t sz_user_reg_password = 0;
+	size_t sz_user_reg_email = 0;
+	size_t sz_user_reg_suspend = 0;
+	size_t sz_member_reg_lastmod = 0;
+
+	size_t sz_chan_reg_name = 0;
+	size_t sz_chan_reg_topic = 0;
+	size_t sz_chan_reg_url = 0;
+	size_t sz_chan_reg_suspend = 0;
+
+	size_t sz_ban_reg_mask = 0;
+	size_t sz_ban_reg_reason = 0;
+	size_t sz_ban_reg_username = 0;
+
+	s_userserv_countmem(&sz_user_reg_password, &sz_user_reg_email, 
+				&sz_user_reg_suspend, &sz_member_reg_lastmod);
+
+	s_chanserv_countmem(&sz_chan_reg_name, &sz_chan_reg_topic,
+				&sz_chan_reg_url, &sz_chan_reg_suspend,
+				&sz_ban_reg_mask, &sz_ban_reg_reason,
+				&sz_ban_reg_username);
+
+	/* XXX NUMERIC */
+	sendto_server(":%s 988 %s :USERSERV", MYNAME, client_p->name);
+	sendto_server(":%s 988 %s :   Password  : %u",
+			MYNAME, client_p->name, (unsigned int) sz_user_reg_password);
+	sendto_server(":%s 988 %s :   Email     : %u",
+			MYNAME, client_p->name, (unsigned int) sz_user_reg_email);
+	sendto_server(":%s 988 %s :   Suspend   : %u",
+			MYNAME, client_p->name, (unsigned int) sz_user_reg_suspend);
+	sendto_server(":%s 988 %s :   Member mod: %u",
+			MYNAME, client_p->name, (unsigned int) sz_member_reg_lastmod);
+	sendto_server(":%s 988 %s :CHANSERV", MYNAME, client_p->name);
+	sendto_server(":%s 988 %s :   Name      : %u",
+			MYNAME, client_p->name, (unsigned int) sz_chan_reg_name);
+	sendto_server(":%s 988 %s :   Topic     : %u",
+			MYNAME, client_p->name, (unsigned int) sz_chan_reg_topic);
+	sendto_server(":%s 988 %s :   URL       : %u",
+			MYNAME, client_p->name, (unsigned int) sz_chan_reg_url);
+	sendto_server(":%s 988 %s :   Suspend   : %u",
+			MYNAME, client_p->name, (unsigned int) sz_chan_reg_suspend);
+	sendto_server(":%s 988 %s :   Ban Mask  : %u",
+			MYNAME, client_p->name, (unsigned int) sz_ban_reg_mask);
+	sendto_server(":%s 988 %s :   Ban Reason: %u",
+			MYNAME, client_p->name, (unsigned int) sz_ban_reg_reason);
+	sendto_server(":%s 988 %s :   Ban User  : %u",
+			MYNAME, client_p->name, (unsigned int) sz_ban_reg_username);
+}
 

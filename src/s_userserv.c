@@ -1960,4 +1960,38 @@ s_user_info(struct client *client_p, struct lconn *conn_p, const char *parv[], i
 	return 1;
 }
 
+void
+s_userserv_countmem(size_t *sz_user_reg_password, size_t *sz_user_reg_email,
+		size_t *sz_user_reg_suspend, size_t *sz_member_reg_lastmod)
+{
+	struct user_reg *ureg_p;
+	struct member_reg *mreg_p;
+	dlink_node *ptr, *vptr;
+	int i;
+
+	HASH_WALK(i, MAX_NAME_HASH, ptr, user_reg_table)
+	{
+		ureg_p = ptr->data;
+
+		if(!EmptyString(ureg_p->password))
+			*sz_user_reg_password += strlen(ureg_p->password) + 1;
+
+		if(!EmptyString(ureg_p->email))
+			*sz_user_reg_email += strlen(ureg_p->email) + 1;
+
+		if(!EmptyString(ureg_p->suspender))
+			*sz_user_reg_suspend += strlen(ureg_p->suspender) + 1;
+
+		if(!EmptyString(ureg_p->suspend_reason))
+			*sz_user_reg_suspend += strlen(ureg_p->suspend_reason) + 1;
+
+		DLINK_FOREACH(vptr, ureg_p->channels.head)
+		{
+			mreg_p = vptr->data;
+			*sz_member_reg_lastmod += strlen(mreg_p->lastmod) + 1;
+		}
+	}
+	HASH_WALK_END
+}
+
 #endif

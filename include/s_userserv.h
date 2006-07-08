@@ -36,4 +36,6 @@ struct user_reg
 extern struct user_reg *find_user_reg(struct client *, const char *name);
 extern struct user_reg *find_user_reg_nick(struct client *, const char *name);
 
+void s_userserv_countmem(size_t *, size_t *, size_t *, size_t *);
+
 #endif

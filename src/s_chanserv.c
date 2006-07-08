@@ -3381,3 +3381,51 @@ s_chan_info(struct client *client_p, struct lconn *conn_p, const char *parv[], i
 
 	return 1;
 }
+
+void
+s_chanserv_countmem(size_t *sz_chan_reg_name, size_t *sz_chan_reg_topic,
+		size_t *sz_chan_reg_url, size_t *sz_chan_reg_suspend,
+		size_t *sz_ban_reg_mask, size_t *sz_ban_reg_reason,
+		size_t *sz_ban_reg_username)
+{
+	struct chan_reg *chreg_p;
+	struct ban_reg *banreg_p;
+	dlink_node *ptr, *vptr;
+	int i;
+
+	HASH_WALK(i, MAX_CHANNEL_TABLE, ptr, chan_reg_table)
+	{
+		chreg_p = ptr->data;
+
+		if(!EmptyString(chreg_p->name))
+			*sz_chan_reg_name += strlen(chreg_p->name) + 1;
+
+		if(!EmptyString(chreg_p->topic))
+			*sz_chan_reg_topic += strlen(chreg_p->topic) + 1;
+
+		if(!EmptyString(chreg_p->url))
+			*sz_chan_reg_url += strlen(chreg_p->url) + 1;
+
+		if(!EmptyString(chreg_p->suspender))
+			*sz_chan_reg_suspend += strlen(chreg_p->suspender) + 1;
+
+		if(!EmptyString(chreg_p->suspend_reason))
+			*sz_chan_reg_suspend += strlen(chreg_p->suspend_reason) + 1;
+
+		DLINK_FOREACH(vptr, chreg_p->bans.head)
+		{
+			banreg_p = vptr->data;
+
+			if(!EmptyString(banreg_p->mask))
+				*sz_ban_reg_mask += strlen(banreg_p->mask) + 1;
+
+			if(!EmptyString(banreg_p->reason))
+				*sz_ban_reg_reason += strlen(banreg_p->reason) + 1;
+
+			if(!EmptyString(banreg_p->username))
+				*sz_ban_reg_username += strlen(banreg_p->username) + 1;
+		}
+	}
+	HASH_WALK_END
+}
+

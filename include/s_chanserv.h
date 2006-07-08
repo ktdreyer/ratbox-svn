@@ -82,4 +82,6 @@ struct ban_reg
 void free_channel_reg(struct chan_reg *);
 void free_member_reg(struct member_reg *, int);
 
+void s_chanserv_countmem(size_t *, size_t *, size_t *, size_t *, size_t *, size_t *, size_t *);
+
 #endif
