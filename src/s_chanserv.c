@@ -904,7 +904,7 @@ e_chanserv_enforcetopic(void *unused)
 static void
 e_chanserv_expire_delowner(void *unused)
 {
-	rsdb_exec(NULL, "DELETE FROM channels_delowner WHERE time <= '%lu'",
+	rsdb_exec(NULL, "DELETE FROM channels_dropowner WHERE time <= '%lu'",
 			CURRENT_TIME - config_file.cdelowner_duration);
 }
 
