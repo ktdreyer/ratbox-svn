@@ -1,3 +1,22 @@
+leeh        2006/07/08 12:05:33 UTC	(20060708_2-22864)
+  Log:
+  - make BlockHeapCreate() take a string parameter of the name of the heap
+  - output balloc stats in stats Z
+  
+
+  Modified:
+	rserv/trunk/include/balloc.h (File Modified) 
+	rserv/trunk/src/balloc.c (File Modified) 
+	rserv/trunk/src/cache.c (File Modified) 
+	rserv/trunk/src/channel.c (File Modified) 
+	rserv/trunk/src/client.c (File Modified) 
+	rserv/trunk/src/rserv.c (File Modified) 
+	rserv/trunk/src/s_chanserv.c (File Modified) 
+	rserv/trunk/src/s_nickserv.c (File Modified) 
+	rserv/trunk/src/s_userserv.c (File Modified) 
+	rserv/trunk/src/tools.c (File Modified) 
+
+
 leeh        2006/07/08 12:04:53 UTC	(20060708_1-22862)
   Log:
   - add stats Z to count memory
