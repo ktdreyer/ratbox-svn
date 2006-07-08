@@ -101,7 +101,7 @@ valid_ban(const char *banstr)
 
 	*user++ = '\0';
 
-	if((host = strchr(nick, '@')) == NULL)
+	if((host = strchr(user, '@')) == NULL)
 		return 0;
 
 	*host++ = '\0';
