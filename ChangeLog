@@ -1,3 +1,12 @@
+leeh        2006/07/08 12:06:18 UTC	(20060708_3-22866)
+  Log:
+  - add hash overhead and conf memory to stats Z
+  
+
+  Modified:
+	rserv/trunk/src/rserv.c (File Modified) 
+
+
 leeh        2006/07/08 12:05:33 UTC	(20060708_2-22864)
   Log:
   - make BlockHeapCreate() take a string parameter of the name of the heap
