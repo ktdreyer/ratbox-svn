@@ -606,7 +606,10 @@ c_stats(struct client *client_p, const char *parv[], int parc)
 		}
 
 		case 'Z': case 'z':
-			if(!is_oper(client_p) && !client_p->user->oper)
+			/* highly intensive as it counts RAM manually,
+			 * restrict to admins
+			 */
+			if(!client_p->user->oper || !client_p->user->oper->flags & CONF_OPER_ADMIN)
 				break;
 
 			count_memory(client_p);

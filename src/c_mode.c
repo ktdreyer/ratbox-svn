@@ -668,7 +668,6 @@ static void
 c_tmode(struct client *client_p, const char *parv[], int parc)
 {
 	struct channel *chptr;
-	struct chmember *msptr;
 
 	if(parc < 3 || EmptyString(parv[2]))
 		return;
