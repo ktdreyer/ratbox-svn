@@ -394,6 +394,10 @@ main(int argc, char *argv[])
 
        	write_pidfile();
 
+	/* we need the correct time here so the timeout to connect() will
+	 * work.
+	 */
+	set_time();
 	connect_to_server(NULL);
 
 	/* enter main IO loop */
