@@ -1,3 +1,15 @@
+leeh        2006/07/09 11:13:33 UTC	(20060709_1-22874)
+  Log:
+  - via ongeboren, move service introduction up to after we've received
+    SERVER, as chanserv may deop people on SJOIN which requires its already
+    introduced
+  
+
+  Modified:
+	rserv/trunk/src/client.c (File Modified) 
+	rserv/trunk/src/scommand.c (File Modified) 
+
+
 leeh        2006/07/09 11:10:17 UTC	(20060709_0-22872)
   Log:
   - as pointed out by ongeboren, we need to set_time() before we call
