@@ -388,15 +388,6 @@ c_pong(struct client *client_p, const char *parv[], int parc)
                            server_p->name);
                 SetConnEOB(server_p);
 
-		/* introduce our clients only once their server has finished
-		 * bursting.  We cant send them until we know whether theyre
-		 * TS6 capable, so here is as good a place as any. --anfl
-		 */
-		introduce_services();
-		introduce_services_channels();
-
-		SetConnSentBurst(server_p);
-
 		hook_call(HOOK_FINISHED_BURSTING, NULL, NULL);
         }
 

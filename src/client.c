@@ -978,6 +978,12 @@ c_server(struct client *client_p, const char *parv[], int parc)
 	add_client(target_p);
 	dlink_add(target_p, &target_p->listnode, &server_list);
 
+	/* has to be done before the burst as chanserv will deop clients */
+	introduce_services();
+	introduce_services_channels();
+
+	SetConnSentBurst(server_p);
+
 	sendto_server(":%s PING %s %s", MYUID, target_p->name, UID(target_p));
 }
 
