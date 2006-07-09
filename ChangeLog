@@ -1,3 +1,14 @@
+leeh        2006/07/09 11:10:17 UTC	(20060709_0-22872)
+  Log:
+  - as pointed out by ongeboren, we need to set_time() before we call
+    connect_to_server() on startup, as otherwise connect() can immediately
+    time out
+  
+
+  Modified:
+	rserv/trunk/src/rserv.c (File Modified) 
+
+
 leeh        2006/07/08 18:26:16 UTC	(20060708_5-22870)
   Log:
   - s/chanserv_delowner/chanserv_dropowner
