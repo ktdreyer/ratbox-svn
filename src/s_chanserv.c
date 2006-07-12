@@ -173,6 +173,7 @@ static void e_chanserv_expirechan(void *unused);
 static void e_chanserv_expireban(void *unused);
 static void e_chanserv_enforcetopic(void *unused);
 static void e_chanserv_expire_delowner(void *unused);
+static void e_chanserv_partinhabit(void *unused);
 
 static void dump_info_extended(struct client *, struct lconn *, struct chan_reg *);
 static void dump_info_accesslist(struct client *, struct lconn *, struct chan_reg *);
@@ -202,6 +203,7 @@ init_s_chanserv(void)
 
 	eventAdd("chanserv_updatechan", e_chanserv_updatechan, NULL, 3600);
 	eventAdd("chanserv_expirechan", e_chanserv_expirechan, NULL, 43200);
+	eventAdd("chanserv_partinhabit", e_chanserv_partinhabit, NULL, 21600);
 
 	/* we add these with defaults, then update the timers when we parse
 	 * the conf..
@@ -900,6 +902,48 @@ e_chanserv_expire_delowner(void *unused)
 {
 	rsdb_exec(NULL, "DELETE FROM channels_dropowner WHERE time <= '%lu'",
 			CURRENT_TIME - config_file.cdelowner_duration);
+}
+
+static void
+e_chanserv_partinhabit(void *unused)
+{
+	struct channel *chptr;
+	struct chan_reg *chreg_p;
+	struct chmember *member_p;
+	dlink_node *ptr, *vptr;
+	int i;
+	int found_opped = 0;
+
+	HASH_WALK(i, MAX_CHANNEL_TABLE, ptr, chan_reg_table)
+	{
+		chreg_p = ptr->data;
+
+		if(!(chreg_p->flags & CS_FLAGS_INHABIT))
+			continue;
+
+		/* we're not in there?! */
+		if((chptr = find_channel(chreg_p->name)) == NULL)
+		{
+			chreg_p->flags &= ~CS_FLAGS_INHABIT;
+			continue;
+		}
+
+		DLINK_FOREACH(vptr, chptr->users.head)
+		{
+			member_p = vptr->data;
+
+			if(member_p->flags & MODE_OPPED)
+				found_opped++;
+		}
+
+		/* if theres someone opped, or no users, stop enforcing */
+		if(!dlink_list_length(&chptr->users) || found_opped)
+		{
+			chreg_p->flags &= ~CS_FLAGS_INHABIT;
+			part_service(chanserv_p, chptr->name);
+		}
+	}
+	HASH_WALK_END
 }
 
 static int
