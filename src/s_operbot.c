@@ -100,7 +100,7 @@ init_s_operbot(void)
 static int
 operbot_db_callback(int argc, const char **argv)
 {
-	join_service(operbot_p, argv[0], atol(argv[1]), NULL);
+	join_service(operbot_p, argv[0], atol(argv[1]), NULL, 0);
 	return 0;
 }
 
@@ -147,7 +147,7 @@ o_operbot_objoin(struct client *client_p, struct lconn *conn_p, const char *parv
 	rsdb_exec(NULL, "INSERT INTO operbot (chname, tsinfo, oper) VALUES(LOWER('%Q'), '%lu', '%Q')",
 			parv[0], tsinfo, OPER_NAME(client_p, conn_p));
 
-	join_service(operbot_p, parv[0], tsinfo, NULL);
+	join_service(operbot_p, parv[0], tsinfo, NULL, 0);
 
 	service_send(operbot_p, client_p, conn_p,
 			"%s joined to %s", operbot_p->name, parv[0]);

@@ -542,7 +542,7 @@ channel_db_callback(int argc, const char **argv)
 
 	if(reg_p->flags & CS_FLAGS_AUTOJOIN)
 		join_service(chanserv_p, reg_p->name, reg_p->tsinfo,
-			reg_p->emode.mode ? &reg_p->emode : &reg_p->cmode);
+			reg_p->emode.mode ? &reg_p->emode : &reg_p->cmode, 0);
 
 	return 0;
 }
@@ -657,27 +657,21 @@ update_chreg_flags(struct chan_reg *chreg_p)
 }
 
 static void
-enable_autojoin(struct chan_reg *chreg_p)
+enable_inhabit(struct chan_reg *chreg_p, struct channel *chptr)
 {
-	struct channel *chptr;
+	chreg_p->flags |= CS_FLAGS_INHABIT;
 
-	chreg_p->flags |= CS_FLAGS_AUTOJOIN;
-
-	/* Store the TS, so we will join with the correct
-	 * TS in future -- jilles
-	 */
-	chptr = find_channel(chreg_p->name);
-
-	if(chptr != NULL && chptr->tsinfo != chreg_p->tsinfo)
+	/* lower TS than what we have stored.. match it */
+	if(chptr->tsinfo < chreg_p->tsinfo)
 	{
-		chreg_p->flags |= CS_FLAGS_NEEDUPDATE;
 		chreg_p->tsinfo = chptr->tsinfo;
+		chreg_p->flags |= CS_FLAGS_NEEDUPDATE;
 	}
 
 	/* Join with stored TS */
 	join_service(chanserv_p, chreg_p->name, chreg_p->tsinfo,
 			chreg_p->emode.mode ? &chreg_p->emode :
-			&chreg_p->cmode);
+			&chreg_p->cmode, 1);
 }
 
 static void
@@ -1187,7 +1181,7 @@ h_chanserv_join(void *v_chptr, void *v_members)
 			 * channel --fl
 			 */
 			if(dlink_list_length(&chptr->users) == 1)
-				enable_autojoin(chreg_p);
+				enable_inhabit(chreg_p, chptr);
 
 			kickbuild_add(UID(member_p->client_p), banreg_p->reason);
 
@@ -1217,7 +1211,7 @@ h_chanserv_join(void *v_chptr, void *v_members)
 			{
 				/* stop them cycling for ops */
 				if(dlink_list_length(&chptr->users) == 1)
-					enable_autojoin(chreg_p);
+					enable_inhabit(chreg_p, chptr);
 
 				modebuild_add(DIR_DEL, "o", 
 						UID(member_p->client_p));
@@ -1230,7 +1224,7 @@ h_chanserv_join(void *v_chptr, void *v_members)
 		if(is_voiced(member_p) && (chreg_p->flags & CS_FLAGS_NOVOICES))
 		{
 			if(dlink_list_length(&chptr->users) == 1)
-				enable_autojoin(chreg_p);
+				enable_inhabit(chreg_p, chptr);
 
 			modebuild_add(DIR_DEL, "v", UID(member_p->client_p));
 			member_p->flags &= ~MODE_VOICED;
@@ -2543,7 +2537,25 @@ s_chan_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 		retval = s_chan_set_flag(client_p, chreg_p, parv[1], arg, CS_FLAGS_AUTOJOIN);
 
 		if(retval == 1)
-			enable_autojoin(chreg_p);
+		{
+			chreg_p->flags |= CS_FLAGS_AUTOJOIN;
+
+			/* Store the TS, so we will join with the correct
+			 * TS in future -- jilles
+			 */
+			chptr = find_channel(chreg_p->name);
+
+			if(chptr != NULL && chptr->tsinfo != chreg_p->tsinfo)
+			{
+				chreg_p->flags |= CS_FLAGS_NEEDUPDATE;
+				chreg_p->tsinfo = chptr->tsinfo;
+			}
+
+			/* Join with stored TS */
+			join_service(chanserv_p, chreg_p->name, chreg_p->tsinfo,
+					chreg_p->emode.mode ? &chreg_p->emode :
+					&chreg_p->cmode, 0);
+		}
 		else if(retval == -1)
 			part_service(chanserv_p, chreg_p->name);
 

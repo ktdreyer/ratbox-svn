@@ -293,9 +293,10 @@ count_topics(void)
 
 /* join service to chname, create channel with TS tsinfo, using mode in the
  * SJOIN. if channel already exists, don't use tsinfo -- jilles */
+/* that is, unless override is specified */
 void
 join_service(struct client *service_p, const char *chname, time_t tsinfo,
-		struct chmode *mode)
+		struct chmode *mode, int override)
 {
 	struct channel *chptr;
 
@@ -323,7 +324,25 @@ join_service(struct client *service_p, const char *chname, time_t tsinfo,
 	}
 	/* may already be joined.. */
 	else if(dlink_find(service_p, &chptr->services) != NULL)
+	{
 		return;
+	}
+	else if(override && tsinfo < chptr->tsinfo)
+	{
+		chptr->tsinfo = tsinfo;
+
+		if(mode != NULL)
+		{
+			chptr->mode.mode = mode->mode;
+			chptr->mode.limit = mode->limit;
+
+			if(mode->key[0])
+				strlcpy(chptr->mode.key, mode->key,
+					sizeof(chptr->mode.key));
+		}
+		else
+			chptr->mode.mode = MODE_NOEXTERNAL|MODE_TOPIC;
+	}
 
 	dlink_add_alloc(service_p, &chptr->services);
 	dlink_add_alloc(chptr, &service_p->service->channels);

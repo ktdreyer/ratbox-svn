@@ -97,7 +97,7 @@ int find_exempt(struct channel *chptr, struct client *target_p);
 extern unsigned long count_topics(void);
 
 extern void join_service(struct client *service_p, const char *chname,
-			time_t tsinfo, struct chmode *mode);
+			time_t tsinfo, struct chmode *mode, int override);
 extern int part_service(struct client *service_p, const char *chname);
 extern void rejoin_service(struct client *service_p, struct channel *chptr, int reop);
 

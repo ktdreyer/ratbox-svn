@@ -21,6 +21,7 @@ struct chmode;
 
 /* Flags not stored in the DB: 0xFFFF0000 */
 #define CS_FLAGS_NEEDUPDATE	0x00010000
+#define CS_FLAGS_INHABIT	0x00020000
 
 #define CS_MEMBER_AUTOOP	0x001
 #define CS_MEMBER_AUTOVOICE	0x002

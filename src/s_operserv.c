@@ -111,7 +111,7 @@ init_s_operserv(void)
 static int
 operserv_db_callback(int argc, const char **argv)
 {
-	join_service(operserv_p, argv[0], atol(argv[1]), NULL);
+	join_service(operserv_p, argv[0], atol(argv[1]), NULL, 0);
 	return 0;
 }
 
@@ -166,7 +166,7 @@ otakeover(struct channel *chptr, int invite)
 
 	chptr->tsinfo--;
 
-	join_service(operserv_p, chptr->name, chptr->tsinfo, NULL);
+	join_service(operserv_p, chptr->name, chptr->tsinfo, NULL, 0);
 
 	/* apply the -beI if needed, after the join */
 	if(EmptyString(server_p->sid))
@@ -300,7 +300,7 @@ o_oper_osjoin(struct client *client_p, struct lconn *conn_p, const char *parv[],
 	rsdb_exec(NULL, "INSERT INTO operserv (chname, tsinfo, oper) VALUES(LOWER('%Q'), '%lu', '%Q')",
 			parv[0], tsinfo, OPER_NAME(client_p, conn_p));
 
-	join_service(operserv_p, parv[0], tsinfo, NULL);
+	join_service(operserv_p, parv[0], tsinfo, NULL, 0);
 
 	service_send(operserv_p, client_p, conn_p,
 			"%s joined to %s", operserv_p->name, parv[0]);
