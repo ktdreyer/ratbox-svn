@@ -1,3 +1,21 @@
+leeh        2006/07/12 10:26:53 UTC	(20060712_0-22876)
+  Log:
+  - make join_service() take an "override" parameter, which can force it to
+    lower the ts to the one given
+  - set an INHABIT flag which isn't stored in the database, rather than
+    AUTOJOIN when we need to join a channel to enforce restrictops/bans after
+    someone creates it
+  
+
+  Modified:
+	rserv/trunk/include/channel.h (File Modified) 
+	rserv/trunk/include/s_chanserv.h (File Modified) 
+	rserv/trunk/src/channel.c (File Modified) 
+	rserv/trunk/src/s_chanserv.c (File Modified) 
+	rserv/trunk/src/s_operbot.c (File Modified) 
+	rserv/trunk/src/s_operserv.c (File Modified) 
+
+
 leeh        2006/07/09 11:13:33 UTC	(20060709_1-22874)
   Log:
   - via ongeboren, move service introduction up to after we've received
