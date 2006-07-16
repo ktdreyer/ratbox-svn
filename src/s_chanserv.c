@@ -2730,19 +2730,19 @@ s_chan_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 			return 1;
 		}
 
-		if(strlen(data) > TOPICLEN)
-			data[TOPICLEN] = '\0';
+		if(strlen(data) >= TOPICLEN)
+			data[TOPICLEN-1] = '\0';
 
 		my_free(chreg_p->topic);
 		chreg_p->topic = my_strdup(data);
 
 		rsdb_exec(NULL, "UPDATE channels SET topic='%Q' "
 				"WHERE chname='%Q'",
-				data, chreg_p->name);
+				chreg_p->topic, chreg_p->name);
 
 		service_error(chanserv_p, client_p,
 				"Channel %s TOPIC set '%s'",
-				chreg_p->name, data);
+				chreg_p->name, chreg_p->topic);
 		return 1;
 	}
 	else if(!strcasecmp(parv[1], "URL"))
@@ -2776,11 +2776,11 @@ s_chan_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 
 		rsdb_exec(NULL, "UPDATE channels SET url='%Q' "
 				"WHERE chname='%Q'",
-				arg, chreg_p->name);
+				chreg_p->url, chreg_p->name);
 
 		service_error(chanserv_p, client_p,
 				"Channel %s URL set '%s'",
-				chreg_p->name, arg);
+				chreg_p->name, chreg_p->url);
 		return 1;
 	}
 
