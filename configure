@@ -2831,6 +2831,11 @@ else
 fi
 
 
+if test "$ac_cv_topiclen" -gt "255" && test "$DB_BACKEND" == "mysql"; then
+	ac_cv_topiclen="255"
+	{ echo "configure: error: topic length cannot exceed 255 when using mysql" 1>&2; exit 1; }
+fi
+
 echo "$ac_t"""checking topic length... $ac_cv_topiclen"" 1>&6
 cat >> confdefs.h <<EOF
 #define TOPICLEN (${ac_cv_topiclen}+1)

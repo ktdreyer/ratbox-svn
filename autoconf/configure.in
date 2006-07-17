@@ -425,6 +425,11 @@ AC_ARG_WITH([topiclen],
 [ --with-topiclen=LENGTH    Sets topic length to LENGTH],
 [ac_cv_topiclen=$withval], [ac_cv_topiclen="160"])
 
+if test "$ac_cv_topiclen" -gt "255" && test "$DB_BACKEND" == "mysql"; then
+	ac_cv_topiclen="255"
+	AC_MSG_ERROR([topic length cannot exceed 255 when using mysql])
+fi
+
 AC_MSG_RESULT("checking topic length... $ac_cv_topiclen")
 AC_DEFINE_UNQUOTED(TOPICLEN, (${ac_cv_topiclen}+1), Topic Length)
 
