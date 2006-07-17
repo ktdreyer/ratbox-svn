@@ -1998,7 +1998,7 @@ s_chan_delowner(struct client *client_p, struct lconn *conn_p, const char *parv[
 
 	/* authenticating a password reset */
 	rsdb_exec_fetch(&data, "SELECT token FROM channels_dropowner WHERE chname='%Q' AND time > '%lu'",
-			ureg_p->name, CURRENT_TIME - config_file.cdelowner_duration);
+			chreg_p->name, CURRENT_TIME - config_file.cdelowner_duration);
 
 	/* ok, found the entry.. */
 	if(data.row_count)
