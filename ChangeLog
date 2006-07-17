@@ -1,3 +1,12 @@
+leeh        2006/07/17 21:04:18 UTC	(20060717_3-22894)
+  Log:
+  - only do service introductions when our uplink introduces itself
+  
+
+  Modified:
+	rserv/trunk/src/client.c (File Modified) 
+
+
 leeh        2006/07/17 20:32:07 UTC	(20060717_2-22892)
   Log:
   - s/ureg_p/chreg_p
