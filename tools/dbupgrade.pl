@@ -35,7 +35,8 @@ my %versionlist = (
 	"1.1.0beta1"	=> 2,
 	"1.1.0beta2"	=> 2,
 	"1.1.0beta3"	=> 2,
-	"1.1.0beta4"	=> 3
+	"1.1.0beta4"	=> 3,
+	"1.1.0rc1"	=> 4
 );
 
 my $version = $ARGV[0];
@@ -177,7 +178,7 @@ if($currentver < 3)
 
 if($currentver < 4)
 {
-	print "-- To version 1.1.0beta5\n";
+	print "-- To version 1.1.0rc1\n";
 
 	if($dbtype eq "mysql" || $dbtype eq "pgsql")
 	{
@@ -197,5 +198,28 @@ if($currentver < 4)
 	print "\n";
 }
 
+if($currentver < 5)
+{
+	print "-- To version 1.1.0rc2\n";
+
+	if($dbtype eq "mysql")
+	{
+		print "ALTER TABLE members ADD PRIMARY KEY(chname, username);\n";
+		print "ALTER TABLE members ADD INDEX (chname);\n";
+		print "ALTER TABLE members ADD INDEX (username);\n";
+		print "ALTER TABLE bans ADD PRIMARY KEY(chname, mask);\n";
+		print "ALTER TABLE bans ADD INDEX (chname);\n";
+	}
+	elsif($dbtype eq "pgsql")
+	{
+		print "ALTER TABLE members ADD PRIMARY KEY(chname, username);\n";
+		print "CREATE INDEX members_chname_idx ON members (chname);\n";
+		print "CREATE INDEX members_username_idx ON members (username);\n";
+		print "ALTER TABLE bans ADD PRIMARY KEY(chname, mask);\n";
+		print "CREATE INDEX bans_chname_idx ON bans (chname);\n";
+	}
+
+	print "\n";
+}
 
 exit;

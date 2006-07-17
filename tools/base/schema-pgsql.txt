@@ -77,9 +77,12 @@ CREATE TABLE members (
 	level INT,
 	flags INTEGER,
 	suspend INT,
+	PRIMARY KEY(chname, username),
 	FOREIGN KEY(chname) REFERENCES channels (chname) MATCH FULL,
 	FOREIGN KEY(username) REFERENCES users (username) MATCH FULL
 );
+CREATE INDEX members_chname_idx ON members (chname);
+CREATE INDEX members_username_idx ON members (username);
 
 CREATE TABLE bans (
 	chname VARCHAR(CHANNELLEN) NOT NULL,
@@ -88,10 +91,12 @@ CREATE TABLE bans (
 	username VARCHAR(USERREGNAME_LEN) NOT NULL,
 	level INT,
 	hold INT,
+	PRIMARY KEY(chname, mask),
 	FOREIGN KEY(chname) REFERENCES channels (chname) MATCH FULL
 --	FOREIGN KEY(username) REFERENCES users (username) MATCH FULL
 --	Username might not exist?
 );
+CREATE INDEX bans_chname_idx ON bans (chname);
 
 CREATE TABLE operbot (
 	chname VARCHAR(CHANNELLEN) NOT NULL,
