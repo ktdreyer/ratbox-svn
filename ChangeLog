@@ -1,3 +1,14 @@
+leeh        2006/07/17 18:37:09 UTC	(20060717_1-22890)
+  Log:
+  - add in some indexes on members/bans tables
+  
+
+  Modified:
+	rserv/trunk/tools/base/schema-mysql.txt (File Modified) 
+	rserv/trunk/tools/base/schema-pgsql.txt (File Modified) 
+	rserv/trunk/tools/dbupgrade.pl (File Modified) 
+
+
 leeh        2006/07/17 18:17:32 UTC	(20060717_0-22888)
   Log:
   - refuse to complete autoconf when we need a topiclen greater than 255, as
