@@ -1,3 +1,13 @@
+leeh        2006/07/18 19:54:41 UTC	(20060718_2-22904)
+  Log:
+  - revert that for now, I need to cut rc2..
+  
+
+  Modified:
+	rserv/trunk/include/balloc.h (File Modified) 
+	rserv/trunk/src/balloc.c (File Modified) 
+
+
 androsyn    2006/07/18 18:55:12 UTC	(20060718_1-22902)
   Log:
   Block heap changes from ircd-ratbox devel.  
