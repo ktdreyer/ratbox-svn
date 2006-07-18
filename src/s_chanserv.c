@@ -2641,6 +2641,8 @@ s_chan_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 		if(mode.key[0])
 			strlcpy(chreg_p->cmode.key, mode.key,
 				sizeof(chreg_p->cmode.key));
+		else
+			chreg_p->cmode.key[0] = '\0';
 
 		modestring = chmode_to_string(&mode);
 
@@ -2684,6 +2686,8 @@ s_chan_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 		if(mode.key[0])
 			strlcpy(chreg_p->emode.key, mode.key,
 				sizeof(chreg_p->emode.key));
+		else
+			chreg_p->emode.key[0] = '\0';
 
 		modestring = chmode_to_string(&mode);
 
