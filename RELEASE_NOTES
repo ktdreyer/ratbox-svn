@@ -1,6 +1,25 @@
 
 This is the current development version of ratbox-services.
 
+-- ratbox-services-1.1.0rc2
+- *** THIS RELEASE REQUIRES A DATABASE UPGRADE ** SEE UPGRADING ***
+
+- stop checking for sjoin-deopped users through TS6 mode, as its pointless
+- make chanserv::delowner confirm success when it doesnt need emails
+- fix memory leak when using pgsql
+- fix some minor memory leaks
+- fix check for valid bans to work properly
+- various memory stats are now in stats Z
+- fix initial server connect when database has took an extended time loading
+- fix a table name mismatch for delowner
+- move service introductions to after SERVER so chanserv can deop people
+- dont enable AUTOJOIN for channels we join to enforce restrictops/bans etc,
+  instead set a non-stored INHABIT flag, and part after a period
+- fix some length issues when storing urls/topics
+- url length is now 100 characters
+- add in some database indices
+- fix removing a key from createmodes/enforcemodes
+
 -- ratbox-services-1.1.0rc1
 - *** THIS RELEASE REQUIRES A DATABASE UPGRADE ** SEE UPGRADING ***
 
