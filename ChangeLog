@@ -1,3 +1,17 @@
+leeh        2006/07/18 18:06:04 UTC	(20060718_0-22896)
+  Log:
+  - move url length in channels away from TOPICLEN to URLLEN, default 100
+  
+
+  Modified:
+	rserv/trunk/include/rserv.h (File Modified) 
+	rserv/trunk/src/s_chanserv.c (File Modified) 
+	rserv/trunk/tools/base/schema-mysql.txt (File Modified) 
+	rserv/trunk/tools/base/schema-pgsql.txt (File Modified) 
+	rserv/trunk/tools/dbupgrade.pl (File Modified) 
+	rserv/trunk/tools/definetolength.pl (File Modified) 
+
+
 leeh        2006/07/17 21:04:18 UTC	(20060717_3-22894)
   Log:
   - only do service introductions when our uplink introduces itself
