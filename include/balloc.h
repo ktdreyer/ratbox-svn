@@ -36,8 +36,7 @@ struct Block
 	size_t alloc_size;
 	struct Block *next;	/* Next in our chain of blocks */
 	void *elems;		/* Points to allocated memory */
-	dlink_list free_list;
-	dlink_list used_list;
+	unsigned long free_count;
 };
 typedef struct Block Block;
 
@@ -61,6 +60,8 @@ struct BlockHeap
 	unsigned long blocksAllocated;	/* Number of blocks allocated */
 	unsigned long freeElems;		/* Number of free elements */
 	Block *base;		/* Pointer to first block */
+	dlink_list free_list;
+	dlink_list used_list;
 };
 typedef struct BlockHeap BlockHeap;
 

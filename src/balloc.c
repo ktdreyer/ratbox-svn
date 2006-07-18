@@ -94,6 +94,8 @@ static int zero_fd = -1;
 #endif
 
 #define blockheap_fail(x) _blockheap_fail(x, __FILE__, __LINE__)
+#define get_memblock(ptr) (void *) ((size_t) ptr - sizeof(MemBlock))
+
 
 static void
 _blockheap_fail(const char *reason, const char *file, int line)
@@ -217,8 +219,7 @@ newblock(BlockHeap * bh)
 	{
 		return (1);
 	}
-	b->free_list.head = b->free_list.tail = NULL;
-	b->used_list.head = b->used_list.tail = NULL;
+
 	b->next = bh->base;
 
 	b->alloc_size = (bh->elemsPerBlock + 1) * (bh->elemSize + sizeof(MemBlock));
@@ -237,13 +238,14 @@ newblock(BlockHeap * bh)
 		newblk->block = b;
 		data = (void *) ((size_t) offset + sizeof(MemBlock));
 		newblk->block = b;
-		dlink_add(data, &newblk->self, &b->free_list);
+		dlink_add(data, &newblk->self, &bh->free_list);
 		offset = (unsigned char *) ((unsigned char *) offset +
 					    bh->elemSize + sizeof(MemBlock));
 	}
 
 	++bh->blocksAllocated;
 	bh->freeElems += bh->elemsPerBlock;
+	b->free_count = bh->elemsPerBlock;
 	bh->base = b;
 
 	return (0);
@@ -330,7 +332,7 @@ BlockHeapCreate(const char *name, size_t elemsize, int elemsperblock)
 void *
 BlockHeapAlloc(BlockHeap * bh)
 {
-	Block *walker;
+	MemBlock *memblock;
 	dlink_node *new_node;
 
 	s_assert(bh != NULL);
@@ -353,22 +355,17 @@ BlockHeapAlloc(BlockHeap * bh)
 		}
 	}
 
-	for (walker = bh->base; walker != NULL; walker = walker->next)
-	{
-		if(dlink_list_length(&walker->free_list) > 0)
-		{
-			bh->freeElems--;
-			new_node = walker->free_list.head;
-			dlink_move_node(new_node, &walker->free_list, &walker->used_list);
-			s_assert(new_node->data != NULL);
-			if(new_node->data == NULL)
-				blockheap_fail("new_node->data is NULL and that shouldn't happen!!!");
-			memset(new_node->data, 0, bh->elemSize);
-			return (new_node->data);
-		}
-	}
-	blockheap_fail("BlockHeapAlloc failed, giving up");
-	return NULL;
+	new_node = bh->free_list.head;
+	dlink_move_node(new_node, &bh->free_list, &bh->used_list);
+	s_assert(new_node->data != NULL);
+	if(new_node->data == NULL)
+		blockheap_fail("new_node->data is NULL and that shouldn't happen!!!");
+	
+	memblock = get_memblock(new_node->data);
+	s_assert(memblock->block != NULL);
+	memblock->block->free_count--;
+	memset(new_node->data, 0, bh->elemSize);
+	return (new_node->data);
 }
 
 
@@ -404,7 +401,7 @@ BlockHeapFree(BlockHeap * bh, void *ptr)
 		return (1);
 	}
 
-	memblock = (void *) ((size_t) ptr - sizeof(MemBlock));
+	memblock = get_memblock(ptr);
 	s_assert(memblock->block != NULL);
 	if(memblock->block == NULL)
 	{
@@ -413,8 +410,9 @@ BlockHeapFree(BlockHeap * bh, void *ptr)
 
 	block = memblock->block;
 	bh->freeElems++;
+	block->free_count++;
 	mem_frob(ptr, bh->elemSize);
-	dlink_move_node(&memblock->self, &block->used_list, &block->free_list);
+	dlink_move_node(&memblock->self, &bh->used_list, &bh->free_list);
 	return (0);
 }
 
@@ -450,7 +448,7 @@ BlockHeapGarbageCollect(BlockHeap * bh)
 
 	while (walker != NULL)
 	{
-		if((dlink_list_length(&walker->free_list) == bh->elemsPerBlock) != 0)
+		if(walker->free_count == bh->elemsPerBlock)
 		{
 			free_block(walker->elems, walker->alloc_size);
 			if(last != NULL)
