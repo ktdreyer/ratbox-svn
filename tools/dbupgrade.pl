@@ -209,6 +209,8 @@ if($currentver < 5)
 		print "ALTER TABLE members ADD INDEX (username);\n";
 		print "ALTER TABLE bans ADD PRIMARY KEY(chname, mask);\n";
 		print "ALTER TABLE bans ADD INDEX (chname);\n";
+		print "UPDATE channels SET url=SUBSTR(url,1,".$vals{"URLLEN"}.");\n";
+		print "ALTER TABLE channels CHANGE url url VARCHAR(".$vals{"URLLEN"}.");\n";
 	}
 	elsif($dbtype eq "pgsql")
 	{
@@ -217,6 +219,8 @@ if($currentver < 5)
 		print "CREATE INDEX members_username_idx ON members (username);\n";
 		print "ALTER TABLE bans ADD PRIMARY KEY(chname, mask);\n";
 		print "CREATE INDEX bans_chname_idx ON bans (chname);\n";
+		print "UPDATE channels SET url=SUBSTR(url,1,".$vals{"URLLEN"}.");\n";
+		print "ALTER TABLE channels ALTER COLUMN url TYPE VARCHAR(".$vals{"URLLEN"}.");\n";
 	}
 
 	print "\n";

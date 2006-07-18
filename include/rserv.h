@@ -10,6 +10,7 @@
 #define PASSWDLEN	35
 #define EMAILLEN	100
 #define OPERNAMELEN	30
+#define URLLEN		100
 
 #define SUSPENDREASONLEN	200
 

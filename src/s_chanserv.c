@@ -2772,7 +2772,7 @@ s_chan_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 		}
 
 		my_free(chreg_p->url);
-		chreg_p->url = my_strndup(arg, TOPICLEN);
+		chreg_p->url = my_strndup(arg, URLLEN);
 
 		rsdb_exec(NULL, "UPDATE channels SET url='%Q' "
 				"WHERE chname='%Q'",

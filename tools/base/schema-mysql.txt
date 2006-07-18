@@ -50,7 +50,7 @@ CREATE TABLE nicks (
 CREATE TABLE channels (
 	chname VARCHAR(CHANNELLEN) NOT NULL,
 	topic VARCHAR(TOPICLEN),
-	url VARCHAR(TOPICLEN),
+	url VARCHAR(URLLEN),
 	createmodes VARCHAR(50),
 	enforcemodes VARCHAR(50),
 	tsinfo INT UNSIGNED,
