@@ -1073,6 +1073,7 @@ static struct ConfEntry conf_userserv_table[] =
 	{ "allow_resetemail",	CF_YESNO, NULL, 0, &config_file.allow_resetemail	},
 	{ "resetpass_duration",	CF_TIME,  NULL, 0, &config_file.uresetpass_duration	},
 	{ "resetemail_duration", CF_TIME, NULL, 0, &config_file.uresetemail_duration	},
+	{ "reset_regtime_duration", CF_TIME, NULL, 0, &config_file.ureset_regtime_duration },
 	{ "allow_set_email",	CF_YESNO, NULL, 0, &config_file.allow_set_email		},
 	{ "max_logins",		CF_INT,   NULL, 0, &config_file.umax_logins		},
 	{ "\0", 0, NULL, 0, NULL }
