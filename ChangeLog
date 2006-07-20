@@ -1,3 +1,14 @@
+leeh        2006/07/20 19:51:00 UTC	(20060720_2-22926)
+  Log:
+  - fix missing ';' in example.conf
+  - fix missing expire bonus stuff from conf parser
+  
+
+  Modified:
+	rserv/trunk/doc/example.conf (File Modified) 
+	rserv/trunk/src/newconf.c (File Modified) 
+
+
 leeh        2006/07/20 19:44:48 UTC	(20060720_1-22924)
   Log:
   - remove the error checking once we've tried to send the email, as it can
