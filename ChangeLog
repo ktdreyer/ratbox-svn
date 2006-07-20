@@ -1,3 +1,12 @@
+leeh        2006/07/20 19:43:32 UTC	(20060720_0-22922)
+  Log:
+  - reset_regtime_duration was missing from conf parser
+  
+
+  Modified:
+	rserv/trunk/src/newconf.c (File Modified) 
+
+
 leeh        2006/07/18 20:03:29 UTC	(20060718_4-22908)
   Log:
   - update RELEASE_NOTES
