@@ -1,3 +1,15 @@
+leeh        2006/07/20 19:44:48 UTC	(20060720_1-22924)
+  Log:
+  - remove the error checking once we've tried to send the email, as it can
+    hang services whilst we wait for it to complete.
+  - add SIGCHLD handler for when children quit
+  
+
+  Modified:
+	rserv/trunk/src/email.c (File Modified) 
+	rserv/trunk/src/rserv.c (File Modified) 
+
+
 leeh        2006/07/20 19:43:32 UTC	(20060720_0-22922)
   Log:
   - reset_regtime_duration was missing from conf parser
