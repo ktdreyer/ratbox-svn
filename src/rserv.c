@@ -71,9 +71,11 @@ int testing_conf = 0;
 
 static int need_rehash = 0;
 static int need_rehash_help = 0;
+static int need_waitpid = 0;
 static void sig_hup(int);
 static void sig_term(int);
 static void sig_usr1(int);
+static void sig_chld(int);
 static void check_rehash(void *);
 
 void
@@ -294,6 +296,7 @@ main(int argc, char *argv[])
 	signal(SIGHUP, sig_hup);
 	signal(SIGTERM, sig_term);
 	signal(SIGUSR1, sig_usr1);
+	signal(SIGCHLD, sig_chld);
 
 	signal(SIGTRAP, SIG_IGN); /* Needed on FreeBSD and possibly others */
 	signal(SIGPIPE, SIG_IGN);
@@ -423,6 +426,13 @@ void sig_usr1(int sig)
 	signal(SIGUSR1, sig_usr1);
 }
 
+void
+sig_chld(int sig)
+{
+	need_waitpid = 1;
+	signal(SIGCHLD, sig_chld);
+}
+
 void check_rehash(void *unused)
 {
 	if(need_rehash)
@@ -437,6 +447,14 @@ void check_rehash(void *unused)
 		sendto_all("services rehashing: got SIGUSR1, reloading help");
 		rehash_help();
 		need_rehash_help = 0;
+	}
+
+	if(need_waitpid)
+	{
+		while(waitpid(-1, NULL, WNOHANG) > 0)
+			;
+
+		need_waitpid = 0;
 	}
 }
 

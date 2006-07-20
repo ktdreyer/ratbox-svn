@@ -64,7 +64,6 @@ send_email(const char *address, const char *subject, const char *format, ...)
 	va_list args;
 	pid_t childpid;
 	int pfd[2];
-	int retval;
 
 	/* master override is enabled.. cant send emails */
 	if(config_file.disable_email)
@@ -145,6 +144,6 @@ send_email(const char *address, const char *subject, const char *format, ...)
 
 	fclose(out);
 
-	waitpid(childpid, &retval, 0);
-	return WIFEXITED(retval) && WEXITSTATUS(retval) == 0;
+	waitpid(childpid, NULL, WNOHANG);
+	return 1;
 }
