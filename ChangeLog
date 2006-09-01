@@ -1,3 +1,13 @@
+leeh        2006/09/01 18:23:33 UTC	(20060901_0-23021)
+  Log:
+  - add a maximum duration of a year in to channel bans, to stop some db
+    screwups
+  
+
+  Modified:
+	rserv/trunk/src/s_chanserv.c (File Modified) 
+
+
 leeh        2006/07/20 19:51:00 UTC	(20060720_2-22926)
   Log:
   - fix missing ';' in example.conf
