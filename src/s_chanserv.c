@@ -3010,7 +3010,12 @@ s_chan_addban(struct client *client_p, struct lconn *conn_p, const char *parv[],
 
 	/* valid duration.. */
 	if(EmptyString(endptr))
+	{
+		if(duration > (60*24*7*52))
+			duration = (60*24*7*52);
+
 		loc++;
+	}
 	else
 		duration = 0;
 
