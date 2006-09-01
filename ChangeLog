@@ -1,3 +1,17 @@
+leeh        2006/09/01 18:59:20 UTC	(20060901_1-23023)
+  Log:
+  - move get_temp_time() into tools.c
+  - make chanserv::addban use get_temp_time(), allowing '1w' etc klines
+  
+
+  Modified:
+	rserv/trunk/help/chanserv/addban (File Modified) 
+	rserv/trunk/include/tools.h (File Modified) 
+	rserv/trunk/src/s_banserv.c (File Modified) 
+	rserv/trunk/src/s_chanserv.c (File Modified) 
+	rserv/trunk/src/tools.c (File Modified) 
+
+
 leeh        2006/09/01 18:23:33 UTC	(20060901_0-23021)
   Log:
   - add a maximum duration of a year in to channel bans, to stop some db
