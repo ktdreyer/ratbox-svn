@@ -2999,25 +2999,17 @@ s_chan_addban(struct client *client_p, struct lconn *conn_p, const char *parv[],
 	dlink_node *ptr, *next_ptr;
 	const char *mask;
 	char *endptr;
-	int duration;
+	time_t duration;
 	int level;
 	int loc = 1;
 
 	if((mreg_p = verify_member_reg_name(client_p, &chptr, parv[0], S_C_REGULAR)) == NULL)
 		return 1;
 
-	duration = (int) strtol(parv[1], &endptr, 10);
+	duration = get_temp_time(parv[1]);
 
-	/* valid duration.. */
-	if(EmptyString(endptr))
-	{
-		if(duration > (60*24*7*52))
-			duration = (60*24*7*52);
-
+	if(duration)
 		loc++;
-	}
-	else
-		duration = 0;
 
 	mask = parv[loc++];
 

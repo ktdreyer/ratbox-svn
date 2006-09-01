@@ -126,46 +126,6 @@ e_banserv_expire(void *unused)
 			CURRENT_TIME);
 }
 
-static time_t
-get_temp_time(const char *duration)
-{
-	time_t result = 0;
-
-	for(; *duration; duration++)
-	{
-		if(IsDigit(*duration))
-		{
-			result *= 10;
-			result += ((*duration) & 0xF);
-		}
-		else
-		{
-			if (!result || *(duration+1))
-				return 0;
-			switch (*duration)
-			{
-				case 'h': case 'H':
-					result *= 60; 
-					break;
-				case 'd': case 'D': 
-					result *= 1440; 
-					break;
-				case 'w': case 'W':
-					result *= 10080; 
-					break;
-				default:
-					return 0;
-			}
-		}
-	}
-
-	/* max at 1 year */
-	if(result > (60*24*7*52))
-		result = (60*24*7*52);
-
-	return(result*60);
-}
-
 static int
 split_ban(const char *mask, char **user, char **host)
 {

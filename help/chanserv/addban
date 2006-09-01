@@ -7,3 +7,7 @@ ADDBAN <channel> [duration] <mask> <level> <reason>
   <level>   : Access level to place ban at
   <reason>  : Reason for ban
 Only users with the given level of access can remove the ban.
+
+Temporary bans accept the tokens w/d/h to mean weeks, days, 
+and hours.  These may not be combined, so "1w" is valid, but
+"1w1d" is not.

@@ -21,6 +21,8 @@ extern const char *get_duration(time_t seconds);
 extern const char *get_short_duration(time_t seconds);
 extern const char *get_time(time_t when);
 
+time_t get_temp_time(const char *duration);
+
 extern const char *lcase(const char *);
 extern const char *ucase(const char *);
 
