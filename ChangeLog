@@ -1,3 +1,13 @@
+leeh        2006/09/06 20:43:33 UTC	(20060906_0-23033)
+  Log:
+  - fix bug of trying to enforce chanmodes +lk when we're not actually
+    supposing to, causing us to set the key to blank and the +l to 0
+  
+
+  Modified:
+	rserv/trunk/src/s_chanserv.c (File Modified) 
+
+
 leeh        2006/09/01 18:59:20 UTC	(20060901_1-23023)
   Log:
   - move get_temp_time() into tools.c
