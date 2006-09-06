@@ -1127,14 +1127,14 @@ h_chanserv_mode_simple(void *v_chptr, void *v_chreg)
 		chptr->mode.mode |= mode.mode;
 	}
 
-	if(chptr->mode.limit != chreg_p->emode.limit)
+	if(chreg_p->emode.limit && chptr->mode.limit != chreg_p->emode.limit)
 	{
 		mode.mode |= MODE_LIMIT;
 		chptr->mode.limit = chreg_p->emode.limit;
 		mode.limit = chreg_p->emode.limit;
 	}
 		
-	if(strcasecmp(chptr->mode.key, chreg_p->emode.key))
+	if(chreg_p->emode.key[0] && strcasecmp(chptr->mode.key, chreg_p->emode.key))
 	{
 		mode.mode |= MODE_KEY;
 		strlcpy(chptr->mode.key, chreg_p->emode.key,
