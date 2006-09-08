@@ -1,3 +1,14 @@
+jilles      2006/09/08 14:53:07 UTC	(20060908_0-23035)
+  Log:
+  Don't accept SID before server registration,
+  even with TS6 our uplink will introduce itself
+  with SERVER.
+  
+
+  Modified:
+	rserv/trunk/src/client.c (File Modified) 
+
+
 leeh        2006/09/06 20:43:33 UTC	(20060906_0-23033)
   Log:
   - fix bug of trying to enforce chanmodes +lk when we're not actually
