@@ -73,7 +73,7 @@ static struct scommand_handler nick_command = { "NICK", c_nick, 0, DLINK_EMPTY }
 static struct scommand_handler uid_command = { "UID", c_uid, 0, DLINK_EMPTY };
 static struct scommand_handler quit_command = { "QUIT", c_quit, 0, DLINK_EMPTY };
 static struct scommand_handler server_command = { "SERVER", c_server, FLAGS_UNKNOWN, DLINK_EMPTY};
-static struct scommand_handler sid_command = { "SID", c_sid, FLAGS_UNKNOWN, DLINK_EMPTY};
+static struct scommand_handler sid_command = { "SID", c_sid, 0, DLINK_EMPTY};
 static struct scommand_handler squit_command = { "SQUIT", c_squit, 0, DLINK_EMPTY };
 
 /* init_client()
