@@ -1,3 +1,13 @@
+leeh        2006/09/09 15:41:27 UTC	(20060909_1-23043)
+  Log:
+  - dont allow these to run unless people run configure first
+  
+
+  Modified:
+	rserv/trunk/tools/dbupgrade.pl (File Modified) 
+	rserv/trunk/tools/generate-schema.pl (File Modified) 
+
+
 leeh        2006/09/09 15:37:22 UTC	(20060909_0-23041)
   Log:
   - that should be ratbox_services.* in the GRANT
