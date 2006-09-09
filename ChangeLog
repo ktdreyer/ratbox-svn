@@ -1,3 +1,12 @@
+leeh        2006/09/09 15:37:22 UTC	(20060909_0-23041)
+  Log:
+  - that should be ratbox_services.* in the GRANT
+  
+
+  Modified:
+	rserv/trunk/INSTALL.mysql (File Modified) 
+
+
 jilles      2006/09/08 14:53:07 UTC	(20060908_0-23035)
   Log:
   Don't accept SID before server registration,
