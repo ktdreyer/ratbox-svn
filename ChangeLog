@@ -1,3 +1,12 @@
+leeh        2006/09/09 15:48:22 UTC	(20060909_3-23047)
+  Log:
+  - remove a couple of misplaced ','
+  
+
+  Modified:
+	rserv/trunk/tools/base/schema-mysql.txt (File Modified) 
+
+
 leeh        2006/09/09 15:42:43 UTC	(20060909_2-23045)
   Log:
   - these foreign keys are useless for mysql
