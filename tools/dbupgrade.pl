@@ -27,6 +27,12 @@ unless($ARGV[0] && $ARGV[1])
 	exit;
 }
 
+unless(-r "../include/setup.h")
+{
+	print("Unable to read ../include/setup.h, please run configure first\n");
+	exit();
+}
+
 my %versionlist = (
 	"1.0.0"		=> 1,
 	"1.0.1"		=> 1,

@@ -17,6 +17,12 @@ my @plain_schemas = ("base/schema-sqlite.txt");
 
 my %vals = &parse_includes("../include");
 
+unless(-r "../include/setup.h")
+{
+	print("Unable to read ../include/setup.h, please run configure first\n");
+	exit();
+}
+
 if($ARGV[0])
 {
 	@schemas = ("$ARGV[0]");
