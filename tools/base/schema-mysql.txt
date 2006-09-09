@@ -43,7 +43,7 @@ CREATE TABLE nicks (
 	reg_time INT UNSIGNED,
 	last_time INT UNSIGNED,
 	flags INT UNSIGNED,
-	PRIMARY KEY(nickname),
+	PRIMARY KEY(nickname)
 );
 
 CREATE TABLE channels (
@@ -76,7 +76,7 @@ CREATE TABLE members (
 	level INT,
 	flags INT UNSIGNED,
 	suspend INT,
-	PRIMARY KEY(chname, username),
+	PRIMARY KEY(chname, username)
 );
 ALTER TABLE members ADD INDEX (chname);
 ALTER TABLE members ADD INDEX (username);
