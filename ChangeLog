@@ -1,3 +1,14 @@
+leeh        2006/09/12 20:57:35 UTC	(20060912_0-23051)
+  Log:
+  - update RELEASE_NOTES
+  - revved patchlevel to 1.1.0rc3
+  
+
+  Modified:
+	rserv/trunk/RELEASE_NOTES (File Modified) 
+	rserv/trunk/include/config.h (File Modified) 
+
+
 leeh        2006/09/09 15:49:28 UTC	(20060909_4-23049)
   Log:
   - we need the database name to use on import
