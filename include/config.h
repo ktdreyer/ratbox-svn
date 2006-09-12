@@ -25,7 +25,7 @@
 
 #define MAX_FD		1000
 
-#define RSERV_VERSION		"1.1.0rc2"
+#define RSERV_VERSION		"1.1.0rc3"
 
 #ifdef SMALL_NETWORK
 #define HEAP_CHANNEL    64

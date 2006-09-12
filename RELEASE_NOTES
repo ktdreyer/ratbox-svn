@@ -1,6 +1,15 @@
 
 This is the current development version of ratbox-services.
 
+-- ratbox-services-1.1.0rc3
+- fix various missing variables from the config parser
+- remove the error checking on sending emails, in order to stop us blocking
+  whilst trying to actually send it
+- channel bans now max out at a year
+- make chanserv::addban accept "1w" etc for ban duration
+- stop trying to enforce modes +lk when we don't have either to enforce
+- fix some schema issues
+
 -- ratbox-services-1.1.0rc2
 - *** THIS RELEASE REQUIRES A DATABASE UPGRADE ** SEE UPGRADING ***
 
