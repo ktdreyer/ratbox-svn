@@ -1863,8 +1863,8 @@ dump_user_info(struct client *client_p, struct lconn *conn_p, struct user_reg *u
 	{
 		mreg_p = ptr->data;
 
-		/* "Access to: " + ":200 " */
-		if((buflen + strlen(mreg_p->channel_reg->name) + 16) >= (BUFSIZE - 3))
+		/* "Access to: " + " 200, " */
+		if((buflen + strlen(mreg_p->channel_reg->name) + 17) >= (BUFSIZE - 3))
 		{
 			service_send(userserv_p, client_p, conn_p,
 					"[%s] Access to: %s", ureg_p->name, buf);
@@ -1872,7 +1872,8 @@ dump_user_info(struct client *client_p, struct lconn *conn_p, struct user_reg *u
 			buflen = 0;
 		}
 
-		mlen = sprintf(p, "%s:%d ",
+		mlen = sprintf(p, "%s%s %d",
+				(buflen ? ", " : ""),
 				mreg_p->channel_reg->name, mreg_p->level);
 
 		buflen += mlen;
