@@ -1,3 +1,13 @@
+leeh        2006/09/19 19:08:41 UTC	(20060919_1-23063)
+  Log:
+  - make userserv::userinfo list channels as "#foo 200, #x 150" etc, as people
+    are right clicking on the channel name to join it..
+  
+
+  Modified:
+	rserv/trunk/src/s_userserv.c (File Modified) 
+
+
 leeh        2006/09/19 18:53:40 UTC	(20060919_0-23061)
   Log:
   - get_temp_time() returns duration in seconds, so chanserv::addban doesn't
