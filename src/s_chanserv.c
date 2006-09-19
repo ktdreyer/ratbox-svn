@@ -3076,7 +3076,7 @@ s_chan_addban(struct client *client_p, struct lconn *conn_p, const char *parv[],
 
 	banreg_p = make_ban_reg(mreg_p->channel_reg, mask, reason, 
 			mreg_p->user_reg->name, level, 
-			duration ? CURRENT_TIME + (duration*60) : 0);
+			duration ? CURRENT_TIME + duration : 0);
 	write_ban_db_entry(banreg_p, mreg_p->channel_reg->name);
 
 	service_error(chanserv_p, client_p, "Ban %s on %s added",
