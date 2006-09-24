@@ -3282,16 +3282,10 @@ s_chan_listbans(struct client *client_p, struct lconn *conn_p, const char *parv[
 	{
 		banreg_p = ptr->data;
 
-		if(banreg_p->hold)
-			service_error(chanserv_p, client_p, 
-				"  %s %d (%d min) [mod: %s] :%s",
+		service_error(chanserv_p, client_p, 
+				"  %s %d (%s) [mod: %s] :%s",
 				banreg_p->mask, banreg_p->level,
-				(int) ((banreg_p->hold - CURRENT_TIME) / 60),
-				banreg_p->username, banreg_p->reason);
-		else
-			service_error(chanserv_p, client_p, 
-				"  %s %d (perm) [mod: %s] :%s",
-				banreg_p->mask, banreg_p->level,
+				(banreg_p->hold ? get_short_duration(banreg_p->hold - CURRENT_TIME): "perm"),
 				banreg_p->username, banreg_p->reason);
 	}
 
