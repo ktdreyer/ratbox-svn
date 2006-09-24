@@ -1,3 +1,14 @@
+leeh        2006/09/24 19:18:38 UTC	(20060924_0-23069)
+  Log:
+  - extend get_short_duration() to include minutes
+  - make banlist use get_short_duration, rather than simply number of minutes
+  
+
+  Modified:
+	rserv/trunk/src/s_chanserv.c (File Modified) 
+	rserv/trunk/src/tools.c (File Modified) 
+
+
 leeh        2006/09/19 19:08:41 UTC	(20060919_1-23063)
   Log:
   - make userserv::userinfo list channels as "#foo 200, #x 150" etc, as people
