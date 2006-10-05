@@ -1,3 +1,13 @@
+leeh        2006/10/05 17:57:11 UTC	(20061005_0-23087)
+  Log:
+  - handle an SJOIN containing modes of "0", sent when an uplink nukes the
+    modes due to a losing TS
+  
+
+  Modified:
+	rserv/trunk/src/channel.c (File Modified) 
+
+
 leeh        2006/09/24 19:18:38 UTC	(20060924_0-23069)
   Log:
   - extend get_short_duration() to include minutes
