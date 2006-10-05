@@ -721,16 +721,22 @@ c_sjoin(struct client *client_p, const char *parv[], int parc)
 	newmode.key[0] = '\0';
 	newmode.limit = 0;
 
-	args = parse_simple_mode(&newmode, parv, parc, 2);
-
-	/* invalid mode */
-	s_assert(args);
-	if(!args)
+	/* mode of 0 is sent when someone joins remotely with higher TS. */
+	if(strcmp(args, "0"))
 	{
-		mlog("PROTO: SJOIN issued with invalid mode: %s",
-			rebuild_params(parv, parc, 2));
-		return;
+		args = parse_simple_mode(&newmode, parv, parc, 2);
+
+		/* invalid mode */
+		s_assert(args);
+		if(!args)
+		{
+			mlog("PROTO: SJOIN issued with invalid mode: %s",
+				rebuild_params(parv, parc, 2));
+			return;
+		}
 	}
+	else
+		args++;
 
 	if(!keep_old_modes)
 	{
