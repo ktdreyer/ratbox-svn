@@ -722,7 +722,7 @@ c_sjoin(struct client *client_p, const char *parv[], int parc)
 	newmode.limit = 0;
 
 	/* mode of 0 is sent when someone joins remotely with higher TS. */
-	if(strcmp(args, "0"))
+	if(strcmp(parv[2], "0"))
 	{
 		args = parse_simple_mode(&newmode, parv, parc, 2);
 
@@ -736,7 +736,7 @@ c_sjoin(struct client *client_p, const char *parv[], int parc)
 		}
 	}
 	else
-		args++;
+		args = 3;
 
 	if(!keep_old_modes)
 	{
