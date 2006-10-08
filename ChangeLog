@@ -1,3 +1,12 @@
+leeh        2006/10/08 15:31:38 UTC	(20061008_0-23108)
+  Log:
+  - ignore login bursts to suspended usernames and log them out
+  
+
+  Modified:
+	rserv/trunk/src/s_userserv.c (File Modified) 
+
+
 jilles      2006/10/05 18:21:48 UTC	(20061005_1-23089)
   Log:
   Fix handling of SJOIN with "0" modes correctly now.
