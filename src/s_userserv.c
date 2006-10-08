@@ -419,6 +419,13 @@ h_user_burst_login(void *v_client_p, void *v_username)
 	if(client_p->user->user_reg)
 		dlink_find_destroy(client_p, &client_p->user->user_reg->users);
 
+	/* username is suspended, ignore it and log them out */
+	if(ureg_p->flags & US_FLAGS_SUSPENDED)
+	{
+		sendto_server(":%s ENCAP * SU %s", MYUID, UID(client_p));
+		return 0;
+	}
+
 	client_p->user->user_reg = ureg_p;
 	dlink_add_alloc(client_p, &ureg_p->users);
 
