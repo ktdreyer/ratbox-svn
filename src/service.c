@@ -553,8 +553,12 @@ handle_service(struct client *service_p, struct client *client_p,
 			service_error(service_p, client_p, 
 					"Temporarily unable to answer query. Please try again shortly.");
 			client_p->user->flood_count++;
-			service_p->service->flood++;
 			service_p->service->paced_count++;
+
+			/* if no ignore limit, flood_max is our threshold */
+			if(service_p->service->flood_max_ignore)
+				service_p->service->flood++;
+
 			return;
 		}
 	}
