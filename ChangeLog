@@ -1,3 +1,13 @@
+leeh        2006/10/08 20:31:31 UTC	(20061008_2-23115)
+  Log:
+  - if ignore value is not specified for per-server flood limits, make
+    flood_max the upper limit
+  
+
+  Modified:
+	rserv/trunk/src/service.c (File Modified) 
+
+
 leeh        2006/10/08 20:29:12 UTC	(20061008_1-23113)
   Log:
   - make the per-service flood limits optional, and default them all to off.
