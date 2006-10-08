@@ -90,7 +90,7 @@ static struct ucommand_handler banserv_ucommand[] =
 
 static struct service_handler banserv_service = {
 	"BANSERV", "BANSERV", "banserv", "services.int",
-	"Global Ban Service", 60, 80, 
+	"Global Ban Service", 0, 0, 
 	banserv_command, sizeof(banserv_command), banserv_ucommand, NULL, NULL
 };
 

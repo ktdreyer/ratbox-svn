@@ -913,6 +913,18 @@ conf_set_service_loglevel(void *data)
 }
 
 static void
+conf_set_service_flood_max(void *data)
+{
+	yy_service->service->flood_max = *(unsigned int *) data;
+}
+
+static void
+conf_set_service_flood_max_ignore(void *data)
+{
+	yy_service->service->flood_max_ignore = *(unsigned int *) data;
+}
+
+static void
 conf_set_chanserv_expireban(void *data)
 {
 	time_t val = *(time_t *) data;
@@ -1052,6 +1064,8 @@ static struct ConfEntry conf_service_table[] =
 	{ "realname",	CF_QSTRING, conf_set_service_realname,	0, NULL },
 	{ "loglevel",	CF_INT,     conf_set_service_loglevel,  0, NULL },
 	{ "flags",	CF_STRING|CF_FLIST, conf_set_service_flags, 0, NULL },
+	{ "flood_max",	CF_INT,	    conf_set_service_flood_max,	0, NULL },
+	{ "flood_max_ignore", CF_INT, conf_set_service_flood_max_ignore, 0, NULL },
 	{ "\0", 0, NULL, 0, NULL }
 };
 

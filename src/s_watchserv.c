@@ -106,7 +106,7 @@ static struct ucommand_handler watch_ucommand [] =
 
 static struct service_handler watchserv_service = {
 	"WATCHSERV", "WATCHSERV", "watchserv", "services.int", "Command Watching Service",
-	60, 80, watch_command, sizeof(watch_command), watch_ucommand, NULL, NULL
+	0, 0, watch_command, sizeof(watch_command), watch_ucommand, NULL, NULL
 };
 
 void

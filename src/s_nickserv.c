@@ -86,7 +86,7 @@ static struct ucommand_handler nickserv_ucommand[] =
 
 static struct service_handler nick_service = {
 	"NICKSERV", "NICKSERV", "nickserv", "services.int",
-	"Nickname Registration Service", 60, 80, 
+	"Nickname Registration Service", 0, 0, 
 	nickserv_command, sizeof(nickserv_command), nickserv_ucommand, init_s_nickserv, NULL
 };
 

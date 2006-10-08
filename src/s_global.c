@@ -83,7 +83,7 @@ static struct ucommand_handler global_ucommand[] =
 
 static struct service_handler global_service = {
 	"GLOBAL", "GLOBAL", "global", "services.int",
-	"Network Message Service", 60, 80, 
+	"Network Message Service", 0, 0, 
 	global_command, sizeof(global_command), global_ucommand, init_s_global, NULL
 };
 

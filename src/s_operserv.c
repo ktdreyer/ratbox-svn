@@ -88,7 +88,7 @@ static struct ucommand_handler operserv_ucommand[] =
 
 static struct service_handler operserv_service = {
 	"OPERSERV", "OPERSERV", "operserv", "services.int", "Oper Services",
-	60, 80, operserv_command, sizeof(operserv_command), operserv_ucommand, init_s_operserv, NULL
+	0, 0, operserv_command, sizeof(operserv_command), operserv_ucommand, init_s_operserv, NULL
 };
 
 static int operserv_db_callback(int, const char **);

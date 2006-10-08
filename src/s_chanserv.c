@@ -155,7 +155,7 @@ static struct ucommand_handler chanserv_ucommand[] =
 
 static struct service_handler chanserv_service = {
 	"CHANSERV", "CHANSERV", "chanserv", "services.int", "Channel Service",
-	30, 50, chanserv_command, sizeof(chanserv_command), chanserv_ucommand, init_s_chanserv, NULL
+	0, 0, chanserv_command, sizeof(chanserv_command), chanserv_ucommand, init_s_chanserv, NULL
 };
 
 static void load_channel_db(void);

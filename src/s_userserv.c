@@ -110,7 +110,7 @@ static struct ucommand_handler userserv_ucommand[] =
 
 static struct service_handler userserv_service = {
 	"USERSERV", "USERSERV", "userserv", "services.int", "User Auth Services",
-	30, 50, userserv_command, sizeof(userserv_command), userserv_ucommand, init_s_userserv, NULL
+	0, 0, userserv_command, sizeof(userserv_command), userserv_ucommand, init_s_userserv, NULL
 };
 
 static int user_db_callback(int argc, const char **argv);

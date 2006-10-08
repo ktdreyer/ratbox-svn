@@ -59,7 +59,7 @@ static struct service_command alis_command[] =
 
 static struct service_handler alis_service = {
 	"ALIS", "ALIS", "alis", "services.int", "Advanced List Service",
-        60, 80, alis_command, sizeof(alis_command), NULL, NULL, NULL
+        0, 0, alis_command, sizeof(alis_command), NULL, NULL, NULL
 };
 
 void

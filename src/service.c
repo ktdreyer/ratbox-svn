@@ -539,7 +539,7 @@ handle_service(struct client *service_p, struct client *client_p,
 			client_p->user->flood_count = 0;
 		}
 
-		if(service_p->service->flood > service_p->service->flood_max_ignore ||
+		if((service_p->service->flood_max_ignore && service_p->service->flood > service_p->service->flood_max_ignore) ||
 		   client_p->user->flood_count > config_file.client_flood_max_ignore)
 		{
 			client_p->user->flood_count++;
@@ -547,7 +547,7 @@ handle_service(struct client *service_p, struct client *client_p,
 			return;
 		}
 
-		if(service_p->service->flood > service_p->service->flood_max ||
+		if((service_p->service->flood_max && service_p->service->flood > service_p->service->flood_max) ||
 		   client_p->user->flood_count > config_file.client_flood_max)
 		{
 			service_error(service_p, client_p, 
