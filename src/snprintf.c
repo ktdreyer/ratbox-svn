@@ -455,11 +455,11 @@ rs_vsnprintf(char *dest, const size_t bytes, const char *format, va_list args)
 			if(ch == 'Q')
 			{
 				const char *arg = va_arg(args, const char *);
-
+				const char *str;
 				if(arg == NULL)
 					continue;
 
-				const char *str = rsdb_quote(arg);
+				str = rsdb_quote(arg);
 
 				while ((*dest = *str))
 				{
