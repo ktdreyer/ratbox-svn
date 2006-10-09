@@ -1,3 +1,11 @@
+androsyn    2006/10/09 00:08:39 UTC	(20061009_0-23117)
+  Log:
+  c99isms aren't really a good idea yet
+
+  Modified:
+	rserv/trunk/src/snprintf.c (File Modified) 
+
+
 leeh        2006/10/08 20:31:31 UTC	(20061008_2-23115)
   Log:
   - if ignore value is not specified for per-server flood limits, make
