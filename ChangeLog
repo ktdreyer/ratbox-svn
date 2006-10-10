@@ -1,3 +1,12 @@
+leeh        2006/10/10 17:59:59 UTC	(20061010_0-23119)
+  Log:
+  - make ospart work through dcc
+  
+
+  Modified:
+	rserv/trunk/src/s_operserv.c (File Modified) 
+
+
 androsyn    2006/10/09 00:08:39 UTC	(20061009_0-23117)
   Log:
   c99isms aren't really a good idea yet
