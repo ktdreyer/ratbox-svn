@@ -1,3 +1,12 @@
+leeh        2006/10/10 18:21:52 UTC	(20061010_1-23121)
+  Log:
+  - fix count_memory() to account for userserv/chanserv being disabled
+  
+
+  Modified:
+	rserv/trunk/src/rserv.c (File Modified) 
+
+
 leeh        2006/10/10 17:59:59 UTC	(20061010_0-23119)
   Log:
   - make ospart work through dcc
