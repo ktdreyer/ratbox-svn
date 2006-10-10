@@ -540,11 +540,14 @@ count_memory(struct client *client_p)
 	struct conf_oper *oconf;
 	dlink_node *ptr;
 
+#ifdef ENABLE_USERSERV
 	size_t sz_user_reg_password = 0;
 	size_t sz_user_reg_email = 0;
 	size_t sz_user_reg_suspend = 0;
 	size_t sz_member_reg_lastmod = 0;
+#endif
 
+#ifdef ENABLE_CHANSERV
 	size_t sz_chan_reg_name = 0;
 	size_t sz_chan_reg_topic = 0;
 	size_t sz_chan_reg_url = 0;
@@ -553,20 +556,26 @@ count_memory(struct client *client_p)
 	size_t sz_ban_reg_mask = 0;
 	size_t sz_ban_reg_reason = 0;
 	size_t sz_ban_reg_username = 0;
+#endif
 
 	size_t sz_hash_overhead = 0;
 
 	size_t sz_conf = 0;
 
+#ifdef ENABLE_USERSERV
 	s_userserv_countmem(&sz_user_reg_password, &sz_user_reg_email, 
 				&sz_user_reg_suspend, &sz_member_reg_lastmod);
+#endif
 
+#ifdef ENABLE_CHANSERV
 	s_chanserv_countmem(&sz_chan_reg_name, &sz_chan_reg_topic,
 				&sz_chan_reg_url, &sz_chan_reg_suspend,
 				&sz_ban_reg_mask, &sz_ban_reg_reason,
 				&sz_ban_reg_username);
+#endif
 
 	/* XXX NUMERIC */
+#ifdef ENABLE_USERSERV
 	sendto_server(":%s 988 %s :USERSERV", MYNAME, client_p->name);
 	sendto_server(":%s 988 %s :   Password  : %u",
 			MYNAME, client_p->name, (unsigned int) sz_user_reg_password);
@@ -576,6 +585,8 @@ count_memory(struct client *client_p)
 			MYNAME, client_p->name, (unsigned int) sz_user_reg_suspend);
 	sendto_server(":%s 988 %s :   Member mod: %u",
 			MYNAME, client_p->name, (unsigned int) sz_member_reg_lastmod);
+#endif
+#ifdef ENABLE_CHANSERV
 	sendto_server(":%s 988 %s :CHANSERV", MYNAME, client_p->name);
 	sendto_server(":%s 988 %s :   Name      : %u",
 			MYNAME, client_p->name, (unsigned int) sz_chan_reg_name);
@@ -591,6 +602,7 @@ count_memory(struct client *client_p)
 			MYNAME, client_p->name, (unsigned int) sz_ban_reg_reason);
 	sendto_server(":%s 988 %s :   Ban User  : %u",
 			MYNAME, client_p->name, (unsigned int) sz_ban_reg_username);
+#endif
 
 	sendto_server(":%s 988 %s :BLOCKHEAP", MYNAME, client_p->name);
 
