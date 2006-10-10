@@ -314,7 +314,7 @@ o_oper_ospart(struct client *client_p, struct lconn *conn_p, const char *parv[],
 	struct channel *chptr;
 	int osjoin = 0;
 
-	if(!client_p->user->oper)
+	if(client_p && !client_p->user->oper)
 	{
 		service_error(operserv_p, client_p, "No access to OPERSERV::OSPART");
 		return 1;
@@ -348,17 +348,19 @@ o_oper_ospart(struct client *client_p, struct lconn *conn_p, const char *parv[],
 	/* done through OSJOIN */
 	if(osjoin)
 	{
-		if((client_p->user->oper->sflags & CONF_OPER_OS_CHANNEL) == 0)
+		if((client_p && (client_p->user->oper->sflags & CONF_OPER_OS_CHANNEL) == 0) ||
+		   (conn_p && (conn_p->sprivs & CONF_OPER_OS_CHANNEL) == 0))
 		{
-			service_error(operserv_p, client_p, 
+			service_send(operserv_p, client_p, conn_p,
 					"No access to OPERSERV::OSPART on channels joined through OSJOIN");
 			return 0;
 		}
 	}
 	/* through TAKEOVER */
-	else if((client_p->user->oper->sflags & CONF_OPER_OS_TAKEOVER) == 0)
+	else if((client_p && (client_p->user->oper->sflags & CONF_OPER_OS_TAKEOVER) == 0) ||
+		(conn_p && (conn_p->sprivs & CONF_OPER_OS_TAKEOVER) == 0))
 	{
-		service_error(operserv_p, client_p, 
+		service_send(operserv_p, client_p, conn_p,
 				"No access to OPERSERV::OSPART on channels joined through TAKEOVER");
 		return 0;
 	}
