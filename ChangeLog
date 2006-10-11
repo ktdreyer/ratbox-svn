@@ -1,3 +1,13 @@
+leeh        2006/10/11 18:08:45 UTC	(20061011_0-23138)
+  Log:
+  - we need to use banreg_p->mask when deleting from the db, not parv[1] as
+    we're not messing around too much with case
+  
+
+  Modified:
+	rserv/trunk/src/s_chanserv.c (File Modified) 
+
+
 leeh        2006/10/10 18:21:52 UTC	(20061010_1-23121)
   Log:
   - fix count_memory() to account for userserv/chanserv being disabled
