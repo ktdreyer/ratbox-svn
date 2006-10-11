@@ -3177,7 +3177,7 @@ s_chan_delban(struct client *client_p, struct lconn *conn_p, const char *parv[],
 			parv[1], mreg_p->channel_reg->name);
 
 	rsdb_exec(NULL, "DELETE FROM bans WHERE chname = '%Q' AND mask = '%Q'",
-			mreg_p->channel_reg->name, parv[1]);
+			mreg_p->channel_reg->name, banreg_p->mask);
 
 	free_ban_reg(mreg_p->channel_reg, banreg_p);
 
