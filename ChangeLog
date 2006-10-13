@@ -1,3 +1,38 @@
+androsyn    2006/10/13 17:29:07 UTC	(20061013_3-23229)
+  Log:
+  test commit
+
+  Modified:
+	rserv/trunk/SVN-Access (File Modified) 
+
+
+leeh        2006/10/13 17:28:15 UTC	(20061013_2-23228)
+  Log:
+  - test commit
+  
+
+  Modified:
+	rserv/trunk/INSTALL (File Modified) 
+
+
+leeh        2006/10/13 17:25:14 UTC	(20061013_1-23227)
+  Log:
+  - time_t is signed, make get_temp_time() handle an overflow
+  
+
+  Modified:
+	rserv/trunk/src/tools.c (File Modified) 
+
+
+leeh        2006/10/13 17:23:17 UTC	(20061013_0-23226)
+  Log:
+  - make us::resetemail handle parameters properly
+  
+
+  Modified:
+	rserv/trunk/src/s_userserv.c (File Modified) 
+
+
 leeh        2006/10/11 18:08:45 UTC	(20061011_0-23138)
   Log:
   - we need to use banreg_p->mask when deleting from the db, not parv[1] as
