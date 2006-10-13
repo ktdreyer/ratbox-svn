@@ -4,7 +4,7 @@ ratbox-services installation guide
 ----------------------------------
 
 IMPORTANT: ratbox-services maintains a large amount of state in RAM.  See
-doc/database_mod.txt for more information. 
+doc/database_mod.txt for more information.
 
 
 *********************************************************
