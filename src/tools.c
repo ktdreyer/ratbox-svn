@@ -210,7 +210,8 @@ get_temp_time(const char *duration)
 	}
 
 	/* max at 1 year */
-	if(result > (60*24*7*52))
+	/* time_t is signed, so if we've overflowed, reset to max */
+	if(result > (60*24*7*52) || result < 0)
 		result = (60*24*7*52);
 
 	return(result*60);
