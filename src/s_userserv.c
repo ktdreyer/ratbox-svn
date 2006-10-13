@@ -1578,7 +1578,7 @@ s_user_resetemail(struct client *client_p, struct lconn *conn_p, const char *par
 	/* confirm from old email */
 	else if(!strcasecmp(parv[0], "CONFIRM"))
 	{
-		if(EmptyString(parv[2]))
+		if(EmptyString(parv[1]) || EmptyString(parv[2]))
 		{
 			service_error(userserv_p, client_p,
 					"Insufficient parameters to %s::RESETEMAIL, new email not specified",
