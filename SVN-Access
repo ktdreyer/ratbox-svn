@@ -3,3 +3,4 @@ $Id: SVN-Access 20555 2005-07-08 00:38:15Z androsyn $
 The ratbox-services SVN repository is available for anonymous access:
 
 svn co http://svn.ratbox.org/svnroot/rserv/trunk ratbox-services
+
