@@ -33,7 +33,7 @@ struct service_handler
 	const char *info;
 
         int flood_max;
-        int flood_max_ignore;
+        int flood_grace;
 
 	struct service_command *command;
 	unsigned long command_size;

@@ -85,7 +85,7 @@ struct service
 
 	int flood;
         int flood_max;
-        int flood_max_ignore;
+        int flood_grace;
 
 	int loglevel;
 

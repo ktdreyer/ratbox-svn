@@ -250,7 +250,7 @@ add_service(struct service_handler *service)
 	client_p->service->loglevel = 1;
 
         client_p->service->flood_max = service->flood_max;
-        client_p->service->flood_max_ignore = service->flood_max_ignore;
+        client_p->service->flood_grace = service->flood_grace;
 
 	dlink_add_tail(client_p, &client_p->listnode, &service_list);
 
@@ -377,7 +377,7 @@ update_service_floodcount(void *unused)
 	{
 		client_p = ptr->data;
 
-		client_p->service->flood -= 5;
+		client_p->service->flood -= client_p->service->flood_grace;
 
 		if(client_p->service->flood < 0)
 			client_p->service->flood = 0;
@@ -539,8 +539,7 @@ handle_service(struct client *service_p, struct client *client_p,
 			client_p->user->flood_count = 0;
 		}
 
-		if((service_p->service->flood_max_ignore && service_p->service->flood > service_p->service->flood_max_ignore) ||
-		   client_p->user->flood_count > config_file.client_flood_max_ignore)
+		if(client_p->user->flood_count > config_file.client_flood_max_ignore)
 		{
 			client_p->user->flood_count++;
 			service_p->service->ignored_count++;
@@ -554,11 +553,6 @@ handle_service(struct client *service_p, struct client *client_p,
 					"Temporarily unable to answer query. Please try again shortly.");
 			client_p->user->flood_count++;
 			service_p->service->paced_count++;
-
-			/* if no ignore limit, flood_max is our threshold */
-			if(service_p->service->flood_max_ignore)
-				service_p->service->flood++;
-
 			return;
 		}
 	}
@@ -796,9 +790,8 @@ service_stats(struct client *service_p, struct lconn *conn_p)
         if(service_p->service->command == NULL)
                 return;
 
-        sendto_one(conn_p, " Current load: %d/%d [%d] Paced: %lu [%lu]",
+        sendto_one(conn_p, " Current load: %d/%d Paced: %lu [%lu]",
                    service_p->service->flood, service_p->service->flood_max,
-                   service_p->service->flood_max_ignore,
                    service_p->service->paced_count,
                    service_p->service->ignored_count);
 

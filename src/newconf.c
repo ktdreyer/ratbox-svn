@@ -919,9 +919,9 @@ conf_set_service_flood_max(void *data)
 }
 
 static void
-conf_set_service_flood_max_ignore(void *data)
+conf_set_service_flood_grace(void *data)
 {
-	yy_service->service->flood_max_ignore = *(unsigned int *) data;
+	yy_service->service->flood_grace = *(unsigned int *) data;
 }
 
 static void
@@ -1065,7 +1065,7 @@ static struct ConfEntry conf_service_table[] =
 	{ "loglevel",	CF_INT,     conf_set_service_loglevel,  0, NULL },
 	{ "flags",	CF_STRING|CF_FLIST, conf_set_service_flags, 0, NULL },
 	{ "flood_max",	CF_INT,	    conf_set_service_flood_max,	0, NULL },
-	{ "flood_max_ignore", CF_INT, conf_set_service_flood_max_ignore, 0, NULL },
+	{ "flood_grace",CF_INT,     conf_set_service_flood_grace, 0, NULL },
 	{ "\0", 0, NULL, 0, NULL }
 };
 
