@@ -1,6 +1,20 @@
 
 This is the current development version of ratbox-services.
 
+-- ratbox-services-1.1.0rc4
+- fix chanserv::addban making duration 60 times too long
+- make userserv::userinfo list channels as "#foo 200, #x 150" etc, as people
+  are right clicking on the channel name to join it..
+- chanserv::listbans now shows bans in a 'short' form
+- handle an SJOIN containing modes of '0'
+- ignore server logins to suspended nicknames
+- disable the per-service flood protection by default
+- make operserv::ospart work through dcc
+- fix build with chanserv/userserv disabled
+- fix case issue with chanserv::delban
+- fix parameter handling in userserv::resetemail
+- handle signedness overflows on temporary times
+
 -- ratbox-services-1.1.0rc3
 - fix various missing variables from the config parser
 - remove the error checking on sending emails, in order to stop us blocking
