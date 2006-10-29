@@ -1,3 +1,14 @@
+leeh        2006/10/29 15:47:12 UTC	(20061029_2-23259)
+  Log:
+  - update RELEASE_NOTES
+  - revved patchlevel to 1.1.0rc4
+  
+
+  Modified:
+	rserv/trunk/RELEASE_NOTES (File Modified) 
+	rserv/trunk/include/config.h (File Modified) 
+
+
 leeh        2006/10/29 15:42:22 UTC	(20061029_1-23257)
   Log:
   - remove service flood_max_ignore, replacing it with flood_grace of what we
