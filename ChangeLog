@@ -1,3 +1,19 @@
+leeh        2006/10/29 15:42:22 UTC	(20061029_1-23257)
+  Log:
+  - remove service flood_max_ignore, replacing it with flood_grace of what we
+    remove per second
+  - undocument the per service flood protection, it's not particularly
+    pleasant atm.
+  
+
+  Modified:
+	rserv/trunk/doc/example.conf (File Modified) 
+	rserv/trunk/include/client.h (File Modified) 
+	rserv/trunk/include/service.h (File Modified) 
+	rserv/trunk/src/newconf.c (File Modified) 
+	rserv/trunk/src/service.c (File Modified) 
+
+
 leeh        2006/10/29 15:30:35 UTC	(20061029_0-23255)
   Log:
   - remove those other flood_max from the other services..
