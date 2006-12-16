@@ -109,6 +109,7 @@ set_default_conf(void)
 	config_file.cenforcetopic_frequency = DEFAULT_ENFORCETOPIC_FREQUENCY;
 	config_file.cdelowner_duration = 86400;	/* 1 day */
 	config_file.cemail_delowner = 0;
+	config_file.cautojoin_empty = 0;
 
 	config_file.nmax_nicks = 2;
 	config_file.nallow_set_warn = 1;

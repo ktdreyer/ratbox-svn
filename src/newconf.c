@@ -1111,6 +1111,7 @@ static struct ConfEntry conf_chanserv_table[] =
 	{ "enforcetopic_frequency", CF_TIME,	conf_set_chanserv_enforcetopic, 0, NULL },
 	{ "delowner_duration",	CF_TIME,  NULL, 0, &config_file.cdelowner_duration	},
 	{ "email_delowner",	CF_YESNO, NULL, 0, &config_file.cemail_delowner	},
+	{ "autojoin_empty",	CF_YESNO, NULL, 0, &config_file.cautojoin_empty		},
 	{ "\0", 0, NULL, 0, NULL }
 };
 

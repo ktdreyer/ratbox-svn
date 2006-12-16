@@ -90,6 +90,7 @@ struct _config_file
 	int cenforcetopic_frequency;
 	int cdelowner_duration;
 	int cemail_delowner;
+	int cautojoin_empty;
 
 	/* nickserv */
 	int nmax_nicks;

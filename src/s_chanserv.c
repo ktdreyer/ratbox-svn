@@ -160,6 +160,7 @@ static struct service_handler chanserv_service = {
 
 static void load_channel_db(void);
 static void free_ban_reg(struct chan_reg *chreg_p, struct ban_reg *banreg_p);
+static void enable_inhabit(struct chan_reg *chreg_p, struct channel *chptr, int autojoin);
 
 static int h_chanserv_join(void *members, void *unused);
 static int h_chanserv_mode_op(void *chptr, void *members);
@@ -542,9 +543,8 @@ channel_db_callback(int argc, const char **argv)
 
 	add_channel_reg(reg_p);
 
-	if(reg_p->flags & CS_FLAGS_AUTOJOIN)
-		join_service(chanserv_p, reg_p->name, reg_p->tsinfo,
-			reg_p->emode.mode ? &reg_p->emode : &reg_p->cmode, 0);
+	if(config_file.cautojoin_empty && reg_p->flags & CS_FLAGS_AUTOJOIN)
+		enable_inhabit(reg_p, NULL, 1);
 
 	return 0;
 }
@@ -659,12 +659,13 @@ update_chreg_flags(struct chan_reg *chreg_p)
 }
 
 static void
-enable_inhabit(struct chan_reg *chreg_p, struct channel *chptr)
+enable_inhabit(struct chan_reg *chreg_p, struct channel *chptr, int autojoin)
 {
-	chreg_p->flags |= CS_FLAGS_INHABIT;
+	if(!autojoin)
+		chreg_p->flags |= CS_FLAGS_INHABIT;
 
 	/* lower TS than what we have stored.. match it */
-	if(chptr->tsinfo < chreg_p->tsinfo)
+	if(chptr && chptr->tsinfo < chreg_p->tsinfo)
 	{
 		chreg_p->tsinfo = chptr->tsinfo;
 		chreg_p->flags |= CS_FLAGS_NEEDUPDATE;
@@ -918,7 +919,7 @@ e_chanserv_partinhabit(void *unused)
 	{
 		chreg_p = ptr->data;
 
-		if(!(chreg_p->flags & CS_FLAGS_INHABIT))
+		if((chreg_p->flags & (CS_FLAGS_INHABIT|CS_FLAGS_AUTOJOIN)) == 0)
 			continue;
 
 		/* we're not in there?! */
@@ -928,19 +929,55 @@ e_chanserv_partinhabit(void *unused)
 			continue;
 		}
 
-		DLINK_FOREACH(vptr, chptr->users.head)
+		/* we want to part inhabited channels with no users.  If it is not autojoin
+		 * and someone is opped, then also leave.
+		 */
+		if(chreg_p->flags & CS_FLAGS_INHABIT)
 		{
-			member_p = vptr->data;
+			/* this can happen if we inhabit an empty channel
+			 * marked AUTOJOIN to boot someone out..
+			 */
+			if(config_file.cautojoin_empty && chreg_p->flags & CS_FLAGS_AUTOJOIN)
+			{
+				chreg_p->flags &= CS_FLAGS_INHABIT;
+				continue;
+			}
 
-			if(member_p->flags & MODE_OPPED)
-				found_opped++;
+			DLINK_FOREACH(vptr, chptr->users.head)
+			{
+				member_p = vptr->data;
+
+				if(member_p->flags & MODE_OPPED)
+					found_opped++;
+			}
+
+			/* noone in there.. */
+			if(!dlink_list_length(&chptr->users))
+			{
+				chreg_p->flags &= ~CS_FLAGS_INHABIT;
+				part_service(chanserv_p, chptr->name);
+			}
+			/* if theres someone in there, then we're not technically inhabiting.. */
+			else if(chreg_p->flags & CS_FLAGS_AUTOJOIN)
+			{
+				chreg_p->flags &= ~CS_FLAGS_INHABIT;
+			}
+			/* someone is opped, they can look after it */
+			else if(found_opped)
+			{
+				chreg_p->flags &= ~CS_FLAGS_INHABIT;
+				part_service(chanserv_p, chptr->name);
+			}
+
+			continue;
 		}
-
-		/* if theres someone opped, or no users, stop enforcing */
-		if(!dlink_list_length(&chptr->users) || found_opped)
+		/* when dealing with autojoin, we only want to part channels that are empty */
+		else if(chreg_p->flags & CS_FLAGS_AUTOJOIN && !config_file.cautojoin_empty)
 		{
-			chreg_p->flags &= ~CS_FLAGS_INHABIT;
-			part_service(chanserv_p, chptr->name);
+			if(dlink_list_length(&chptr->users) == 0)
+				part_service(chanserv_p, chptr->name);
+
+			continue;
 		}
 	}
 	HASH_WALK_END
@@ -1225,7 +1262,7 @@ h_chanserv_join(void *v_chptr, void *v_members)
 			 * channel --fl
 			 */
 			if(dlink_list_length(&chptr->users) == 1)
-				enable_inhabit(chreg_p, chptr);
+				enable_inhabit(chreg_p, chptr, 0);
 
 			kickbuild_add(UID(member_p->client_p), banreg_p->reason);
 
@@ -1255,7 +1292,7 @@ h_chanserv_join(void *v_chptr, void *v_members)
 			{
 				/* stop them cycling for ops */
 				if(dlink_list_length(&chptr->users) == 1)
-					enable_inhabit(chreg_p, chptr);
+					enable_inhabit(chreg_p, chptr, 0);
 
 				modebuild_add(DIR_DEL, "o", 
 						UID(member_p->client_p));
@@ -1268,14 +1305,18 @@ h_chanserv_join(void *v_chptr, void *v_members)
 		if(is_voiced(member_p) && (chreg_p->flags & CS_FLAGS_NOVOICES))
 		{
 			if(dlink_list_length(&chptr->users) == 1)
-				enable_inhabit(chreg_p, chptr);
+				enable_inhabit(chreg_p, chptr, 0);
 
 			modebuild_add(DIR_DEL, "v", UID(member_p->client_p));
 			member_p->flags &= ~MODE_VOICED;
 			continue;
 		}
 
-		/* removed ops from them.. cant be setting them back */
+		/* channel is marked autojoin and we're not in there.. */
+		if(chreg_p->flags & CS_FLAGS_AUTOJOIN && dlink_find(chanserv_p, &chptr->services) == NULL)
+			enable_inhabit(chreg_p, chptr, 1);
+			
+		/* removed ops from them, or they joined opped.. cant be setting them */
 		if(hit)
 			continue;
 
@@ -2596,9 +2637,7 @@ s_chan_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 			}
 
 			/* Join with stored TS */
-			join_service(chanserv_p, chreg_p->name, chreg_p->tsinfo,
-					chreg_p->emode.mode ? &chreg_p->emode :
-					&chreg_p->cmode, 0);
+			enable_inhabit(chreg_p, NULL, 1);
 		}
 		else if(retval == -1)
 			part_service(chanserv_p, chreg_p->name);
