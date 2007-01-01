@@ -1,3 +1,12 @@
+leeh        2007/01/01 22:03:46 UTC	(20070101_0-23321)
+  Log:
+  - fix watchserv -flag to skip past the '-'
+  
+
+  Modified:
+	rserv/trunk/src/s_watchserv.c (File Modified) 
+
+
 leeh        2006/12/16 19:08:41 UTC	(20061216_0-23301)
   Log:
   - new chanserv config option, autojoin_empty = yes|no;, controls whether
