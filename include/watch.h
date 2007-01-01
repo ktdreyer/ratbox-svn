@@ -16,6 +16,31 @@
 #define WATCH_NSREGISTER	0x00000800
 #define WATCH_BANSERV		0x00001000
 #define WATCH_AUTH		0x00002000
+#define WATCH_ALL		(WATCH_AUTH | \
+#ifdef ENABLE_BANSERV
+	WATCH_BANSERV | \
+#endif
+#ifdef ENABLE_CHANSERV
+	WATCH_CSADMIN | WATCH_CSOPER | WATCH_CSREGISTER | \
+#endif
+#ifdef ENABLE_GLOBAL
+	WATCH_GLOBAL | \
+#endif
+#ifdef ENABLE_JUPESERV
+	WATCH_JUPESERV | \
+#endif
+#ifdef ENABLE_NICKSERV
+	WATCH_NSADMIN | WATCH_NSREGISTER | \
+#endif
+#ifdef ENABLE_OPERBOT
+	WATCH_OPERBOT | \
+#endif
+#ifdef ENABLE_OPERSERV
+	WATCH_OPERSERV | \
+#endif
+#ifdef ENABLE_USERSERV
+	WATCH_USADMIN | WATCH_USOPER | WATCH_USREGISTER)
+#endif
 
 void PRINTFLIKE(5, 6) watch_send(unsigned int flag, struct client *client_p,
 				struct lconn *conn_p, int oper, const char *format, ...);

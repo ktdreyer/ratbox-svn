@@ -86,6 +86,7 @@ static struct
 	{ "usoper",		WATCH_USOPER		},
 	{ "usregister",		WATCH_USREGISTER	},
 #endif
+	{ "all",		WATCH_ALL		},
 	{ NULL, 0 }
 };
 
