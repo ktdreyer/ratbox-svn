@@ -202,7 +202,10 @@ o_watch_watch(struct client *client_p, struct lconn *conn_p, const char **parv, 
 	while(p)
 	{
 		if(*p == '-')
+		{
 			dir = 0;
+			p++;
+		}
 		else
 			dir = 1;
 
