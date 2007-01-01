@@ -1,3 +1,14 @@
+leeh        2007/01/01 22:06:19 UTC	(20070101_1-23323)
+  Log:
+  - via ongeboren
+    - add watch all to watch all flags
+  
+
+  Modified:
+	rserv/trunk/include/watch.h (File Modified) 
+	rserv/trunk/src/s_watchserv.c (File Modified) 
+
+
 leeh        2007/01/01 22:03:46 UTC	(20070101_0-23321)
   Log:
   - fix watchserv -flag to skip past the '-'
