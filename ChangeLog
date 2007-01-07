@@ -1,3 +1,14 @@
+leeh        2007/01/07 19:54:34 UTC	(20070107_1-23377)
+  Log:
+  - bugger it, revved patchlevel to 1.1.0 final
+  
+
+  Modified:
+	rserv/trunk/RELEASE_NOTES (File Modified) 
+	rserv/trunk/SVN-Access (File Modified) 
+	rserv/trunk/include/config.h (File Modified) 
+
+
 leeh        2007/01/07 19:46:58 UTC	(20070107_0-23373)
   Log:
   - update whats-new-1.1.txt with autojoin_empty
