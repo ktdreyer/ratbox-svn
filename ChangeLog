@@ -1,3 +1,12 @@
+leeh        2007/01/07 20:22:32 UTC	(20070107_3-23385)
+  Log:
+  - trunk is now 1.2.0beta
+  
+
+  Modified:
+	rserv/trunk/include/config.h (File Modified) 
+
+
 leeh        2007/01/07 20:21:49 UTC	(20070107_2-23383)
   Log:
   - extend copyrights to 2007
