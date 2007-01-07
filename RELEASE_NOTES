@@ -1,7 +1,7 @@
 
-This is the current development version of ratbox-services.
+This is the current stable version of ratbox-services.
 
--- ratbox-services-1.1.0rc5
+-- ratbox-services-1.1.0
 - new chanserv config option, autojoin_empty = yes|no;, controls whether
   chanserv will autojoin empty channels or not
 - fix watchserv -flag to skip past the '-'
