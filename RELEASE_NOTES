@@ -1,6 +1,12 @@
 
 This is the current development version of ratbox-services.
 
+-- ratbox-services-1.1.0rc5
+- new chanserv config option, autojoin_empty = yes|no;, controls whether
+  chanserv will autojoin empty channels or not
+- fix watchserv -flag to skip past the '-'
+- add watch all to watch all flags
+
 -- ratbox-services-1.1.0rc4
 - fix chanserv::addban making duration 60 times too long
 - make userserv::userinfo list channels as "#foo 200, #x 150" etc, as people

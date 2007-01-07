@@ -110,6 +110,8 @@ Config file
     verification or not
   - 'delowner_duration = <time>;' length of time delowner requests are kept
     around
+  - 'autojoin_empty = <yes|no>;', controls whether chanserv autojoins empty
+    channels or not
 - service "operserv" {};
   - 'allow_die = <yes|no>;', whether operserv::die is allowed or not
 - service "watchserv" {};
