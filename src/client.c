@@ -518,6 +518,7 @@ free_client(struct client *target_p)
 {
         if(target_p->user != NULL)
 	{
+		my_free(target_p->user->ip);
 		my_free(target_p->user->mask);
                 BlockHeapFree(user_heap, target_p->user);
 	}
@@ -804,7 +805,10 @@ c_uid(struct client *client_p, const char *parv[], int parc)
 		sizeof(target_p->user->username));
 	strlcpy(target_p->user->host, parv[5], 
 		sizeof(target_p->user->host));
-	/* XXX - parv[6] == ip */
+
+	if(parv[6][0] != '0' && parv[6][1] != '\0')
+		target_p->user->ip = my_strdup(parv[6]);
+
 	strlcpy(target_p->uid, parv[7], sizeof(target_p->uid));
 	strlcpy(target_p->info, parv[8], sizeof(target_p->info));
 

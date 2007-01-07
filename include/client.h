@@ -43,6 +43,7 @@ struct user
 {
 	char username[USERLEN+1];
 	char host[HOSTLEN+1];
+	char *ip;
 	char *servername;		/* name of server its on */
 	char *mask;
 
