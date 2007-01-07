@@ -1,8 +1,8 @@
 /* src/u_stats.c
  *   Contains code for handling the 'stats' user command
  *
- * Copyright (C) 2003-2005 Lee Hardy <leeh@leeh.co.uk>
- * Copyright (C) 2003-2005 ircd-ratbox development team
+ * Copyright (C) 2003-2007 Lee Hardy <leeh@leeh.co.uk>
+ * Copyright (C) 2003-2007 ircd-ratbox development team
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are

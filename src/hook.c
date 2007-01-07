@@ -1,8 +1,8 @@
 /* src/hook.c
  *   Contains code for "hooks"
  *
- * Copyright (C) 2004-2005 Lee Hardy <leeh@leeh.co.uk>
- * Copyright (C) 2004-2005 ircd-ratbox development team
+ * Copyright (C) 2004-2007 Lee Hardy <leeh@leeh.co.uk>
+ * Copyright (C) 2004-2007 ircd-ratbox development team
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are

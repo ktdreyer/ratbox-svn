@@ -1,8 +1,8 @@
 /* src/s_nickserv.c
  *   Contains the code for the nickname services.
  *
- * Copyright (C) 2005-2006 Lee Hardy <lee -at- leeh.co.uk>
- * Copyright (C) 2005-2006 ircd-ratbox development team
+ * Copyright (C) 2005-2007 Lee Hardy <lee -at- leeh.co.uk>
+ * Copyright (C) 2005-2007 ircd-ratbox development team
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are

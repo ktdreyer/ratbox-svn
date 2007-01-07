@@ -1,8 +1,8 @@
 /* src/channel.c
  *   Contains code for handling changes within channels.
  *
- * Copyright (C) 2003-2006 Lee Hardy <leeh@leeh.co.uk>
- * Copyright (C) 2003-2006 ircd-ratbox development team
+ * Copyright (C) 2003-2007 Lee Hardy <leeh@leeh.co.uk>
+ * Copyright (C) 2003-2007 ircd-ratbox development team
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are

@@ -1,8 +1,8 @@
 /* src/watch.c
  *   Contains code for watching issued commands.
  *
- * Copyright (C) 2006 Lee Hardy <leeh@leeh.co.uk>
- * Copyright (C) 2006 ircd-ratbox development team
+ * Copyright (C) 2006-2007 Lee Hardy <leeh@leeh.co.uk>
+ * Copyright (C) 2006-2007 ircd-ratbox development team
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
