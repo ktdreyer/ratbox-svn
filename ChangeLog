@@ -1,3 +1,13 @@
+leeh        2007/01/07 22:16:36 UTC	(20070107_4-23387)
+  Log:
+  - start storing the ip addresses for remote users via TS6
+  
+
+  Modified:
+	rserv/trunk/include/client.h (File Modified) 
+	rserv/trunk/src/client.c (File Modified) 
+
+
 leeh        2007/01/07 20:22:32 UTC	(20070107_3-23385)
   Log:
   - trunk is now 1.2.0beta
