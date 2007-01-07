@@ -1,3 +1,16 @@
+leeh        2007/01/07 19:46:58 UTC	(20070107_0-23373)
+  Log:
+  - update whats-new-1.1.txt with autojoin_empty
+  - update RELEASE_NOTES
+  - revved patchlevel to 1.1.0rc5
+  
+
+  Modified:
+	rserv/trunk/RELEASE_NOTES (File Modified) 
+	rserv/trunk/doc/whats-new-1.1.txt (File Modified) 
+	rserv/trunk/include/config.h (File Modified) 
+
+
 leeh        2007/01/06 13:59:49 UTC	(20070106_1-23367)
   Log:
   - another fix for the watch all stuff
