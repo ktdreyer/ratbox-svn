@@ -1,3 +1,46 @@
+leeh        2007/01/07 20:21:49 UTC	(20070107_2-23383)
+  Log:
+  - extend copyrights to 2007
+  
+
+  Modified:
+	rserv/trunk/LICENSE (File Modified) 
+	rserv/trunk/doc/example.conf (File Modified) 
+	rserv/trunk/src/c_error.c (File Modified) 
+	rserv/trunk/src/c_message.c (File Modified) 
+	rserv/trunk/src/c_mode.c (File Modified) 
+	rserv/trunk/src/cache.c (File Modified) 
+	rserv/trunk/src/channel.c (File Modified) 
+	rserv/trunk/src/client.c (File Modified) 
+	rserv/trunk/src/conf.c (File Modified) 
+	rserv/trunk/src/crypt.c (File Modified) 
+	rserv/trunk/src/dbhook.c (File Modified) 
+	rserv/trunk/src/email.c (File Modified) 
+	rserv/trunk/src/hook.c (File Modified) 
+	rserv/trunk/src/io.c (File Modified) 
+	rserv/trunk/src/log.c (File Modified) 
+	rserv/trunk/src/modebuild.c (File Modified) 
+	rserv/trunk/src/rsdb_mysql.c (File Modified) 
+	rserv/trunk/src/rsdb_pgsql.c (File Modified) 
+	rserv/trunk/src/rsdb_sqlite3.c (File Modified) 
+	rserv/trunk/src/rserv.c (File Modified) 
+	rserv/trunk/src/s_alis.c (File Modified) 
+	rserv/trunk/src/s_banserv.c (File Modified) 
+	rserv/trunk/src/s_chanserv.c (File Modified) 
+	rserv/trunk/src/s_global.c (File Modified) 
+	rserv/trunk/src/s_jupeserv.c (File Modified) 
+	rserv/trunk/src/s_nickserv.c (File Modified) 
+	rserv/trunk/src/s_operbot.c (File Modified) 
+	rserv/trunk/src/s_operserv.c (File Modified) 
+	rserv/trunk/src/s_userserv.c (File Modified) 
+	rserv/trunk/src/s_watchserv.c (File Modified) 
+	rserv/trunk/src/scommand.c (File Modified) 
+	rserv/trunk/src/service.c (File Modified) 
+	rserv/trunk/src/tools.c (File Modified) 
+	rserv/trunk/src/u_stats.c (File Modified) 
+	rserv/trunk/src/ucommand.c (File Modified) 
+
+
 leeh        2007/01/07 19:54:34 UTC	(20070107_1-23377)
   Log:
   - bugger it, revved patchlevel to 1.1.0 final
