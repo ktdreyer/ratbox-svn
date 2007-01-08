@@ -1,3 +1,13 @@
+leeh        2007/01/08 15:34:51 UTC	(20070108_0-23395)
+  Log:
+  - via Ralf S. Engelschall
+    - fix some autoconf tests to be POSIX compliant
+  
+
+  Modified:
+	rserv/trunk/autoconf/configure.in (File Modified) 
+
+
 leeh        2007/01/07 22:16:36 UTC	(20070107_4-23387)
   Log:
   - start storing the ip addresses for remote users via TS6
