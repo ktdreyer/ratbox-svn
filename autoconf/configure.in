@@ -337,7 +337,7 @@ AC_CHECK_HEADER(pgsql/libpq-fe.h,
 	fi
 ], [])
 
-if test "X$ac_cv_pgsql_altinclude" == "Xyes"; then
+if test "X$ac_cv_pgsql_altinclude" = "Xyes"; then
 	AC_DEFINE(PGSQL_ALTERNATE_INCLUDE, 1, Use alternate pgsql include path)
 fi
 
@@ -361,8 +361,8 @@ no_recursion="yes"
 AC_MSG_CHECKING(which database to use)
 
 if test "X$ac_cv_mysql_val" != "X" &&
-   test "X$ac_cv_found_mysql_inc" == "Xyes" &&
-   test "X$ac_cv_found_mysql_lib" == "Xyes" &&
+   test "X$ac_cv_found_mysql_inc" = "Xyes" &&
+   test "X$ac_cv_found_mysql_lib" = "Xyes" &&
    test "X$ac_cv_sqlitebuild" != "Xyes"; then
 	AC_MSG_RESULT(mysql)
 	DB_BACKEND="mysql"
@@ -375,8 +375,8 @@ if test "X$ac_cv_mysql_val" != "X" &&
 	fi
 else
 if test "X$ac_cv_pgsql_val" != "X" &&
-   test "X$ac_cv_found_pgsql_inc" == "Xyes" &&
-   test "X$ac_cv_found_pgsql_lib" == "Xyes" &&
+   test "X$ac_cv_found_pgsql_inc" = "Xyes" &&
+   test "X$ac_cv_found_pgsql_lib" = "Xyes" &&
    test "X$ac_cv_sqlitebuild" != "Xyes"; then
 	AC_MSG_RESULT(pgsql)
 	DB_BACKEND="pgsql"
@@ -388,8 +388,8 @@ if test "X$ac_cv_pgsql_val" != "X" &&
 		LDFLAGS="$LDFLAGS -L $ac_cv_pgsql_path/lib/"
 	fi
 else
-	if test "X$ac_cv_found_sqlite3_inc" == "Xyes" &&
-	   test "X$ac_cv_found_sqlite3_lib" == "Xyes" &&
+	if test "X$ac_cv_found_sqlite3_inc" = "Xyes" &&
+	   test "X$ac_cv_found_sqlite3_lib" = "Xyes" &&
 	   test "X$ac_cv_sqlitebuild" != "Xyes"; then
 		AC_MSG_RESULT(sqlite3)
 		DB_BACKEND="sqlite3"
@@ -425,7 +425,7 @@ AC_ARG_WITH([topiclen],
 [ --with-topiclen=LENGTH    Sets topic length to LENGTH],
 [ac_cv_topiclen=$withval], [ac_cv_topiclen="160"])
 
-if test "$ac_cv_topiclen" -gt "255" && test "$DB_BACKEND" == "mysql"; then
+if test "$ac_cv_topiclen" -gt "255" && test "$DB_BACKEND" = "mysql"; then
 	ac_cv_topiclen="255"
 	AC_MSG_ERROR([topic length cannot exceed 255 when using mysql])
 fi
