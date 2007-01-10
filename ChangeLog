@@ -1,3 +1,13 @@
+leeh        2007/01/10 20:32:38 UTC	(20070110_3-23411)
+  Log:
+  - fix a few service {}; conf options to handle a disabled service without
+    coring
+  
+
+  Modified:
+	rserv/trunk/src/newconf.c (File Modified) 
+
+
 leeh        2007/01/10 20:10:25 UTC	(20070110_2-23409)
   Log:
   - fix the generation of installation of helpfiles, and index generation to
