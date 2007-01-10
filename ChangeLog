@@ -1,3 +1,15 @@
+leeh        2007/01/10 20:50:04 UTC	(20070110_4-23415)
+  Log:
+  - make the service help file loading account for languages
+  
+
+  Modified:
+	rserv/trunk/include/client.h (File Modified) 
+	rserv/trunk/include/langs.h (File Added) 
+	rserv/trunk/include/service.h (File Modified) 
+	rserv/trunk/src/service.c (File Modified) 
+
+
 leeh        2007/01/10 20:32:38 UTC	(20070110_3-23411)
   Log:
   - fix a few service {}; conf options to handle a disabled service without
