@@ -901,6 +901,9 @@ conf_set_service_realname(void *data)
 static void
 conf_set_service_flags(void *data)
 {
+	if(yy_service == NULL)
+		return;
+
 	yy_service->service->flags = 0;
 	set_modes_from_table(&yy_service->service->flags, "flag",
 				service_flags_table, data);
@@ -909,18 +912,27 @@ conf_set_service_flags(void *data)
 static void
 conf_set_service_loglevel(void *data)
 {
+	if(yy_service == NULL)
+		return;
+
 	yy_service->service->loglevel = *(unsigned int *) data;
 }
 
 static void
 conf_set_service_flood_max(void *data)
 {
+	if(yy_service == NULL)
+		return;
+
 	yy_service->service->flood_max = *(unsigned int *) data;
 }
 
 static void
 conf_set_service_flood_grace(void *data)
 {
+	if(yy_service == NULL)
+		return;
+
 	yy_service->service->flood_grace = *(unsigned int *) data;
 }
 
