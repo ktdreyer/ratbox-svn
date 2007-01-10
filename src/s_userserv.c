@@ -175,10 +175,12 @@ free_user_reg(struct user_reg *ureg_p)
 	rsdb_exec(NULL, "DELETE FROM members WHERE username = '%Q'",
 			ureg_p->name);
 
+#ifdef ENABLE_CHANSERV
 	DLINK_FOREACH_SAFE(ptr, next_ptr, ureg_p->channels.head)
 	{
 		free_member_reg(ptr->data, 1);
 	}
+#endif
 
 #ifdef ENABLE_NICKSERV
 	DLINK_FOREACH_SAFE(ptr, next_ptr, ureg_p->nicks.head)
