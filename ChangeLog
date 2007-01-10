@@ -1,3 +1,14 @@
+leeh        2007/01/10 20:10:25 UTC	(20070110_2-23409)
+  Log:
+  - fix the generation of installation of helpfiles, and index generation to
+    accomodate languages
+  
+
+  Modified:
+	rserv/trunk/help/Makefile.in (File Modified) 
+	rserv/trunk/help/genindex.sh (File Modified) 
+
+
 leeh        2007/01/10 19:52:30 UTC	(20070110_1-23407)
   Log:
   - move the helpfiles into en_GB subdirectory
