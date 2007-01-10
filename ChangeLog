@@ -1,3 +1,34 @@
+leeh        2007/01/10 19:52:30 UTC	(20070110_1-23407)
+  Log:
+  - move the helpfiles into en_GB subdirectory
+  
+
+  Modified:
+	rserv/trunk/help/alis/ (File Deleted) 
+	rserv/trunk/help/banserv/ (File Deleted) 
+	rserv/trunk/help/chanserv/ (File Deleted) 
+	rserv/trunk/help/en_GB/ (File Added) 
+	rserv/trunk/help/en_GB/alis/ (File Added) 
+	rserv/trunk/help/en_GB/banserv/ (File Added) 
+	rserv/trunk/help/en_GB/chanserv/ (File Added) 
+	rserv/trunk/help/en_GB/global/ (File Added) 
+	rserv/trunk/help/en_GB/jupeserv/ (File Added) 
+	rserv/trunk/help/en_GB/main/ (File Added) 
+	rserv/trunk/help/en_GB/nickserv/ (File Added) 
+	rserv/trunk/help/en_GB/operbot/ (File Added) 
+	rserv/trunk/help/en_GB/operserv/ (File Added) 
+	rserv/trunk/help/en_GB/userserv/ (File Added) 
+	rserv/trunk/help/en_GB/watchserv/ (File Added) 
+	rserv/trunk/help/global/ (File Deleted) 
+	rserv/trunk/help/jupeserv/ (File Deleted) 
+	rserv/trunk/help/main/ (File Deleted) 
+	rserv/trunk/help/nickserv/ (File Deleted) 
+	rserv/trunk/help/operbot/ (File Deleted) 
+	rserv/trunk/help/operserv/ (File Deleted) 
+	rserv/trunk/help/userserv/ (File Deleted) 
+	rserv/trunk/help/watchserv/ (File Deleted) 
+
+
 leeh        2007/01/10 19:44:30 UTC	(20070110_0-23403)
   Log:
   - via ongeboren
