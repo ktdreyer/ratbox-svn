@@ -1,3 +1,13 @@
+leeh        2007/01/10 19:44:30 UTC	(20070110_0-23403)
+  Log:
+  - via ongeboren
+    - fix compile of rserv with --disable-chanserv
+  
+
+  Modified:
+	rserv/trunk/src/s_userserv.c (File Modified) 
+
+
 leeh        2007/01/08 15:34:51 UTC	(20070108_0-23395)
   Log:
   - via Ralf S. Engelschall
