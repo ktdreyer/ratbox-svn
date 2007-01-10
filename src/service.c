@@ -48,6 +48,7 @@
 #include "channel.h"
 #include "s_userserv.h"
 #include "watch.h"
+#include "langs.h"
 
 dlink_list service_list;
 
@@ -91,32 +92,41 @@ load_service_help(struct client *service_p)
 	dlink_node *ptr;
 	int maxlen = service_p->service->command_size / sizeof(struct service_command);
 	unsigned long i;
+	unsigned int j;
 
         if(service_p->service->command == NULL)
 		return;
 
 	scommand = service_p->service->command;
 
-	snprintf(filename, sizeof(filename), "%s/%s/index",
-		HELP_PATH, lcase(service_p->service->id));
+	service_p->service->help = my_malloc(sizeof(struct cachefile *) * LANG_LAST);
+	service_p->service->helpadmin = my_malloc(sizeof(struct cachefile *) * LANG_LAST);
 
-	service_p->service->help = cache_file(filename, "index");
+	for(j = 0; j < LANG_LAST; j++)
+	{
+		snprintf(filename, sizeof(filename), "%s/%s/%s/index",
+			HELP_PATH, langs_available[j], lcase(service_p->service->id));
+		service_p->service->help[j] = cache_file(filename, "index");
 
-	snprintf(filename, sizeof(filename), "%s/%s/index-admin",
-		HELP_PATH, lcase(service_p->service->id));
-
-	service_p->service->helpadmin = cache_file(filename, "index-admin");
+		strlcat(filename, "-admin", sizeof(filename));
+		service_p->service->helpadmin[j] = cache_file(filename, "index-admin");
+	}
 
 	for(i = 0; i < maxlen; i++)
 	{
-		snprintf(filename, sizeof(filename), "%s/%s/",
-			HELP_PATH, lcase(service_p->service->id));
+		scommand[i].helpfile = my_malloc(sizeof(struct cachefile *) * LANG_LAST);
 
-		/* we cant lcase() twice in one function call */
-		strlcat(filename, lcase(scommand[i].cmd),
-			sizeof(filename));
+		for(j = 0; j < LANG_LAST; j++)
+		{
+			snprintf(filename, sizeof(filename), "%s/%s/%s/",
+				HELP_PATH, langs_available[j], lcase(service_p->service->id));
 
-		scommand[i].helpfile = cache_file(filename, scommand[i].cmd);
+			/* we cant lcase() twice in one function call */
+			strlcat(filename, lcase(scommand[i].cmd),
+				sizeof(filename));
+
+			scommand[i].helpfile[j] = cache_file(filename, scommand[i].cmd);
+		}
 	}
 
 	DLINK_FOREACH(ptr, service_p->service->ucommand_list.head)
@@ -139,21 +149,32 @@ clear_service_help(struct client *service_p)
 	struct ucommand_handler *ucommand;
 	dlink_node *ptr;
 	int maxlen = service_p->service->command_size / sizeof(struct service_command);
-	int i;
+	int i, j;
 	
 	if(service_p->service->command == NULL)
 		return;
 
 	scommand = service_p->service->command;
 
-	free_cachefile(service_p->service->help);
-	free_cachefile(service_p->service->helpadmin);
+	for(j = 0; j < LANG_LAST; j++)
+	{
+		free_cachefile(service_p->service->help[j]);
+		free_cachefile(service_p->service->helpadmin[j]);
+	}
+
+	my_free(service_p->service->help);
+	my_free(service_p->service->helpadmin);
 	service_p->service->help = NULL;
 	service_p->service->helpadmin = NULL;
 
 	for(i = 0; i < maxlen; i++)
 	{
-		free_cachefile(scommand[i].helpfile);
+		for(j = 0; j < LANG_LAST; j++)
+		{
+			free_cachefile(scommand[i].helpfile[j]);
+		}
+
+		my_free(scommand[i].helpfile);
 		scommand[i].helpfile = NULL;
 	}
 
@@ -397,8 +418,8 @@ handle_service_help_index(struct client *service_p, struct client *client_p)
 	 * or theres no admin file.
 	 */
 	if(ServiceShortHelp(service_p) ||
-	   (!service_p->service->help &&
-	    (!client_p->user->oper || !service_p->service->helpadmin)))
+	   ((!service_p->service->help || !service_p->service->help[LANG_DEFAULT]) &&
+	    (!client_p->user->oper || (!service_p->service->helpadmin || !service_p->service->helpadmin[LANG_DEFAULT]))))
 	{
 		char buf[BUFSIZE];
 		struct service_command *cmd_table;
@@ -434,7 +455,7 @@ handle_service_help_index(struct client *service_p, struct client *client_p)
 	}
 
 	service_p->service->flood++;
-	fileptr = service_p->service->help;
+	fileptr = service_p->service->help[LANG_DEFAULT];
 
 	if(fileptr)
 	{
@@ -449,7 +470,7 @@ handle_service_help_index(struct client *service_p, struct client *client_p)
 		}
 	}
 
-	fileptr = service_p->service->helpadmin;
+	fileptr = service_p->service->helpadmin[LANG_DEFAULT];
 
 	if(client_p->user->oper && fileptr)
 	{
@@ -477,7 +498,7 @@ handle_service_help(struct client *service_p, struct client *client_p, const cha
 		struct cacheline *lineptr;
 		dlink_node *ptr;
 
-		if(cmd_entry->helpfile == NULL ||
+		if(cmd_entry->helpfile == NULL || cmd_entry->helpfile[LANG_DEFAULT] == NULL ||
 		   (cmd_entry->operonly && !is_oper(client_p)))
 		{
 			service_error(service_p, client_p,
@@ -485,7 +506,7 @@ handle_service_help(struct client *service_p, struct client *client_p, const cha
 			return;
 		}
 
-		fileptr = cmd_entry->helpfile;
+		fileptr = cmd_entry->helpfile[LANG_DEFAULT];
 
 		DLINK_FOREACH(ptr, fileptr->contents.head)
 		{

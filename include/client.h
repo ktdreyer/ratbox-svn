@@ -101,8 +101,8 @@ struct service
 
 	dlink_list ucommand_list;
 
-	struct cachefile *help;
-	struct cachefile *helpadmin;
+	struct cachefile **help;
+	struct cachefile **helpadmin;
 
 	void (*init)(void);
         void (*stats)(struct lconn *, const char **, int);
