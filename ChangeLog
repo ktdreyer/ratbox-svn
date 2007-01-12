@@ -1,3 +1,25 @@
+leeh        2007/01/12 20:48:17 UTC	(20070112_0-23427)
+  Log:
+  - make the registered username struct have the language enum in it, and move
+    the declaration of langs_available over to langs.c
+  
+
+  Modified:
+	rserv/trunk/include/langs.h (File Modified) 
+	rserv/trunk/include/s_userserv.h (File Modified) 
+	rserv/trunk/src/Makefile.in (File Modified) 
+	rserv/trunk/src/client.c (File Modified) 
+	rserv/trunk/src/langs.c (File Added) 
+	rserv/trunk/src/log.c (File Modified) 
+	rserv/trunk/src/rserv.c (File Modified) 
+	rserv/trunk/src/s_chanserv.c (File Modified) 
+	rserv/trunk/src/s_nickserv.c (File Modified) 
+	rserv/trunk/src/s_userserv.c (File Modified) 
+	rserv/trunk/src/s_watchserv.c (File Modified) 
+	rserv/trunk/src/scommand.c (File Modified) 
+	rserv/trunk/src/service.c (File Modified) 
+
+
 leeh        2007/01/10 20:50:04 UTC	(20070110_4-23415)
   Log:
   - make the service help file loading account for languages
