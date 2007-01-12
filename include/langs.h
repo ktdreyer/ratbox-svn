@@ -11,6 +11,6 @@ enum langs_enum
 	LANG_LAST
 } langs_id;
 
-extern const char **langs_available;
+extern const char *langs_available[];
 
 #endif

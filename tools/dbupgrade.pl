@@ -232,4 +232,13 @@ if($currentver < 5)
 	print "\n";
 }
 
+if($currentver < 6)
+{
+	print "-- To UNRELEASED VERSION\n";
+
+	print "ALTER TABLE users ADD COLUMN language INTEGER DEFAULT '0';\n";
+
+	print "\n";
+}
+
 exit;

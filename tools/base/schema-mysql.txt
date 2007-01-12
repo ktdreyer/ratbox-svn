@@ -10,6 +10,7 @@ CREATE TABLE users (
 	last_time INT UNSIGNED,
 	flags INT UNSIGNED,
 	verify_token VARCHAR(8),
+	language INTEGER DEFAULT '0',
 	PRIMARY KEY(username)
 );
 

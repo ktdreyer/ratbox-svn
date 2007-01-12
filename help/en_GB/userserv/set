@@ -3,3 +3,4 @@ Sets various username options.
   PASSWORD [oldpass] [newpass]: Sets password to [newpass]
   EMAIL    [email]   : Sets email address to [email].
   PRIVATE  [on|off]  : Hides information about username.
+  LANGUAGE [lang]    : Sets language to [language].  See LANGUAGE helpfile.

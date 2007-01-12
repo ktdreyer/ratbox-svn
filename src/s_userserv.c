@@ -94,7 +94,8 @@ static struct service_command userserv_command[] =
 	{ "RESETPASS",	&s_user_resetpass,	1, NULL, 1, 0L, 0, 0, 0	},
 	{ "RESETEMAIL",	&s_user_resetemail,	0, NULL, 1, 0L, 1, 0, 0	},
 	{ "SET",	&s_user_set,		1, NULL, 1, 0L, 1, 0, 0	},
-	{ "INFO",	&s_user_info,		1, NULL, 1, 0L, 1, 0, 0	}
+	{ "INFO",	&s_user_info,		1, NULL, 1, 0L, 1, 0, 0	},
+	{ "LANGUAGE",	NULL,			0, NULL, 1, 0L, 0, 0, 0 }
 };
 
 static struct ucommand_handler userserv_ucommand[] =
@@ -141,7 +142,7 @@ init_s_userserv(void)
 
 	rsdb_exec(user_db_callback, 
 			"SELECT username, password, email, suspender, suspend_reason, "
-			"reg_time, last_time, flags FROM users");
+			"reg_time, last_time, flags, language FROM users");
 
 	rsdb_hook_add("users_sync", "REGISTER", 900, dbh_user_register);
 	rsdb_hook_add("users_sync", "SETPASS", 900, dbh_user_setpass);
@@ -224,6 +225,7 @@ user_db_callback(int argc, const char **argv)
 	reg_p->reg_time = atol(argv[5]);
 	reg_p->last_time = atol(argv[6]);
 	reg_p->flags = atoi(argv[7]);
+	reg_p->language = atoi(argv[8]);
 
 	add_user_reg(reg_p);
 
@@ -341,8 +343,8 @@ dbh_user_register(struct rsdb_hook *dbh, const char *c_data)
 
 	add_user_reg(ureg_p);
 
-	rsdb_hook_schedule("INSERT INTO users (username, password, email, reg_time, last_time, flags) "
-				"VALUES('%Q','%Q','%Q','%lu','%lu','0')",
+	rsdb_hook_schedule("INSERT INTO users (username, password, email, reg_time, last_time, flags, language) "
+				"VALUES('%Q','%Q','%Q','%lu','%lu','0', '0')",
 			ureg_p->name, ureg_p->password, ureg_p->email,
 			ureg_p->reg_time, ureg_p->last_time);
 	return 1;
@@ -604,8 +606,8 @@ o_user_userregister(struct client *client_p, struct lconn *conn_p, const char *p
 
 	add_user_reg(reg_p);
 
-	rsdb_exec(NULL, "INSERT INTO users (username, password, email, reg_time, last_time, flags) "
-			"VALUES('%Q', '%Q', '%Q', '%lu', '%lu', '%u')",
+	rsdb_exec(NULL, "INSERT INTO users (username, password, email, reg_time, last_time, flags, language) "
+			"VALUES('%Q', '%Q', '%Q', '%lu', '%lu', '%u', '0')",
 			reg_p->name, reg_p->password, 
 			EmptyString(reg_p->email) ? "" : reg_p->email, 
 			reg_p->reg_time, reg_p->last_time, reg_p->flags);
@@ -1149,8 +1151,8 @@ s_user_register(struct client *client_p, struct lconn *conn_p, const char *parv[
 
 	add_user_reg(reg_p);
 
-	rsdb_exec(NULL, "INSERT INTO users (username, password, email, reg_time, last_time, flags, verify_token) "
-			"VALUES('%Q', '%Q', '%Q', '%lu', '%lu', '%u', '%Q')",
+	rsdb_exec(NULL, "INSERT INTO users (username, password, email, reg_time, last_time, flags, verify_token, language) "
+			"VALUES('%Q', '%Q', '%Q', '%lu', '%lu', '%u', '%Q', '0')",
 			reg_p->name, reg_p->password, 
 			EmptyString(reg_p->email) ? "" : reg_p->email, 
 			reg_p->reg_time, reg_p->last_time, reg_p->flags, 
@@ -1846,6 +1848,44 @@ s_user_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 
 		rsdb_exec(NULL, "UPDATE users SET flags='%d' WHERE username='%Q'",
 				ureg_p->flags, ureg_p->name);
+		return 1;
+	}
+	else if(!strcasecmp(parv[0], "LANGUAGE"))
+	{
+		int i;
+
+		if(EmptyString(arg))
+		{
+			service_error(userserv_p, client_p,
+				"Username %s LANGUAGE is %s",
+				ureg_p->name, langs_available[ureg_p->language]);
+			return 1;
+		}
+
+		for(i = 0; i < LANG_LAST; i++)
+		{
+			if(EmptyString(langs_available[i]))
+				continue;
+
+			if(!strcasecmp(arg, langs_available[i]))
+				break;
+		}
+
+		if(i == LANG_LAST)
+		{
+			service_error(userserv_p, client_p,
+				"Language %s invalid", arg);
+			return 1;
+		}
+
+		ureg_p->language = i;
+
+		service_error(userserv_p, client_p,
+				"Username %s LANGUAGE set to %s",
+				ureg_p->name, langs_available[i]);
+
+		rsdb_exec(NULL, "UPDATE users SET language='%d' WHERE username='%Q'",
+				ureg_p->language, ureg_p->name);
 		return 1;
 	}
 
