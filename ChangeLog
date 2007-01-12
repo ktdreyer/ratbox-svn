@@ -1,3 +1,12 @@
+leeh        2007/01/12 21:23:53 UTC	(20070112_1-23429)
+  Log:
+  - make service command handlers deal with a null function to do nothing
+  
+
+  Modified:
+	rserv/trunk/src/service.c (File Modified) 
+
+
 leeh        2007/01/12 20:48:17 UTC	(20070112_0-23427)
   Log:
   - make the registered username struct have the language enum in it, and move
