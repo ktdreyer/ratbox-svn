@@ -1,3 +1,20 @@
+leeh        2007/01/12 22:03:06 UTC	(20070112_2-23431)
+  Log:
+  - add a dummy language handler in userserv and help on languages
+  - add userserv::set::language to change language, with associated db storage
+  
+
+  Modified:
+	rserv/trunk/help/en_GB/userserv/language (File Added) 
+	rserv/trunk/help/en_GB/userserv/set (File Modified) 
+	rserv/trunk/include/langs.h (File Modified) 
+	rserv/trunk/src/s_userserv.c (File Modified) 
+	rserv/trunk/tools/base/schema-mysql.txt (File Modified) 
+	rserv/trunk/tools/base/schema-pgsql.txt (File Modified) 
+	rserv/trunk/tools/base/schema-sqlite.txt (File Modified) 
+	rserv/trunk/tools/dbupgrade.pl (File Modified) 
+
+
 leeh        2007/01/12 21:23:53 UTC	(20070112_1-23429)
   Log:
   - make service command handlers deal with a null function to do nothing
