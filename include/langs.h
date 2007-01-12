@@ -3,7 +3,7 @@
 
 #define LANG_DEFAULT LANG_en_GB
 
-enum
+enum langs_enum
 {
 	LANG_en_GB,
 
@@ -11,10 +11,6 @@ enum
 	LANG_LAST
 } langs_id;
 
-const char *langs_available[] =
-{
-	"en_GB",
-	"\0"
-};
+extern const char **langs_available;
 
 #endif

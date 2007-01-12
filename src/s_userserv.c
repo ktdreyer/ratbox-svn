@@ -34,10 +34,11 @@
 
 #ifdef ENABLE_USERSERV
 #include "rsdb.h"
+#include "rserv.h"
+#include "langs.h"
 #include "service.h"
 #include "client.h"
 #include "channel.h"
-#include "rserv.h"
 #include "c_init.h"
 #include "log.h"
 #include "s_chanserv.h"

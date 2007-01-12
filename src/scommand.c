@@ -33,6 +33,7 @@
 #include "stdinc.h"
 #include "scommand.h"
 #include "rserv.h"
+#include "langs.h"
 #include "tools.h"
 #include "io.h"
 #include "conf.h"

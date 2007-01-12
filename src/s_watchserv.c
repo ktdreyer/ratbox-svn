@@ -34,6 +34,7 @@
 
 #ifdef ENABLE_WATCHSERV
 #include "rserv.h"
+#include "langs.h"
 #include "conf.h"
 #include "io.h"
 #include "client.h"

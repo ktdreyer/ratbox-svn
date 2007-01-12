@@ -42,6 +42,7 @@ BSRCS = 		\
 	event.c		\
 	hook.c		\
 	io.c		\
+	langs.c		\
 	log.c		\
 	match.c		\
 	modebuild.c	\

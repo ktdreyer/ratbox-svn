@@ -36,10 +36,11 @@
 #include <crypt.h>
 #endif
 
+#include "rserv.h"
+#include "langs.h"
 #include "service.h"
 #include "client.h"
 #include "scommand.h"
-#include "rserv.h"
 #include "conf.h"
 #include "io.h"
 #include "log.h"
@@ -48,7 +49,6 @@
 #include "channel.h"
 #include "s_userserv.h"
 #include "watch.h"
-#include "langs.h"
 
 dlink_list service_list;
 

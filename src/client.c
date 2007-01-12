@@ -32,6 +32,7 @@
  */
 #include "stdinc.h"
 #include "rserv.h"
+#include "langs.h"
 #include "client.h"
 #include "channel.h"
 #include "scommand.h"

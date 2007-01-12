@@ -35,6 +35,7 @@
 #ifdef ENABLE_NICKSERV
 #include "rsdb.h"
 #include "rserv.h"
+#include "langs.h"
 #include "io.h"
 #include "service.h"
 #include "client.h"

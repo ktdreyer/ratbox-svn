@@ -43,6 +43,7 @@
 #endif
 
 #include "rserv.h"
+#include "langs.h"
 #include "rsdb.h"
 #include "conf.h"
 #include "io.h"

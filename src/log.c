@@ -32,6 +32,7 @@
  */
 #include "stdinc.h"
 #include "rserv.h"
+#include "langs.h"
 #include "log.h"
 #include "io.h"
 #include "client.h"

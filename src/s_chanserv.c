@@ -33,10 +33,11 @@
 #include "stdinc.h"
 
 #include "rsdb.h"
+#include "rserv.h"
+#include "langs.h"
 #include "service.h"
 #include "client.h"
 #include "channel.h"
-#include "rserv.h"
 #include "ucommand.h"
 #include "log.h"
 #include "io.h"
