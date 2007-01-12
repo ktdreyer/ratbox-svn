@@ -739,7 +739,10 @@ handle_service(struct client *service_p, struct client *client_p,
 			return;
 		}
 
-		retval = (cmd_entry->func)(client_p, NULL, (const char **) parv, parc);
+		if(cmd_entry->func)
+			retval = (cmd_entry->func)(client_p, NULL, (const char **) parv, parc);
+		else
+			retval = 0;
 
 		client_p->user->flood_count += retval;
 		service_p->service->flood += retval;
