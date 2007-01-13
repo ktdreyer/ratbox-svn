@@ -132,13 +132,17 @@ load_service_help(struct client *service_p)
 	DLINK_FOREACH(ptr, service_p->service->ucommand_list.head)
 	{
 		ucommand = ptr->data;
+		ucommand->helpfile = my_malloc(sizeof(struct cachefile *) * LANG_LAST);
 
-	        /* now see if we can load a helpfile.. */
-        	snprintf(filename, sizeof(filename), "%s/%s/u-",
-                	 HELP_PATH, lcase(service_p->service->id));
-	        strlcat(filename, lcase(ucommand->cmd), sizeof(filename));
+		for(j = 0; j < LANG_LAST; j++)
+		{
+		        /* now see if we can load a helpfile.. */
+        		snprintf(filename, sizeof(filename), "%s/%s/%s/u-",
+                		 HELP_PATH, langs_available[j], lcase(service_p->service->id));
+		        strlcat(filename, lcase(ucommand->cmd), sizeof(filename));
 
-        	ucommand->helpfile = cache_file(filename, ucommand->cmd);
+	        	ucommand->helpfile[j] = cache_file(filename, ucommand->cmd);
+		}
 	}
 }
 
@@ -182,7 +186,12 @@ clear_service_help(struct client *service_p)
 	{
 		ucommand = ptr->data;
 
-		free_cachefile(ucommand->helpfile);
+		for(j = 0; j < LANG_LAST; j++)
+		{
+			free_cachefile(ucommand->helpfile[j]);
+		}
+
+		my_free(ucommand->helpfile);
 		ucommand->helpfile = NULL;
 	}
 }

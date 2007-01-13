@@ -17,7 +17,7 @@ struct ucommand_handler
 	unsigned int flags;	/* normal oper flags required */
 	unsigned int sflags;	/* services flags required */
 	int minpara;
-        struct cachefile *helpfile;
+        struct cachefile **helpfile;
 };
 
 extern void init_ucommand(void);

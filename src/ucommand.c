@@ -33,6 +33,7 @@
 #include "stdinc.h"
 #include "ucommand.h"
 #include "rserv.h"
+#include "langs.h"
 #include "tools.h"
 #include "io.h"
 #include "log.h"
@@ -198,14 +199,19 @@ load_ucommand_help(void)
 	struct ucommand_handler *ucommand;
 	char filename[PATH_MAX];
 	dlink_node *ptr;
+	int i;
 
 	DLINK_FOREACH(ptr, ucommand_list.head)
 	{
 		ucommand = ptr->data;
+		ucommand->helpfile = my_malloc(sizeof(struct cachefile *) * LANG_LAST);
 
-		snprintf(filename, sizeof(filename), "%s/main/u-", HELP_PATH);
-		strlcat(filename, lcase(ucommand->cmd), sizeof(filename));
-		ucommand->helpfile = cache_file(filename, ucommand->cmd);
+		for(i = 0; i < LANG_LAST; i++)
+		{
+			snprintf(filename, sizeof(filename), "%s/%s/main/u-%s",
+				HELP_PATH, langs_available[i], lcase(ucommand->cmd));
+			ucommand->helpfile[i] = cache_file(filename, ucommand->cmd);
+		}
 	}
 }
 
@@ -214,11 +220,19 @@ clear_ucommand_help(void)
 {
 	struct ucommand_handler *ucommand;
 	dlink_node *ptr;
+	int i;
 
 	DLINK_FOREACH(ptr, ucommand_list.head)
 	{
 		ucommand = ptr->data;
-		free_cachefile(ucommand->helpfile);
+
+		for(i = 0; i < LANG_LAST; i++)
+		{
+			free_cachefile(ucommand->helpfile[i]);
+		}
+		
+		my_free(ucommand->helpfile);
+		ucommand->helpfile = NULL;
 	}
 }
 
@@ -550,10 +564,10 @@ u_help(struct client *unused, struct lconn *conn_p, const char *parv[], int parc
 
         if((handler = find_ucommand(parv[0])) != NULL)
         {
-                if(handler->helpfile == NULL)
+                if(handler->helpfile == NULL || handler->helpfile[LANG_DEFAULT] == NULL)
                         sendto_one(conn_p, "No help available on %s", parv[0]);
                 else
-                        send_cachefile(handler->helpfile, conn_p);
+                        send_cachefile(handler->helpfile[LANG_DEFAULT], conn_p);
 
                 return 0;
         }
