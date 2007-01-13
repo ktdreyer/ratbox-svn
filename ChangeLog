@@ -1,3 +1,14 @@
+leeh        2007/01/13 14:58:17 UTC	(20070113_1-23439)
+  Log:
+  - make ucommand help account for language translations
+  
+
+  Modified:
+	rserv/trunk/include/ucommand.h (File Modified) 
+	rserv/trunk/src/service.c (File Modified) 
+	rserv/trunk/src/ucommand.c (File Modified) 
+
+
 leeh        2007/01/13 14:50:18 UTC	(20070113_0-23435)
   Log:
   - split the loading/clearing of the non-service dcc commands into their own
