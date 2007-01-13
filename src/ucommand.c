@@ -564,10 +564,10 @@ u_help(struct client *unused, struct lconn *conn_p, const char *parv[], int parc
 
         if((handler = find_ucommand(parv[0])) != NULL)
         {
-                if(handler->helpfile == NULL || handler->helpfile[LANG_DEFAULT] == NULL)
+                if(handler->helpfile == NULL || lang_get_cachefile_u(handler->helpfile, conn_p) == NULL)
                         sendto_one(conn_p, "No help available on %s", parv[0]);
                 else
-                        send_cachefile(handler->helpfile[LANG_DEFAULT], conn_p);
+                        send_cachefile(lang_get_cachefile_u(handler->helpfile, conn_p), conn_p);
 
                 return 0;
         }

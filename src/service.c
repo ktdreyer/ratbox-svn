@@ -415,8 +415,9 @@ handle_service_help_index(struct client *service_p, struct client *client_p)
 	 * or theres no admin file.
 	 */
 	if(ServiceShortHelp(service_p) ||
-	   ((!service_p->service->help || !service_p->service->help[LANG_DEFAULT]) &&
-	    (!client_p->user->oper || (!service_p->service->helpadmin || !service_p->service->helpadmin[LANG_DEFAULT]))))
+	   ((!service_p->service->help || lang_get_cachefile(service_p->service->help, client_p) == NULL) &&
+	    (!client_p->user->oper || 
+	     (!service_p->service->helpadmin || lang_get_cachefile(service_p->service->helpadmin, client_p) == NULL))))
 	{
 		char buf[BUFSIZE];
 		struct service_command *cmd_table;
@@ -452,7 +453,7 @@ handle_service_help_index(struct client *service_p, struct client *client_p)
 	}
 
 	service_p->service->flood++;
-	fileptr = service_p->service->help[LANG_DEFAULT];
+	fileptr = lang_get_cachefile(service_p->service->help, client_p);
 
 	if(fileptr)
 	{
@@ -467,7 +468,7 @@ handle_service_help_index(struct client *service_p, struct client *client_p)
 		}
 	}
 
-	fileptr = service_p->service->helpadmin[LANG_DEFAULT];
+	fileptr = lang_get_cachefile(service_p->service->helpadmin, client_p);
 
 	if(client_p->user->oper && fileptr)
 	{
@@ -495,7 +496,7 @@ handle_service_help(struct client *service_p, struct client *client_p, const cha
 		struct cacheline *lineptr;
 		dlink_node *ptr;
 
-		if(cmd_entry->helpfile == NULL || cmd_entry->helpfile[LANG_DEFAULT] == NULL ||
+		if(cmd_entry->helpfile == NULL || lang_get_cachefile(cmd_entry->helpfile, client_p) == NULL ||
 		   (cmd_entry->operonly && !is_oper(client_p)))
 		{
 			service_error(service_p, client_p,
@@ -503,7 +504,7 @@ handle_service_help(struct client *service_p, struct client *client_p, const cha
 			return;
 		}
 
-		fileptr = cmd_entry->helpfile[LANG_DEFAULT];
+		fileptr = lang_get_cachefile(cmd_entry->helpfile, client_p);
 
 		DLINK_FOREACH(ptr, fileptr->contents.head)
 		{
