@@ -32,6 +32,7 @@
  */
 #include "stdinc.h"
 #include "rserv.h"
+#include "langs.h"
 #include "conf.h"
 #include "tools.h"
 #include "client.h"
@@ -64,6 +65,8 @@ set_default_conf(void)
 
 	config_file.ratbox = 1;
 	config_file.allow_stats_o = 1;
+
+	config_file.default_language = LANG_DEFAULT;
 
 	config_file.client_flood_max = 20;
 	config_file.client_flood_max_ignore = 30;

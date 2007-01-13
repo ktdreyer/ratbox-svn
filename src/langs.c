@@ -4,6 +4,7 @@
 #include "cache.h"
 #include "client.h"
 #include "io.h"
+#include "conf.h"
 #ifdef ENABLE_USERSERV
 #include "s_userserv.h"
 #endif
@@ -22,10 +23,13 @@ lang_get_cachefile(struct cachefile **translations, struct client *client_p)
 	{
 		enum langs_enum language = client_p->user->user_reg->language;
 
-		if(translations[language] != NULL)
+		if(language < LANG_LAST && translations[language] != NULL)
 			return translations[language];
 	}
 #endif
+
+	if(translations[config_file.default_language] != NULL)
+		return translations[config_file.default_language];
 
 	return translations[LANG_DEFAULT];
 }

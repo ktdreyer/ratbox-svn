@@ -30,6 +30,7 @@ struct _config_file
 	int ping_time;
 	int ratbox;
 	int allow_stats_o;
+	int default_language;
 
 	unsigned int client_flood_time;
 	unsigned int client_flood_ignore_time;
