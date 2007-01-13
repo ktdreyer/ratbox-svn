@@ -1940,7 +1940,7 @@ PCRE_VERSION=${PCRE_MAJOR}.${PCRE_MINOR}${PCRE_PRERELEASE}
 if test "${enable_cpp+set}" = set; then
   enableval=$enable_cpp; want_cpp="$enableval"
 else
-  want_cpp=yes
+  want_cpp=no
 fi
 
 
