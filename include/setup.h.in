@@ -1,109 +1,139 @@
-/* include/setup.h.in.  Generated automatically from autoconf/configure.in by autoheader 2.13.  */
-
-/* Define if you have the strftime function.  */
-#undef HAVE_STRFTIME
-
-/* Define as the return type of signal handlers (int or void).  */
-#undef RETSIGTYPE
-
-/* Define if you have the ANSI C header files.  */
-#undef STDC_HEADERS
-
-/* Define if you have the getaddrinfo function.  */
-#undef HAVE_GETADDRINFO
-
-/* Define if you have the gethostbyname function.  */
-#undef HAVE_GETHOSTBYNAME
-
-/* Define if you have the mmap function.  */
-#undef HAVE_MMAP
-
-/* Define if you have the select function.  */
-#undef HAVE_SELECT
-
-/* Define if you have the strlcat function.  */
-#undef HAVE_STRLCAT
-
-/* Define if you have the strlcpy function.  */
-#undef HAVE_STRLCPY
-
-/* Define if you have the <crypt.h> header file.  */
-#undef HAVE_CRYPT_H
-
-/* Define if you have the <errno.h> header file.  */
-#undef HAVE_ERRNO_H
-
-/* Define if you have the <getopt.h> header file.  */
-#undef HAVE_GETOPT_H
-
-/* Define if you have the <stdarg.h> header file.  */
-#undef HAVE_STDARG_H
-
-/* Define if you have the <stdlib.h> header file.  */
-#undef HAVE_STDLIB_H
-
-/* Define if you have the <string.h> header file.  */
-#undef HAVE_STRING_H
-
-/* Define if you have the <strings.h> header file.  */
-#undef HAVE_STRINGS_H
-
-/* Define if you have the <sys/time.h> header file.  */
-#undef HAVE_SYS_TIME_H
-
-/* Define if you have the <unistd.h> header file.  */
-#undef HAVE_UNISTD_H
-
-/* Define if you have the crypt library (-lcrypt).  */
-#undef HAVE_LIBCRYPT
-
-/* Define if you have the nsl library (-lnsl).  */
-#undef HAVE_LIBNSL
-
-/* Define if you have the socket library (-lsocket).  */
-#undef HAVE_LIBSOCKET
-
-/* Define if you have nanosleep */
-#undef HAVE_NANOSLEEP
-
-/* Nickname Service */
-#undef ENABLE_NICKSERV
-
-/* Channel Service */
-#undef ENABLE_CHANSERV
-
-/* User Service */
-#undef ENABLE_USERSERV
-
-/* Oper Service */
-#undef ENABLE_OPERSERV
+/* include/setup.h.in.  Generated from autoconf/configure.in by autoheader.  */
 
 /* List Service */
 #undef ENABLE_ALIS
 
-/* Jupe Service */
-#undef ENABLE_JUPESERV
+/* Ban Service */
+#undef ENABLE_BANSERV
 
-/* Operbot Service */
-#undef ENABLE_OPERBOT
+/* Channel Service */
+#undef ENABLE_CHANSERV
 
 /* Global Messaging Service */
 #undef ENABLE_GLOBAL
 
-/* Ban Service */
-#undef ENABLE_BANSERV
+/* Jupe Service */
+#undef ENABLE_JUPESERV
+
+/* Nickname Service */
+#undef ENABLE_NICKSERV
+
+/* Operbot Service */
+#undef ENABLE_OPERBOT
+
+/* Oper Service */
+#undef ENABLE_OPERSERV
+
+/* User Service */
+#undef ENABLE_USERSERV
 
 /* Command Watching Service */
 #undef ENABLE_WATCHSERV
 
+/* Define to 1 if you have the <crypt.h> header file. */
+#undef HAVE_CRYPT_H
+
+/* Define to 1 if you have the <errno.h> header file. */
+#undef HAVE_ERRNO_H
+
+/* Define to 1 if you have the `getaddrinfo' function. */
+#undef HAVE_GETADDRINFO
+
+/* Define to 1 if you have the `gethostbyname' function. */
+#undef HAVE_GETHOSTBYNAME
+
+/* Define to 1 if you have the <getopt.h> header file. */
+#undef HAVE_GETOPT_H
+
+/* Define to 1 if you have the <inttypes.h> header file. */
+#undef HAVE_INTTYPES_H
+
+/* Define to 1 if you have the `crypt' library (-lcrypt). */
+#undef HAVE_LIBCRYPT
+
+/* Define to 1 if you have the `nsl' library (-lnsl). */
+#undef HAVE_LIBNSL
+
+/* Define to 1 if you have the `socket' library (-lsocket). */
+#undef HAVE_LIBSOCKET
+
+/* Define to 1 if you have the <memory.h> header file. */
+#undef HAVE_MEMORY_H
+
+/* Define to 1 if you have the `mmap' function. */
+#undef HAVE_MMAP
+
+/* Define if you have nanosleep */
+#undef HAVE_NANOSLEEP
+
+/* Define to 1 if you have the `select' function. */
+#undef HAVE_SELECT
+
+/* Define to 1 if you have the <stdarg.h> header file. */
+#undef HAVE_STDARG_H
+
+/* Define to 1 if you have the <stdint.h> header file. */
+#undef HAVE_STDINT_H
+
+/* Define to 1 if you have the <stdlib.h> header file. */
+#undef HAVE_STDLIB_H
+
+/* Define to 1 if you have the `strftime' function. */
+#undef HAVE_STRFTIME
+
+/* Define to 1 if you have the <strings.h> header file. */
+#undef HAVE_STRINGS_H
+
+/* Define to 1 if you have the <string.h> header file. */
+#undef HAVE_STRING_H
+
+/* Define to 1 if you have the `strlcat' function. */
+#undef HAVE_STRLCAT
+
+/* Define to 1 if you have the `strlcpy' function. */
+#undef HAVE_STRLCPY
+
+/* Define to 1 if you have the <sys/stat.h> header file. */
+#undef HAVE_SYS_STAT_H
+
+/* Define to 1 if you have the <sys/time.h> header file. */
+#undef HAVE_SYS_TIME_H
+
+/* Define to 1 if you have the <sys/types.h> header file. */
+#undef HAVE_SYS_TYPES_H
+
+/* Define to 1 if you have the <unistd.h> header file. */
+#undef HAVE_UNISTD_H
+
+/* Nick Length */
+#undef NICKLEN
+
+/* Define to the address where bug reports for this package should be sent. */
+#undef PACKAGE_BUGREPORT
+
+/* Define to the full name of this package. */
+#undef PACKAGE_NAME
+
+/* Define to the full name and version of this package. */
+#undef PACKAGE_STRING
+
+/* Define to the one symbol short name of this package. */
+#undef PACKAGE_TARNAME
+
+/* Define to the version of this package. */
+#undef PACKAGE_VERSION
+
 /* Use alternate pgsql include path */
 #undef PGSQL_ALTERNATE_INCLUDE
+
+/* Define as the return type of signal handlers (`int' or `void'). */
+#undef RETSIGTYPE
 
 /* Build packaged sqlite3 */
 #undef SQLITE_BUILD
 
-/* Nick Length */
-#undef NICKLEN
+/* Define to 1 if you have the ANSI C header files. */
+#undef STDC_HEADERS
 
 /* Topic Length */
 #undef TOPICLEN
@@ -111,3 +141,6 @@
 /* Registered Username Length */
 #undef USERREGNAME_LEN
 
+/* Define to 1 if `lex' declares `yytext' as a `char *' by default, not a
+   `char[]'. */
+#undef YYTEXT_POINTER

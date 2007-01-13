@@ -14,6 +14,7 @@ bindir=@bindir@
 sbindir=@sbindir@
 sysconfdir=@sysconfdir@
 datadir=@datadir@
+datarootdir=@datarootdir@
 localstatedir=@localstatedir@
 logdir=@logdir@
 rundir=@rundir@
@@ -72,7 +73,7 @@ clean:
 
 distclean:
 	$(RM) -f Makefile 
-	$(RM) config.status config.cache config.log include/setup.h
+	$(RM) config.status config.log include/setup.h
 	@for i in $(SUBDIRS); do \
 		echo "distclean -> $$i"; \
 		cd $$i; \

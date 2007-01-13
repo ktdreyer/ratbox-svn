@@ -1,6 +1,9 @@
 dnl $Id$
 
-AC_INIT
+dnl Sneaky way to get an Id tag into the configure script
+AC_COPYRIGHT([$Id$])
+
+AC_INIT([ratbox-services],[stable])
 
 AC_CONFIG_AUX_DIR(autoconf)
 AC_CONFIG_HEADER(include/setup.h)
@@ -354,10 +357,6 @@ AC_CHECK_LIB([pq], [PQconnectdb],
 	fi
 ], [])
 
-dnl dont go into sqlite3/ if we dont need to.
-dnl This is here to work round autoconf2.1.x
-no_recursion="yes"
-
 AC_MSG_CHECKING(which database to use)
 
 if test "X$ac_cv_mysql_val" != "X" &&
@@ -418,7 +417,7 @@ AC_ARG_WITH([nicklen],
 [ --with-nicklen=LENGTH     Sets nick length to LENGTH],
 [ac_cv_nicklen=$withval], [ac_cv_nicklen="9"])
 
-AC_MSG_RESULT("checking nick length... $ac_cv_nicklen")
+AC_MSG_RESULT([checking nick length... $ac_cv_nicklen])
 AC_DEFINE_UNQUOTED(NICKLEN, (${ac_cv_nicklen}+1), Nick Length)
 
 AC_ARG_WITH([topiclen],
@@ -430,14 +429,14 @@ if test "$ac_cv_topiclen" -gt "255" && test "$DB_BACKEND" = "mysql"; then
 	AC_MSG_ERROR([topic length cannot exceed 255 when using mysql])
 fi
 
-AC_MSG_RESULT("checking topic length... $ac_cv_topiclen")
+AC_MSG_RESULT([checking topic length... $ac_cv_topiclen])
 AC_DEFINE_UNQUOTED(TOPICLEN, (${ac_cv_topiclen}+1), Topic Length)
 
 AC_ARG_WITH([userreglen],
 [ --with-userreglen=LENGTH  Sets registered username length to LENGTH],
 [ac_cv_userreglen=$withval], [ac_cv_userreglen="10"])
 
-AC_MSG_RESULT("checking registered username length... $ac_cv_userreglen")
+AC_MSG_RESULT([checking registered username length... $ac_cv_userreglen])
 AC_DEFINE_UNQUOTED(USERREGNAME_LEN, (${ac_cv_userreglen}+1), Registered Username Length)
 
 AC_SUBST(DB_INCLUDES)

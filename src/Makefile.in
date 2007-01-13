@@ -20,6 +20,7 @@ localstatedir=@localstatedir@
 logdir=@logdir@
 rundir=@rundir@
 helpdir=@helpdir@
+datarootdir=@datarootdir@
 
 CFLAGS=@CPPFLAGS@ @CFLAGS@ -DPREFIX=\"$(prefix)\" -DSYSCONFDIR=\"$(sysconfdir)\" \
 	-DLOGDIR=\"$(logdir)\" -DRUNDIR=\"$(rundir)\" -DHELPDIR=\"$(helpdir)\"

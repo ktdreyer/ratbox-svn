@@ -7,6 +7,7 @@ INSTALL=@INSTALL@
 INSTALL_DATA=@INSTALL_DATA@
 prefix=@prefix@
 helpdir=@helpdir@
+datarootdir=@datarootdir@
 
 LANGS=en_GB
 SERVICES=alis main operbot chanserv userserv jupeserv operserv nickserv global banserv watchserv
