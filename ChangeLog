@@ -1,3 +1,13 @@
+leeh        2007/01/13 21:03:16 UTC	(20070113_4-23446)
+  Log:
+  - ugh, just mark the fact we dont want C++ libraries in the configure script
+    itself
+  
+
+  Modified:
+	rserv/trunk/pcre/configure (File Modified) 
+
+
 leeh        2007/01/13 20:55:39 UTC	(20070113_3-23444)
   Log:
   - add autoconf checks for pcre
