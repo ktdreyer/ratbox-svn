@@ -1,3 +1,17 @@
+leeh        2007/01/13 14:50:18 UTC	(20070113_0-23435)
+  Log:
+  - split the loading/clearing of the non-service dcc commands into their own
+    functions, so we can load the helpfiles easier on boot, fixing them not
+    being loaded
+  
+
+  Modified:
+	rserv/trunk/include/ucommand.h (File Modified) 
+	rserv/trunk/src/rserv.c (File Modified) 
+	rserv/trunk/src/service.c (File Modified) 
+	rserv/trunk/src/ucommand.c (File Modified) 
+
+
 leeh        2007/01/12 22:03:06 UTC	(20070112_2-23431)
   Log:
   - add a dummy language handler in userserv and help on languages
