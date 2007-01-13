@@ -402,7 +402,6 @@ else
 	else
 		AC_MSG_RESULT(internal packaged sqlite3)
 		DB_BACKEND="sqlite3"
-		no_recursion="no"
 
 		AC_CONFIG_SUBDIRS(sqlite3)
 		AC_DEFINE(SQLITE_BUILD, 1, Build packaged sqlite3)
@@ -412,7 +411,67 @@ else
 	fi
 fi
 fi
-	
+
+dnl Check for forced pcre build
+AC_ARG_WITH([pcrebuild],
+[ --with-pcrebuild        Forces packaged PCRE to be used for build],
+[ac_cv_pcrebuild=$withval], [ac_cv_pcrebuild=no])
+
+AC_ARG_ENABLE(pcre,
+[ --enable-pcre[=DIR]    Default: Enable PCRE engine, optionally search
+                           DIR/include/ for headers and DIR/lib/ for libs],
+[ac_cv_pcre_val=$enableval], [])
+
+AC_CHECK_HEADER(pcre.h,
+[
+	ac_cv_found_pcre_inc="yes"
+], [
+	AC_MSG_CHECKING(for pcre.h in given path)
+	if test -f "$ac_cv_spcre_val/include/pcre.h"; then
+		AC_MSG_RESULT(yes)
+		ac_cv_found_pcre_inc="yes"
+		ac_cv_pcre_path="$ac_cv_pcre_val"
+	else
+		AC_MSG_RESULT(no)
+	fi
+], [])
+
+AC_CHECK_LIB([pcre], [pcre_compile],
+[
+	ac_cv_found_pcre_lib="yes"
+], [
+	AC_MSG_CHECKING(for -lpcre in given path)
+	if test -e "$ac_cv_pcre_path/lib/libpcre.so"; then
+		AC_MSG_RESULT(yes)
+		ac_cv_found_pcre_lib="yes"
+	else
+		AC_MSG_RESULT(no)
+	fi
+], [])
+
+AC_MSG_CHECKING([which version of PCRE to use])
+
+if test "X$ac_cv_found_pcre_inc" = "Xyes" &&
+   test "X$ac_cv_found_pcre_lib" = "Xyes" &&
+   test "X$ac_cv_pcrebuild" != "Xyes"; then
+	AC_MSG_RESULT(system)
+	LIBS="$LIBS -lpcre"
+
+	if test "X$ac_cv_pcre_path" != "X"; then
+		PCRE_INCLUDES="$PCRE_INCLUDES -I $ac_cv_pcre_path/include/"
+		LDFLAGS="$LDFLAGS -L $ac_cv_pcre_path/lib/"
+	fi
+else
+	AC_MSG_RESULT([internal packaged PCRE])
+
+	AC_CONFIG_SUBDIRS(pcre)
+	AC_DEFINE(PCRE_BUILD, 1, Build packaged PCRE)
+	PCRE_SUBDIR="pcre"
+	PCRE_INCLUDES="$PCRE_INCLUDES -I ../pcre/"
+	LIBS="$LIBS ../pcre/.libs/libpcre.a"
+fi
+
+
 AC_ARG_WITH([nicklen],
 [ --with-nicklen=LENGTH     Sets nick length to LENGTH],
 [ac_cv_nicklen=$withval], [ac_cv_nicklen="9"])
@@ -441,7 +500,9 @@ AC_DEFINE_UNQUOTED(USERREGNAME_LEN, (${ac_cv_userreglen}+1), Registered Username
 
 AC_SUBST(DB_INCLUDES)
 AC_SUBST(DB_LIBS)
+AC_SUBST(PCRE_INCLUDES)
 AC_SUBST(SQLITE_SUBDIR)
+AC_SUBST(PCRE_SUBDIR)
 
 AC_SUBST(DB_BACKEND)
 

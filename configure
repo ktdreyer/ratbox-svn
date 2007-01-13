@@ -682,7 +682,9 @@ helpdir
 subdirs
 DB_INCLUDES
 DB_LIBS
+PCRE_INCLUDES
 SQLITE_SUBDIR
+PCRE_SUBDIR
 DB_BACKEND
 S_NICKSERV
 S_CHANSERV
@@ -708,7 +710,8 @@ CPPFLAGS
 YACC
 YFLAGS
 CPP'
-ac_subdirs_all='sqlite3'
+ac_subdirs_all='sqlite3
+pcre'
 
 # Initialize some variables set by options.
 ac_init_help=
@@ -1295,6 +1298,8 @@ Optional Features:
                            DIR/include/ for headers and DIR/lib/ for libs
  --enable-pgsql=DIR     Enable pgsql backend, optionally search
                           DIR/include/ for headers and DIR/lib/ for libs
+ --enable-pcre=DIR    Default: Enable PCRE engine, optionally search
+                           DIR/include/ for headers and DIR/lib/ for libs
 
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
@@ -1303,6 +1308,7 @@ Optional Packages:
  --with-rundir=DIR         pidfile in DIR localstatedir/run
  --with-helpdir=DIR        helpfiles in DIR datadir/ratbox-services/help
  --with-sqlitebuild        Forces packaged sqlite3 to be used for build
+ --with-pcrebuild        Forces packaged PCRE to be used for build
  --with-nicklen=LENGTH     Sets nick length to LENGTH
  --with-topiclen=LENGTH    Sets topic length to LENGTH
  --with-userreglen=LENGTH  Sets registered username length to LENGTH
@@ -6235,7 +6241,6 @@ echo "${ECHO_T}sqlite3" >&6; }
 		{ echo "$as_me:$LINENO: result: internal packaged sqlite3" >&5
 echo "${ECHO_T}internal packaged sqlite3" >&6; }
 		DB_BACKEND="sqlite3"
-		no_recursion="no"
 
 		subdirs="$subdirs sqlite3"
 
@@ -6250,6 +6255,280 @@ _ACEOF
 	fi
 fi
 fi
+
+
+# Check whether --with-pcrebuild was given.
+if test "${with_pcrebuild+set}" = set; then
+  withval=$with_pcrebuild; ac_cv_pcrebuild=$withval
+else
+  ac_cv_pcrebuild=no
+fi
+
+
+# Check whether --enable-pcre was given.
+if test "${enable_pcre+set}" = set; then
+  enableval=$enable_pcre; ac_cv_pcre_val=$enableval
+fi
+
+
+if test "${ac_cv_header_pcre_h+set}" = set; then
+  { echo "$as_me:$LINENO: checking for pcre.h" >&5
+echo $ECHO_N "checking for pcre.h... $ECHO_C" >&6; }
+if test "${ac_cv_header_pcre_h+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+fi
+{ echo "$as_me:$LINENO: result: $ac_cv_header_pcre_h" >&5
+echo "${ECHO_T}$ac_cv_header_pcre_h" >&6; }
+else
+  # Is the header compilable?
+{ echo "$as_me:$LINENO: checking pcre.h usability" >&5
+echo $ECHO_N "checking pcre.h usability... $ECHO_C" >&6; }
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+$ac_includes_default
+#include <pcre.h>
+_ACEOF
+rm -f conftest.$ac_objext
+if { (ac_try="$ac_compile"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_compile") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest.$ac_objext; then
+  ac_header_compiler=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	ac_header_compiler=no
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+{ echo "$as_me:$LINENO: result: $ac_header_compiler" >&5
+echo "${ECHO_T}$ac_header_compiler" >&6; }
+
+# Is the header present?
+{ echo "$as_me:$LINENO: checking pcre.h presence" >&5
+echo $ECHO_N "checking pcre.h presence... $ECHO_C" >&6; }
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+#include <pcre.h>
+_ACEOF
+if { (ac_try="$ac_cpp conftest.$ac_ext"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_cpp conftest.$ac_ext") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } >/dev/null && {
+	 test -z "$ac_c_preproc_warn_flag$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       }; then
+  ac_header_preproc=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+  ac_header_preproc=no
+fi
+
+rm -f conftest.err conftest.$ac_ext
+{ echo "$as_me:$LINENO: result: $ac_header_preproc" >&5
+echo "${ECHO_T}$ac_header_preproc" >&6; }
+
+# So?  What about this header?
+case $ac_header_compiler:$ac_header_preproc:$ac_c_preproc_warn_flag in
+  yes:no: )
+    { echo "$as_me:$LINENO: WARNING: pcre.h: accepted by the compiler, rejected by the preprocessor!" >&5
+echo "$as_me: WARNING: pcre.h: accepted by the compiler, rejected by the preprocessor!" >&2;}
+    { echo "$as_me:$LINENO: WARNING: pcre.h: proceeding with the compiler's result" >&5
+echo "$as_me: WARNING: pcre.h: proceeding with the compiler's result" >&2;}
+    ac_header_preproc=yes
+    ;;
+  no:yes:* )
+    { echo "$as_me:$LINENO: WARNING: pcre.h: present but cannot be compiled" >&5
+echo "$as_me: WARNING: pcre.h: present but cannot be compiled" >&2;}
+    { echo "$as_me:$LINENO: WARNING: pcre.h:     check for missing prerequisite headers?" >&5
+echo "$as_me: WARNING: pcre.h:     check for missing prerequisite headers?" >&2;}
+    { echo "$as_me:$LINENO: WARNING: pcre.h: see the Autoconf documentation" >&5
+echo "$as_me: WARNING: pcre.h: see the Autoconf documentation" >&2;}
+    { echo "$as_me:$LINENO: WARNING: pcre.h:     section \"Present But Cannot Be Compiled\"" >&5
+echo "$as_me: WARNING: pcre.h:     section \"Present But Cannot Be Compiled\"" >&2;}
+    { echo "$as_me:$LINENO: WARNING: pcre.h: proceeding with the preprocessor's result" >&5
+echo "$as_me: WARNING: pcre.h: proceeding with the preprocessor's result" >&2;}
+    { echo "$as_me:$LINENO: WARNING: pcre.h: in the future, the compiler will take precedence" >&5
+echo "$as_me: WARNING: pcre.h: in the future, the compiler will take precedence" >&2;}
+
+    ;;
+esac
+{ echo "$as_me:$LINENO: checking for pcre.h" >&5
+echo $ECHO_N "checking for pcre.h... $ECHO_C" >&6; }
+if test "${ac_cv_header_pcre_h+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  ac_cv_header_pcre_h=$ac_header_preproc
+fi
+{ echo "$as_me:$LINENO: result: $ac_cv_header_pcre_h" >&5
+echo "${ECHO_T}$ac_cv_header_pcre_h" >&6; }
+
+fi
+if test $ac_cv_header_pcre_h = yes; then
+
+	ac_cv_found_pcre_inc="yes"
+
+else
+
+	{ echo "$as_me:$LINENO: checking for pcre.h in given path" >&5
+echo $ECHO_N "checking for pcre.h in given path... $ECHO_C" >&6; }
+	if test -f "$ac_cv_spcre_val/include/pcre.h"; then
+		{ echo "$as_me:$LINENO: result: yes" >&5
+echo "${ECHO_T}yes" >&6; }
+		ac_cv_found_pcre_inc="yes"
+		ac_cv_pcre_path="$ac_cv_pcre_val"
+	else
+		{ echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6; }
+	fi
+
+fi
+
+
+
+{ echo "$as_me:$LINENO: checking for pcre_compile in -lpcre" >&5
+echo $ECHO_N "checking for pcre_compile in -lpcre... $ECHO_C" >&6; }
+if test "${ac_cv_lib_pcre_pcre_compile+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lpcre  $LIBS"
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char pcre_compile ();
+int
+main ()
+{
+return pcre_compile ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (ac_try="$ac_link"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_link") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest$ac_exeext &&
+       $as_test_x conftest$ac_exeext; then
+  ac_cv_lib_pcre_pcre_compile=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	ac_cv_lib_pcre_pcre_compile=no
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
+      conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ echo "$as_me:$LINENO: result: $ac_cv_lib_pcre_pcre_compile" >&5
+echo "${ECHO_T}$ac_cv_lib_pcre_pcre_compile" >&6; }
+if test $ac_cv_lib_pcre_pcre_compile = yes; then
+
+	ac_cv_found_pcre_lib="yes"
+
+else
+
+	{ echo "$as_me:$LINENO: checking for -lpcre in given path" >&5
+echo $ECHO_N "checking for -lpcre in given path... $ECHO_C" >&6; }
+	if test -e "$ac_cv_pcre_path/lib/libpcre.so"; then
+		{ echo "$as_me:$LINENO: result: yes" >&5
+echo "${ECHO_T}yes" >&6; }
+		ac_cv_found_pcre_lib="yes"
+	else
+		{ echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6; }
+	fi
+
+fi
+
+
+{ echo "$as_me:$LINENO: checking which version of PCRE to use" >&5
+echo $ECHO_N "checking which version of PCRE to use... $ECHO_C" >&6; }
+
+if test "X$ac_cv_found_pcre_inc" = "Xyes" &&
+   test "X$ac_cv_found_pcre_lib" = "Xyes" &&
+   test "X$ac_cv_pcrebuild" != "Xyes"; then
+	{ echo "$as_me:$LINENO: result: system" >&5
+echo "${ECHO_T}system" >&6; }
+	LIBS="$LIBS -lpcre"
+
+	if test "X$ac_cv_pcre_path" != "X"; then
+		PCRE_INCLUDES="$PCRE_INCLUDES -I $ac_cv_pcre_path/include/"
+		LDFLAGS="$LDFLAGS -L $ac_cv_pcre_path/lib/"
+	fi
+else
+	{ echo "$as_me:$LINENO: result: internal packaged PCRE" >&5
+echo "${ECHO_T}internal packaged PCRE" >&6; }
+
+	subdirs="$subdirs pcre"
+
+
+cat >>confdefs.h <<\_ACEOF
+#define PCRE_BUILD 1
+_ACEOF
+
+	PCRE_SUBDIR="pcre"
+	PCRE_INCLUDES="$PCRE_INCLUDES -I ../pcre/"
+	LIBS="$LIBS ../pcre/.libs/libpcre.a"
+fi
+
 
 
 # Check whether --with-nicklen was given.
@@ -6307,6 +6586,8 @@ echo "${ECHO_T}checking registered username length... $ac_cv_userreglen" >&6; }
 cat >>confdefs.h <<_ACEOF
 #define USERREGNAME_LEN (${ac_cv_userreglen}+1)
 _ACEOF
+
+
 
 
 
@@ -7013,7 +7294,9 @@ helpdir!$helpdir$ac_delim
 subdirs!$subdirs$ac_delim
 DB_INCLUDES!$DB_INCLUDES$ac_delim
 DB_LIBS!$DB_LIBS$ac_delim
+PCRE_INCLUDES!$PCRE_INCLUDES$ac_delim
 SQLITE_SUBDIR!$SQLITE_SUBDIR$ac_delim
+PCRE_SUBDIR!$PCRE_SUBDIR$ac_delim
 DB_BACKEND!$DB_BACKEND$ac_delim
 S_NICKSERV!$S_NICKSERV$ac_delim
 S_CHANSERV!$S_CHANSERV$ac_delim
@@ -7029,7 +7312,7 @@ LIBOBJS!$LIBOBJS$ac_delim
 LTLIBOBJS!$LTLIBOBJS$ac_delim
 _ACEOF
 
-  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 81; then
+  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 83; then
     break
   elif $ac_last_try; then
     { { echo "$as_me:$LINENO: error: could not make $CONFIG_STATUS" >&5
