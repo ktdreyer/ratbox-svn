@@ -28,4 +28,7 @@ extern void add_ucommands(struct client *, struct ucommand_handler *);
 
 extern struct ucommand_handler *find_ucommand(const char *command);
 
+void load_ucommand_help(void);
+void clear_ucommand_help(void);
+
 #endif

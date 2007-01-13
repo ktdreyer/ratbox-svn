@@ -368,8 +368,6 @@ main(int argc, char *argv[])
 	add_scommand_handler(&bmask_command);
 	add_scommand_handler(&privmsg_command);
 
-        add_ucommand_handler(NULL, &stats_ucommand);
-
 	first_time = CURRENT_TIME;
 
 	if(testing_conf)

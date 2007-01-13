@@ -45,6 +45,7 @@
 #include "cache.h"
 #include "hook.h"
 #include "watch.h"
+#include "c_init.h"
 
 #ifdef HAVE_CRYPT_H
 #include <crypt.h>
@@ -85,6 +86,8 @@ void
 init_ucommand(void)
 {
         add_ucommands(NULL, ucommands);
+	add_ucommand_handler(NULL, &stats_ucommand);
+	load_ucommand_help();
 }
 
 static int
@@ -187,6 +190,36 @@ add_ucommands(struct client *service_p, struct ucommand_handler *handler)
         {
                 add_ucommand_handler(service_p, &handler[i]);
         }
+}
+
+void
+load_ucommand_help(void)
+{
+	struct ucommand_handler *ucommand;
+	char filename[PATH_MAX];
+	dlink_node *ptr;
+
+	DLINK_FOREACH(ptr, ucommand_list.head)
+	{
+		ucommand = ptr->data;
+
+		snprintf(filename, sizeof(filename), "%s/main/u-", HELP_PATH);
+		strlcat(filename, lcase(ucommand->cmd), sizeof(filename));
+		ucommand->helpfile = cache_file(filename, ucommand->cmd);
+	}
+}
+
+void
+clear_ucommand_help(void)
+{
+	struct ucommand_handler *ucommand;
+	dlink_node *ptr;
+
+	DLINK_FOREACH(ptr, ucommand_list.head)
+	{
+		ucommand = ptr->data;
+		free_cachefile(ucommand->helpfile);
+	}
 }
 
 static int

@@ -190,8 +190,6 @@ clear_service_help(struct client *service_p)
 void
 rehash_help(void)
 {
-	struct ucommand_handler *ucommand;
-	char filename[PATH_MAX];
 	dlink_node *ptr;
 
 	DLINK_FOREACH(ptr, service_list.head)
@@ -200,18 +198,8 @@ rehash_help(void)
 		load_service_help(ptr->data);
 	}
 
-	DLINK_FOREACH(ptr, ucommand_list.head)
-	{
-		ucommand = ptr->data;
-
-		free_cachefile(ucommand->helpfile);
-
-        	snprintf(filename, sizeof(filename), "%s/main/u-",
-                	 HELP_PATH);
-	        strlcat(filename, lcase(ucommand->cmd), sizeof(filename));
-
-        	ucommand->helpfile = cache_file(filename, ucommand->cmd);
-	}
+	clear_ucommand_help();
+	load_ucommand_help();
 }
 
 struct client *
