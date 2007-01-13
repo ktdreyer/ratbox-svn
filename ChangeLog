@@ -1,3 +1,16 @@
+leeh        2007/01/13 22:14:51 UTC	(20070113_5-23448)
+  Log:
+  - add lang_get_cachefile() to attempt to pull the right translation from an
+    array of cachefile pointers
+  
+
+  Modified:
+	rserv/trunk/include/langs.h (File Modified) 
+	rserv/trunk/src/langs.c (File Modified) 
+	rserv/trunk/src/service.c (File Modified) 
+	rserv/trunk/src/ucommand.c (File Modified) 
+
+
 leeh        2007/01/13 21:03:16 UTC	(20070113_4-23446)
   Log:
   - ugh, just mark the fact we dont want C++ libraries in the configure script
