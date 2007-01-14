@@ -1,3 +1,12 @@
+leeh        2007/01/14 16:06:04 UTC	(20070114_0-23463)
+  Log:
+  - newconf.c needs langs.h
+  
+
+  Modified:
+	rserv/trunk/src/newconf.c (File Modified) 
+
+
 leeh        2007/01/13 22:26:00 UTC	(20070113_6-23450)
   Log:
   - add the ability to set a default_language in the conf
