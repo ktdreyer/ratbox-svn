@@ -1,3 +1,17 @@
+leeh        2007/01/14 17:50:38 UTC	(20070114_5-23475)
+  Log:
+  - swap some userserv notices over to the translation methods
+  - swap a couple of LANG_LAST for SVC_LAST
+  - fix length checking of password on userserv::usersetpass
+  
+
+  Modified:
+	rserv/trunk/include/langs.h (File Modified) 
+	rserv/trunk/src/langs.c (File Modified) 
+	rserv/trunk/src/messages.c (File Modified) 
+	rserv/trunk/src/s_userserv.c (File Modified) 
+
+
 leeh        2007/01/14 17:15:19 UTC	(20070114_4-23471)
   Log:
   - rerun make depend
