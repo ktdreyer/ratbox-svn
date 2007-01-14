@@ -1,3 +1,16 @@
+leeh        2007/01/14 16:53:40 UTC	(20070114_2-23467)
+  Log:
+  - add an alternate version of service_error() too
+  
+
+  Modified:
+	rserv/trunk/include/langs.h (File Modified) 
+	rserv/trunk/include/service.h (File Modified) 
+	rserv/trunk/src/langs.c (File Modified) 
+	rserv/trunk/src/s_userserv.c (File Modified) 
+	rserv/trunk/src/service.c (File Modified) 
+
+
 leeh        2007/01/14 16:49:23 UTC	(20070114_1-23465)
   Log:
   - add in the backend sending methods for dealing with translations for
