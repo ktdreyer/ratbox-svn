@@ -19,7 +19,18 @@ const char **svc_notice;
 
 const char *svc_notice_string[] =
 {
+	/* general service */
+	"SVC_ISDISABLED",
+
+	/* userserv */
 	"SVC_USER_ALREADYREG",
+	"SVC_USER_NOTREG",
+	"SVC_USER_INVALIDUSERNAME",
+	"SVC_USER_INVALIDPASSWORD",
+	"SVC_USER_LONGPASSWORD",
+	"SVC_USER_ALREADYLOGGEDIN",
+
+	/* must be last */
 	"\0"
 };
 
@@ -30,7 +41,7 @@ init_langs(void)
 
 	svc_notice = my_malloc(sizeof(char *) * SVC_LAST);
 
-	for(i = 0; lang_internal[i].id != LANG_LAST; i++)
+	for(i = 0; lang_internal[i].id != SVC_LAST; i++)
 	{
 		svc_notice[lang_internal[i].id] = lang_internal[i].msg;
 	}

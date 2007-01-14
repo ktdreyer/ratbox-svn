@@ -34,8 +34,16 @@ struct cachefile *lang_get_cachefile_u(struct cachefile **, struct lconn *);
  */
 enum svc_notice_enum
 {
+	/* general service */
+	SVC_ISDISABLED,
+
 	/* userserv */
 	SVC_USER_ALREADYREG,
+	SVC_USER_NOTREG,
+	SVC_USER_INVALIDUSERNAME,
+	SVC_USER_INVALIDPASSWORD,
+	SVC_USER_LONGPASSWORD,
+	SVC_USER_ALREADYLOGGEDIN,
 
 	/* this must be last */
 	SVC_LAST

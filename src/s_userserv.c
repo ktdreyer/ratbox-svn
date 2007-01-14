@@ -248,8 +248,7 @@ find_user_reg(struct client *client_p, const char *username)
 	}
 
 	if(client_p != NULL)
-		service_error(userserv_p, client_p, "Username %s is not registered",
-				username);
+		service_err(userserv_p, client_p, SVC_USER_NOTREG, username);
 
 	return NULL;
 }
@@ -572,15 +571,13 @@ o_user_userregister(struct client *client_p, struct lconn *conn_p, const char *p
 
 	if(!valid_username(parv[0]))
 	{
-		service_send(userserv_p, client_p, conn_p,
-				"Username %s invalid", parv[0]);
+		service_snd(userserv_p, client_p, conn_p, SVC_USER_INVALIDUSERNAME, parv[0]);
 		return 0;
 	}
 
 	if(strlen(parv[1]) > PASSWDLEN)
 	{
-		service_send(userserv_p, client_p, conn_p,
-				"Password too long");
+		service_snd(userserv_p, client_p, conn_p, SVC_USER_LONGPASSWORD);
 		return 0;
 	}
 
@@ -624,8 +621,7 @@ o_user_userdrop(struct client *client_p, struct lconn *conn_p, const char *parv[
 
 	if((ureg_p = find_user_reg(NULL, parv[0])) == NULL)
 	{
-		service_send(userserv_p, client_p, conn_p,
-				"Username %s is not registered", parv[0]);
+		service_snd(userserv_p, client_p, conn_p, SVC_USER_NOTREG, parv[0]);
 		return 0;
 	}
 
@@ -649,8 +645,7 @@ o_user_usersuspend(struct client *client_p, struct lconn *conn_p, const char *pa
 
 	if((reg_p = find_user_reg(NULL, parv[0])) == NULL)
 	{
-		service_send(userserv_p, client_p, conn_p,
-				"Username %s is not registered", parv[0]);
+		service_snd(userserv_p, client_p, conn_p, SVC_USER_NOTREG, parv[0]);
 		return 0;
 	}
 
@@ -690,8 +685,7 @@ o_user_userunsuspend(struct client *client_p, struct lconn *conn_p, const char *
 
 	if((reg_p = find_user_reg(NULL, parv[0])) == NULL)
 	{
-		service_send(userserv_p, client_p, conn_p,
-				"Username %s is not registered", parv[0]);
+		service_snd(userserv_p, client_p, conn_p, SVC_USER_NOTREG, parv[0]);
 		return 0;
 	}
 
@@ -861,8 +855,7 @@ o_user_userinfo(struct client *client_p, struct lconn *conn_p, const char *parv[
 					"Nickname %s is not logged in",
 					parv[0]);
 		else
-			service_send(userserv_p, client_p, conn_p,
-					"Username %s is not registered", parv[0]);
+			service_snd(userserv_p, client_p, conn_p, SVC_USER_NOTREG, parv[0]);
 
 		return 0;
 	}
@@ -893,15 +886,13 @@ o_user_usersetpass(struct client *client_p, struct lconn *conn_p, const char *pa
 
 	if((ureg_p = find_user_reg(NULL, parv[0])) == NULL)
 	{
-		service_send(userserv_p, client_p, conn_p,
-				"Username %s is not registered", parv[0]);
+		service_snd(userserv_p, client_p, conn_p, SVC_USER_NOTREG, parv[0]);
 		return 0;
 	}
 
-	if(strlen(parv[0]) > PASSWDLEN)
+	if(strlen(parv[1]) > PASSWDLEN)
 	{
-		service_send(userserv_p, client_p, conn_p,
-				"Password too long");
+		service_snd(userserv_p, client_p, conn_p, SVC_USER_LONGPASSWORD);
 		return 0;
 	}
 
@@ -990,36 +981,33 @@ s_user_register(struct client *client_p, struct lconn *conn_p, const char *parv[
 				"%s::REGISTER is disabled, see %s",
 				userserv_p->name, config_file.uregister_url);
 		else
-			service_error(userserv_p, client_p, 
-					"%s::REGISTER is disabled",
-					userserv_p->name);
+			service_err(userserv_p, client_p, SVC_ISDISABLED,
+					userserv_p->name, "::REGISTER");
 
 		return 1;
 	}
 
 	if(client_p->user->user_reg != NULL)
 	{
-		service_error(userserv_p, client_p, "You are already logged in");
+		service_err(userserv_p, client_p, SVC_USER_ALREADYLOGGEDIN);
 		return 1;
 	}
 
 	if((reg_p = find_user_reg(NULL, parv[0])) != NULL)
 	{
-		service_error(userserv_p, client_p, "Username %s is already registered",
-				parv[0]);
+		service_err(userserv_p, client_p, SVC_USER_ALREADYREG, parv[0]);
 		return 1;
 	}
 
 	if(!valid_username(parv[0]))
 	{
-		service_error(userserv_p, client_p, "Username %s invalid", parv[0]);
+		service_err(userserv_p, client_p, SVC_USER_INVALIDUSERNAME, parv[0]);
 		return 1;
 	}
 
 	if(strlen(parv[1]) > PASSWDLEN)
 	{
-		service_send(userserv_p, client_p, conn_p,
-				"Password too long");
+		service_snd(userserv_p, client_p, conn_p, SVC_USER_LONGPASSWORD);
 		return 0;
 	}
 
@@ -1186,7 +1174,7 @@ s_user_activate(struct client *client_p, struct lconn *conn_p, const char *parv[
 
 	if(client_p->user->user_reg != NULL)
 	{
-		service_error(userserv_p, client_p, "You are already logged in");
+		service_err(userserv_p, client_p, SVC_USER_ALREADYLOGGEDIN);
 		return 1;
 	}
 
@@ -1244,7 +1232,7 @@ s_user_login(struct client *client_p, struct lconn *conn_p, const char *parv[], 
 
 	if(client_p->user->user_reg != NULL)
 	{
-		service_error(userserv_p, client_p, "You are already logged in");
+		service_err(userserv_p, client_p, SVC_USER_ALREADYLOGGEDIN);
 		return 1;
 	}
 
@@ -1279,7 +1267,7 @@ s_user_login(struct client *client_p, struct lconn *conn_p, const char *parv[], 
 
 	if(strcmp(password, reg_p->password))
 	{
-		service_error(userserv_p, client_p, "Invalid password");
+		service_err(userserv_p, client_p, SVC_USER_INVALIDPASSWORD);
 		return 1;
 	}
 
@@ -1327,8 +1315,8 @@ s_user_resetpass(struct client *client_p, struct lconn *conn_p, const char *parv
 
 	if(config_file.disable_email || !config_file.allow_resetpass)
 	{
-		service_error(userserv_p, client_p,
-			"%s::RESETPASS is disabled", userserv_p->name);
+		service_err(userserv_p, client_p, SVC_ISDISABLED,
+				userserv_p->name, "::RESETPASS");
 		return 1;
 	}
 
@@ -1438,7 +1426,7 @@ s_user_resetpass(struct client *client_p, struct lconn *conn_p, const char *parv
 
 	if(strlen(parv[2]) > PASSWDLEN)
 	{
-		service_error(userserv_p, client_p, "Password too long");
+		service_err(userserv_p, client_p, SVC_USER_LONGPASSWORD);
 		return 1;
 	}
 
@@ -1497,8 +1485,8 @@ s_user_resetemail(struct client *client_p, struct lconn *conn_p, const char *par
 
 	if(config_file.disable_email || !config_file.allow_resetemail)
 	{
-		service_error(userserv_p, client_p,
-			"%s::RESETEMAIL is disabled", userserv_p->name);
+		service_err(userserv_p, client_p, SVC_ISDISABLED,
+				userserv_p->name, "::RESETEMAIL");
 		return 1;
 	}
 
@@ -1740,9 +1728,8 @@ s_user_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 
 		if(!config_file.allow_set_password)
 		{
-			service_error(userserv_p, client_p,
-				"%s::SET::PASSWORD is disabled", 
-				userserv_p->name);
+			service_err(userserv_p, client_p, SVC_ISDISABLED,
+				userserv_p->name, "::SET::PASSWORD");
 			return 1;
 		}
 
@@ -1756,8 +1743,7 @@ s_user_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 
 		if(strlen(parv[2]) > PASSWDLEN)
 		{
-			service_send(userserv_p, client_p, conn_p,
-					"Password too long");
+			service_snd(userserv_p, client_p, conn_p, SVC_USER_LONGPASSWORD);
 			return 0;
 		}
 
@@ -1765,7 +1751,7 @@ s_user_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 
 		if(strcmp(password, ureg_p->password))
 		{
-			service_error(userserv_p, client_p, "Invalid password");
+			service_err(userserv_p, client_p, SVC_USER_INVALIDPASSWORD);
 			return 1;
 		}
 
@@ -1786,8 +1772,8 @@ s_user_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 	{
 		if(!config_file.allow_set_email)
 		{
-			service_error(userserv_p, client_p,
-				"%s::SET::EMAIL is disabled", userserv_p->name);
+			service_err(userserv_p, client_p, SVC_ISDISABLED,
+					userserv_p->name, "::SET::EMAIL");
 			return 1;
 		}
 
