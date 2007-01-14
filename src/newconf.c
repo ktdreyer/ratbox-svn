@@ -6,6 +6,7 @@
 #include "tools.h"
 #include "newconf.h"
 #include "rserv.h"
+#include "langs.h"
 #include "client.h"
 #include "channel.h"
 #include "log.h"
