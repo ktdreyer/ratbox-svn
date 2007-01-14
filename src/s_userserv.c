@@ -1081,9 +1081,8 @@ s_user_register(struct client *client_p, struct lconn *conn_p, const char *parv[
 	{
 		if(config_file.disable_email)
 		{
-			service_error(userserv_p, client_p,
-				"%s::REGISTER is disabled as it cannot send emails",
-				userserv_p->name);
+			service_err(userserv_p, client_p, SVC_ISDISABLEDEMAIL,
+					userserv_p->name, "::REGISTER");
 			return 1;
 		}
 
@@ -1263,8 +1262,7 @@ s_user_login(struct client *client_p, struct lconn *conn_p, const char *parv[], 
 
 	DLINK_FOREACH(ptr, reg_p->users.head)
 	{
-		service_error(userserv_p, ptr->data,
-				"%s has just authenticated as you (%s)",
+		service_err(userserv_p, ptr->data, SVC_USER_USERLOGGEDIN,
 				client_p->user->mask, reg_p->name);
 	}
 
@@ -1320,9 +1318,8 @@ s_user_resetpass(struct client *client_p, struct lconn *conn_p, const char *parv
 
 	if((CURRENT_TIME - reg_p->reg_time) < config_file.ureset_regtime_duration)
 	{
-		service_error(userserv_p, client_p, 
-				"Username %s has not been registered long enough for RESETPASS",
-				reg_p->name);
+		service_err(userserv_p, client_p, SVC_USER_DURATIONTOOSHORT,
+				reg_p->name, userserv_p->name, "::RESETPASS");
 		return 1;
 	}
 
@@ -1471,9 +1468,8 @@ s_user_resetemail(struct client *client_p, struct lconn *conn_p, const char *par
 
 	if((CURRENT_TIME - reg_p->reg_time) < config_file.ureset_regtime_duration)
 	{
-		service_error(userserv_p, client_p, 
-				"Username %s has not been registered long enough for RESETEMAIL",
-				reg_p->name);
+		service_err(userserv_p, client_p, SVC_USER_DURATIONTOOSHORT,
+				reg_p->name, userserv_p->name, "::RESETEMAIL");
 		return 1;
 	}
 
@@ -1782,18 +1778,15 @@ s_user_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 			ureg_p->flags &= ~US_FLAGS_PRIVATE;
 		else
 		{
-			service_error(userserv_p, client_p,
-				"Username %s PRIVATE is %s",
-				ureg_p->name,
-				(ureg_p->flags & US_FLAGS_PRIVATE) ?
-				 "ON" : "OFF");
+			service_err(userserv_p, client_p, SVC_USER_QUERYOPTION,
+					ureg_p->name, "PRIVATE", 
+					(ureg_p->flags & US_FLAGS_PRIVATE) ? "ON" : "OFF");
 			return 1;
 		}
 
-		service_error(userserv_p, client_p,
-			"Username %s PRIVATE set %s",
-			ureg_p->name,
-			(ureg_p->flags & US_FLAGS_PRIVATE) ? "ON" : "OFF");
+		service_err(userserv_p, client_p, SVC_USER_CHANGEDOPTION,
+				ureg_p->name, "PRIVATE",
+				(ureg_p->flags & US_FLAGS_PRIVATE) ? "ON" : "OFF");
 
 		rsdb_exec(NULL, "UPDATE users SET flags='%d' WHERE username='%Q'",
 				ureg_p->flags, ureg_p->name);
@@ -1805,9 +1798,9 @@ s_user_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 
 		if(EmptyString(arg))
 		{
-			service_error(userserv_p, client_p,
-				"Username %s LANGUAGE is %s",
-				ureg_p->name, langs_available[ureg_p->language]);
+			service_err(userserv_p, client_p, SVC_USER_QUERYOPTION,
+					ureg_p->name, "LANGUAGE", 
+					langs_available[ureg_p->language]);
 			return 1;
 		}
 
@@ -1822,16 +1815,14 @@ s_user_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 
 		if(i == LANG_LAST)
 		{
-			service_error(userserv_p, client_p,
-				"Language %s invalid", arg);
+			service_err(userserv_p, client_p, SVC_USER_INVALIDLANGUAGE, arg);
 			return 1;
 		}
 
 		ureg_p->language = i;
 
-		service_error(userserv_p, client_p,
-				"Username %s LANGUAGE set to %s",
-				ureg_p->name, langs_available[i]);
+		service_err(userserv_p, client_p, SVC_USER_CHANGEDOPTION,
+				ureg_p->name, "LANGUAGE", langs_available[i]);
 
 		rsdb_exec(NULL, "UPDATE users SET language='%d' WHERE username='%Q'",
 				ureg_p->language, ureg_p->name);
