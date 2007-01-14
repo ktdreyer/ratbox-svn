@@ -70,7 +70,13 @@ lang_get_cachefile_u(struct cachefile **translations, struct lconn *conn_p)
 }
 
 const char *
-lang_get_notice(enum svc_notice_enum msgid, struct client *client_p, struct lconn *conn_p)
+lang_get_notice_u(enum svc_notice_enum msgid, struct client *client_p, struct lconn *conn_p)
+{
+	return svc_notice[msgid];
+}
+
+const char *
+lang_get_notice(enum svc_notice_enum msgid, struct client *client_p)
 {
 	return svc_notice[msgid];
 }

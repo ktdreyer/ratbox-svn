@@ -808,6 +808,22 @@ service_error(struct client *service_p, struct client *client_p,
 }
 
 void
+service_err(struct client *service_p, struct client *client_p,
+		const char *format, ...)
+{
+	static char buf[BUFSIZE];
+	va_list args;
+
+	va_start(args, format);
+	vsnprintf(buf, sizeof(buf), format, args);
+	va_end(args);
+
+	sendto_server(":%s NOTICE %s :%s",
+			ServiceMsgSelf(service_p) ? SVC_UID(service_p) : MYUID, 
+			UID(client_p), buf);
+}
+
+void
 service_stats(struct client *service_p, struct lconn *conn_p)
 {
         struct service_command *cmd_table;

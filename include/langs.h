@@ -30,7 +30,7 @@ struct cachefile *lang_get_cachefile(struct cachefile **, struct client *);
 struct cachefile *lang_get_cachefile_u(struct cachefile **, struct lconn *);
 
 /* when changing this, you MUST reflect the change in svc_notice_string in
- * langs.c
+ * langs.c and add a default into messages.c
  */
 enum svc_notice_enum
 {
@@ -46,7 +46,9 @@ extern const char *svc_notice_string[];
 
 extern const char **svc_notice;
 
-const char *lang_get_notice(enum svc_notice_enum msgid, struct client *, struct lconn *);
+const char *lang_get_notice_u(enum svc_notice_enum msgid, struct client *, struct lconn *);
+#define LNGU lang_get_notice_u
+const char *lang_get_notice(enum svc_notice_enum msgid, struct client *);
 #define LNG lang_get_notice
 
 /* used to create the 'default' hardcoded language from messages.c */
