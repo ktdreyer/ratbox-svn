@@ -264,7 +264,7 @@ find_user_reg_nick(struct client *client_p, const char *name)
 		   target_p->user->user_reg == NULL)
 		{
 			if(client_p != NULL)
-				service_error(userserv_p, client_p, "Nickname %s is not logged in",
+				service_err(userserv_p, client_p, SVC_USER_NICKNOTLOGGEDIN,
 						name+1);
 			return NULL;
 		}
@@ -906,8 +906,8 @@ o_user_usersetpass(struct client *client_p, struct lconn *conn_p, const char *pa
 	rsdb_exec(NULL, "UPDATE users SET password='%Q' WHERE username='%Q'", 
 			password, ureg_p->name);
 
-	service_send(userserv_p, client_p, conn_p,
-			"Username %s password changed", ureg_p->name);
+	service_snd(userserv_p, client_p, conn_p, SVC_USER_CHANGEDPASSWORD, ureg_p->name);
+
 	return 0;
 }
 
@@ -977,9 +977,8 @@ s_user_register(struct client *client_p, struct lconn *conn_p, const char *parv[
 	if(config_file.disable_uregister)
 	{
 		if(config_file.uregister_url)
-			service_error(userserv_p, client_p,
-				"%s::REGISTER is disabled, see %s",
-				userserv_p->name, config_file.uregister_url);
+			service_err(userserv_p, client_p, SVC_USER_REGISTERDISABLED,
+					userserv_p->name, "::REGISTER", config_file.uregister_url);
 		else
 			service_err(userserv_p, client_p, SVC_ISDISABLED,
 					userserv_p->name, "::REGISTER");
@@ -1015,21 +1014,19 @@ s_user_register(struct client *client_p, struct lconn *conn_p, const char *parv[
 	{
 		if(config_file.uregister_email)
 		{
-			service_error(userserv_p, client_p, 
-					"Insufficient parameters to %s::REGISTER",
-					userserv_p->name);
+			service_err(userserv_p, client_p, SVC_NEEDMOREPARAMS,
+					userserv_p->name, "::REGISTER");
 			return 1;
 		}
 	}
 	else if(!valid_email(parv[2]))
 	{
-		service_error(userserv_p, client_p, "Email %s invalid",
-				parv[2]);
+		service_err(userserv_p, client_p, SVC_EMAIL_INVALID, parv[2]);
 		return 1;
 	}
 	else if(!valid_email_domain(parv[2]))
 	{
-		service_error(userserv_p, client_p, "Email provider banned");
+		service_err(userserv_p, client_p, SVC_EMAIL_BANNEDDOMAIN);
 		return 1;
 	}
 
@@ -1046,9 +1043,8 @@ s_user_register(struct client *client_p, struct lconn *conn_p, const char *parv[
 		}
 		else if(last_count >= config_file.uregister_amount)
 		{
-			service_error(userserv_p, client_p, 
-				"%s::REGISTER rate-limited, try again shortly",
-				userserv_p->name);
+			service_err(userserv_p, client_p, SVC_RATELIMITED,
+					userserv_p->name, "::REGISTER");
 			return 1;
 		}
 		else
@@ -1064,9 +1060,8 @@ s_user_register(struct client *client_p, struct lconn *conn_p, const char *parv[
 		if(hent->uregister >= config_file.uhregister_amount &&
 		   hent->uregister_expire > CURRENT_TIME)
 		{
-			service_error(userserv_p, client_p,
-				"%s::REGISTER rate-limited for your host, try again later",
-				userserv_p->name);
+			service_err(userserv_p, client_p, SVC_RATELIMITEDHOST,
+					userserv_p->name, "::REGISTER");
 			return 1;
 		}
 
@@ -1094,8 +1089,7 @@ s_user_register(struct client *client_p, struct lconn *conn_p, const char *parv[
 
 		if(!can_send_email())
 		{
-			service_error(userserv_p, client_p,
-				"Temporarily unable to send email, please try later");
+			service_err(userserv_p, client_p, SVC_EMAIL_TEMPUNAVAILABLE);
 			return 1;
 		}
 
@@ -1111,8 +1105,8 @@ s_user_register(struct client *client_p, struct lconn *conn_p, const char *parv[
 				client_p->user->host, token, userserv_p->name, parv[0], token,
 				get_short_duration(config_file.uexpire_unverified_time)))
 		{
-			service_error(userserv_p, client_p,
-				"Unable to register username due to problems sending email");
+			service_err(userserv_p, client_p, SVC_EMAIL_SENDFAILED,
+					userserv_p->name, "::REGISTER");
 			return 1;
 		}
 	}
@@ -1288,7 +1282,8 @@ s_user_login(struct client *client_p, struct lconn *conn_p, const char *parv[], 
 	reg_p->last_time = CURRENT_TIME;
 	reg_p->flags |= US_FLAGS_NEEDUPDATE;
 	dlink_add_alloc(client_p, &reg_p->users);
-	service_error(userserv_p, client_p, "Login successful");
+	service_err(userserv_p, client_p, SVC_SUCCESSFUL,
+			userserv_p->name, "::LOGIN");
 
 	hook_call(HOOK_USER_LOGIN, client_p, NULL);
 
@@ -1300,7 +1295,8 @@ s_user_logout(struct client *client_p, struct lconn *conn_p, const char *parv[],
 {
 	dlink_find_destroy(client_p, &client_p->user->user_reg->users);
 	client_p->user->user_reg = NULL;
-	service_error(userserv_p, client_p, "Logout successful");
+	service_err(userserv_p, client_p, SVC_SUCCESSFUL,
+			userserv_p->name, "::LOGOUT");
 
 	sendto_server(":%s ENCAP * SU %s", MYUID, UID(client_p));
 
@@ -1344,9 +1340,7 @@ s_user_resetpass(struct client *client_p, struct lconn *conn_p, const char *parv
 
 		if(EmptyString(reg_p->email))
 		{
-			service_error(userserv_p, client_p,
-					"Username %s does not have an email address set",
-					reg_p->name);
+			service_err(userserv_p, client_p, SVC_USER_NOEMAIL, reg_p->name);
 			return 1;
 		}
 
@@ -1373,8 +1367,7 @@ s_user_resetpass(struct client *client_p, struct lconn *conn_p, const char *parv
 
 		if(!can_send_email())
 		{
-			service_error(userserv_p, client_p,
-				"Temporarily unable to send email, please try later");
+			service_err(userserv_p, client_p, SVC_EMAIL_TEMPUNAVAILABLE);
 			return 1;
 		}
 
@@ -1401,8 +1394,8 @@ s_user_resetpass(struct client *client_p, struct lconn *conn_p, const char *parv
 				client_p->name, client_p->user->username, client_p->user->host,
 				reg_p->name, userserv_p->name, reg_p->name, token))
 		{
-			service_error(userserv_p, client_p,
-					"Unable to issue password reset due to problems sending email");
+			service_err(userserv_p, client_p, SVC_EMAIL_SENDFAILED,
+					userserv_p->name, "::RESETPASS");
 		}
 		else
 		{
@@ -1418,9 +1411,8 @@ s_user_resetpass(struct client *client_p, struct lconn *conn_p, const char *parv
 
 	if(EmptyString(parv[2]))
 	{
-		service_error(userserv_p, client_p,
-				"Insufficient parameters to %s::RESETPASS, new password not specified",
-				userserv_p->name);
+		service_err(userserv_p, client_p, SVC_NEEDMOREPARAMS,
+				userserv_p->name, "::RESETPASS");
 		return 1;
 	}
 
@@ -1455,9 +1447,7 @@ s_user_resetpass(struct client *client_p, struct lconn *conn_p, const char *parv
 			my_free(reg_p->password);
 			reg_p->password = my_strdup(password);
 
-			service_error(userserv_p, client_p,
-					"Username %s password reset", reg_p->name);
-
+			service_err(userserv_p, client_p, SVC_USER_CHANGEDPASSWORD, reg_p->name);
 			return 1;
 		}
 		else
@@ -1493,15 +1483,14 @@ s_user_resetemail(struct client *client_p, struct lconn *conn_p, const char *par
 	if((CURRENT_TIME - reg_p->reg_time) < config_file.ureset_regtime_duration)
 	{
 		service_error(userserv_p, client_p, 
-				"Username %s has not been registered long enough for RESETPASS",
+				"Username %s has not been registered long enough for RESETEMAIL",
 				reg_p->name);
 		return 1;
 	}
 
 	if(EmptyString(reg_p->email))
 	{
-		service_error(userserv_p, client_p,
-				"Username %s does not have an email address set", reg_p->name);
+		service_err(userserv_p, client_p, SVC_USER_NOEMAIL, reg_p->name);
 		return 1;
 	}
 
@@ -1531,8 +1520,7 @@ s_user_resetemail(struct client *client_p, struct lconn *conn_p, const char *par
 
 		if(!can_send_email())
 		{
-			service_error(userserv_p, client_p,
-				"Temporarily unable to send email, please try later");
+			service_err(userserv_p, client_p, SVC_EMAIL_TEMPUNAVAILABLE);
 			return 1;
 		}
 
@@ -1556,8 +1544,8 @@ s_user_resetemail(struct client *client_p, struct lconn *conn_p, const char *par
 				client_p->name, client_p->user->username, client_p->user->host,
 				reg_p->name, userserv_p->name, token))
 		{
-			service_error(userserv_p, client_p,
-					"Unable to issue e-mail reset due to problems sending email");
+			service_err(userserv_p, client_p, SVC_EMAIL_SENDFAILED,
+					userserv_p->name, "::RESETEMAIL");
 		}
 		else
 		{
@@ -1573,20 +1561,19 @@ s_user_resetemail(struct client *client_p, struct lconn *conn_p, const char *par
 	{
 		if(EmptyString(parv[1]) || EmptyString(parv[2]))
 		{
-			service_error(userserv_p, client_p,
-					"Insufficient parameters to %s::RESETEMAIL, new email not specified",
-					userserv_p->name);
+			service_err(userserv_p, client_p, SVC_NEEDMOREPARAMS,
+					userserv_p->name, "::RESETEMAIL");
 			return 1;
 		}
 
 		if(!valid_email(parv[2]))
 		{
-			service_error(userserv_p, client_p, "Email %s invalid", parv[2]);
+			service_err(userserv_p, client_p, SVC_EMAIL_INVALID, parv[2]);
 			return 1;
 		}
 		else if(!valid_email_domain(parv[2]))
 		{
-			service_error(userserv_p, client_p, "Email provider banned");
+			service_err(userserv_p, client_p, SVC_EMAIL_BANNEDDOMAIN);
 			return 1;
 		}
 
@@ -1612,8 +1599,8 @@ s_user_resetemail(struct client *client_p, struct lconn *conn_p, const char *par
 						client_p->name, client_p->user->username, client_p->user->host,
 						reg_p->name, userserv_p->name, token))
 				{
-					service_error(userserv_p, client_p,
-							"Unable to issue e-mail reset due to problems sending email");
+					service_err(userserv_p, client_p, SVC_EMAIL_SENDFAILED,
+							userserv_p->name, "::RESETEMAIL");
 					return 2;
 				}
 
@@ -1654,9 +1641,8 @@ s_user_resetemail(struct client *client_p, struct lconn *conn_p, const char *par
 	{
 		if(EmptyString(parv[1]))
 		{
-			service_error(userserv_p, client_p,
-					"Insufficient parameters to %s::RESETEMAIL, auth token not specified",
-					userserv_p->name);
+			service_err(userserv_p, client_p, SVC_NEEDMOREPARAMS,
+					userserv_p->name, "::RESETEMAIL");
 			return 1;
 		}
 
@@ -1735,9 +1721,8 @@ s_user_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 
 		if(EmptyString(parv[1]) || EmptyString(parv[2]))
 		{
-			service_error(userserv_p, client_p,
-				"Insufficient parameters to %s::SET::PASSWORD",
-				userserv_p->name);
+			service_err(userserv_p, client_p, SVC_NEEDMOREPARAMS,
+					userserv_p->name, "::SET::PASSWORD");
 			return 1;
 		}
 
@@ -1779,21 +1764,19 @@ s_user_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 
 		if(EmptyString(arg))
 		{
-			service_error(userserv_p, client_p,
-				"Insufficient parameters to %s::SET::EMAIL",
-				userserv_p->name);
+			service_err(userserv_p, client_p, SVC_NEEDMOREPARAMS,
+					userserv_p->name, "::SET::EMAIL");
 			return 1;
 		}
 
 		if(!valid_email(arg))
 		{
-			service_error(userserv_p, client_p, "Email %s invalid",
-					arg);
+			service_err(userserv_p, client_p, SVC_EMAIL_INVALID, arg);
 			return 1;
 		}
 		else if(!valid_email_domain(parv[2]))
 		{
-			service_error(userserv_p, client_p, "Email provider banned");
+			service_err(userserv_p, client_p, SVC_EMAIL_BANNEDDOMAIN);
 			return 1;
 		}
 
