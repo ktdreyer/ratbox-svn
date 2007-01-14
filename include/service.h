@@ -70,13 +70,11 @@ extern void handle_service(struct client *service_p, struct client *client_p,
                            const char *command, int parc, const char **parv, int msg);
 extern void PRINTFLIKE(3, 4) service_error(struct client *service_p,
                           struct client *client_p, const char *, ...);
-extern void PRINTFLIKE(3, 4) service_err(struct client *service_p,
-                          struct client *client_p, const char *, ...);
+void service_err(struct client *service_p, struct client *client_p, int msgid, ...);
 
 void PRINTFLIKE(4, 5) service_send(struct client *, struct client *,
                 struct lconn *, const char *, ...);
-void PRINTFLIKE(4, 5) service_snd(struct client *, struct client *,
-                struct lconn *, const char *, ...);
+void service_snd(struct client *, struct client *, struct lconn *, int msgid, ...);
 
 extern void service_stats(struct client *service_p, struct lconn *);
 

@@ -46,10 +46,7 @@ extern const char *svc_notice_string[];
 
 extern const char **svc_notice;
 
-const char *lang_get_notice_u(enum svc_notice_enum msgid, struct client *, struct lconn *);
-#define LNGU lang_get_notice_u
-const char *lang_get_notice(enum svc_notice_enum msgid, struct client *);
-#define LNG lang_get_notice
+const char *lang_get_notice(enum svc_notice_enum msgid, struct client *, struct lconn *);
 
 /* used to create the 'default' hardcoded language from messages.c */
 struct _lang_internal

@@ -565,8 +565,8 @@ o_user_userregister(struct client *client_p, struct lconn *conn_p, const char *p
 
 	if((reg_p = find_user_reg(NULL, parv[0])) != NULL)
 	{
-		service_snd(userserv_p, client_p, conn_p,
-				LNGU(SVC_USER_ALREADYREG, client_p, conn_p), reg_p->name);
+		service_snd(userserv_p, client_p, conn_p, SVC_USER_ALREADYREG, 
+				reg_p->name);
 		return 0;
 	}
 

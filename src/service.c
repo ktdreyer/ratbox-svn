@@ -774,13 +774,13 @@ service_send(struct client *service_p, struct client *client_p,
 
 void
 service_snd(struct client *service_p, struct client *client_p,
-		struct lconn *conn_p, const char *format, ...)
+		struct lconn *conn_p, int msgid, ...)
 {
 	static char buf[BUFSIZE];
 	va_list args;
 
-	va_start(args, format);
-	vsnprintf(buf, sizeof(buf), format, args);
+	va_start(args, msgid);
+	vsnprintf(buf, sizeof(buf), lang_get_notice(msgid, client_p, conn_p), args);
 	va_end(args);
 
 	if(client_p)
@@ -808,14 +808,13 @@ service_error(struct client *service_p, struct client *client_p,
 }
 
 void
-service_err(struct client *service_p, struct client *client_p,
-		const char *format, ...)
+service_err(struct client *service_p, struct client *client_p, int msgid, ...)
 {
 	static char buf[BUFSIZE];
 	va_list args;
 
-	va_start(args, format);
-	vsnprintf(buf, sizeof(buf), format, args);
+	va_start(args, msgid);
+	vsnprintf(buf, sizeof(buf), lang_get_notice(msgid, client_p, NULL), args);
 	va_end(args);
 
 	sendto_server(":%s NOTICE %s :%s",
