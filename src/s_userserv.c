@@ -1148,14 +1148,12 @@ s_user_register(struct client *client_p, struct lconn *conn_p, const char *parv[
 		sendto_server(":%s ENCAP * SU %s %s", 
 				MYUID, UID(client_p), reg_p->name);
 
-		service_error(userserv_p, client_p, "Username %s registered, you are now logged in", parv[0]);
+		service_err(userserv_p, client_p, SVC_USER_NOWREG, parv[0]);
 
 		hook_call(HOOK_USER_LOGIN, client_p, NULL);
 	}
 	else
-		service_error(userserv_p, client_p, 
-				"Username %s registered, your activation token has been emailed",
-				parv[0]);
+		service_err(userserv_p, client_p, SVC_USER_NOWREGEMAILED, parv[0]);
 
 	return 5;
 }
@@ -1177,8 +1175,7 @@ s_user_activate(struct client *client_p, struct lconn *conn_p, const char *parv[
 
 	if((ureg_p->flags & US_FLAGS_NEVERLOGGEDIN) == 0)
 	{
-		service_error(userserv_p, client_p, "Username %s has already been activated",
-				ureg_p->name);
+		service_err(userserv_p, client_p, SVC_USER_ACT_ALREADY, ureg_p->name);
 		return 1;
 	}
 
@@ -1187,16 +1184,16 @@ s_user_activate(struct client *client_p, struct lconn *conn_p, const char *parv[
 
 	if(!data.row_count || EmptyString(data.row[0][0]))
 	{
-		service_error(userserv_p, client_p, "Username %s verification token is malformed",
-				ureg_p->name);
+		service_err(userserv_p, client_p, SVC_USER_TOKENBAD,
+				ureg_p->name, "ACTIVATE");
 		rsdb_exec_fetch_end(&data);
 		return 1;
 	}
 
 	if(strcmp(data.row[0][0], parv[1]))
 	{
-		service_error(userserv_p, client_p, "Username %s activation tokens do not match",
-				ureg_p->name);
+		service_err(userserv_p, client_p, SVC_USER_TOKENMISMATCH,
+				ureg_p->name, "ACTIVATE");
 		rsdb_exec_fetch_end(&data);
 		return 1;
 	}
@@ -1211,8 +1208,7 @@ s_user_activate(struct client *client_p, struct lconn *conn_p, const char *parv[
 	rsdb_exec(NULL, "UPDATE users SET flags='%d' WHERE username='%Q'",
 			ureg_p->flags, ureg_p->name);
 
-	service_error(userserv_p, client_p, "Username %s activated, you may now LOGIN",
-			ureg_p->name);
+	service_err(userserv_p, client_p, SVC_USER_ACT_COMPLETE, ureg_p->name);
 
 	return 1;
 }
@@ -1235,25 +1231,22 @@ s_user_login(struct client *client_p, struct lconn *conn_p, const char *parv[], 
 
 	if(reg_p->flags & US_FLAGS_SUSPENDED)
 	{
-		service_error(userserv_p, client_p,
-			"Login failed, username has been suspended");
+		service_err(userserv_p, client_p, SVC_USER_LOGINSUSPENDED);
 		return 1;
 	}
 
 	if(reg_p->flags & US_FLAGS_NEVERLOGGEDIN)
 	{
-		service_error(userserv_p, client_p,
-			"Login failed, username has not been activated.  Use %s::ACTIVATE first.",
-			userserv_p->name);
+		service_err(userserv_p, client_p, SVC_USER_LOGINUNACTIVATED,
+				userserv_p->name);
 		return 1;
 	}
 
 	if(config_file.umax_logins && 
 	   dlink_list_length(&reg_p->users) >= config_file.umax_logins)
 	{
-		service_error(userserv_p, client_p,
-			"Login failed, username has %d logged in users",
-			config_file.umax_logins);
+		service_err(userserv_p, client_p, SVC_USER_LOGINMAX,
+				config_file.umax_logins);
 		return 1;
 	}
 
@@ -1318,7 +1311,7 @@ s_user_resetpass(struct client *client_p, struct lconn *conn_p, const char *parv
 
 	if(client_p->user->user_reg != NULL)
 	{
-		service_error(userserv_p, client_p, "You cannot request a password reset whilst logged in");
+		service_err(userserv_p, client_p, SVC_USER_RP_LOGGEDIN);
 		return 1;
 	}
 
@@ -1356,9 +1349,8 @@ s_user_resetpass(struct client *client_p, struct lconn *conn_p, const char *parv
 		/* already issued one within the past day.. */
 		if(atoi(data.row[0][0]))
 		{
-			service_error(userserv_p, client_p,
-					"Username %s already has a pending password reset",
-					reg_p->name);
+			service_err(userserv_p, client_p, SVC_USER_REQUESTPENDING,
+					reg_p->name, "RESETPASS");
 			rsdb_exec_fetch_end(&data);
 			return 1;
 		}
@@ -1399,9 +1391,8 @@ s_user_resetpass(struct client *client_p, struct lconn *conn_p, const char *parv
 		}
 		else
 		{
-			service_error(userserv_p, client_p,
-					"Username %s has been sent an email to confirm the password reset",
-					reg_p->name);
+			service_err(userserv_p, client_p, SVC_USER_REQUESTISSUED,
+					reg_p->name, "RESETPASS");
 		}
 
 		
@@ -1451,14 +1442,12 @@ s_user_resetpass(struct client *client_p, struct lconn *conn_p, const char *parv
 			return 1;
 		}
 		else
-			service_error(userserv_p, client_p,
-					"Username %s password reset tokens do not match",
-					reg_p->name);
+			service_err(userserv_p, client_p, SVC_USER_TOKENMISMATCH,
+					reg_p->name, "RESETPASS");
 	}
 	else
-		service_error(userserv_p, client_p,
-				"Username %s does not have a pending password reset",
-				reg_p->name);
+		service_err(userserv_p, client_p, SVC_USER_REQUESTNONE,
+				reg_p->name, "RESETPASS");
 
 	rsdb_exec_fetch_end(&data);
 	return 1;
@@ -1509,9 +1498,8 @@ s_user_resetemail(struct client *client_p, struct lconn *conn_p, const char *par
 		/* already issued one within the past day.. */
 		if(atoi(data.row[0][0]))
 		{
-			service_error(userserv_p, client_p,
-					"Username %s already has a pending e-mail reset",
-					reg_p->name);
+			service_err(userserv_p, client_p, SVC_USER_REQUESTPENDING,
+					reg_p->name, "RESETEMAIL");
 			rsdb_exec_fetch_end(&data);
 			return 1;
 		}
@@ -1549,9 +1537,8 @@ s_user_resetemail(struct client *client_p, struct lconn *conn_p, const char *par
 		}
 		else
 		{
-			service_error(userserv_p, client_p,
-					"Username %s has been sent an email to confirm the e-mail reset",
-					reg_p->name);
+			service_err(userserv_p, client_p, SVC_USER_REQUESTISSUED,
+					reg_p->name, "RESETEMAIL");
 		}
 
 		return 2;
@@ -1604,9 +1591,8 @@ s_user_resetemail(struct client *client_p, struct lconn *conn_p, const char *par
 					return 2;
 				}
 
-				service_error(userserv_p, client_p,
-						"Username %s has been sent an email to confirm the e-mail reset",
-						reg_p->name);
+				service_err(userserv_p, client_p, SVC_USER_REQUESTISSUED,
+						reg_p->name, "RESETEMAIL");
 
 				rsdb_exec(NULL, "DELETE FROM users_resetemail WHERE username='%Q'",
 						reg_p->name);
@@ -1619,18 +1605,16 @@ s_user_resetemail(struct client *client_p, struct lconn *conn_p, const char *par
 			}
 			else
 			{
-				service_error(userserv_p, client_p,
-						"Username %s email reset tokens do not match",
-						reg_p->name);
+				service_err(userserv_p, client_p, SVC_USER_TOKENMISMATCH,
+						reg_p->name, "RESETEMAIL");
 				zlog(userserv_p, 3, 0, 0, client_p, NULL,
 						"RESETEMAIL %s (confirm failed)", reg_p->name);
 			}
 		}
 		else
 		{
-			service_error(userserv_p, client_p,
-					"Username %s does not have a pending email CONFIRM",
-					reg_p->name);
+			service_err(userserv_p, client_p, SVC_USER_REQUESTNONE,
+					reg_p->name, "RESETEMAIL::CONFIRM");
 		}
 
 		rsdb_exec_fetch_end(&data);
@@ -1670,31 +1654,28 @@ s_user_resetemail(struct client *client_p, struct lconn *conn_p, const char *par
 				zlog(userserv_p, 3, 0, 0, client_p, NULL,
 						"RESETEMAIL %s (auth)", reg_p->name);
 
-				service_error(userserv_p, client_p,
-						"Username %s email reset", reg_p->name);
+				service_err(userserv_p, client_p, SVC_USER_CHANGEDEMAIL, reg_p->name);
 
 				return 1;
 			}
 			else
 			{
-				service_error(userserv_p, client_p,
-						"Username %s email reset tokens do not match",
-						reg_p->name);
+				service_err(userserv_p, client_p, SVC_USER_TOKENMISMATCH,
+						reg_p->name, "RESETEMAIL");
 			}
 		}
 		else
 		{
-			service_error(userserv_p, client_p,
-					"Username %s does not have a pending email AUTH",
-					reg_p->name);
+			service_err(userserv_p, client_p, SVC_USER_REQUESTNONE,
+					reg_p->name, "RESETEMAIL::AUTH");
 		}
 
 		rsdb_exec_fetch_end(&data);
 		return 2;
 	}
 
-	service_error(userserv_p, client_p, "%s::RESETEMAIL option invalid",
-			userserv_p->name);
+	service_err(userserv_p, client_p, SVC_OPTIONINVALID,
+			userserv_p->name, "::RESETEMAIL");
 	return 1;
 }
 
@@ -1749,8 +1730,8 @@ s_user_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 		rsdb_exec(NULL, "UPDATE users SET password='%Q' "
 				"WHERE username='%Q'", password, ureg_p->name);
 
-		service_error(userserv_p, client_p,
-				"Username %s PASSWORD set", ureg_p->name);
+		service_err(userserv_p, client_p, SVC_USER_CHANGEDPASSWORD,
+				ureg_p->name);
 		return 1;
 	}
 	else if(!strcasecmp(parv[0], "EMAIL"))
@@ -1789,9 +1770,8 @@ s_user_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 		rsdb_exec(NULL, "UPDATE users SET email='%Q' "
 				"WHERE username='%Q'", arg, ureg_p->name);
 
-		service_error(userserv_p, client_p,
-				"Username %s EMAIL set %s",
-				ureg_p->name, arg);
+		service_err(userserv_p, client_p, SVC_USER_CHANGEDEMAIL,
+				ureg_p->name);
 		return 1;
 	}
 	else if(!strcasecmp(parv[0], "PRIVATE"))
@@ -1858,7 +1838,8 @@ s_user_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 		return 1;
 	}
 
-	service_error(userserv_p, client_p, "Set option invalid");
+	service_err(userserv_p, client_p, SVC_OPTIONINVALID,
+			userserv_p->name, "::SET");
 	return 1;
 }
 
