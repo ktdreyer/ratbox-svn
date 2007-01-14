@@ -73,7 +73,8 @@ extern void PRINTFLIKE(3, 4) service_error(struct client *service_p,
 
 void PRINTFLIKE(4, 5) service_send(struct client *, struct client *,
                 struct lconn *, const char *, ...);
-			
+void PRINTFLIKE(4, 5) service_snd(struct client *, struct client *,
+                struct lconn *, const char *, ...);
 
 extern void service_stats(struct client *service_p, struct lconn *);
 

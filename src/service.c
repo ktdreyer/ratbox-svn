@@ -773,6 +773,25 @@ service_send(struct client *service_p, struct client *client_p,
 }
 
 void
+service_snd(struct client *service_p, struct client *client_p,
+		struct lconn *conn_p, const char *format, ...)
+{
+	static char buf[BUFSIZE];
+	va_list args;
+
+	va_start(args, format);
+	vsnprintf(buf, sizeof(buf), format, args);
+	va_end(args);
+
+	if(client_p)
+		sendto_server(":%s NOTICE %s :%s",
+				ServiceMsgSelf(service_p) ? SVC_UID(service_p) : MYUID, 
+				UID(client_p), buf);
+	else
+		sendto_one(conn_p, "%s", buf);
+}
+
+void
 service_error(struct client *service_p, struct client *client_p,
 		const char *format, ...)
 {

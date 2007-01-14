@@ -46,6 +46,7 @@ BSRCS = 		\
 	langs.c		\
 	log.c		\
 	match.c		\
+	messages.c	\
 	modebuild.c	\
         newconf.c       \
 	rserv.c		\

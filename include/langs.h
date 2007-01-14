@@ -4,7 +4,7 @@
 struct lconn;
 struct client;
 
-/* DO NOT CHANGE THIS.
+/* DO NOT CHANGE LANG_DEFAULT.
  *
  * This macro is only used to define a "fallback" language that is
  * guaranteed to be complete.  It will only be used when a translated
@@ -24,7 +24,38 @@ enum langs_enum
 
 extern const char *langs_available[];
 
+void init_langs(void);
+
 struct cachefile *lang_get_cachefile(struct cachefile **, struct client *);
 struct cachefile *lang_get_cachefile_u(struct cachefile **, struct lconn *);
+
+/* when changing this, you MUST reflect the change in svc_notice_string in
+ * langs.c
+ */
+enum svc_notice_enum
+{
+	/* userserv */
+	SVC_USER_ALREADYREG,
+
+	/* this must be last */
+	SVC_LAST
+} svc_notice_id;
+
+/* contains the string version of the enum above */
+extern const char *svc_notice_string[];
+
+extern const char **svc_notice;
+
+const char *lang_get_notice(enum svc_notice_enum msgid, struct client *, struct lconn *);
+#define LNG lang_get_notice
+
+/* used to create the 'default' hardcoded language from messages.c */
+struct _lang_internal
+{
+	enum svc_notice_enum id;
+	const char *msg;
+};
+
+extern struct _lang_internal lang_internal[];
 
 #endif
