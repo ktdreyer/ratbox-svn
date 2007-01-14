@@ -1,3 +1,20 @@
+leeh        2007/01/14 16:49:23 UTC	(20070114_1-23465)
+  Log:
+  - add in the backend sending methods for dealing with translations for
+    server notices
+  
+
+  Modified:
+	rserv/trunk/include/langs.h (File Modified) 
+	rserv/trunk/include/service.h (File Modified) 
+	rserv/trunk/src/Makefile.in (File Modified) 
+	rserv/trunk/src/langs.c (File Modified) 
+	rserv/trunk/src/messages.c (File Added) 
+	rserv/trunk/src/rserv.c (File Modified) 
+	rserv/trunk/src/s_userserv.c (File Modified) 
+	rserv/trunk/src/service.c (File Modified) 
+
+
 leeh        2007/01/14 16:06:04 UTC	(20070114_0-23463)
   Log:
   - newconf.c needs langs.h
