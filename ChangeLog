@@ -1,3 +1,15 @@
+leeh        2007/01/14 21:47:57 UTC	(20070114_7-23481)
+  Log:
+  - more userserv notices over to the new framework
+  
+
+  Modified:
+	rserv/trunk/include/langs.h (File Modified) 
+	rserv/trunk/src/langs.c (File Modified) 
+	rserv/trunk/src/messages.c (File Modified) 
+	rserv/trunk/src/s_userserv.c (File Modified) 
+
+
 leeh        2007/01/14 18:35:54 UTC	(20070114_6-23479)
   Log:
   - move various more userserv notices over to the new framework
