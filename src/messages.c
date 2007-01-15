@@ -4,13 +4,20 @@ struct _lang_internal lang_internal[] =
 {
 	/* general service */
 	{ SVC_SUCCESSFUL,		"%s%s successful"					},
+	{ SVC_ISSUED,			"%s%s issued"						},
 	{ SVC_NEEDMOREPARAMS,		"Insufficient parameters to %s%s"			},
 	{ SVC_ISDISABLED,		"%s%s is disabled"					},
 	{ SVC_ISDISABLEDEMAIL,		"%s%s is disabled as it cannot send emails"		},
+	{ SVC_NOACCESS,			"No access to %s%s"					},
 	{ SVC_OPTIONINVALID,		"%s%s option invalid"					},
 	{ SVC_RATELIMITED,		"%s%s rate-limited, try again shortly"			},
 	{ SVC_RATELIMITEDHOST,		"%s%s rate-limited for your host, try again shortly"	},
-	
+
+	/* general irc related */
+	{ SVC_IRC_NOSUCHCHANNEL,	"Channel %s does not exist"				},
+	{ SVC_IRC_CHANNELINVALID,	"Invalid channel %s"					},
+	{ SVC_IRC_CHANNELNOUSERS,	"Channel %s has no users"				},
+
 	/* email */
 	{ SVC_EMAIL_INVALID,		"Email %s invalid"					},
 	{ SVC_EMAIL_INVALIDIGNORED,	"Email %s invalid, ignoring"				},
@@ -69,6 +76,11 @@ struct _lang_internal lang_internal[] =
 	{ SVC_USER_INFO_NICKNAMES,	"[%s] Registered nicknames: %s"				},
 	{ SVC_USER_INFO_EMAIL,		"[%s] Email: %s"					},
 	{ SVC_USER_INFO_CURRENTLOGON,	"[%s] Currently logged on via:"				},
+
+	/* operserv */
+	{ SVC_OPER_CONNECTIONSSTART,	"Current connections (%s)"				},
+	{ SVC_OPER_CONNECTIONSEND,	"End of connections"					},
+	{ SVC_OPER_SERVERNAMEMISMATCH,	"Servernames do not match"				},
 
 	/* this must be last */
 	{ SVC_LAST,		"\0"	},

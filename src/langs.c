@@ -21,12 +21,19 @@ const char *svc_notice_string[] =
 {
 	/* general service */
 	"SVC_SUCCESSFUL",
+	"SVC_ISSUED",
 	"SVC_NEEDMOREPARAMS",
 	"SVC_ISDISABLED",
 	"SVC_ISDISABLEDEMAIL",
+	"SVC_NOACCESS",
 	"SVC_OPTIONINVALID",
 	"SVC_RATELIMITED",
 	"SVC_RATELIMITEDHOST",
+
+	/* general irc related */
+	"SVC_IRC_NOSUCHCHANNEL",
+	"SVC_IRC_CHANNELINVALID",
+	"SVC_IRC_CHANNELNOUSERS",
 
 	/* email */
 	"SVC_EMAIL_INVALID",
@@ -82,6 +89,11 @@ const char *svc_notice_string[] =
 	"SVC_USER_INFO_NICKNAMES",
 	"SVC_USER_INFO_EMAIL",
 	"SVC_USER_INFO_CURRENTLOGON",
+
+	/* operserv */
+	"SVC_OPER_CONNECTIONSSTART",
+	"SVC_OPER_CONNECTIONSEND",
+	"SVC_OPER_SERVERNAMEMISMATCH",
 
 	/* must be last */
 	"\0"

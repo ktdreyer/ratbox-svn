@@ -221,13 +221,13 @@ o_oper_takeover(struct client *client_p, struct lconn *conn_p, const char *parv[
 
 	if((chptr = find_channel(parv[0])) == NULL)
 	{
-		service_send(operserv_p, client_p, conn_p,
-				"Channel %s does not exist", parv[0]);
+		service_snd(operserv_p, client_p, conn_p, SVC_IRC_NOSUCHCHANNEL, parv[0]);
 		return 0;
 	}
 
 	if(chptr->tsinfo < 2)
 	{
+		/* isnt really worth translating */
 		service_send(operserv_p, client_p, conn_p,
 				"Channel %s TS too low for takeover", parv[0]);
 		return 0;
@@ -237,8 +237,7 @@ o_oper_takeover(struct client *client_p, struct lconn *conn_p, const char *parv[
 	{
 		/* Taking over a channel without users would lead to segfaults
 		 * and is pointless anyway -- jilles */
-		service_send(operserv_p, client_p, conn_p,
-				"Channel %s has no users", parv[0]);
+		service_snd(operserv_p, client_p, conn_p, SVC_IRC_CHANNELNOUSERS, parv[0]);
 		return 0;
 	}
 
@@ -266,8 +265,8 @@ o_oper_takeover(struct client *client_p, struct lconn *conn_p, const char *parv[
 	zlog(operserv_p, 1, WATCH_OPERSERV, 1, client_p, conn_p,
 		"TAKEOVER %s", parv[0]);
 
-	service_send(operserv_p, client_p, conn_p,
-			"Channel %s has been taken over", chptr->name);
+	service_snd(operserv_p, client_p, conn_p, SVC_SUCCESSFUL,
+			operserv_p->name, "::TAKEOVER");
 	return 0;
 }
 
@@ -279,8 +278,7 @@ o_oper_osjoin(struct client *client_p, struct lconn *conn_p, const char *parv[],
 
 	if(!valid_chname(parv[0]))
 	{
-		service_send(operserv_p, client_p, conn_p,
-				"Invalid channel %s", parv[0]);
+		service_snd(operserv_p, client_p, conn_p, SVC_IRC_CHANNELINVALID, parv[0]);
 		return 0;
 	}
 
@@ -302,8 +300,8 @@ o_oper_osjoin(struct client *client_p, struct lconn *conn_p, const char *parv[],
 
 	join_service(operserv_p, parv[0], tsinfo, NULL, 0);
 
-	service_send(operserv_p, client_p, conn_p,
-			"%s joined to %s", operserv_p->name, parv[0]);
+	service_snd(operserv_p, client_p, conn_p, SVC_SUCCESSFUL,
+			operserv_p->name, "::OSJOIN");
 	return 0;
 }
 
@@ -316,7 +314,8 @@ o_oper_ospart(struct client *client_p, struct lconn *conn_p, const char *parv[],
 
 	if(client_p && !client_p->user->oper)
 	{
-		service_error(operserv_p, client_p, "No access to OPERSERV::OSPART");
+		service_err(operserv_p, client_p, SVC_NOACCESS,
+				operserv_p->name, "::OSPART");
 		return 1;
 	}
 
@@ -374,9 +373,8 @@ o_oper_ospart(struct client *client_p, struct lconn *conn_p, const char *parv[],
 	if(osjoin)
 		rsdb_exec(NULL, "DELETE FROM operserv WHERE chname=LOWER('%Q')", parv[0]);
 
-	service_send(operserv_p, client_p, conn_p,
-			"%s removed from %s",
-			operserv_p->name, parv[0]);
+	service_snd(operserv_p, client_p, conn_p, SVC_SUCCESSFUL,
+			operserv_p->name, "::OSPART");
 
 	return 0;
 }
@@ -397,7 +395,8 @@ o_oper_omode(struct client *client_p, struct lconn *conn_p, const char *parv[], 
 	zlog(operserv_p, 1, WATCH_OPERSERV, 1, client_p, conn_p,
 		"OMODE %s %s", chptr->name, rebuild_params(parv, parc, 1));
 
-	service_send(operserv_p, client_p, conn_p, "OMODE issued");
+	service_snd(operserv_p, client_p, conn_p, SVC_ISSUED,
+			operserv_p->name, "::OMODE");
 	return 0;
 }
 
@@ -408,7 +407,8 @@ o_oper_dbsync(struct client *client_p, struct lconn *conn_p, const char *parv[],
 
 	zlog(operserv_p, 2, WATCH_OPERSERV, 1, client_p, conn_p, "DBSYNC");
 
-	service_send(operserv_p, client_p, conn_p, "Databases have been synced");
+	service_snd(operserv_p, client_p, conn_p, SVC_SUCCESSFUL,
+			operserv_p->name, "::DBSYNC");
 	return 0;
 }
 
@@ -443,8 +443,8 @@ o_oper_die(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 
 	if(client_p && !config_file.os_allow_die)
 	{
-		service_send(operserv_p, client_p, conn_p,
-				"%s::DIE is disabled", operserv_p->name);
+		service_snd(operserv_p, client_p, conn_p, SVC_ISDISABLED,
+				operserv_p->name, "::DIE");
 		return 0;
 	}
 
@@ -470,20 +470,14 @@ o_oper_listopers(struct client *client_p, struct lconn *conn_p, const char *parv
 		if(ServiceStealth(operserv_p))
 			return 1;
 
-		service_send(operserv_p, client_p, conn_p,
-				"No access to %s::LISTOPERS", operserv_p->name);
+		service_snd(operserv_p, client_p, conn_p, SVC_NOACCESS,
+				operserv_p->name, "::LISTOPERS");
 		return 1;
-	}
-
-	if(!dlink_list_length(&connection_list) && !dlink_list_length(&oper_list))
-	{
-		service_send(operserv_p, client_p, conn_p, "No connections");
-		return 0;
 	}
 
 	if(dlink_list_length(&connection_list))
 	{
-		service_send(operserv_p, client_p, conn_p, "DCC Connections:");
+		service_snd(operserv_p, client_p, conn_p, SVC_OPER_CONNECTIONSSTART, "DCC");
 
 		DLINK_FOREACH(ptr, connection_list.head)
 		{
@@ -497,7 +491,7 @@ o_oper_listopers(struct client *client_p, struct lconn *conn_p, const char *parv
 
 	if(dlink_list_length(&oper_list))
 	{
-		service_send(operserv_p, client_p, conn_p, "IRC Connections:");
+		service_snd(operserv_p, client_p, conn_p, SVC_OPER_CONNECTIONSSTART, "IRC");
 
 		DLINK_FOREACH(ptr, oper_list.head)
 		{
@@ -510,7 +504,7 @@ o_oper_listopers(struct client *client_p, struct lconn *conn_p, const char *parv
 		}
 	}
 
-	service_send(operserv_p, client_p, conn_p, "End of connections");
+	service_snd(operserv_p, client_p, conn_p, SVC_OPER_CONNECTIONSEND);
 
 	zlog(operserv_p, 2, WATCH_OPERSERV, 1, client_p, conn_p, "LISTOPERS");
 
