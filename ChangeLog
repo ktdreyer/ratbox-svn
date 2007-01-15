@@ -1,3 +1,15 @@
+leeh        2007/01/15 19:22:46 UTC	(20070115_1-23489)
+  Log:
+  - move most of operserv over to the new framework
+  
+
+  Modified:
+	rserv/trunk/include/langs.h (File Modified) 
+	rserv/trunk/src/langs.c (File Modified) 
+	rserv/trunk/src/messages.c (File Modified) 
+	rserv/trunk/src/s_operserv.c (File Modified) 
+
+
 leeh        2007/01/15 18:59:43 UTC	(20070115_0-23487)
   Log:
   - finish off moving s_userserv.c over to the new framework, except a little
