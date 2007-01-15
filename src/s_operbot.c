@@ -35,6 +35,7 @@
 #ifdef ENABLE_OPERBOT
 #include "rsdb.h"
 #include "rserv.h"
+#include "langs.h"
 #include "io.h"
 #include "service.h"
 #include "client.h"
@@ -126,8 +127,7 @@ o_operbot_objoin(struct client *client_p, struct lconn *conn_p, const char *parv
 
 	if(!valid_chname(parv[0]))
 	{
-		service_send(operbot_p, client_p, conn_p,
-				"Invalid channel %s", parv[0]);
+		service_snd(operbot_p, client_p, conn_p, SVC_IRC_CHANNELINVALID, parv[0]);
 		return 0;
 	}
 
@@ -149,8 +149,8 @@ o_operbot_objoin(struct client *client_p, struct lconn *conn_p, const char *parv
 
 	join_service(operbot_p, parv[0], tsinfo, NULL, 0);
 
-	service_send(operbot_p, client_p, conn_p,
-			"%s joined to %s", operbot_p->name, parv[0]);
+	service_snd(operbot_p, client_p, conn_p, SVC_SUCCESSFUL,
+			operbot_p->name, "::OBJOIN");
 	return 0;
 }
 
@@ -164,8 +164,8 @@ o_operbot_obpart(struct client *client_p, struct lconn *conn_p, const char *parv
 
 		rsdb_exec(NULL, "DELETE FROM operbot WHERE chname = LOWER('%Q')",
 				parv[0]);
-		service_send(operbot_p, client_p, conn_p,
-				"%s removed from %s", operbot_p->name, parv[0]);
+		service_snd(operbot_p, client_p, conn_p, SVC_SUCCESSFUL,
+				operbot_p->name, "::OBPART");
 	}
 	else
 		service_send(operbot_p, client_p, conn_p,
@@ -181,13 +181,13 @@ s_operbot_invite(struct client *client_p, struct lconn *conn_p, const char *parv
 
 	if((chptr = find_channel(parv[0])) == NULL)
 	{
-		service_error(operbot_p, client_p, "Invalid channel");
+		service_err(operbot_p, client_p, SVC_IRC_CHANNELINVALID, parv[0]);
 		return 1;
 	}
 
 	if(dlink_find(chptr, &operbot_p->service->channels) == NULL)
 	{
-		service_error(operbot_p, client_p, "Invalid channel");
+		service_err(operbot_p, client_p, SVC_IRC_CHANNELINVALID, parv[0]);
 		return 1;
 	}
 
@@ -230,13 +230,13 @@ s_operbot_op(struct client *client_p, struct lconn *conn_p, const char *parv[], 
 
 	if((chptr = find_channel(parv[0])) == NULL)
 	{
-		service_error(operbot_p, client_p, "Invalid channel");
+		service_err(operbot_p, client_p, SVC_IRC_CHANNELINVALID, parv[0]);
 		return 1;
 	}
 
 	if(dlink_find(chptr, &operbot_p->service->channels) == NULL)
 	{
-		service_error(operbot_p, client_p, "Invalid channel");
+		service_err(operbot_p, client_p, SVC_IRC_CHANNELINVALID, parv[0]);
 		return 1;
 	}
 

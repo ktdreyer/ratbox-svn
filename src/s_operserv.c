@@ -35,6 +35,7 @@
 #ifdef ENABLE_OPERSERV
 #include "rsdb.h"
 #include "rserv.h"
+#include "langs.h"
 #include "io.h"
 #include "client.h"
 #include "service.h"
