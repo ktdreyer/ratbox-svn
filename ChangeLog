@@ -1,3 +1,14 @@
+leeh        2007/01/15 19:26:28 UTC	(20070115_3-23493)
+  Log:
+  - move most of operbot over to the new framework
+  - operserv needs langs.h
+  
+
+  Modified:
+	rserv/trunk/src/s_operbot.c (File Modified) 
+	rserv/trunk/src/s_operserv.c (File Modified) 
+
+
 leeh        2007/01/15 19:23:35 UTC	(20070115_2-23491)
   Log:
   - whoops, missed a save there
