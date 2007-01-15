@@ -596,7 +596,7 @@ o_user_userregister(struct client *client_p, struct lconn *conn_p, const char *p
 		if(valid_email(parv[2]))
 			reg_p->email = my_strdup(parv[2]);
 		else
-			service_send(userserv_p, client_p, conn_p, "Email %s invalid, ignoring", parv[2]);
+			service_snd(userserv_p, client_p, conn_p, SVC_EMAIL_INVALIDIGNORED, parv[2]);
 	}
 
 	reg_p->reg_time = reg_p->last_time = CURRENT_TIME;
@@ -609,8 +609,7 @@ o_user_userregister(struct client *client_p, struct lconn *conn_p, const char *p
 			EmptyString(reg_p->email) ? "" : reg_p->email, 
 			reg_p->reg_time, reg_p->last_time, reg_p->flags);
 
-	service_send(userserv_p, client_p, conn_p,
-			"Username %s registered", parv[0]);
+	service_snd(userserv_p, client_p, conn_p, SVC_USER_NOWREG, parv[0]);
 	return 0;
 }
 
@@ -630,10 +629,9 @@ o_user_userdrop(struct client *client_p, struct lconn *conn_p, const char *parv[
 
 	logout_user_reg(ureg_p);
 
-	service_send(userserv_p, client_p, conn_p,
-			"Username %s registration dropped", ureg_p->name);
-
+	service_snd(userserv_p, client_p, conn_p, SVC_USER_REGDROPPED, ureg_p->name);
 	free_user_reg(ureg_p);
+
 	return 0;
 }
 
@@ -651,8 +649,8 @@ o_user_usersuspend(struct client *client_p, struct lconn *conn_p, const char *pa
 
 	if(reg_p->flags & US_FLAGS_SUSPENDED)
 	{
-		service_send(userserv_p, client_p, conn_p,
-				"Username %s is already suspended", reg_p->name);
+		service_snd(userserv_p, client_p, conn_p, SVC_USER_QUERYOPTIONALREADY,
+				reg_p->name, "SUSPEND", "ON");
 		return 0;
 	}
 
@@ -673,8 +671,8 @@ o_user_usersuspend(struct client *client_p, struct lconn *conn_p, const char *pa
 			reg_p->flags, reg_p->suspender, reg_p->suspend_reason,
 			reg_p->last_time, reg_p->name);
 
-	service_send(userserv_p, client_p, conn_p,
-			"Username %s suspended", reg_p->name);
+	service_snd(userserv_p, client_p, conn_p, SVC_USER_CHANGEDOPTION,
+			reg_p->name, "SUSPEND", "ON");
 	return 0;
 }
 
@@ -691,8 +689,8 @@ o_user_userunsuspend(struct client *client_p, struct lconn *conn_p, const char *
 
 	if((reg_p->flags & US_FLAGS_SUSPENDED) == 0)
 	{
-		service_send(userserv_p, client_p, conn_p,
-				"Username %s is not suspended", reg_p->name);
+		service_snd(userserv_p, client_p, conn_p, SVC_USER_QUERYOPTIONALREADY,
+				reg_p->name, "SUSPEND", "OFF");
 		return 0;
 	}
 
@@ -709,8 +707,8 @@ o_user_userunsuspend(struct client *client_p, struct lconn *conn_p, const char *
 	rsdb_exec(NULL, "UPDATE users SET flags='%d',suspender=NULL,suspend_reason=NULL,last_time='%lu' WHERE username='%Q'",
 			reg_p->flags, reg_p->last_time, reg_p->name);
 
-	service_send(userserv_p, client_p, conn_p,
-			"Username %s unsuspended", reg_p->name);
+	service_snd(userserv_p, client_p, conn_p, SVC_USER_CHANGEDOPTION,
+			reg_p->name, "SUSPEND", "OFF");
 	return 0;
 }
 
@@ -754,10 +752,8 @@ o_user_userlist(struct client *client_p, struct lconn *conn_p, const char *parv[
 			limit = atoi(parv[para]);
 	}
 
-	service_send(userserv_p, client_p, conn_p,
-			"Username list matching %s, limit %u%s",
-			mask, limit,
-			suspended ? ", suspended" : "");
+	service_snd(userserv_p, client_p, conn_p, SVC_USER_UL_START,
+			mask, limit, suspended ? ", suspended" : "");
 
 	HASH_WALK(i, MAX_NAME_HASH, ptr, user_reg_table)
 	{
@@ -833,9 +829,10 @@ o_user_userlist(struct client *client_p, struct lconn *conn_p, const char *parv[
 	if(!longlist)
 		service_send(userserv_p, client_p, conn_p, "  %s", buf);
 
-	service_send(userserv_p, client_p, conn_p,
-			"End of username list%s",
-			(limit == 1) ? ", limit reached" : "");
+	if(limit == 1)
+		service_snd(userserv_p, client_p, conn_p, SVC_USER_UL_ENDLIMIT);
+	else
+		service_snd(userserv_p, client_p, conn_p, SVC_USER_UL_END);
 
 	zlog(userserv_p, 1, WATCH_USADMIN, 1, client_p, conn_p,
 		"USERLIST %s", mask);
@@ -851,9 +848,7 @@ o_user_userinfo(struct client *client_p, struct lconn *conn_p, const char *parv[
 	if((ureg_p = find_user_reg_nick(NULL, parv[0])) == NULL)
 	{
 		if(parv[0][0] == '=')
-			service_send(userserv_p, client_p, conn_p,
-					"Nickname %s is not logged in",
-					parv[0]);
+			service_snd(userserv_p, client_p, conn_p, SVC_USER_NICKNOTLOGGEDIN, parv[0]);
 		else
 			service_snd(userserv_p, client_p, conn_p, SVC_USER_NOTREG, parv[0]);
 
@@ -863,14 +858,12 @@ o_user_userinfo(struct client *client_p, struct lconn *conn_p, const char *parv[
 	zlog(userserv_p, 1, WATCH_USADMIN, 1, client_p, conn_p,
 		"USERINFO %s", ureg_p->name);
 
-	service_send(userserv_p, client_p, conn_p,
-			"[%s] Username registered for %s",
+	service_snd(userserv_p, client_p, conn_p, SVC_USER_INFO_REGDURATION,
 			ureg_p->name,
 			get_duration((time_t) (CURRENT_TIME - ureg_p->reg_time)));
 
 	if(ureg_p->flags & US_FLAGS_SUSPENDED)
-		service_send(userserv_p, client_p, conn_p,
-				"[%s] Suspended by %s: %s",
+		service_snd(userserv_p, client_p, conn_p, SVC_USER_INFO_SUSPENDED,
 				ureg_p->name, ureg_p->suspender,
 				ureg_p->suspend_reason ? ureg_p->suspend_reason : "");
 
@@ -1147,7 +1140,7 @@ s_user_register(struct client *client_p, struct lconn *conn_p, const char *parv[
 		sendto_server(":%s ENCAP * SU %s %s", 
 				MYUID, UID(client_p), reg_p->name);
 
-		service_err(userserv_p, client_p, SVC_USER_NOWREG, parv[0]);
+		service_err(userserv_p, client_p, SVC_USER_NOWREGLOGGEDIN, parv[0]);
 
 		hook_call(HOOK_USER_LOGIN, client_p, NULL);
 	}
@@ -1857,8 +1850,8 @@ dump_user_info(struct client *client_p, struct lconn *conn_p, struct user_reg *u
 		/* "Access to: " + " 200, " */
 		if((buflen + strlen(mreg_p->channel_reg->name) + 17) >= (BUFSIZE - 3))
 		{
-			service_send(userserv_p, client_p, conn_p,
-					"[%s] Access to: %s", ureg_p->name, buf);
+			service_snd(userserv_p, client_p, conn_p, SVC_USER_INFO_ACCESSTO,
+					ureg_p->name, buf);
 			p = buf;
 			buflen = 0;
 		}
@@ -1873,8 +1866,8 @@ dump_user_info(struct client *client_p, struct lconn *conn_p, struct user_reg *u
 
 	/* could have access to no channels.. */
 	if(buflen)
-		service_send(userserv_p, client_p, conn_p,
-				"[%s] Access to: %s", ureg_p->name, buf);
+		service_snd(userserv_p, client_p, conn_p, SVC_USER_INFO_ACCESSTO,
+				ureg_p->name, buf);
 
 #ifdef ENABLE_NICKSERV
 	p = buf;
@@ -1887,8 +1880,7 @@ dump_user_info(struct client *client_p, struct lconn *conn_p, struct user_reg *u
 		/* "Registered nicknames: " + " " */
 		if((buflen + strlen(nreg_p->name) + 25) >= (BUFSIZE - 3))
 		{
-			service_send(userserv_p, client_p, conn_p,
-					"[%s] Registered nicknames: %s",
+			service_snd(userserv_p, client_p, conn_p, SVC_USER_INFO_NICKNAMES,
 					ureg_p->name, buf);
 			p = buf;
 			buflen = 0;
@@ -1900,20 +1892,18 @@ dump_user_info(struct client *client_p, struct lconn *conn_p, struct user_reg *u
 	}
 
 	if(buflen)
-		service_send(userserv_p, client_p, conn_p,
-				"[%s] Registered nicknames: %s",
+		service_snd(userserv_p, client_p, conn_p, SVC_USER_INFO_NICKNAMES,
 				ureg_p->name, buf);
 #endif
 
 	if(!EmptyString(ureg_p->email))
-		service_send(userserv_p, client_p, conn_p,
-				"[%s] Email: %s", 
+		service_snd(userserv_p, client_p, conn_p, SVC_USER_INFO_EMAIL,
 				ureg_p->name, ureg_p->email);
 
 	if(dlink_list_length(&ureg_p->users))
 	{
-		service_send(userserv_p, client_p, conn_p,
-				"[%s] Currently logged on via:", ureg_p->name);
+		service_snd(userserv_p, client_p, conn_p, SVC_USER_INFO_CURRENTLOGON,
+				ureg_p->name);
 
 		DLINK_FOREACH(ptr, ureg_p->users.head)
 		{
@@ -1933,15 +1923,13 @@ s_user_info(struct client *client_p, struct lconn *conn_p, const char *parv[], i
 	if((ureg_p = find_user_reg_nick(client_p, parv[0])) == NULL)
 		return 1;
 
-	service_error(userserv_p, client_p, 
-			"[%s] Username registered for %s",
+	service_err(userserv_p, client_p, SVC_USER_INFO_REGDURATION,
 			ureg_p->name,
 			get_duration((time_t) (CURRENT_TIME - ureg_p->reg_time)));
 
 	if(ureg_p->flags & US_FLAGS_SUSPENDED)
 	{
-		service_error(userserv_p, client_p,
-				"[%s] Suspended by services admin", ureg_p->name);
+		service_err(userserv_p, client_p, SVC_USER_INFO_SUSPENDEDADMIN, ureg_p->name);
 	}
 	else if(ureg_p == client_p->user->user_reg)
 	{

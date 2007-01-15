@@ -13,6 +13,7 @@ struct _lang_internal lang_internal[] =
 	
 	/* email */
 	{ SVC_EMAIL_INVALID,		"Email %s invalid"					},
+	{ SVC_EMAIL_INVALIDIGNORED,	"Email %s invalid, ignoring"				},
 	{ SVC_EMAIL_BANNEDDOMAIN,	"Email provider banned"					},
 	{ SVC_EMAIL_TEMPUNAVAILABLE,	"Temporarily unable to send email, please try later"	},
 	{ SVC_EMAIL_SENDFAILED,		"Unable to complete %s%s due to problems sending email"	},
@@ -22,8 +23,10 @@ struct _lang_internal lang_internal[] =
 	{ SVC_USER_REGISTERDISABLED,	"%s%s is disabled, see %s"				},
 	{ SVC_USER_ALREADYREG,		"Username %s is already registered"			},
 	{ SVC_USER_NOTREG,		"Username %s is not registered"				},
-	{ SVC_USER_NOWREG,		"Username %s registered, you are now logged in"		},
+	{ SVC_USER_NOWREG,		"Username %s registered"				},
+	{ SVC_USER_NOWREGLOGGEDIN,	"Username %s registered, you are now logged in"		},
 	{ SVC_USER_NOWREGEMAILED,	"Username %s registered, your activation token has been emailed"		},
+	{ SVC_USER_REGDROPPED,		"Username %s registration dropped"			},
 	{ SVC_USER_INVALIDUSERNAME,	"Username %s invalid"					},
 	{ SVC_USER_INVALIDPASSWORD,	"Invalid password"					},
 	{ SVC_USER_INVALIDLANGUAGE,	"Invalid language %s"					},
@@ -38,6 +41,7 @@ struct _lang_internal lang_internal[] =
 	{ SVC_USER_CHANGEDEMAIL,	"Username %s email changed"				},
 	{ SVC_USER_CHANGEDOPTION,	"Username %s %s set to %s"				},
 	{ SVC_USER_QUERYOPTION,		"Username %s %s is set to %s"				},
+	{ SVC_USER_QUERYOPTIONALREADY,	"Username %s %s is already set to %s",			},
 	{ SVC_USER_REQUESTISSUED,	"Username %s has been sent an email to confirm the %s request"			},
 	{ SVC_USER_REQUESTPENDING,	"Username %s already has a pending %s request"		},
 	{ SVC_USER_REQUESTNONE,		"Username %s does not have a pending %s request"	},
@@ -51,6 +55,20 @@ struct _lang_internal lang_internal[] =
 
 	/* userserv::resetpass */
 	{ SVC_USER_RP_LOGGEDIN,		"You cannot request a password reset whilst logged in"	},
+
+	/* userserv::userlist */
+	{ SVC_USER_UL_START,		"Username list matching %s, limit %u%s"			},
+	{ SVC_USER_UL_END,		"End of username list"					},
+	{ SVC_USER_UL_ENDLIMIT,		"End of username list, limit reached"			},
+
+	/* userserv::info */
+	{ SVC_USER_INFO_REGDURATION,	"[%s] Username registered for %s"			},
+	{ SVC_USER_INFO_SUSPENDED,	"[%s] Suspended by %s: %s"				},
+	{ SVC_USER_INFO_SUSPENDEDADMIN,	"[%s] Suspended by services admin"			},
+	{ SVC_USER_INFO_ACCESSTO,	"[%s] Access to: %s"					},
+	{ SVC_USER_INFO_NICKNAMES,	"[%s] Registered nicknames: %s"				},
+	{ SVC_USER_INFO_EMAIL,		"[%s] Email: %s"					},
+	{ SVC_USER_INFO_CURRENTLOGON,	"[%s] Currently logged on via:"				},
 
 	/* this must be last */
 	{ SVC_LAST,		"\0"	},
