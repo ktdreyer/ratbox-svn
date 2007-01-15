@@ -437,7 +437,7 @@ o_oper_die(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 {
 	if(parc < 1 || strcasecmp(MYNAME, parv[0]))
 	{
-		service_send(operserv_p, client_p, conn_p, "Servernames do not match");
+		service_snd(operserv_p, client_p, conn_p, SVC_OPER_SERVERNAMEMISMATCH);
 		return 0;
 	}
 
