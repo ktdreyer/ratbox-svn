@@ -1,3 +1,16 @@
+leeh        2007/01/15 18:59:43 UTC	(20070115_0-23487)
+  Log:
+  - finish off moving s_userserv.c over to the new framework, except a little
+    bit in userlist that is complicated
+  
+
+  Modified:
+	rserv/trunk/include/langs.h (File Modified) 
+	rserv/trunk/src/langs.c (File Modified) 
+	rserv/trunk/src/messages.c (File Modified) 
+	rserv/trunk/src/s_userserv.c (File Modified) 
+
+
 leeh        2007/01/14 22:07:56 UTC	(20070114_8-23483)
   Log:
   - move rest of service_error() in s_userserv over to new framework, barring
