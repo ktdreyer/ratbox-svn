@@ -17,6 +17,7 @@ struct _lang_internal lang_internal[] =
 	{ SVC_IRC_NOSUCHCHANNEL,	"Channel %s does not exist"				},
 	{ SVC_IRC_CHANNELINVALID,	"Invalid channel %s"					},
 	{ SVC_IRC_CHANNELNOUSERS,	"Channel %s has no users"				},
+	{ SVC_IRC_NOSUCHSERVER,		"Server %s does not exist"				},
 
 	/* email */
 	{ SVC_EMAIL_INVALID,		"Email %s invalid"					},
@@ -81,6 +82,15 @@ struct _lang_internal lang_internal[] =
 	{ SVC_OPER_CONNECTIONSSTART,	"Current connections (%s)"				},
 	{ SVC_OPER_CONNECTIONSEND,	"End of connections"					},
 	{ SVC_OPER_SERVERNAMEMISMATCH,	"Servernames do not match"				},
+
+	/* banserv */
+	{ SVC_BAN_ISSUED,		"Issued %s for %s"					},
+	{ SVC_BAN_ALREADYPLACED,	"%s already placed on %s"				},
+	{ SVC_BAN_NOTPLACED,		"%s not placed on %s"					},
+	{ SVC_BAN_INVALID,		"Invalid %s: %s"					},
+	{ SVC_BAN_LISTSTART,		"Ban list matching %s"					},
+	{ SVC_BAN_LISTEND,		"End of ban list"					},
+	{ SVC_BAN_NOPERMACCESS,		"No access to set a permanent %s"			},
 
 	/* this must be last */
 	{ SVC_LAST,		"\0"	},

@@ -35,6 +35,7 @@
 #ifdef ENABLE_BANSERV
 #include "rsdb.h"
 #include "rserv.h"
+#include "langs.h"
 #include "io.h"
 #include "service.h"
 #include "client.h"
@@ -341,9 +342,8 @@ o_banserv_kline(struct client *client_p, struct lconn *conn_p, const char *parv[
 
 	if(res == 1)
 	{
-		service_send(banserv_p, client_p, conn_p,
-				"Kline already placed on %s",
-				parv[para]);
+		service_snd(banserv_p, client_p, conn_p, SVC_BAN_ALREADYPLACED,
+				"KLINE", parv[para]);
 		return 0;
 	}
 
@@ -361,8 +361,8 @@ o_banserv_kline(struct client *client_p, struct lconn *conn_p, const char *parv[
 
 		if(hit)
 		{
-			service_send(banserv_p, client_p, conn_p,
-					"No access to set permanent klines");
+			service_snd(banserv_p, client_p, conn_p, SVC_BAN_NOPERMACCESS,
+					"KLINE");
 			return 0;
 		}
 	}
@@ -371,8 +371,8 @@ o_banserv_kline(struct client *client_p, struct lconn *conn_p, const char *parv[
 
 	if(!split_ban(mask, NULL, NULL))
 	{
-		service_send(banserv_p, client_p, conn_p,
-				"Invalid kline %s", mask);
+		service_snd(banserv_p, client_p, conn_p, SVC_BAN_INVALID,
+				"KLINE", mask);
 		return 0;
 	}
 
@@ -380,9 +380,8 @@ o_banserv_kline(struct client *client_p, struct lconn *conn_p, const char *parv[
 
 	if(EmptyString(reason))
 	{
-		service_send(banserv_p, client_p, conn_p,
-				"Insufficient parameters to %s::KLINE",
-				banserv_p->name);
+		service_snd(banserv_p, client_p, conn_p, SVC_NEEDMOREPARAMS,
+				banserv_p->name, "::KLINE");
 		return 0;
 	}
 
@@ -405,8 +404,8 @@ o_banserv_kline(struct client *client_p, struct lconn *conn_p, const char *parv[
 				temptime ? CURRENT_TIME + temptime : 0,
 				CURRENT_TIME, OPER_NAME(client_p, conn_p));
 			
-	service_send(banserv_p, client_p, conn_p,
-			"Issued kline for %s", mask);
+	service_snd(banserv_p, client_p, conn_p, SVC_BAN_ISSUED,
+			"KLINE", mask);
 
 	push_ban("*", 'K', mask, reason, temptime);
 
@@ -434,9 +433,8 @@ o_banserv_xline(struct client *client_p, struct lconn *conn_p, const char *parv[
 
 	if(res == 1)
 	{
-		service_send(banserv_p, client_p, conn_p,
-				"Xline already placed on %s",
-				parv[para]);
+		service_snd(banserv_p, client_p, conn_p, SVC_BAN_ALREADYPLACED,
+				"XLINE", parv[para]);
 		return 0;
 	}
 
@@ -454,8 +452,7 @@ o_banserv_xline(struct client *client_p, struct lconn *conn_p, const char *parv[
 
 		if(hit)
 		{
-			service_send(banserv_p, client_p, conn_p,
-					"No access to set permanent xlines");
+			service_snd(banserv_p, client_p, conn_p, SVC_BAN_NOPERMACCESS, "XLINE");
 			return 0;
 		}
 	}
@@ -464,8 +461,8 @@ o_banserv_xline(struct client *client_p, struct lconn *conn_p, const char *parv[
 
 	if(strlen(gecos) > NICKUSERHOSTLEN)
 	{
-		service_send(banserv_p, client_p, conn_p,
-				"Invalid xline %s", gecos);
+		service_snd(banserv_p, client_p, conn_p, SVC_BAN_INVALID,
+				"XLINE", gecos);
 		return 0;
 	}
 
@@ -473,9 +470,8 @@ o_banserv_xline(struct client *client_p, struct lconn *conn_p, const char *parv[
 
 	if(EmptyString(reason))
 	{
-		service_send(banserv_p, client_p, conn_p,
-				"Insufficient parameters to %s::XLINE",
-				banserv_p->name);
+		service_snd(banserv_p, client_p, conn_p, SVC_NEEDMOREPARAMS,
+				banserv_p->name, "::XLINE");
 		return 0;
 	}
 
@@ -498,8 +494,8 @@ o_banserv_xline(struct client *client_p, struct lconn *conn_p, const char *parv[
 				temptime ? CURRENT_TIME + temptime : 0,
 				CURRENT_TIME, OPER_NAME(client_p, conn_p));
 
-	service_send(banserv_p, client_p, conn_p,
-			"Issued xline for %s", gecos);
+	service_snd(banserv_p, client_p, conn_p, SVC_BAN_ISSUED,
+			"XLINE", gecos);
 
 	push_ban("*", 'X', gecos, reason, temptime);
 
@@ -527,9 +523,8 @@ o_banserv_resv(struct client *client_p, struct lconn *conn_p, const char *parv[]
 
 	if(res == 1)
 	{
-		service_send(banserv_p, client_p, conn_p,
-				"Resv already placed on %s",
-				parv[para]);
+		service_snd(banserv_p, client_p, conn_p, SVC_BAN_ALREADYPLACED,
+				"RESV", parv[para]);
 		return 0;
 	}
 
@@ -547,8 +542,7 @@ o_banserv_resv(struct client *client_p, struct lconn *conn_p, const char *parv[]
 
 		if(hit)
 		{
-			service_send(banserv_p, client_p, conn_p,
-					"No access to set permanent resvs");
+			service_snd(banserv_p, client_p, conn_p, SVC_BAN_NOPERMACCESS, "RESV");
 			return 0;
 		}
 	}
@@ -557,8 +551,8 @@ o_banserv_resv(struct client *client_p, struct lconn *conn_p, const char *parv[]
 
 	if(strlen(mask) > CHANNELLEN)
 	{
-		service_send(banserv_p, client_p, conn_p,
-				"Invalid resv %s", mask);
+		service_snd(banserv_p, client_p, conn_p, SVC_BAN_INVALID,
+				"RESV", mask);
 		return 0;
 	}
 
@@ -566,9 +560,8 @@ o_banserv_resv(struct client *client_p, struct lconn *conn_p, const char *parv[]
 
 	if(EmptyString(reason))
 	{
-		service_send(banserv_p, client_p, conn_p,
-				"Insufficient parameters to %s::RESV",
-				banserv_p->name);
+		service_snd(banserv_p, client_p, conn_p, SVC_NEEDMOREPARAMS,
+				banserv_p->name, "::RESV");
 		return 0;
 	}
 
@@ -591,8 +584,8 @@ o_banserv_resv(struct client *client_p, struct lconn *conn_p, const char *parv[]
 				temptime ? CURRENT_TIME + temptime : 0,
 				CURRENT_TIME, OPER_NAME(client_p, conn_p));
 
-	service_send(banserv_p, client_p, conn_p,
-			"Issued resv for %s", mask);
+	service_snd(banserv_p, client_p, conn_p, SVC_BAN_ISSUED,
+			"RESV", mask);
 
 	push_ban("*", 'R', mask, reason, temptime);
 
@@ -611,9 +604,8 @@ o_banserv_unkline(struct client *client_p, struct lconn *conn_p, const char *par
 
 	if(oper == NULL)
 	{
-		service_send(banserv_p, client_p, conn_p,
-				"Kline not placed on %s",
-				parv[0]);
+		service_snd(banserv_p, client_p, conn_p, SVC_BAN_NOTPLACED,
+				"KLINE", parv[0]);
 		return 0;
 	}
 
@@ -631,16 +623,16 @@ o_banserv_unkline(struct client *client_p, struct lconn *conn_p, const char *par
 
 		if(hit)
 		{
-			service_send(banserv_p, client_p, conn_p,
-					"No access to remove klines");
+			service_snd(banserv_p, client_p, conn_p, SVC_NOACCESS,
+					banserv_p->name, "::UNKLINE");
 			return 0;
 		}
 	}
 
 	if(!split_ban(parv[0], NULL, NULL))
 	{
-		service_send(banserv_p, client_p, conn_p,
-				"Invalid kline %s", parv[0]);
+		service_snd(banserv_p, client_p, conn_p, SVC_BAN_INVALID,
+				"KLINE", parv[0]);
 		return 0;
 	}
 
@@ -648,8 +640,8 @@ o_banserv_unkline(struct client *client_p, struct lconn *conn_p, const char *par
 			"WHERE mask=LOWER('%Q') AND type='K'",
 			CURRENT_TIME + config_file.bs_unban_time, parv[0]);
 
-	service_send(banserv_p, client_p, conn_p,
-			"Issued unkline for %s", parv[0]);
+	service_snd(banserv_p, client_p, conn_p, SVC_BAN_ISSUED,
+			"UNKLINE", parv[0]);
 
 	push_unban("*", 'K', parv[0]);
 
@@ -666,9 +658,8 @@ o_banserv_unxline(struct client *client_p, struct lconn *conn_p, const char *par
 
 	if(oper == NULL)
 	{
-		service_send(banserv_p, client_p, conn_p,
-				"Xline not placed on %s",
-				parv[0]);
+		service_snd(banserv_p, client_p, conn_p, SVC_BAN_NOTPLACED,
+				"XLINE", parv[0]);
 		return 0;
 	}
 
@@ -686,8 +677,8 @@ o_banserv_unxline(struct client *client_p, struct lconn *conn_p, const char *par
 
 		if(hit)
 		{
-			service_send(banserv_p, client_p, conn_p,
-					"No access to remove xlines");
+			service_snd(banserv_p, client_p, conn_p, SVC_NOACCESS,
+					banserv_p->name, "::UNXLINE");
 			return 0;
 		}
 	}
@@ -696,8 +687,8 @@ o_banserv_unxline(struct client *client_p, struct lconn *conn_p, const char *par
 			"WHERE mask=LOWER('%Q') AND type='X'",
 			CURRENT_TIME + config_file.bs_unban_time, parv[0]);
 
-	service_send(banserv_p, client_p, conn_p,
-			"Issued unxline for %s", parv[0]);
+	service_snd(banserv_p, client_p, conn_p, SVC_BAN_ISSUED,
+			"UNXLINE", parv[0]);
 
 	push_unban("*", 'X', parv[0]);
 
@@ -714,9 +705,8 @@ o_banserv_unresv(struct client *client_p, struct lconn *conn_p, const char *parv
 
 	if(oper == NULL)
 	{
-		service_send(banserv_p, client_p, conn_p,
-				"Resv not placed on %s",
-				parv[0]);
+		service_snd(banserv_p, client_p, conn_p, SVC_BAN_NOTPLACED,
+				"RESV", parv[0]);
 		return 0;
 	}
 
@@ -734,8 +724,8 @@ o_banserv_unresv(struct client *client_p, struct lconn *conn_p, const char *parv
 
 		if(hit)
 		{
-			service_send(banserv_p, client_p, conn_p,
-					"No access to remove xlines");
+			service_snd(banserv_p, client_p, conn_p, SVC_NOACCESS,
+					banserv_p->name, "::UNRESV");
 			return 0;
 		}
 	}
@@ -744,8 +734,8 @@ o_banserv_unresv(struct client *client_p, struct lconn *conn_p, const char *parv
 			"WHERE mask=LOWER('%Q') AND type='R'",
 			CURRENT_TIME + config_file.bs_unban_time, parv[0]);
 
-	service_send(banserv_p, client_p, conn_p,
-			"Issued unresv for %s", parv[0]);
+	service_snd(banserv_p, client_p, conn_p, SVC_BAN_ISSUED,
+			"UNRESV", parv[0]);
 
 	push_unban("*", 'R', parv[0]);
 
@@ -776,8 +766,8 @@ o_banserv_sync(struct client *client_p, struct lconn *conn_p, const char *parv[]
 
 		if(hit)
 		{
-			service_send(banserv_p, client_p, conn_p,
-					"No access to sync bans");
+			service_snd(banserv_p, client_p, conn_p, SVC_NOACCESS,
+					banserv_p->name, "::SYNC");
 			return 0;
 		}
 
@@ -793,8 +783,7 @@ o_banserv_sync(struct client *client_p, struct lconn *conn_p, const char *parv[]
 		/* NULL if loop terminated without a break */
 		if(ptr == NULL)
 		{
-			service_send(banserv_p, client_p, conn_p,
-				"Server %s does not exist", parv[0]);
+			service_snd(banserv_p, client_p, conn_p, SVC_IRC_NOSUCHSERVER, parv[0]);
 			return 0;
 		}
 	}
@@ -809,16 +798,16 @@ o_banserv_sync(struct client *client_p, struct lconn *conn_p, const char *parv[]
 			banletter = 'R';
 		else
 		{
-			service_send(banserv_p, client_p, conn_p,
-					"Invalid ban type");
+			service_snd(banserv_p, client_p, conn_p, SVC_OPTIONINVALID,
+					banserv_p->name, "::SYNC");
 			return 0;
 		}
 	}
 
 	sync_bans(parv[0], banletter);
 
-	service_send(banserv_p, client_p, conn_p,
-			"Issued sync to %s", parv[0]);
+	service_snd(banserv_p, client_p, conn_p, SVC_BAN_ISSUED,
+			"SYNC", parv[0]);
 
 	zlog(banserv_p, 1, WATCH_BANSERV, 1, client_p, conn_p,
 		"SYNC %s %s",
@@ -839,8 +828,7 @@ list_bans(struct client *client_p, struct lconn *conn_p,
 				"FROM operbans WHERE type='%c' AND remove='0' AND (hold='0' OR hold > '%lu')",
 			type, (unsigned long) CURRENT_TIME);
 
-	service_send(banserv_p, client_p, conn_p,
-			"Ban list matching %s", mask);
+	service_snd(banserv_p, client_p, conn_p, SVC_BAN_LISTSTART, mask);
 
 	for(i = 0; i < data.row_count; i++)
 	{
@@ -861,7 +849,7 @@ list_bans(struct client *client_p, struct lconn *conn_p,
 
 	rsdb_exec_fetch_end(&data);
 
-	service_send(banserv_p, client_p, conn_p, "End of ban list");
+	service_snd(banserv_p, client_p, conn_p, SVC_BAN_LISTEND);
 }
 
 static int
