@@ -1487,7 +1487,7 @@ static struct addrinfo *gethostinfo(char const *host, int port)
 	hints.ai_flags = 0;
 	hints.ai_family = AF_UNSPEC;
 	hints.ai_socktype = SOCK_STREAM;
-	snprintf(portbuf, 6, "%d", port);
+	snprintf(portbuf, sizeof(portbuf), "%d", port);
 	error = getaddrinfo(host, portbuf, &hints, &res);
 	if (error)
 	{
