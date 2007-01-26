@@ -1432,11 +1432,9 @@ o_chan_chanregister(struct client *client_p, struct lconn *conn_p, const char *p
 	if((ureg_p = find_user_reg_nick(NULL, parv[1])) == NULL)
 	{
 		if(*parv[1] == '=')
-			service_send(chanserv_p, client_p, conn_p,
-					"Nickname %s is not logged in", parv[1]);
+			service_snd(chanserv_p, client_p, conn_p, SVC_USER_NICKNOTLOGGEDIN, parv[1]);
 		else
-			service_send(chanserv_p, client_p, conn_p,
-					"Username %s is not registered", parv[1]);
+			service_snd(chanserv_p, client_p, conn_p, SVC_USER_NOTREG, parv[1]);
 
 		return 0;
 	}
@@ -1473,8 +1471,8 @@ o_chan_chandrop(struct client *client_p, struct lconn *conn_p, const char *parv[
 
 	destroy_channel_reg(reg_p);
 
-	service_send(chanserv_p, client_p, conn_p,
-			"Channel %s registration dropped", parv[0]);
+	service_snd(chanserv_p, client_p, conn_p, SVC_SUCCESSFULON,
+			chanserv_p->name, "::CHANDROP", parv[0]);
 	return 0;
 }
 
@@ -1733,7 +1731,8 @@ s_chan_register(struct client *client_p, struct lconn *conn_p, const char *parv[
 
 	if(config_file.disable_cregister)
 	{
-		service_error(chanserv_p, client_p, "%s::REGISTER is disabled", chanserv_p->name);
+		service_err(chanserv_p, client_p, SVC_ISDISABLED,
+				chanserv_p->name, "::REGISTER");
 		return 1;
 	}
 
@@ -1764,9 +1763,8 @@ s_chan_register(struct client *client_p, struct lconn *conn_p, const char *parv[
 		}
 		else if(last_count >= config_file.cregister_amount)
 		{
-			service_error(chanserv_p, client_p, 
-				"%s::REGISTER rate-limited, try again shortly",
-				chanserv_p->name);
+			service_err(chanserv_p, client_p, SVC_RATELIMITED,
+					chanserv_p->name, "::REGISTER");
 			return 1;
 		}
 		else
@@ -1782,9 +1780,8 @@ s_chan_register(struct client *client_p, struct lconn *conn_p, const char *parv[
 		if(hent->cregister >= config_file.chregister_amount &&
 		   hent->cregister_expire > CURRENT_TIME)
 		{
-			service_error(chanserv_p, client_p,
-				"%s::REGISTER rate-limited for your host, try again later",
-				chanserv_p->name);
+			service_err(chanserv_p, client_p, SVC_RATELIMITEDHOST,
+					chanserv_p->name, "::REGISTER");
 			return 1;
 		}
 
@@ -1963,8 +1960,7 @@ s_chan_delowner(struct client *client_p, struct lconn *conn_p, const char *parv[
 	
 		if(EmptyString(ureg_p->email))
 		{
-			service_error(chanserv_p, client_p,
-					"Username %s does not have an email address set",
+			service_err(chanserv_p, client_p, SVC_USER_NOEMAIL,
 					ureg_p->name);
 			return 1;
 		}
@@ -1992,8 +1988,7 @@ s_chan_delowner(struct client *client_p, struct lconn *conn_p, const char *parv[
 
 		if(!can_send_email())
 		{
-			service_error(chanserv_p, client_p,
-				"Temporarily unable to send email, please try later");
+			service_err(chanserv_p, client_p, SVC_EMAIL_TEMPUNAVAILABLE);
 			return 1;
 		}
 
@@ -2022,14 +2017,13 @@ s_chan_delowner(struct client *client_p, struct lconn *conn_p, const char *parv[
 				client_p->name, client_p->user->username, client_p->user->host,
 				chreg_p->name, chanserv_p->name, chreg_p->name, token))
 		{
-			service_error(chanserv_p, client_p,
-					"Unable to issue owner delete due to problems sending email");
+			service_err(chanserv_p, client_p, SVC_EMAIL_SENDFAILED,
+					chanserv_p->name, "::DELOWNER");
 		}
 		else
 		{
-			service_error(chanserv_p, client_p,
-					"Username %s has been sent an email to confirm the owner delete",
-					ureg_p->name);
+			service_err(chanserv_p, client_p, SVC_USER_REQUESTISSUED,
+					ureg_p->name, "DELOWNER");
 		}
 		
 		return 2;
@@ -2362,8 +2356,8 @@ s_chan_clearmodes(struct client *client_p, struct lconn *conn_p, const char *par
 
 	parse_full_mode(chptr, chanserv_p, modev, chptr->mode.key[0] ? 2 : 1, 0);
 
-	service_error(chanserv_p, client_p, "Channel %s modes cleared",
-			chptr->name);
+	service_err(chanserv_p, client_p, SVC_SUCCESSFULON,
+			chanserv_p->name, "::CLEARMODES", chptr->name);
 
 	return 1;
 }
@@ -2437,8 +2431,8 @@ s_chan_clearops(struct client *client_p, struct lconn *conn_p, const char *parv[
 
 	s_chan_clearops_loc(chptr, mreg_p->channel_reg, S_C_OP);
 
-	service_error(chanserv_p, client_p, "Channel %s ops cleared", 
-			chptr->name);
+	service_err(chanserv_p, client_p, SVC_SUCCESSFULON,
+			chanserv_p->name, "::CLEAROPS", chptr->name);
 	return 3;
 }
 
@@ -2456,8 +2450,8 @@ s_chan_clearallops(struct client *client_p, struct lconn *conn_p, const char *pa
 
 	s_chan_clearops_loc(chptr, mreg_p->channel_reg, mreg_p->level);
 
-	service_error(chanserv_p, client_p, "Channel %s ops cleared", 
-			chptr->name);
+	service_err(chanserv_p, client_p, SVC_SUCCESSFULON,
+			chanserv_p->name, "::CLEARALLOPS", chptr->name);
 	return 3;
 }
 
@@ -2504,7 +2498,8 @@ s_chan_clearbans(struct client *client_p, struct lconn *conn_p, const char *parv
 
 	modebuild_finish();
 
-	service_error(chanserv_p, client_p, "Channel %s bans cleared", chptr->name);
+	service_err(chanserv_p, client_p, SVC_SUCCESSFULON,
+			chanserv_p->name, "::CLEARBANS", chptr->name);
 
 	return 3;
 }
@@ -3090,7 +3085,8 @@ s_chan_addban(struct client *client_p, struct lconn *conn_p, const char *parv[],
 	 */
 	if(loc >= parc)
 	{
-		service_error(chanserv_p, client_p, "Insufficient parameters to CHANSERV::ADDBAN");
+		service_err(chanserv_p, client_p, SVC_NEEDMOREPARAMS,
+				chanserv_p->name, "::ADDBAN");
 		return 1;
 	}
 
