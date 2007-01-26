@@ -4,6 +4,7 @@ struct _lang_internal lang_internal[] =
 {
 	/* general service */
 	{ SVC_SUCCESSFUL,		"%s%s successful"					},
+	{ SVC_SUCCESSFULON,		"%s%s successful on %s"					},
 	{ SVC_ISSUED,			"%s%s issued"						},
 	{ SVC_NEEDMOREPARAMS,		"Insufficient parameters to %s%s"			},
 	{ SVC_ISDISABLED,		"%s%s is disabled"					},

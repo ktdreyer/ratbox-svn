@@ -36,6 +36,7 @@ enum svc_notice_enum
 {
 	/* general service */
 	SVC_SUCCESSFUL,
+	SVC_SUCCESSFULON,
 	SVC_ISSUED,
 	SVC_NEEDMOREPARAMS,
 	SVC_ISDISABLED,

@@ -149,8 +149,8 @@ o_operbot_objoin(struct client *client_p, struct lconn *conn_p, const char *parv
 
 	join_service(operbot_p, parv[0], tsinfo, NULL, 0);
 
-	service_snd(operbot_p, client_p, conn_p, SVC_SUCCESSFUL,
-			operbot_p->name, "::OBJOIN");
+	service_snd(operbot_p, client_p, conn_p, SVC_SUCCESSFULON,
+			operbot_p->name, "::OBJOIN", parv[0]);
 	return 0;
 }
 
@@ -164,8 +164,8 @@ o_operbot_obpart(struct client *client_p, struct lconn *conn_p, const char *parv
 
 		rsdb_exec(NULL, "DELETE FROM operbot WHERE chname = LOWER('%Q')",
 				parv[0]);
-		service_snd(operbot_p, client_p, conn_p, SVC_SUCCESSFUL,
-				operbot_p->name, "::OBPART");
+		service_snd(operbot_p, client_p, conn_p, SVC_SUCCESSFULON,
+				operbot_p->name, "::OBPART", parv[0]);
 	}
 	else
 		service_send(operbot_p, client_p, conn_p,

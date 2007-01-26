@@ -266,8 +266,8 @@ o_oper_takeover(struct client *client_p, struct lconn *conn_p, const char *parv[
 	zlog(operserv_p, 1, WATCH_OPERSERV, 1, client_p, conn_p,
 		"TAKEOVER %s", parv[0]);
 
-	service_snd(operserv_p, client_p, conn_p, SVC_SUCCESSFUL,
-			operserv_p->name, "::TAKEOVER");
+	service_snd(operserv_p, client_p, conn_p, SVC_SUCCESSFULON,
+			operserv_p->name, "::TAKEOVER", parv[0]);
 	return 0;
 }
 
@@ -301,8 +301,8 @@ o_oper_osjoin(struct client *client_p, struct lconn *conn_p, const char *parv[],
 
 	join_service(operserv_p, parv[0], tsinfo, NULL, 0);
 
-	service_snd(operserv_p, client_p, conn_p, SVC_SUCCESSFUL,
-			operserv_p->name, "::OSJOIN");
+	service_snd(operserv_p, client_p, conn_p, SVC_SUCCESSFULON,
+			operserv_p->name, "::OSJOIN", parv[0]);
 	return 0;
 }
 
@@ -374,8 +374,8 @@ o_oper_ospart(struct client *client_p, struct lconn *conn_p, const char *parv[],
 	if(osjoin)
 		rsdb_exec(NULL, "DELETE FROM operserv WHERE chname=LOWER('%Q')", parv[0]);
 
-	service_snd(operserv_p, client_p, conn_p, SVC_SUCCESSFUL,
-			operserv_p->name, "::OSPART");
+	service_snd(operserv_p, client_p, conn_p, SVC_SUCCESSFULON,
+			operserv_p->name, "::OSPART", parv[0]);
 
 	return 0;
 }
