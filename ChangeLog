@@ -1,3 +1,16 @@
+leeh        2007/01/26 21:20:57 UTC	(20070126_0-23511)
+  Log:
+  - add SVC_SUCCESSFULON so we can be more helpful..
+  
+
+  Modified:
+	rserv/trunk/include/langs.h (File Modified) 
+	rserv/trunk/src/langs.c (File Modified) 
+	rserv/trunk/src/messages.c (File Modified) 
+	rserv/trunk/src/s_operbot.c (File Modified) 
+	rserv/trunk/src/s_operserv.c (File Modified) 
+
+
 androsyn    2007/01/17 19:17:35 UTC	(20070117_0-23499)
   Log:
   use sockof(portbuf) instead of a magic number in gethostinfo()
