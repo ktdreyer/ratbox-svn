@@ -1,3 +1,17 @@
+leeh        2007/01/27 14:15:46 UTC	(20070127_0-23519)
+  Log:
+  - move chanserv::info over to the new framework, tidying it into
+    userserv::info
+  
+
+  Modified:
+	rserv/trunk/include/langs.h (File Modified) 
+	rserv/trunk/src/langs.c (File Modified) 
+	rserv/trunk/src/messages.c (File Modified) 
+	rserv/trunk/src/s_chanserv.c (File Modified) 
+	rserv/trunk/src/s_userserv.c (File Modified) 
+
+
 leeh        2007/01/26 23:37:04 UTC	(20070126_1-23513)
   Log:
   - move some chanserv notices over to new framework
