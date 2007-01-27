@@ -1696,14 +1696,12 @@ o_chan_chaninfo(struct client *client_p, struct lconn *conn_p, const char *parv[
 
 	owner = find_owner(chreg_p);
 
-	service_send(chanserv_p, client_p, conn_p,
-			"[%s] Registered to %s for %s",
+	service_snd(chanserv_p, client_p, conn_p, SVC_INFO_REGDURATIONCHAN,
 			chreg_p->name, owner ?  owner : "?unknown?",
 			get_duration((time_t) (CURRENT_TIME - chreg_p->reg_time)));
 
 	if(chreg_p->flags & CS_FLAGS_SUSPENDED)
-		service_send(chanserv_p, client_p, conn_p,
-				"[%s] Suspended by %s: %s",
+		service_snd(chanserv_p, client_p, conn_p, SVC_INFO_SUSPENDED,
 				chreg_p->name, chreg_p->suspender, 
 				chreg_p->suspend_reason ? chreg_p->suspend_reason : "");
 	else
@@ -3389,14 +3387,14 @@ dump_info_extended(struct client *client_p, struct lconn *conn_p,
 			struct chan_reg *chreg_p)
 {
 	if(!EmptyString(chreg_p->url))
-		service_send(chanserv_p, client_p, conn_p,
-			"[%s] URL: %s",
+		service_snd(chanserv_p, client_p, conn_p, SVC_INFO_URL,
 			chreg_p->name, chreg_p->url);
 
 	if(chreg_p->flags & CS_FLAGS_SHOW)
-		service_send(chanserv_p, client_p, conn_p,
-			"[%s] Settings: %s%s%s%s%s%s",
-			chreg_p->name,
+	{
+		char buf[BUFSIZE];
+
+		snprintf(buf, sizeof(buf), "%s%s%s%s%s%s",
 			(chreg_p->flags & CS_FLAGS_AUTOJOIN) ? "AUTOJOIN " : "",
 			(chreg_p->flags & CS_FLAGS_NOOPS) ? "NOOPS " : "",
 			(chreg_p->flags & CS_FLAGS_NOVOICES) ? "NOVOICES " : "",
@@ -3404,13 +3402,16 @@ dump_info_extended(struct client *client_p, struct lconn *conn_p,
 			(chreg_p->flags & CS_FLAGS_RESTRICTOPS) ? "RESTRICTOPS " : "",
 			(chreg_p->flags & CS_FLAGS_WARNOVERRIDE) ? "WARNOVERRIDE" : "");
 
+		service_snd(chanserv_p, client_p, conn_p, SVC_INFO_SETTINGS,
+				chreg_p->name, buf);
+	}
+
 	if(!EmptyString(chreg_p->topic))
-		service_send(chanserv_p, client_p, conn_p,
-			"[%s] Topic: %s", chreg_p->name, chreg_p->topic);
+		service_snd(chanserv_p, client_p, conn_p, SVC_INFO_TOPIC,
+				chreg_p->name, chreg_p->topic);
 
 	if(chreg_p->emode.mode)
-		service_send(chanserv_p, client_p, conn_p,
-			"[%s] Enforced modes: %s",
+		service_snd(chanserv_p, client_p, conn_p, SVC_INFO_ENFORCEDMODES,
 			chreg_p->name, chmode_to_string(&chreg_p->emode));
 }
 
@@ -3422,8 +3423,8 @@ dump_info_accesslist(struct client *client_p, struct lconn *conn_p,
 	dlink_node *ptr;
 	char buf[30];
 
-	service_send(chanserv_p, client_p, conn_p,
-			"[%s] Access list:", chreg_p->name);
+	service_snd(chanserv_p, client_p, conn_p, SVC_INFO_ACCESSLIST,
+			chreg_p->name, "");
 
 	DLINK_FOREACH(ptr, chreg_p->users.head)
 	{
@@ -3451,13 +3452,12 @@ s_chan_info(struct client *client_p, struct lconn *conn_p, const char *parv[], i
 
 	owner = find_owner(reg_p);
 
-	service_error(chanserv_p, client_p, 
-			"[%s] Registered to %s for %s",
+	service_err(chanserv_p, client_p, SVC_INFO_REGDURATIONCHAN,
 			reg_p->name, owner ?  owner : "?unknown?",
 			get_duration((time_t) (CURRENT_TIME - reg_p->reg_time)));
 
 	if(reg_p->flags & CS_FLAGS_SUSPENDED)
-		service_error(chanserv_p, client_p, "[%s] Suspended by services admin",
+		service_err(chanserv_p, client_p, SVC_INFO_SUSPENDEDADMIN,
 				reg_p->name);
 	else if((mreg_p = find_member_reg(client_p->user->user_reg, reg_p)) &&
 		!mreg_p->suspend)

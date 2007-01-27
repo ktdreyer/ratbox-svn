@@ -858,12 +858,12 @@ o_user_userinfo(struct client *client_p, struct lconn *conn_p, const char *parv[
 	zlog(userserv_p, 1, WATCH_USADMIN, 1, client_p, conn_p,
 		"USERINFO %s", ureg_p->name);
 
-	service_snd(userserv_p, client_p, conn_p, SVC_USER_INFO_REGDURATION,
+	service_snd(userserv_p, client_p, conn_p, SVC_INFO_REGDURATIONUSER,
 			ureg_p->name,
 			get_duration((time_t) (CURRENT_TIME - ureg_p->reg_time)));
 
 	if(ureg_p->flags & US_FLAGS_SUSPENDED)
-		service_snd(userserv_p, client_p, conn_p, SVC_USER_INFO_SUSPENDED,
+		service_snd(userserv_p, client_p, conn_p, SVC_INFO_SUSPENDED,
 				ureg_p->name, ureg_p->suspender,
 				ureg_p->suspend_reason ? ureg_p->suspend_reason : "");
 
@@ -1850,7 +1850,7 @@ dump_user_info(struct client *client_p, struct lconn *conn_p, struct user_reg *u
 		/* "Access to: " + " 200, " */
 		if((buflen + strlen(mreg_p->channel_reg->name) + 17) >= (BUFSIZE - 3))
 		{
-			service_snd(userserv_p, client_p, conn_p, SVC_USER_INFO_ACCESSTO,
+			service_snd(userserv_p, client_p, conn_p, SVC_INFO_ACCESSLIST,
 					ureg_p->name, buf);
 			p = buf;
 			buflen = 0;
@@ -1866,7 +1866,7 @@ dump_user_info(struct client *client_p, struct lconn *conn_p, struct user_reg *u
 
 	/* could have access to no channels.. */
 	if(buflen)
-		service_snd(userserv_p, client_p, conn_p, SVC_USER_INFO_ACCESSTO,
+		service_snd(userserv_p, client_p, conn_p, SVC_INFO_ACCESSLIST,
 				ureg_p->name, buf);
 
 #ifdef ENABLE_NICKSERV
@@ -1880,7 +1880,7 @@ dump_user_info(struct client *client_p, struct lconn *conn_p, struct user_reg *u
 		/* "Registered nicknames: " + " " */
 		if((buflen + strlen(nreg_p->name) + 25) >= (BUFSIZE - 3))
 		{
-			service_snd(userserv_p, client_p, conn_p, SVC_USER_INFO_NICKNAMES,
+			service_snd(userserv_p, client_p, conn_p, SVC_INFO_NICKNAMES,
 					ureg_p->name, buf);
 			p = buf;
 			buflen = 0;
@@ -1892,17 +1892,17 @@ dump_user_info(struct client *client_p, struct lconn *conn_p, struct user_reg *u
 	}
 
 	if(buflen)
-		service_snd(userserv_p, client_p, conn_p, SVC_USER_INFO_NICKNAMES,
+		service_snd(userserv_p, client_p, conn_p, SVC_INFO_NICKNAMES,
 				ureg_p->name, buf);
 #endif
 
 	if(!EmptyString(ureg_p->email))
-		service_snd(userserv_p, client_p, conn_p, SVC_USER_INFO_EMAIL,
+		service_snd(userserv_p, client_p, conn_p, SVC_INFO_EMAIL,
 				ureg_p->name, ureg_p->email);
 
 	if(dlink_list_length(&ureg_p->users))
 	{
-		service_snd(userserv_p, client_p, conn_p, SVC_USER_INFO_CURRENTLOGON,
+		service_snd(userserv_p, client_p, conn_p, SVC_INFO_CURRENTLOGON,
 				ureg_p->name);
 
 		DLINK_FOREACH(ptr, ureg_p->users.head)
@@ -1923,13 +1923,13 @@ s_user_info(struct client *client_p, struct lconn *conn_p, const char *parv[], i
 	if((ureg_p = find_user_reg_nick(client_p, parv[0])) == NULL)
 		return 1;
 
-	service_err(userserv_p, client_p, SVC_USER_INFO_REGDURATION,
+	service_err(userserv_p, client_p, SVC_INFO_REGDURATIONUSER,
 			ureg_p->name,
 			get_duration((time_t) (CURRENT_TIME - ureg_p->reg_time)));
 
 	if(ureg_p->flags & US_FLAGS_SUSPENDED)
 	{
-		service_err(userserv_p, client_p, SVC_USER_INFO_SUSPENDEDADMIN, ureg_p->name);
+		service_err(userserv_p, client_p, SVC_INFO_SUSPENDEDADMIN, ureg_p->name);
 	}
 	else if(ureg_p == client_p->user->user_reg)
 	{

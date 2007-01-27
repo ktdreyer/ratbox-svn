@@ -71,13 +71,19 @@ struct _lang_internal lang_internal[] =
 	{ SVC_USER_UL_ENDLIMIT,		"End of username list, limit reached"			},
 
 	/* userserv::info */
-	{ SVC_USER_INFO_REGDURATION,	"[%s] Username registered for %s"			},
-	{ SVC_USER_INFO_SUSPENDED,	"[%s] Suspended by %s: %s"				},
-	{ SVC_USER_INFO_SUSPENDEDADMIN,	"[%s] Suspended by services admin"			},
-	{ SVC_USER_INFO_ACCESSTO,	"[%s] Access to: %s"					},
-	{ SVC_USER_INFO_NICKNAMES,	"[%s] Registered nicknames: %s"				},
-	{ SVC_USER_INFO_EMAIL,		"[%s] Email: %s"					},
-	{ SVC_USER_INFO_CURRENTLOGON,	"[%s] Currently logged on via:"				},
+	/* chanserv::info */
+	{ SVC_INFO_REGDURATIONUSER,	"[%s] Username registered for %s"			},
+	{ SVC_INFO_REGDURATIONCHAN,	"[%s] Channel registered to %s for %s"			},
+	{ SVC_INFO_SUSPENDED,		"[%s] Suspended by %s: %s"				},
+	{ SVC_INFO_SUSPENDEDADMIN,	"[%s] Suspended by services admin"			},
+	{ SVC_INFO_ACCESSLIST,		"[%s] Access list: %s"					},
+	{ SVC_INFO_NICKNAMES,		"[%s] Registered nicknames: %s"				},
+	{ SVC_INFO_EMAIL,		"[%s] Email: %s"					},
+	{ SVC_INFO_URL,			"[%s] URL: %s"						},
+	{ SVC_INFO_TOPIC,		"[%s] Topic: %s"					},
+	{ SVC_INFO_SETTINGS,		"[%s] Settings: %s"					},
+	{ SVC_INFO_ENFORCEDMODES,	"[%s] Enforced modes: %s"				},
+	{ SVC_INFO_CURRENTLOGON,	"[%s] Currently logged on via:"				},
 
 	/* operserv */
 	{ SVC_OPER_CONNECTIONSSTART,	"Current connections (%s)"				},
