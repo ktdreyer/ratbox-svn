@@ -1,3 +1,15 @@
+leeh        2007/01/27 16:04:04 UTC	(20070127_7-23535)
+  Log:
+  - move global over to the new framework
+  
+
+  Modified:
+	rserv/trunk/include/langs.h (File Modified) 
+	rserv/trunk/src/langs.c (File Modified) 
+	rserv/trunk/src/messages.c (File Modified) 
+	rserv/trunk/src/s_global.c (File Modified) 
+
+
 leeh        2007/01/27 15:55:41 UTC	(20070127_6-23533)
   Log:
   - swap SVC_USER_UL_END and SVC_BAN_LISTEND for a single SVC_ENDOFLIST
