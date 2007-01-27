@@ -106,6 +106,7 @@ struct _lang_internal lang_internal[] =
 	{ SVC_OPER_CONNECTIONSSTART,	"Current connections (%s)"				},
 	{ SVC_OPER_CONNECTIONSEND,	"End of connections"					},
 	{ SVC_OPER_SERVERNAMEMISMATCH,	"Servernames do not match"				},
+	{ SVC_OPER_OSPARTACCESS,	"No access to %s::OSPART on channels joined through %s"	},
 
 	/* banserv */
 	{ SVC_BAN_ISSUED,		"Issued %s for %s"					},

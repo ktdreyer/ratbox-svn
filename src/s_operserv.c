@@ -286,8 +286,8 @@ o_oper_osjoin(struct client *client_p, struct lconn *conn_p, const char *parv[],
 	if((chptr = find_channel(parv[0])) &&
 	   dlink_find(operserv_p, &chptr->services))
 	{
-		service_send(operserv_p, client_p, conn_p,
-				"%s already in %s", operserv_p->name, parv[0]);
+		service_snd(operserv_p, client_p, conn_p, SVC_IRC_ALREADYONCHANNEL,
+				operserv_p->name, parv[0]);
 		return 0;
 	}
 
@@ -322,8 +322,7 @@ o_oper_ospart(struct client *client_p, struct lconn *conn_p, const char *parv[],
 
 	if((chptr = find_channel(parv[0])) == NULL || dlink_find(operserv_p, &chptr->services) == NULL)
 	{
-		service_send(operserv_p, client_p, conn_p,
-				"%s not in channel %s", 
+		service_snd(operserv_p, client_p, conn_p, SVC_IRC_NOTONCHANNEL,
 				operserv_p->name, parv[0]);
 		return 0;
 	}
@@ -351,8 +350,8 @@ o_oper_ospart(struct client *client_p, struct lconn *conn_p, const char *parv[],
 		if((client_p && (client_p->user->oper->sflags & CONF_OPER_OS_CHANNEL) == 0) ||
 		   (conn_p && (conn_p->sprivs & CONF_OPER_OS_CHANNEL) == 0))
 		{
-			service_send(operserv_p, client_p, conn_p,
-					"No access to OPERSERV::OSPART on channels joined through OSJOIN");
+			service_snd(operserv_p, client_p, conn_p, SVC_OPER_OSPARTACCESS,
+					operserv_p->name, "OSJOIN");
 			return 0;
 		}
 	}
@@ -360,8 +359,8 @@ o_oper_ospart(struct client *client_p, struct lconn *conn_p, const char *parv[],
 	else if((client_p && (client_p->user->oper->sflags & CONF_OPER_OS_TAKEOVER) == 0) ||
 		(conn_p && (conn_p->sprivs & CONF_OPER_OS_TAKEOVER) == 0))
 	{
-		service_send(operserv_p, client_p, conn_p,
-				"No access to OPERSERV::OSPART on channels joined through TAKEOVER");
+		service_snd(operserv_p, client_p, conn_p, SVC_OPER_OSPARTACCESS,
+				operserv_p->name, "TAKEOVER");
 		return 0;
 	}
 
