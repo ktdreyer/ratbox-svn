@@ -47,7 +47,6 @@ struct _lang_internal lang_internal[] =
 	{ SVC_USER_NICKNOTLOGGEDIN,	"Nickname %s is not logged in"				},
 	{ SVC_USER_NOEMAIL,		"Username %s does not have an email address"		},
 	{ SVC_USER_CHANGEDPASSWORD,	"Username %s password changed"				},
-	{ SVC_USER_CHANGEDEMAIL,	"Username %s email changed"				},
 	{ SVC_USER_CHANGEDOPTION,	"Username %s %s set to %s"				},
 	{ SVC_USER_QUERYOPTION,		"Username %s %s is set to %s"				},
 	{ SVC_USER_QUERYOPTIONALREADY,	"Username %s %s is already set to %s",			},

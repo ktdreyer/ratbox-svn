@@ -1643,7 +1643,8 @@ s_user_resetemail(struct client *client_p, struct lconn *conn_p, const char *par
 				zlog(userserv_p, 3, 0, 0, client_p, NULL,
 						"RESETEMAIL %s (auth)", reg_p->name);
 
-				service_err(userserv_p, client_p, SVC_USER_CHANGEDEMAIL, reg_p->name);
+				service_err(userserv_p, client_p, SVC_USER_CHANGEDOPTION, 
+						reg_p->name, reg_p->email);
 
 				return 1;
 			}
@@ -1759,8 +1760,8 @@ s_user_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 		rsdb_exec(NULL, "UPDATE users SET email='%Q' "
 				"WHERE username='%Q'", arg, ureg_p->name);
 
-		service_err(userserv_p, client_p, SVC_USER_CHANGEDEMAIL,
-				ureg_p->name);
+		service_err(userserv_p, client_p, SVC_USER_CHANGEDOPTION,
+				ureg_p->name, arg);
 		return 1;
 	}
 	else if(!strcasecmp(parv[0], "PRIVATE"))
