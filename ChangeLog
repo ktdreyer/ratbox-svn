@@ -1,3 +1,16 @@
+leeh        2007/01/27 15:55:41 UTC	(20070127_6-23533)
+  Log:
+  - swap SVC_USER_UL_END and SVC_BAN_LISTEND for a single SVC_ENDOFLIST
+  
+
+  Modified:
+	rserv/trunk/include/langs.h (File Modified) 
+	rserv/trunk/src/langs.c (File Modified) 
+	rserv/trunk/src/messages.c (File Modified) 
+	rserv/trunk/src/s_banserv.c (File Modified) 
+	rserv/trunk/src/s_userserv.c (File Modified) 
+
+
 leeh        2007/01/27 15:50:52 UTC	(20070127_5-23531)
   Log:
   - finish moving operserv across to the new framework
