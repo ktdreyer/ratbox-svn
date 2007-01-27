@@ -20,6 +20,8 @@ struct _lang_internal lang_internal[] =
 	{ SVC_IRC_CHANNELINVALID,	"Invalid channel %s"					},
 	{ SVC_IRC_CHANNELNOUSERS,	"Channel %s has no users"				},
 	{ SVC_IRC_NOSUCHSERVER,		"Server %s does not exist"				},
+	{ SVC_IRC_ALREADYONCHANNEL,	"%s is already on channel %s"				},
+	{ SVC_IRC_NOTONCHANNEL,		"%s is not on channel %s"				},
 
 	/* email */
 	{ SVC_EMAIL_INVALID,		"Email %s invalid"					},

@@ -134,8 +134,8 @@ o_operbot_objoin(struct client *client_p, struct lconn *conn_p, const char *parv
 	if((chptr = find_channel(parv[0])) && 
 	   dlink_find(operbot_p, &chptr->services))
 	{
-		service_send(operbot_p, client_p, conn_p,
-				"%s already in %s", operbot_p->name, chptr->name);
+		service_snd(operbot_p, client_p, conn_p, SVC_IRC_ALREADYONCHANNEL,
+				operbot_p->name, chptr->name);
 		return 0;
 	}
 
@@ -168,8 +168,8 @@ o_operbot_obpart(struct client *client_p, struct lconn *conn_p, const char *parv
 				operbot_p->name, "::OBPART", parv[0]);
 	}
 	else
-		service_send(operbot_p, client_p, conn_p,
-				"%s not in channel %s", operbot_p->name, parv[0]);
+		service_snd(operbot_p, client_p, conn_p, SVC_IRC_NOTONCHANNEL,
+				operbot_p->name, parv[0]);
 
 	return 0;
 }
