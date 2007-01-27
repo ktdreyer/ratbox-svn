@@ -9,6 +9,7 @@ struct _lang_internal lang_internal[] =
 	{ SVC_NEEDMOREPARAMS,		"Insufficient parameters to %s%s"			},
 	{ SVC_ISDISABLED,		"%s%s is disabled"					},
 	{ SVC_ISDISABLEDEMAIL,		"%s%s is disabled as it cannot send emails"		},
+	{ SVC_NOTSUPPORTED,		"%s%s is not supported by your server"			},
 	{ SVC_NOACCESS,			"No access to %s%s"					},
 	{ SVC_OPTIONINVALID,		"%s%s option invalid"					},
 	{ SVC_RATELIMITED,		"%s%s rate-limited, try again shortly"			},
@@ -71,8 +72,10 @@ struct _lang_internal lang_internal[] =
 
 	/* userserv::info */
 	/* chanserv::info */
+	/* nickserv::info */
 	{ SVC_INFO_REGDURATIONUSER,	"[%s] Username registered for %s"			},
 	{ SVC_INFO_REGDURATIONCHAN,	"[%s] Channel registered to %s for %s"			},
+	{ SVC_INFO_REGDURATIONNICK,	"[%s] Nickname registered to %s for %s"			},
 	{ SVC_INFO_SUSPENDED,		"[%s] Suspended by %s: %s"				},
 	{ SVC_INFO_SUSPENDEDADMIN,	"[%s] Suspended by services admin"			},
 	{ SVC_INFO_ACCESSLIST,		"[%s] Access list: %s"					},
@@ -83,6 +86,19 @@ struct _lang_internal lang_internal[] =
 	{ SVC_INFO_SETTINGS,		"[%s] Settings: %s"					},
 	{ SVC_INFO_ENFORCEDMODES,	"[%s] Enforced modes: %s"				},
 	{ SVC_INFO_CURRENTLOGON,	"[%s] Currently logged on via:"				},
+
+	/* nickserv */
+	{ SVC_NICK_NOTONLINE,		"Nickname %s is not online"				},
+	{ SVC_NICK_ALREADYREG,		"Nickname %s is already registered"			},
+	{ SVC_NICK_NOTREG,		"Nickname %s is not registered"				},
+	{ SVC_NICK_NOWREG,		"Nickname %s registered"				},
+	{ SVC_NICK_CANTREGUID,		"You may not register your UID, please change to a real nickname"			},
+	{ SVC_NICK_USING,		"Nickname %s is already in use by you"			},
+	{ SVC_NICK_TOOMANYREG,		"You have already registered %d nicknames"		},
+	{ SVC_NICK_LOGINFIRST,		"You must register a username with %s and log in before you can register your nickname"	},
+	{ SVC_NICK_REGGEDOTHER,		"Nickname %s is not registered to you"			},
+	{ SVC_NICK_CHANGEDOPTION,	"Nickname %s %s set to %s"				},
+	{ SVC_NICK_QUERYOPTION,		"Nickname %s %s is set to %s"				},
 
 	/* operserv */
 	{ SVC_OPER_CONNECTIONSSTART,	"Current connections (%s)"				},

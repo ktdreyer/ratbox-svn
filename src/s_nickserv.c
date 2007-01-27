@@ -147,8 +147,7 @@ find_nick_reg(struct client *client_p, const char *name)
 	}
 
 	if(client_p)
-		service_error(nickserv_p, client_p, "Nickname %s is not registered",
-				name);
+		service_err(nickserv_p, client_p, SVC_NICK_NOTREG, name);
 
 	return NULL;
 }
@@ -238,12 +237,12 @@ o_nick_nickdrop(struct client *client_p, struct lconn *conn_p, const char *parv[
 
 	if((nreg_p = find_nick_reg(NULL, parv[0])) == NULL)
 	{
-		service_send(nickserv_p, client_p, conn_p,
-				"Nickname %s is not registered", parv[0]);
+		service_snd(nickserv_p, client_p, conn_p, SVC_NICK_NOTREG, parv[0]);
 		return 0;
 	}
 
-	service_error(nickserv_p, client_p, "Nickname %s dropped", parv[0]);
+	service_snd(nickserv_p, client_p, conn_p, SVC_SUCCESSFULON, 
+			nickserv_p->name, "::NICKDROP", parv[0]);
 
 	zlog(nickserv_p, 1, WATCH_NSADMIN, 1, client_p, conn_p,
 		"NICKDROP %s", nreg_p->name);
@@ -263,8 +262,7 @@ s_nick_register(struct client *client_p, struct lconn *conn_p, const char *parv[
 	if (ureg_p == NULL)
 	{
 		userserv_p = find_service_id("USERSERV");
-		service_error(nickserv_p, client_p,
-				"You must register a username with %s and log in before you can register your nickname",
+		service_err(nickserv_p, client_p, SVC_NICK_LOGINFIRST,
 				userserv_p != NULL ? userserv_p->name : "???");
 		return 1;
 	}
@@ -273,23 +271,20 @@ s_nick_register(struct client *client_p, struct lconn *conn_p, const char *parv[
 
 	if(dlink_list_length(&ureg_p->nicks) >= config_file.nmax_nicks)
 	{
-		service_error(nickserv_p, client_p,
-				"You have already registered %d nicknames",
+		service_err(nickserv_p, client_p, SVC_NICK_TOOMANYREG,
 				config_file.nmax_nicks);
 		return 1;
 	}
 
 	if(IsDigit(client_p->name[0]))
 	{
-		service_error(nickserv_p, client_p,
-				"You may not register your UID, please change to a real nickname");
+		service_err(nickserv_p, client_p, SVC_NICK_CANTREGUID);
 		return 1;
 	}
 
 	if(find_nick_reg(NULL, client_p->name))
 	{
-		service_error(nickserv_p, client_p,
-				"Nickname %s is already registered",
+		service_err(nickserv_p, client_p, SVC_NICK_ALREADYREG,
 				client_p->name);
 		return 1;
 	}
@@ -315,7 +310,7 @@ s_nick_register(struct client *client_p, struct lconn *conn_p, const char *parv[
 			nreg_p->name, ureg_p->name, nreg_p->reg_time, 
 			nreg_p->last_time, nreg_p->flags);
 
-	service_error(nickserv_p, client_p, "Nickname registered");
+	service_err(nickserv_p, client_p, SVC_NICK_NOWREG, client_p->name);
 	return 1;
 }
 
@@ -329,13 +324,13 @@ s_nick_drop(struct client *client_p, struct lconn *conn_p, const char *parv[], i
 
 	if(nreg_p->user_reg != client_p->user->user_reg)
 	{
-		service_error(nickserv_p, client_p,
-				"Nickname %s is not registered to you",
+		service_err(nickserv_p, client_p, SVC_NICK_REGGEDOTHER,
 				nreg_p->name);
 		return 1;
 	}
 
-	service_error(nickserv_p, client_p, "Nickname %s dropped", parv[0]);
+	service_err(nickserv_p, client_p, SVC_SUCCESSFULON,
+			nickserv_p->name, "::DROP", parv[0]);
 
 	zlog(nickserv_p, 3, 0, 0, client_p, NULL, "DROP %s", parv[0]);
 
@@ -354,23 +349,20 @@ s_nick_release(struct client *client_p, struct lconn *conn_p, const char *parv[]
 
 	if(nreg_p->user_reg != client_p->user->user_reg)
 	{
-		service_error(nickserv_p, client_p,
-				"Nickname %s is not registered to you",
+		service_err(nickserv_p, client_p, SVC_NICK_REGGEDOTHER,
 				nreg_p->name);
 		return 1;
 	}
 
 	if((target_p = find_user(parv[0], 0)) == NULL)
 	{
-		service_error(nickserv_p, client_p,
-				"Nickname %s is not online", nreg_p->name);
+		service_err(nickserv_p, client_p, SVC_NICK_NOTONLINE, nreg_p->name);
 		return 1;
 	}
 
 	if(target_p == client_p)
 	{
-		service_error(nickserv_p, client_p,
-				"Nickname %s is already in use by you",
+		service_err(nickserv_p, client_p, SVC_NICK_USING,
 				nreg_p->name);
 		return 1;
 	}
@@ -396,32 +388,29 @@ s_nick_regain(struct client *client_p, struct lconn *conn_p, const char *parv[],
 
 	if(nreg_p->user_reg != client_p->user->user_reg)
 	{
-		service_error(nickserv_p, client_p,
-				"Nickname %s is not registered to you",
+		service_err(nickserv_p, client_p, SVC_NICK_REGGEDOTHER,
 				nreg_p->name);
 		return 1;
 	}
 
 	if((target_p = find_user(parv[0], 0)) == NULL)
 	{
-		service_error(nickserv_p, client_p,
-				"Nickname %s is not online", nreg_p->name);
+		service_err(nickserv_p, client_p, SVC_NICK_NOTONLINE,
+				nreg_p->name);
 		return 1;
 	}
 
 	if(target_p == client_p)
 	{
-		service_error(nickserv_p, client_p,
-				"Nickname %s is already in use by you",
+		service_err(nickserv_p, client_p, SVC_NICK_USING,
 				nreg_p->name);
 		return 1;
 	}
 
 	if((client_p->uplink->flags & FLAGS_RSFNC) == 0)
 	{
-		service_error(nickserv_p, client_p,
-				"%s::REGAIN is not supported by your server",
-				nickserv_p->name);
+		service_err(nickserv_p, client_p, SVC_NOTSUPPORTED,
+				nickserv_p->name, "::REGAIN");
 		return 1;
 	}
 
@@ -451,8 +440,8 @@ s_nick_set_flag(struct client *client_p, struct nick_reg *nreg_p,
 {
 	if(!strcasecmp(arg, "ON"))
 	{
-		service_error(nickserv_p, client_p,
-			"Nickname %s %s set ON", nreg_p->name, name);
+		service_err(nickserv_p, client_p, SVC_NICK_CHANGEDOPTION,
+				nreg_p->name, name, "ON");
 
 		if(nreg_p->flags & flag)
 			return 0;
@@ -466,8 +455,8 @@ s_nick_set_flag(struct client *client_p, struct nick_reg *nreg_p,
 	}
 	else if(!strcasecmp(arg, "OFF"))
 	{
-		service_error(nickserv_p, client_p,
-			"Nickname %s %s set OFF", nreg_p->name, name);
+		service_err(nickserv_p, client_p, SVC_NICK_CHANGEDOPTION,
+				nreg_p->name, name, "OFF");
 
 		if((nreg_p->flags & flag) == 0)
 			return 0;
@@ -480,8 +469,7 @@ s_nick_set_flag(struct client *client_p, struct nick_reg *nreg_p,
 		return -1;
 	}
 
-	service_error(nickserv_p, client_p,
-			"Nickname %s %s is %s",
+	service_err(nickserv_p, client_p, SVC_NICK_QUERYOPTION,
 			nreg_p->name, name, (nreg_p->flags & flag) ? "ON" : "OFF");
 	return 0;
 }
@@ -498,8 +486,7 @@ s_nick_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 
 	if(nreg_p->user_reg != client_p->user->user_reg)
 	{
-		service_error(nickserv_p, client_p,
-				"Nickname %s is not registered to you",
+		service_err(nickserv_p, client_p, SVC_NICK_REGGEDOTHER,
 				nreg_p->name);
 		return 1;
 	}
@@ -510,9 +497,8 @@ s_nick_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 	{
 		if(!config_file.nallow_set_warn)
 		{
-			service_error(nickserv_p, client_p,
-					"%s::SET::WARN is disabled",
-					nickserv_p->name);
+			service_err(nickserv_p, client_p, SVC_ISDISABLED,	
+					nickserv_p->name, "::SET::WARN");
 			return 1;
 		}
 
@@ -520,7 +506,8 @@ s_nick_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 		return 1;
 	}
 
-	service_error(nickserv_p, client_p, "Set option invalid");
+	service_err(nickserv_p, client_p, SVC_OPTIONINVALID,
+			nickserv_p->name, "::SET");
 	return 1;
 }	
 
@@ -532,13 +519,8 @@ s_nick_info(struct client *client_p, struct lconn *conn_p, const char *parv[], i
 	if((nreg_p = find_nick_reg(client_p, parv[0])) == NULL)
 		return 1;
 
-	service_error(nickserv_p, client_p,
-			"[%s] Registered to %s",
-			nreg_p->name, nreg_p->user_reg->name);
-
-	service_error(nickserv_p, client_p,
-			"[%s] Registered for %s",
-			nreg_p->name, 
+	service_err(nickserv_p, client_p, SVC_INFO_REGDURATIONNICK,
+			nreg_p->name, nreg_p->user_reg->name,
 			get_duration((time_t) (CURRENT_TIME - nreg_p->reg_time)));
 
 	zlog(nickserv_p, 5, 0, 0, client_p, NULL, "INFO %s", parv[0]);
