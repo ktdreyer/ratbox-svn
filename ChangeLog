@@ -1,3 +1,15 @@
+leeh        2007/01/27 15:50:52 UTC	(20070127_5-23531)
+  Log:
+  - finish moving operserv across to the new framework
+  
+
+  Modified:
+	rserv/trunk/include/langs.h (File Modified) 
+	rserv/trunk/src/langs.c (File Modified) 
+	rserv/trunk/src/messages.c (File Modified) 
+	rserv/trunk/src/s_operserv.c (File Modified) 
+
+
 leeh        2007/01/27 15:45:37 UTC	(20070127_4-23529)
   Log:
   - finish moving operbot onto the new framework
