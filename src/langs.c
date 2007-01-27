@@ -31,6 +31,7 @@ const char *svc_notice_string[] =
 	"SVC_OPTIONINVALID",
 	"SVC_RATELIMITED",
 	"SVC_RATELIMITEDHOST",
+	"SVC_ENDOFLIST",
 
 	/* general irc related */
 	"SVC_IRC_NOSUCHCHANNEL",
@@ -83,7 +84,6 @@ const char *svc_notice_string[] =
 	"SVC_USER_RP_LOGGEDIN",
 	/* userserv::userlist */
 	"SVC_USER_UL_START",
-	"SVC_USER_UL_END",
 	"SVC_USER_UL_ENDLIMIT",
 
 	/* userserv::info */
@@ -128,7 +128,6 @@ const char *svc_notice_string[] =
 	"SVC_BAN_NOTPLACED",
 	"SVC_BAN_INVALID",
 	"SVC_BAN_LISTSTART",
-	"SVC_BAN_LISTEND",
 	"SVC_BAN_NOPERMACCESS",
 
 	/* must be last */

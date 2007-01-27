@@ -849,7 +849,7 @@ list_bans(struct client *client_p, struct lconn *conn_p,
 
 	rsdb_exec_fetch_end(&data);
 
-	service_snd(banserv_p, client_p, conn_p, SVC_BAN_LISTEND);
+	service_snd(banserv_p, client_p, conn_p, SVC_ENDOFLIST);
 }
 
 static int

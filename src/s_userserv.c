@@ -832,7 +832,7 @@ o_user_userlist(struct client *client_p, struct lconn *conn_p, const char *parv[
 	if(limit == 1)
 		service_snd(userserv_p, client_p, conn_p, SVC_USER_UL_ENDLIMIT);
 	else
-		service_snd(userserv_p, client_p, conn_p, SVC_USER_UL_END);
+		service_snd(userserv_p, client_p, conn_p, SVC_ENDOFLIST);
 
 	zlog(userserv_p, 1, WATCH_USADMIN, 1, client_p, conn_p,
 		"USERLIST %s", mask);

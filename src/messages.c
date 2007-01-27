@@ -14,6 +14,7 @@ struct _lang_internal lang_internal[] =
 	{ SVC_OPTIONINVALID,		"%s%s option invalid"					},
 	{ SVC_RATELIMITED,		"%s%s rate-limited, try again shortly"			},
 	{ SVC_RATELIMITEDHOST,		"%s%s rate-limited for your host, try again shortly"	},
+	{ SVC_ENDOFLIST,		"End of list"						},
 
 	/* general irc related */
 	{ SVC_IRC_NOSUCHCHANNEL,	"Channel %s does not exist"				},
@@ -69,7 +70,6 @@ struct _lang_internal lang_internal[] =
 
 	/* userserv::userlist */
 	{ SVC_USER_UL_START,		"Username list matching %s, limit %u%s"			},
-	{ SVC_USER_UL_END,		"End of username list"					},
 	{ SVC_USER_UL_ENDLIMIT,		"End of username list, limit reached"			},
 
 	/* userserv::info */
@@ -114,7 +114,6 @@ struct _lang_internal lang_internal[] =
 	{ SVC_BAN_NOTPLACED,		"%s not placed on %s"					},
 	{ SVC_BAN_INVALID,		"Invalid %s: %s"					},
 	{ SVC_BAN_LISTSTART,		"Ban list matching %s"					},
-	{ SVC_BAN_LISTEND,		"End of ban list"					},
 	{ SVC_BAN_NOPERMACCESS,		"No access to set a permanent %s"			},
 
 	/* this must be last */
