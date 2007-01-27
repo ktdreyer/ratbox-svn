@@ -1,3 +1,15 @@
+leeh        2007/01/27 14:20:57 UTC	(20070127_1-23521)
+  Log:
+  - morph CHANGEDEMAIL into CHANGEOPTION
+  
+
+  Modified:
+	rserv/trunk/include/langs.h (File Modified) 
+	rserv/trunk/src/langs.c (File Modified) 
+	rserv/trunk/src/messages.c (File Modified) 
+	rserv/trunk/src/s_userserv.c (File Modified) 
+
+
 leeh        2007/01/27 14:15:46 UTC	(20070127_0-23519)
   Log:
   - move chanserv::info over to the new framework, tidying it into
