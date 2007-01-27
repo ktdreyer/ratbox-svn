@@ -116,6 +116,14 @@ struct _lang_internal lang_internal[] =
 	{ SVC_BAN_LISTSTART,		"Ban list matching %s"					},
 	{ SVC_BAN_NOPERMACCESS,		"No access to set a permanent %s"			},
 
+	/* global */
+	{ SVC_GLOBAL_WELCOMETOOLONG,	"Welcome message too long (%u > %u)",			},
+	{ SVC_GLOBAL_WELCOMEINVALID,	"Welcome id invalid (%u >= %u)"				},
+	{ SVC_GLOBAL_WELCOMESET,	"Welcome message %u set"				},
+	{ SVC_GLOBAL_WELCOMENOTSET,	"Welcome message %u not set"				},
+	{ SVC_GLOBAL_WELCOMEDELETED,	"Welcome message %u deleted"				},
+	{ SVC_GLOBAL_WELCOMELIST,	"Welcome messages:"					},
+
 	/* this must be last */
 	{ SVC_LAST,		"\0"	},
 };

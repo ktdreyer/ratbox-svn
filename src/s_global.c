@@ -35,6 +35,7 @@
 #ifdef ENABLE_GLOBAL
 #include "rsdb.h"
 #include "rserv.h"
+#include "langs.h"
 #include "io.h"
 #include "service.h"
 #include "client.h"
@@ -174,16 +175,14 @@ o_global_addwelcome(struct client *client_p, struct lconn *conn_p, const char *p
 
 	if(strlen(data) > WELCOME_MAGIC)
 	{
-		service_send(global_p, client_p, conn_p,
-				"Welcome message too long (%u > %u)",
+		service_snd(global_p, client_p, conn_p, SVC_GLOBAL_WELCOMETOOLONG,
 				(unsigned int) strlen(data), WELCOME_MAGIC);
 		return 0;
 	}
 
 	if(id >= WELCOME_MAX)
 	{
-		service_send(global_p, client_p, conn_p,
-				"Welcome id invalid (%u >= %u)",
+		service_snd(global_p, client_p, conn_p, SVC_GLOBAL_WELCOMEINVALID,
 				id, WELCOME_MAX);
 		return 0;
 	}
@@ -200,8 +199,7 @@ o_global_addwelcome(struct client *client_p, struct lconn *conn_p, const char *p
 	rsdb_exec(NULL, "INSERT INTO global_welcome (id, text) VALUES('%u', '%Q')",
 			id, data);
 
-	service_send(global_p, client_p, conn_p,
-			"Welcome message %u set", id);
+	service_snd(global_p, client_p, conn_p, SVC_GLOBAL_WELCOMESET, id);
 
 	zlog(global_p, 1, WATCH_GLOBAL, 1, client_p, conn_p,
 		"ADDWELCOME %u %s", id, data);
@@ -218,8 +216,7 @@ o_global_delwelcome(struct client *client_p, struct lconn *conn_p, const char *p
 
 	if(global_welcome_list[id] == NULL)
 	{
-		service_send(global_p, client_p, conn_p,
-				"Welcome message %u not found", id);
+		service_snd(global_p, client_p, conn_p, SVC_GLOBAL_WELCOMENOTSET, id);
 		return 0;
 	}
 
@@ -228,8 +225,7 @@ o_global_delwelcome(struct client *client_p, struct lconn *conn_p, const char *p
 	my_free(global_welcome_list[id]);
 	global_welcome_list[id] = NULL;
 
-	service_send(global_p, client_p, conn_p,
-			"Welcome message %u deleted", id);
+	service_snd(global_p, client_p, conn_p, SVC_GLOBAL_WELCOMEDELETED, id);
 
 	zlog(global_p, 1, WATCH_GLOBAL, 1, client_p, conn_p,
 		"DELWELCOME %u", id);
@@ -242,7 +238,7 @@ o_global_listwelcome(struct client *client_p, struct lconn *conn_p, const char *
 {
 	unsigned int i;
 
-	service_send(global_p, client_p, conn_p, "Welcome messages:");
+	service_snd(global_p, client_p, conn_p, SVC_GLOBAL_WELCOMELIST);
 
 	for(i = 0; i < WELCOME_MAX; i++)
 	{
@@ -251,7 +247,7 @@ o_global_listwelcome(struct client *client_p, struct lconn *conn_p, const char *
 				i, EmptyString(global_welcome_list[i]) ? "" : global_welcome_list[i]);
 	}
 
-	service_send(global_p, client_p, conn_p, "End of welcome messages");
+	service_snd(global_p, client_p, conn_p, SVC_ENDOFLIST);
 
 	zlog(global_p, 2, WATCH_GLOBAL, 1, client_p, conn_p, "LISTWELCOME");
 
