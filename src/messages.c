@@ -23,7 +23,9 @@ struct _lang_internal lang_internal[] =
 	{ SVC_IRC_CHANNELNOUSERS,	"Channel %s has no users"				},
 	{ SVC_IRC_NOSUCHSERVER,		"Server %s does not exist"				},
 	{ SVC_IRC_ALREADYONCHANNEL,	"%s is already on channel %s"				},
-	{ SVC_IRC_NOTONCHANNEL,		"%s is not on channel %s"				},
+	{ SVC_IRC_YOUALREADYONCHANNEL,	"You are already on channel %s"				},
+	{ SVC_IRC_NOTINCHANNEL,		"%s is not in channel %s"				},
+	{ SVC_IRC_YOUNOTINCHANNEL,	"You are not in channel %s"				},
 	{ SVC_IRC_NOTOPPEDONCHANNEL,	"You are not opped on channel %s"			},
 
 	/* email */
@@ -108,10 +110,24 @@ struct _lang_internal lang_internal[] =
 	{ SVC_CHAN_NOTREG,		"Channel %s is not registered"				},
 	{ SVC_CHAN_ALREADYREG,		"Channel %s is already registered"			},
 	{ SVC_CHAN_CHANGEDOPTION,	"Channel %s %s set to %s"				},
+	{ SVC_CHAN_UNSETOPTION,		"Channel %s %s unset"					},
 	{ SVC_CHAN_QUERYOPTION,		"Channel %s %s is set to %s"				},
 	{ SVC_CHAN_QUERYOPTIONALREADY,	"Channel %s %s is already set to %s"			},
 	{ SVC_CHAN_LISTSTART,		"Channel list matching %s, limit %u%s"			},
 	{ SVC_CHAN_ISSUSPENDED,		"Channel %s is suspended"				},
+	{ SVC_CHAN_NOACCESS,		"Insufficient access to channel %s"			},
+	{ SVC_CHAN_USERNOACCESS,	"User %s does not have access to channel %s"		},
+	{ SVC_CHAN_USERALREADYACCESS,	"User %s already has access to channel %s"		},
+	{ SVC_CHAN_USERHIGHERACCESS,	"User %s access level equal or higher to channel %s"	},
+	{ SVC_CHAN_INVALIDACCESS,	"Access level %s invalid"				},
+	{ SVC_CHAN_INVALIDAUTOLEVEL,	"Auto level %s invalid"					},
+	{ SVC_CHAN_INVALIDSUSPENDLEVEL,	"Suspend level %s invalid"				},
+	{ SVC_CHAN_USERREMOVED,		"User %s access to channel %s removed"			},
+	{ SVC_CHAN_REQUESTPENDING,	"Channel %s already has a pending %s request"		},
+	{ SVC_CHAN_REQUESTNONE,		"Channel %s does not have a pending %s request"		},
+	{ SVC_CHAN_TOKENMISMATCH,	"Channel %s %s tokens do not match"			},
+	{ SVC_CHAN_NOMODE,		"Channel %s does not have mode %s"			},
+
 
 	/* operserv */
 	{ SVC_OPER_CONNECTIONSSTART,	"Current connections (%s)"				},

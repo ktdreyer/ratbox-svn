@@ -168,7 +168,7 @@ o_operbot_obpart(struct client *client_p, struct lconn *conn_p, const char *parv
 				operbot_p->name, "::OBPART", parv[0]);
 	}
 	else
-		service_snd(operbot_p, client_p, conn_p, SVC_IRC_NOTONCHANNEL,
+		service_snd(operbot_p, client_p, conn_p, SVC_IRC_NOTINCHANNEL,
 				operbot_p->name, parv[0]);
 
 	return 0;

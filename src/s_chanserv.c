@@ -446,7 +446,7 @@ verify_member_reg(struct client *client_p, struct channel **chptr,
 	if((mreg_p = find_member_reg(client_p->user->user_reg, chreg_p)) == NULL ||
 	   mreg_p->level < level || mreg_p->suspend)
 	{
-		service_error(chanserv_p, client_p, "Insufficient access on %s",
+		service_err(chanserv_p, client_p, SVC_CHAN_NOACCESS,
 				chreg_p->name);
 		return NULL;
 	}
@@ -1814,7 +1814,7 @@ s_chan_adduser(struct client *client_p, struct lconn *conn_p, const char *parv[]
 
 	if(find_member_reg(ureg_p, mreg_p->channel_reg))
 	{
-		service_error(chanserv_p, client_p, "User %s on %s already has access",
+		service_err(chanserv_p, client_p, SVC_CHAN_USERALREADYACCESS,
 				ureg_p->name, mreg_p->channel_reg->name);
 		return 1;
 	}
@@ -1823,7 +1823,7 @@ s_chan_adduser(struct client *client_p, struct lconn *conn_p, const char *parv[]
 
 	if(level < 1 || level >= mreg_p->level)
 	{
-		service_error(chanserv_p, client_p, "Access level %d invalid", level);
+		service_err(chanserv_p, client_p, SVC_CHAN_INVALIDACCESS, parv[2]);
 		return 1;
 	}
 
@@ -1842,8 +1842,7 @@ s_chan_adduser(struct client *client_p, struct lconn *conn_p, const char *parv[]
 		}
 		else
 		{
-			service_error(chanserv_p, client_p,
-					"Auto level %s invalid", parv[3]);
+			service_err(chanserv_p, client_p, SVC_CHAN_INVALIDAUTOLEVEL, parv[3]);
 			return 1;
 		}
 	}
@@ -1881,7 +1880,7 @@ s_chan_deluser(struct client *client_p, struct lconn *conn_p, const char *parv[]
 
 	if((mreg_tp = find_member_reg(ureg_p, chreg_p)) == NULL)
 	{
-		service_error(chanserv_p, client_p, "User %s on %s does not have access",
+		service_err(chanserv_p, client_p, SVC_CHAN_USERNOACCESS,
 				ureg_p->name, chreg_p->name);
 		return 1;
 	}
@@ -1889,7 +1888,7 @@ s_chan_deluser(struct client *client_p, struct lconn *conn_p, const char *parv[]
 	/* allow users to delete themselves.. */
 	if(mreg_p->level <= mreg_tp->level && mreg_p != mreg_tp)
 	{
-		service_error(chanserv_p, client_p, "User %s on %s access level equal or higher",
+		service_err(chanserv_p, client_p, SVC_CHAN_USERHIGHERACCESS,
 				ureg_p->name, chreg_p->name);
 		return 1;
 	}
@@ -1905,7 +1904,7 @@ s_chan_deluser(struct client *client_p, struct lconn *conn_p, const char *parv[]
 	zlog(chanserv_p, 5, 0, 0, client_p, NULL,
 		"DELUSER %s %s", parv[0], mreg_tp->user_reg->name);
 
-	service_error(chanserv_p, client_p, "User %s on %s removed",
+	service_err(chanserv_p, client_p, SVC_CHAN_USERREMOVED,
 			mreg_tp->user_reg->name, chreg_p->name);
 
 	delete_member_db_entry(mreg_tp);
@@ -1963,9 +1962,8 @@ s_chan_delowner(struct client *client_p, struct lconn *conn_p, const char *parv[
 		/* already issued one within the past day.. */
 		if(atoi(data.row[0][0]))
 		{
-			service_error(chanserv_p, client_p,
-					"Channel %s already has a pending owner delete",
-					chreg_p->name);
+			service_err(chanserv_p, client_p, SVC_CHAN_REQUESTPENDING,
+					chreg_p->name, "DELOWNER");
 			rsdb_exec_fetch_end(&data);
 			return 1;
 		}
@@ -2040,14 +2038,12 @@ s_chan_delowner(struct client *client_p, struct lconn *conn_p, const char *parv[
 			return 1;
 		}
 		else
-			service_error(chanserv_p, client_p,
-					"Channel %s owner delete tokens do not match",
-					chreg_p->name);
+			service_err(chanserv_p, client_p, SVC_CHAN_TOKENMISMATCH,
+					chreg_p->name, "DELOWNER");
 	}
 	else
-		service_error(chanserv_p, client_p,
-				"Channel %s does not have a pending owner delete",
-				chreg_p->name);
+		service_err(chanserv_p, client_p, SVC_CHAN_REQUESTNONE,
+				chreg_p->name, "DELOWNER");
 
 	rsdb_exec_fetch_end(&data);
 	return 1;
@@ -2070,14 +2066,14 @@ s_chan_moduser(struct client *client_p, struct lconn *conn_p, const char *parv[]
 
 	if((mreg_tp = find_member_reg(ureg_p, mreg_p->channel_reg)) == NULL)
 	{
-		service_error(chanserv_p, client_p, "User %s on %s does not have access",
+		service_err(chanserv_p, client_p, SVC_CHAN_USERNOACCESS,
 				ureg_p->name, mreg_p->channel_reg->name);
 		return 1;
 	}
 
 	if(mreg_p->level <= mreg_tp->level)
 	{
-		service_error(chanserv_p, client_p, "User %s on %s access level equal or higher",
+		service_err(chanserv_p, client_p, SVC_CHAN_USERHIGHERACCESS,
 				ureg_p->name, mreg_p->channel_reg->name);
 		return 1;
 	}
@@ -2086,8 +2082,7 @@ s_chan_moduser(struct client *client_p, struct lconn *conn_p, const char *parv[]
 
 	if(!EmptyString(endptr) || level < 1 || level >= mreg_p->level)
 	{
-		service_error(chanserv_p, client_p, "Access level %s invalid",
-				parv[2]);
+		service_err(chanserv_p, client_p, SVC_CHAN_INVALIDACCESS, parv[2]);
 		return 1;
 	}
 
@@ -2126,14 +2121,14 @@ s_chan_modauto(struct client *client_p, struct lconn *conn_p, const char *parv[]
 
 	if((mreg_tp = find_member_reg(ureg_p, mreg_p->channel_reg)) == NULL)
 	{
-		service_error(chanserv_p, client_p, "User %s on %s does not have access",
+		service_err(chanserv_p, client_p, SVC_CHAN_USERNOACCESS,
 				ureg_p->name, mreg_p->channel_reg->name);
 		return 1;
 	}
 
 	if(mreg_p->level <= mreg_tp->level && mreg_p != mreg_tp)
 	{
-		service_error(chanserv_p, client_p, "User %s on %s access level equal or higher",
+		service_err(chanserv_p, client_p, SVC_CHAN_USERHIGHERACCESS,
 				ureg_p->name, mreg_p->channel_reg->name);
 		return 1;
 	}
@@ -2154,8 +2149,7 @@ s_chan_modauto(struct client *client_p, struct lconn *conn_p, const char *parv[]
 	}
 	else
 	{
-		service_error(chanserv_p, client_p, "Auto level %s invalid",
-				parv[2]);
+		service_err(chanserv_p, client_p, SVC_CHAN_INVALIDAUTOLEVEL, parv[2]);
 		return 1;
 	}
 
@@ -2213,14 +2207,14 @@ s_chan_suspend(struct client *client_p, struct lconn *conn_p, const char *parv[]
 
 	if((mreg_tp = find_member_reg(ureg_p, mreg_p->channel_reg)) == NULL)
 	{
-		service_error(chanserv_p, client_p, "User %s on %s does not have access",
+		service_err(chanserv_p, client_p, SVC_CHAN_USERNOACCESS,
 				ureg_p->name, mreg_p->channel_reg->name);
 		return 1;
 	}
 
 	if(mreg_p->level <= mreg_tp->level)
 	{
-		service_error(chanserv_p, client_p, "User %s on %s access level equal or higher",
+		service_err(chanserv_p, client_p, SVC_CHAN_USERHIGHERACCESS,
 				ureg_p->name, mreg_p->channel_reg->name);
 		return 1;
 	}
@@ -2237,7 +2231,7 @@ s_chan_suspend(struct client *client_p, struct lconn *conn_p, const char *parv[]
 
 	if(level < 1 || level > mreg_p->level)
 	{
-		service_error(chanserv_p, client_p, "Suspend level %d invalid", level);
+		service_err(chanserv_p, client_p, SVC_CHAN_INVALIDSUSPENDLEVEL, parv[2]);
 		return 1;
 	}
 
@@ -2275,7 +2269,7 @@ s_chan_unsuspend(struct client *client_p, struct lconn *conn_p, const char *parv
 
 	if((mreg_tp = find_member_reg(ureg_p, mreg_p->channel_reg)) == NULL)
 	{
-		service_error(chanserv_p, client_p, "User %s on %s does not have access",
+		service_err(chanserv_p, client_p, SVC_CHAN_USERNOACCESS,
 				ureg_p->name, mreg_p->channel_reg->name);
 		return 1;
 	}
@@ -2744,9 +2738,8 @@ s_chan_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 					"topic = NULL WHERE chname = '%Q'",
 					chreg_p->name);
 
-			service_error(chanserv_p, client_p,
-					"Channel %s TOPIC unset",
-					chreg_p->name);
+			service_err(chanserv_p, client_p, SVC_CHAN_UNSETOPTION, 
+					chreg_p->name, "TOPIC");
 			return 1;
 		}
 
@@ -2783,9 +2776,8 @@ s_chan_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 					"url = NULL WHERE chname = '%Q'",
 					chreg_p->name);
 
-			service_error(chanserv_p, client_p,
-					"Channel %s URL unset",
-					chreg_p->name);
+			service_err(chanserv_p, client_p, SVC_CHAN_UNSETOPTION, 
+					chreg_p->name, "URL");
 			return 1;
 		}
 
@@ -2861,7 +2853,7 @@ s_chan_op(struct client *client_p, struct lconn *conn_p, const char *parv[], int
 
 	if((msptr = find_chmember(chptr, client_p)) == NULL)
 	{
-		service_error(chanserv_p, client_p, "You are not on %s", parv[0]);
+		service_err(chanserv_p, client_p, SVC_IRC_YOUNOTINCHANNEL, parv[0]);
 		return 1;
 	}
 
@@ -2900,15 +2892,14 @@ s_chan_voice(struct client *client_p, struct lconn *conn_p, const char *parv[], 
 
 	if(reg_p->channel_reg->flags & CS_FLAGS_NOVOICECMD)
 	{
-		service_error(chanserv_p, client_p,
-				"Channel %s is set NOVOICECMD",
-				reg_p->channel_reg->name);
+		service_err(chanserv_p, client_p, SVC_CHAN_QUERYOPTION,
+				reg_p->channel_reg->name, "NOVOICECMD", "ON");
 		return 1;
 	}
 
 	if((msptr = find_chmember(chptr, client_p)) == NULL)
 	{
-		service_error(chanserv_p, client_p, "You are not on %s", parv[0]);
+		service_err(chanserv_p, client_p, SVC_IRC_YOUNOTINCHANNEL, parv[0]);
 		return 1;
 	}
 
@@ -2938,13 +2929,13 @@ s_chan_invite(struct client *client_p, struct lconn *conn_p, const char *parv[],
 
 	if((chptr->mode.mode & MODE_INVITEONLY) == 0)
 	{
-		service_error(chanserv_p, client_p, "Channel %s is not invite-only", parv[0]);
+		service_err(chanserv_p, client_p, SVC_CHAN_NOMODE, parv[0], "+i");
 		return 1;
 	}
 
 	if(find_chmember(chptr, client_p))
 	{
-		service_error(chanserv_p, client_p, "You are already on %s", parv[0]);
+		service_err(chanserv_p, client_p, SVC_IRC_YOUALREADYONCHANNEL, parv[0]);
 		return 1;
 	}
 
@@ -2973,22 +2964,21 @@ s_chan_getkey(struct client *client_p, struct lconn *conn_p, const char *parv[],
 
 	if(!chptr->mode.key[0])
 	{
-		service_error(chanserv_p, client_p,
-			"Channel %s is not keyed", parv[0]);
+		service_err(chanserv_p, client_p, SVC_CHAN_NOMODE,
+				parv[0], "+k");
 		return 1;
 	}
 
 	if(find_chmember(chptr, client_p))
 	{
-		service_error(chanserv_p, client_p,
-				"You are already on %s", parv[0]);
+		service_err(chanserv_p, client_p, SVC_IRC_YOUALREADYONCHANNEL, parv[0]);
 		return 1;
 	}
 
 	zlog(chanserv_p, 6, 0, 0, client_p, NULL, "GETKEY %s", parv[0]);
 
-	service_error(chanserv_p, client_p,
-			"Channel %s key is: %s", parv[0], chptr->mode.key);
+	service_err(chanserv_p, client_p, SVC_CHAN_QUERYOPTION,
+			parv[0], "+k", chptr->mode.key);
 
 	if(mreg_p->channel_reg->flags & CS_FLAGS_WARNOVERRIDE &&
 	   mreg_p->channel_reg->flags & CS_FLAGS_AUTOJOIN)
@@ -3050,8 +3040,7 @@ s_chan_addban(struct client *client_p, struct lconn *conn_p, const char *parv[],
 
 	if(!EmptyString(endptr) || level < 1 || level > mreg_p->level)
 	{
-		service_error(chanserv_p, client_p, "Access level %s invalid",
-				parv[loc]);
+		service_err(chanserv_p, client_p, SVC_CHAN_INVALIDACCESS, parv[loc]);
 		return 1;
 	}
 	
@@ -3238,8 +3227,7 @@ s_chan_modban(struct client *client_p, struct lconn *conn_p, const char *parv[],
 
 	if(!EmptyString(endptr) || level < 1 || level > mreg_p->level)
 	{
-		service_error(chanserv_p, client_p,
-				"Access level %s invalid", parv[2]);
+		service_err(chanserv_p, client_p, SVC_CHAN_INVALIDACCESS, parv[2]);
 		return 1;
 	}
 
@@ -3302,7 +3290,7 @@ s_chan_listbans(struct client *client_p, struct lconn *conn_p, const char *parv[
 				banreg_p->username, banreg_p->reason);
 	}
 
-	service_error(chanserv_p, client_p, "End of ban list");
+	service_err(chanserv_p, client_p, SVC_ENDOFLIST);
 
 	return 3;
 }

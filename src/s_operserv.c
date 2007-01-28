@@ -322,7 +322,7 @@ o_oper_ospart(struct client *client_p, struct lconn *conn_p, const char *parv[],
 
 	if((chptr = find_channel(parv[0])) == NULL || dlink_find(operserv_p, &chptr->services) == NULL)
 	{
-		service_snd(operserv_p, client_p, conn_p, SVC_IRC_NOTONCHANNEL,
+		service_snd(operserv_p, client_p, conn_p, SVC_IRC_NOTINCHANNEL,
 				operserv_p->name, parv[0]);
 		return 0;
 	}
