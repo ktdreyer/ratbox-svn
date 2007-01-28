@@ -1,3 +1,16 @@
+leeh        2007/01/28 17:52:55 UTC	(20070128_0-23539)
+  Log:
+  - move more of chanserv over to the new framework
+  
+
+  Modified:
+	rserv/trunk/include/langs.h (File Modified) 
+	rserv/trunk/src/langs.c (File Modified) 
+	rserv/trunk/src/messages.c (File Modified) 
+	rserv/trunk/src/s_chanserv.c (File Modified) 
+	rserv/trunk/src/s_userserv.c (File Modified) 
+
+
 leeh        2007/01/27 16:04:04 UTC	(20070127_7-23535)
   Log:
   - move global over to the new framework
