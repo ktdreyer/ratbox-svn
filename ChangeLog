@@ -1,3 +1,17 @@
+leeh        2007/01/28 18:51:49 UTC	(20070128_1-23541)
+  Log:
+  - more conversions of chanserv to the new framework
+  
+
+  Modified:
+	rserv/trunk/include/langs.h (File Modified) 
+	rserv/trunk/src/langs.c (File Modified) 
+	rserv/trunk/src/messages.c (File Modified) 
+	rserv/trunk/src/s_chanserv.c (File Modified) 
+	rserv/trunk/src/s_operbot.c (File Modified) 
+	rserv/trunk/src/s_operserv.c (File Modified) 
+
+
 leeh        2007/01/28 17:52:55 UTC	(20070128_0-23539)
   Log:
   - move more of chanserv over to the new framework
