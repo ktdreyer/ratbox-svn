@@ -32,6 +32,7 @@ const char *svc_notice_string[] =
 	"SVC_RATELIMITED",
 	"SVC_RATELIMITEDHOST",
 	"SVC_ENDOFLIST",
+	"SVC_ENDOFLISTLIMIT",
 
 	/* general irc related */
 	"SVC_IRC_NOSUCHCHANNEL",
@@ -40,6 +41,7 @@ const char *svc_notice_string[] =
 	"SVC_IRC_NOSUCHSERVER",
 	"SVC_IRC_ALREADYONCHANNEL",
 	"SVC_IRC_NOTONCHANNEL",
+	"SVC_IRC_NOTOPPEDONCHANNEL",
 
 	/* email */
 	"SVC_EMAIL_INVALID",
@@ -84,7 +86,6 @@ const char *svc_notice_string[] =
 	"SVC_USER_RP_LOGGEDIN",
 	/* userserv::userlist */
 	"SVC_USER_UL_START",
-	"SVC_USER_UL_ENDLIMIT",
 
 	/* userserv::info */
 	/* chanserv::info */
@@ -115,6 +116,16 @@ const char *svc_notice_string[] =
 	"SVC_NICK_REGGEDOTHER",
 	"SVC_NICK_CHANGEDOPTION",
 	"SVC_NICK_QUERYOPTION",
+
+	/* chanserv */
+	"SVC_CHAN_NOWREG",
+	"SVC_CHAN_NOTREG",
+	"SVC_CHAN_ALREADYREG",
+	"SVC_CHAN_CHANGEDOPTION",
+	"SVC_CHAN_QUERYOPTION",
+	"SVC_CHAN_QUERYOPTIONALREADY",
+	"SVC_CHAN_LISTSTART",
+	"SVC_CHAN_ISSUSPENDED",
 
 	/* operserv */
 	"SVC_OPER_CONNECTIONSSTART",

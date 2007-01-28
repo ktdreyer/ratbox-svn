@@ -830,7 +830,7 @@ o_user_userlist(struct client *client_p, struct lconn *conn_p, const char *parv[
 		service_send(userserv_p, client_p, conn_p, "  %s", buf);
 
 	if(limit == 1)
-		service_snd(userserv_p, client_p, conn_p, SVC_USER_UL_ENDLIMIT);
+		service_snd(userserv_p, client_p, conn_p, SVC_ENDOFLISTLIMIT);
 	else
 		service_snd(userserv_p, client_p, conn_p, SVC_ENDOFLIST);
 

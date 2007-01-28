@@ -15,6 +15,7 @@ struct _lang_internal lang_internal[] =
 	{ SVC_RATELIMITED,		"%s%s rate-limited, try again shortly"			},
 	{ SVC_RATELIMITEDHOST,		"%s%s rate-limited for your host, try again shortly"	},
 	{ SVC_ENDOFLIST,		"End of list"						},
+	{ SVC_ENDOFLISTLIMIT,		"End of list, limit reached"				},
 
 	/* general irc related */
 	{ SVC_IRC_NOSUCHCHANNEL,	"Channel %s does not exist"				},
@@ -23,6 +24,7 @@ struct _lang_internal lang_internal[] =
 	{ SVC_IRC_NOSUCHSERVER,		"Server %s does not exist"				},
 	{ SVC_IRC_ALREADYONCHANNEL,	"%s is already on channel %s"				},
 	{ SVC_IRC_NOTONCHANNEL,		"%s is not on channel %s"				},
+	{ SVC_IRC_NOTOPPEDONCHANNEL,	"You are not opped on channel %s"			},
 
 	/* email */
 	{ SVC_EMAIL_INVALID,		"Email %s invalid"					},
@@ -70,7 +72,6 @@ struct _lang_internal lang_internal[] =
 
 	/* userserv::userlist */
 	{ SVC_USER_UL_START,		"Username list matching %s, limit %u%s"			},
-	{ SVC_USER_UL_ENDLIMIT,		"End of username list, limit reached"			},
 
 	/* userserv::info */
 	/* chanserv::info */
@@ -101,6 +102,16 @@ struct _lang_internal lang_internal[] =
 	{ SVC_NICK_REGGEDOTHER,		"Nickname %s is not registered to you"			},
 	{ SVC_NICK_CHANGEDOPTION,	"Nickname %s %s set to %s"				},
 	{ SVC_NICK_QUERYOPTION,		"Nickname %s %s is set to %s"				},
+
+	/* chanserv */
+	{ SVC_CHAN_NOWREG,		"Channel %s registered"					},
+	{ SVC_CHAN_NOTREG,		"Channel %s is not registered"				},
+	{ SVC_CHAN_ALREADYREG,		"Channel %s is already registered"			},
+	{ SVC_CHAN_CHANGEDOPTION,	"Channel %s %s set to %s"				},
+	{ SVC_CHAN_QUERYOPTION,		"Channel %s %s is set to %s"				},
+	{ SVC_CHAN_QUERYOPTIONALREADY,	"Channel %s %s is already set to %s"			},
+	{ SVC_CHAN_LISTSTART,		"Channel list matching %s, limit %u%s"			},
+	{ SVC_CHAN_ISSUSPENDED,		"Channel %s is suspended"				},
 
 	/* operserv */
 	{ SVC_OPER_CONNECTIONSSTART,	"Current connections (%s)"				},

@@ -311,8 +311,7 @@ find_channel_reg(struct client *client_p, const char *name)
 	}
 
 	if(client_p != NULL)
-		service_error(chanserv_p, client_p, "Channel %s is not registered",
-				name);
+		service_err(chanserv_p, client_p, SVC_CHAN_NOTREG, name);
 
 	return NULL;
 }
@@ -434,15 +433,13 @@ verify_member_reg(struct client *client_p, struct channel **chptr,
 
 	if(chptr && (*chptr = find_channel(chreg_p->name)) == NULL)
 	{
-		service_error(chanserv_p, client_p, "Channel %s does not exist",
-				chreg_p->name);
+		service_err(chanserv_p, client_p, SVC_IRC_NOSUCHCHANNEL, chreg_p->name);
 		return NULL;
 	}
 
 	if(chreg_p->flags & CS_FLAGS_SUSPENDED)
 	{
-		service_error(chanserv_p, client_p, "Channel %s is suspended",
-				chreg_p->name);
+		service_err(chanserv_p, client_p, SVC_CHAN_ISSUSPENDED, chreg_p->name);
 		return NULL;
 	}
 
@@ -1424,8 +1421,7 @@ o_chan_chanregister(struct client *client_p, struct lconn *conn_p, const char *p
 
 	if((chreg_p = find_channel_reg(NULL, parv[0])))
 	{
-		service_send(chanserv_p, client_p, conn_p,
-				"Channel %s is already registered", parv[0]);
+		service_snd(chanserv_p, client_p, conn_p, SVC_CHAN_ALREADYREG, parv[0]);
 		return 0;
 	}
 
@@ -1448,9 +1444,7 @@ o_chan_chanregister(struct client *client_p, struct lconn *conn_p, const char *p
 	mreg_p = make_member_reg(ureg_p, chreg_p, OPER_NAME(client_p, conn_p), 200, 0);
 	write_member_db_entry(mreg_p);
 
-	service_send(chanserv_p, client_p, conn_p,
-			"Channel %s registered to %s",
-			chreg_p->name, ureg_p->name);
+	service_snd(chanserv_p, client_p, conn_p, SVC_CHAN_NOWREG, chreg_p->name);
 	return 0;
 }
 
@@ -1461,8 +1455,7 @@ o_chan_chandrop(struct client *client_p, struct lconn *conn_p, const char *parv[
 
 	if((reg_p = find_channel_reg(NULL, parv[0])) == NULL)
 	{
-		service_send(chanserv_p, client_p, conn_p,
-				"Channel %s is not registered", parv[0]);
+		service_snd(chanserv_p, client_p, conn_p, SVC_CHAN_NOTREG, parv[0]);
 		return 0;
 	}
 
@@ -1484,15 +1477,14 @@ o_chan_chansuspend(struct client *client_p, struct lconn *conn_p, const char *pa
 
 	if((reg_p = find_channel_reg(NULL, parv[0])) == NULL)
 	{
-		service_send(chanserv_p, client_p, conn_p,
-				"Channel %s is not registered", parv[0]);
+		service_snd(chanserv_p, client_p, conn_p, SVC_CHAN_NOTREG, parv[0]);
 		return 0;
 	}
 
 	if(reg_p->flags & CS_FLAGS_SUSPENDED)
 	{
-		service_send(chanserv_p, client_p, conn_p,
-				"Channel %s is already suspended", parv[0]);
+		service_snd(chanserv_p, client_p, conn_p, SVC_CHAN_QUERYOPTIONALREADY,
+				parv[0], "SUSPEND", "ON");
 		return 0;
 	}
 
@@ -1511,8 +1503,8 @@ o_chan_chansuspend(struct client *client_p, struct lconn *conn_p, const char *pa
 			reg_p->flags, reg_p->suspender, reg_p->suspend_reason,
 			reg_p->last_time, reg_p->name);
 
-	service_send(chanserv_p, client_p, conn_p,
-			"Channel %s suspended", parv[0]);
+	service_snd(chanserv_p, client_p, conn_p, SVC_CHAN_CHANGEDOPTION,
+			parv[0], "SUSPEND", "ON");
 	return 0;
 }
 
@@ -1523,15 +1515,14 @@ o_chan_chanunsuspend(struct client *client_p, struct lconn *conn_p, const char *
 
 	if((reg_p = find_channel_reg(NULL, parv[0])) == NULL)
 	{
-		service_send(chanserv_p, client_p, conn_p,
-				"Channel %s is not registered", parv[0]);
+		service_snd(chanserv_p, client_p, conn_p, SVC_CHAN_NOTREG, parv[0]);
 		return 0;
 	}
 
 	if((reg_p->flags & CS_FLAGS_SUSPENDED) == 0)
 	{
-		service_send(chanserv_p, client_p, conn_p,
-				"Channel %s is not suspended", reg_p->name);
+		service_snd(chanserv_p, client_p, conn_p, SVC_CHAN_QUERYOPTIONALREADY,
+				reg_p->name, "SUSPEND", "OFF");
 		return 0;
 	}
 
@@ -1548,8 +1539,8 @@ o_chan_chanunsuspend(struct client *client_p, struct lconn *conn_p, const char *
 	rsdb_exec(NULL, "UPDATE channels SET flags='%d',suspender=NULL,suspend_reason=NULL,last_time='%lu' WHERE chname = '%Q'",
 			reg_p->flags, reg_p->last_time, reg_p->name);
 
-	service_send(chanserv_p, client_p, conn_p,
-			"Channel %s unsuspended", reg_p->name);
+	service_snd(chanserv_p, client_p, conn_p, SVC_CHAN_CHANGEDOPTION,
+			reg_p->name, "SUSPEND", "OFF");
 	return 0;
 }
 
@@ -1593,10 +1584,8 @@ o_chan_chanlist(struct client *client_p, struct lconn *conn_p, const char *parv[
 			limit = atoi(parv[para]);
 	}
 
-	service_send(chanserv_p, client_p, conn_p,
-			"Channel list matching %s, limit %u%s",
-			mask, limit,
-			suspended ? ", suspended" : "");
+	service_snd(chanserv_p, client_p, conn_p, SVC_CHAN_LISTSTART,
+			mask, limit, suspended ? ", suspended" : "");
 
 	HASH_WALK(i, MAX_CHANNEL_TABLE, ptr, chan_reg_table)
 	{
@@ -1671,9 +1660,10 @@ o_chan_chanlist(struct client *client_p, struct lconn *conn_p, const char *parv[
 	if(!longlist)
 		service_send(chanserv_p, client_p, conn_p, "  %s", buf);
 
-	service_send(chanserv_p, client_p, conn_p,
-			"End of channel list%s",
-			(limit == 1) ? ", limit reached" : "");
+	if(limit == 1)
+		service_snd(chanserv_p, client_p, conn_p, SVC_ENDOFLISTLIMIT);
+	else
+		service_snd(chanserv_p, client_p, conn_p, SVC_ENDOFLIST);
 
 	zlog(chanserv_p, 1, WATCH_CSOPER, 1, client_p, conn_p,
 		"CHANLIST %s", mask);
@@ -1689,8 +1679,7 @@ o_chan_chaninfo(struct client *client_p, struct lconn *conn_p, const char *parv[
 
 	if((chreg_p = find_channel_reg(NULL, parv[0])) == NULL)
 	{
-		service_send(chanserv_p, client_p, conn_p,
-				"Channel %s is not registered", parv[0]);
+		service_snd(chanserv_p, client_p, conn_p, SVC_CHAN_NOTREG, parv[0]);
 		return 0;
 	}
 
@@ -1736,7 +1725,7 @@ s_chan_register(struct client *client_p, struct lconn *conn_p, const char *parv[
 
 	if((reg_p = find_channel_reg(NULL, parv[0])))
 	{
-		service_error(chanserv_p, client_p, "Channel %s is already registered", parv[0]);
+		service_err(chanserv_p, client_p, SVC_CHAN_ALREADYREG, parv[0]);
 		return 1;
 	}
 
@@ -1744,7 +1733,7 @@ s_chan_register(struct client *client_p, struct lconn *conn_p, const char *parv[
 	   (mptr = find_chmember(chptr, client_p)) == NULL ||
 	   !is_opped(mptr))
 	{
-		service_error(chanserv_p, client_p, "You are not opped on %s", parv[0]);
+		service_err(chanserv_p, client_p, SVC_IRC_NOTOPPEDONCHANNEL, parv[0]);
 		return 1;
 	}
 
@@ -1803,8 +1792,7 @@ s_chan_register(struct client *client_p, struct lconn *conn_p, const char *parv[
 				client_p->user->user_reg->name, 200, 0);
 	write_member_db_entry(mreg_p);
 
-	service_error(chanserv_p, client_p, "Channel %s registered",
-			chptr->name);
+	service_err(chanserv_p, client_p, SVC_CHAN_NOWREG, chptr->name);
 
 	return 5;
 }
@@ -2204,7 +2192,7 @@ s_chan_listusers(struct client *client_p, struct lconn *conn_p, const char *parv
 
 	dump_info_accesslist(client_p, NULL, mreg_p->channel_reg);
 
-	service_error(chanserv_p, client_p, "End of access list");
+	service_err(chanserv_p, client_p, SVC_ENDOFLIST);
 
 	return 3;
 }
@@ -2515,8 +2503,8 @@ s_chan_set_flag(struct client *client_p, struct chan_reg *chreg_p,
 {
 	if(!strcasecmp(arg, "ON"))
 	{
-		service_error(chanserv_p, client_p,
-			"Channel %s %s set ON", chreg_p->name, name);
+		service_err(chanserv_p, client_p, SVC_CHAN_CHANGEDOPTION,
+				chreg_p->name, name, "ON");
 
 		if(chreg_p->flags & flag)
 			return 0;
@@ -2527,8 +2515,8 @@ s_chan_set_flag(struct client *client_p, struct chan_reg *chreg_p,
 	}
 	else if(!strcasecmp(arg, "OFF"))
 	{
-		service_error(chanserv_p, client_p,
-			"Channel %s %s set OFF", chreg_p->name, name);
+		service_err(chanserv_p, client_p, SVC_CHAN_CHANGEDOPTION,
+				chreg_p->name, name, "OFF");
 
 		if((chreg_p->flags & flag) == 0)
 			return 0;
@@ -2538,8 +2526,8 @@ s_chan_set_flag(struct client *client_p, struct chan_reg *chreg_p,
 		return -1;
 	}
 	
-	service_error(chanserv_p, client_p,
-			"Channel %s %s is %s", chreg_p->name, name,
+	service_err(chanserv_p, client_p, SVC_CHAN_QUERYOPTION,
+			chreg_p->name, name,
 			(chreg_p->flags & flag) ? "ON" : "OFF");
 	return 0;
 }
@@ -2650,10 +2638,9 @@ s_chan_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 
 		if(EmptyString(arg))
 		{
-			service_error(chanserv_p, client_p,
-				"Channel %s CREATEMODES are %s",
-				chreg_p->name,
-				chmode_to_string(&chreg_p->cmode));
+			service_err(chanserv_p, client_p, SVC_CHAN_QUERYOPTION,
+					chreg_p->name, "CREATEMODES",
+					chmode_to_string(&chreg_p->cmode));
 			return 1;
 		}
 
@@ -2683,9 +2670,8 @@ s_chan_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 				"WHERE chname = '%Q'",
 				modestring, chreg_p->name);
 
-		service_error(chanserv_p, client_p,
-				"Channel %s CREATEMODES set %s",
-				chreg_p->name, modestring);
+		service_err(chanserv_p, client_p, SVC_CHAN_CHANGEDOPTION,
+				chreg_p->name, "CREATEMODES", modestring);
 
 		return 1;
 	}
@@ -2696,10 +2682,9 @@ s_chan_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 
 		if(EmptyString(arg))
 		{
-			service_error(chanserv_p, client_p,
-				"Channel %s ENFORCEMODES are %s",
-				chreg_p->name,
-				chmode_to_string(&chreg_p->emode));
+			service_err(chanserv_p, client_p, SVC_CHAN_QUERYOPTION,
+					chreg_p->name, "ENFORCEMODES",
+					chmode_to_string(&chreg_p->emode));
 			return 1;
 		}
 
@@ -2727,9 +2712,8 @@ s_chan_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 		rsdb_exec(NULL, "UPDATE channels SET enforcemodes='%Q' "
 				"WHERE chname='%Q'",
 				modestring, chreg_p->name);
-		service_error(chanserv_p, client_p,
-				"Channel %s ENFORCEMODES set %s",
-				chreg_p->name, modestring);
+		service_err(chanserv_p, client_p, SVC_CHAN_CHANGEDOPTION,
+				chreg_p->name, "ENFORCEMODES", modestring);
 
 		/* this will do all the hard work for us.. */
 		if((chptr = find_channel(chreg_p->name)))
@@ -2743,10 +2727,9 @@ s_chan_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 
 		if(EmptyString(arg))
 		{
-			service_error(chanserv_p, client_p,
-				"Channel %s TOPIC is '%s'",
-				chreg_p->name, EmptyString(chreg_p->topic) ?
-				 "<none>" : chreg_p->topic);
+			service_err(chanserv_p, client_p, SVC_CHAN_QUERYOPTION,
+				chreg_p->name, "TOPIC",
+				EmptyString(chreg_p->topic) ? "<none>" : chreg_p->topic);
 			return 1;
 		}
 
@@ -2777,19 +2760,17 @@ s_chan_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 				"WHERE chname='%Q'",
 				chreg_p->topic, chreg_p->name);
 
-		service_error(chanserv_p, client_p,
-				"Channel %s TOPIC set '%s'",
-				chreg_p->name, chreg_p->topic);
+		service_err(chanserv_p, client_p, SVC_CHAN_CHANGEDOPTION,
+				chreg_p->name, "TOPIC", chreg_p->topic);
 		return 1;
 	}
 	else if(!strcasecmp(parv[1], "URL"))
 	{
 		if(EmptyString(arg))
 		{
-			service_error(chanserv_p, client_p,
-				"Channel %s URL is '%s'",
-				chreg_p->name, EmptyString(chreg_p->url) ?
-				 "<none>" : chreg_p->url);
+			service_err(chanserv_p, client_p, SVC_CHAN_QUERYOPTION,
+					chreg_p->name, "URL",
+					EmptyString(chreg_p->url) ? "<none>" : chreg_p->url);
 			return 1;
 		}
 
@@ -2815,14 +2796,14 @@ s_chan_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 				"WHERE chname='%Q'",
 				chreg_p->url, chreg_p->name);
 
-		service_error(chanserv_p, client_p,
-				"Channel %s URL set '%s'",
-				chreg_p->name, chreg_p->url);
+		service_err(chanserv_p, client_p, SVC_CHAN_CHANGEDOPTION,
+				chreg_p->name, "URL", chreg_p->url);
 		return 1;
 	}
 
 
-	service_error(chanserv_p, client_p, "Set option invalid");
+	service_err(chanserv_p, client_p, SVC_OPTIONINVALID,
+			chanserv_p->name, "::SET");
 	return 1;
 }
 
@@ -2873,9 +2854,8 @@ s_chan_op(struct client *client_p, struct lconn *conn_p, const char *parv[], int
 	/* noone is allowed to be opped.. */
 	if(reg_p->channel_reg->flags & CS_FLAGS_NOOPS)
 	{
-		service_error(chanserv_p, client_p,
-			"Channel %s is set NOOPS",
-			reg_p->channel_reg->name);
+		service_err(chanserv_p, client_p, SVC_CHAN_QUERYOPTION,
+				reg_p->channel_reg->name, "NOOPS", "ON");
 		return 1;
 	}
 
@@ -2913,9 +2893,8 @@ s_chan_voice(struct client *client_p, struct lconn *conn_p, const char *parv[], 
 	/* noone is allowed to be voiced.. */
 	if(reg_p->channel_reg->flags & CS_FLAGS_NOVOICES)
 	{
-		service_error(chanserv_p, client_p,
-			"Channel %s is set NOVOICES",
-			reg_p->channel_reg->name);
+		service_err(chanserv_p, client_p, SVC_CHAN_QUERYOPTION,
+				reg_p->channel_reg->name, "NOVOICES", "ON");
 		return 1;
 	}
 
