@@ -1854,10 +1854,8 @@ s_chan_adduser(struct client *client_p, struct lconn *conn_p, const char *parv[]
 	mreg_tp = make_member_reg(ureg_p, mreg_p->channel_reg, mreg_p->user_reg->name, level, flags);
 	write_member_db_entry(mreg_tp);
 
-	service_error(chanserv_p, client_p, "User %s on %s level %d%s%s added",
-			ureg_p->name, mreg_p->channel_reg->name, level,
-			flags != 0 ? " autolevel " : "",
-			flags != 0 ? parv[3] : "");
+	service_err(chanserv_p, client_p, SVC_CHAN_USERSETACCESS,
+			ureg_p->name, level, mreg_tp->channel_reg->name);
 
 	return 1;
 }
@@ -1895,8 +1893,7 @@ s_chan_deluser(struct client *client_p, struct lconn *conn_p, const char *parv[]
 
 	if(mreg_tp->level == S_C_OWNER)
 	{
-		service_error(chanserv_p, client_p,
-				"User %s is the owner of %s. Please use %s::DELOWNER instead",
+		service_err(chanserv_p, client_p, SVC_CHAN_USEDELOWNER,
 				ureg_p->name, chreg_p->name, chanserv_p->name);
 		return 1;
 	}
@@ -1931,8 +1928,8 @@ s_chan_delowner(struct client *client_p, struct lconn *conn_p, const char *parv[
 	/* dont require auth */
 	if(!config_file.cemail_delowner)
 	{
-		service_error(chanserv_p, client_p,
-				"Channel %s owner deleted", chreg_p->name);
+		service_err(chanserv_p, client_p, SVC_CHAN_USERREMOVED,
+				ureg_p->name, chreg_p->name);
 		delete_member_db_entry(mreg_p);
 		free_member_reg(mreg_p, 1);
 		return 1;
@@ -2030,8 +2027,8 @@ s_chan_delowner(struct client *client_p, struct lconn *conn_p, const char *parv[
 			rsdb_exec(NULL, "DELETE FROM channels_dropowner WHERE chname='%Q'",
 					ureg_p->name);
 
-			service_error(chanserv_p, client_p,
-					"Channel %s owner deleted", chreg_p->name);
+			service_err(chanserv_p, client_p, SVC_CHAN_USERREMOVED,
+					ureg_p->name, chreg_p->name);
 
 			delete_member_db_entry(mreg_p);
 			free_member_reg(mreg_p, 1);
@@ -2094,8 +2091,8 @@ s_chan_moduser(struct client *client_p, struct lconn *conn_p, const char *parv[]
 	my_free(mreg_tp->lastmod);
 	mreg_tp->lastmod = my_strdup(mreg_p->user_reg->name);
 
-	service_error(chanserv_p, client_p, "User %s on %s level %d set",
-			mreg_tp->user_reg->name, mreg_tp->channel_reg->name, level);
+	service_err(chanserv_p, client_p, SVC_CHAN_USERSETACCESS,
+			mreg_tp->user_reg->name, level, mreg_tp->channel_reg->name);
 
 	rsdb_exec(NULL, 
 			"UPDATE members SET level = '%d', lastmod = '%Q' "
@@ -2160,9 +2157,8 @@ s_chan_modauto(struct client *client_p, struct lconn *conn_p, const char *parv[]
 	my_free(mreg_tp->lastmod);
 	mreg_tp->lastmod = my_strdup(mreg_p->user_reg->name);
 
-	service_error(chanserv_p, client_p, "User %s on %s autolevel %s set",
-			mreg_tp->user_reg->name, mreg_tp->channel_reg->name, 
-			parv[2]);
+	service_err(chanserv_p, client_p, SVC_CHAN_USERSETAUTOLEVEL,
+			mreg_tp->user_reg->name, parv[2], mreg_tp->channel_reg->name);
 
 	rsdb_exec(NULL, 
 			"UPDATE members SET flags = '%d', lastmod = '%Q' "
@@ -2222,7 +2218,7 @@ s_chan_suspend(struct client *client_p, struct lconn *conn_p, const char *parv[]
 	/* suspended already at a higher level? */
 	if(mreg_tp->suspend > mreg_p->level)
 	{
-		service_error(chanserv_p, client_p, "User %s on %s suspend level higher",
+		service_err(chanserv_p, client_p, SVC_CHAN_USERHIGHERSUSPEND,
 				ureg_p->name, mreg_p->channel_reg->name);
 		return 1;
 	}
@@ -2243,8 +2239,8 @@ s_chan_suspend(struct client *client_p, struct lconn *conn_p, const char *parv[]
 	my_free(mreg_tp->lastmod);
 	mreg_tp->lastmod = my_strdup(mreg_p->user_reg->name);
 
-	service_error(chanserv_p, client_p, "User %s on %s suspend %d set",
-			mreg_tp->user_reg->name, mreg_tp->channel_reg->name, level);
+	service_err(chanserv_p, client_p, SVC_CHAN_USERSETSUSPEND,
+			mreg_tp->user_reg->name, level, mreg_tp->channel_reg->name);
 
 	rsdb_exec(NULL, "UPDATE members SET suspend = '%d', lastmod = '%Q' "
 			"WHERE chname = '%Q' AND username = '%Q'",
@@ -2279,7 +2275,7 @@ s_chan_unsuspend(struct client *client_p, struct lconn *conn_p, const char *parv
 	 */
 	if(mreg_tp->suspend > mreg_p->level)
 	{
-		service_error(chanserv_p, client_p, "User %s on %s suspend level higher",
+		service_err(chanserv_p, client_p, SVC_CHAN_USERHIGHERSUSPEND,
 				ureg_p->name, mreg_p->channel_reg->name);
 		return 1;
 	}
@@ -2292,7 +2288,7 @@ s_chan_unsuspend(struct client *client_p, struct lconn *conn_p, const char *parv
 	my_free(mreg_tp->lastmod);
 	mreg_tp->lastmod = my_strdup(mreg_p->user_reg->name);
 
-	service_error(chanserv_p, client_p, "User %s on %s unsuspended",
+	service_err(chanserv_p, client_p, SVC_CHAN_USERSUSPENDREMOVED,
 			 mreg_tp->user_reg->name, mreg_tp->channel_reg->name);
 
 	rsdb_exec(NULL, "UPDATE members SET suspend = '0', lastmod = '%Q' "
@@ -2318,8 +2314,8 @@ s_chan_clearmodes(struct client *client_p, struct lconn *conn_p, const char *par
 	if(!chptr->mode.key[0] && !chptr->mode.limit &&
 	   !(chptr->mode.mode & MODE_INVITEONLY))
 	{
-		service_error(chanserv_p, client_p, "Channel %s has no modes to clear",
-				chptr->name);
+		service_err(chanserv_p, client_p, SVC_CHAN_NOMODE,
+				chptr->name, "+ilk");
 		return 1;
 	}
 
@@ -2643,9 +2639,7 @@ s_chan_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 		if(strchr(parv[2], '-') ||
 		   !parse_simple_mode(&mode, (const char **) parv, parc, 2))
 		{
-			service_error(chanserv_p, client_p,
-				"Mode %s invalid",
-				parv[2]);
+			service_err(chanserv_p, client_p, SVC_CHAN_INVALIDMODE, parv[2]);
 			return 1;
 		}
 
@@ -2687,8 +2681,7 @@ s_chan_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 		if(strchr(arg, '-') ||
 		   !parse_simple_mode(&mode, (const char **) parv, parc, 2))
 		{
-			service_error(chanserv_p, client_p,
-				"Mode %s invalid", arg);
+			service_err(chanserv_p, client_p, SVC_CHAN_INVALIDMODE, arg);
 			return 1;
 		}
 
@@ -2859,7 +2852,7 @@ s_chan_op(struct client *client_p, struct lconn *conn_p, const char *parv[], int
 
 	if(is_opped(msptr))
 	{
-		service_error(chanserv_p, client_p, "You are already opped on %s", parv[0]);
+		service_err(chanserv_p, client_p, SVC_CHAN_ALREADYOPPED, parv[0]);
 		return 1;
 	}
 
@@ -2905,7 +2898,7 @@ s_chan_voice(struct client *client_p, struct lconn *conn_p, const char *parv[], 
 
 	if(is_voiced(msptr))
 	{
-		service_error(chanserv_p, client_p, "You are already voiced on %s", parv[0]);
+		service_err(chanserv_p, client_p, SVC_CHAN_ALREADYVOICED, parv[0]);
 		return 1;
 	}
 
@@ -3017,21 +3010,19 @@ s_chan_addban(struct client *client_p, struct lconn *conn_p, const char *parv[],
 
 	if(dlink_list_length(&mreg_p->channel_reg->bans) > config_file.cmax_bans)
 	{
-		service_error(chanserv_p, client_p, "Channel %s banlist full",
-				chptr->name);
+		service_err(chanserv_p, client_p, SVC_CHAN_BANLISTFULL, chptr->name);
 		return 1;
 	}
 
 	if(!valid_ban(mask))
 	{
-		service_error(chanserv_p, client_p, "Ban %s invalid",
-				mask);
+		service_err(chanserv_p, client_p, SVC_CHAN_INVALIDBAN, mask);
 		return 1;
 	}
 
 	if((banreg_p = find_ban_reg(mreg_p->channel_reg, mask)) != NULL)
 	{
-		service_error(chanserv_p, client_p, "Ban %s on %s already set",
+		service_err(chanserv_p, client_p, SVC_CHAN_ALREADYBANNED,
 				mask, mreg_p->channel_reg->name);
 		return 1;
 	}
@@ -3081,8 +3072,8 @@ s_chan_addban(struct client *client_p, struct lconn *conn_p, const char *parv[],
 			duration ? CURRENT_TIME + duration : 0);
 	write_ban_db_entry(banreg_p, mreg_p->channel_reg->name);
 
-	service_error(chanserv_p, client_p, "Ban %s on %s added",
-			mask, mreg_p->channel_reg->name);
+	service_err(chanserv_p, client_p, SVC_CHAN_BANSET,
+			mask, level, mreg_p->channel_reg->name);
 
 	if(chptr == NULL)
 		return 1;
@@ -3160,14 +3151,14 @@ s_chan_delban(struct client *client_p, struct lconn *conn_p, const char *parv[],
 
 	if((banreg_p = find_ban_reg(mreg_p->channel_reg, parv[1])) == NULL)
 	{
-		service_error(chanserv_p, client_p, "Ban %s on %s not found",
+		service_err(chanserv_p, client_p, SVC_CHAN_NOTBANNED,
 				parv[1], mreg_p->channel_reg->name);
 		return 1;
 	}
 
 	if(banreg_p->level > mreg_p->level)
 	{
-		service_error(chanserv_p, client_p, "Ban %s on %s higher level",
+		service_err(chanserv_p, client_p, SVC_CHAN_BANHIGHERLEVEL,
 				parv[1], mreg_p->channel_reg->name);
 		return 1;
 	}
@@ -3175,7 +3166,7 @@ s_chan_delban(struct client *client_p, struct lconn *conn_p, const char *parv[],
 	zlog(chanserv_p, 6, 0, 0, client_p, NULL,
 		"DELBAN %s %s", parv[0], parv[1]);
 
-	service_error(chanserv_p, client_p, "Ban %s on %s removed",
+	service_err(chanserv_p, client_p, SVC_CHAN_BANREMOVED,
 			parv[1], mreg_p->channel_reg->name);
 
 	rsdb_exec(NULL, "DELETE FROM bans WHERE chname = '%Q' AND mask = '%Q'",
@@ -3233,15 +3224,14 @@ s_chan_modban(struct client *client_p, struct lconn *conn_p, const char *parv[],
 
 	if((banreg_p = find_ban_reg(mreg_p->channel_reg, parv[1])) == NULL)
 	{
-		service_error(chanserv_p, client_p, "Ban %s on %s not found",
+		service_err(chanserv_p, client_p, SVC_CHAN_NOTBANNED,
 				parv[1], mreg_p->channel_reg->name);
 		return 1;
 	}
 
 	if(banreg_p->level > mreg_p->level)
 	{
-		service_error(chanserv_p, client_p,
-				"Ban %s on %s higher level",
+		service_err(chanserv_p, client_p, SVC_CHAN_BANHIGHERLEVEL,
 				parv[1], mreg_p->channel_reg->name);
 		return 1;
 	}
@@ -3250,9 +3240,8 @@ s_chan_modban(struct client *client_p, struct lconn *conn_p, const char *parv[],
 	my_free(banreg_p->username);
 	banreg_p->username = my_strdup(mreg_p->user_reg->name);
 
-	service_error(chanserv_p, client_p,
-			"Ban %s on %s level %d set",
-			parv[1], mreg_p->channel_reg->name, level);
+	service_err(chanserv_p, client_p, SVC_CHAN_BANSET,
+			parv[1], level, mreg_p->channel_reg->name);
 
 	rsdb_exec(NULL, "UPDATE bans SET level = '%d', username = '%Q' "
 			"WHERE chname = '%Q' AND mask = '%Q'",
@@ -3276,8 +3265,7 @@ s_chan_listbans(struct client *client_p, struct lconn *conn_p, const char *parv[
 
 	zlog(chanserv_p, 6, 0, 0, client_p, NULL, "LISTBANS %s", parv[0]);
 
-	service_error(chanserv_p, client_p, "Channel %s ban list:",
-			mreg_p->channel_reg->name);
+	service_err(chanserv_p, client_p, SVC_CHAN_BANLISTSTART, mreg_p->channel_reg->name);
 
 	DLINK_FOREACH(ptr, mreg_p->channel_reg->bans.head)
 	{
@@ -3311,16 +3299,14 @@ s_chan_unban(struct client *client_p, struct lconn *conn_p, const char *parv[], 
 	/* cached ban of higher level */
 	if(mreg_p->bants == mreg_p->channel_reg->bants)
 	{
-		service_error(chanserv_p, client_p,
-			"Channel %s has a higher level ban",
-			chptr->name);
+		service_err(chanserv_p, client_p, SVC_CHAN_BANHIGHERACCOUNT,
+				chptr->name);
 		return 1;
 	}
 
 	if(find_exempt(chptr, client_p))
 	{
-		service_error(chanserv_p, client_p, "Channel %s has a +e for your mask",
-				chptr->name);
+		service_err(chanserv_p, client_p, SVC_CHAN_YOUNOTBANNED, chptr->name);
 		return 1;
 	}
 
@@ -3340,11 +3326,10 @@ s_chan_unban(struct client *client_p, struct lconn *conn_p, const char *parv[], 
 	modebuild_finish();
 
 	if(found)
-		service_error(chanserv_p, client_p, 
-			"Channel %s matching bans cleared", chptr->name);
+		service_err(chanserv_p, client_p, SVC_SUCCESSFULON,
+				chanserv_p->name, "::UNBAN", chptr->name);
 	else
-		service_error(chanserv_p, client_p,
-			"Channel %s has no +b for you", chptr->name);
+		service_err(chanserv_p, client_p, SVC_CHAN_YOUNOTBANNED, chptr->name);
 
 	return 3;
 }
