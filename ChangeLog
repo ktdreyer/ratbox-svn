@@ -1,3 +1,15 @@
+leeh        2007/01/30 18:23:22 UTC	(20070130_1-23548)
+  Log:
+  - move alis over to new framework
+  
+
+  Modified:
+	rserv/trunk/include/langs.h (File Modified) 
+	rserv/trunk/src/langs.c (File Modified) 
+	rserv/trunk/src/messages.c (File Modified) 
+	rserv/trunk/src/s_alis.c (File Modified) 
+
+
 leeh        2007/01/30 18:17:34 UTC	(20070130_0-23546)
   Log:
   - finish moving chanserv over to the new framework
