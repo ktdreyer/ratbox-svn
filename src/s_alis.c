@@ -35,6 +35,7 @@
 #ifdef ENABLE_ALIS
 #include "service.h"
 #include "rserv.h"
+#include "langs.h"
 #include "io.h"
 #include "client.h"
 #include "channel.h"
@@ -143,7 +144,8 @@ parse_alis(struct client *client_p, struct alis_query *query,
 	{
 		if(param >= parc || EmptyString(parv[param]))
 		{
-			service_error(alis_p, client_p, "Missing parameters");
+			service_err(alis_p, client_p, SVC_NEEDMOREPARAMS,
+					alis_p->name, "::LIST");
 			return 0;
 		}
 
@@ -151,7 +153,8 @@ parse_alis(struct client *client_p, struct alis_query *query,
 		{
 			if((query->min = atoi(parv[param])) < 1)
 			{
-				service_error(alis_p, client_p, "Invalid -min option");
+				service_err(alis_p, client_p, SVC_OPTIONINVALID,
+						alis_p->name, "::LIST -min");
 				return 0;
 			}
 		}
@@ -159,7 +162,8 @@ parse_alis(struct client *client_p, struct alis_query *query,
 		{
 			if((query->max = atoi(parv[param])) < 1)
 			{
-				service_error(alis_p, client_p, "Invalid -max option");
+				service_err(alis_p, client_p, SVC_OPTIONINVALID,
+						alis_p->name, "::LIST -max");
 				return 0;
 			}
 		}
@@ -167,7 +171,8 @@ parse_alis(struct client *client_p, struct alis_query *query,
 		{
 			if((query->skip = atoi(parv[param])) < 1)
 			{
-				service_error(alis_p, client_p, "Invalid -skip option");
+				service_err(alis_p, client_p, SVC_OPTIONINVALID,
+						alis_p->name, "::LIST -skip");
 				return 0;
 			}
 		}
@@ -210,7 +215,8 @@ parse_alis(struct client *client_p, struct alis_query *query,
 					query->mode_dir = DIR_EQUAL;
 					break;
 				default:
-					service_error(alis_p, client_p, "Invalid -mode option");
+					service_err(alis_p, client_p, SVC_OPTIONINVALID,
+							alis_p->name, "::LIST -mode");
 					return 0;
 			}
 
@@ -220,13 +226,15 @@ parse_alis(struct client *client_p, struct alis_query *query,
 
 			if(query->mode == -1)
 			{
-				service_error(alis_p, client_p, "Invalid -mode option");
+				service_err(alis_p, client_p, SVC_OPTIONINVALID,
+						alis_p->name, "::LIST -mode");
 				return 0;
 			}
 		}
 		else
 		{
-			service_error(alis_p, client_p, "Invalid option %s", parv[i]);
+			service_err(alis_p, client_p, SVC_OPTIONINVALID,
+					alis_p->name, "::LIST");
 			return 0;
 		}
 
@@ -344,8 +352,7 @@ s_alis_list(struct client *client_p, struct lconn *conn_p, const char *parv[], i
 
 	zlog(alis_p, 1, 0, 0, client_p, NULL, "LIST %s", query.mask);
 
-        service_error(alis_p, client_p, 
-		"Returning maximum of %d channel names matching '%s'",
+        service_err(alis_p, client_p, SVC_ALIS_LISTSTART,
 		config_file.max_matches, query.mask);
 
         /* hunting for one channel.. */
@@ -357,7 +364,7 @@ s_alis_list(struct client *client_p, struct lconn *conn_p, const char *parv[], i
                                 print_channel(client_p, chptr, &query);
                 }
 
-                service_error(alis_p, client_p, "End of output");
+                service_err(alis_p, client_p, SVC_ENDOFLIST);
                 return 1;
         }
 
@@ -372,13 +379,13 @@ s_alis_list(struct client *client_p, struct lconn *conn_p, const char *parv[], i
 
                         if(--maxmatch == 0)
                         {
-                                service_error(alis_p, client_p, "Maximum channel output reached");
+                                service_err(alis_p, client_p, SVC_ENDOFLISTLIMIT);
                                 break;
                         }
                 }
         }
 
-        service_error(alis_p, client_p, "End of output");
+        service_err(alis_p, client_p, SVC_ENDOFLIST);
         return 3;
 }
 

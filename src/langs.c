@@ -182,6 +182,9 @@ const char *svc_notice_string[] =
 	"SVC_GLOBAL_WELCOMEDELETED",
 	"SVC_GLOBAL_WELCOMELIST",
 
+	/* alis */
+	"SVC_ALIS_LISTSTART",
+
 	/* must be last */
 	"\0"
 };

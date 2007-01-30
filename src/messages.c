@@ -169,6 +169,9 @@ struct _lang_internal lang_internal[] =
 	{ SVC_GLOBAL_WELCOMEDELETED,	"Welcome message %u deleted"				},
 	{ SVC_GLOBAL_WELCOMELIST,	"Welcome messages:"					},
 
+	/* alis */
+	{ SVC_ALIS_LISTSTART,		"Returning maximum of %d channel names matching '%s'"	},
+
 	/* this must be last */
 	{ SVC_LAST,		"\0"	},
 };

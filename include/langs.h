@@ -198,6 +198,9 @@ enum svc_notice_enum
 	SVC_GLOBAL_WELCOMEDELETED,
 	SVC_GLOBAL_WELCOMELIST,
 
+	/* alis */
+	SVC_ALIS_LISTSTART,
+
 	/* this must be last */
 	SVC_LAST
 } svc_notice_id;
