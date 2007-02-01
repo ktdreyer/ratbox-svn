@@ -20,6 +20,7 @@ const char **svc_notice;
 const char *svc_notice_string[] =
 {
 	/* general service */
+	"SVC_UNKNOWNCOMMAND",
 	"SVC_SUCCESSFUL",
 	"SVC_SUCCESSFULON",
 	"SVC_ISSUED",
@@ -29,10 +30,13 @@ const char *svc_notice_string[] =
 	"SVC_NOTSUPPORTED",
 	"SVC_NOACCESS",
 	"SVC_OPTIONINVALID",
+	"SVC_RATELIMITEDGENERIC",
 	"SVC_RATELIMITED",
 	"SVC_RATELIMITEDHOST",
+	"SVC_NOTLOGGEDIN",
 	"SVC_ENDOFLIST",
 	"SVC_ENDOFLISTLIMIT",
+	"SVC_USECOMMANDSHORTCUT",
 
 	/* general irc related */
 	"SVC_IRC_NOSUCHCHANNEL",
@@ -52,6 +56,13 @@ const char *svc_notice_string[] =
 	"SVC_EMAIL_BANNEDDOMAIN",
 	"SVC_EMAIL_TEMPUNAVAILABLE",
 	"SVC_EMAIL_SENDFAILED",
+
+	/* service help */
+	"SVC_HELP_INDEXINFO",
+	"SVC_HELP_TOPICS",
+	"SVC_HELP_UNAVAILABLE",
+	"SVC_HELP_UNAVAILABLETOPIC",
+	"SVC_HELP_INDEXADMIN",
 
 	/* userserv */
 	"SVC_USER_USERLOGGEDIN",

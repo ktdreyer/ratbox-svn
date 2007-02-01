@@ -3,6 +3,7 @@
 struct _lang_internal lang_internal[] = 
 {
 	/* general service */
+	{ SVC_UNKNOWNCOMMAND,		"Invalid command %s::%s"				},
 	{ SVC_SUCCESSFUL,		"%s%s successful"					},
 	{ SVC_SUCCESSFULON,		"%s%s successful on %s"					},
 	{ SVC_ISSUED,			"%s%s issued"						},
@@ -12,10 +13,13 @@ struct _lang_internal lang_internal[] =
 	{ SVC_NOTSUPPORTED,		"%s%s is not supported by your server"			},
 	{ SVC_NOACCESS,			"No access to %s%s"					},
 	{ SVC_OPTIONINVALID,		"%s%s option invalid"					},
+	{ SVC_RATELIMITEDGENERIC,	"Temporarily unable to answer query. Please try again shortly."			},
 	{ SVC_RATELIMITED,		"%s%s rate-limited, try again shortly"			},
 	{ SVC_RATELIMITEDHOST,		"%s%s rate-limited for your host, try again shortly"	},
+	{ SVC_NOTLOGGEDIN,		"%s::%s requires you are logged in"			},
 	{ SVC_ENDOFLIST,		"End of list"						},
 	{ SVC_ENDOFLISTLIMIT,		"End of list, limit reached"				},
+	{ SVC_USECOMMANDSHORTCUT,	"Commands to this service must be issued via /%s instead of by name."		},
 
 	/* general irc related */
 	{ SVC_IRC_NOSUCHCHANNEL,	"Channel %s does not exist"				},
@@ -35,6 +39,13 @@ struct _lang_internal lang_internal[] =
 	{ SVC_EMAIL_BANNEDDOMAIN,	"Email provider banned"					},
 	{ SVC_EMAIL_TEMPUNAVAILABLE,	"Temporarily unable to send email, please try later"	},
 	{ SVC_EMAIL_SENDFAILED,		"Unable to complete %s%s due to problems sending email"	},
+
+	/* service help */
+	{ SVC_HELP_INDEXINFO,		"%s Help Index. Use HELP <command> for more information"			},
+	{ SVC_HELP_TOPICS,		"Topics: %s"						},
+	{ SVC_HELP_UNAVAILABLE,		"No help is available for this service"			},
+	{ SVC_HELP_UNAVAILABLETOPIC,	"No help is available on %s"				},
+	{ SVC_HELP_INDEXADMIN,		"Administrator commands:"				},
 
 	/* userserv */
 	{ SVC_USER_USERLOGGEDIN,	"%s has just authenticated as you (%s)"			},

@@ -440,13 +440,11 @@ handle_service_help_index(struct client *service_p, struct client *client_p)
 
 		if(buf[0] != '\0')
 		{
-			service_error(service_p, client_p,
-				"%s Help Index. Use HELP <command> for more information",
-				service_p->name);
-			service_error(service_p, client_p, "Topics: %s", buf);
+			service_err(service_p, client_p, SVC_HELP_INDEXINFO, service_p->name);
+			service_err(service_p, client_p, SVC_HELP_TOPICS, buf);
 		}
 		else
-			service_error(service_p, client_p, "No help is available for this service.");
+			service_err(service_p, client_p, SVC_HELP_UNAVAILABLE);
 
 		service_p->service->help_count++;
 		return;
@@ -472,7 +470,7 @@ handle_service_help_index(struct client *service_p, struct client *client_p)
 
 	if(client_p->user->oper && fileptr)
 	{
-		service_error(service_p, client_p, "Administrator commands:");
+		service_err(service_p, client_p, SVC_HELP_INDEXADMIN);
 
 		DLINK_FOREACH(ptr, fileptr->contents.head)
 		{
@@ -499,8 +497,7 @@ handle_service_help(struct client *service_p, struct client *client_p, const cha
 		if(cmd_entry->helpfile == NULL || lang_get_cachefile(cmd_entry->helpfile, client_p) == NULL ||
 		   (cmd_entry->operonly && !is_oper(client_p)))
 		{
-			service_error(service_p, client_p,
-					"No help available on %s", arg);
+			service_err(service_p, client_p, SVC_HELP_UNAVAILABLETOPIC, arg);
 			return;
 		}
 
@@ -516,7 +513,7 @@ handle_service_help(struct client *service_p, struct client *client_p, const cha
 		service_p->service->ehelp_count++;
 	}
 	else
-		service_error(service_p, client_p, "Unknown topic '%s'", arg);
+		service_err(service_p, client_p, SVC_HELP_UNAVAILABLETOPIC, arg);
 }
 
 void
@@ -568,8 +565,7 @@ handle_service(struct client *service_p, struct client *client_p,
 		if((service_p->service->flood_max && service_p->service->flood > service_p->service->flood_max) ||
 		   client_p->user->flood_count > config_file.client_flood_max)
 		{
-			service_error(service_p, client_p, 
-					"Temporarily unable to answer query. Please try again shortly.");
+			service_err(service_p, client_p, SVC_RATELIMITEDGENERIC);
 			client_p->user->flood_count++;
 			service_p->service->paced_count++;
 			return;
@@ -584,9 +580,7 @@ handle_service(struct client *service_p, struct client *client_p,
 		client_p->user->flood_count += 1;
                 service_p->service->flood += 1;
 
-		service_error(service_p, client_p,
-				"Commands to this service must be issued via /%s instead of by name.",
-				service_p->name);
+		service_err(service_p, client_p, SVC_USECOMMANDSHORTCUT, service_p->name);
 		return;
 	}
 
@@ -599,9 +593,8 @@ handle_service(struct client *service_p, struct client *client_p,
 		if(ServiceLoginHelp(service_p) && !client_p->user->user_reg &&
 		   !client_p->user->oper && !is_oper(client_p))
 		{
-			service_error(service_p, client_p, 
-					"You must be logged in for %s::HELP",
-					service_p->name);
+			service_err(service_p, client_p, SVC_NOTLOGGEDIN,
+					service_p->name, "HELP");
 			return;
 		}
 #endif
@@ -701,7 +694,7 @@ handle_service(struct client *service_p, struct client *client_p,
 		    (!client_p->user->oper || 
 		     (client_p->user->oper->sflags & cmd_entry->operflags) == 0)))
 		{
-			service_error(service_p, client_p, "No access to %s::%s",
+			service_err(service_p, client_p, SVC_NOACCESS,
 					service_p->name, cmd_entry->cmd);
 			client_p->user->flood_count++;
 			service_p->service->flood++;
@@ -713,8 +706,7 @@ handle_service(struct client *service_p, struct client *client_p,
 		{
 			if(client_p->user->user_reg == NULL)
 			{
-				service_error(service_p, client_p, 
-						"You must be logged in for %s::%s",
+				service_err(service_p, client_p, SVC_NOTLOGGEDIN,
 						service_p->name, cmd_entry->cmd);
 				client_p->user->flood_count++;
 				service_p->service->flood++;
@@ -730,7 +722,7 @@ handle_service(struct client *service_p, struct client *client_p,
 
 		if(parc < cmd_entry->minparc)
 		{
-			service_error(service_p, client_p, "Insufficient parameters to %s::%s",
+			service_err(service_p, client_p, SVC_NEEDMOREPARAMS,
 					service_p->name, cmd_entry->cmd);
 			client_p->user->flood_count++;
 			service_p->service->flood++;
@@ -748,7 +740,8 @@ handle_service(struct client *service_p, struct client *client_p,
 		return;
         }
 
-        service_error(service_p, client_p, "Unknown command.");
+        service_err(service_p, client_p, SVC_UNKNOWNCOMMAND,
+			service_p->name, command);
         service_p->service->flood++;
 	client_p->user->flood_count++;
 }
