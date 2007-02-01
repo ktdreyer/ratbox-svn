@@ -34,10 +34,11 @@
 
 #ifdef ENABLE_JUPESERV
 #include "rsdb.h"
+#include "rserv.h"
+#include "langs.h"
 #include "service.h"
 #include "client.h"
 #include "channel.h"
-#include "rserv.h"
 #include "io.h"
 #include "c_init.h"
 #include "log.h"
@@ -269,15 +270,13 @@ o_jupeserv_jupe(struct client *client_p, struct lconn *conn_p, const char *parv[
 
 	if(!valid_jupe(parv[0]))
 	{
-		service_send(jupeserv_p, client_p, conn_p,
-				"Servername %s is invalid", parv[0]);
+		service_snd(jupeserv_p, client_p, conn_p, SVC_IRC_SERVERNAMEINVALID, parv[0]);
 		return 0;
 	}
 
 	if((jupe_p = find_jupe(parv[0], &active_jupes)))
 	{
-		service_send(jupeserv_p, client_p, conn_p,
-				"Server %s is already juped", jupe_p->name);
+		service_snd(jupeserv_p, client_p, conn_p, SVC_JUPE_ALREADYJUPED, jupe_p->name);
 		return 0;
 	}
 
@@ -327,8 +326,7 @@ o_jupeserv_unjupe(struct client *client_p, struct lconn *conn_p, const char *par
 
 	if((jupe_p = find_jupe(parv[0], &active_jupes)) == NULL)
 	{
-		service_send(jupeserv_p, client_p, conn_p,
-				"Server %s is not juped", parv[0]);
+		service_snd(jupeserv_p, client_p, conn_p, SVC_JUPE_NOTJUPED, parv[0]);
 		return 0;
 	}
 
@@ -366,21 +364,20 @@ s_jupeserv_calljupe(struct client *client_p, struct lconn *conn_p, const char *p
 
 	if(!valid_jupe(parv[0]))
 	{
-		service_error(jupeserv_p, client_p, "Servername %s is invalid",
-				parv[0]);
+		service_err(jupeserv_p, client_p, SVC_IRC_SERVERNAMEINVALID, parv[0]);
 		return 0;
 	}
 
 	if(!config_file.jupe_score || !config_file.oper_score)
 	{
-		service_error(jupeserv_p, client_p, "Oper jupes are disabled");
+		service_err(jupeserv_p, client_p, SVC_ISDISABLED,
+				jupeserv_p->name, "::CALLJUPE");
 		return 0;
 	}
 
 	if((jupe_p = find_jupe(parv[0], &active_jupes)))
 	{
-		service_error(jupeserv_p, client_p, "Server %s is already juped",
-				jupe_p->name);
+		service_err(jupeserv_p, client_p, SVC_JUPE_ALREADYJUPED, jupe_p->name);
 		return 0;
 	}
 
@@ -406,8 +403,8 @@ s_jupeserv_calljupe(struct client *client_p, struct lconn *conn_p, const char *p
 	{
 		if(!irccmp((const char *) ptr->data, client_p->user->servername))
 		{
-			service_error(jupeserv_p, client_p, "Server %s jupe already requested by your server",
-					jupe_p->name);
+			service_err(jupeserv_p, client_p, SVC_JUPE_ALREADYREQUESTED,
+					jupeserv_p->name, "::CALLJUPE", jupe_p->name);
 			return 0;
 		}
 	}
@@ -447,17 +444,18 @@ static int
 s_jupeserv_callunjupe(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct server_jupe *ajupe_p, *jupe_p;
+	dlink_node *ptr;
 
 	if(!config_file.unjupe_score || !config_file.oper_score)
 	{
-		service_error(jupeserv_p, client_p, "Oper jupes are disabled");
+		service_err(jupeserv_p, client_p, SVC_ISDISABLED,
+				jupeserv_p->name, "::CALLUNJUPE");
 		return 0;
 	}
 
 	if((ajupe_p = find_jupe(parv[0], &active_jupes)) == NULL)
 	{
-		service_error(jupeserv_p, client_p, "Server %s is not juped",
-				parv[0]);
+		service_err(jupeserv_p, client_p, SVC_JUPE_NOTJUPED, parv[0]);
 		return 0;
 	}
 
@@ -467,11 +465,22 @@ s_jupeserv_callunjupe(struct client *client_p, struct lconn *conn_p, const char 
 		jupe_p->points = config_file.unjupe_score;
 	}
 
+	DLINK_FOREACH(ptr, jupe_p->servers.head)
+	{
+		if(!irccmp((const char *) ptr->data, client_p->user->servername))
+		{
+			service_err(jupeserv_p, client_p, SVC_JUPE_ALREADYREQUESTED,
+					jupeserv_p->name, "::CALLUNJUPE", jupe_p->name);
+			return 0;
+		}
+	}
+
 	zlog(jupeserv_p, 1, WATCH_JUPESERV, 1, client_p, conn_p,
 		"CALLUNJUPE %s", parv[0]);
 
 	jupe_p->expire = CURRENT_TIME + config_file.pending_time;
 	jupe_p->points -= config_file.oper_score;
+	dlink_add_alloc(my_strdup(client_p->user->servername), &jupe_p->servers);
 
 	if(jupe_p->points <= 0)
 	{
@@ -509,19 +518,15 @@ s_jupeserv_pending(struct client *client_p, struct lconn *conn_p, const char *pa
 
 	if(!config_file.oper_score)
 	{
-		service_error(jupeserv_p, client_p, "Oper jupes are disabled");
+		service_err(jupeserv_p, client_p, SVC_ISDISABLED,
+				jupeserv_p->name, "::PENDING");
 		return 0;
 	}
 
-	if(!dlink_list_length(&pending_jupes))
-	{
-		service_error(jupeserv_p, client_p, "No pending jupes");
-		return 0;
-	}
+	if(dlink_list_length(&pending_jupes))
+		zlog(jupeserv_p, 3, WATCH_JUPESERV, 1, client_p, conn_p, "PENDING");
 
-	zlog(jupeserv_p, 3, WATCH_JUPESERV, 1, client_p, conn_p, "PENDING");
-
-	service_error(jupeserv_p, client_p, "Pending jupes:");
+	service_err(jupeserv_p, client_p, SVC_JUPE_PENDINGLIST);
 
 	DLINK_FOREACH(ptr, pending_jupes.head)
 	{
@@ -534,7 +539,7 @@ s_jupeserv_pending(struct client *client_p, struct lconn *conn_p, const char *pa
 				jupe_p->reason);
 	}
 
-	service_error(jupeserv_p, client_p, "End of pending jupes");
+	service_err(jupeserv_p, client_p, SVC_ENDOFLIST);
 
 	return 0;
 }

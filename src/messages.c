@@ -22,6 +22,7 @@ struct _lang_internal lang_internal[] =
 	{ SVC_IRC_CHANNELINVALID,	"Invalid channel %s"					},
 	{ SVC_IRC_CHANNELNOUSERS,	"Channel %s has no users"				},
 	{ SVC_IRC_NOSUCHSERVER,		"Server %s does not exist"				},
+	{ SVC_IRC_SERVERNAMEINVALID,	"Invalid servername %s"					},
 	{ SVC_IRC_ALREADYONCHANNEL,	"%s is already on channel %s"				},
 	{ SVC_IRC_YOUALREADYONCHANNEL,	"You are already on channel %s"				},
 	{ SVC_IRC_NOTINCHANNEL,		"%s is not in channel %s"				},
@@ -168,6 +169,12 @@ struct _lang_internal lang_internal[] =
 	{ SVC_GLOBAL_WELCOMENOTSET,	"Welcome message %u not set"				},
 	{ SVC_GLOBAL_WELCOMEDELETED,	"Welcome message %u deleted"				},
 	{ SVC_GLOBAL_WELCOMELIST,	"Welcome messages:"					},
+
+	/* jupeserv */
+	{ SVC_JUPE_ALREADYJUPED,	"Server %s is already juped"				},
+	{ SVC_JUPE_NOTJUPED,		"Server %s is not juped"				},
+	{ SVC_JUPE_ALREADYREQUESTED,	"%s%s on %s already requested by your server"		},
+	{ SVC_JUPE_PENDINGLIST,		"Pending jupes:"					},
 
 	/* alis */
 	{ SVC_ALIS_LISTSTART,		"Returning maximum of %d channel names matching '%s'"	},
