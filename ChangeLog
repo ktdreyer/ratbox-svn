@@ -1,3 +1,15 @@
+leeh        2007/02/01 20:39:41 UTC	(20070201_1-23587)
+  Log:
+  - move service.c over to the new framework, so those are all done now..
+  
+
+  Modified:
+	rserv/trunk/include/langs.h (File Modified) 
+	rserv/trunk/src/langs.c (File Modified) 
+	rserv/trunk/src/messages.c (File Modified) 
+	rserv/trunk/src/service.c (File Modified) 
+
+
 leeh        2007/02/01 20:20:13 UTC	(20070201_0-23585)
   Log:
   - move jupeserv over to the new framework
