@@ -1,3 +1,13 @@
+leeh        2007/02/02 18:25:06 UTC	(20070202_0-23591)
+  Log:
+  - add copyrights and license to langs.c/messages.c
+  
+
+  Modified:
+	rserv/trunk/src/langs.c (File Modified) (Property Modified)
+	rserv/trunk/src/messages.c (File Modified) (Property Modified)
+
+
 leeh        2007/02/01 20:39:41 UTC	(20070201_1-23587)
   Log:
   - move service.c over to the new framework, so those are all done now..
