@@ -1,3 +1,21 @@
+leeh        2007/02/05 21:35:27 UTC	(20070205_0-23596)
+  Log:
+  - sync all the messages so the language file has %s::%s instead of passing
+    the "::" as a param
+  
+
+  Modified:
+	rserv/trunk/src/messages.c (File Modified) 
+	rserv/trunk/src/s_alis.c (File Modified) 
+	rserv/trunk/src/s_banserv.c (File Modified) 
+	rserv/trunk/src/s_chanserv.c (File Modified) 
+	rserv/trunk/src/s_jupeserv.c (File Modified) 
+	rserv/trunk/src/s_nickserv.c (File Modified) 
+	rserv/trunk/src/s_operbot.c (File Modified) 
+	rserv/trunk/src/s_operserv.c (File Modified) 
+	rserv/trunk/src/s_userserv.c (File Modified) 
+
+
 leeh        2007/02/02 18:25:06 UTC	(20070202_0-23591)
   Log:
   - add copyrights and license to langs.c/messages.c
