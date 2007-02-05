@@ -267,7 +267,7 @@ o_oper_takeover(struct client *client_p, struct lconn *conn_p, const char *parv[
 		"TAKEOVER %s", parv[0]);
 
 	service_snd(operserv_p, client_p, conn_p, SVC_SUCCESSFULON,
-			operserv_p->name, "::TAKEOVER", parv[0]);
+			operserv_p->name, "TAKEOVER", parv[0]);
 	return 0;
 }
 
@@ -302,7 +302,7 @@ o_oper_osjoin(struct client *client_p, struct lconn *conn_p, const char *parv[],
 	join_service(operserv_p, parv[0], tsinfo, NULL, 0);
 
 	service_snd(operserv_p, client_p, conn_p, SVC_SUCCESSFULON,
-			operserv_p->name, "::OSJOIN", parv[0]);
+			operserv_p->name, "OSJOIN", parv[0]);
 	return 0;
 }
 
@@ -316,7 +316,7 @@ o_oper_ospart(struct client *client_p, struct lconn *conn_p, const char *parv[],
 	if(client_p && !client_p->user->oper)
 	{
 		service_err(operserv_p, client_p, SVC_NOACCESS,
-				operserv_p->name, "::OSPART");
+				operserv_p->name, "OSPART");
 		return 1;
 	}
 
@@ -374,7 +374,7 @@ o_oper_ospart(struct client *client_p, struct lconn *conn_p, const char *parv[],
 		rsdb_exec(NULL, "DELETE FROM operserv WHERE chname=LOWER('%Q')", parv[0]);
 
 	service_snd(operserv_p, client_p, conn_p, SVC_SUCCESSFULON,
-			operserv_p->name, "::OSPART", parv[0]);
+			operserv_p->name, "OSPART", parv[0]);
 
 	return 0;
 }
@@ -396,7 +396,7 @@ o_oper_omode(struct client *client_p, struct lconn *conn_p, const char *parv[], 
 		"OMODE %s %s", chptr->name, rebuild_params(parv, parc, 1));
 
 	service_snd(operserv_p, client_p, conn_p, SVC_ISSUED,
-			operserv_p->name, "::OMODE");
+			operserv_p->name, "OMODE");
 	return 0;
 }
 
@@ -408,7 +408,7 @@ o_oper_dbsync(struct client *client_p, struct lconn *conn_p, const char *parv[],
 	zlog(operserv_p, 2, WATCH_OPERSERV, 1, client_p, conn_p, "DBSYNC");
 
 	service_snd(operserv_p, client_p, conn_p, SVC_SUCCESSFUL,
-			operserv_p->name, "::DBSYNC");
+			operserv_p->name, "DBSYNC");
 	return 0;
 }
 
@@ -444,7 +444,7 @@ o_oper_die(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 	if(client_p && !config_file.os_allow_die)
 	{
 		service_snd(operserv_p, client_p, conn_p, SVC_ISDISABLED,
-				operserv_p->name, "::DIE");
+				operserv_p->name, "DIE");
 		return 0;
 	}
 
@@ -471,7 +471,7 @@ o_oper_listopers(struct client *client_p, struct lconn *conn_p, const char *parv
 			return 1;
 
 		service_snd(operserv_p, client_p, conn_p, SVC_NOACCESS,
-				operserv_p->name, "::LISTOPERS");
+				operserv_p->name, "LISTOPERS");
 		return 1;
 	}
 

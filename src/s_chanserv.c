@@ -1465,7 +1465,7 @@ o_chan_chandrop(struct client *client_p, struct lconn *conn_p, const char *parv[
 	destroy_channel_reg(reg_p);
 
 	service_snd(chanserv_p, client_p, conn_p, SVC_SUCCESSFULON,
-			chanserv_p->name, "::CHANDROP", parv[0]);
+			chanserv_p->name, "CHANDROP", parv[0]);
 	return 0;
 }
 
@@ -1719,7 +1719,7 @@ s_chan_register(struct client *client_p, struct lconn *conn_p, const char *parv[
 	if(config_file.disable_cregister)
 	{
 		service_err(chanserv_p, client_p, SVC_ISDISABLED,
-				chanserv_p->name, "::REGISTER");
+				chanserv_p->name, "REGISTER");
 		return 1;
 	}
 
@@ -1751,7 +1751,7 @@ s_chan_register(struct client *client_p, struct lconn *conn_p, const char *parv[
 		else if(last_count >= config_file.cregister_amount)
 		{
 			service_err(chanserv_p, client_p, SVC_RATELIMITED,
-					chanserv_p->name, "::REGISTER");
+					chanserv_p->name, "REGISTER");
 			return 1;
 		}
 		else
@@ -1768,7 +1768,7 @@ s_chan_register(struct client *client_p, struct lconn *conn_p, const char *parv[
 		   hent->cregister_expire > CURRENT_TIME)
 		{
 			service_err(chanserv_p, client_p, SVC_RATELIMITEDHOST,
-					chanserv_p->name, "::REGISTER");
+					chanserv_p->name, "REGISTER");
 			return 1;
 		}
 
@@ -1999,7 +1999,7 @@ s_chan_delowner(struct client *client_p, struct lconn *conn_p, const char *parv[
 				chreg_p->name, chanserv_p->name, chreg_p->name, token))
 		{
 			service_err(chanserv_p, client_p, SVC_EMAIL_SENDFAILED,
-					chanserv_p->name, "::DELOWNER");
+					chanserv_p->name, "DELOWNER");
 		}
 		else
 		{
@@ -2333,7 +2333,7 @@ s_chan_clearmodes(struct client *client_p, struct lconn *conn_p, const char *par
 	parse_full_mode(chptr, chanserv_p, modev, chptr->mode.key[0] ? 2 : 1, 0);
 
 	service_err(chanserv_p, client_p, SVC_SUCCESSFULON,
-			chanserv_p->name, "::CLEARMODES", chptr->name);
+			chanserv_p->name, "CLEARMODES", chptr->name);
 
 	return 1;
 }
@@ -2408,7 +2408,7 @@ s_chan_clearops(struct client *client_p, struct lconn *conn_p, const char *parv[
 	s_chan_clearops_loc(chptr, mreg_p->channel_reg, S_C_OP);
 
 	service_err(chanserv_p, client_p, SVC_SUCCESSFULON,
-			chanserv_p->name, "::CLEAROPS", chptr->name);
+			chanserv_p->name, "CLEAROPS", chptr->name);
 	return 3;
 }
 
@@ -2427,7 +2427,7 @@ s_chan_clearallops(struct client *client_p, struct lconn *conn_p, const char *pa
 	s_chan_clearops_loc(chptr, mreg_p->channel_reg, mreg_p->level);
 
 	service_err(chanserv_p, client_p, SVC_SUCCESSFULON,
-			chanserv_p->name, "::CLEARALLOPS", chptr->name);
+			chanserv_p->name, "CLEARALLOPS", chptr->name);
 	return 3;
 }
 
@@ -2475,7 +2475,7 @@ s_chan_clearbans(struct client *client_p, struct lconn *conn_p, const char *parv
 	modebuild_finish();
 
 	service_err(chanserv_p, client_p, SVC_SUCCESSFULON,
-			chanserv_p->name, "::CLEARBANS", chptr->name);
+			chanserv_p->name, "CLEARBANS", chptr->name);
 
 	return 3;
 }
@@ -2788,7 +2788,7 @@ s_chan_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 
 
 	service_err(chanserv_p, client_p, SVC_OPTIONINVALID,
-			chanserv_p->name, "::SET");
+			chanserv_p->name, "SET");
 	return 1;
 }
 
@@ -3043,7 +3043,7 @@ s_chan_addban(struct client *client_p, struct lconn *conn_p, const char *parv[],
 	if(loc >= parc)
 	{
 		service_err(chanserv_p, client_p, SVC_NEEDMOREPARAMS,
-				chanserv_p->name, "::ADDBAN");
+				chanserv_p->name, "ADDBAN");
 		return 1;
 	}
 
@@ -3327,7 +3327,7 @@ s_chan_unban(struct client *client_p, struct lconn *conn_p, const char *parv[], 
 
 	if(found)
 		service_err(chanserv_p, client_p, SVC_SUCCESSFULON,
-				chanserv_p->name, "::UNBAN", chptr->name);
+				chanserv_p->name, "UNBAN", chptr->name);
 	else
 		service_err(chanserv_p, client_p, SVC_CHAN_YOUNOTBANNED, chptr->name);
 

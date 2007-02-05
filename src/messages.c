@@ -36,18 +36,18 @@ struct _lang_internal lang_internal[] =
 {
 	/* general service */
 	{ SVC_UNKNOWNCOMMAND,		"Invalid command %s::%s"				},
-	{ SVC_SUCCESSFUL,		"%s%s successful"					},
-	{ SVC_SUCCESSFULON,		"%s%s successful on %s"					},
-	{ SVC_ISSUED,			"%s%s issued"						},
-	{ SVC_NEEDMOREPARAMS,		"Insufficient parameters to %s%s"			},
-	{ SVC_ISDISABLED,		"%s%s is disabled"					},
-	{ SVC_ISDISABLEDEMAIL,		"%s%s is disabled as it cannot send emails"		},
-	{ SVC_NOTSUPPORTED,		"%s%s is not supported by your server"			},
-	{ SVC_NOACCESS,			"No access to %s%s"					},
-	{ SVC_OPTIONINVALID,		"%s%s option invalid"					},
+	{ SVC_SUCCESSFUL,		"%s::%s successful"					},
+	{ SVC_SUCCESSFULON,		"%s::%s successful on %s"				},
+	{ SVC_ISSUED,			"%s::%s issued"						},
+	{ SVC_NEEDMOREPARAMS,		"Insufficient parameters to %s::%s"			},
+	{ SVC_ISDISABLED,		"%s::%s is disabled"					},
+	{ SVC_ISDISABLEDEMAIL,		"%s::%s is disabled as it cannot send emails"		},
+	{ SVC_NOTSUPPORTED,		"%s::%s is not supported by your server"		},
+	{ SVC_NOACCESS,			"No access to %s::%s"					},
+	{ SVC_OPTIONINVALID,		"%s::%s option invalid"					},
 	{ SVC_RATELIMITEDGENERIC,	"Temporarily unable to answer query. Please try again shortly."			},
-	{ SVC_RATELIMITED,		"%s%s rate-limited, try again shortly"			},
-	{ SVC_RATELIMITEDHOST,		"%s%s rate-limited for your host, try again shortly"	},
+	{ SVC_RATELIMITED,		"%s::%s rate-limited, try again shortly"		},
+	{ SVC_RATELIMITEDHOST,		"%s::%s rate-limited for your host, try again shortly"	},
 	{ SVC_NOTLOGGEDIN,		"%s::%s requires you are logged in"			},
 	{ SVC_ENDOFLIST,		"End of list"						},
 	{ SVC_ENDOFLISTLIMIT,		"End of list, limit reached"				},
@@ -70,7 +70,7 @@ struct _lang_internal lang_internal[] =
 	{ SVC_EMAIL_INVALIDIGNORED,	"Email %s invalid, ignoring"				},
 	{ SVC_EMAIL_BANNEDDOMAIN,	"Email provider banned"					},
 	{ SVC_EMAIL_TEMPUNAVAILABLE,	"Temporarily unable to send email, please try later"	},
-	{ SVC_EMAIL_SENDFAILED,		"Unable to complete %s%s due to problems sending email"	},
+	{ SVC_EMAIL_SENDFAILED,		"Unable to complete %s::%s due to problems sending email"	},
 
 	/* service help */
 	{ SVC_HELP_INDEXINFO,		"%s Help Index. Use HELP <command> for more information"			},
@@ -81,7 +81,7 @@ struct _lang_internal lang_internal[] =
 
 	/* userserv */
 	{ SVC_USER_USERLOGGEDIN,	"%s has just authenticated as you (%s)"			},
-	{ SVC_USER_REGISTERDISABLED,	"%s%s is disabled, see %s"				},
+	{ SVC_USER_REGISTERDISABLED,	"%s::%s is disabled, see %s"				},
 	{ SVC_USER_ALREADYREG,		"Username %s is already registered"			},
 	{ SVC_USER_NOTREG,		"Username %s is not registered"				},
 	{ SVC_USER_NOWREG,		"Username %s registered"				},
@@ -107,7 +107,7 @@ struct _lang_internal lang_internal[] =
 	{ SVC_USER_REQUESTNONE,		"Username %s does not have a pending %s request"	},
 	{ SVC_USER_TOKENBAD,		"Username %s %s token is malformed"			},
 	{ SVC_USER_TOKENMISMATCH,	"Username %s %s tokens do not match"			},
-	{ SVC_USER_DURATIONTOOSHORT,	"Username %s has not been registered long enough to use %s%s"			},
+	{ SVC_USER_DURATIONTOOSHORT,	"Username %s has not been registered long enough to use %s::%s"			},
 
 	/* userserv::activate */
 	{ SVC_USER_ACT_ALREADY,		"Username %s has already been activated for use"	},
@@ -216,7 +216,7 @@ struct _lang_internal lang_internal[] =
 	/* jupeserv */
 	{ SVC_JUPE_ALREADYJUPED,	"Server %s is already juped"				},
 	{ SVC_JUPE_NOTJUPED,		"Server %s is not juped"				},
-	{ SVC_JUPE_ALREADYREQUESTED,	"%s%s on %s already requested by your server"		},
+	{ SVC_JUPE_ALREADYREQUESTED,	"%s::%s on %s already requested by your server"		},
 	{ SVC_JUPE_PENDINGLIST,		"Pending jupes:"					},
 
 	/* alis */

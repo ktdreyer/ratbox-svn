@@ -242,7 +242,7 @@ o_nick_nickdrop(struct client *client_p, struct lconn *conn_p, const char *parv[
 	}
 
 	service_snd(nickserv_p, client_p, conn_p, SVC_SUCCESSFULON, 
-			nickserv_p->name, "::NICKDROP", parv[0]);
+			nickserv_p->name, "NICKDROP", parv[0]);
 
 	zlog(nickserv_p, 1, WATCH_NSADMIN, 1, client_p, conn_p,
 		"NICKDROP %s", nreg_p->name);
@@ -330,7 +330,7 @@ s_nick_drop(struct client *client_p, struct lconn *conn_p, const char *parv[], i
 	}
 
 	service_err(nickserv_p, client_p, SVC_SUCCESSFULON,
-			nickserv_p->name, "::DROP", parv[0]);
+			nickserv_p->name, "DROP", parv[0]);
 
 	zlog(nickserv_p, 3, 0, 0, client_p, NULL, "DROP %s", parv[0]);
 
@@ -410,7 +410,7 @@ s_nick_regain(struct client *client_p, struct lconn *conn_p, const char *parv[],
 	if((client_p->uplink->flags & FLAGS_RSFNC) == 0)
 	{
 		service_err(nickserv_p, client_p, SVC_NOTSUPPORTED,
-				nickserv_p->name, "::REGAIN");
+				nickserv_p->name, "REGAIN");
 		return 1;
 	}
 
@@ -498,7 +498,7 @@ s_nick_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 		if(!config_file.nallow_set_warn)
 		{
 			service_err(nickserv_p, client_p, SVC_ISDISABLED,	
-					nickserv_p->name, "::SET::WARN");
+					nickserv_p->name, "SET::WARN");
 			return 1;
 		}
 
@@ -507,7 +507,7 @@ s_nick_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 	}
 
 	service_err(nickserv_p, client_p, SVC_OPTIONINVALID,
-			nickserv_p->name, "::SET");
+			nickserv_p->name, "SET");
 	return 1;
 }	
 

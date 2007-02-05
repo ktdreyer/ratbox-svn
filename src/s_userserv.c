@@ -971,10 +971,10 @@ s_user_register(struct client *client_p, struct lconn *conn_p, const char *parv[
 	{
 		if(config_file.uregister_url)
 			service_err(userserv_p, client_p, SVC_USER_REGISTERDISABLED,
-					userserv_p->name, "::REGISTER", config_file.uregister_url);
+					userserv_p->name, "REGISTER", config_file.uregister_url);
 		else
 			service_err(userserv_p, client_p, SVC_ISDISABLED,
-					userserv_p->name, "::REGISTER");
+					userserv_p->name, "REGISTER");
 
 		return 1;
 	}
@@ -1008,7 +1008,7 @@ s_user_register(struct client *client_p, struct lconn *conn_p, const char *parv[
 		if(config_file.uregister_email)
 		{
 			service_err(userserv_p, client_p, SVC_NEEDMOREPARAMS,
-					userserv_p->name, "::REGISTER");
+					userserv_p->name, "REGISTER");
 			return 1;
 		}
 	}
@@ -1037,7 +1037,7 @@ s_user_register(struct client *client_p, struct lconn *conn_p, const char *parv[
 		else if(last_count >= config_file.uregister_amount)
 		{
 			service_err(userserv_p, client_p, SVC_RATELIMITED,
-					userserv_p->name, "::REGISTER");
+					userserv_p->name, "REGISTER");
 			return 1;
 		}
 		else
@@ -1054,7 +1054,7 @@ s_user_register(struct client *client_p, struct lconn *conn_p, const char *parv[
 		   hent->uregister_expire > CURRENT_TIME)
 		{
 			service_err(userserv_p, client_p, SVC_RATELIMITEDHOST,
-					userserv_p->name, "::REGISTER");
+					userserv_p->name, "REGISTER");
 			return 1;
 		}
 
@@ -1075,7 +1075,7 @@ s_user_register(struct client *client_p, struct lconn *conn_p, const char *parv[
 		if(config_file.disable_email)
 		{
 			service_err(userserv_p, client_p, SVC_ISDISABLEDEMAIL,
-					userserv_p->name, "::REGISTER");
+					userserv_p->name, "REGISTER");
 			return 1;
 		}
 
@@ -1098,7 +1098,7 @@ s_user_register(struct client *client_p, struct lconn *conn_p, const char *parv[
 				get_short_duration(config_file.uexpire_unverified_time)))
 		{
 			service_err(userserv_p, client_p, SVC_EMAIL_SENDFAILED,
-					userserv_p->name, "::REGISTER");
+					userserv_p->name, "REGISTER");
 			return 1;
 		}
 	}
@@ -1267,7 +1267,7 @@ s_user_login(struct client *client_p, struct lconn *conn_p, const char *parv[], 
 	reg_p->flags |= US_FLAGS_NEEDUPDATE;
 	dlink_add_alloc(client_p, &reg_p->users);
 	service_err(userserv_p, client_p, SVC_SUCCESSFUL,
-			userserv_p->name, "::LOGIN");
+			userserv_p->name, "LOGIN");
 
 	hook_call(HOOK_USER_LOGIN, client_p, NULL);
 
@@ -1280,7 +1280,7 @@ s_user_logout(struct client *client_p, struct lconn *conn_p, const char *parv[],
 	dlink_find_destroy(client_p, &client_p->user->user_reg->users);
 	client_p->user->user_reg = NULL;
 	service_err(userserv_p, client_p, SVC_SUCCESSFUL,
-			userserv_p->name, "::LOGOUT");
+			userserv_p->name, "LOGOUT");
 
 	sendto_server(":%s ENCAP * SU %s", MYUID, UID(client_p));
 
@@ -1296,7 +1296,7 @@ s_user_resetpass(struct client *client_p, struct lconn *conn_p, const char *parv
 	if(config_file.disable_email || !config_file.allow_resetpass)
 	{
 		service_err(userserv_p, client_p, SVC_ISDISABLED,
-				userserv_p->name, "::RESETPASS");
+				userserv_p->name, "RESETPASS");
 		return 1;
 	}
 
@@ -1312,7 +1312,7 @@ s_user_resetpass(struct client *client_p, struct lconn *conn_p, const char *parv
 	if((CURRENT_TIME - reg_p->reg_time) < config_file.ureset_regtime_duration)
 	{
 		service_err(userserv_p, client_p, SVC_USER_DURATIONTOOSHORT,
-				reg_p->name, userserv_p->name, "::RESETPASS");
+				reg_p->name, userserv_p->name, "RESETPASS");
 		return 1;
 	}
 
@@ -1377,7 +1377,7 @@ s_user_resetpass(struct client *client_p, struct lconn *conn_p, const char *parv
 				reg_p->name, userserv_p->name, reg_p->name, token))
 		{
 			service_err(userserv_p, client_p, SVC_EMAIL_SENDFAILED,
-					userserv_p->name, "::RESETPASS");
+					userserv_p->name, "RESETPASS");
 		}
 		else
 		{
@@ -1393,7 +1393,7 @@ s_user_resetpass(struct client *client_p, struct lconn *conn_p, const char *parv
 	if(EmptyString(parv[2]))
 	{
 		service_err(userserv_p, client_p, SVC_NEEDMOREPARAMS,
-				userserv_p->name, "::RESETPASS");
+				userserv_p->name, "RESETPASS");
 		return 1;
 	}
 
@@ -1455,14 +1455,14 @@ s_user_resetemail(struct client *client_p, struct lconn *conn_p, const char *par
 	if(config_file.disable_email || !config_file.allow_resetemail)
 	{
 		service_err(userserv_p, client_p, SVC_ISDISABLED,
-				userserv_p->name, "::RESETEMAIL");
+				userserv_p->name, "RESETEMAIL");
 		return 1;
 	}
 
 	if((CURRENT_TIME - reg_p->reg_time) < config_file.ureset_regtime_duration)
 	{
 		service_err(userserv_p, client_p, SVC_USER_DURATIONTOOSHORT,
-				reg_p->name, userserv_p->name, "::RESETEMAIL");
+				reg_p->name, userserv_p->name, "RESETEMAIL");
 		return 1;
 	}
 
@@ -1522,7 +1522,7 @@ s_user_resetemail(struct client *client_p, struct lconn *conn_p, const char *par
 				reg_p->name, userserv_p->name, token))
 		{
 			service_err(userserv_p, client_p, SVC_EMAIL_SENDFAILED,
-					userserv_p->name, "::RESETEMAIL");
+					userserv_p->name, "RESETEMAIL");
 		}
 		else
 		{
@@ -1538,7 +1538,7 @@ s_user_resetemail(struct client *client_p, struct lconn *conn_p, const char *par
 		if(EmptyString(parv[1]) || EmptyString(parv[2]))
 		{
 			service_err(userserv_p, client_p, SVC_NEEDMOREPARAMS,
-					userserv_p->name, "::RESETEMAIL");
+					userserv_p->name, "RESETEMAIL");
 			return 1;
 		}
 
@@ -1576,7 +1576,7 @@ s_user_resetemail(struct client *client_p, struct lconn *conn_p, const char *par
 						reg_p->name, userserv_p->name, token))
 				{
 					service_err(userserv_p, client_p, SVC_EMAIL_SENDFAILED,
-							userserv_p->name, "::RESETEMAIL");
+							userserv_p->name, "RESETEMAIL");
 					return 2;
 				}
 
@@ -1615,7 +1615,7 @@ s_user_resetemail(struct client *client_p, struct lconn *conn_p, const char *par
 		if(EmptyString(parv[1]))
 		{
 			service_err(userserv_p, client_p, SVC_NEEDMOREPARAMS,
-					userserv_p->name, "::RESETEMAIL");
+					userserv_p->name, "RESETEMAIL");
 			return 1;
 		}
 
@@ -1665,7 +1665,7 @@ s_user_resetemail(struct client *client_p, struct lconn *conn_p, const char *par
 	}
 
 	service_err(userserv_p, client_p, SVC_OPTIONINVALID,
-			userserv_p->name, "::RESETEMAIL");
+			userserv_p->name, "RESETEMAIL");
 	return 1;
 }
 
@@ -1686,14 +1686,14 @@ s_user_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 		if(!config_file.allow_set_password)
 		{
 			service_err(userserv_p, client_p, SVC_ISDISABLED,
-				userserv_p->name, "::SET::PASSWORD");
+				userserv_p->name, "SET::PASSWORD");
 			return 1;
 		}
 
 		if(EmptyString(parv[1]) || EmptyString(parv[2]))
 		{
 			service_err(userserv_p, client_p, SVC_NEEDMOREPARAMS,
-					userserv_p->name, "::SET::PASSWORD");
+					userserv_p->name, "SET::PASSWORD");
 			return 1;
 		}
 
@@ -1729,14 +1729,14 @@ s_user_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 		if(!config_file.allow_set_email)
 		{
 			service_err(userserv_p, client_p, SVC_ISDISABLED,
-					userserv_p->name, "::SET::EMAIL");
+					userserv_p->name, "SET::EMAIL");
 			return 1;
 		}
 
 		if(EmptyString(arg))
 		{
 			service_err(userserv_p, client_p, SVC_NEEDMOREPARAMS,
-					userserv_p->name, "::SET::EMAIL");
+					userserv_p->name, "SET::EMAIL");
 			return 1;
 		}
 
@@ -1824,7 +1824,7 @@ s_user_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 	}
 
 	service_err(userserv_p, client_p, SVC_OPTIONINVALID,
-			userserv_p->name, "::SET");
+			userserv_p->name, "SET");
 	return 1;
 }
 

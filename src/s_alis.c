@@ -145,7 +145,7 @@ parse_alis(struct client *client_p, struct alis_query *query,
 		if(param >= parc || EmptyString(parv[param]))
 		{
 			service_err(alis_p, client_p, SVC_NEEDMOREPARAMS,
-					alis_p->name, "::LIST");
+					alis_p->name, "LIST");
 			return 0;
 		}
 
@@ -154,7 +154,7 @@ parse_alis(struct client *client_p, struct alis_query *query,
 			if((query->min = atoi(parv[param])) < 1)
 			{
 				service_err(alis_p, client_p, SVC_OPTIONINVALID,
-						alis_p->name, "::LIST -min");
+						alis_p->name, "LIST -min");
 				return 0;
 			}
 		}
@@ -163,7 +163,7 @@ parse_alis(struct client *client_p, struct alis_query *query,
 			if((query->max = atoi(parv[param])) < 1)
 			{
 				service_err(alis_p, client_p, SVC_OPTIONINVALID,
-						alis_p->name, "::LIST -max");
+						alis_p->name, "LIST -max");
 				return 0;
 			}
 		}
@@ -172,7 +172,7 @@ parse_alis(struct client *client_p, struct alis_query *query,
 			if((query->skip = atoi(parv[param])) < 1)
 			{
 				service_err(alis_p, client_p, SVC_OPTIONINVALID,
-						alis_p->name, "::LIST -skip");
+						alis_p->name, "LIST -skip");
 				return 0;
 			}
 		}
@@ -216,7 +216,7 @@ parse_alis(struct client *client_p, struct alis_query *query,
 					break;
 				default:
 					service_err(alis_p, client_p, SVC_OPTIONINVALID,
-							alis_p->name, "::LIST -mode");
+							alis_p->name, "LIST -mode");
 					return 0;
 			}
 
@@ -227,14 +227,14 @@ parse_alis(struct client *client_p, struct alis_query *query,
 			if(query->mode == -1)
 			{
 				service_err(alis_p, client_p, SVC_OPTIONINVALID,
-						alis_p->name, "::LIST -mode");
+						alis_p->name, "LIST -mode");
 				return 0;
 			}
 		}
 		else
 		{
 			service_err(alis_p, client_p, SVC_OPTIONINVALID,
-					alis_p->name, "::LIST");
+					alis_p->name, "LIST");
 			return 0;
 		}
 

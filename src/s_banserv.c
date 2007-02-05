@@ -381,7 +381,7 @@ o_banserv_kline(struct client *client_p, struct lconn *conn_p, const char *parv[
 	if(EmptyString(reason))
 	{
 		service_snd(banserv_p, client_p, conn_p, SVC_NEEDMOREPARAMS,
-				banserv_p->name, "::KLINE");
+				banserv_p->name, "KLINE");
 		return 0;
 	}
 
@@ -471,7 +471,7 @@ o_banserv_xline(struct client *client_p, struct lconn *conn_p, const char *parv[
 	if(EmptyString(reason))
 	{
 		service_snd(banserv_p, client_p, conn_p, SVC_NEEDMOREPARAMS,
-				banserv_p->name, "::XLINE");
+				banserv_p->name, "XLINE");
 		return 0;
 	}
 
@@ -561,7 +561,7 @@ o_banserv_resv(struct client *client_p, struct lconn *conn_p, const char *parv[]
 	if(EmptyString(reason))
 	{
 		service_snd(banserv_p, client_p, conn_p, SVC_NEEDMOREPARAMS,
-				banserv_p->name, "::RESV");
+				banserv_p->name, "RESV");
 		return 0;
 	}
 
@@ -624,7 +624,7 @@ o_banserv_unkline(struct client *client_p, struct lconn *conn_p, const char *par
 		if(hit)
 		{
 			service_snd(banserv_p, client_p, conn_p, SVC_NOACCESS,
-					banserv_p->name, "::UNKLINE");
+					banserv_p->name, "UNKLINE");
 			return 0;
 		}
 	}
@@ -678,7 +678,7 @@ o_banserv_unxline(struct client *client_p, struct lconn *conn_p, const char *par
 		if(hit)
 		{
 			service_snd(banserv_p, client_p, conn_p, SVC_NOACCESS,
-					banserv_p->name, "::UNXLINE");
+					banserv_p->name, "UNXLINE");
 			return 0;
 		}
 	}
@@ -725,7 +725,7 @@ o_banserv_unresv(struct client *client_p, struct lconn *conn_p, const char *parv
 		if(hit)
 		{
 			service_snd(banserv_p, client_p, conn_p, SVC_NOACCESS,
-					banserv_p->name, "::UNRESV");
+					banserv_p->name, "UNRESV");
 			return 0;
 		}
 	}
@@ -767,7 +767,7 @@ o_banserv_sync(struct client *client_p, struct lconn *conn_p, const char *parv[]
 		if(hit)
 		{
 			service_snd(banserv_p, client_p, conn_p, SVC_NOACCESS,
-					banserv_p->name, "::SYNC");
+					banserv_p->name, "SYNC");
 			return 0;
 		}
 
@@ -799,7 +799,7 @@ o_banserv_sync(struct client *client_p, struct lconn *conn_p, const char *parv[]
 		else
 		{
 			service_snd(banserv_p, client_p, conn_p, SVC_OPTIONINVALID,
-					banserv_p->name, "::SYNC");
+					banserv_p->name, "SYNC");
 			return 0;
 		}
 	}

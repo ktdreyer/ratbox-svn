@@ -371,7 +371,7 @@ s_jupeserv_calljupe(struct client *client_p, struct lconn *conn_p, const char *p
 	if(!config_file.jupe_score || !config_file.oper_score)
 	{
 		service_err(jupeserv_p, client_p, SVC_ISDISABLED,
-				jupeserv_p->name, "::CALLJUPE");
+				jupeserv_p->name, "CALLJUPE");
 		return 0;
 	}
 
@@ -404,7 +404,7 @@ s_jupeserv_calljupe(struct client *client_p, struct lconn *conn_p, const char *p
 		if(!irccmp((const char *) ptr->data, client_p->user->servername))
 		{
 			service_err(jupeserv_p, client_p, SVC_JUPE_ALREADYREQUESTED,
-					jupeserv_p->name, "::CALLJUPE", jupe_p->name);
+					jupeserv_p->name, "CALLJUPE", jupe_p->name);
 			return 0;
 		}
 	}
@@ -449,7 +449,7 @@ s_jupeserv_callunjupe(struct client *client_p, struct lconn *conn_p, const char 
 	if(!config_file.unjupe_score || !config_file.oper_score)
 	{
 		service_err(jupeserv_p, client_p, SVC_ISDISABLED,
-				jupeserv_p->name, "::CALLUNJUPE");
+				jupeserv_p->name, "CALLUNJUPE");
 		return 0;
 	}
 
@@ -470,7 +470,7 @@ s_jupeserv_callunjupe(struct client *client_p, struct lconn *conn_p, const char 
 		if(!irccmp((const char *) ptr->data, client_p->user->servername))
 		{
 			service_err(jupeserv_p, client_p, SVC_JUPE_ALREADYREQUESTED,
-					jupeserv_p->name, "::CALLUNJUPE", jupe_p->name);
+					jupeserv_p->name, "CALLUNJUPE", jupe_p->name);
 			return 0;
 		}
 	}
@@ -519,7 +519,7 @@ s_jupeserv_pending(struct client *client_p, struct lconn *conn_p, const char *pa
 	if(!config_file.oper_score)
 	{
 		service_err(jupeserv_p, client_p, SVC_ISDISABLED,
-				jupeserv_p->name, "::PENDING");
+				jupeserv_p->name, "PENDING");
 		return 0;
 	}
 
