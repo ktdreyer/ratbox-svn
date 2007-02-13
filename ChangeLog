@@ -1,3 +1,12 @@
+leeh        2007/02/13 22:17:30 UTC	(20070213_3-23622)
+  Log:
+  - to avoid conflicts with code taken from ircd, rserv is now under the GPL
+  
+
+  Modified:
+	rserv/trunk/LICENSE (File Modified) 
+
+
 leeh        2007/02/13 22:08:37 UTC	(20070213_2-23616)
   Log:
   - add autoconf test for dirent.h
