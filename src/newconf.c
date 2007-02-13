@@ -518,24 +518,7 @@ conf_set_serverinfo_sid(void *data)
 static void
 conf_set_serverinfo_lang(void *data)
 {
-	const char *lang;
-	int i;
-
-	lang = data;
-
-	for(i = 0; i < LANG_LAST; i++)
-	{
-		if(EmptyString(langs_available[i]))
-			continue;
-
-		if(!strcasecmp(lang, langs_available[i]))
-			break;
-	}
-
-	if(i < LANG_LAST)
-		config_file.default_language = i;
-	else
-		conf_report_error("Ignoring serverinfo::default_language -- invalid language");
+	config_file.default_language = lang_get_langcode((const char *) data);
 }
 
 static void

@@ -37,16 +37,12 @@
 #include "client.h"
 #include "io.h"
 #include "conf.h"
+#include "log.h"
 #ifdef ENABLE_USERSERV
 #include "s_userserv.h"
 #endif
 
-const char *langs_available[] =
-{
-	"en_GB",
-	"\0"
-};
-
+const char *langs_available[LANG_MAX];
 const char **svc_notice;
 
 const char *svc_notice_string[] =
@@ -245,6 +241,10 @@ init_langs(void)
 {
 	int i;
 
+	/* ensure the default language is always at position 0 */
+	memset(langs_available, 0, sizeof(const char *) * LANG_MAX);
+	(void) lang_get_langcode(LANG_DEFAULT);
+
 	svc_notice = my_malloc(sizeof(char *) * SVC_LAST);
 
 	for(i = 0; lang_internal[i].id != SVC_LAST; i++)
@@ -261,15 +261,38 @@ init_langs(void)
 	}
 }
 
+unsigned int
+lang_get_langcode(const char *name)
+{
+	unsigned int i;
+
+	/* first hunt for a match */
+	for(i = 0; langs_available[i]; i++)
+	{
+		if(!strcasecmp(langs_available[i], name))
+			return i;
+	}
+
+	/* not found, add it in at i */
+	if(i+1 >= LANG_MAX)
+	{
+		mlog("Warning: Reach maximum amount of languages, translations may not be loaded correctly");
+		return 0;
+	}
+
+	langs_available[i] = my_strdup(name);
+	return i;
+}
+
 struct cachefile *
 lang_get_cachefile(struct cachefile **translations, struct client *client_p)
 {
 #ifdef ENABLE_USERSERV
 	if(client_p != NULL && client_p->user != NULL && client_p->user->user_reg != NULL)
 	{
-		enum langs_enum language = client_p->user->user_reg->language;
+		unsigned int language = client_p->user->user_reg->language;
 
-		if(language < LANG_LAST && translations[language] != NULL)
+		if(translations[language] != NULL)
 			return translations[language];
 	}
 #endif
@@ -277,13 +300,15 @@ lang_get_cachefile(struct cachefile **translations, struct client *client_p)
 	if(translations[config_file.default_language] != NULL)
 		return translations[config_file.default_language];
 
-	return translations[LANG_DEFAULT];
+	/* base translation is always first */
+	return translations[0];
 }
 
 struct cachefile *
 lang_get_cachefile_u(struct cachefile **translations, struct lconn *conn_p)
 {
-	return translations[LANG_DEFAULT];
+	/* base translation is always first */
+	return translations[0];
 }
 
 const char *

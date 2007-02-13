@@ -318,6 +318,7 @@ main(int argc, char *argv[])
 	/* tools requires balloc */
 	init_tools();
 
+	/* conf/commands/help all need base language stuff */
 	init_langs();
 
 	/* commands require cache */

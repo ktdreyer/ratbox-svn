@@ -19,7 +19,7 @@ struct user_reg
 
 	int flags;
 
-	enum langs_enum language;
+	unsigned int language;
 
 	dlink_node node;
 	dlink_list channels;

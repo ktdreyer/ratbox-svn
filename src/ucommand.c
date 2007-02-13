@@ -204,9 +204,9 @@ load_ucommand_help(void)
 	DLINK_FOREACH(ptr, ucommand_list.head)
 	{
 		ucommand = ptr->data;
-		ucommand->helpfile = my_malloc(sizeof(struct cachefile *) * LANG_LAST);
+		ucommand->helpfile = my_malloc(sizeof(struct cachefile *) * LANG_MAX);
 
-		for(i = 0; i < LANG_LAST; i++)
+		for(i = 0; langs_available[i]; i++)
 		{
 			snprintf(filename, sizeof(filename), "%s/%s/main/u-%s",
 				HELP_PATH, langs_available[i], lcase(ucommand->cmd));
@@ -226,7 +226,7 @@ clear_ucommand_help(void)
 	{
 		ucommand = ptr->data;
 
-		for(i = 0; i < LANG_LAST; i++)
+		for(i = 0; langs_available[i]; i++)
 		{
 			free_cachefile(ucommand->helpfile[i]);
 		}

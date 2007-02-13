@@ -4,27 +4,29 @@
 struct lconn;
 struct client;
 
+/* The maximum number of languages we can support.  Note, if a user is
+ * marked as using a translation that no longer exists, it will still count
+ * towards this limit.
+ */
+#define LANG_MAX 32
+
+
 /* DO NOT CHANGE LANG_DEFAULT.
  *
  * This macro is only used to define a "fallback" language that is
  * guaranteed to be complete.  It will only be used when a translated
- * version of the helpfile we are looking for is not around.
+ * version of the helpfile we are looking for is not around.  If this
+ * language is not complete, services will likely crash.
  *
  * There is a conf option to set a default language, use that instead.
  */
-#define LANG_DEFAULT LANG_en_GB
-
-enum langs_enum
-{
-	LANG_en_GB,
-
-	/* THIS ENTRY MUST BE LAST */
-	LANG_LAST
-} langs_id;
+#define LANG_DEFAULT "en_GB"
 
 extern const char *langs_available[];
 
 void init_langs(void);
+
+unsigned int lang_get_langcode(const char *name);
 
 struct cachefile *lang_get_cachefile(struct cachefile **, struct client *);
 struct cachefile *lang_get_cachefile_u(struct cachefile **, struct lconn *);

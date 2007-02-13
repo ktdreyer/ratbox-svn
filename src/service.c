@@ -99,10 +99,10 @@ load_service_help(struct client *service_p)
 
 	scommand = service_p->service->command;
 
-	service_p->service->help = my_malloc(sizeof(struct cachefile *) * LANG_LAST);
-	service_p->service->helpadmin = my_malloc(sizeof(struct cachefile *) * LANG_LAST);
+	service_p->service->help = my_malloc(sizeof(struct cachefile *) * LANG_MAX);
+	service_p->service->helpadmin = my_malloc(sizeof(struct cachefile *) * LANG_MAX);
 
-	for(j = 0; j < LANG_LAST; j++)
+	for(j = 0; langs_available[j]; j++)
 	{
 		snprintf(filename, sizeof(filename), "%s/%s/%s/index",
 			HELP_PATH, langs_available[j], lcase(service_p->service->id));
@@ -114,9 +114,9 @@ load_service_help(struct client *service_p)
 
 	for(i = 0; i < maxlen; i++)
 	{
-		scommand[i].helpfile = my_malloc(sizeof(struct cachefile *) * LANG_LAST);
+		scommand[i].helpfile = my_malloc(sizeof(struct cachefile *) * LANG_MAX);
 
-		for(j = 0; j < LANG_LAST; j++)
+		for(j = 0; langs_available[j]; j++)
 		{
 			snprintf(filename, sizeof(filename), "%s/%s/%s/",
 				HELP_PATH, langs_available[j], lcase(service_p->service->id));
@@ -132,9 +132,9 @@ load_service_help(struct client *service_p)
 	DLINK_FOREACH(ptr, service_p->service->ucommand_list.head)
 	{
 		ucommand = ptr->data;
-		ucommand->helpfile = my_malloc(sizeof(struct cachefile *) * LANG_LAST);
+		ucommand->helpfile = my_malloc(sizeof(struct cachefile *) * LANG_MAX);
 
-		for(j = 0; j < LANG_LAST; j++)
+		for(j = 0; langs_available[j]; j++)
 		{
 		        /* now see if we can load a helpfile.. */
         		snprintf(filename, sizeof(filename), "%s/%s/%s/u-",
@@ -160,7 +160,7 @@ clear_service_help(struct client *service_p)
 
 	scommand = service_p->service->command;
 
-	for(j = 0; j < LANG_LAST; j++)
+	for(j = 0; langs_available[j]; j++)
 	{
 		free_cachefile(service_p->service->help[j]);
 		free_cachefile(service_p->service->helpadmin[j]);
@@ -173,7 +173,7 @@ clear_service_help(struct client *service_p)
 
 	for(i = 0; i < maxlen; i++)
 	{
-		for(j = 0; j < LANG_LAST; j++)
+		for(j = 0; langs_available[j]; j++)
 		{
 			free_cachefile(scommand[i].helpfile[j]);
 		}
@@ -186,7 +186,7 @@ clear_service_help(struct client *service_p)
 	{
 		ucommand = ptr->data;
 
-		for(j = 0; j < LANG_LAST; j++)
+		for(j = 0; langs_available[j]; j++)
 		{
 			free_cachefile(ucommand->helpfile[j]);
 		}

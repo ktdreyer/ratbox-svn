@@ -1799,16 +1799,13 @@ s_user_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 			return 1;
 		}
 
-		for(i = 0; i < LANG_LAST; i++)
+		for(i = 0; langs_available[i]; i++)
 		{
-			if(EmptyString(langs_available[i]))
-				continue;
-
 			if(!strcasecmp(arg, langs_available[i]))
 				break;
 		}
 
-		if(i == LANG_LAST)
+		if(langs_available[i] == NULL)
 		{
 			service_err(userserv_p, client_p, SVC_USER_INVALIDLANGUAGE, arg);
 			return 1;
