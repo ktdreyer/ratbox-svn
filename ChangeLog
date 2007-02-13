@@ -1,3 +1,20 @@
+leeh        2007/02/13 20:52:16 UTC	(20070213_1-23614)
+  Log:
+  - move over to a dynamic list of available languages
+  
+
+  Modified:
+	rserv/trunk/include/langs.h (File Modified) 
+	rserv/trunk/include/s_userserv.h (File Modified) 
+	rserv/trunk/src/conf.c (File Modified) 
+	rserv/trunk/src/langs.c (File Modified) 
+	rserv/trunk/src/newconf.c (File Modified) 
+	rserv/trunk/src/rserv.c (File Modified) 
+	rserv/trunk/src/s_userserv.c (File Modified) 
+	rserv/trunk/src/service.c (File Modified) 
+	rserv/trunk/src/ucommand.c (File Modified) 
+
+
 leeh        2007/02/13 15:04:51 UTC	(20070213_0-23612)
   Log:
   - store language as a string rather than an integer
