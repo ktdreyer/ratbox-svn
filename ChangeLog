@@ -1,3 +1,19 @@
+leeh        2007/02/13 22:08:37 UTC	(20070213_2-23616)
+  Log:
+  - add autoconf test for dirent.h
+  - define PATH_MAX if not already defined
+  - make init_langs() fill langs_available will the list of subdirs in the
+    help folder
+  
+
+  Modified:
+	rserv/trunk/autoconf/configure.in (File Modified) 
+	rserv/trunk/configure (File Modified) 
+	rserv/trunk/include/setup.h.in (File Modified) 
+	rserv/trunk/include/stdinc.h (File Modified) 
+	rserv/trunk/src/langs.c (File Modified) 
+
+
 leeh        2007/02/13 20:52:16 UTC	(20070213_1-23614)
   Log:
   - move over to a dynamic list of available languages
