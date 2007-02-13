@@ -19,7 +19,7 @@ CREATE TABLE users (
 	last_time INTEGER,
 	flags INTEGER,
 	verify_token TEXT,
-	language INTEGER DEFAULT '0',
+	language TEXT DEFAULT '',
 	PRIMARY KEY(username)
 );
 

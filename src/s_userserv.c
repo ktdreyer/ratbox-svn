@@ -225,7 +225,8 @@ user_db_callback(int argc, const char **argv)
 	reg_p->reg_time = atol(argv[5]);
 	reg_p->last_time = atol(argv[6]);
 	reg_p->flags = atoi(argv[7]);
-	reg_p->language = atoi(argv[8]);
+
+	//reg_p->language = atoi(argv[8]);
 
 	add_user_reg(reg_p);
 
@@ -343,7 +344,7 @@ dbh_user_register(struct rsdb_hook *dbh, const char *c_data)
 	add_user_reg(ureg_p);
 
 	rsdb_hook_schedule("INSERT INTO users (username, password, email, reg_time, last_time, flags, language) "
-				"VALUES('%Q','%Q','%Q','%lu','%lu','0', '0')",
+				"VALUES('%Q','%Q','%Q','%lu','%lu','0', '')",
 			ureg_p->name, ureg_p->password, ureg_p->email,
 			ureg_p->reg_time, ureg_p->last_time);
 	return 1;
@@ -604,7 +605,7 @@ o_user_userregister(struct client *client_p, struct lconn *conn_p, const char *p
 	add_user_reg(reg_p);
 
 	rsdb_exec(NULL, "INSERT INTO users (username, password, email, reg_time, last_time, flags, language) "
-			"VALUES('%Q', '%Q', '%Q', '%lu', '%lu', '%u', '0')",
+			"VALUES('%Q', '%Q', '%Q', '%lu', '%lu', '%u', '')",
 			reg_p->name, reg_p->password, 
 			EmptyString(reg_p->email) ? "" : reg_p->email, 
 			reg_p->reg_time, reg_p->last_time, reg_p->flags);
@@ -1126,7 +1127,7 @@ s_user_register(struct client *client_p, struct lconn *conn_p, const char *parv[
 	add_user_reg(reg_p);
 
 	rsdb_exec(NULL, "INSERT INTO users (username, password, email, reg_time, last_time, flags, verify_token, language) "
-			"VALUES('%Q', '%Q', '%Q', '%lu', '%lu', '%u', '%Q', '0')",
+			"VALUES('%Q', '%Q', '%Q', '%lu', '%lu', '%u', '%Q', '')",
 			reg_p->name, reg_p->password, 
 			EmptyString(reg_p->email) ? "" : reg_p->email, 
 			reg_p->reg_time, reg_p->last_time, reg_p->flags, 
@@ -1818,8 +1819,8 @@ s_user_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 		service_err(userserv_p, client_p, SVC_USER_CHANGEDOPTION,
 				ureg_p->name, "LANGUAGE", langs_available[i]);
 
-		rsdb_exec(NULL, "UPDATE users SET language='%d' WHERE username='%Q'",
-				ureg_p->language, ureg_p->name);
+		rsdb_exec(NULL, "UPDATE users SET language='%Q' WHERE username='%Q'",
+				arg, ureg_p->name);
 		return 1;
 	}
 
