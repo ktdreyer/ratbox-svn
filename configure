@@ -4135,7 +4135,8 @@ done
 
 
 
-for ac_header in sys/time.h stdlib.h stdarg.h string.h strings.h unistd.h errno.h getopt.h crypt.h
+
+for ac_header in sys/time.h stdlib.h stdarg.h string.h strings.h unistd.h errno.h getopt.h crypt.h dirent.h
 do
 as_ac_Header=`echo "ac_cv_header_$ac_header" | $as_tr_sh`
 if { as_var=$as_ac_Header; eval "test \"\${$as_var+set}\" = set"; }; then

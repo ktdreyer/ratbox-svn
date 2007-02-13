@@ -70,4 +70,8 @@ extern int errno;
 #define SCANFLIKE(fmtarg, firstvararg)
 #endif /* defined(__INTEL_COMPILER) || defined(__GNUC__) */
 
+#ifndef PATH_MAX
+#define PATH_MAX 4096
+#endif
+
 #endif

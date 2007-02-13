@@ -31,6 +31,11 @@
  * $Id$
  */
 #include "stdinc.h"
+
+#ifdef HAVE_DIRENT_H
+#include <dirent.h>
+#endif
+
 #include "rserv.h"
 #include "langs.h"
 #include "cache.h"
@@ -239,6 +244,10 @@ const char *svc_notice_string[] =
 void
 init_langs(void)
 {
+	char pathbuf[PATH_MAX];
+	DIR *helpdir;
+	struct dirent *subdir;
+	struct stat subdirinfo;
 	int i;
 
 	/* ensure the default language is always at position 0 */
@@ -259,6 +268,30 @@ init_langs(void)
 			die(1, "Unable to find default message for %s", svc_notice_string[i]);
 		}
 	}
+
+	if((helpdir = opendir(HELPDIR)) == NULL)
+	{
+		mlog("Warning: Unable to open helpfile directory: %s", HELPDIR);
+		return;
+	}
+
+	while((subdir = readdir(helpdir)))
+	{
+		/* skip '.' and '..' */
+		if(!strcmp(subdir->d_name, ".") || !strcmp(subdir->d_name, ".."))
+			continue;
+
+		snprintf(pathbuf, sizeof(pathbuf), "%s/%s",
+				HELPDIR, subdir->d_name);
+
+		if(stat(pathbuf, &subdirinfo) >= 0)
+		{
+			if(S_ISDIR(subdirinfo.st_mode))
+				(void) lang_get_langcode(subdir->d_name);
+		}
+	}
+
+	(void) closedir(helpdir);
 }
 
 unsigned int
