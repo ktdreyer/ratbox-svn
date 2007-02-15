@@ -1,3 +1,13 @@
+leeh        2007/02/15 19:38:29 UTC	(20070215_1-23632)
+  Log:
+  - add in an example translation file
+  
+
+  Modified:
+	rserv/trunk/langs/ (File Added) 
+	rserv/trunk/langs/example.lang.x (File Added) 
+
+
 leeh        2007/02/15 19:29:42 UTC	(20070215_0-23630)
   Log:
   - rename en_GB to en
