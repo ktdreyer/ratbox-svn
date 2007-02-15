@@ -20,7 +20,7 @@ struct client;
  *
  * There is a conf option to set a default language, use that instead.
  */
-#define LANG_DEFAULT "en_GB"
+#define LANG_DEFAULT "en"
 
 extern const char *langs_available[];
 
