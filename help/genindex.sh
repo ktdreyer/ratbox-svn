@@ -7,7 +7,7 @@
 # If the second line is marked [ADMIN] it goes in index-admin
 # index first gets the contents of the "general" file.
 
-LANGS="en_GB"
+LANGS="en"
 SERVICES="alis operbot chanserv userserv jupeserv operserv nickserv global banserv watchserv"
 
 for k in $LANGS; do
