@@ -1,3 +1,19 @@
+leeh        2007/02/16 20:53:37 UTC	(20070216_0-23638)
+  Log:
+  - rename example.lang.x to example.lang
+  - add in Makefile to help/
+  
+
+  Modified:
+	rserv/trunk/Makefile.in (File Modified) 
+	rserv/trunk/autoconf/configure.in (File Modified) 
+	rserv/trunk/configure (File Modified) 
+	rserv/trunk/langs/Makefile.in (File Added) 
+	rserv/trunk/langs/example.lang (File Added) 
+	rserv/trunk/langs/example.lang.x (File Deleted) 
+	rserv/trunk/src/Makefile.in (File Modified) 
+
+
 leeh        2007/02/15 19:39:05 UTC	(20070215_2-23634)
   Log:
   - finish renaming en_GB to en
