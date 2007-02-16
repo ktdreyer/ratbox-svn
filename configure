@@ -679,6 +679,7 @@ EGREP
 logdir
 rundir
 helpdir
+langdir
 subdirs
 DB_INCLUDES
 DB_LIBS
@@ -1307,6 +1308,7 @@ Optional Packages:
  --with-logdir=DIR         logfiles in DIR localstatedir/log
  --with-rundir=DIR         pidfile in DIR localstatedir/run
  --with-helpdir=DIR        helpfiles in DIR datadir/ratbox-services/help
+ --with-langdir=DIR        language translations in DIR datadir/ratbox-services/langs
  --with-sqlitebuild        Forces packaged sqlite3 to be used for build
  --with-pcrebuild        Forces packaged PCRE to be used for build
  --with-nicklen=LENGTH     Sets nick length to LENGTH
@@ -5028,6 +5030,16 @@ fi
 
 
 
+# Check whether --with-langdir was given.
+if test "${with_langdir+set}" = set; then
+  withval=$with_langdir;  langdir=$with_langdir
+else
+   langdir=$datadir'/ratbox-services/langs'
+fi
+
+
+
+
 
 
 
@@ -6608,7 +6620,7 @@ _ACEOF
 
 
 
-ac_config_files="$ac_config_files Makefile help/Makefile src/Makefile"
+ac_config_files="$ac_config_files Makefile help/Makefile langs/Makefile src/Makefile"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -7166,6 +7178,7 @@ do
     "include/setup.h") CONFIG_HEADERS="$CONFIG_HEADERS include/setup.h" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
     "help/Makefile") CONFIG_FILES="$CONFIG_FILES help/Makefile" ;;
+    "langs/Makefile") CONFIG_FILES="$CONFIG_FILES langs/Makefile" ;;
     "src/Makefile") CONFIG_FILES="$CONFIG_FILES src/Makefile" ;;
 
   *) { { echo "$as_me:$LINENO: error: invalid argument: $ac_config_target" >&5
@@ -7292,6 +7305,7 @@ EGREP!$EGREP$ac_delim
 logdir!$logdir$ac_delim
 rundir!$rundir$ac_delim
 helpdir!$helpdir$ac_delim
+langdir!$langdir$ac_delim
 subdirs!$subdirs$ac_delim
 DB_INCLUDES!$DB_INCLUDES$ac_delim
 DB_LIBS!$DB_LIBS$ac_delim
@@ -7313,7 +7327,7 @@ LIBOBJS!$LIBOBJS$ac_delim
 LTLIBOBJS!$LTLIBOBJS$ac_delim
 _ACEOF
 
-  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 83; then
+  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 84; then
     break
   elif $ac_last_try; then
     { { echo "$as_me:$LINENO: error: could not make $CONFIG_STATUS" >&5

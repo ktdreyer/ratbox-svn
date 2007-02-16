@@ -6,7 +6,7 @@ BIN=ratbox-services@EXEEXT@
 LIBS=@LIBS@
 LDFLAGS=@LDFLAGS@
 
-SUBDIRS=@SQLITE_SUBDIR@ @PCRE_SUBDIR@ src help
+SUBDIRS=@SQLITE_SUBDIR@ @PCRE_SUBDIR@ src help langs
 
 prefix=@prefix@
 exec_prefix=@prefix@

@@ -47,9 +47,14 @@ AC_ARG_WITH(helpdir,
 [ --with-helpdir=DIR        helpfiles in DIR [datadir/ratbox-services/help] ],
 [ helpdir=$with_helpdir ],[ helpdir=$datadir'/ratbox-services/help' ])
 
+AC_ARG_WITH(langdir,
+[ --with-langdir=DIR        language translations in DIR [datadir/ratbox-services/langs] ],
+[ langdir=$with_langdir ],[ langdir=$datadir'/ratbox-services/langs' ])
+
 AC_SUBST(logdir)
 AC_SUBST(rundir)
 AC_SUBST(helpdir)
+AC_SUBST(langdir)
 
 AC_MSG_CHECKING(Compile with warning flags)
 AC_ARG_ENABLE(warnings,
@@ -520,6 +525,7 @@ AC_SUBST(S_WATCHSERV)
 AC_OUTPUT(			\
 	Makefile		\
         help/Makefile   	\
+	langs/Makefile		\
 	src/Makefile		\
 )
 

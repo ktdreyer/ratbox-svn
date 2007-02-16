@@ -20,10 +20,11 @@ localstatedir=@localstatedir@
 logdir=@logdir@
 rundir=@rundir@
 helpdir=@helpdir@
+langdir=@langdir@
 datarootdir=@datarootdir@
 
 CFLAGS=@CPPFLAGS@ @CFLAGS@ -DPREFIX=\"$(prefix)\" -DSYSCONFDIR=\"$(sysconfdir)\" \
-	-DLOGDIR=\"$(logdir)\" -DRUNDIR=\"$(rundir)\" -DHELPDIR=\"$(helpdir)\"
+	-DLOGDIR=\"$(logdir)\" -DRUNDIR=\"$(rundir)\" -DHELPDIR=\"$(helpdir)\" -DLANGDIR=\"$(langdir)\"
 
 # Anything marked with the .PHONY attribute is always considered "out of date"
 .PHONY: $(BIN)
