@@ -9,7 +9,7 @@ prefix=@prefix@
 langdir=@langdir@
 datarootdir=@datarootdir@
 
-LANGS=example.lang
+LANGS=
 
 install: 
 	@if [ -d $(DESTDIR)$(langdir)-old ]; then \
