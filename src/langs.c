@@ -520,7 +520,10 @@ lang_parse_transfile(FILE *fp, const char *filename, unsigned int langcode,
 			if((p = strrchr(data, '"')))
 			{
 				*p = '\0';
-				svc_notice[langcode][i] = my_strdup(data);
+
+				if(lang_fmt_check(filename, svc_notice[0][i], data))
+					svc_notice[langcode][i] = my_strdup(data);
+
 				continue;
 			}
 		}

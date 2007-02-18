@@ -45,6 +45,7 @@ BSRCS = 		\
 	hook.c		\
 	io.c		\
 	langs.c		\
+	langs_format.c	\
 	log.c		\
 	match.c		\
 	messages.c	\

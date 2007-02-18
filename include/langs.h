@@ -31,6 +31,9 @@ unsigned int lang_get_langcode(const char *name);
 struct cachefile *lang_get_cachefile(struct cachefile **, struct client *);
 struct cachefile *lang_get_cachefile_u(struct cachefile **, struct lconn *);
 
+/* langs_format.c */
+int lang_fmt_check(const char *filename, const char *original, const char *translation);
+
 /* when changing this, you MUST reflect the change in svc_notice_string in
  * langs.c and add a default into messages.c
  */
