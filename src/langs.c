@@ -604,10 +604,10 @@ lang_load_trans(void)
 			/* open the file pointer here just so its easier to 
 			 * close if lang_load_transfile() aborts
 			 */
-			if((fp = fopen(filename, "r")) == NULL)
+			if((fp = fopen(pathbuf, "r")) == NULL)
 			{
 				mlog("Warning: Unable to open translation %s: %s", 
-					filename, strerror(errno));
+					pathbuf, strerror(errno));
 				continue;
 			}
 
