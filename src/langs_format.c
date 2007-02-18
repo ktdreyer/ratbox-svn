@@ -33,6 +33,7 @@
 #include "stdinc.h"
 #include "rserv.h"
 #include "langs.h"
+#include "log.h"
 
 #define MAX_FMT_ARGS		64
 

@@ -383,10 +383,12 @@ u_rehash(struct client *unused, struct lconn *conn_p, const char *parv[], int pa
 {
 	if(parc > 0 && !irccmp(parv[0], "help"))
 	{
-		mlog("services rehashing: %s reloading help", conn_p->name);
-		sendto_all("services rehashing: %s reloading help",
+		mlog("services rehashing: %s reloading help/translations", conn_p->name);
+		sendto_all("services rehashing: %s reloading help/translations",
 				conn_p->name);
 		rehash_help();
+		lang_clear_trans();
+		lang_load_trans();
 		return 0;
 	}
 

@@ -417,11 +417,13 @@ o_oper_rehash(struct client *client_p, struct lconn *conn_p, const char *parv[],
 {
 	if(parc > 0 && !irccmp(parv[0], "help"))
 	{
-		mlog("services rehashing: %s reloading help", OPER_NAME(client_p, conn_p));
-		sendto_all("services rehashing: %s reloading help",
+		mlog("services rehashing: %s reloading help/translations", OPER_NAME(client_p, conn_p));
+		sendto_all("services rehashing: %s reloading help/translations",
 				OPER_NAME(client_p, conn_p));
 
 		rehash_help();
+		lang_clear_trans();
+		lang_load_trans();
 		return 0;
 	}
 

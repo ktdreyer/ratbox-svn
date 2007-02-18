@@ -50,8 +50,6 @@
 const char *langs_available[LANG_MAX];
 const char **svc_notice[LANG_MAX];
 
-static void lang_load_trans(void);
-
 const char *svc_notice_string[] =
 {
 	/* general service */
@@ -581,7 +579,7 @@ lang_load_transfile(FILE *fp, const char *filename)
 	lang_parse_transfile(fp, filename, langcode, NULL, NULL);
 }
 
-static void
+void
 lang_load_trans(void)
 {
 	char pathbuf[PATH_MAX];
@@ -622,3 +620,23 @@ lang_load_trans(void)
 	(void) closedir(langdir);
 }
 
+void
+lang_clear_trans(void)
+{
+	int i, j;
+
+	for(i = 1; i < LANG_MAX; i++)
+	{
+		if(svc_notice[i] == NULL)
+			continue;
+
+		for(j = 0; j < SVC_LAST; j++)
+		{
+			if(svc_notice[i][j])
+				my_free((void *) svc_notice[i][j]);
+		}
+
+		my_free(svc_notice[i]);
+		svc_notice[i] = NULL;
+	}
+}

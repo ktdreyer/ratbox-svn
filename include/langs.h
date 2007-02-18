@@ -26,6 +26,9 @@ extern const char *langs_available[];
 
 void init_langs(void);
 
+void lang_load_trans(void);
+void lang_clear_trans(void);
+
 unsigned int lang_get_langcode(const char *name);
 
 struct cachefile *lang_get_cachefile(struct cachefile **, struct client *);

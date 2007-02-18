@@ -445,9 +445,11 @@ void check_rehash(void *unused)
 
 	if(need_rehash_help)
 	{
-		mlog("services rehashing: got SIGUSR1, reloading help");
-		sendto_all("services rehashing: got SIGUSR1, reloading help");
+		mlog("services rehashing: got SIGUSR1, reloading help/translations");
+		sendto_all("services rehashing: got SIGUSR1, reloading help/translations");
 		rehash_help();
+		lang_clear_trans();
+		lang_load_trans();
 		need_rehash_help = 0;
 	}
 
