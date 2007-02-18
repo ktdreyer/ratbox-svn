@@ -48,7 +48,9 @@
 #endif
 
 const char *langs_available[LANG_MAX];
-const char **svc_notice;
+const char **svc_notice[LANG_MAX];
+
+static void lang_load_trans(void);
 
 const char *svc_notice_string[] =
 {
@@ -250,20 +252,30 @@ init_langs(void)
 	struct stat subdirinfo;
 	int i;
 
+	/* sanity check! that the table of codes against strings for
+	 * services notices are actually the same size
+	 */
+	if((unsigned int) SVC_LAST != ((sizeof(svc_notice_string) / sizeof(const char *)) - 1))
+	{
+		die(1, "fatal error: svc_notice_string != svc_notice_enum");
+	}
+
 	/* ensure the default language is always at position 0 */
 	memset(langs_available, 0, sizeof(const char *) * LANG_MAX);
 	(void) lang_get_langcode(LANG_DEFAULT);
 
-	svc_notice = my_malloc(sizeof(char *) * SVC_LAST);
+	/* reset svc_notice, and load default messages */
+	memset(svc_notice, 0, sizeof(char **) * LANG_MAX);
+	svc_notice[0] = my_calloc(1, sizeof(char *) * SVC_LAST);
 
 	for(i = 0; lang_internal[i].id != SVC_LAST; i++)
 	{
-		svc_notice[lang_internal[i].id] = lang_internal[i].msg;
+		svc_notice[0][lang_internal[i].id] = lang_internal[i].msg;
 	}
 
 	for(i = 0; i < SVC_LAST; i++)
 	{
-		if(svc_notice[i] == NULL)
+		if(svc_notice[0][i] == NULL)
 		{
 			die(1, "Unable to find default message for %s", svc_notice_string[i]);
 		}
@@ -292,6 +304,8 @@ init_langs(void)
 	}
 
 	(void) closedir(helpdir);
+
+	lang_load_trans();
 }
 
 unsigned int
@@ -347,6 +361,261 @@ lang_get_cachefile_u(struct cachefile **translations, struct lconn *conn_p)
 const char *
 lang_get_notice(enum svc_notice_enum msgid, struct client *client_p, struct lconn *conn_p)
 {
-	return svc_notice[msgid];
+#ifdef ENABLE_USERSERV
+	if(client_p != NULL && client_p->user && client_p->user->user_reg != NULL)
+	{
+		unsigned int language = client_p->user->user_reg->language;
+
+		if(svc_notice[language][msgid])
+			return svc_notice[language][msgid];
+	}
+#endif
+
+	if(svc_notice[config_file.default_language][msgid])
+		return svc_notice[config_file.default_language][msgid];
+
+	/* base translation is always first */
+	return svc_notice[0][msgid];
+}
+
+
+static void
+lang_parse_transfile(FILE *fp, const char *filename, unsigned int langcode,
+			char **langcode_str, char **langdesc_str)
+{
+	char buf[BUFSIZE];
+	char tmpbuf[BUFSIZE];
+	char *data;
+	char *p;
+	unsigned int i;
+
+	while(fgets(buf, sizeof(buf), fp))
+	{
+		/* last line in file may not have a \n, look for any other
+		 * that is excessively long
+		 */
+		if(strchr(buf, '\n') == NULL && strlen(buf) >= BUFSIZE-1)
+		{
+			if(langcode_str == NULL)
+				mlog("Warning: Ignoring long line in translation %s: %s",
+					filename, buf);
+
+			/* and skip the entire line.. */
+			while(fgets(tmpbuf, sizeof(tmpbuf), fp))
+			{
+				if(strchr(tmpbuf, '\n'))
+					break;
+			}
+
+			continue;
+		}
+
+		/* comment */
+		if(buf[0] == '#')
+			continue;
+
+		if((p = strchr(buf, '\n')) != NULL)
+			*p = '\0';
+		if((p = strchr(buf, '\r')) != NULL)
+			*p = '\0';
+
+		/* empty lines */
+		if(buf[0] == '\0')
+			continue;
+
+		/* declarations of the code and the description */
+		if(strncmp(buf, "set LANG_CODE", 13) == 0)
+		{
+			if(langcode_str)
+			{
+				if(*langcode_str)
+				{
+					my_free(*langcode_str);
+					*langcode_str = NULL;
+				}
+
+				if((data = strchr(buf, '"')))
+				{
+					*data++ = '\0';
+
+					if((p = strrchr(data, '"')))
+						*p = '\0';
+
+					*langcode_str = my_strdup(data);
+				}
+			}
+
+			continue;
+		}
+
+		if(strncmp(buf, "set LANG_DESCRIPTION", 20) == 0)
+		{
+			if(langdesc_str)
+			{
+				if(*langdesc_str)
+				{
+					my_free(*langdesc_str);
+					*langdesc_str = NULL;
+				}
+
+				if((data = strchr(buf, '"')))
+				{
+					*data++ = '\0';
+
+					if((p = strrchr(data, '"')))
+						*p = '\0';
+
+					*langdesc_str = my_strdup(data);
+				}
+			}
+
+			continue;
+		}
+
+		/* initial run through, only hunting for language codes */
+		if(langcode_str)
+			continue;
+
+		/* lines containing only tabs/spaces */
+		for(p = buf; *p; p++)
+		{
+			if(*p != ' ' && *p != '\t')
+				break;
+		}
+
+		if(p == '\0')
+			continue;
+
+		/* ',' delimits the notice name */
+		if((data = strchr(buf, ',')) == NULL)
+		{
+			mlog("Warning: Ignoring bogus line in translation %s: %s",
+				filename, buf);
+			continue;
+		}
+		
+		*data++ = '\0';
+
+		/* hunt for the index of the translation */
+		for(i = 0; lang_internal[i].id != SVC_LAST; i++)
+		{
+			if(strcmp(svc_notice_string[i], buf) == 0)
+				break;
+		}
+
+		/* not found */
+		if(lang_internal[i].id == SVC_LAST)
+		{
+			mlog("Warning: Invalid notice code in translation %s: %s",
+				filename, buf);
+			continue;
+		}
+
+		/* now hunt for the string itself, and continue if found */
+		if((p = strchr(data, '"')))
+		{
+			*p++ = '\0';
+			data = p;
+
+			if((p = strrchr(data, '"')))
+			{
+				*p = '\0';
+				svc_notice[langcode][i] = my_strdup(data);
+				continue;
+			}
+		}
+
+		mlog("Warning: Invalid translation string in translation %s: %s",
+			filename, data);
+	}
+
+}
+
+static void
+lang_load_transfile(FILE *fp, const char *filename)
+{
+	char *langcode_str = NULL;
+	char *langdesc_str = NULL;
+	unsigned int langcode;
+
+	lang_parse_transfile(fp, filename, -1, &langcode_str, &langdesc_str);
+
+	if(langcode_str == NULL || langcode_str[0] == '\0')
+	{
+		mlog("Warning: LANG_CODE is not set in translation %s", filename);
+		return;
+	}
+
+	if(langdesc_str == NULL || langdesc_str[0] == '\0')
+	{
+		mlog("Warning: LANG_DESCRIPTION is not set in translation %s", filename);
+		return;
+	}
+
+	/* LANG_DEFAULT *MUST* *ALWAYS* come from messages.c.
+	 * It must be fully working, and we cannot guarantee that in a
+	 * translation file. --anfl
+	 */
+	if(strcmp(langcode_str, LANG_DEFAULT) == 0)
+	{
+		mlog("Warning: Attempted override of compiled translations from translation %s", filename);
+		return;
+	}
+
+	rewind(fp);
+
+	langcode = lang_get_langcode(langcode_str);
+
+	/* language code conflict */
+	if(svc_notice[langcode])
+	{
+		mlog("Warning: Attempted override of %s translations from translation %s", 
+			langcode_str, filename);
+		return;
+	}
+
+	svc_notice[langcode] = my_calloc(1, sizeof(char *) * SVC_LAST);
+	lang_parse_transfile(fp, filename, langcode, NULL, NULL);
+}
+
+static void
+lang_load_trans(void)
+{
+	char pathbuf[PATH_MAX];
+	FILE *fp;
+	DIR *langdir;
+	struct dirent *fileent;
+	struct stat fileinfo;
+
+	if((langdir = opendir(LANGDIR)) == NULL)
+	{
+		mlog("Warning: Unable to open translation directory: %s", LANGDIR);
+		return;
+	}
+
+	while((fileent = readdir(langdir)))
+	{
+		snprintf(pathbuf, sizeof(pathbuf), "%s/%s",
+				LANGDIR, fileent->d_name);
+
+		/* we want only regular files */
+		if(stat(pathbuf, &fileinfo) >= 0 && S_ISREG(fileinfo.st_mode))
+		{
+			/* open the file pointer here just so its easier to 
+			 * close if lang_load_transfile() aborts
+			 */
+			if((fp = fopen(filename, "r")) == NULL)
+			{
+				mlog("Warning: Unable to open translation %s: %s", 
+					filename, strerror(errno));
+				continue;
+			}
+
+			lang_load_transfile(fp, pathbuf);
+			fclose(fp);
+		}
+	}
+
+	(void) closedir(langdir);
 }
 

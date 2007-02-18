@@ -228,7 +228,7 @@ enum svc_notice_enum
 /* contains the string version of the enum above */
 extern const char *svc_notice_string[];
 
-extern const char **svc_notice;
+extern const char **svc_notice[];
 
 const char *lang_get_notice(enum svc_notice_enum msgid, struct client *, struct lconn *);
 
