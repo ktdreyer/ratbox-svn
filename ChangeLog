@@ -1,3 +1,19 @@
+leeh        2007/02/18 21:13:35 UTC	(20070218_5-23650)
+  Log:
+  - make USR1/rehash help also reload the translations
+  
+
+  Modified:
+	rserv/trunk/help/en/main/u-rehash (File Modified) 
+	rserv/trunk/help/en/operserv/rehash (File Modified) 
+	rserv/trunk/include/langs.h (File Modified) 
+	rserv/trunk/src/langs.c (File Modified) 
+	rserv/trunk/src/langs_format.c (File Modified) 
+	rserv/trunk/src/rserv.c (File Modified) 
+	rserv/trunk/src/s_operserv.c (File Modified) 
+	rserv/trunk/src/ucommand.c (File Modified) 
+
+
 leeh        2007/02/18 19:22:58 UTC	(20070218_4-23648)
   Log:
   - finished testing, dont want to install example.lang
