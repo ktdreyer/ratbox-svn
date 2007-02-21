@@ -68,6 +68,12 @@ lang_fmt_parse(struct lang_fmt *fmt, const char *data)
 					parsing = 0;
 					break;
 
+				case 's':
+					fmt[pos].type = LANG_FMT_STRING;
+					pos++;
+					parsing = 0;
+					break;
+
 				case 'l':
 					if(fmt[pos].flags & LANG_FMT_INTLONG)
 						fmt[pos].flags |= LANG_FMT_INTLONGLONG;
@@ -89,6 +95,13 @@ lang_fmt_parse(struct lang_fmt *fmt, const char *data)
 					parsing = 0;
 					break;
 
+				case 'c':
+					fmt[pos].type = LANG_FMT_CHAR;
+					fmt[pos].flags |= LANG_FMT_UNSIGNED;
+					pos++;
+					parsing = 0;
+					break;
+
 				case 'x':
 				case 'X':
 					fmt[pos].type = LANG_FMT_HEX;
@@ -97,18 +110,22 @@ lang_fmt_parse(struct lang_fmt *fmt, const char *data)
 					parsing = 0;
 					break;
 
-				case 'c':
-					fmt[pos].type = LANG_FMT_CHAR;
-					fmt[pos].flags |= LANG_FMT_UNSIGNED;
-					pos++;
-					parsing = 0;
+				case '.':
+				case '+':
+				case '-':
+				case '#':
+					if(fmt[pos].flags)
+						return -1;
 					break;
 
-				case 's':
-					fmt[pos].type = LANG_FMT_STRING;
-					pos++;
-					parsing = 0;
+				case '1': case '2': case '3': case '4': case '5':
+				case '6': case '7': case '8': case '9': case '0':
+					if(fmt[pos].flags)
+						return -1;
 					break;
+
+				default:
+					return -2;
 			}
 		}
 		else if(*data == '%')
@@ -132,18 +149,18 @@ lang_fmt_check(const char *filename, const char *original, const char *translati
 	memset(original_fmt, 0, sizeof(struct lang_fmt) * MAX_FMT_ARGS);
 	memset(translation_fmt, 0, sizeof(struct lang_fmt) * MAX_FMT_ARGS);
 
-	if(!lang_fmt_parse(original_fmt, original))
+	if(lang_fmt_parse(original_fmt, original) > 0)
 	{
-		mlog("Warning: format string has too many arguments, raise MAX_FMT_ARGS");
+		mlog("Warning: Error parsing format string: %s", original);
 		return 0;
 	}
 
 	/* if the original is fine but the translation isn't, then they have
 	 * different amounts of format strings
 	 */
-	if(!lang_fmt_parse(translation_fmt, translation))
+	if(lang_fmt_parse(translation_fmt, translation) > 0)
 	{
-		mlog("Warning: translation format strings differ in %s: %s",
+		mlog("Warning: Error parsing format string in %s: %s", 
 			filename, translation);
 		return 0;
 	}
