@@ -1,3 +1,12 @@
+leeh        2007/02/21 18:16:21 UTC	(20070221_0-23652)
+  Log:
+  - watch for MAX_FMT_ARGS overflowing
+  
+
+  Modified:
+	rserv/trunk/src/langs_format.c (File Modified) 
+
+
 leeh        2007/02/18 21:13:35 UTC	(20070218_5-23650)
   Log:
   - make USR1/rehash help also reload the translations
