@@ -52,7 +52,7 @@ struct lang_fmt
 	unsigned int flags;
 };
 
-static void
+static int
 lang_fmt_parse(struct lang_fmt *fmt, const char *data)
 {
 	unsigned int pos = 0;
@@ -113,7 +113,12 @@ lang_fmt_parse(struct lang_fmt *fmt, const char *data)
 		}
 		else if(*data == '%')
 			parsing = 1;
+
+		if(pos+1 >= MAX_FMT_ARGS)
+			return 0;
 	}
+
+	return 1;
 }
 
 int
@@ -127,8 +132,21 @@ lang_fmt_check(const char *filename, const char *original, const char *translati
 	memset(original_fmt, 0, sizeof(struct lang_fmt) * MAX_FMT_ARGS);
 	memset(translation_fmt, 0, sizeof(struct lang_fmt) * MAX_FMT_ARGS);
 
-	lang_fmt_parse(original_fmt, original);
-	lang_fmt_parse(translation_fmt, translation);
+	if(!lang_fmt_parse(original_fmt, original))
+	{
+		mlog("Warning: format string has too many arguments, raise MAX_FMT_ARGS");
+		return 0;
+	}
+
+	/* if the original is fine but the translation isn't, then they have
+	 * different amounts of format strings
+	 */
+	if(!lang_fmt_parse(translation_fmt, translation))
+	{
+		mlog("Warning: translation format strings differ in %s: %s",
+			filename, translation);
+		return 0;
+	}
 
 	for(i = 0; i < MAX_FMT_ARGS; i++)
 	{
