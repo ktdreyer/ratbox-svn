@@ -1,3 +1,13 @@
+leeh        2007/02/21 18:27:19 UTC	(20070221_1-23654)
+  Log:
+  - handle some conversion specifiers, and error if we get a part of a format
+    string we dont understand
+  
+
+  Modified:
+	rserv/trunk/src/langs_format.c (File Modified) 
+
+
 leeh        2007/02/21 18:16:21 UTC	(20070221_0-23652)
   Log:
   - watch for MAX_FMT_ARGS overflowing
