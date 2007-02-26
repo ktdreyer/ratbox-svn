@@ -1,3 +1,15 @@
+leeh        2007/02/26 21:13:35 UTC	(20070226_2-23668)
+  Log:
+  - make HOOK_MODE_BAN only for user set +b
+  - make del_ban() external
+  
+
+  Modified:
+	rserv/trunk/include/channel.h (File Modified) 
+	rserv/trunk/include/hook.h (File Modified) 
+	rserv/trunk/src/c_mode.c (File Modified) 
+
+
 leeh        2007/02/26 21:01:18 UTC	(20070226_1-23666)
   Log:
   - add a hook for +b modes
