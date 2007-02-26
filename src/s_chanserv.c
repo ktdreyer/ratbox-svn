@@ -1819,6 +1819,13 @@ s_chan_adduser(struct client *client_p, struct lconn *conn_p, const char *parv[]
 		return 1;
 	}
 
+	/* user is not allowed to be added to channels */
+	if(ureg_p->flags & US_FLAGS_NOACCESS)
+	{
+		service_err(chanserv_p, client_p, SVC_USER_NOACCESSON, ureg_p->name);
+		return 1;
+	}
+
 	level = atoi(parv[2]);
 
 	if(level < 1 || level >= mreg_p->level)

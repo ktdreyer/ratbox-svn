@@ -108,6 +108,7 @@ struct _lang_internal lang_internal[] =
 	{ SVC_USER_TOKENBAD,		"Username %s %s token is malformed"			},
 	{ SVC_USER_TOKENMISMATCH,	"Username %s %s tokens do not match"			},
 	{ SVC_USER_DURATIONTOOSHORT,	"Username %s has not been registered long enough to use %s::%s"			},
+	{ SVC_USER_NOACCESSON,		"Username %s is flagged NOACCESS and cannot be added to channels"		},
 
 	/* userserv::activate */
 	{ SVC_USER_ACT_ALREADY,		"Username %s has already been activated for use"	},

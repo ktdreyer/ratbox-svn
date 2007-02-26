@@ -126,6 +126,7 @@ const char *svc_notice_string[] =
 	"SVC_USER_TOKENBAD",
 	"SVC_USER_TOKENMISMATCH",
 	"SVC_USER_DURATIONTOOSHORT",
+	"SVC_USER_NOACCESSON",
 	/* userserv::activate */
 	"SVC_USER_ACT_ALREADY",
 	"SVC_USER_ACT_COMPLETE",

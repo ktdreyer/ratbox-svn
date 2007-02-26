@@ -31,6 +31,7 @@ struct user_reg
 #define US_FLAGS_SUSPENDED	0x0001
 #define US_FLAGS_PRIVATE	0x0002
 #define US_FLAGS_NEVERLOGGEDIN	0x0004
+#define US_FLAGS_NOACCESS	0x0008
 
 /* Flags not stored in the DB: 0xFFFF0000 */
 #define US_FLAGS_NEEDUPDATE	0x00010000

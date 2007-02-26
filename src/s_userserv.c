@@ -1787,6 +1787,28 @@ s_user_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 				ureg_p->flags, ureg_p->name);
 		return 1;
 	}
+	else if(!strcasecmp(parv[0], "NOACCESS"))
+	{
+		if(!strcasecmp(arg, "ON"))
+			ureg_p->flags |= US_FLAGS_NOACCESS;
+		else if(!strcasecmp(arg, "OFF"))
+			ureg_p->flags &= ~US_FLAGS_NOACCESS;
+		else
+		{
+			service_err(userserv_p, client_p, SVC_USER_QUERYOPTION,
+					ureg_p->name, "NOACCESS",
+					(ureg_p->flags & US_FLAGS_NOACCESS) ? "ON" : "OFF");
+			return 1;
+		}
+
+		service_err(userserv_p, client_p, SVC_USER_CHANGEDOPTION,
+				ureg_p->name, "NOACCESS",
+				(ureg_p->flags & US_FLAGS_NOACCESS) ? "ON" : "OFF");
+
+		rsdb_exec(NULL, "UPDATE users SET flags='%d' WHERE username='%Q'",
+				ureg_p->flags, ureg_p->name);
+		return 1;
+	}
 	else if(!strcasecmp(parv[0], "LANGUAGE"))
 	{
 		int i;
