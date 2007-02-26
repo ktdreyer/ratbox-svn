@@ -1,3 +1,14 @@
+leeh        2007/02/26 21:16:31 UTC	(20070226_3-23670)
+  Log:
+  - add CHANSERV::SET::NOUSERBANS, to force all bans to go through services
+  
+
+  Modified:
+	rserv/trunk/help/en/chanserv/set (File Modified) 
+	rserv/trunk/include/s_chanserv.h (File Modified) 
+	rserv/trunk/src/s_chanserv.c (File Modified) 
+
+
 leeh        2007/02/26 21:13:35 UTC	(20070226_2-23668)
   Log:
   - make HOOK_MODE_BAN only for user set +b
