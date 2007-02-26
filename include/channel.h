@@ -104,6 +104,9 @@ extern void rejoin_service(struct client *service_p, struct channel *chptr, int 
 /* c_mode.c */
 int valid_ban(const char *banstr);
 
+/* DO NOT DEREFERENCE THE VOID POINTER RETURNED FROM THIS */
+void *del_ban(const char *banstr, dlink_list *list);
+
 int parse_simple_mode(struct chmode *, const char **, int, int);
 void parse_full_mode(struct channel *, struct client *, const char **, int, int);
 

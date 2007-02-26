@@ -22,7 +22,7 @@
 #define HOOK_DCC_EXIT		15	/* dcc client exits */
 #define HOOK_USER_EXIT		16	/* user exits the network */
 #define HOOK_SERVER_EXIT	17	/* server exits the network */
-#define HOOK_MODE_BAN		18
+#define HOOK_MODE_BAN		18	/* mode +b done by a user only */
 #define HOOK_LAST_HOOK		19
 
 typedef int (*hook_func)(void *, void *);

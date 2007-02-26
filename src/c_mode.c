@@ -138,7 +138,7 @@ add_ban(const char *banstr, dlink_list *list)
  *
  * Do *NOT* dereference the return value from this function.
  */
-static void *
+void *
 del_ban(const char *banstr, dlink_list *list)
 {
 	void *banptr;
@@ -593,7 +593,7 @@ parse_full_mode(struct channel *chptr, struct client *source_p,
 }
 
 static void
-handle_chmode(struct channel *chptr, int parc, const char **parv)
+handle_chmode(struct channel *chptr, struct client *source_p, int parc, const char **parv)
 {
 	struct client *target_p;
 	dlink_node *ptr;
@@ -619,7 +619,7 @@ handle_chmode(struct channel *chptr, int parc, const char **parv)
 	   strcasecmp(oldmode.key, chptr->mode.key))
 		hook_call(HOOK_MODE_SIMPLE, chptr, NULL);
 
-	if(dlink_list_length(&ban_list))
+	if(IsUser(source_p) && dlink_list_length(&ban_list))
 		hook_call(HOOK_MODE_BAN, chptr, &ban_list);
 
 	DLINK_FOREACH_SAFE(ptr, next_ptr, opped_list.head)
@@ -695,7 +695,7 @@ c_mode(struct client *client_p, const char *parv[], int parc)
 	   (msptr->flags & MODE_DEOPPED))
 		return;
 
-	handle_chmode(chptr, parc - 1, parv + 1);
+	handle_chmode(chptr, client_p, parc - 1, parv + 1);
 }
 
 /* c_tmode()
@@ -718,7 +718,7 @@ c_tmode(struct client *client_p, const char *parv[], int parc)
 	/* MODE_DEOPPED check removed, this is not possible given the
 	 * TS on the mode is correct -- jilles */
 
-	handle_chmode(chptr, parc - 2, parv + 2);
+	handle_chmode(chptr, client_p, parc - 2, parv + 2);
 }
 
 static void
