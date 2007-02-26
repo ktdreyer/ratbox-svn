@@ -6,6 +6,7 @@ SET <channel> <option> [parameter]
   RESTRICTOPS  [on|off]: Disallow any users without OP access being opped.
   NOVOICES     [on|off]: Disallow any user being voiced.
   NOVOICECMD   [on|off]: Disables use of the VOICE command on the channel.
+  NOUSERBANS   [on|off]: Disallow any bans not set through services.
   WARNOVERRIDE [on|off]: Warns chanops when INVITE/GETKEY are used.
                          Requires AUTOJOIN.
   CREATEMODES  [modes] : Channel modes used on channel creation.  Set to "+"

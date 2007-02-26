@@ -167,6 +167,7 @@ static int h_chanserv_join(void *members, void *unused);
 static int h_chanserv_mode_op(void *chptr, void *members);
 static int h_chanserv_mode_voice(void *chptr, void *members);
 static int h_chanserv_mode_simple(void *chptr, void *unused);
+static int h_chanserv_mode_ban(void *chptr, void *list);
 static int h_chanserv_sjoin_lowerts(void *chptr, void *unused);
 static int h_chanserv_user_login(void *client, void *unused);
 static int h_chanserv_dbsync(void *unused, void *unusedd);
@@ -199,6 +200,7 @@ init_s_chanserv(void)
 	hook_add(h_chanserv_mode_op, HOOK_MODE_OP);
 	hook_add(h_chanserv_mode_voice, HOOK_MODE_VOICE);
 	hook_add(h_chanserv_mode_simple, HOOK_MODE_SIMPLE);
+	hook_add(h_chanserv_mode_ban, HOOK_MODE_BAN);
 	hook_add(h_chanserv_sjoin_lowerts, HOOK_SJOIN_LOWERTS);
 	hook_add(h_chanserv_user_login, HOOK_USER_LOGIN);
 	hook_add(h_chanserv_dbsync, HOOK_DBSYNC);
@@ -1184,6 +1186,44 @@ h_chanserv_mode_simple(void *v_chptr, void *v_chreg)
 				chmode_to_string(&mode));
 	return 0;
 }
+
+static int
+h_chanserv_mode_ban(void *v_chptr, void *v_list)
+{
+	struct channel *chptr = v_chptr;
+	struct chan_reg *chreg_p;
+	dlink_list *banlist = v_list;
+	dlink_node *ptr, *next_ptr;
+
+	if(!dlink_list_length(banlist))
+		return 0;
+
+	if((chreg_p = find_channel_reg(NULL, chptr->name)) == NULL)
+		return 0;
+
+	if(chreg_p->flags & CS_FLAGS_SUSPENDED)
+		return 0;
+
+	/* only thing we're testing here.. */
+	if(!(chreg_p->flags & CS_FLAGS_NOUSERBANS))
+		return 0;
+
+	modebuild_start(chanserv_p, chptr);
+
+	DLINK_FOREACH_SAFE(ptr, next_ptr, banlist->head)
+	{
+		modebuild_add(DIR_DEL, "b", ptr->data);
+
+		/* this will destroy what is referenced by ptr->data */
+		del_ban(ptr->data, &chptr->bans);
+		dlink_destroy(ptr, banlist);
+	}
+
+	modebuild_finish();
+
+	return 0;
+}
+
 
 static int
 h_chanserv_join(void *v_chptr, void *v_members)
@@ -2596,6 +2636,11 @@ s_chan_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 		s_chan_set_flag(client_p, chreg_p, parv[1], arg, CS_FLAGS_NOVOICECMD);
 		return 1;
 	}
+	else if(!strcasecmp(parv[1], "NOUSERBANS"))
+	{
+		s_chan_set_flag(client_p, chreg_p, parv[1], arg, CS_FLAGS_NOUSERBANS);
+		return 1;
+	}
 	else if(!strcasecmp(parv[1], "AUTOJOIN"))
 	{
 		retval = s_chan_set_flag(client_p, chreg_p, parv[1], arg, CS_FLAGS_AUTOJOIN);
@@ -3353,13 +3398,14 @@ dump_info_extended(struct client *client_p, struct lconn *conn_p,
 	{
 		char buf[BUFSIZE];
 
-		snprintf(buf, sizeof(buf), "%s%s%s%s%s%s",
+		snprintf(buf, sizeof(buf), "%s%s%s%s%s%s%s",
 			(chreg_p->flags & CS_FLAGS_AUTOJOIN) ? "AUTOJOIN " : "",
 			(chreg_p->flags & CS_FLAGS_NOOPS) ? "NOOPS " : "",
 			(chreg_p->flags & CS_FLAGS_NOVOICES) ? "NOVOICES " : "",
 			(chreg_p->flags & CS_FLAGS_NOVOICECMD) ? "NOVOICECMD " : "",
 			(chreg_p->flags & CS_FLAGS_RESTRICTOPS) ? "RESTRICTOPS " : "",
-			(chreg_p->flags & CS_FLAGS_WARNOVERRIDE) ? "WARNOVERRIDE" : "");
+			(chreg_p->flags & CS_FLAGS_WARNOVERRIDE) ? "WARNOVERRIDE " : "",
+			(chreg_p->flags & CS_FLAGS_NOUSERBANS) ? "NOUSERBANS" : "");
 
 		service_snd(chanserv_p, client_p, conn_p, SVC_INFO_SETTINGS,
 				chreg_p->name, buf);
