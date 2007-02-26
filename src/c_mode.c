@@ -50,6 +50,7 @@ struct scommand_handler bmask_command = { "BMASK", c_bmask, 0, DLINK_EMPTY };
 static dlink_list deopped_list;
 static dlink_list opped_list;
 static dlink_list voiced_list;
+static dlink_list ban_list;
 
 /* valid_key()
  *   validates key, and transforms to lower ascii
@@ -115,7 +116,7 @@ valid_ban(const char *banstr)
 	return 1;
 }
 
-static void
+static void *
 add_ban(const char *banstr, dlink_list *list)
 {
 	char *ban;
@@ -124,27 +125,42 @@ add_ban(const char *banstr, dlink_list *list)
 	DLINK_FOREACH(ptr, list->head)
 	{
 		if(!irccmp((const char *) ptr->data, banstr))
-			return;
+			return NULL;
 	}
 
 	ban = my_strdup(banstr);
 	dlink_add_alloc(ban, list);
+	return ban;
 }
 
-static void
+/* IMPORTANT:  The void * pointer that this function returns refers to
+ * memory that has been free()'d by the time the function exits.
+ *
+ * Do *NOT* dereference the return value from this function.
+ */
+static void *
 del_ban(const char *banstr, dlink_list *list)
 {
+	void *banptr;
 	dlink_node *ptr;
 
 	DLINK_FOREACH(ptr, list->head)
 	{
 		if(!irccmp(banstr, (const char *) ptr->data))
 		{
+			/* store the memory address of the pointer, we can
+			 * then tell whether this exact ban needs to be
+			 * removed from ban_list.. --anfl
+			 */
+			banptr = ptr->data;
+
 			my_free(ptr->data);
 			dlink_destroy(ptr, list);
-			return;
+			return banptr;
 		}
 	}
+
+	return NULL;
 }
 
 
@@ -519,9 +535,20 @@ parse_full_mode(struct channel *chptr, struct client *source_p,
 				return;
 
 			if(dir)
-				add_ban(parv[start], &chptr->bans);
+			{
+				void *banstr = add_ban(parv[start], &chptr->bans);
+
+				if(banstr)
+					dlink_add_alloc(banstr, &ban_list);
+			}
 			else
-				del_ban(parv[start], &chptr->bans);
+			{
+				/* DO NOT DEREFERENCE THIS */
+				void *banptr = del_ban(parv[start], &chptr->bans);
+
+				if(banptr)
+					dlink_find_destroy(banptr, &ban_list);
+			}
 
 			if(source_p)
 				modebuild_add(dir, "b", parv[start]);
@@ -592,6 +619,9 @@ handle_chmode(struct channel *chptr, int parc, const char **parv)
 	   strcasecmp(oldmode.key, chptr->mode.key))
 		hook_call(HOOK_MODE_SIMPLE, chptr, NULL);
 
+	if(dlink_list_length(&ban_list))
+		hook_call(HOOK_MODE_BAN, chptr, &ban_list);
+
 	DLINK_FOREACH_SAFE(ptr, next_ptr, opped_list.head)
 	{
 		free_dlink_node(ptr);
@@ -602,9 +632,16 @@ handle_chmode(struct channel *chptr, int parc, const char **parv)
 		free_dlink_node(ptr);
 	}
 
+	DLINK_FOREACH_SAFE(ptr, next_ptr, ban_list.head)
+	{
+		free_dlink_node(ptr);
+	}
+
 	opped_list.head = opped_list.tail = NULL;
 	voiced_list.head = voiced_list.tail = NULL;
 	opped_list.length = voiced_list.length = 0;
+	ban_list.head = ban_list.tail = NULL;
+	ban_list.length = 0;
 
 	/* some services were deopped.. */
 	DLINK_FOREACH_SAFE(ptr, next_ptr, deopped_list.head)
