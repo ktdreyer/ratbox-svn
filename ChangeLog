@@ -1,3 +1,19 @@
+leeh        2007/02/27 19:01:57 UTC	(20070227_0-23672)
+  Log:
+  - add userserv::usersetemail for admins to reset a users email address, with
+    associated operator {}; priv
+  
+
+  Modified:
+	rserv/trunk/doc/example.conf (File Modified) 
+	rserv/trunk/help/en/userserv/index-admin (File Modified) 
+	rserv/trunk/help/en/userserv/u-usersetemail (File Added) 
+	rserv/trunk/help/en/userserv/usersetemail (File Added) 
+	rserv/trunk/include/conf.h (File Modified) 
+	rserv/trunk/src/newconf.c (File Modified) 
+	rserv/trunk/src/s_userserv.c (File Modified) 
+
+
 leeh        2007/02/26 21:16:31 UTC	(20070226_3-23670)
   Log:
   - add CHANSERV::SET::NOUSERBANS, to force all bans to go through services
