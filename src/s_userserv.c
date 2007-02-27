@@ -68,6 +68,7 @@ static int o_user_userunsuspend(struct client *, struct lconn *, const char **, 
 static int o_user_userlist(struct client *, struct lconn *, const char **, int);
 static int o_user_userinfo(struct client *, struct lconn *, const char **, int);
 static int o_user_usersetpass(struct client *, struct lconn *, const char **, int);
+static int o_user_usersetemail(struct client *, struct lconn *, const char **, int);
 
 static int s_user_register(struct client *, struct lconn *, const char **, int);
 static int s_user_activate(struct client *, struct lconn *, const char **, int);
@@ -87,6 +88,7 @@ static struct service_command userserv_command[] =
 	{ "USERLIST",		&o_user_userlist,	1, NULL, 1, 0L, 0, 0, CONF_OPER_US_LIST		},
 	{ "USERINFO",		&o_user_userinfo,	0, NULL, 1, 0L, 0, 0, CONF_OPER_US_INFO		},
 	{ "USERSETPASS",	&o_user_usersetpass,	2, NULL, 1, 0L, 0, 0, CONF_OPER_US_SETPASS	},
+	{ "USERSETEMAIL",	&o_user_usersetemail,	2, NULL, 1, 0L, 0, 0, CONF_OPER_US_SETEMAIL	},
 	{ "REGISTER",	&s_user_register,	2, NULL, 1, 0L, 0, 0, 0	},
 	{ "ACTIVATE",	&s_user_activate,	2, NULL, 1, 0L, 0, 0, 0	},
 	{ "LOGIN",	&s_user_login,		2, NULL, 1, 0L, 0, 0, 0	},
@@ -107,6 +109,7 @@ static struct ucommand_handler userserv_ucommand[] =
 	{ "userlist",		o_user_userlist,	0, CONF_OPER_US_LIST,		0, NULL },
 	{ "userinfo",		o_user_userinfo,	0, CONF_OPER_US_INFO,		1, NULL },
 	{ "usersetpass",	o_user_usersetpass,	0, CONF_OPER_US_SETPASS,	2, NULL },
+	{ "usersetemail",	o_user_usersetemail,	0, CONF_OPER_US_SETEMAIL,	2, NULL },
 	{ "\0",			NULL,			0, 0,				0, NULL }
 };
 
@@ -901,6 +904,38 @@ o_user_usersetpass(struct client *client_p, struct lconn *conn_p, const char *pa
 			password, ureg_p->name);
 
 	service_snd(userserv_p, client_p, conn_p, SVC_USER_CHANGEDPASSWORD, ureg_p->name);
+
+	return 0;
+}
+
+static int
+o_user_usersetemail(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
+{
+	struct user_reg *ureg_p;
+
+	if((ureg_p = find_user_reg(NULL, parv[0])) == NULL)
+	{
+		service_snd(userserv_p, client_p, conn_p, SVC_USER_NOTREG, parv[0]);
+		return 0;
+	}
+
+	if(!valid_email(parv[1]))
+	{
+		service_snd(userserv_p, client_p, conn_p, SVC_EMAIL_INVALID, parv[1]);
+		return 0;
+	}
+
+	zlog(userserv_p, 1, WATCH_USADMIN, 1, client_p, conn_p,
+		"USERSETEMAIL %s", ureg_p->name);
+
+	my_free(ureg_p->email);
+	ureg_p->email = my_strdup(parv[1]);
+
+	rsdb_exec(NULL, "UPDATE users SET email='%Q' WHERE username='%Q'", 
+			parv[1], ureg_p->name);
+
+	service_snd(userserv_p, client_p, conn_p, SVC_USER_CHANGEDOPTION, 
+			ureg_p->name, "EMAIL", parv[1]);
 
 	return 0;
 }

@@ -51,6 +51,7 @@ static struct mode_table userserv_table[] = {
 	{ "list",	CONF_OPER_US_LIST	},
 	{ "info",	CONF_OPER_US_INFO	},
 	{ "setpass",	CONF_OPER_US_SETPASS	},
+	{ "setemail",	CONF_OPER_US_SETEMAIL	},
 	{ "\0",		0			}
 };
 
