@@ -229,7 +229,7 @@ user_db_callback(int argc, const char **argv)
 	reg_p->last_time = atol(argv[6]);
 	reg_p->flags = atoi(argv[7]);
 
-	//reg_p->language = atoi(argv[8]);
+	reg_p->language = lang_get_langcode(argv[8]);
 
 	add_user_reg(reg_p);
 

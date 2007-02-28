@@ -149,7 +149,7 @@ lang_fmt_check(const char *filename, const char *original, const char *translati
 	memset(original_fmt, 0, sizeof(struct lang_fmt) * MAX_FMT_ARGS);
 	memset(translation_fmt, 0, sizeof(struct lang_fmt) * MAX_FMT_ARGS);
 
-	if(lang_fmt_parse(original_fmt, original) > 0)
+	if(lang_fmt_parse(original_fmt, original) <= 0)
 	{
 		mlog("Warning: Error parsing format string: %s", original);
 		return 0;
@@ -158,7 +158,7 @@ lang_fmt_check(const char *filename, const char *original, const char *translati
 	/* if the original is fine but the translation isn't, then they have
 	 * different amounts of format strings
 	 */
-	if(lang_fmt_parse(translation_fmt, translation) > 0)
+	if(lang_fmt_parse(translation_fmt, translation) <= 0)
 	{
 		mlog("Warning: Error parsing format string in %s: %s", 
 			filename, translation);

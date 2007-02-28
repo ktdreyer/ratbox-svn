@@ -482,7 +482,7 @@ lang_parse_transfile(FILE *fp, const char *filename, unsigned int langcode,
 				break;
 		}
 
-		if(p == '\0')
+		if(*p == '\0')
 			continue;
 
 		/* ',' delimits the notice name */
@@ -520,7 +520,7 @@ lang_parse_transfile(FILE *fp, const char *filename, unsigned int langcode,
 			{
 				*p = '\0';
 
-				if(lang_fmt_check(filename, svc_notice[0][i], data))
+				if(lang_fmt_check(filename, svc_notice[0][i], data) > 0)
 					svc_notice[langcode][i] = my_strdup(data);
 
 				continue;
