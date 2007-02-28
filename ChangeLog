@@ -1,3 +1,16 @@
+leeh        2007/02/28 18:32:23 UTC	(20070228_0-23684)
+  Log:
+  - fix language to be loaded from the db at startup
+  - fix inverted test for a translation being valid
+  - fix a check for an empty string in translations
+  
+
+  Modified:
+	rserv/trunk/src/langs.c (File Modified) 
+	rserv/trunk/src/langs_format.c (File Modified) 
+	rserv/trunk/src/s_userserv.c (File Modified) 
+
+
 leeh        2007/02/27 19:01:57 UTC	(20070227_0-23672)
   Log:
   - add userserv::usersetemail for admins to reset a users email address, with
