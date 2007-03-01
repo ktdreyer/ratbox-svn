@@ -664,13 +664,18 @@ o_user_usersuspend(struct client *client_p, struct lconn *conn_p, const char *pa
 	struct user_reg *reg_p;
 	const char *reason;
 	time_t suspend_time;
-	int para = 1;
+	int para = 0;
 
-	if((reg_p = find_user_reg(NULL, parv[0])) == NULL)
+	if((suspend_time = get_temp_time(parv[0])))
+		para++;
+
+	if((reg_p = find_user_reg(NULL, parv[para])) == NULL)
 	{
-		service_snd(userserv_p, client_p, conn_p, SVC_USER_NOTREG, parv[0]);
+		service_snd(userserv_p, client_p, conn_p, SVC_USER_NOTREG, parv[para]);
 		return 0;
 	}
+
+	para++;
 
 	if(reg_p->flags & US_FLAGS_SUSPENDED)
 	{
@@ -685,9 +690,6 @@ o_user_usersuspend(struct client *client_p, struct lconn *conn_p, const char *pa
 			/* clean it up so we dont leak memory */
 			expire_user_suspend(reg_p);
 	}
-
-	if((suspend_time = get_temp_time(parv[1])))
-		para++;
 
 	reason = rebuild_params(parv, parc, para);
 
