@@ -1,3 +1,24 @@
+leeh        2007/03/01 20:09:14 UTC	(20070301_0-23688)
+  Log:
+  - add database field suspend_time to users table, for tracking the suspend
+    time
+  - disable userserv::resetpass and userserv::activate if username is
+    suspended
+  - add ability to do temporary suspends of users
+  
+
+  Modified:
+	rserv/trunk/include/langs.h (File Modified) 
+	rserv/trunk/include/s_userserv.h (File Modified) 
+	rserv/trunk/src/langs.c (File Modified) 
+	rserv/trunk/src/messages.c (File Modified) 
+	rserv/trunk/src/s_userserv.c (File Modified) 
+	rserv/trunk/tools/base/schema-mysql.txt (File Modified) 
+	rserv/trunk/tools/base/schema-pgsql.txt (File Modified) 
+	rserv/trunk/tools/base/schema-sqlite.txt (File Modified) 
+	rserv/trunk/tools/dbupgrade.pl (File Modified) 
+
+
 leeh        2007/02/28 18:32:23 UTC	(20070228_0-23684)
   Log:
   - fix language to be loaded from the db at startup
