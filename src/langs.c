@@ -366,12 +366,12 @@ lang_get_notice(enum svc_notice_enum msgid, struct client *client_p, struct lcon
 	{
 		unsigned int language = client_p->user->user_reg->language;
 
-		if(svc_notice[language][msgid])
+		if(svc_notice[language] && svc_notice[language][msgid])
 			return svc_notice[language][msgid];
 	}
 #endif
 
-	if(svc_notice[config_file.default_language][msgid])
+	if(svc_notice[config_file.default_language] && svc_notice[config_file.default_language][msgid])
 		return svc_notice[config_file.default_language][msgid];
 
 	/* base translation is always first */

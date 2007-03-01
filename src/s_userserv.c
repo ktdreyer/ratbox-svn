@@ -231,7 +231,9 @@ user_db_callback(int argc, const char **argv)
 	reg_p->last_time = atol(argv[7]);
 	reg_p->flags = atoi(argv[8]);
 
-	reg_p->language = lang_get_langcode(argv[9]);
+	/* entries may not have a language */
+	if(!EmptyString(argv[9]))
+		reg_p->language = lang_get_langcode(argv[9]);
 
 	add_user_reg(reg_p);
 
