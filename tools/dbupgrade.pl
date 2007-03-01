@@ -238,6 +238,19 @@ if($currentver < 6)
 
 	print "ALTER TABLE users ADD COLUMN language VARCHAR(255) DEFAULT '';\n";
 
+	if($dbtype eq "mysql")
+	{
+		print "ALTER TABLE users ADD COLUMN suspend_time INT UNSIGNED;\n";
+	}
+	else if($dbtype eq "pgsql")
+	{
+		print "ALTER TABLE users ADD COLUMN suspend_time INTEGER;\n";
+	}
+	else
+	{
+		print "ALTER TABLE users ADD COLUMN suspend_time INTEGER;\n";
+	}
+
 	print "\n";
 }
 

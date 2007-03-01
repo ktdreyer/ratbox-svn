@@ -6,6 +6,7 @@ CREATE TABLE users (
 	email VARCHAR(EMAILLEN),
 	suspender VARCHAR(OPERNAMELEN),
 	suspend_reason VARCHAR(SUSPENDREASONLEN),
+	suspend_time INTEGER,
 	reg_time INTEGER,
 	last_time INTEGER,
 	flags INTEGER,

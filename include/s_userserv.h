@@ -13,6 +13,7 @@ struct user_reg
 	char *email;
 	char *suspender;
 	char *suspend_reason;
+	time_t suspend_time;
 
 	time_t reg_time;
 	time_t last_time;
@@ -35,6 +36,8 @@ struct user_reg
 
 /* Flags not stored in the DB: 0xFFFF0000 */
 #define US_FLAGS_NEEDUPDATE	0x00010000
+
+#define USER_SUSPEND_EXPIRED(x)	((x)->flags & US_FLAGS_SUSPENDED && (x)->suspend_time && (x)->suspend_time <= CURRENT_TIME)
 
 extern struct user_reg *find_user_reg(struct client *, const char *name);
 extern struct user_reg *find_user_reg_nick(struct client *, const char *name);

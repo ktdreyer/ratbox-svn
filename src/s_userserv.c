@@ -131,6 +131,7 @@ static void dump_user_info(struct client *, struct lconn *, struct user_reg *);
 
 static int valid_email(const char *email);
 static int valid_email_domain(const char *email);
+static void expire_user_suspend(struct user_reg *ureg_p);
 
 void
 preinit_s_userserv(void)
@@ -145,7 +146,7 @@ init_s_userserv(void)
 
 	rsdb_exec(user_db_callback, 
 			"SELECT username, password, email, suspender, suspend_reason, "
-			"reg_time, last_time, flags, language FROM users");
+			"suspend_time, reg_time, last_time, flags, language FROM users");
 
 	rsdb_hook_add("users_sync", "REGISTER", 900, dbh_user_register);
 	rsdb_hook_add("users_sync", "SETPASS", 900, dbh_user_setpass);
@@ -225,11 +226,12 @@ user_db_callback(int argc, const char **argv)
 	if(!EmptyString(argv[4]))
 		reg_p->suspend_reason = my_strdup(argv[4]);
 
-	reg_p->reg_time = atol(argv[5]);
-	reg_p->last_time = atol(argv[6]);
-	reg_p->flags = atoi(argv[7]);
+	reg_p->suspend_time = atol(argv[5]);
+	reg_p->reg_time = atol(argv[6]);
+	reg_p->last_time = atol(argv[7]);
+	reg_p->flags = atoi(argv[8]);
 
-	reg_p->language = lang_get_langcode(argv[8]);
+	reg_p->language = lang_get_langcode(argv[9]);
 
 	add_user_reg(reg_p);
 
@@ -560,6 +562,21 @@ e_user_expire_reset(void *unused)
 			CURRENT_TIME - config_file.uresetemail_duration);
 }
 
+static void
+expire_user_suspend(struct user_reg *ureg_p)
+{
+	ureg_p->flags &= ~US_FLAGS_SUSPENDED;
+	my_free(ureg_p->suspender);
+	ureg_p->suspender = NULL;
+	my_free(ureg_p->suspend_reason);
+	ureg_p->suspend_reason = NULL;
+	ureg_p->suspend_time = 0;
+	ureg_p->last_time = CURRENT_TIME;
+
+	rsdb_exec(NULL, "UPDATE users SET flags='%d',suspender=NULL,suspend_reason=NULL,last_time='%lu',suspend_time='0' WHERE username='%Q'",
+			ureg_p->flags, ureg_p->last_time, ureg_p->name);
+}
+
 static int
 o_user_userregister(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
@@ -644,6 +661,8 @@ o_user_usersuspend(struct client *client_p, struct lconn *conn_p, const char *pa
 {
 	struct user_reg *reg_p;
 	const char *reason;
+	time_t suspend_time;
+	int para = 1;
 
 	if((reg_p = find_user_reg(NULL, parv[0])) == NULL)
 	{
@@ -653,12 +672,29 @@ o_user_usersuspend(struct client *client_p, struct lconn *conn_p, const char *pa
 
 	if(reg_p->flags & US_FLAGS_SUSPENDED)
 	{
-		service_snd(userserv_p, client_p, conn_p, SVC_USER_QUERYOPTIONALREADY,
-				reg_p->name, "SUSPEND", "ON");
-		return 0;
+		/* this suspend may have expired.. */
+		if(!USER_SUSPEND_EXPIRED(reg_p))
+		{
+			service_snd(userserv_p, client_p, conn_p, SVC_USER_QUERYOPTIONALREADY,
+					reg_p->name, "SUSPEND", "ON");
+			return 0;
+		}
+		else
+			/* clean it up so we dont leak memory */
+			expire_user_suspend(reg_p);
 	}
 
-	reason = rebuild_params(parv, parc, 1);
+	if((suspend_time = get_temp_time(parv[1])))
+		para++;
+
+	reason = rebuild_params(parv, parc, para);
+
+	if(EmptyString(reason))
+	{
+		service_err(userserv_p, client_p, SVC_NEEDMOREPARAMS,
+				userserv_p->name, "REGISTER");
+		return 0;
+	}
 
 	zlog(userserv_p, 1, WATCH_USADMIN, 1, client_p, conn_p,
 		"USERSUSPEND %s %s", reg_p->name, reason);
@@ -667,13 +703,19 @@ o_user_usersuspend(struct client *client_p, struct lconn *conn_p, const char *pa
 
 	reg_p->flags |= US_FLAGS_SUSPENDED;
 	reg_p->last_time = CURRENT_TIME;
+
+	if(suspend_time)
+		reg_p->suspend_time = CURRENT_TIME + suspend_time;
+	else
+		reg_p->suspend_time = 0;
+
 	reg_p->suspender = my_strdup(OPER_NAME(client_p, conn_p));
 	reg_p->suspend_reason = my_strndup(reason, SUSPENDREASONLEN);
 
 	rsdb_exec(NULL, "UPDATE users SET flags='%d', suspender='%Q', "
-			"suspend_reason='%Q',last_time='%lu' WHERE username='%Q'",
+			"suspend_reason='%Q',last_time='%lu', suspend_time='%lu' WHERE username='%Q'",
 			reg_p->flags, reg_p->suspender, reg_p->suspend_reason,
-			reg_p->last_time, reg_p->name);
+			reg_p->last_time, reg_p->suspend_time, reg_p->name);
 
 	service_snd(userserv_p, client_p, conn_p, SVC_USER_CHANGEDOPTION,
 			reg_p->name, "SUSPEND", "ON");
@@ -706,9 +748,10 @@ o_user_userunsuspend(struct client *client_p, struct lconn *conn_p, const char *
 	reg_p->suspender = NULL;
 	my_free(reg_p->suspend_reason);
 	reg_p->suspend_reason = NULL;
+	reg_p->suspend_time = 0;
 	reg_p->last_time = CURRENT_TIME;
 
-	rsdb_exec(NULL, "UPDATE users SET flags='%d',suspender=NULL,suspend_reason=NULL,last_time='%lu' WHERE username='%Q'",
+	rsdb_exec(NULL, "UPDATE users SET flags='%d',suspender=NULL,suspend_reason=NULL,last_time='%lu',suspend_time='0' WHERE username='%Q'",
 			reg_p->flags, reg_p->last_time, reg_p->name);
 
 	service_snd(userserv_p, client_p, conn_p, SVC_USER_CHANGEDOPTION,
@@ -765,6 +808,10 @@ o_user_userlist(struct client *client_p, struct lconn *conn_p, const char *parv[
 
 		if(!match(mask, ureg_p->name))
 			continue;
+
+		/* expire any suspends */
+		if(USER_SUSPEND_EXPIRED(ureg_p))
+			expire_user_suspend(ureg_p);
 
 		if(suspended)
 		{
@@ -865,6 +912,9 @@ o_user_userinfo(struct client *client_p, struct lconn *conn_p, const char *parv[
 	service_snd(userserv_p, client_p, conn_p, SVC_INFO_REGDURATIONUSER,
 			ureg_p->name,
 			get_duration((time_t) (CURRENT_TIME - ureg_p->reg_time)));
+
+	if(USER_SUSPEND_EXPIRED(ureg_p))
+		expire_user_suspend(ureg_p);
 
 	if(ureg_p->flags & US_FLAGS_SUSPENDED)
 		service_snd(userserv_p, client_p, conn_p, SVC_INFO_SUSPENDED,
@@ -1259,8 +1309,13 @@ s_user_login(struct client *client_p, struct lconn *conn_p, const char *parv[], 
 
 	if(reg_p->flags & US_FLAGS_SUSPENDED)
 	{
-		service_err(userserv_p, client_p, SVC_USER_LOGINSUSPENDED);
-		return 1;
+		if(!USER_SUSPEND_EXPIRED(reg_p))
+		{
+			service_err(userserv_p, client_p, SVC_USER_LOGINSUSPENDED);
+			return 1;
+		}
+		else
+			expire_user_suspend(reg_p);
 	}
 
 	if(reg_p->flags & US_FLAGS_NEVERLOGGEDIN)
@@ -1350,6 +1405,17 @@ s_user_resetpass(struct client *client_p, struct lconn *conn_p, const char *parv
 		service_err(userserv_p, client_p, SVC_USER_DURATIONTOOSHORT,
 				reg_p->name, userserv_p->name, "RESETPASS");
 		return 1;
+	}
+
+	if(reg_p->flags & US_FLAGS_SUSPENDED)
+	{
+		if(!USER_SUSPEND_EXPIRED(reg_p))
+		{
+			service_err(userserv_p, client_p, SVC_USER_SUSPENDED, reg_p->name);
+			return 1;
+		}
+		else
+			expire_user_suspend(reg_p);
 	}
 
 	/* initial password reset */
@@ -1982,6 +2048,9 @@ s_user_info(struct client *client_p, struct lconn *conn_p, const char *parv[], i
 	service_err(userserv_p, client_p, SVC_INFO_REGDURATIONUSER,
 			ureg_p->name,
 			get_duration((time_t) (CURRENT_TIME - ureg_p->reg_time)));
+
+	if(USER_SUSPEND_EXPIRED(ureg_p))
+		expire_user_suspend(ureg_p);
 
 	if(ureg_p->flags & US_FLAGS_SUSPENDED)
 	{

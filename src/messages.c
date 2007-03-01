@@ -97,6 +97,7 @@ struct _lang_internal lang_internal[] =
 	{ SVC_USER_LOGINMAX,		"Login failed, username has %d logged in users"		},
 	{ SVC_USER_ALREADYLOGGEDIN,	"You are already logged in"				},
 	{ SVC_USER_NICKNOTLOGGEDIN,	"Nickname %s is not logged in"				},
+	{ SVC_USER_SUSPENDED,		"Username %s is suspended"				},
 	{ SVC_USER_NOEMAIL,		"Username %s does not have an email address"		},
 	{ SVC_USER_CHANGEDPASSWORD,	"Username %s password changed"				},
 	{ SVC_USER_CHANGEDOPTION,	"Username %s %s set to %s"				},
