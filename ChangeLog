@@ -1,3 +1,15 @@
+leeh        2007/03/01 20:12:18 UTC	(20070301_1-23690)
+  Log:
+  - if the language field in the db is empty, dont give users a language
+  - account for a preferred language not being loaded when grabbing
+    translations for messages
+  
+
+  Modified:
+	rserv/trunk/src/langs.c (File Modified) 
+	rserv/trunk/src/s_userserv.c (File Modified) 
+
+
 leeh        2007/03/01 20:09:14 UTC	(20070301_0-23688)
   Log:
   - add database field suspend_time to users table, for tracking the suspend
