@@ -1,3 +1,14 @@
+leeh        2007/03/01 20:16:41 UTC	(20070301_2-23692)
+  Log:
+  - consistency, make duration of suspend the first param and update the help
+  
+
+  Modified:
+	rserv/trunk/help/en/userserv/u-usersuspend (File Modified) 
+	rserv/trunk/help/en/userserv/usersuspend (File Modified) 
+	rserv/trunk/src/s_userserv.c (File Modified) 
+
+
 leeh        2007/03/01 20:12:18 UTC	(20070301_1-23690)
   Log:
   - if the language field in the db is empty, dont give users a language
