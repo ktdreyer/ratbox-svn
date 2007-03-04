@@ -2072,7 +2072,7 @@ s_chan_delowner(struct client *client_p, struct lconn *conn_p, const char *parv[
 			rsdb_exec_fetch_end(&data);
 
 			rsdb_exec(NULL, "DELETE FROM channels_dropowner WHERE chname='%Q'",
-					ureg_p->name);
+					chreg_p->name);
 
 			service_err(chanserv_p, client_p, SVC_CHAN_USERREMOVED,
 					ureg_p->name, chreg_p->name);
