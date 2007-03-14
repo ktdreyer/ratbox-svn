@@ -133,7 +133,7 @@ static struct service_command chanserv_command[] =
 	{ "CLEARBANS",	&s_chan_clearbans,	1, NULL, 1, 0L, 1, 0, 0	},
 	{ "INVITE",	&s_chan_invite,		1, NULL, 1, 0L, 1, 0, 0	},
 	{ "GETKEY",	&s_chan_getkey,		1, NULL, 1, 0L, 1, 0, 0	},
-	{ "OP",		&s_chan_op,		1, NULL, 1, 0L, 1, 0, 0	},
+	{ "OP",		&s_chan_op,		0, NULL, 1, 0L, 1, 0, 0	},
 	{ "VOICE",	&s_chan_voice,		1, NULL, 1, 0L, 1, 0, 0	},
 	{ "ADDBAN",	&s_chan_addban,		4, NULL, 1, 0L, 1, 0, 0	},
 	{ "DELBAN",	&s_chan_delban,		2, NULL, 1, 0L, 1, 0, 0	},
@@ -429,27 +429,30 @@ find_member_reg_name(struct client *client_p, struct user_reg *ureg_p, const cha
 
 static struct member_reg *
 verify_member_reg(struct client *client_p, struct channel **chptr, 
-		struct chan_reg *chreg_p, int level)
+		struct chan_reg *chreg_p, int level, int warn)
 {
 	struct member_reg *mreg_p;
 
 	if(chptr && (*chptr = find_channel(chreg_p->name)) == NULL)
 	{
-		service_err(chanserv_p, client_p, SVC_IRC_NOSUCHCHANNEL, chreg_p->name);
+		if(warn)
+			service_err(chanserv_p, client_p, SVC_IRC_NOSUCHCHANNEL, chreg_p->name);
 		return NULL;
 	}
 
 	if(chreg_p->flags & CS_FLAGS_SUSPENDED)
 	{
-		service_err(chanserv_p, client_p, SVC_CHAN_ISSUSPENDED, chreg_p->name);
+		if(warn)
+			service_err(chanserv_p, client_p, SVC_CHAN_ISSUSPENDED, chreg_p->name);
 		return NULL;
 	}
 
 	if((mreg_p = find_member_reg(client_p->user->user_reg, chreg_p)) == NULL ||
 	   mreg_p->level < level || mreg_p->suspend)
 	{
-		service_err(chanserv_p, client_p, SVC_CHAN_NOACCESS,
-				chreg_p->name);
+		if(warn)
+			service_err(chanserv_p, client_p, SVC_CHAN_NOACCESS,
+					chreg_p->name);
 		return NULL;
 	}
 
@@ -469,7 +472,19 @@ verify_member_reg_name(struct client *client_p, struct channel **chptr,
 	if((chreg_p = find_channel_reg(client_p, name)) == NULL)
 		return NULL;
 
-	return verify_member_reg(client_p, chptr, chreg_p, level);
+	return verify_member_reg(client_p, chptr, chreg_p, level, 1);
+}
+
+static struct member_reg *
+check_member_reg(struct client *client_p, struct channel **chptr,
+			const char *name, int level)
+{
+	struct chan_reg *chreg_p;
+
+	if((chreg_p = find_channel_reg(NULL, name)) == NULL)
+		return NULL;
+
+	return verify_member_reg(client_p, chptr, chreg_p, level, 0);
 }
 
 static int
@@ -2884,6 +2899,36 @@ s_chan_op(struct client *client_p, struct lconn *conn_p, const char *parv[], int
 	struct member_reg *reg_p;
 	struct channel *chptr;
 	struct chmember *msptr;
+
+	if(parc < 1 || EmptyString(parv[0]))
+	{
+		dlink_node *ptr;
+
+		DLINK_FOREACH(ptr, client_p->user->channels.head)
+		{
+			msptr = ptr->data;
+
+			if(is_opped(msptr))
+				continue;
+
+			if((reg_p = check_member_reg(client_p, NULL, chptr->name, S_C_OP)) == NULL)
+				continue;
+
+			/* noone is allowed to be opped.. */
+			if(reg_p->channel_reg->flags & CS_FLAGS_NOOPS)
+				continue;
+
+			msptr->flags &= ~MODE_DEOPPED;
+			msptr->flags |= MODE_OPPED;
+			sendto_server(":%s MODE %s +o %s",
+					chanserv_p->name, chptr->name, UID(client_p));
+		}
+
+		service_err(chanserv_p, client_p, SVC_SUCCESSFUL,
+				chanserv_p->name, "OP");
+		zlog(chanserv_p, 6, 0, 0, client_p, NULL, "OP");
+		return 1;
+	}
 
 	if((reg_p = verify_member_reg_name(client_p, &chptr, parv[0], S_C_OP)) == NULL)
 		return 1;
