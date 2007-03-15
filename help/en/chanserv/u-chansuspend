@@ -1,4 +1,5 @@
-chanunsuspend <channel> <reason>
-Unsuspends the given channel's registration
-  <channel>: Channel to unsuspend 
-  <reason> : Reason for suspension
+chansuspend [duration] <channel> <reason>
+Suspends the given channel's registration
+  [duration]: Duration suspend lasts
+  <channel> : Channel to suspend 
+  <reason>  : Reason for suspension
