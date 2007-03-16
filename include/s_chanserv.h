@@ -38,6 +38,7 @@ struct chan_reg
 	char *url;
 	char *suspender;
 	char *suspend_reason;
+	time_t suspend_time;
 	struct chmode cmode;
 	struct chmode emode;
 
@@ -81,6 +82,9 @@ struct ban_reg
 
 	dlink_node channode;
 };
+
+#define CHAN_SUSPEND_EXPIRED(x) ((x)->flags & CS_FLAGS_SUSPENDED && (x)->suspend_time && \
+				(x)->suspend_time <= CURRENT_TIME)
 
 void free_channel_reg(struct chan_reg *);
 void free_member_reg(struct member_reg *, int);

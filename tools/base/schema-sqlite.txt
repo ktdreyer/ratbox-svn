@@ -57,6 +57,7 @@ CREATE TABLE channels (
 	flags INTEGER,
 	suspender TEXT,
 	suspend_reason TEXT,
+	suspend_time INTEGER,
 	PRIMARY KEY(chname)
 );
 

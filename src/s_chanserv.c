@@ -181,6 +181,8 @@ static void e_chanserv_partinhabit(void *unused);
 static void dump_info_extended(struct client *, struct lconn *, struct chan_reg *);
 static void dump_info_accesslist(struct client *, struct lconn *, struct chan_reg *);
 
+static void expire_chan_suspend(struct chan_reg *chreg_p);
+
 void
 preinit_s_chanserv(void)
 {
@@ -442,9 +444,14 @@ verify_member_reg(struct client *client_p, struct channel **chptr,
 
 	if(chreg_p->flags & CS_FLAGS_SUSPENDED)
 	{
-		if(warn)
-			service_err(chanserv_p, client_p, SVC_CHAN_ISSUSPENDED, chreg_p->name);
-		return NULL;
+		if(!CHAN_SUSPEND_EXPIRED(chreg_p))
+		{
+			if(warn)
+				service_err(chanserv_p, client_p, SVC_CHAN_ISSUSPENDED, chreg_p->name);
+			return NULL;
+		}
+		else
+			expire_chan_suspend(chreg_p);
 	}
 
 	if((mreg_p = find_member_reg(client_p->user->user_reg, chreg_p)) == NULL ||
@@ -556,6 +563,8 @@ channel_db_callback(int argc, const char **argv)
 	if(!EmptyString(argv[10]))
 		reg_p->suspend_reason = my_strdup(argv[10]);
 
+	if(!EmptyString(argv[11]) && atol(argv[11]))
+		reg_p->suspend_time = atol(argv[11]);
 	add_channel_reg(reg_p);
 
 	if(config_file.cautojoin_empty && reg_p->flags & CS_FLAGS_AUTOJOIN)
@@ -657,7 +666,7 @@ load_channel_db(void)
 	rsdb_exec(channel_db_callback, 
 			"SELECT chname, topic, url, createmodes, "
 			"enforcemodes, tsinfo, reg_time, last_time, "
-			"flags, suspender, suspend_reason FROM channels");
+			"flags, suspender, suspend_reason, suspend_time FROM channels");
 	rsdb_exec(member_db_callback, 
 			"SELECT chname, username, lastmod, level, "
 			"flags, suspend FROM members");
@@ -816,6 +825,9 @@ e_chanserv_expirechan(void *unused)
 	HASH_WALK_SAFE(i, MAX_CHANNEL_TABLE, ptr, next_ptr, chan_reg_table)
 	{
 		chreg_p = ptr->data;
+
+		if(CHAN_SUSPEND_EXPIRED(chreg_p))
+			expire_chan_suspend(chreg_p);
 
 		if(chreg_p->flags & CS_FLAGS_SUSPENDED)
 		{
@@ -1066,6 +1078,9 @@ h_chanserv_mode_op(void *v_chptr, void *v_members)
 	if((chreg_p = find_channel_reg(NULL, chptr->name)) == NULL)
 		return 0;
 
+	if(CHAN_SUSPEND_EXPIRED(chreg_p))
+		expire_chan_suspend(chreg_p);
+
 	if(chreg_p->flags & CS_FLAGS_SUSPENDED)
 		return 0;
 
@@ -1127,6 +1142,9 @@ h_chanserv_mode_voice(void *v_chptr, void *v_members)
 	if((chreg_p = find_channel_reg(NULL, chptr->name)) == NULL)
 		return 0;
 
+	if(CHAN_SUSPEND_EXPIRED(chreg_p))
+		expire_chan_suspend(chreg_p);
+
 	if(chreg_p->flags & CS_FLAGS_SUSPENDED)
 		return 0;
 
@@ -1162,6 +1180,9 @@ h_chanserv_mode_simple(void *v_chptr, void *v_chreg)
 		if((chreg_p = find_channel_reg(NULL, chptr->name)) == NULL)
 			return 0;
 	}
+
+	if(CHAN_SUSPEND_EXPIRED(chreg_p))
+		expire_chan_suspend(chreg_p);
 
 	/* only care about mode enforcement here.. */
 	if(chreg_p->flags & CS_FLAGS_SUSPENDED || !chreg_p->emode.mode)
@@ -1216,6 +1237,9 @@ h_chanserv_mode_ban(void *v_chptr, void *v_list)
 	if((chreg_p = find_channel_reg(NULL, chptr->name)) == NULL)
 		return 0;
 
+	if(CHAN_SUSPEND_EXPIRED(chreg_p))
+		expire_chan_suspend(chreg_p);
+
 	if(chreg_p->flags & CS_FLAGS_SUSPENDED)
 		return 0;
 
@@ -1260,6 +1284,9 @@ h_chanserv_join(void *v_chptr, void *v_members)
 	/* not registered, cant ban anyone.. */
 	if((chreg_p = find_channel_reg(NULL, chptr->name)) == NULL)
 		return 0;
+
+	if(CHAN_SUSPEND_EXPIRED(chreg_p))
+		expire_chan_suspend(chreg_p);
 
 	if(chreg_p->flags & CS_FLAGS_SUSPENDED)
 		return 0;
@@ -1427,6 +1454,10 @@ h_chanserv_user_login(void *v_client_p, void *unused)
 
 		if((chreg_p = find_channel_reg(NULL, chptr->name)) == NULL)
 			continue;
+
+		if(CHAN_SUSPEND_EXPIRED(chreg_p))
+			expire_chan_suspend(chreg_p);
+
 		if(chreg_p->flags & CS_FLAGS_SUSPENDED)
 			continue;
 
@@ -1465,6 +1496,22 @@ h_chanserv_user_login(void *v_client_p, void *unused)
 	}
 
 	return 0;
+}
+
+static void
+expire_chan_suspend(struct chan_reg *chreg_p)
+{
+	chreg_p->flags &= ~CS_FLAGS_SUSPENDED;
+	my_free(chreg_p->suspender);
+	chreg_p->suspender = NULL;
+	my_free(chreg_p->suspend_reason);
+	chreg_p->suspend_reason = NULL;
+	chreg_p->suspend_time = 0;
+	chreg_p->last_time = CURRENT_TIME;
+
+	rsdb_exec(NULL, "UPDATE channels SET flags='%d', suspender=NULL, suspend_reason=NULL,"
+			"suspend_time='0', last_time='%lu' WHERE chname='%Q'",
+			chreg_p->flags, chreg_p->last_time, chreg_p->name);
 }
 
 static int
@@ -1538,9 +1585,15 @@ o_chan_chansuspend(struct client *client_p, struct lconn *conn_p, const char *pa
 
 	if(reg_p->flags & CS_FLAGS_SUSPENDED)
 	{
-		service_snd(chanserv_p, client_p, conn_p, SVC_CHAN_QUERYOPTIONALREADY,
-				parv[0], "SUSPEND", "ON");
-		return 0;
+		if(!CHAN_SUSPEND_EXPIRED(reg_p))
+		{
+			service_snd(chanserv_p, client_p, conn_p, SVC_CHAN_QUERYOPTIONALREADY,
+					parv[0], "SUSPEND", "ON");
+			return 0;
+		}
+		/* cleanup memory */
+		else
+			expire_chan_suspend(reg_p);
 	}
 
 	reason = rebuild_params(parv, parc, 1);
