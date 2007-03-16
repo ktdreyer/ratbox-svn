@@ -1,3 +1,17 @@
+leeh        2007/03/16 21:46:42 UTC	(20070316_1-23704)
+  Log:
+  - temporary channel suspends
+  
+
+  Modified:
+	rserv/trunk/include/s_chanserv.h (File Modified) 
+	rserv/trunk/src/s_chanserv.c (File Modified) 
+	rserv/trunk/tools/base/schema-mysql.txt (File Modified) 
+	rserv/trunk/tools/base/schema-pgsql.txt (File Modified) 
+	rserv/trunk/tools/base/schema-sqlite.txt (File Modified) 
+	rserv/trunk/tools/dbupgrade.pl (File Modified) 
+
+
 leeh        2007/03/16 21:22:00 UTC	(20070316_0-23702)
   Log:
   - remove the doc/ stuff from Makefile.in, as we dont have it to install
