@@ -99,6 +99,7 @@ set_default_conf(void)
 	config_file.ureset_regtime_duration = 1209600; /* 2 weeks */
 	config_file.allow_set_email = 1;
 	config_file.umax_logins = 5;
+	config_file.ushow_suspend_reasons = 0;
 
 	config_file.disable_cregister = 0;
 	config_file.cregister_time = 60;
@@ -113,6 +114,7 @@ set_default_conf(void)
 	config_file.cdelowner_duration = 86400;	/* 1 day */
 	config_file.cemail_delowner = 0;
 	config_file.cautojoin_empty = 0;
+	config_file.cshow_suspend_reasons = 0;
 
 	config_file.nmax_nicks = 2;
 	config_file.nallow_set_warn = 1;

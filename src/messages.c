@@ -128,7 +128,7 @@ struct _lang_internal lang_internal[] =
 	{ SVC_INFO_REGDURATIONCHAN,	"[%s] Channel registered to %s for %s"			},
 	{ SVC_INFO_REGDURATIONNICK,	"[%s] Nickname registered to %s for %s"			},
 	{ SVC_INFO_SUSPENDED,		"[%s] Suspended by %s: %s"				},
-	{ SVC_INFO_SUSPENDEDADMIN,	"[%s] Suspended by services admin"			},
+	{ SVC_INFO_SUSPENDEDADMIN,	"[%s] Suspended by services admin%s%s"			},
 	{ SVC_INFO_ACCESSLIST,		"[%s] Access list: %s"					},
 	{ SVC_INFO_NICKNAMES,		"[%s] Registered nicknames: %s"				},
 	{ SVC_INFO_EMAIL,		"[%s] Email: %s"					},

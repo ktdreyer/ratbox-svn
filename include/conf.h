@@ -77,6 +77,7 @@ struct _config_file
 	int ureset_regtime_duration;
 	int allow_set_email;
 	int umax_logins;
+	int ushow_suspend_reasons;
 
 	/* chanserv */
 	int disable_cregister;
@@ -92,6 +93,7 @@ struct _config_file
 	int cdelowner_duration;
 	int cemail_delowner;
 	int cautojoin_empty;
+	int cshow_suspend_reasons;
 
 	/* nickserv */
 	int nmax_nicks;

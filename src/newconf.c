@@ -1114,6 +1114,7 @@ static struct ConfEntry conf_userserv_table[] =
 	{ "reset_regtime_duration", CF_TIME, NULL, 0, &config_file.ureset_regtime_duration },
 	{ "allow_set_email",	CF_YESNO, NULL, 0, &config_file.allow_set_email		},
 	{ "max_logins",		CF_INT,   NULL, 0, &config_file.umax_logins		},
+	{ "show_suspend_reasons",CF_YESNO,NULL, 0, &config_file.ushow_suspend_reasons	},
 	{ "\0", 0, NULL, 0, NULL }
 };
 
@@ -1132,6 +1133,7 @@ static struct ConfEntry conf_chanserv_table[] =
 	{ "delowner_duration",	CF_TIME,  NULL, 0, &config_file.cdelowner_duration	},
 	{ "email_delowner",	CF_YESNO, NULL, 0, &config_file.cemail_delowner	},
 	{ "autojoin_empty",	CF_YESNO, NULL, 0, &config_file.cautojoin_empty		},
+	{ "show_suspend_reasons",CF_YESNO,NULL, 0, &config_file.cshow_suspend_reasons	},
 	{ "\0", 0, NULL, 0, NULL }
 };
 

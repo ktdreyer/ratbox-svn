@@ -3560,8 +3560,15 @@ s_chan_info(struct client *client_p, struct lconn *conn_p, const char *parv[], i
 			get_duration((time_t) (CURRENT_TIME - reg_p->reg_time)));
 
 	if(reg_p->flags & CS_FLAGS_SUSPENDED)
-		service_err(chanserv_p, client_p, SVC_INFO_SUSPENDEDADMIN,
-				reg_p->name);
+	{
+		if(config_file.cshow_suspend_reasons)
+			service_err(chanserv_p, client_p, SVC_INFO_SUSPENDEDADMIN,
+					reg_p->name, ": ",
+					(reg_p->suspend_reason ? reg_p->suspend_reason : ""));
+		else
+			service_err(chanserv_p, client_p, SVC_INFO_SUSPENDEDADMIN,
+					reg_p->name, "", "");
+	}
 	else if((mreg_p = find_member_reg(client_p->user->user_reg, reg_p)) &&
 		!mreg_p->suspend)
 	{
