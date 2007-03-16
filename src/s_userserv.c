@@ -2059,7 +2059,7 @@ s_user_info(struct client *client_p, struct lconn *conn_p, const char *parv[], i
 	if(ureg_p->flags & US_FLAGS_SUSPENDED)
 	{
 		if(config_file.ushow_suspend_reasons)
-			service_err(userserv_p, client_p, , SVC_INFO_SUSPENDEDADMIN,
+			service_err(userserv_p, client_p, SVC_INFO_SUSPENDEDADMIN,
 					ureg_p->name, ": ",
 					ureg_p->suspend_reason ? ureg_p->suspend_reason : "");
 		else
