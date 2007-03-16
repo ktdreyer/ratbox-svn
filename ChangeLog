@@ -1,3 +1,12 @@
+leeh        2007/03/16 21:22:00 UTC	(20070316_0-23702)
+  Log:
+  - remove the doc/ stuff from Makefile.in, as we dont have it to install
+  
+
+  Modified:
+	rserv/trunk/pcre/Makefile.in (File Modified) 
+
+
 leeh        2007/03/15 20:25:38 UTC	(20070315_0-23700)
   Log:
   - bulgarian translations, courtesy of
