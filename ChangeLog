@@ -1,3 +1,19 @@
+leeh        2007/03/16 21:55:12 UTC	(20070316_2-23706)
+  Log:
+  - new conf option to chanserv and userserv, show_suspend_reasons =
+    <yes|no>;, controlling whether suspend reasons are shown to users
+  
+
+  Modified:
+	rserv/trunk/doc/example.conf (File Modified) 
+	rserv/trunk/include/conf.h (File Modified) 
+	rserv/trunk/src/conf.c (File Modified) 
+	rserv/trunk/src/messages.c (File Modified) 
+	rserv/trunk/src/newconf.c (File Modified) 
+	rserv/trunk/src/s_chanserv.c (File Modified) 
+	rserv/trunk/src/s_userserv.c (File Modified) 
+
+
 leeh        2007/03/16 21:46:42 UTC	(20070316_1-23704)
   Log:
   - temporary channel suspends
