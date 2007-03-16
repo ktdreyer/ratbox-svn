@@ -1,3 +1,12 @@
+leeh        2007/03/16 21:58:18 UTC	(20070316_4-23710)
+  Log:
+  - erroneous ','
+  
+
+  Modified:
+	rserv/trunk/src/s_userserv.c (File Modified) 
+
+
 leeh        2007/03/16 21:56:05 UTC	(20070316_3-23708)
   Log:
   - clarify show_suspend_reasons wont display who suspended it
