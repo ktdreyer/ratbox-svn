@@ -480,44 +480,6 @@ install:        all @ON_WINDOWS@ wininstall
 @HAVE_CPP@		 $(INSTALL_DATA) pcrecpparg.h $(DESTDIR)$(INCDIR)/pcrecpparg.h
 @HAVE_CPP@		 $(INSTALL_DATA) pcre_stringpiece.h $(DESTDIR)$(INCDIR)/pcre_stringpiece.h
 @HAVE_CPP@		 $(INSTALL_DATA) $(top_srcdir)/pcre_scanner.h $(DESTDIR)$(INCDIR)/pcre_scanner.h
-		$(mkinstalldirs) $(DESTDIR)$(MANDIR)/man3
-		$(INSTALL_DATA) $(top_srcdir)/doc/pcre.3 $(DESTDIR)$(MANDIR)/man3/pcre.3
-		$(INSTALL_DATA) $(top_srcdir)/doc/pcreapi.3 $(DESTDIR)$(MANDIR)/man3/pcreapi.3
-		$(INSTALL_DATA) $(top_srcdir)/doc/pcrebuild.3 $(DESTDIR)$(MANDIR)/man3/pcrebuild.3
-		$(INSTALL_DATA) $(top_srcdir)/doc/pcrecallout.3 $(DESTDIR)$(MANDIR)/man3/pcrecallout.3
-		$(INSTALL_DATA) $(top_srcdir)/doc/pcrecompat.3 $(DESTDIR)$(MANDIR)/man3/pcrecompat.3
-@HAVE_CPP@		 $(INSTALL_DATA) $(top_srcdir)/doc/pcrecpp.3 $(DESTDIR)$(MANDIR)/man3/pcrecpp.3
-		$(INSTALL_DATA) $(top_srcdir)/doc/pcrematching.3 $(DESTDIR)$(MANDIR)/man3/pcrematching.3
-		$(INSTALL_DATA) $(top_srcdir)/doc/pcrepartial.3 $(DESTDIR)$(MANDIR)/man3/pcrepartial.3
-		$(INSTALL_DATA) $(top_srcdir)/doc/pcrepattern.3 $(DESTDIR)$(MANDIR)/man3/pcrepattern.3
-		$(INSTALL_DATA) $(top_srcdir)/doc/pcreperform.3 $(DESTDIR)$(MANDIR)/man3/pcreperform.3
-		$(INSTALL_DATA) $(top_srcdir)/doc/pcreposix.3 $(DESTDIR)$(MANDIR)/man3/pcreposix.3
-		$(INSTALL_DATA) $(top_srcdir)/doc/pcreprecompile.3 $(DESTDIR)$(MANDIR)/man3/pcreprecompile.3
-		$(INSTALL_DATA) $(top_srcdir)/doc/pcresample.3 $(DESTDIR)$(MANDIR)/man3/pcresample.3
-		$(INSTALL_DATA) $(top_srcdir)/doc/pcrestack.3 $(DESTDIR)$(MANDIR)/man3/pcrestack.3
-		$(INSTALL_DATA) $(top_srcdir)/doc/pcre_compile.3 $(DESTDIR)$(MANDIR)/man3/pcre_compile.3
-		$(INSTALL_DATA) $(top_srcdir)/doc/pcre_compile2.3 $(DESTDIR)$(MANDIR)/man3/pcre_compile2.3
-		$(INSTALL_DATA) $(top_srcdir)/doc/pcre_config.3 $(DESTDIR)$(MANDIR)/man3/pcre_config.3
-		$(INSTALL_DATA) $(top_srcdir)/doc/pcre_copy_named_substring.3 $(DESTDIR)$(MANDIR)/man3/pcre_copy_named_substring.3
-		$(INSTALL_DATA) $(top_srcdir)/doc/pcre_copy_substring.3 $(DESTDIR)$(MANDIR)/man3/pcre_copy_substring.3
-		$(INSTALL_DATA) $(top_srcdir)/doc/pcre_dfa_exec.3 $(DESTDIR)$(MANDIR)/man3/pcre_dfa_exec.3
-		$(INSTALL_DATA) $(top_srcdir)/doc/pcre_exec.3 $(DESTDIR)$(MANDIR)/man3/pcre_exec.3
-		$(INSTALL_DATA) $(top_srcdir)/doc/pcre_free_substring.3 $(DESTDIR)$(MANDIR)/man3/pcre_free_substring.3
-		$(INSTALL_DATA) $(top_srcdir)/doc/pcre_free_substring_list.3 $(DESTDIR)$(MANDIR)/man3/pcre_free_substring_list.3
-		$(INSTALL_DATA) $(top_srcdir)/doc/pcre_fullinfo.3 $(DESTDIR)$(MANDIR)/man3/pcre_fullinfo.3
-		$(INSTALL_DATA) $(top_srcdir)/doc/pcre_get_named_substring.3 $(DESTDIR)$(MANDIR)/man3/pcre_get_named_substring.3
-		$(INSTALL_DATA) $(top_srcdir)/doc/pcre_get_stringnumber.3 $(DESTDIR)$(MANDIR)/man3/pcre_get_stringnumber.3
-		$(INSTALL_DATA) $(top_srcdir)/doc/pcre_get_stringtable_entries.3 $(DESTDIR)$(MANDIR)/man3/pcre_get_stringtable_entries.3
-		$(INSTALL_DATA) $(top_srcdir)/doc/pcre_get_substring.3 $(DESTDIR)$(MANDIR)/man3/pcre_get_substring.3
-		$(INSTALL_DATA) $(top_srcdir)/doc/pcre_get_substring_list.3 $(DESTDIR)$(MANDIR)/man3/pcre_get_substring_list.3
-		$(INSTALL_DATA) $(top_srcdir)/doc/pcre_info.3 $(DESTDIR)$(MANDIR)/man3/pcre_info.3
-		$(INSTALL_DATA) $(top_srcdir)/doc/pcre_maketables.3 $(DESTDIR)$(MANDIR)/man3/pcre_maketables.3
-		$(INSTALL_DATA) $(top_srcdir)/doc/pcre_refcount.3 $(DESTDIR)$(MANDIR)/man3/pcre_refcount.3
-		$(INSTALL_DATA) $(top_srcdir)/doc/pcre_study.3 $(DESTDIR)$(MANDIR)/man3/pcre_study.3
-		$(INSTALL_DATA) $(top_srcdir)/doc/pcre_version.3 $(DESTDIR)$(MANDIR)/man3/pcre_version.3
-		$(mkinstalldirs) $(DESTDIR)$(MANDIR)/man1
-		$(INSTALL_DATA) $(top_srcdir)/doc/pcregrep.1 $(DESTDIR)$(MANDIR)/man1/pcregrep.1
-		$(INSTALL_DATA) $(top_srcdir)/doc/pcretest.1 $(DESTDIR)$(MANDIR)/man1/pcretest.1
 		$(mkinstalldirs) $(DESTDIR)$(BINDIR)
 		$(LIBTOOL) --mode=install $(INSTALL) pcregrep@EXEEXT@ $(DESTDIR)$(BINDIR)/pcregrep@EXEEXT@
 		$(LIBTOOL) --mode=install $(INSTALL) pcretest@EXEEXT@ $(DESTDIR)$(BINDIR)/pcretest@EXEEXT@
