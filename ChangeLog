@@ -1,3 +1,12 @@
+leeh        2007/03/18 20:24:05 UTC	(20070318_0-23712)
+  Log:
+  - via ongeboren, missing "chptr = msptr->chptr;" in chanserv::op
+  
+
+  Modified:
+	rserv/trunk/src/s_chanserv.c (File Modified) 
+
+
 leeh        2007/03/16 21:58:18 UTC	(20070316_4-23710)
   Log:
   - erroneous ','
