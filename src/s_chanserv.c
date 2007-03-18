@@ -2960,6 +2960,7 @@ s_chan_op(struct client *client_p, struct lconn *conn_p, const char *parv[], int
 		DLINK_FOREACH(ptr, client_p->user->channels.head)
 		{
 			msptr = ptr->data;
+			chptr = msptr->chptr;
 
 			if(is_opped(msptr))
 				continue;
