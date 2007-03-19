@@ -921,9 +921,17 @@ o_user_userinfo(struct client *client_p, struct lconn *conn_p, const char *parv[
 		expire_user_suspend(ureg_p);
 
 	if(ureg_p->flags & US_FLAGS_SUSPENDED)
+	{
+		time_t suspend_time = ureg_p->suspend_time;
+
+		if(suspend_time)
+			suspend_time -= CURRENT_TIME;
+
 		service_snd(userserv_p, client_p, conn_p, SVC_INFO_SUSPENDED,
 				ureg_p->name, ureg_p->suspender,
+				suspend_time ? get_short_duration(suspend_time) : "never",
 				ureg_p->suspend_reason ? ureg_p->suspend_reason : "");
+	}
 
 	dump_user_info(client_p, conn_p, ureg_p);
 	return 0;
@@ -2058,12 +2066,21 @@ s_user_info(struct client *client_p, struct lconn *conn_p, const char *parv[], i
 
 	if(ureg_p->flags & US_FLAGS_SUSPENDED)
 	{
+		time_t suspend_time = ureg_p->suspend_time;
+
+		if(suspend_time)
+			suspend_time -= CURRENT_TIME;
+
 		if(config_file.ushow_suspend_reasons)
 			service_err(userserv_p, client_p, SVC_INFO_SUSPENDEDADMIN,
 					ureg_p->name, ": ",
+					suspend_time ? get_short_duration(suspend_time) : "never",
 					ureg_p->suspend_reason ? ureg_p->suspend_reason : "");
 		else
-			service_err(userserv_p, client_p, SVC_INFO_SUSPENDEDADMIN, ureg_p->name, "", "");
+			service_err(userserv_p, client_p, SVC_INFO_SUSPENDEDADMIN,
+					ureg_p->name, 
+					suspend_time ? get_short_duration(suspend_time) : "never",
+					"", "");
 	}
 	else if(ureg_p == client_p->user->user_reg)
 	{

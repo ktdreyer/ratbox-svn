@@ -1793,14 +1793,25 @@ o_chan_chaninfo(struct client *client_p, struct lconn *conn_p, const char *parv[
 
 	owner = find_owner(chreg_p);
 
+	if(CHAN_SUSPEND_EXPIRED(chreg_p))
+		expire_chan_suspend(chreg_p);
+
 	service_snd(chanserv_p, client_p, conn_p, SVC_INFO_REGDURATIONCHAN,
 			chreg_p->name, owner ?  owner : "?unknown?",
 			get_duration((time_t) (CURRENT_TIME - chreg_p->reg_time)));
 
 	if(chreg_p->flags & CS_FLAGS_SUSPENDED)
+	{
+		time_t suspend_time = chreg_p->suspend_time;
+
+		if(suspend_time)
+			suspend_time -= CURRENT_TIME;
+
 		service_snd(chanserv_p, client_p, conn_p, SVC_INFO_SUSPENDED,
 				chreg_p->name, chreg_p->suspender, 
+				suspend_time ? get_short_duration(suspend_time) : "never",
 				chreg_p->suspend_reason ? chreg_p->suspend_reason : "");
+	}
 	else
 		dump_info_extended(client_p, conn_p, chreg_p);
 
@@ -3560,15 +3571,26 @@ s_chan_info(struct client *client_p, struct lconn *conn_p, const char *parv[], i
 			reg_p->name, owner ?  owner : "?unknown?",
 			get_duration((time_t) (CURRENT_TIME - reg_p->reg_time)));
 
+	if(CHAN_SUSPEND_EXPIRED(reg_p))
+		expire_chan_suspend(reg_p);
+
 	if(reg_p->flags & CS_FLAGS_SUSPENDED)
 	{
+		time_t suspend_time = reg_p->suspend_time;
+
+		if(suspend_time)
+			suspend_time -= CURRENT_TIME;
+
 		if(config_file.cshow_suspend_reasons)
 			service_err(chanserv_p, client_p, SVC_INFO_SUSPENDEDADMIN,
 					reg_p->name, ": ",
+					suspend_time ? get_short_duration(suspend_time) : "never",
 					(reg_p->suspend_reason ? reg_p->suspend_reason : ""));
 		else
 			service_err(chanserv_p, client_p, SVC_INFO_SUSPENDEDADMIN,
-					reg_p->name, "", "");
+					reg_p->name, 
+					suspend_time ? get_short_duration(suspend_time) : "never",
+					"", "");
 	}
 	else if((mreg_p = find_member_reg(client_p->user->user_reg, reg_p)) &&
 		!mreg_p->suspend)
