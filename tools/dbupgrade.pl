@@ -242,16 +242,28 @@ if($currentver < 6)
 	{
 		print "ALTER TABLE users ADD COLUMN suspend_time INT UNSIGNED;\n";
 		print "ALTER TABLE channels ADD COLUMN suspend_time INT UNSIGNED;\n";
+		print "CREATE TABLE ignore_hosts (\n";
+		print "    hostname VARCHAR(255) NOT NULL,\n";
+		print "    PRIMARY KEY(hostname)\n";
+		print ");\n";
 	}
-	else if($dbtype eq "pgsql")
+	elsif($dbtype eq "pgsql")
 	{
 		print "ALTER TABLE users ADD COLUMN suspend_time INTEGER;\n";
 		print "ALTER TABLE channels ADD COLUMN suspend_time INTEGER;\n";
+		print "CREATE TABLE ignore_hosts (\n";
+		print "    hostname VARCHAR(255) NOT NULL,\n";
+		print "    PRIMARY KEY(hostname)\n";
+		print ");\n";
 	}
 	else
 	{
 		print "ALTER TABLE users ADD COLUMN suspend_time INTEGER;\n";
 		print "ALTER TABLE channels ADD COLUMN suspend_time INTEGER;\n";
+		print "CREATE TABLE ignore_hosts (\n";
+		print "    hostname TEXT NOT NULL,\n";
+		print "    PRIMARY KEY(hostname)\n";
+		print ");\n";
 	}
 
 	print "\n";

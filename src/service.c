@@ -36,6 +36,7 @@
 #include <crypt.h>
 #endif
 
+#include "rsdb.h"
 #include "rserv.h"
 #include "langs.h"
 #include "service.h"
@@ -51,6 +52,9 @@
 #include "watch.h"
 
 dlink_list service_list;
+static dlink_list ignore_list;
+
+static int ignore_db_callback(int, const char **);
 
 void
 init_services(void)
@@ -68,6 +72,32 @@ init_services(void)
 		if(service_p->service->init)
 			(service_p->service->init)();
 	}
+
+	rsdb_exec(ignore_db_callback, "SELECT hostname FROM ignore_hosts");
+}
+
+static int
+ignore_db_callback(int argc, const char **argv)
+{
+	if(EmptyString(argv[0]))
+		return 0;
+
+	dlink_add_alloc(my_strdup(argv[0]), &ignore_list);
+	return 0;
+}
+
+static int
+find_ignore(struct client *client_p)
+{
+	dlink_node *ptr;
+
+	DLINK_FOREACH(ptr, ignore_list.head)
+	{
+		if(match(ptr->data, client_p->user->mask))
+			return 1;
+	}
+
+	return 0;
 }
 
 typedef int (*bqcmp)(const void *, const void *);
@@ -549,6 +579,14 @@ handle_service(struct client *service_p, struct client *client_p,
 	/* do flood limiting */
 	if(!client_p->user->oper)
 	{
+		/* we allow opers to traverse ignores (above), together with
+		 * any oper who is about to login
+		 */
+		if(find_ignore(client_p) && 
+			(strcasecmp(command, "OLOGIN") ||
+			 find_conf_oper(client_p->user->username, client_p->user->host, client_p->user->servername) == NULL))
+			return;
+
 		if((client_p->user->flood_time + config_file.client_flood_time) < CURRENT_TIME)
 		{
 			client_p->user->flood_time = CURRENT_TIME;
