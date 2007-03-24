@@ -1,3 +1,16 @@
+leeh        2007/03/24 20:28:32 UTC	(20070324_0-23716)
+  Log:
+  - services ignores, the sql and code for ignoring users
+  
+
+  Modified:
+	rserv/trunk/src/service.c (File Modified) 
+	rserv/trunk/tools/base/schema-mysql.txt (File Modified) 
+	rserv/trunk/tools/base/schema-pgsql.txt (File Modified) 
+	rserv/trunk/tools/base/schema-sqlite.txt (File Modified) 
+	rserv/trunk/tools/dbupgrade.pl (File Modified) 
+
+
 leeh        2007/03/19 21:44:06 UTC	(20070319_0-23714)
   Log:
   - show expiry of channel and user suspends
