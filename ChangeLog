@@ -1,3 +1,15 @@
+leeh        2007/03/25 21:42:04 UTC	(20070325_0-23718)
+  Log:
+  - make table of ignore hosts support tracking reason/oper too
+  
+
+  Modified:
+	rserv/trunk/tools/base/schema-mysql.txt (File Modified) 
+	rserv/trunk/tools/base/schema-pgsql.txt (File Modified) 
+	rserv/trunk/tools/base/schema-sqlite.txt (File Modified) 
+	rserv/trunk/tools/dbupgrade.pl (File Modified) 
+
+
 leeh        2007/03/24 20:28:32 UTC	(20070324_0-23716)
   Log:
   - services ignores, the sql and code for ignoring users
