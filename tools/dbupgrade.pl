@@ -244,6 +244,8 @@ if($currentver < 6)
 		print "ALTER TABLE channels ADD COLUMN suspend_time INT UNSIGNED;\n";
 		print "CREATE TABLE ignore_hosts (\n";
 		print "    hostname VARCHAR(255) NOT NULL,\n";
+		print "    oper VARCHAR(" . $vals{"OPERNAMELEN"} . ") NOT NULL,\n";
+		print "    reason VARCHAR(255) NOT NULL,\n";
 		print "    PRIMARY KEY(hostname)\n";
 		print ");\n";
 	}
@@ -253,6 +255,8 @@ if($currentver < 6)
 		print "ALTER TABLE channels ADD COLUMN suspend_time INTEGER;\n";
 		print "CREATE TABLE ignore_hosts (\n";
 		print "    hostname VARCHAR(255) NOT NULL,\n";
+		print "    oper VARCHAR(" . $vals{"OPERNAMELEN"} . ") NOT NULL,\n";
+		print "    reason VARCHAR(255) NOT NULL,\n";
 		print "    PRIMARY KEY(hostname)\n";
 		print ");\n";
 	}
@@ -262,6 +266,8 @@ if($currentver < 6)
 		print "ALTER TABLE channels ADD COLUMN suspend_time INTEGER;\n";
 		print "CREATE TABLE ignore_hosts (\n";
 		print "    hostname TEXT NOT NULL,\n";
+		print "    oper TEXT NOT NULL,\n";
+		print "    reason TEXT NOT NULL,\n";
 		print "    PRIMARY KEY(hostname)\n";
 		print ");\n";
 	}

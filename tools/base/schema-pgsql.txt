@@ -147,5 +147,7 @@ CREATE TABLE email_banned_domain (
 
 CREATE TABLE ignore_hosts (
 	hostname VARCHAR(255) NOT NULL,
+	oper VARCHAR(OPERNAMELEN) NOT NULL,
+	reason VARCHAR(255) NOT NULL,
 	PRIMARY KEY(hostname)
 );
