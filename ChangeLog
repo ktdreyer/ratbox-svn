@@ -1,3 +1,12 @@
+leeh        2007/03/26 19:16:02 UTC	(20070326_0-23722)
+  Log:
+  - as pointed out by hml on irc, s/REGISTER/USERSUSPEND in a notice sent out
+  
+
+  Modified:
+	rserv/trunk/src/s_userserv.c (File Modified) 
+
+
 leeh        2007/03/25 21:42:04 UTC	(20070325_0-23718)
   Log:
   - make table of ignore hosts support tracking reason/oper too
