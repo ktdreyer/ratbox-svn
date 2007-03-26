@@ -696,7 +696,7 @@ o_user_usersuspend(struct client *client_p, struct lconn *conn_p, const char *pa
 	if(EmptyString(reason))
 	{
 		service_err(userserv_p, client_p, SVC_NEEDMOREPARAMS,
-				userserv_p->name, "REGISTER");
+				userserv_p->name, "USERSUSPEND");
 		return 0;
 	}
 
