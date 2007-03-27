@@ -1,3 +1,17 @@
+leeh        2007/03/27 21:00:55 UTC	(20070327_1-23726)
+  Log:
+  - add operserv::addignore and operserv::delignore
+  
+
+  Modified:
+	rserv/trunk/include/langs.h (File Modified) 
+	rserv/trunk/include/service.h (File Modified) 
+	rserv/trunk/src/langs.c (File Modified) 
+	rserv/trunk/src/messages.c (File Modified) 
+	rserv/trunk/src/s_operserv.c (File Modified) 
+	rserv/trunk/src/service.c (File Modified) 
+
+
 leeh        2007/03/27 20:48:28 UTC	(20070327_0-23724)
   Log:
   - make ignore_list external
