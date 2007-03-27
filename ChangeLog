@@ -1,3 +1,18 @@
+leeh        2007/03/27 20:48:28 UTC	(20070327_0-23724)
+  Log:
+  - make ignore_list external
+  - add in new operserv flag, 'ignore', controls access to ignore functions
+  
+
+  Modified:
+	rserv/trunk/doc/example.conf (File Modified) 
+	rserv/trunk/include/conf.h (File Modified) 
+	rserv/trunk/include/service.h (File Modified) 
+	rserv/trunk/src/conf.c (File Modified) 
+	rserv/trunk/src/newconf.c (File Modified) 
+	rserv/trunk/src/service.c (File Modified) 
+
+
 leeh        2007/03/26 19:16:02 UTC	(20070326_0-23722)
   Log:
   - as pointed out by hml on irc, s/REGISTER/USERSUSPEND in a notice sent out
