@@ -52,6 +52,7 @@ struct _lang_internal lang_internal[] =
 	{ SVC_ENDOFLIST,		"End of list"						},
 	{ SVC_ENDOFLISTLIMIT,		"End of list, limit reached"				},
 	{ SVC_USECOMMANDSHORTCUT,	"Commands to this service must be issued via /%s instead of by name."		},
+	{ SVC_INVALIDMASK,		"Invalid mask %s"					},
 
 	/* general irc related */
 	{ SVC_IRC_NOSUCHCHANNEL,	"Channel %s does not exist"				},
@@ -198,6 +199,8 @@ struct _lang_internal lang_internal[] =
 	{ SVC_OPER_CONNECTIONSEND,	"End of connections"					},
 	{ SVC_OPER_SERVERNAMEMISMATCH,	"Servernames do not match"				},
 	{ SVC_OPER_OSPARTACCESS,	"No access to %s::OSPART on channels joined through %s"	},
+	{ SVC_OPER_IGNORENOTFOUND,	"Ignore %s not found"					},
+	{ SVC_OPER_IGNOREALREADY,	"Ignore %s matches existing ignore %s"			},
 
 	/* banserv */
 	{ SVC_BAN_ISSUED,		"Issued %s for %s"					},

@@ -73,27 +73,37 @@ init_services(void)
 			(service_p->service->init)();
 	}
 
-	rsdb_exec(ignore_db_callback, "SELECT hostname FROM ignore_hosts");
+	rsdb_exec(ignore_db_callback, "SELECT hostname, oper, reason FROM ignore_hosts");
 }
 
 static int
 ignore_db_callback(int argc, const char **argv)
 {
-	if(EmptyString(argv[0]))
+	struct service_ignore *ignore_p;
+
+	if(EmptyString(argv[0]) || EmptyString(argv[1]) || EmptyString(argv[2]))
 		return 0;
 
-	dlink_add_alloc(my_strdup(argv[0]), &ignore_list);
+	ignore_p = my_malloc(sizeof(struct service_ignore));
+	ignore_p->mask = my_strdup(argv[0]);
+	ignore_p->oper = my_strdup(argv[1]);
+	ignore_p->reason = my_strdup(argv[2]);
+
+	dlink_add(ignore_p, &ignore_p->ptr, &ignore_list);
 	return 0;
 }
 
 static int
 find_ignore(struct client *client_p)
 {
+	struct service_ignore *ignore_p;
 	dlink_node *ptr;
 
 	DLINK_FOREACH(ptr, ignore_list.head)
 	{
-		if(match(ptr->data, client_p->user->mask))
+		ignore_p = ptr->data;
+
+		if(match(ignore_p->mask, client_p->user->mask))
 			return 1;
 	}
 

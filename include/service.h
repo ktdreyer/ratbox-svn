@@ -43,6 +43,15 @@ struct service_handler
         void (*stats)(struct lconn *, const char **, int);
 };
 
+struct service_ignore
+{
+	char *mask;
+	char *reason;
+	char *oper;
+
+	dlink_node ptr;
+};
+
 extern dlink_list service_list;
 extern dlink_list ignore_list;
 

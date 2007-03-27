@@ -59,6 +59,8 @@ static int o_oper_omode(struct client *, struct lconn *, const char **, int);
 static int o_oper_dbsync(struct client *, struct lconn *, const char **, int);
 static int o_oper_rehash(struct client *, struct lconn *, const char **, int);
 static int o_oper_die(struct client *, struct lconn *, const char **, int);
+static int o_oper_addignore(struct client *, struct lconn *, const char **, int);
+static int o_oper_delignore(struct client *, struct lconn *, const char **, int);
 static int o_oper_listopers(struct client *, struct lconn *, const char **, int);
 
 static int h_operserv_sjoin_lowerts(void *chptr, void *unused);
@@ -72,18 +74,22 @@ static struct service_command operserv_command[] =
 	{ "DBSYNC",	&o_oper_dbsync,		0, NULL, 1, 0L, 0, 0, CONF_OPER_OS_MAINTAIN	},
 	{ "REHASH",	&o_oper_rehash,		0, NULL, 1, 0L, 0, 0, CONF_OPER_OS_MAINTAIN	},
 	{ "DIE",	&o_oper_die,		1, NULL, 1, 0L, 0, 0, CONF_OPER_OS_MAINTAIN	},
+	{ "ADDIGNORE",	&o_oper_addignore,	2, NULL, 1, 0L, 0, 0, CONF_OPER_OS_IGNORE	},
+	{ "DELIGNORE",	&o_oper_delignore,	1, NULL, 1, 0L, 0, 0, CONF_OPER_OS_IGNORE	},
 	{ "LISTOPERS",	&o_oper_listopers,	0, NULL, 1, 0L, 0, 0, 0	}
 };
 
 static struct ucommand_handler operserv_ucommand[] =
 {
-	{ "osjoin",	o_oper_osjoin,	0, CONF_OPER_OS_CHANNEL, 1, NULL },
-	{ "ospart",	o_oper_ospart,	0, CONF_OPER_OS_CHANNEL, 1, NULL },
-	{ "takeover",	o_oper_takeover,0, CONF_OPER_OS_TAKEOVER, 1, NULL },
-	{ "omode",	o_oper_omode,	0, CONF_OPER_OS_OMODE, 2, NULL },
-	{ "dbsync",	o_oper_dbsync,	CONF_OPER_ADMIN, 0, 0, NULL },
-	{ "die",	o_oper_die,	CONF_OPER_ADMIN, 0, 1, NULL },
-	{ "listopers",	o_oper_listopers, 0, 0, 0, NULL },
+	{ "osjoin",	o_oper_osjoin,		0, CONF_OPER_OS_CHANNEL,	1, NULL },
+	{ "ospart",	o_oper_ospart,		0, CONF_OPER_OS_CHANNEL,	1, NULL },
+	{ "takeover",	o_oper_takeover,	0, CONF_OPER_OS_TAKEOVER,	1, NULL },
+	{ "omode",	o_oper_omode,		0, CONF_OPER_OS_OMODE,		2, NULL },
+	{ "dbsync",	o_oper_dbsync,		CONF_OPER_ADMIN, 0,		0, NULL },
+	{ "die",	o_oper_die,		CONF_OPER_ADMIN, 0,		1, NULL },
+	{ "addignore",	o_oper_addignore,	0, CONF_OPER_OS_IGNORE, 	2, NULL },
+	{ "delignore",	o_oper_delignore,	0, CONF_OPER_OS_IGNORE,		1, NULL },
+	{ "listopers",	o_oper_listopers,	0, 0, 0, NULL },
 	{ "\0", NULL, 0, 0, 0, NULL }
 };
 
@@ -457,6 +463,70 @@ o_oper_die(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 	mlog("ratbox-services terminated by %s", OPER_NAME(client_p, conn_p));
 
 	die(1, "Services terminated");
+	return 0;
+}
+
+static int
+o_oper_addignore(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
+{
+	struct service_ignore *ignore_p;
+	dlink_node *ptr;
+
+	if(!valid_ban(parv[0]))
+	{
+		service_snd(operserv_p, client_p, conn_p, SVC_INVALIDMASK, parv[0]);
+		return 0;
+	}
+
+	DLINK_FOREACH(ptr, ignore_list.head)
+	{
+		if(match(ptr->data, parv[0]))
+		{
+			service_snd(operserv_p, client_p, conn_p, SVC_OPER_IGNOREALREADY,
+					parv[0], ptr->data);
+			return 0;
+		}
+	}
+
+	ignore_p = my_malloc(sizeof(struct service_ignore));
+	ignore_p->mask = my_strdup(parv[0]);
+	collapse(ignore_p->mask);
+	ignore_p->reason = my_strdup(rebuild_params(parv, parc, 1));
+	ignore_p->oper = my_strdup(OPER_NAME(client_p, conn_p));
+
+	dlink_add(ignore_p, &ignore_p->ptr, &ignore_list);
+
+	rsdb_exec(NULL, "INSERT INTO ignore_hosts (hostname, oper, reason) VALUES('%Q', '%Q', '%Q')",
+			ignore_p->mask, ignore_p->oper, ignore_p->reason);
+	return 0;
+}
+
+static int
+o_oper_delignore(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
+{
+	struct service_ignore *ignore_p;
+	dlink_node *ptr;
+
+	DLINK_FOREACH(ptr, ignore_list.head)
+	{
+		ignore_p = ptr->data;
+
+		if(!irccmp(ignore_p->mask, parv[0]))
+		{
+			dlink_delete(&ignore_p->ptr, &ignore_list);
+
+			my_free(ignore_p->mask);
+			my_free(ignore_p->oper);
+			my_free(ignore_p->reason);
+			my_free(ignore_p);
+
+			service_snd(operserv_p, client_p, conn_p, SVC_SUCCESSFUL,
+					operserv_p->name, "DELIGNORE");
+			return 0;
+		}
+	}
+
+	service_snd(operserv_p, client_p, conn_p, SVC_OPER_IGNORENOTFOUND, parv[0]);
 	return 0;
 }
 

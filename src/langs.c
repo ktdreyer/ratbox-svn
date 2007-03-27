@@ -70,6 +70,7 @@ const char *svc_notice_string[] =
 	"SVC_ENDOFLIST",
 	"SVC_ENDOFLISTLIMIT",
 	"SVC_USECOMMANDSHORTCUT",
+	"SVC_INVALIDMASK",
 
 	/* general irc related */
 	"SVC_IRC_NOSUCHCHANNEL",
@@ -213,6 +214,8 @@ const char *svc_notice_string[] =
 	"SVC_OPER_CONNECTIONSEND",
 	"SVC_OPER_SERVERNAMEMISMATCH",
 	"SVC_OPER_OSPARTACCESS",
+	"SVC_OPER_IGNORENOTFOUND",
+	"SVC_OPER_IGNOREALREADY",
 
 	/* banserv */
 	"SVC_BAN_ISSUED",
