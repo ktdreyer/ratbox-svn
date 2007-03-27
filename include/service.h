@@ -44,6 +44,7 @@ struct service_handler
 };
 
 extern dlink_list service_list;
+extern dlink_list ignore_list;
 
 #define OPER_NAME(client_p, conn_p) ((conn_p) ? (conn_p)->name : \
 		((client_p)->user->oper ? (client_p)->user->oper->name : "-"))

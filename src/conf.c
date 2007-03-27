@@ -390,6 +390,7 @@ static struct sflag_table
 } service_flags[] = {
 #ifdef SERVICE_FLAGS_FULL
 	{ 1, "operserv", CONF_OPER_OS_MAINTAIN, "maintain"	},
+	{ 1, "operserv", CONF_OPER_OS_IGNORE,	"ignore"	},
 	{ 1, "operserv", CONF_OPER_OS_CHANNEL,	"channel"	},
 	{ 1, "operserv", CONF_OPER_OS_TAKEOVER,	"takeover"	},
 	{ 1, "operserv", CONF_OPER_OS_OMODE,	"omode"		},
@@ -417,6 +418,7 @@ static struct sflag_table
 	{ 8, "banserv",  CONF_OPER_BAN_SYNC,	"sync"		},
 #else
 	{ 1, "OS", CONF_OPER_OS_MAINTAIN,	"M" },
+	{ 1, "OS", CONF_OPER_OS_IGNORE,		"I" },
 	{ 1, "OS", CONF_OPER_OS_CHANNEL,	"C" },
 	{ 1, "OS", CONF_OPER_OS_TAKEOVER,	"T" },
 	{ 1, "OS", CONF_OPER_OS_OMODE,		"O" },

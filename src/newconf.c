@@ -73,6 +73,7 @@ static struct mode_table nickserv_table[] = {
 
 static struct mode_table operserv_table[] = {
 	{ "maintain",	CONF_OPER_OS_MAINTAIN	},
+	{ "ignore",	CONF_OPER_OS_IGNORE	},
 	{ "admin",	CONF_OPER_OS_ADMIN	},
 	{ "channel",	CONF_OPER_OS_CHANNEL	},
 	{ "takeover",	CONF_OPER_OS_TAKEOVER	},

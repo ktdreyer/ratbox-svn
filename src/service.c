@@ -52,7 +52,7 @@
 #include "watch.h"
 
 dlink_list service_list;
-static dlink_list ignore_list;
+dlink_list ignore_list;
 
 static int ignore_db_callback(int, const char **);
 
