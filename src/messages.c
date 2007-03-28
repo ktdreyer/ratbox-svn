@@ -201,6 +201,7 @@ struct _lang_internal lang_internal[] =
 	{ SVC_OPER_OSPARTACCESS,	"No access to %s::OSPART on channels joined through %s"	},
 	{ SVC_OPER_IGNORENOTFOUND,	"Ignore %s not found"					},
 	{ SVC_OPER_IGNOREALREADY,	"Ignore %s matches existing ignore %s"			},
+	{ SVC_OPER_IGNORELIST,		"Ignore list:"						},
 
 	/* banserv */
 	{ SVC_BAN_ISSUED,		"Issued %s for %s"					},

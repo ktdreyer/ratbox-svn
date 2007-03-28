@@ -216,6 +216,7 @@ const char *svc_notice_string[] =
 	"SVC_OPER_OSPARTACCESS",
 	"SVC_OPER_IGNORENOTFOUND",
 	"SVC_OPER_IGNOREALREADY",
+	"SVC_OPER_IGNORELIST",
 
 	/* banserv */
 	"SVC_BAN_ISSUED",

@@ -61,6 +61,7 @@ static int o_oper_rehash(struct client *, struct lconn *, const char **, int);
 static int o_oper_die(struct client *, struct lconn *, const char **, int);
 static int o_oper_addignore(struct client *, struct lconn *, const char **, int);
 static int o_oper_delignore(struct client *, struct lconn *, const char **, int);
+static int o_oper_listignores(struct client *, struct lconn *, const char **, int);
 static int o_oper_listopers(struct client *, struct lconn *, const char **, int);
 
 static int h_operserv_sjoin_lowerts(void *chptr, void *unused);
@@ -76,6 +77,7 @@ static struct service_command operserv_command[] =
 	{ "DIE",	&o_oper_die,		1, NULL, 1, 0L, 0, 0, CONF_OPER_OS_MAINTAIN	},
 	{ "ADDIGNORE",	&o_oper_addignore,	2, NULL, 1, 0L, 0, 0, CONF_OPER_OS_IGNORE	},
 	{ "DELIGNORE",	&o_oper_delignore,	1, NULL, 1, 0L, 0, 0, CONF_OPER_OS_IGNORE	},
+	{ "LISTIGNORES",&o_oper_listignores,	0, NULL, 1, 0L, 0, 0, CONF_OPER_OS_IGNORE	},
 	{ "LISTOPERS",	&o_oper_listopers,	0, NULL, 1, 0L, 0, 0, 0	}
 };
 
@@ -89,6 +91,7 @@ static struct ucommand_handler operserv_ucommand[] =
 	{ "die",	o_oper_die,		CONF_OPER_ADMIN, 0,		1, NULL },
 	{ "addignore",	o_oper_addignore,	0, CONF_OPER_OS_IGNORE, 	2, NULL },
 	{ "delignore",	o_oper_delignore,	0, CONF_OPER_OS_IGNORE,		1, NULL },
+	{ "listignores",o_oper_listignores,	0, CONF_OPER_OS_IGNORE,		1, NULL },
 	{ "listopers",	o_oper_listopers,	0, 0, 0, NULL },
 	{ "\0", NULL, 0, 0, 0, NULL }
 };
@@ -532,6 +535,26 @@ o_oper_delignore(struct client *client_p, struct lconn *conn_p, const char *parv
 	}
 
 	service_snd(operserv_p, client_p, conn_p, SVC_OPER_IGNORENOTFOUND, parv[0]);
+	return 0;
+}
+
+static int
+o_oper_listignores(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
+{
+	struct service_ignore *ignore_p;
+	dlink_node *ptr;
+
+	service_snd(operserv_p, client_p, conn_p, SVC_OPER_IGNORELIST);
+
+	DLINK_FOREACH(ptr, ignore_list.head)
+	{
+		ignore_p = ptr->data;
+
+		service_send(operserv_p, client_p, conn_p, "  %-40s oper:%s [%s]",
+				ignore_p->mask, ignore_p->oper, ignore_p->reason);
+	}
+
+	service_snd(operserv_p, client_p, conn_p, SVC_ENDOFLIST);
 	return 0;
 }
 
