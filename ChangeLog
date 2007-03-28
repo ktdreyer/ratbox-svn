@@ -1,3 +1,13 @@
+leeh        2007/03/28 19:26:20 UTC	(20070328_3-23742)
+  Log:
+  - swap the release notes around
+  
+
+  Modified:
+	rserv/trunk/RELEASE_NOTES (File Modified) 
+	rserv/trunk/doc/release_notes/RELEASE_NOTES_1.1 (File Added) 
+
+
 leeh        2007/03/28 18:29:22 UTC	(20070328_2-23740)
   Log:
   - add helpfiles for the operserv ignore stuff
