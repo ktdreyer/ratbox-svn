@@ -498,6 +498,9 @@ o_oper_addignore(struct client *client_p, struct lconn *conn_p, const char *parv
 
 	rsdb_exec(NULL, "INSERT INTO ignore_hosts (hostname, oper, reason) VALUES('%Q', '%Q', '%Q')",
 			ignore_p->mask, ignore_p->oper, ignore_p->reason);
+
+	service_snd(operserv_p, client_p, conn_p, SVC_SUCCESSFUL,
+			operserv_p->name, "ADDIGNORE");
 	return 0;
 }
 
@@ -519,6 +522,8 @@ o_oper_delignore(struct client *client_p, struct lconn *conn_p, const char *parv
 			my_free(ignore_p->oper);
 			my_free(ignore_p->reason);
 			my_free(ignore_p);
+
+			rsdb_exec(NULL, "DELETE FROM ignore_hosts WHERE hostname='%Q'", parv[0]);
 
 			service_snd(operserv_p, client_p, conn_p, SVC_SUCCESSFUL,
 					operserv_p->name, "DELIGNORE");
