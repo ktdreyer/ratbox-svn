@@ -1,3 +1,13 @@
+leeh        2007/03/28 18:17:49 UTC	(20070328_0-23736)
+  Log:
+  - operserv::addignore should send out a notice on success
+  - operserv::delignore was missing the sql to remove the ignore from db
+  
+
+  Modified:
+	rserv/trunk/src/s_operserv.c (File Modified) 
+
+
 leeh        2007/03/27 21:00:55 UTC	(20070327_1-23726)
   Log:
   - add operserv::addignore and operserv::delignore
