@@ -1,3 +1,18 @@
+leeh        2007/03/28 18:29:22 UTC	(20070328_2-23740)
+  Log:
+  - add helpfiles for the operserv ignore stuff
+  
+
+  Modified:
+	rserv/trunk/help/en/operserv/addignore (File Added) 
+	rserv/trunk/help/en/operserv/delignore (File Added) 
+	rserv/trunk/help/en/operserv/index-admin (File Modified) 
+	rserv/trunk/help/en/operserv/listignores (File Added) 
+	rserv/trunk/help/en/operserv/u-addignore (File Added) 
+	rserv/trunk/help/en/operserv/u-delignore (File Added) 
+	rserv/trunk/help/en/operserv/u-listignores (File Added) 
+
+
 leeh        2007/03/28 18:24:19 UTC	(20070328_1-23738)
   Log:
   - add operserv::listignores
