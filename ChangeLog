@@ -1,3 +1,16 @@
+leeh        2007/03/29 21:19:02 UTC	(20070329_1-23749)
+  Log:
+  - new flag, banserv::regexp, grants ability to set/delete regexps
+  - add operserv::regexp, to add a regexp
+  
+
+  Modified:
+	rserv/trunk/include/conf.h (File Modified) 
+	rserv/trunk/src/conf.c (File Modified) 
+	rserv/trunk/src/newconf.c (File Modified) 
+	rserv/trunk/src/s_banserv.c (File Modified) 
+
+
 leeh        2007/03/29 21:17:33 UTC	(20070329_0-23747)
   Log:
   - sql for operbans_regexp table
