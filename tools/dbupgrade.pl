@@ -248,6 +248,14 @@ if($currentver < 6)
 		print "    reason VARCHAR(255) NOT NULL,\n";
 		print "    PRIMARY KEY(hostname)\n";
 		print ");\n";
+		print "CREATE TABLE operbans_regexp (\n";
+		print "    regex VARCHAR(255) NOT NULL,\n";
+		print "    reason VARCHAR(" . $vals{"REASONLEN"} . ") NOT NULL,\n";
+		print "    hold INTEGER,\n";
+		print "    create_time INTEGER,\n";
+		print "    oper VARCHAR(" . $vals{"OPERNAMELEN"} . ") NOT NULL,\n";
+		print "    PRIMARY KEY(regex)\n";
+		print ");\n";
 	}
 	elsif($dbtype eq "pgsql")
 	{
@@ -259,6 +267,14 @@ if($currentver < 6)
 		print "    reason VARCHAR(255) NOT NULL,\n";
 		print "    PRIMARY KEY(hostname)\n";
 		print ");\n";
+		print "CREATE TABLE operbans_regexp (\n";
+		print "    regex VARCHAR(255) NOT NULL,\n";
+		print "    reason VARCHAR(" . $vals{"REASONLEN"} . ") NOT NULL,\n";
+		print "    hold INTEGER,\n";
+		print "    create_time INTEGER,\n";
+		print "    oper VARCHAR(" . $vals{"OPERNAMELEN"} . ") NOT NULL,\n";
+		print "    PRIMARY KEY(regex)\n";
+		print ");\n";
 	}
 	else
 	{
@@ -269,6 +285,14 @@ if($currentver < 6)
 		print "    oper TEXT NOT NULL,\n";
 		print "    reason TEXT NOT NULL,\n";
 		print "    PRIMARY KEY(hostname)\n";
+		print ");\n";
+		print "CREATE TABLE operbans_regexp (\n";
+		print "    regex TEXT NOT NULL,\n";
+		print "    reason TEXT NOT NULL,\n";
+		print "    hold INTEGER,\n";
+		print "    create_time INTEGER,\n";
+		print "    oper TEXT NOT NULL,\n";
+		print "    PRIMARY KEY(regex)\n";
 		print ");\n";
 	}
 

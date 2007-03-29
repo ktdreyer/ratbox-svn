@@ -118,6 +118,15 @@ CREATE TABLE operbans (
 	flags INTEGER
 );
 
+CREATE TABLE operbans_regexp (
+	regex VARCHAR(255) NOT NULL,
+	reason TEXT NOT NULL,
+	hold INTEGER,
+	create_time INTEGER,
+	oper TEXT,
+	PRIMARY KEY(regex)
+);
+
 CREATE TABLE global_welcome (
 	id INTEGER,
 	text TEXT,

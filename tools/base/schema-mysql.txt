@@ -128,6 +128,15 @@ CREATE TABLE operbans (
 	PRIMARY KEY(type, mask)
 );
 
+CREATE TABLE operbans_regexp (
+	regex VARCHAR(255) NOT NULL,
+	reason VARCHAR(REASONLEN) NOT NULL,
+	hold INTEGER,
+	create_time INTEGER,
+	oper VARCHAR(OPERNAMELEN),
+	PRIMARY KEY(regex)
+);
+
 CREATE TABLE global_welcome (
 	id INTEGER,
 	text TEXT,
