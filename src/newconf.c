@@ -101,6 +101,7 @@ static struct mode_table banserv_table[] = {
 	{ "kline",	CONF_OPER_BAN_KLINE	},
 	{ "xline",	CONF_OPER_BAN_XLINE	},
 	{ "resv",	CONF_OPER_BAN_RESV	},
+	{ "regexp",	CONF_OPER_BAN_REGEXP	},
 	{ "perm",	CONF_OPER_BAN_PERM	},
 	{ "remove",	CONF_OPER_BAN_REMOVE	},
 	{ "sync",	CONF_OPER_BAN_SYNC	},
