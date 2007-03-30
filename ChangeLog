@@ -1,3 +1,12 @@
+leeh        2007/03/30 18:37:29 UTC	(20070330_0-23751)
+  Log:
+  - add banserv::unregexp
+  
+
+  Modified:
+	rserv/trunk/src/s_banserv.c (File Modified) 
+
+
 leeh        2007/03/29 21:19:02 UTC	(20070329_1-23749)
   Log:
   - new flag, banserv::regexp, grants ability to set/delete regexps
