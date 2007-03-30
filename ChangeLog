@@ -1,3 +1,12 @@
+leeh        2007/03/30 19:26:43 UTC	(20070330_3-23757)
+  Log:
+  - code for loading in regexps from the database
+  
+
+  Modified:
+	rserv/trunk/src/s_banserv.c (File Modified) 
+
+
 leeh        2007/03/30 19:18:18 UTC	(20070330_2-23755)
   Log:
   - make banserv::regexp walk through the client list and issue klines to any
