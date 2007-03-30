@@ -225,6 +225,7 @@ const char *svc_notice_string[] =
 	"SVC_BAN_INVALID",
 	"SVC_BAN_LISTSTART",
 	"SVC_BAN_NOPERMACCESS",
+	"SVC_BAN_REGEXPSUCCESS",
 
 	/* global */
 	"SVC_GLOBAL_WELCOMETOOLONG",

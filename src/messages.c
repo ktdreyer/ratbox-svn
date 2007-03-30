@@ -210,6 +210,7 @@ struct _lang_internal lang_internal[] =
 	{ SVC_BAN_INVALID,		"Invalid %s: %s"					},
 	{ SVC_BAN_LISTSTART,		"Ban list matching %s"					},
 	{ SVC_BAN_NOPERMACCESS,		"No access to set a permanent %s"			},
+	{ SVC_BAN_REGEXPSUCCESS,	"%s::REGEXP successful on %s, issued %u kline(s)"	},
 
 	/* global */
 	{ SVC_GLOBAL_WELCOMETOOLONG,	"Welcome message too long (%u > %u)",			},

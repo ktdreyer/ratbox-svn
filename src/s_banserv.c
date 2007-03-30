@@ -368,6 +368,39 @@ sync_bans(const char *target, char banletter)
 }
 
 static int
+regexp_match(struct regexp_ban *regexp_p, int kline)
+{
+	char buf[BUFSIZE];
+	int ovector[30];
+	struct client *target_p;
+	unsigned int matches = 0;
+	int buflen;
+	dlink_node *ptr;
+
+	DLINK_FOREACH(ptr, user_list.head)
+	{
+		target_p = ptr->data;
+
+		buflen = snprintf(buf, sizeof(buf), "%s#%s", 
+				target_p->user->mask, target_p->info);
+
+		if(pcre_exec(regexp_p->regexp, NULL, buf, buflen, 0, 0, ovector, 30) >= 0)
+		{
+			matches++;
+
+			if(kline)
+			{
+				sendto_server(":%s ENCAP %s KLINE 86400 * %s :%s",
+						SVC_UID(banserv_p), target_p->user->servername,
+						target_p->user->host, regexp_p->reason);
+			}
+		}	
+	}
+
+	return matches;
+}
+
+static int
 o_banserv_kline(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	const char *mask;
@@ -650,6 +683,7 @@ o_banserv_regexp(struct client *client_p, struct lconn *conn_p, const char *parv
 	time_t temptime = 0;
 	int para = 0;
 	int re_error_offset;
+	unsigned int matches;
 	dlink_node *ptr;
 
 	if(regexp_validity == NULL)
@@ -742,8 +776,10 @@ o_banserv_regexp(struct client *client_p, struct lconn *conn_p, const char *parv
 			temptime ? CURRENT_TIME + temptime : 0,
 			CURRENT_TIME, OPER_NAME(client_p, conn_p));
 
-	service_snd(banserv_p, client_p, conn_p, SVC_SUCCESSFULON,
-			banserv_p->name, "REGEXP", mask);
+	matches = regexp_match(regexp_p, 1);
+
+	service_snd(banserv_p, client_p, conn_p, SVC_BAN_REGEXPSUCCESS,
+			banserv_p->name, mask, matches);
 
 	zlog(banserv_p, 1, WATCH_BANSERV, 1, client_p, conn_p,
 		"REGEXP %s %s %s",
