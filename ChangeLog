@@ -1,3 +1,16 @@
+leeh        2007/03/30 19:18:18 UTC	(20070330_2-23755)
+  Log:
+  - make banserv::regexp walk through the client list and issue klines to any
+    matching clients
+  
+
+  Modified:
+	rserv/trunk/include/langs.h (File Modified) 
+	rserv/trunk/src/langs.c (File Modified) 
+	rserv/trunk/src/messages.c (File Modified) 
+	rserv/trunk/src/s_banserv.c (File Modified) 
+
+
 leeh        2007/03/30 18:56:44 UTC	(20070330_1-23753)
   Log:
   - add expiry of regexps
