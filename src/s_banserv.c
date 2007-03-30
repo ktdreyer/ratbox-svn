@@ -137,11 +137,23 @@ e_banserv_autosync(void *unused)
 static void
 e_banserv_expire(void *unused)
 {
+	struct regexp_ban *regexp_p;
+	dlink_node *ptr;
+	dlink_node *next_ptr;
+
 	/* these bans are temp, so they will expire automatically on 
 	 * servers
 	 */
 	rsdb_exec(NULL, "DELETE FROM operbans WHERE hold != '0' AND hold <= '%lu'",
 			CURRENT_TIME);
+
+	DLINK_FOREACH_SAFE(ptr, next_ptr, regexp_list.head)
+	{
+		regexp_p = ptr->data;
+
+		if(regexp_p->hold <= CURRENT_TIME)
+			regexp_free(regexp_p);
+	}
 }
 
 static int
