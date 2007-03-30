@@ -54,6 +54,8 @@
 #include "watch.h"
 #include "s_banserv.h"
 
+static void init_s_banserv(void);
+
 static struct client *banserv_p;
 
 static int o_banserv_kline(struct client *, struct lconn *, const char **, int);
@@ -105,10 +107,12 @@ static struct ucommand_handler banserv_ucommand[] =
 static struct service_handler banserv_service = {
 	"BANSERV", "BANSERV", "banserv", "services.int",
 	"Global Ban Service", 0, 0, 
-	banserv_command, sizeof(banserv_command), banserv_ucommand, NULL, NULL
+	banserv_command, sizeof(banserv_command), banserv_ucommand, init_s_banserv, NULL
 };
 
 dlink_list regexp_list;
+
+static int regexp_callback(int argc, const char **argv);
 
 static void e_banserv_expire(void *unused);
 static void e_banserv_autosync(void *unused);
@@ -122,10 +126,44 @@ void
 preinit_s_banserv(void)
 {
 	banserv_p = add_service(&banserv_service);
+}
 
+static void
+init_s_banserv(void)
+{
 	eventAdd("banserv_expire", e_banserv_expire, NULL, 900);
 	eventAdd("banserv_autosync", e_banserv_autosync, NULL,
 			DEFAULT_AUTOSYNC_FREQUENCY);
+
+	rsdb_exec(regexp_callback, "SELECT regex, reason, hold, create_time, oper FROM operbans_regexp");
+}
+
+static int
+regexp_callback(int argc, const char **argv)
+{
+	struct regexp_ban *regexp_p;
+	pcre *regexp_comp;
+	const char *re_error;
+	int re_error_offset;
+
+	if(EmptyString(argv[0]) || EmptyString(argv[1]) || EmptyString(argv[4]))
+		return 0;
+
+	regexp_comp = pcre_compile(argv[0], 0, &re_error, &re_error_offset, NULL);
+
+	if(regexp_comp == NULL)
+		return 0;
+
+	regexp_p = my_malloc(sizeof(struct regexp_ban));
+	regexp_p->regexp_str = my_strdup(argv[0]);
+	regexp_p->reason = my_strdup(argv[1]);
+	regexp_p->hold = atol(argv[2]);
+	regexp_p->create_time = atol(argv[3]);
+	regexp_p->oper = my_strdup(argv[4]);
+	regexp_p->regexp = regexp_comp;
+
+	dlink_add(regexp_p, &regexp_p->ptr, &regexp_list);
+	return 0;
 }
 
 static void
