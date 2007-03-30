@@ -52,6 +52,7 @@
 #include "log.h"
 #include "event.h"
 #include "watch.h"
+#include "hook.h"
 #include "s_banserv.h"
 
 static void init_s_banserv(void);
@@ -117,6 +118,8 @@ static int regexp_callback(int argc, const char **argv);
 static void e_banserv_expire(void *unused);
 static void e_banserv_autosync(void *unused);
 
+static int h_banserv_new_client(void *_client_p, void *unused);
+
 static void push_unban(const char *target, char type, const char *mask);
 static void sync_bans(const char *target, char banletter);
 
@@ -134,6 +137,9 @@ init_s_banserv(void)
 	eventAdd("banserv_expire", e_banserv_expire, NULL, 900);
 	eventAdd("banserv_autosync", e_banserv_autosync, NULL,
 			DEFAULT_AUTOSYNC_FREQUENCY);
+
+	hook_add(h_banserv_new_client, HOOK_NEW_CLIENT);
+	hook_add(h_banserv_new_client, HOOK_NEW_CLIENT_BURST);
 
 	rsdb_exec(regexp_callback, "SELECT regex, reason, hold, create_time, oper FROM operbans_regexp");
 }
@@ -189,10 +195,48 @@ e_banserv_expire(void *unused)
 	{
 		regexp_p = ptr->data;
 
-		if(regexp_p->hold <= CURRENT_TIME)
+		if(regexp_p->hold && regexp_p->hold <= CURRENT_TIME)
 			regexp_free(regexp_p);
 	}
 }
+
+static int
+h_banserv_new_client(void *_target_p, void *unused)
+{
+	char buf[BUFSIZE];
+	int ovector[30];
+	struct regexp_ban *regexp_p;
+	struct client *target_p = _target_p;
+	int buflen;
+	dlink_node *ptr;
+	dlink_node *next_ptr;
+
+	buflen = snprintf(buf, sizeof(buf), "%s#%s",
+			target_p->user->mask, target_p->info);
+
+	DLINK_FOREACH_SAFE(ptr, next_ptr, regexp_list.head)
+	{
+		regexp_p = ptr->data;
+
+		/* regexp has expired */
+		if(regexp_p->hold && regexp_p->hold <= CURRENT_TIME)
+		{
+			regexp_free(regexp_p);
+			continue;
+		}
+
+		if(pcre_exec(regexp_p->regexp, NULL, buf, buflen, 0, 0, ovector, 30) >= 0)
+		{
+			sendto_server(":%s ENCAP %s KLINE 86400 * %s :%s",
+					SVC_UID(banserv_p), target_p->user->servername,
+					target_p->user->host, regexp_p->reason);
+			return 0;
+		}
+	}
+
+	return 0;
+}
+
 
 static int
 split_ban(const char *mask, char **user, char **host)
