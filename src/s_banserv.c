@@ -71,6 +71,7 @@ static int o_banserv_sync(struct client *, struct lconn *, const char **, int);
 static int o_banserv_findkline(struct client *, struct lconn *, const char **, int);
 static int o_banserv_findxline(struct client *, struct lconn *, const char **, int);
 static int o_banserv_findresv(struct client *, struct lconn *, const char **, int);
+static int o_banserv_listregexps(struct client *, struct lconn *, const char **, int);
 
 static struct service_command banserv_command[] =
 {
@@ -85,7 +86,8 @@ static struct service_command banserv_command[] =
 	{ "SYNC",	&o_banserv_sync,	1, NULL, 1, 0L, 0, 0, 0 },
 	{ "FINDKLINE",	&o_banserv_findkline,	1, NULL, 1, 0L, 0, 0, CONF_OPER_BAN_KLINE },
 	{ "FINDXLINE",	&o_banserv_findxline,	1, NULL, 1, 0L, 0, 0, CONF_OPER_BAN_XLINE },
-	{ "FINDRESV",	&o_banserv_findresv,	1, NULL, 1, 0L, 0, 0, CONF_OPER_BAN_RESV }
+	{ "FINDRESV",	&o_banserv_findresv,	1, NULL, 1, 0L, 0, 0, CONF_OPER_BAN_RESV 	},
+	{ "LISTREGEXPS",&o_banserv_listregexps,	0, NULL, 1, 0L, 0, 0, CONF_OPER_BAN_REGEXP	}
 };
 
 static struct ucommand_handler banserv_ucommand[] =
@@ -102,6 +104,7 @@ static struct ucommand_handler banserv_ucommand[] =
 	{ "findxline",	o_banserv_findxline,	0, CONF_OPER_BAN_XLINE, 1, NULL },
 	{ "findresv",	o_banserv_findresv,	0, CONF_OPER_BAN_RESV, 1, NULL },
 	{ "sync",	o_banserv_sync,		0, 0, 1, NULL },
+	{ "listregexps",o_banserv_listregexps,	0, CONF_OPER_BAN_REGEXP, 0, NULL	},
 	{ "\0", NULL, 0, 0, 0, NULL }
 };
 
@@ -161,7 +164,7 @@ regexp_callback(int argc, const char **argv)
 		return 0;
 
 	regexp_p = my_malloc(sizeof(struct regexp_ban));
-	regexp_p->id = atoi(argv[1]);
+	regexp_p->id = atoi(argv[0]);
 	regexp_p->regexp_str = my_strdup(argv[1]);
 	regexp_p->reason = my_strdup(argv[2]);
 	regexp_p->hold = atol(argv[3]);
@@ -169,7 +172,7 @@ regexp_callback(int argc, const char **argv)
 	regexp_p->oper = my_strdup(argv[5]);
 	regexp_p->regexp = regexp_comp;
 
-	dlink_add(regexp_p, &regexp_p->ptr, &regexp_list);
+	dlink_add_tail(regexp_p, &regexp_p->ptr, &regexp_list);
 	return 0;
 }
 
@@ -851,7 +854,7 @@ o_banserv_regexp(struct client *client_p, struct lconn *conn_p, const char *parv
 	regexp_p->hold = temptime ? CURRENT_TIME + temptime : 0;
 	regexp_p->create_time = CURRENT_TIME;
 
-	dlink_add(regexp_p, &regexp_p->ptr, &regexp_list);
+	dlink_add_tail(regexp_p, &regexp_p->ptr, &regexp_list);
 
 	rsdb_exec_insert(&regexp_p->id, "operbans_regexp", "id", 
 			"INSERT INTO operbans_regexp (regex, reason, hold, create_time, oper) "
@@ -1204,6 +1207,45 @@ static int
 o_banserv_findresv(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	list_bans(client_p, conn_p, parv[0], 'R');
+	return 0;
+}
+
+static int
+o_banserv_listregexps(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
+{
+	struct regexp_ban *regexp_p;
+	time_t duration;
+	dlink_node *ptr;
+	dlink_node *next_ptr;
+
+	service_snd(banserv_p, client_p, conn_p, SVC_BAN_LISTSTART, "REGEXPS");
+
+	DLINK_FOREACH_SAFE(ptr, next_ptr, regexp_list.head)
+	{
+		regexp_p = ptr->data;
+
+		if(regexp_p->hold)
+		{
+			if(regexp_p->hold <= CURRENT_TIME)
+			{
+				regexp_free(regexp_p);
+				continue;
+			}
+
+			duration = regexp_p->hold - CURRENT_TIME;
+		}
+		else
+			duration = 0;
+
+		service_send(banserv_p, client_p, conn_p, 
+				"  %-4u %-40s exp:%s oper:%s [%s]",
+				regexp_p->id, regexp_p->regexp_str,
+				duration ? get_short_duration(duration) : "never",
+				regexp_p->oper, regexp_p->reason);
+				
+	}
+
+	service_snd(banserv_p, client_p, conn_p, SVC_ENDOFLIST);
 	return 0;
 }
 
