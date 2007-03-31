@@ -141,6 +141,27 @@ tryexec:
 }
 
 void
+rsdb_exec_insert(unsigned int *insert_id, const char *table_name, const char *field_name, const char *format, ...)
+{
+	static char buf[BUFSIZE*4];
+	va_list args;
+
+	va_start(args, format);
+	i = rs_vsnprintf(buf, sizeof(buf), format, args);
+	va_end(args);
+
+	if(i >= sizeof(buf))
+	{
+		mlog("fatal error: length problem with compiling sql");
+		die(0, "problem with compiling sql statement");
+	}
+
+	rsdb_exec(NULL, "%s", buf);
+
+	*insert_id = (unsigned int) sqlite3_last_insert_rowid(rserv_db);
+}
+
+void
 rsdb_exec_fetch(struct rsdb_table *table, const char *format, ...)
 {
 	static char errmsg_busy[] = "Database file locked";

@@ -26,6 +26,9 @@ const char *rsdb_quote(const char *src);
 
 void rsdb_exec(rsdb_callback cb, const char *format, ...);
 
+void rsdb_exec_insert(unsigned int *insert_id, const char *table_name, 
+			const char *field_name, const char *format, ...);
+
 void rsdb_exec_fetch(struct rsdb_table *data, const char *format, ...);
 void rsdb_exec_fetch_end(struct rsdb_table *data);
 

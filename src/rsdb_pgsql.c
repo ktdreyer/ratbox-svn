@@ -252,6 +252,41 @@ rsdb_exec(rsdb_callback cb, const char *format, ...)
 }
 
 void
+rsdb_exec_insert(unsigned int *insert_id, const char *table_name, const char *field_name, const char *format, ...)
+{
+	static char buf[BUFSIZE*4];
+	static struct rsdb_table data;
+	va_list args;
+	int i;
+
+	va_start(args, format);
+	i = rs_vsnprintf(buf, sizeof(buf), format, args);
+	va_end(args);
+
+	if(i >= sizeof(buf))
+	{
+		mlog("fatal error: length problem compiling sql statement: %s", buf);
+		die(0, "length problem compiling sql statement");
+	}
+
+	rsdb_exec(NULL, "%s", buf);
+
+	rsdb_exec_fetch(&data, "SELECT currval(pg_get_serial_sequence('%s', '%s'))",
+			table_name, field_name);
+
+	if(data.row_count == 0)
+	{
+		mlog("fatal error: SELECT currval(pg_get_serial_sequence('%s', '%s')) returned 0 rows",
+			table_name, field_name);
+		die(0, "problem with db file");
+	}
+
+	*insert_id = atoi(data.row[0][0]);
+
+	rsdb_exec_fetch_end(&data);
+}
+
+void
 rsdb_exec_fetch(struct rsdb_table *table, const char *format, ...)
 {
 	static char buf[BUFSIZE*4];

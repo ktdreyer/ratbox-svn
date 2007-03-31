@@ -249,6 +249,27 @@ rsdb_exec(rsdb_callback cb, const char *format, ...)
 }
 
 void
+rsdb_exec_insert(unsigned int *insert_id, const char *table_name, const char *field_name, const char *format, ...)
+{
+	static char buf[BUFSIZE*4];
+	va_list args;
+	int i;
+
+	va_start(args, format);
+	i = rs_vsnprintf(buf, sizeof(buf), format, args);
+	va_end(args);
+
+	if(i >= sizeof(buf))
+	{
+		mlog("fatal error: length problem compiling sql statement: %s", buf);
+		die(0, "length problem compiling sql statement");
+	}
+
+	rsdb_exec(NULL, "%s", buf);
+	*insert_id = (unsigned int) mysql_insert_id(rsdb_database);
+}
+
+void
 rsdb_exec_fetch(struct rsdb_table *table, const char *format, ...)
 {
 	static char buf[BUFSIZE*4];
