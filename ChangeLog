@@ -1,3 +1,12 @@
+leeh        2007/03/31 13:40:09 UTC	(20070331_0-23761)
+  Log:
+  - update rsdb documentation
+  
+
+  Modified:
+	rserv/trunk/doc/rsdb.txt (File Modified) 
+
+
 leeh        2007/03/30 19:49:03 UTC	(20070330_4-23759)
   Log:
   - when a client connects to the network, have banserv scan through the
