@@ -1,3 +1,16 @@
+leeh        2007/03/31 13:42:17 UTC	(20070331_2-23765)
+  Log:
+  - rework banserv regexps so they have an auto incrementing 'id' column
+  
+
+  Modified:
+	rserv/trunk/src/s_banserv.c (File Modified) 
+	rserv/trunk/tools/base/schema-mysql.txt (File Modified) 
+	rserv/trunk/tools/base/schema-pgsql.txt (File Modified) 
+	rserv/trunk/tools/base/schema-sqlite.txt (File Modified) 
+	rserv/trunk/tools/dbupgrade.pl (File Modified) 
+
+
 leeh        2007/03/31 13:41:07 UTC	(20070331_1-23763)
   Log:
   - add rsdb_exec_insert(), which extends rsdb api to be able to return the
