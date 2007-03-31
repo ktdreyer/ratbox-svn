@@ -1,3 +1,16 @@
+leeh        2007/03/31 13:41:07 UTC	(20070331_1-23763)
+  Log:
+  - add rsdb_exec_insert(), which extends rsdb api to be able to return the
+    inserted id from an auto incrementing column
+  
+
+  Modified:
+	rserv/trunk/include/rsdb.h (File Modified) 
+	rserv/trunk/src/rsdb_mysql.c (File Modified) 
+	rserv/trunk/src/rsdb_pgsql.c (File Modified) 
+	rserv/trunk/src/rsdb_sqlite3.c (File Modified) 
+
+
 leeh        2007/03/31 13:40:09 UTC	(20070331_0-23761)
   Log:
   - update rsdb documentation
