@@ -141,7 +141,7 @@ init_s_banserv(void)
 	hook_add(h_banserv_new_client, HOOK_NEW_CLIENT);
 	hook_add(h_banserv_new_client, HOOK_NEW_CLIENT_BURST);
 
-	rsdb_exec(regexp_callback, "SELECT regex, reason, hold, create_time, oper FROM operbans_regexp");
+	rsdb_exec(regexp_callback, "SELECT id, regex, reason, hold, create_time, oper FROM operbans_regexp");
 }
 
 static int
@@ -152,20 +152,21 @@ regexp_callback(int argc, const char **argv)
 	const char *re_error;
 	int re_error_offset;
 
-	if(EmptyString(argv[0]) || EmptyString(argv[1]) || EmptyString(argv[4]))
+	if(EmptyString(argv[1]) || EmptyString(argv[2]) || EmptyString(argv[5]))
 		return 0;
 
-	regexp_comp = pcre_compile(argv[0], 0, &re_error, &re_error_offset, NULL);
+	regexp_comp = pcre_compile(argv[1], 0, &re_error, &re_error_offset, NULL);
 
 	if(regexp_comp == NULL)
 		return 0;
 
 	regexp_p = my_malloc(sizeof(struct regexp_ban));
-	regexp_p->regexp_str = my_strdup(argv[0]);
-	regexp_p->reason = my_strdup(argv[1]);
-	regexp_p->hold = atol(argv[2]);
-	regexp_p->create_time = atol(argv[3]);
-	regexp_p->oper = my_strdup(argv[4]);
+	regexp_p->id = atoi(argv[1]);
+	regexp_p->regexp_str = my_strdup(argv[1]);
+	regexp_p->reason = my_strdup(argv[2]);
+	regexp_p->hold = atol(argv[3]);
+	regexp_p->create_time = atol(argv[4]);
+	regexp_p->oper = my_strdup(argv[5]);
 	regexp_p->regexp = regexp_comp;
 
 	dlink_add(regexp_p, &regexp_p->ptr, &regexp_list);
@@ -852,7 +853,8 @@ o_banserv_regexp(struct client *client_p, struct lconn *conn_p, const char *parv
 
 	dlink_add(regexp_p, &regexp_p->ptr, &regexp_list);
 
-	rsdb_exec(NULL, "INSERT INTO operbans_regexp (regex, reason, hold, create_time, oper) "
+	rsdb_exec_insert(&regexp_p->id, "operbans_regexp", "id", 
+			"INSERT INTO operbans_regexp (regex, reason, hold, create_time, oper) "
 			"VALUES('%Q', '%Q', '%lu', '%lu', '%Q')",
 			mask, reason, 
 			temptime ? CURRENT_TIME + temptime : 0,
@@ -1024,6 +1026,7 @@ static int
 o_banserv_unregexp(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct regexp_ban *regexp_p;
+	unsigned int regexp_id;
 	dlink_node *ptr;
 
 	DLINK_FOREACH(ptr, regexp_list.head)
@@ -1061,15 +1064,17 @@ o_banserv_unregexp(struct client *client_p, struct lconn *conn_p, const char *pa
 		}
 	}
 
+	regexp_id = regexp_p->id;
+
 	regexp_free(regexp_p);
 
-	rsdb_exec(NULL, "DELETE FROM operbans_regexp WHERE regex='%Q'", parv[0]);
+	rsdb_exec(NULL, "DELETE FROM operbans_regexp WHERE id='%u'", regexp_id);
 
 	service_snd(banserv_p, client_p, conn_p, SVC_SUCCESSFULON,
 			banserv_p->name, "UNREGEXP", parv[0]);
 
 	zlog(banserv_p, 1, WATCH_BANSERV, 1, client_p, conn_p,
-		"UNREGEXP%s", parv[0]);
+		"UNREGEXP %s", parv[0]);
 
 	return 0;
 }

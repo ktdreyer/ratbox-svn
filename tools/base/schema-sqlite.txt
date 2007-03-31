@@ -119,12 +119,12 @@ CREATE TABLE operbans (
 );
 
 CREATE TABLE operbans_regexp (
+	id INTEGER PRIMARY KEY,
 	regex VARCHAR(255) NOT NULL,
 	reason TEXT NOT NULL,
 	hold INTEGER,
 	create_time INTEGER,
-	oper TEXT,
-	PRIMARY KEY(regex)
+	oper TEXT
 );
 
 CREATE TABLE global_welcome (

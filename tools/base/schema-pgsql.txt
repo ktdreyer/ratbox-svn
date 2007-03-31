@@ -135,12 +135,13 @@ CREATE TABLE operbans (
 );
 
 CREATE TABLE operbans_regexp (
+	id SERIAL,
 	regex VARCHAR(255) NOT NULL,
 	reason VARCHAR(REASONLEN) NOT NULL,
 	hold INTEGER,
 	create_time INTEGER,
 	oper VARCHAR(OPERNAMELEN),
-	PRIMARY KEY(regex)
+	PRIMARY KEY(id)
 );
 
 CREATE TABLE global_welcome (
