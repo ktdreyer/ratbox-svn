@@ -41,6 +41,17 @@ arguments, an int containing the number of fields, a char ** array
 containing each of the field values, and a char ** array containing the
 field names.
 
+- void rsdb_exec_insert(unsigned int *insert_id, const char *table_name  -
+-                       const char *field_name, const char *format, ...) -
+--------------------------------------------------------------------------
+
+This function is called to execute an INSERT SQL statement into a table
+with an autoincrementing 'id' column, where the value the database assigns
+the id column needs to be known by the parent function.
+
+It should pass appropriate storage to store the insert_id in, together
+with the table name and field name that define where the index is.
+
 - struct rsdb_table -
 ---------------------
 
