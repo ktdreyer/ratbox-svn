@@ -1,3 +1,14 @@
+leeh        2007/03/31 15:46:18 UTC	(20070331_4-23769)
+  Log:
+  - add banserv::listregexps, to list regexps
+  - add stuff to the end of regexp_list, so the list looks nicer
+  - id is argv[0] in sql lookup, not argv[1]
+  
+
+  Modified:
+	rserv/trunk/src/s_banserv.c (File Modified) 
+
+
 leeh        2007/03/31 13:52:21 UTC	(20070331_3-23767)
   Log:
   - need to install the english helpfiles too..
