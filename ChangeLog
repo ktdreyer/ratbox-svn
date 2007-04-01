@@ -1,3 +1,12 @@
+leeh        2007/04/01 17:39:22 UTC	(20070401_4-23781)
+  Log:
+  - forgot to add s_banserv.h
+  
+
+  Modified:
+	rserv/trunk/include/s_banserv.h (File Added) 
+
+
 leeh        2007/04/01 16:32:37 UTC	(20070401_3-23777)
   Log:
   - swap schemas so suspend_time defaults to 0
