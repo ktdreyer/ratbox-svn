@@ -698,7 +698,7 @@ enable_inhabit(struct chan_reg *chreg_p, struct channel *chptr, int autojoin)
 	/* Join with stored TS */
 	join_service(chanserv_p, chreg_p->name, chreg_p->tsinfo,
 			chreg_p->emode.mode ? &chreg_p->emode :
-			&chreg_p->cmode, 1);
+			&chreg_p->cmode, autojoin);
 }
 
 static void
