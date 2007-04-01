@@ -249,11 +249,18 @@ if($currentver < 6)
 		print "    PRIMARY KEY(hostname)\n";
 		print ");\n";
 		print "CREATE TABLE operbans_regexp (\n";
-		print "    id INTEGER AUTO_INCREMEMENT,\n";
+		print "    id INTEGER AUTO_INCREMENT,\n";
 		print "    regex VARCHAR(255) NOT NULL,\n";
 		print "    reason VARCHAR(" . $vals{"REASONLEN"} . ") NOT NULL,\n";
 		print "    hold INTEGER,\n";
 		print "    create_time INTEGER,\n";
+		print "    oper VARCHAR(" . $vals{"OPERNAMELEN"} . ") NOT NULL,\n";
+		print "    PRIMARY KEY(id)\n";
+		print ");\n";
+		print "CREATE TABLE operbans_regexp_neg (\n";
+		print "    id INTEGER AUTO_INCREMENT,\n";
+		print "    parent_id INTEGER NOT NULL,\n";
+		print "    regex VARCHAR(255) NOT NULL,\n";
 		print "    oper VARCHAR(" . $vals{"OPERNAMELEN"} . ") NOT NULL,\n";
 		print "    PRIMARY KEY(id)\n";
 		print ");\n";
@@ -277,6 +284,13 @@ if($currentver < 6)
 		print "    oper VARCHAR(" . $vals{"OPERNAMELEN"} . ") NOT NULL,\n";
 		print "    PRIMARY KEY(id)\n";
 		print ");\n";
+		print "CREATE TABLE operbans_regexp_neg (\n";
+		print "    id SERIAL,\n";
+		print "    parent_id BIGINT NOT NULL,\n";
+		print "    regex VARCHAR(255) NOT NULL,\n";
+		print "    oper VARCHAR(" . $vals{"OPERNAMELEN"} . ") NOT NULL,\n";
+		print "    PRIMARY KEY(id)\n";
+		print ");\n";
 	}
 	else
 	{
@@ -294,6 +308,12 @@ if($currentver < 6)
 		print "    reason TEXT NOT NULL,\n";
 		print "    hold INTEGER,\n";
 		print "    create_time INTEGER,\n";
+		print "    oper TEXT NOT NULL\n";
+		print ");\n";
+		print "CREATE TABLE operbans_regexp_neg (\n";
+		print "    id INTEGER PRIMARY KEY,\n";
+		print "    parent_id INTEGER NOT NULL,\n";
+		print "    regex TEXT NOT NULL,\n";
 		print "    oper TEXT NOT NULL\n";
 		print ");\n";
 	}

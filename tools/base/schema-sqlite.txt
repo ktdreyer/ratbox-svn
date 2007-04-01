@@ -127,6 +127,13 @@ CREATE TABLE operbans_regexp (
 	oper TEXT
 );
 
+CREATE TABLE operbans_regexp_neg (
+	id INTEGER PRIMARY KEY,
+	parent_id INTEGER NOT NULL,
+	regex TEXT NOT NULL,
+	oper TEXT NOT NULL
+);
+
 CREATE TABLE global_welcome (
 	id INTEGER,
 	text TEXT,

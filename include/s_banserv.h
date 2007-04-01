@@ -16,6 +16,9 @@ struct regexp_ban
 	unsigned int id;
 
 	dlink_node ptr;
+	dlink_list negations;
+
+	struct regexp_ban *parent;
 
 	pcre *regexp;
 };

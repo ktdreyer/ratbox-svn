@@ -117,6 +117,7 @@ static struct service_handler banserv_service = {
 dlink_list regexp_list;
 
 static int regexp_callback(int argc, const char **argv);
+static int regexp_neg_callback(int argc, const char **argv);
 
 static void e_banserv_expire(void *unused);
 static void e_banserv_autosync(void *unused);
@@ -126,7 +127,7 @@ static int h_banserv_new_client(void *_client_p, void *unused);
 static void push_unban(const char *target, char type, const char *mask);
 static void sync_bans(const char *target, char banletter);
 
-static void regexp_free(struct regexp_ban *regexp_p);
+static void regexp_free(struct regexp_ban *regexp_p, int neg);
 
 void
 preinit_s_banserv(void)
@@ -145,6 +146,7 @@ init_s_banserv(void)
 	hook_add(h_banserv_new_client, HOOK_NEW_CLIENT_BURST);
 
 	rsdb_exec(regexp_callback, "SELECT id, regex, reason, hold, create_time, oper FROM operbans_regexp");
+	rsdb_exec(regexp_neg_callback, "SELECT id, parent_id, regex, oper FROM operbans_regexp_neg");
 }
 
 static int
@@ -176,6 +178,50 @@ regexp_callback(int argc, const char **argv)
 	return 0;
 }
 
+static int
+regexp_neg_callback(int argc, const char **argv)
+{
+	struct regexp_ban *regexp_p;
+	struct regexp_ban *parent_p;
+	pcre *regexp_comp;
+	const char *re_error;
+	int re_error_offset;
+	unsigned int parent_id;
+	dlink_node *ptr;
+
+	if(EmptyString(argv[1]) || EmptyString(argv[2]) || EmptyString(argv[3]))
+		return 0;
+
+	if((parent_id = atoi(argv[1])) < 1)
+		return 0;
+
+	/* find its parent regexp */
+	DLINK_FOREACH(ptr, regexp_list.head)
+	{
+		parent_p = ptr->data;
+
+		if(parent_p->id == parent_id)
+			break;
+	}
+
+	if(ptr == NULL)
+		return 0;
+
+	regexp_comp = pcre_compile(argv[2], 0, &re_error, &re_error_offset, NULL);
+
+	if(regexp_comp == NULL)
+		return 0;
+
+	regexp_p = my_malloc(sizeof(struct regexp_ban));
+	regexp_p->id = atoi(argv[0]);
+	regexp_p->regexp_str = my_strdup(argv[2]);
+	regexp_p->oper = my_strdup(argv[3]);
+	regexp_p->parent = parent_p;
+
+	dlink_add_tail(regexp_p, &regexp_p->ptr, &parent_p->negations);
+	return 0;
+}
+
 static void
 e_banserv_autosync(void *unused)
 {
@@ -200,7 +246,7 @@ e_banserv_expire(void *unused)
 		regexp_p = ptr->data;
 
 		if(regexp_p->hold && regexp_p->hold <= CURRENT_TIME)
-			regexp_free(regexp_p);
+			regexp_free(regexp_p, 0);
 	}
 }
 
@@ -225,7 +271,7 @@ h_banserv_new_client(void *_target_p, void *unused)
 		/* regexp has expired */
 		if(regexp_p->hold && regexp_p->hold <= CURRENT_TIME)
 		{
-			regexp_free(regexp_p);
+			regexp_free(regexp_p, 0);
 			continue;
 		}
 
@@ -326,10 +372,31 @@ find_ban_remove(const char *mask, char type)
 }
 
 static void
-regexp_free(struct regexp_ban *regexp_p)
+regexp_free(struct regexp_ban *regexp_p, int neg)
 {
+	dlink_node *ptr;
+	dlink_node *next_ptr;
+
+	if(!neg)
+	{
+		rsdb_exec(NULL, "DELETE FROM operbans_regexp_neg WHERE parent_id='%u'",
+				regexp_p->id);
+		rsdb_exec(NULL, "DELETE FROM operbans_regexp WHERE id='%u'",
+				regexp_p->id);
+	}
+
+	/* this will be empty for negations themselves */
+	DLINK_FOREACH_SAFE(ptr, next_ptr, regexp_p->negations.head)
+	{
+		regexp_free(ptr->data, 1);
+	}
+
 	pcre_free(regexp_p->regexp);
-	dlink_delete(&regexp_p->ptr, &regexp_list);
+
+	if(neg)
+		dlink_delete(&regexp_p->ptr, &regexp_p->parent->negations);
+	else
+		dlink_delete(&regexp_p->ptr, &regexp_list);
 
 	my_free(regexp_p->regexp_str);
 	my_free(regexp_p->reason);
@@ -1071,9 +1138,8 @@ o_banserv_unregexp(struct client *client_p, struct lconn *conn_p, const char *pa
 
 	regexp_id = regexp_p->id;
 
-	regexp_free(regexp_p);
-
-	rsdb_exec(NULL, "DELETE FROM operbans_regexp WHERE id='%u'", regexp_id);
+	/* this does our SQL */
+	regexp_free(regexp_p, 0);
 
 	service_snd(banserv_p, client_p, conn_p, SVC_SUCCESSFULON,
 			banserv_p->name, "UNREGEXP", parv[0]);
@@ -1230,7 +1296,7 @@ o_banserv_listregexps(struct client *client_p, struct lconn *conn_p, const char 
 		{
 			if(regexp_p->hold <= CURRENT_TIME)
 			{
-				regexp_free(regexp_p);
+				regexp_free(regexp_p, 0);
 				continue;
 			}
 

@@ -144,6 +144,14 @@ CREATE TABLE operbans_regexp (
 	PRIMARY KEY(id)
 );
 
+CREATE TABLE operbans_regexp_neg (
+	id SERIAL,
+	parent_id BIGINT NOT NULL,
+	regex VARCHAR(255) NOT NULL,
+	oper VARCHAR(30) NOT NULL,
+	PRIMARY KEY(id)
+);
+
 CREATE TABLE global_welcome (
 	id INTEGER,
 	text TEXT,
