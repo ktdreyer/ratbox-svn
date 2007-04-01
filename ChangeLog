@@ -1,3 +1,17 @@
+leeh        2007/04/01 16:32:37 UTC	(20070401_3-23777)
+  Log:
+  - swap schemas so suspend_time defaults to 0
+  - make users database load handle an empty string for suspend_time
+  
+
+  Modified:
+	rserv/trunk/src/s_userserv.c (File Modified) 
+	rserv/trunk/tools/base/schema-mysql.txt (File Modified) 
+	rserv/trunk/tools/base/schema-pgsql.txt (File Modified) 
+	rserv/trunk/tools/base/schema-sqlite.txt (File Modified) 
+	rserv/trunk/tools/dbupgrade.pl (File Modified) 
+
+
 jilles      2007/04/01 16:23:46 UTC	(20070401_2-23775)
   Log:
   Don't lower TS, desynching services, when joining
