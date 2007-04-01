@@ -145,6 +145,7 @@ rsdb_exec_insert(unsigned int *insert_id, const char *table_name, const char *fi
 {
 	static char buf[BUFSIZE*4];
 	va_list args;
+	int i;
 
 	va_start(args, format);
 	i = rs_vsnprintf(buf, sizeof(buf), format, args);
