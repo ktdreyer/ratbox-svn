@@ -226,7 +226,9 @@ user_db_callback(int argc, const char **argv)
 	if(!EmptyString(argv[4]))
 		reg_p->suspend_reason = my_strdup(argv[4]);
 
-	reg_p->suspend_time = atol(argv[5]);
+	if(!EmptyString(argv[5]))
+		reg_p->suspend_time = atol(argv[5]);
+
 	reg_p->reg_time = atol(argv[6]);
 	reg_p->last_time = atol(argv[7]);
 	reg_p->flags = atoi(argv[8]);

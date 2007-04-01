@@ -240,8 +240,8 @@ if($currentver < 6)
 
 	if($dbtype eq "mysql")
 	{
-		print "ALTER TABLE users ADD COLUMN suspend_time INT UNSIGNED;\n";
-		print "ALTER TABLE channels ADD COLUMN suspend_time INT UNSIGNED;\n";
+		print "ALTER TABLE users ADD COLUMN suspend_time INT UNSIGNED DEFAULT '0';\n";
+		print "ALTER TABLE channels ADD COLUMN suspend_time INT UNSIGNED DEFAULT '0';\n";
 		print "CREATE TABLE ignore_hosts (\n";
 		print "    hostname VARCHAR(255) NOT NULL,\n";
 		print "    oper VARCHAR(" . $vals{"OPERNAMELEN"} . ") NOT NULL,\n";
@@ -260,8 +260,8 @@ if($currentver < 6)
 	}
 	elsif($dbtype eq "pgsql")
 	{
-		print "ALTER TABLE users ADD COLUMN suspend_time INTEGER;\n";
-		print "ALTER TABLE channels ADD COLUMN suspend_time INTEGER;\n";
+		print "ALTER TABLE users ADD COLUMN suspend_time INTEGER DEFAULT '0';\n";
+		print "ALTER TABLE channels ADD COLUMN suspend_time INTEGER DEFAULT '0';\n";
 		print "CREATE TABLE ignore_hosts (\n";
 		print "    hostname VARCHAR(255) NOT NULL,\n";
 		print "    oper VARCHAR(" . $vals{"OPERNAMELEN"} . ") NOT NULL,\n";
@@ -280,8 +280,8 @@ if($currentver < 6)
 	}
 	else
 	{
-		print "ALTER TABLE users ADD COLUMN suspend_time INTEGER;\n";
-		print "ALTER TABLE channels ADD COLUMN suspend_time INTEGER;\n";
+		print "ALTER TABLE users ADD COLUMN suspend_time INTEGER DEFAULT '0';\n";
+		print "ALTER TABLE channels ADD COLUMN suspend_time INTEGER DEFAULT '0';\n";
 		print "CREATE TABLE ignore_hosts (\n";
 		print "    hostname TEXT NOT NULL,\n";
 		print "    oper TEXT NOT NULL,\n";
