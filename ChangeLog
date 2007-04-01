@@ -1,3 +1,19 @@
+leeh        2007/04/01 18:14:27 UTC	(20070401_6-23785)
+  Log:
+  - add in the sql stuff for regexp negation, and the db loader functions
+  - extend regexp_free() to do the sql clearing of operbans_regexp and
+    operbans_regexp_neg
+  
+
+  Modified:
+	rserv/trunk/include/s_banserv.h (File Modified) 
+	rserv/trunk/src/s_banserv.c (File Modified) 
+	rserv/trunk/tools/base/schema-mysql.txt (File Modified) 
+	rserv/trunk/tools/base/schema-pgsql.txt (File Modified) 
+	rserv/trunk/tools/base/schema-sqlite.txt (File Modified) 
+	rserv/trunk/tools/dbupgrade.pl (File Modified) 
+
+
 jilles      2007/04/01 17:49:20 UTC	(20070401_5-23783)
   Log:
   Make rsdb_sqlite3.c compile.
