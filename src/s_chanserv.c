@@ -3279,6 +3279,12 @@ s_chan_addban(struct client *client_p, struct lconn *conn_p, const char *parv[],
 		if(is_opped(msptr))
 			modebuild_add(DIR_DEL, "o", UID(msptr->client_p));
 
+		/* if we're kicking out the last user, enable
+		 * inhabit so that kicking them doesnt destroy the
+		 * channel --fl
+		 */
+		if(dlink_list_length(&chptr->users) == 1)
+			enable_inhabit(mreg_p->channel_reg, chptr, 0);
 		kickbuild_add(UID(msptr->client_p), reason);
 		del_chmember(msptr);
 		loc++;
