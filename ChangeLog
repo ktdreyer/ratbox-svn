@@ -1,3 +1,17 @@
+leeh        2007/04/01 11:47:00 UTC	(20070401_0-23771)
+  Log:
+  - add regexp_time to example.conf, controls how long klines issued as part
+    of regexps last
+  
+
+  Modified:
+	rserv/trunk/doc/example.conf (File Modified) 
+	rserv/trunk/include/conf.h (File Modified) 
+	rserv/trunk/src/conf.c (File Modified) 
+	rserv/trunk/src/newconf.c (File Modified) 
+	rserv/trunk/src/s_banserv.c (File Modified) 
+
+
 leeh        2007/03/31 15:46:18 UTC	(20070331_4-23769)
   Log:
   - add banserv::listregexps, to list regexps
