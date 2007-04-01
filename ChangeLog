@@ -1,3 +1,13 @@
+jilles      2007/04/01 16:23:46 UTC	(20070401_2-23775)
+  Log:
+  Don't lower TS, desynching services, when joining
+  a channel for inhabit.
+  
+
+  Modified:
+	rserv/trunk/src/s_chanserv.c (File Modified) 
+
+
 jilles      2007/04/01 16:15:43 UTC	(20070401_1-23773)
   Log:
   If chanserv::addban kicks out the last user, enable
