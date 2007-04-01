@@ -231,8 +231,9 @@ h_banserv_new_client(void *_target_p, void *unused)
 
 		if(pcre_exec(regexp_p->regexp, NULL, buf, buflen, 0, 0, ovector, 30) >= 0)
 		{
-			sendto_server(":%s ENCAP %s KLINE 86400 * %s :%s",
+			sendto_server(":%s ENCAP %s KLINE %u * %s :%s",
 					SVC_UID(banserv_p), target_p->user->servername,
+					config_file.bs_regexp_time,
 					target_p->user->host, regexp_p->reason);
 			return 0;
 		}
@@ -476,8 +477,9 @@ regexp_match(struct regexp_ban *regexp_p, int kline)
 
 			if(kline)
 			{
-				sendto_server(":%s ENCAP %s KLINE 86400 * %s :%s",
+				sendto_server(":%s ENCAP %s KLINE %u * %s :%s",
 						SVC_UID(banserv_p), target_p->user->servername,
+						config_file.bs_regexp_time,
 						target_p->user->host, regexp_p->reason);
 			}
 		}	
