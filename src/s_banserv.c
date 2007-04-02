@@ -262,10 +262,12 @@ h_banserv_new_client(void *_target_p, void *unused)
 	char buf[BUFSIZE];
 	int ovector[30];
 	struct regexp_ban *regexp_p;
+	struct regexp_ban *neg_p;
 	struct client *target_p = _target_p;
 	int buflen;
 	dlink_node *ptr;
 	dlink_node *next_ptr;
+	dlink_node *neg_ptr;
 
 	buflen = snprintf(buf, sizeof(buf), "%s#%s",
 			target_p->user->mask, target_p->info);
@@ -283,6 +285,16 @@ h_banserv_new_client(void *_target_p, void *unused)
 
 		if(pcre_exec(regexp_p->regexp, NULL, buf, buflen, 0, 0, ovector, 30) >= 0)
 		{
+			DLINK_FOREACH(neg_ptr, regexp_p->negations.head)
+			{
+				neg_p = neg_ptr->data;
+
+				/* matches a negation, return */
+				if(pcre_exec(regexp_p->regexp, NULL, buf, buflen, 0, 0, ovector, 30) >= 0)
+					return 0;
+			}
+
+			/* no negations matched */
 			sendto_server(":%s ENCAP %s KLINE %u * %s :%s",
 					SVC_UID(banserv_p), target_p->user->servername,
 					config_file.bs_regexp_time,
@@ -1489,8 +1501,8 @@ o_banserv_listregexps(struct client *client_p, struct lconn *conn_p, const char 
 			neg_p = neg_ptr->data;
 
 			service_send(banserv_p, client_p, conn_p,
-					"    NEG %-4u %-40s oper:%s",
-					neg_p->id, neg_p->regexp_str, neg_p->oper);
+					"    NEG     %-40s oper:%s",
+					neg_p->regexp_str, neg_p->oper);
 		}
 				
 	}
