@@ -68,6 +68,7 @@ static int o_banserv_unkline(struct client *, struct lconn *, const char **, int
 static int o_banserv_unxline(struct client *, struct lconn *, const char **, int);
 static int o_banserv_unresv(struct client *, struct lconn *, const char **, int);
 static int o_banserv_unregexp(struct client *, struct lconn *, const char **, int);
+static int o_banserv_unregexpneg(struct client *, struct lconn *, const char **, int);
 static int o_banserv_sync(struct client *, struct lconn *, const char **, int);
 static int o_banserv_findkline(struct client *, struct lconn *, const char **, int);
 static int o_banserv_findxline(struct client *, struct lconn *, const char **, int);
@@ -85,6 +86,7 @@ static struct service_command banserv_command[] =
 	{ "UNXLINE",	&o_banserv_unxline,	1, NULL, 1, 0L, 0, 0, CONF_OPER_BAN_XLINE },
 	{ "UNRESV",	&o_banserv_unresv,	1, NULL, 1, 0L, 0, 0, CONF_OPER_BAN_RESV },
 	{ "UNREGEXP",	&o_banserv_unregexp,	1, NULL, 1, 0L, 0, 0, CONF_OPER_BAN_REGEXP	},
+	{ "UNREGEXPNEG",&o_banserv_unregexpneg,	1, NULL, 1, 0L, 0, 0, CONF_OPER_BAN_REGEXP	},
 	{ "SYNC",	&o_banserv_sync,	1, NULL, 1, 0L, 0, 0, 0 },
 	{ "FINDKLINE",	&o_banserv_findkline,	1, NULL, 1, 0L, 0, 0, CONF_OPER_BAN_KLINE },
 	{ "FINDXLINE",	&o_banserv_findxline,	1, NULL, 1, 0L, 0, 0, CONF_OPER_BAN_XLINE },
@@ -103,6 +105,7 @@ static struct ucommand_handler banserv_ucommand[] =
 	{ "unxline",	o_banserv_unxline,	0, CONF_OPER_BAN_XLINE, 1, NULL },
 	{ "unresv",	o_banserv_unresv,	0, CONF_OPER_BAN_RESV, 1, NULL },
 	{ "unregexp",	o_banserv_unregexp,	0, CONF_OPER_BAN_REGEXP, 1, NULL },
+	{ "unregexpneg",o_banserv_unregexpneg,	0, CONF_OPER_BAN_REGEXP, 1, NULL },
 	{ "findkline",	o_banserv_findkline,	0, CONF_OPER_BAN_KLINE, 1, NULL },
 	{ "findxline",	o_banserv_findxline,	0, CONF_OPER_BAN_XLINE, 1, NULL },
 	{ "findresv",	o_banserv_findresv,	0, CONF_OPER_BAN_RESV, 1, NULL },
@@ -1194,7 +1197,6 @@ static int
 o_banserv_unregexp(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct regexp_ban *regexp_p;
-	unsigned int regexp_id;
 	dlink_node *ptr;
 
 	DLINK_FOREACH(ptr, regexp_list.head)
@@ -1232,8 +1234,6 @@ o_banserv_unregexp(struct client *client_p, struct lconn *conn_p, const char *pa
 		}
 	}
 
-	regexp_id = regexp_p->id;
-
 	/* this does our SQL */
 	regexp_free(regexp_p, 0);
 
@@ -1245,6 +1245,81 @@ o_banserv_unregexp(struct client *client_p, struct lconn *conn_p, const char *pa
 
 	return 0;
 }
+
+static int
+o_banserv_unregexpneg(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
+{
+	struct regexp_ban *regexp_p;
+	struct regexp_ban *parent_p;
+	unsigned int regexp_id;
+	dlink_node *ptr;
+
+	regexp_id = atoi(parv[0]);
+
+	DLINK_FOREACH(ptr, regexp_list.head)
+	{
+		parent_p = ptr->data;
+
+		if(parent_p->id == regexp_id)
+			break;
+	}
+
+	if(ptr == NULL)
+	{
+		service_snd(banserv_p, client_p, conn_p, SVC_BAN_NOTPLACED,
+				"REGEXP", parv[0]);
+		return 0;
+	}
+
+	DLINK_FOREACH(ptr, parent_p->negations.head)
+	{
+		regexp_p = ptr->data;
+
+		if(!strcmp(regexp_p->regexp_str, parv[1]))
+			break;
+	}
+
+	if(ptr == NULL)
+	{
+		service_snd(banserv_p, client_p, conn_p, SVC_BAN_NOTPLACED,
+				"REGEXPNEG", parv[1]);
+		return 0;
+	}
+
+	if(irccmp(regexp_p->oper, OPER_NAME(client_p, conn_p)))
+	{
+		unsigned int hit = 0;
+
+		if(client_p)
+		{
+			if(!(client_p->user->oper->sflags & CONF_OPER_BAN_REMOVE))
+				hit++;
+		}
+		else if(!conn_p->sprivs & CONF_OPER_BAN_REMOVE)
+			hit++;
+
+		if(hit)
+		{
+			service_snd(banserv_p, client_p, conn_p, SVC_NOACCESS,
+					banserv_p->name, "UNREGEXPNEG");
+			return 0;
+		}
+	}
+
+	rsdb_exec(NULL, "DELETE FROM operbans_regexp_neg WHERE id='%u'", regexp_p->id);
+
+	/* deleting a negation, does not do our sql */
+	regexp_free(regexp_p, 1);
+
+	service_snd(banserv_p, client_p, conn_p, SVC_SUCCESSFULON,
+			banserv_p->name, "UNREGEXPNEG", parv[1]);
+
+	zlog(banserv_p, 1, WATCH_BANSERV, 1, client_p, conn_p,
+		"UNREGEXPNEG %s", parv[1]);
+
+	return 0;
+}
+
 
 static int
 o_banserv_sync(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
