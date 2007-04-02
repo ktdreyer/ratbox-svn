@@ -1,3 +1,13 @@
+leeh        2007/04/02 20:03:30 UTC	(20070402_0-23787)
+  Log:
+  - add banserv::regexpneg, to add a regexp negation
+  - extend banserv::listregexps to list negations
+  
+
+  Modified:
+	rserv/trunk/src/s_banserv.c (File Modified) 
+
+
 leeh        2007/04/01 18:14:27 UTC	(20070401_6-23785)
   Log:
   - add in the sql stuff for regexp negation, and the db loader functions
