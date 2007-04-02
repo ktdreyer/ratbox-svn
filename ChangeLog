@@ -1,3 +1,13 @@
+leeh        2007/04/02 20:19:44 UTC	(20070402_3-23793)
+  Log:
+  - fix hook on connecting clients to match negative regexps
+  - tidy up the listregexps output
+  
+
+  Modified:
+	rserv/trunk/src/s_banserv.c (File Modified) 
+
+
 leeh        2007/04/02 20:14:34 UTC	(20070402_2-23791)
   Log:
   - add banserv::unregexpneg, to remove a negative regexp
