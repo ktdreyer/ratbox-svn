@@ -1,3 +1,12 @@
+leeh        2007/04/02 20:14:34 UTC	(20070402_2-23791)
+  Log:
+  - add banserv::unregexpneg, to remove a negative regexp
+  
+
+  Modified:
+	rserv/trunk/src/s_banserv.c (File Modified) 
+
+
 leeh        2007/04/02 20:07:01 UTC	(20070402_1-23789)
   Log:
   - I swear I have a blind spot for nested DLINK_FOREACH(), refactor some code
