@@ -959,7 +959,6 @@ o_banserv_regexpneg(struct client *client_p, struct lconn *conn_p, const char *p
 	int re_error_offset;
 	unsigned int parent_id;
 	dlink_node *ptr;
-	dlink_node *parent_ptr;
 
 	if(regexp_validity == NULL)
 	{
@@ -978,21 +977,7 @@ o_banserv_regexpneg(struct client *client_p, struct lconn *conn_p, const char *p
 		parent_p = ptr->data;
 
 		if(parent_p->id == parent_id)
-		{
-			DLINK_FOREACH(parent_ptr, parent_p->negations.head)
-			{
-				regexp_p = ptr->data;
-
-				if(!strcmp(parent_p->regexp_str, parv[1]))
-				{
-					service_snd(banserv_p, client_p, conn_p, SVC_BAN_ALREADYPLACED,
-							"REGEXPNEG", parv[1]);
-					return 0;
-				}
-			}
-
 			break;
-		}
 	}
 
 	if(ptr == NULL)
@@ -1001,6 +986,19 @@ o_banserv_regexpneg(struct client *client_p, struct lconn *conn_p, const char *p
 				"REGEXP", parv[0]);
 		return 0;
 	}
+
+	DLINK_FOREACH(ptr, parent_p->negations.head)
+	{
+		regexp_p = ptr->data;
+
+		if(!strcmp(parent_p->regexp_str, parv[1]))
+		{
+			service_snd(banserv_p, client_p, conn_p, SVC_BAN_ALREADYPLACED,
+					"REGEXPNEG", parv[1]);
+			return 0;
+		}
+	}
+
 
 	if(strlen(parv[1]) >= 255 || pcre_exec(regexp_validity, NULL, parv[1], strlen(parv[1]), 0, 0, NULL, 0) < 0)
 	{
