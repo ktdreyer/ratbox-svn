@@ -1,3 +1,13 @@
+leeh        2007/04/02 20:07:01 UTC	(20070402_1-23789)
+  Log:
+  - I swear I have a blind spot for nested DLINK_FOREACH(), refactor some code
+    slightly so its not needed
+  
+
+  Modified:
+	rserv/trunk/src/s_banserv.c (File Modified) 
+
+
 leeh        2007/04/02 20:03:30 UTC	(20070402_0-23787)
   Log:
   - add banserv::regexpneg, to add a regexp negation
