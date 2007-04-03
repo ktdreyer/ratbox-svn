@@ -7,6 +7,8 @@
 
 struct lconn;
 
+struct BlockHeap *cacheline_heap;
+
 struct cachefile
 {
 	char name[CACHEFILELEN];

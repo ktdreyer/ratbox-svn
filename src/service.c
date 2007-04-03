@@ -50,6 +50,7 @@
 #include "channel.h"
 #include "s_userserv.h"
 #include "watch.h"
+#include "balloc.h"
 
 dlink_list service_list;
 dlink_list ignore_list;
@@ -167,6 +168,41 @@ load_service_help(struct client *service_p)
 
 			scommand[i].helpfile[j] = cache_file(filename, scommand[i].cmd);
 		}
+
+#ifdef ENABLE_USERSERV
+		/* unfortunately, userserv help on language requires extra
+		 * work to list the available languages.. do that here.
+		 */
+		if(!strcmp(service_p->service->id, "USERSERV") && !strcmp(scommand[i].cmd, "LANGUAGE"))
+		{
+			int k;
+
+			/* loop the list of langs available to update each
+			 * translation file within that
+			 */
+			for(j = 0; langs_available[j]; j++)
+			{
+				/* this doesn't have a language help file */
+				if(scommand[i].helpfile[j] == NULL)
+					continue;
+
+				/* find all translations */
+				for(k = 0; langs_available[k]; k++)
+				{
+					struct cacheline *lineptr;
+
+					if(EmptyString(langs_description[k]))
+						continue;
+
+					lineptr = BlockHeapAlloc(cacheline_heap);
+					snprintf(lineptr->data, sizeof(lineptr->data),
+						"     %-6s - %s",
+						langs_available[k], langs_description[k]);
+					dlink_add_tail(lineptr, &lineptr->linenode, &(scommand[i].helpfile[j]->contents));
+				}
+			}
+		}
+#endif
 	}
 
 	DLINK_FOREACH(ptr, service_p->service->ucommand_list.head)

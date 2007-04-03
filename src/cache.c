@@ -38,7 +38,7 @@
 #include "io.h"
 
 static BlockHeap *cachefile_heap = NULL;
-static BlockHeap *cacheline_heap = NULL;
+BlockHeap *cacheline_heap = NULL;
 
 struct cacheline *emptyline = NULL;
 

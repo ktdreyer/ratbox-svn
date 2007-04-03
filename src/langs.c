@@ -48,6 +48,7 @@
 #endif
 
 const char *langs_available[LANG_MAX];
+const char *langs_description[LANG_MAX];
 const char **svc_notice[LANG_MAX];
 
 const char *svc_notice_string[] =
@@ -268,6 +269,7 @@ init_langs(void)
 	/* ensure the default language is always at position 0 */
 	memset(langs_available, 0, sizeof(const char *) * LANG_MAX);
 	(void) lang_get_langcode(LANG_DEFAULT);
+	langs_description[0] = my_strdup("English");
 
 	/* reset svc_notice, and load default messages */
 	memset(svc_notice, 0, sizeof(char **) * LANG_MAX);
@@ -582,6 +584,8 @@ lang_load_transfile(FILE *fp, const char *filename)
 		return;
 	}
 
+	my_free(langs_description[langcode]);
+	langs_description[langcode] = my_strdup(langdesc_str);
 	svc_notice[langcode] = my_calloc(1, sizeof(char *) * SVC_LAST);
 	lang_parse_transfile(fp, filename, langcode, NULL, NULL);
 }
