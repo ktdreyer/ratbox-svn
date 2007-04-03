@@ -1,3 +1,21 @@
+leeh        2007/04/03 18:09:31 UTC	(20070403_0-23799)
+  Log:
+  - make cacheline_heap external
+  - store the language descriptions from the translation files into
+    langs_description
+  - when loading service help files, append a list of languages and their
+    descriptions to the language help for userserv
+  
+
+  Modified:
+	rserv/trunk/help/en/userserv/language (File Modified) 
+	rserv/trunk/include/cache.h (File Modified) 
+	rserv/trunk/include/langs.h (File Modified) 
+	rserv/trunk/src/cache.c (File Modified) 
+	rserv/trunk/src/langs.c (File Modified) 
+	rserv/trunk/src/service.c (File Modified) 
+
+
 leeh        2007/04/02 20:19:44 UTC	(20070402_3-23793)
   Log:
   - fix hook on connecting clients to match negative regexps
