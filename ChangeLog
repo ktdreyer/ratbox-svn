@@ -1,3 +1,13 @@
+leeh        2007/04/04 20:50:24 UTC	(20070404_0-23805)
+  Log:
+  - langs_description shouldnt be const, we need to free() it
+  
+
+  Modified:
+	rserv/trunk/include/langs.h (File Modified) 
+	rserv/trunk/src/langs.c (File Modified) 
+
+
 leeh        2007/04/03 18:14:24 UTC	(20070403_1-23801)
   Log:
   - document banned email domains
