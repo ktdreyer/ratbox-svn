@@ -242,7 +242,7 @@ enum svc_notice_enum
 extern const char *svc_notice_string[];
 
 /* name of translations */
-extern const char *langs_description[];
+extern char *langs_description[];
 
 extern const char **svc_notice[];
 

@@ -48,7 +48,7 @@
 #endif
 
 const char *langs_available[LANG_MAX];
-const char *langs_description[LANG_MAX];
+char *langs_description[LANG_MAX];
 const char **svc_notice[LANG_MAX];
 
 const char *svc_notice_string[] =
