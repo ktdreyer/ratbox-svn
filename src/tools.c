@@ -618,6 +618,34 @@ dlink_move_list(dlink_list * from, dlink_list * to)
 	from->length = 0;
 }
 
+void
+dlink_move_list_tail(dlink_list * from, dlink_list * to)
+{
+	/* There are three cases */
+	/* case one, nothing in from list */
+	if(from->head == NULL)
+		return;
+
+	/* case two, nothing in to list */
+	if(to->head == NULL)
+	{
+		to->head = from->head;
+		to->tail = from->tail;
+		from->head = from->tail = NULL;
+		to->length = from->length;
+		from->length = 0;
+		return;
+	}
+
+	/* third case play with the links */
+	from->head->prev = to->tail;
+	to->tail->next = from->head;
+	to->tail = from->tail;
+	to->length += from->length;
+	from->head = from->tail = NULL;
+	from->length = 0;
+}
+
 dlink_node *
 dlink_find_delete(void *data, dlink_list *list)
 {
