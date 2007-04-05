@@ -1,3 +1,13 @@
+leeh        2007/04/05 20:20:30 UTC	(20070405_2-23811)
+  Log:
+  - add dlink_move_list_tail(), moves one list to the end of another list
+  
+
+  Modified:
+	rserv/trunk/include/tools.h (File Modified) 
+	rserv/trunk/src/tools.c (File Modified) 
+
+
 leeh        2007/04/05 20:09:55 UTC	(20070405_1-23809)
   Log:
   - add support for merging one service upwards into another service
