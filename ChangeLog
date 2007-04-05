@@ -1,3 +1,15 @@
+leeh        2007/04/05 18:30:48 UTC	(20070405_0-23807)
+  Log:
+  - rework dcc commands so they just use the struct ucommand_handler from the
+    service_handler, instead of building a linked list of them
+  
+
+  Modified:
+	rserv/trunk/include/client.h (File Modified) 
+	rserv/trunk/src/service.c (File Modified) 
+	rserv/trunk/src/ucommand.c (File Modified) 
+
+
 leeh        2007/04/04 20:50:24 UTC	(20070404_0-23805)
   Log:
   - langs_description shouldnt be const, we need to free() it
