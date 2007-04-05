@@ -152,6 +152,62 @@ load_service_help(struct client *service_p)
 }
 
 static void
+append_service_help(struct client *service_p, const char *service_id)
+{
+	struct cachefile *contents_fileptr;
+	struct cachefile *fileptr;
+	char filename[PATH_MAX];
+	unsigned int i;
+
+	if(service_p->service->help == NULL)
+		service_p->service->help = my_malloc(sizeof(struct cachefile *) * LANG_MAX);
+
+	if(service_p->service->helpadmin == NULL)
+		service_p->service->helpadmin = my_malloc(sizeof(struct cachefile *) * LANG_MAX);
+
+	for(i = 0; langs_available[i]; i++)
+	{
+		snprintf(filename, sizeof(filename), "%s/%s/%s/index",
+			HELP_PATH, langs_available[i], lcase(service_id));
+		fileptr = cache_file(filename, "index");
+
+		contents_fileptr = service_p->service->help[i];
+
+		if(contents_fileptr != NULL && fileptr != NULL)
+		{
+			/* add a blank line to the start of this file to
+			 * separate them
+			 */
+			dlink_add_alloc(emptyline, &fileptr->contents);
+			dlink_move_list_tail(&fileptr->contents, &contents_fileptr->contents);
+		}
+		else if(fileptr != NULL)
+			service_p->service->help[i] = fileptr;
+
+		free_cachefile(fileptr);
+
+		strlcat(filename, "-admin", sizeof(filename));
+		fileptr = cache_file(filename, "index-admin");
+
+		contents_fileptr = service_p->service->helpadmin[i];
+
+		if(contents_fileptr != NULL && fileptr != NULL)
+		{
+			/* add a blank line to the start of this file to
+			 * separate them
+			 */
+			dlink_add_alloc(emptyline, &fileptr->contents);
+			dlink_move_list_tail(&fileptr->contents, &contents_fileptr->contents);
+		}
+		else if(fileptr != NULL)
+			service_p->service->helpadmin[i] = fileptr;
+
+		free_cachefile(fileptr);
+	}
+
+}
+
+static void
 load_service_command_help(struct service_command *scommand, int maxlen,
 			struct ucommand_handler *ucommand, const char *service_id)
 {
@@ -431,6 +487,9 @@ merge_service(struct service_handler *handler_p, const char *service_id, int sta
 
 	if(startup)
 		dlink_add_alloc(handler_p, &service_p->service->merged_handler_list);
+
+	/* play nice, and merge the index/index-admin helpfiles */
+	append_service_help(service_p, handler_p->id);
 
 	/* first, we do irc commands */
 	merged_command_size = service_p->service->command_size + handler_p->command_size;
