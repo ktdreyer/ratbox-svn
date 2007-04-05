@@ -185,7 +185,7 @@ add_ucommands(struct client *service_p, struct ucommand_handler *handler)
 {
         int i;
 
-        for(i = 0; handler[i].cmd[0] != '\0'; i++)
+        for(i = 0; handler[i].cmd && handler[i].cmd[0] != '\0'; i++)
         {
                 add_ucommand_handler(service_p, &handler[i]);
         }
@@ -547,7 +547,7 @@ dump_commands_handler(struct lconn *conn_p, struct client *service_p, struct uco
 	int j = 0;
 	int header = 0;
 
-        for(i = 0; handler[i].cmd[0] != '\0'; i++)
+        for(i = 0; handler[i].cmd && handler[i].cmd[0] != '\0'; i++)
 	{
 		if(handler[i].flags && !(conn_p->privs & handler[i].flags))
 			continue;

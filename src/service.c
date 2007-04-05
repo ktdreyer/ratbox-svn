@@ -57,13 +57,17 @@ dlink_list ignore_list;
 
 static int ignore_db_callback(int, const char **);
 
+static void unmerge_service(struct client *service_p);
+
 void
 init_services(void)
 {
 	struct client *service_p;
 	dlink_node *ptr;
+	dlink_node *next_ptr;
 
-	DLINK_FOREACH(ptr, service_list.head)
+	/* init functions may remove themselves from this list */
+	DLINK_FOREACH_SAFE(ptr, next_ptr, service_list.head)
 	{
 		service_p = ptr->data;
 
@@ -127,30 +131,33 @@ scmd_compare(const char *name, struct service_command *cmd)
 static void
 load_service_help(struct client *service_p)
 {
-	struct service_command *scommand;
-	struct ucommand_handler *ucommand;
 	char filename[PATH_MAX];
-	int maxlen = service_p->service->command_size / sizeof(struct service_command);
-	unsigned long i;
-	unsigned int j;
+	unsigned int i;
 
         if(service_p->service->command == NULL)
 		return;
 
-	scommand = service_p->service->command;
-
 	service_p->service->help = my_malloc(sizeof(struct cachefile *) * LANG_MAX);
 	service_p->service->helpadmin = my_malloc(sizeof(struct cachefile *) * LANG_MAX);
 
-	for(j = 0; langs_available[j]; j++)
+	for(i = 0; langs_available[i]; i++)
 	{
 		snprintf(filename, sizeof(filename), "%s/%s/%s/index",
-			HELP_PATH, langs_available[j], lcase(service_p->service->id));
-		service_p->service->help[j] = cache_file(filename, "index");
+			HELP_PATH, langs_available[i], lcase(service_p->service->id));
+		service_p->service->help[i] = cache_file(filename, "index");
 
 		strlcat(filename, "-admin", sizeof(filename));
-		service_p->service->helpadmin[j] = cache_file(filename, "index-admin");
+		service_p->service->helpadmin[i] = cache_file(filename, "index-admin");
 	}
+}
+
+static void
+load_service_command_help(struct service_command *scommand, int maxlen,
+			struct ucommand_handler *ucommand, const char *service_id)
+{
+	char filename[PATH_MAX];
+	unsigned long i;
+	unsigned int j;
 
 	for(i = 0; i < maxlen; i++)
 	{
@@ -159,7 +166,7 @@ load_service_help(struct client *service_p)
 		for(j = 0; langs_available[j]; j++)
 		{
 			snprintf(filename, sizeof(filename), "%s/%s/%s/",
-				HELP_PATH, langs_available[j], lcase(service_p->service->id));
+				HELP_PATH, langs_available[j], lcase(service_id));
 
 			/* we cant lcase() twice in one function call */
 			strlcat(filename, lcase(scommand[i].cmd),
@@ -172,7 +179,7 @@ load_service_help(struct client *service_p)
 		/* unfortunately, userserv help on language requires extra
 		 * work to list the available languages.. do that here.
 		 */
-		if(!strcmp(service_p->service->id, "USERSERV") && !strcmp(scommand[i].cmd, "LANGUAGE"))
+		if(!strcmp(service_id, "USERSERV") && !strcmp(scommand[i].cmd, "LANGUAGE"))
 		{
 			int k;
 
@@ -204,19 +211,18 @@ load_service_help(struct client *service_p)
 #endif
 	}
 
-	for(i = 0; service_p->service->ucommand && service_p->service->ucommand[i].cmd[0] != '\0'; i++)
+	for(i = 0; ucommand && ucommand[i].cmd && ucommand[i].cmd[0] != '\0'; i++)
 	{
-		ucommand = &service_p->service->ucommand[i];
-		ucommand->helpfile = my_malloc(sizeof(struct cachefile *) * LANG_MAX);
+		ucommand[i].helpfile = my_malloc(sizeof(struct cachefile *) * LANG_MAX);
 
 		for(j = 0; langs_available[j]; j++)
 		{
 		        /* now see if we can load a helpfile.. */
         		snprintf(filename, sizeof(filename), "%s/%s/%s/u-",
-                		 HELP_PATH, langs_available[j], lcase(service_p->service->id));
+                		 HELP_PATH, langs_available[j], lcase(service_id));
 		        strlcat(filename, lcase(ucommand->cmd), sizeof(filename));
 
-	        	ucommand->helpfile[j] = cache_file(filename, ucommand->cmd);
+	        	ucommand[i].helpfile[j] = cache_file(filename, ucommand->cmd);
 		}
 	}
 }
@@ -256,7 +262,7 @@ clear_service_help(struct client *service_p)
 		scommand[i].helpfile = NULL;
 	}
 
-	for(i = 0; service_p->service->ucommand[i].cmd[0] != '\0'; i++)
+	for(i = 0; service_p->service->ucommand && service_p->service->ucommand[i].cmd && service_p->service->ucommand[i].cmd[0] != '\0'; i++)
 	{
 		ucommand = &service_p->service->ucommand[i];
 
@@ -273,12 +279,47 @@ clear_service_help(struct client *service_p)
 void
 rehash_help(void)
 {
+	struct service_handler *handler;
+	struct client *service_p;
 	dlink_node *ptr;
+	dlink_node *merge_ptr;
 
 	DLINK_FOREACH(ptr, service_list.head)
 	{
-		clear_service_help(ptr->data);
-		load_service_help(ptr->data);
+		service_p = ptr->data;
+
+		/* dealing with merged services makes this a little complicated.
+		 *
+		 * We clear the help when it is merged, because that can work on
+		 * the merged list of commands without issue.  The merged version
+		 * is an identical copy of the original, so they both point to the
+		 * same memory -- which we should only free() once.
+		 *
+		 * Loading the help however, requires we are looking for the directory
+		 * given by the services name.  On a merged list however, this will end
+		 * up hunting the parent service for all of the helpfiles.  To avoid
+		 * this, we "unmerge" the service back to its original state.
+		 *
+		 * Once that is done, we load the help as normal.  Then for each
+		 * service that was previously merged, we go and load the helpfiles
+		 * for it, then remerge it back up to the parent service.
+		 */
+		clear_service_help(service_p);
+		unmerge_service(service_p);
+		load_service_help(service_p);
+		load_service_command_help(service_p->service->command,
+					service_p->service->command_size / sizeof(struct service_command),
+					service_p->service->ucommand, service_p->service->id);
+
+		DLINK_FOREACH(merge_ptr, service_p->service->merged_handler_list.head)
+		{
+			handler = merge_ptr->data;
+
+			load_service_command_help(handler->command,
+						handler->command_size / sizeof(struct service_command),
+						handler->ucommand, handler->id);
+			merge_service(handler, service_p->service->id, 0);
+		}
 	}
 
 	clear_ucommand_help();
@@ -351,6 +392,9 @@ add_service(struct service_handler *service)
 
 	open_service_logfile(client_p);
 	load_service_help(client_p);
+	load_service_command_help(service->command,
+				service->command_size / sizeof(struct service_command),
+				service->ucommand, service->id);
 
 	return client_p;
 }
@@ -370,6 +414,123 @@ find_service_id(const char *name)
 	}
 
 	return NULL;
+}
+
+struct client *
+merge_service(struct service_handler *handler_p, const char *service_id, int startup)
+{
+	struct client *service_p;
+	struct service_command *svc_cmd;
+	struct ucommand_handler *svc_ucommand;
+	unsigned long merged_command_size;
+	unsigned int merged_command_length;
+	unsigned int original_command_length;
+
+	if((service_p = find_service_id(service_id)) == NULL)
+		return NULL;
+
+	if(startup)
+		dlink_add_alloc(handler_p, &service_p->service->merged_handler_list);
+
+	/* first, we do irc commands */
+	merged_command_size = service_p->service->command_size + handler_p->command_size;
+	original_command_length = service_p->service->command_size / sizeof(struct service_command);
+	merged_command_length = merged_command_size / sizeof(struct service_command);
+
+	svc_cmd = my_malloc(merged_command_size);
+	memcpy(svc_cmd, service_p->service->command, service_p->service->command_size);
+	memcpy(svc_cmd + original_command_length, handler_p->command, handler_p->command_size);
+
+	/* sort the now bigger array */
+	qsort(svc_cmd, merged_command_length,
+			sizeof(struct service_command), (bqcmp) scmd_sort);
+
+	/* we have already merged some commands into this, and we have built
+	 * the new structure via memcpy(), so we don't need the old copy anymore
+	 */
+	if(service_p->service->orig_command)
+		my_free(service_p->service->command);
+
+	if(service_p->service->orig_command == NULL)
+	{
+		service_p->service->orig_command = service_p->service->command;
+		service_p->service->orig_command_size = service_p->service->command_size;
+	}
+
+	service_p->service->command = svc_cmd;
+	service_p->service->command_size = merged_command_size;
+
+	/* now do dcc commands */
+	if(handler_p->ucommand)
+	{
+		unsigned long original_command_size;
+		unsigned long new_command_size;
+		unsigned int new_command_length;
+		int i;
+
+		original_command_length = 0;
+		new_command_length = 0;
+
+		/* always need space for a NULL entry at the end */
+		merged_command_length = 1;
+
+		for(i = 0; service_p->service->ucommand && service_p->service->ucommand[i].cmd && service_p->service->ucommand[i].cmd[0] != '\0'; i++)
+		{
+			original_command_length++;
+			merged_command_length++;
+		}
+
+		for(i = 0; handler_p->ucommand[i].cmd && handler_p->ucommand[i].cmd[0] != '\0'; i++)
+		{
+			new_command_length++;
+			merged_command_length++;
+		}
+
+		original_command_size = sizeof(struct ucommand_handler) * original_command_length;
+		new_command_size = sizeof(struct ucommand_handler) * new_command_length;
+		merged_command_size = sizeof(struct ucommand_handler) * merged_command_length;
+
+		svc_ucommand = my_malloc(merged_command_size);
+
+		if(original_command_size)
+			memcpy(svc_ucommand, service_p->service->ucommand, original_command_size);
+
+		memcpy(svc_ucommand + original_command_length, handler_p->ucommand, new_command_size);
+
+		if(service_p->service->orig_ucommand)
+			my_free(service_p->service->ucommand);
+
+		if(service_p->service->orig_ucommand == NULL)
+			service_p->service->orig_ucommand = service_p->service->ucommand;
+
+		service_p->service->ucommand = svc_ucommand;
+	}
+
+	return service_p;
+}
+
+static void
+unmerge_service(struct client *service_p)
+{
+	if(service_p->service->orig_command == NULL)
+		return;
+
+	/* allocated in ram */
+	my_free(service_p->service->command);
+	service_p->service->command = service_p->service->orig_command;
+	service_p->service->command_size = service_p->service->orig_command_size;
+
+	/* may not have merged any dcc commands */
+	if(service_p->service->orig_ucommand)
+	{
+		my_free(service_p->service->ucommand);
+		service_p->service->ucommand = service_p->service->orig_ucommand;
+	}
+
+	/* mark this service as unmerged */
+	service_p->service->orig_command = NULL;
+	service_p->service->orig_command_size = 0;
+	service_p->service->orig_ucommand = NULL;
 }
 
 void

@@ -94,6 +94,14 @@ struct service
 	unsigned long command_size;
         struct ucommand_handler *ucommand;
 
+	/* used when another service is merged into this */
+	struct service_command *orig_command;
+	unsigned long orig_command_size;
+        struct ucommand_handler *orig_ucommand;
+
+	/* list of merged service handlers */
+	dlink_list merged_handler_list;
+
         unsigned long help_count;
         unsigned long ehelp_count;
         unsigned long paced_count;

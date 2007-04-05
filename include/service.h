@@ -72,6 +72,8 @@ extern void introduce_services_channels(void);
 extern void reintroduce_service(struct client *client_p);
 extern void deintroduce_service(struct client *client_p);
 
+extern struct client *merge_service(struct service_handler *handler_p, const char *target, int startup);
+
 extern void update_service_floodcount(void *unused);
 
 extern void handle_service_msg(struct client *service_p,
