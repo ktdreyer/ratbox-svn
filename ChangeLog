@@ -1,3 +1,12 @@
+leeh        2007/04/05 20:54:44 UTC	(20070405_4-23815)
+  Log:
+  - ignore Makefile here
+  
+
+  Modified:
+	rserv/trunk/langs/  (Property Modified)
+
+
 leeh        2007/04/05 20:36:55 UTC	(20070405_3-23813)
   Log:
   - add the code to merge the index/index-admin helpfiles upwards too
