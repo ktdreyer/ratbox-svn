@@ -1,3 +1,12 @@
+leeh        2007/04/05 20:36:55 UTC	(20070405_3-23813)
+  Log:
+  - add the code to merge the index/index-admin helpfiles upwards too
+  
+
+  Modified:
+	rserv/trunk/src/service.c (File Modified) 
+
+
 leeh        2007/04/05 20:20:30 UTC	(20070405_2-23811)
   Log:
   - add dlink_move_list_tail(), moves one list to the end of another list
