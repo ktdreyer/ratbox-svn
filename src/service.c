@@ -130,7 +130,6 @@ load_service_help(struct client *service_p)
 	struct service_command *scommand;
 	struct ucommand_handler *ucommand;
 	char filename[PATH_MAX];
-	dlink_node *ptr;
 	int maxlen = service_p->service->command_size / sizeof(struct service_command);
 	unsigned long i;
 	unsigned int j;
@@ -205,9 +204,9 @@ load_service_help(struct client *service_p)
 #endif
 	}
 
-	DLINK_FOREACH(ptr, service_p->service->ucommand_list.head)
+	for(i = 0; service_p->service->ucommand && service_p->service->ucommand[i].cmd[0] != '\0'; i++)
 	{
-		ucommand = ptr->data;
+		ucommand = &service_p->service->ucommand[i];
 		ucommand->helpfile = my_malloc(sizeof(struct cachefile *) * LANG_MAX);
 
 		for(j = 0; langs_available[j]; j++)
@@ -227,7 +226,6 @@ clear_service_help(struct client *service_p)
 {
 	struct service_command *scommand;
 	struct ucommand_handler *ucommand;
-	dlink_node *ptr;
 	int maxlen = service_p->service->command_size / sizeof(struct service_command);
 	int i, j;
 	
@@ -258,9 +256,9 @@ clear_service_help(struct client *service_p)
 		scommand[i].helpfile = NULL;
 	}
 
-	DLINK_FOREACH(ptr, service_p->service->ucommand_list.head)
+	for(i = 0; service_p->service->ucommand[i].cmd[0] != '\0'; i++)
 	{
-		ucommand = ptr->data;
+		ucommand = &service_p->service->ucommand[i];
 
 		for(j = 0; langs_available[j]; j++)
 		{

@@ -99,8 +99,6 @@ struct service
         unsigned long paced_count;
         unsigned long ignored_count;
 
-	dlink_list ucommand_list;
-
 	struct cachefile **help;
 	struct cachefile **helpadmin;
 

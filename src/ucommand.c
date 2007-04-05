@@ -178,8 +178,6 @@ add_ucommand_handler(struct client *service_p,
 	/* command not associated with any service */
         if(service_p == NULL)
 		dlink_add_tail_alloc(chandler, &ucommand_list);
-	else
-		dlink_add_tail_alloc(chandler, &service_p->service->ucommand_list);
 }
 
 void
@@ -491,7 +489,7 @@ u_chat(struct client *unused, struct lconn *conn_p, const char *parv[], int parc
 }
 
 static void
-dump_commands(struct lconn *conn_p, struct client *service_p, dlink_list *list)
+dump_commands_list(struct lconn *conn_p, struct client *service_p, dlink_list *list)
 {
 	struct ucommand_handler *handler;
 	const char *hparv[MAX_HELP_ROW];
@@ -541,6 +539,53 @@ dump_commands(struct lconn *conn_p, struct client *service_p, dlink_list *list)
 	}
 }
 
+static void
+dump_commands_handler(struct lconn *conn_p, struct client *service_p, struct ucommand_handler *handler)
+{
+	const char *hparv[MAX_HELP_ROW];
+	int i;
+	int j = 0;
+	int header = 0;
+
+        for(i = 0; handler[i].cmd[0] != '\0'; i++)
+	{
+		if(handler[i].flags && !(conn_p->privs & handler[i].flags))
+			continue;
+
+		if(!header)
+		{
+			header++;
+			sendto_one(conn_p, "%s commands:",
+					service_p ? ucase(service_p->name) : "Available");
+		}
+
+		hparv[j] = handler[i].cmd;
+		j++;
+
+		if(j >= MAX_HELP_ROW)
+		{
+			sendto_one(conn_p,
+				"   %-8s %-8s %-8s %-8s %-8s %-8s %-8s %-8s",
+				hparv[0], hparv[1], hparv[2], hparv[3],
+				hparv[4], hparv[5], hparv[6], hparv[7]);
+			j = 0;
+		}
+	}
+
+	if(j)
+	{
+		char buf[BUFSIZE];
+		char *p = buf;
+
+		for(i = 0; i < j; i++)
+		{
+			p += sprintf(p, "%-8s ", hparv[i]);
+		}
+
+		sendto_one(conn_p, "   %s", buf);
+	}
+}
+
 static int
 u_help(struct client *unused, struct lconn *conn_p, const char *parv[], int parc)
 {
@@ -551,13 +596,14 @@ u_help(struct client *unused, struct lconn *conn_p, const char *parv[], int parc
         {
 		struct client *service_p;
 
-		dump_commands(conn_p, NULL, &ucommand_list);
+		dump_commands_list(conn_p, NULL, &ucommand_list);
 
 		DLINK_FOREACH(ptr, service_list.head)
 		{
 			service_p = ptr->data;
 
-			dump_commands(conn_p, service_p, &service_p->service->ucommand_list);
+			if(service_p->service->ucommand)
+				dump_commands_handler(conn_p, service_p, service_p->service->ucommand);
 		}
 
                 sendto_one(conn_p, "For more information see .help <command>");
