@@ -1,3 +1,12 @@
+leeh        2007/04/09 04:51:36 UTC	(20070409_0-23817)
+  Log:
+  - userserv::userinfo should have minpara of 1
+  
+
+  Modified:
+	rserv/trunk/src/s_userserv.c (File Modified) 
+
+
 leeh        2007/04/05 20:54:44 UTC	(20070405_4-23815)
   Log:
   - ignore Makefile here
