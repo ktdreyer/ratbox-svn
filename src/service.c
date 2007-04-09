@@ -1031,14 +1031,20 @@ handle_service(struct client *service_p, struct client *client_p,
 			return;
 		}
 
+		cmd_entry->cmd_use++;
+
 		if(cmd_entry->func)
 			retval = (cmd_entry->func)(client_p, NULL, (const char **) parv, parc);
 		else
 			retval = 0;
 
+		/* NOTE, at this point cmd_entry may now be invalid.
+		 * Particularly if we have just done a rehash help
+		 */
+		cmd_entry = NULL;
+
 		client_p->user->flood_count += retval;
 		service_p->service->flood += retval;
-		cmd_entry->cmd_use++;
 		return;
         }
 
