@@ -86,7 +86,7 @@ static struct service_command userserv_command[] =
 	{ "USERSUSPEND",	&o_user_usersuspend,	2, NULL, 1, 0L, 0, 0, CONF_OPER_US_SUSPEND	},
 	{ "USERUNSUSPEND",	&o_user_userunsuspend,	1, NULL, 1, 0L, 0, 0, CONF_OPER_US_SUSPEND	},
 	{ "USERLIST",		&o_user_userlist,	1, NULL, 1, 0L, 0, 0, CONF_OPER_US_LIST		},
-	{ "USERINFO",		&o_user_userinfo,	0, NULL, 1, 0L, 0, 0, CONF_OPER_US_INFO		},
+	{ "USERINFO",		&o_user_userinfo,	1, NULL, 1, 0L, 0, 0, CONF_OPER_US_INFO		},
 	{ "USERSETPASS",	&o_user_usersetpass,	2, NULL, 1, 0L, 0, 0, CONF_OPER_US_SETPASS	},
 	{ "USERSETEMAIL",	&o_user_usersetemail,	2, NULL, 1, 0L, 0, 0, CONF_OPER_US_SETEMAIL	},
 	{ "REGISTER",	&s_user_register,	2, NULL, 1, 0L, 0, 0, 0	},
