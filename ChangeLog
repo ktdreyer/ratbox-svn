@@ -1,3 +1,16 @@
+leeh        2007/04/09 17:34:03 UTC	(20070409_3-23823)
+  Log:
+  - add the ability to merge banserv into operserv
+  
+
+  Modified:
+	rserv/trunk/doc/example.conf (File Modified) 
+	rserv/trunk/include/conf.h (File Modified) 
+	rserv/trunk/src/conf.c (File Modified) 
+	rserv/trunk/src/newconf.c (File Modified) 
+	rserv/trunk/src/s_banserv.c (File Modified) 
+
+
 leeh        2007/04/09 13:57:40 UTC	(20070409_2-23821)
   Log:
   - database uses REALLEN for server jupes, we should too
