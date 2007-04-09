@@ -144,6 +144,19 @@ preinit_s_banserv(void)
 static void
 init_s_banserv(void)
 {
+	/* merge this service up into operserv if needed */
+	if(config_file.bs_merge_into_operserv)
+	{
+		struct client *service_p;
+
+		if((service_p = merge_service(&banserv_service, "OPERSERV", 1)) != NULL)
+		{
+			dlink_delete(&banserv_p->listnode, &service_list);
+			banserv_p = service_p;
+		}
+	}
+
+		
 	eventAdd("banserv_expire", e_banserv_expire, NULL, 900);
 	eventAdd("banserv_autosync", e_banserv_autosync, NULL,
 			DEFAULT_AUTOSYNC_FREQUENCY);

@@ -125,6 +125,7 @@ set_default_conf(void)
 	config_file.bs_temp_workaround = 0;
 	config_file.bs_autosync_frequency = DEFAULT_AUTOSYNC_FREQUENCY;
 	config_file.bs_regexp_time = 86400;	/* 1 day */
+	config_file.bs_merge_into_operserv = 0;
 
 	my_free(config_file.nwarn_string);
 	config_file.nwarn_string = my_strdup("This nickname is registered, you may "

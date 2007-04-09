@@ -114,6 +114,7 @@ struct _config_file
 	int bs_temp_workaround;
 	int bs_autosync_frequency;
 	int bs_regexp_time;
+	int bs_merge_into_operserv;
 
 	/* alis */
 	int max_matches;
