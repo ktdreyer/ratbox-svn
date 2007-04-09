@@ -292,8 +292,8 @@ o_jupeserv_jupe(struct client *client_p, struct lconn *conn_p, const char *parv[
 	jupe_p = make_jupe(parv[0]);
 	reason = rebuild_params(parv, parc, 1);
 
-	if(strlen(reason) > REASONLEN)
-		reason[REASONLEN] = '\0';
+	if(strlen(reason) > REALLEN)
+		reason[REALLEN] = '\0';
 
 	zlog(jupeserv_p, 1, WATCH_JUPESERV, 1, client_p, conn_p,
 		"JUPE %s %s", jupe_p->name, reason);
