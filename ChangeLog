@@ -1,3 +1,12 @@
+leeh        2007/04/09 11:49:52 UTC	(20070409_1-23819)
+  Log:
+  - note cmd_entry may be invalid after we have executed the command
+  
+
+  Modified:
+	rserv/trunk/src/service.c (File Modified) 
+
+
 leeh        2007/04/09 04:51:36 UTC	(20070409_0-23817)
   Log:
   - userserv::userinfo should have minpara of 1
