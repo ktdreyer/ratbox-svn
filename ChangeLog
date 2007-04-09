@@ -1,3 +1,12 @@
+leeh        2007/04/09 13:57:40 UTC	(20070409_2-23821)
+  Log:
+  - database uses REALLEN for server jupes, we should too
+  
+
+  Modified:
+	rserv/trunk/src/s_jupeserv.c (File Modified) 
+
+
 leeh        2007/04/09 11:49:52 UTC	(20070409_1-23819)
   Log:
   - note cmd_entry may be invalid after we have executed the command
