@@ -486,7 +486,7 @@ merge_service(struct service_handler *handler_p, const char *service_id, int sta
 		return NULL;
 
 	if(startup)
-		dlink_add_alloc(handler_p, &service_p->service->merged_handler_list);
+		dlink_add_tail_alloc(handler_p, &service_p->service->merged_handler_list);
 
 	/* play nice, and merge the index/index-admin helpfiles */
 	append_service_help(service_p, handler_p->id);
