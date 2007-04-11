@@ -1,3 +1,15 @@
+leeh        2007/04/11 22:40:55 UTC	(20070411_0-23825)
+  Log:
+  - add ability to merge jupeserv into operserv
+  
+
+  Modified:
+	rserv/trunk/include/conf.h (File Modified) 
+	rserv/trunk/src/conf.c (File Modified) 
+	rserv/trunk/src/newconf.c (File Modified) 
+	rserv/trunk/src/s_jupeserv.c (File Modified) 
+
+
 leeh        2007/04/09 17:34:03 UTC	(20070409_3-23823)
   Log:
   - add the ability to merge banserv into operserv
