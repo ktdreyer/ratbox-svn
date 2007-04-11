@@ -91,6 +91,8 @@ static struct
 	{ NULL, 0 }
 };
 
+static void init_s_watchserv(void);
+
 static struct client *watchserv_p;
 
 static int o_watch_watch(struct client *, struct lconn *, const char **, int);
@@ -108,13 +110,28 @@ static struct ucommand_handler watch_ucommand [] =
 
 static struct service_handler watchserv_service = {
 	"WATCHSERV", "WATCHSERV", "watchserv", "services.int", "Command Watching Service",
-	0, 0, watch_command, sizeof(watch_command), watch_ucommand, NULL, NULL
+	0, 0, watch_command, sizeof(watch_command), watch_ucommand, init_s_watchserv, NULL
 };
 
 void
 preinit_s_watchserv(void)
 {
 	watchserv_p = add_service(&watchserv_service);
+}
+
+static void
+init_s_watchserv(void)
+{
+	if(config_file.ws_merge_into_operserv)
+	{
+		struct client *service_p;
+
+		if((service_p = merge_service(&watchserv_service, "OPERSERV", 1)) != NULL)
+		{
+			dlink_delete(&watchserv_p->listnode, &service_list);
+			watchserv_p = service_p;
+		}
+	}
 }
 
 static unsigned int

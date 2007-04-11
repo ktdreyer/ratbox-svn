@@ -117,6 +117,9 @@ struct _config_file
 	int bs_regexp_time;
 	int bs_merge_into_operserv;
 
+	/* watchserv */
+	int ws_merge_into_operserv;
+
 	/* alis */
 	int max_matches;
 };
