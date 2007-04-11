@@ -105,6 +105,7 @@ struct _config_file
 	int jupe_score;
 	int unjupe_score;
 	int pending_time;
+	int js_merge_into_operserv;
 
 	/* operserv */
 	int os_allow_die;

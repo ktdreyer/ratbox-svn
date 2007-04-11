@@ -135,6 +135,7 @@ set_default_conf(void)
 	config_file.jupe_score = 15;
 	config_file.unjupe_score = 15;
 	config_file.pending_time = 1800;
+	config_file.js_merge_into_operserv = 0;
 
 	config_file.max_matches = 60;
 }

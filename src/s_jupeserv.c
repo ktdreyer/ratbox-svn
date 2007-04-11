@@ -110,6 +110,18 @@ preinit_s_jupeserv(void)
 static void
 init_s_jupeserv(void)
 {
+	/* merge this service up into operserv if needed */
+	if(config_file.js_merge_into_operserv)
+	{
+		struct client *service_p;
+
+		if((service_p = merge_service(&jupe_service, "OPERSERV", 1)) != NULL)
+		{
+			dlink_delete(&jupeserv_p->listnode, &service_list);
+			jupeserv_p = service_p;
+		}
+	}
+
 	hook_add(h_jupeserv_squit, HOOK_SQUIT_UNKNOWN);
 	hook_add(h_jupeserv_finburst, HOOK_FINISHED_BURSTING);
 	eventAdd("e_jupeserv_expire", e_jupeserv_expire, NULL, 60);

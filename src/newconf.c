@@ -1153,6 +1153,7 @@ static struct ConfEntry conf_jupeserv_table[] =
 	{ "jupe_score",		CF_INT, NULL, 0, &config_file.jupe_score	},
 	{ "unjupe_score",	CF_INT, NULL, 0, &config_file.unjupe_score	},
 	{ "pending_time",	CF_TIME,NULL, 0, &config_file.pending_time	},
+	{ "merge_into_operserv",CF_YESNO,NULL, 0, &config_file.js_merge_into_operserv	},
 	{ "\0", 0, NULL, 0, NULL }
 };
 
