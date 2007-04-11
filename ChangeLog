@@ -1,3 +1,13 @@
+leeh        2007/04/11 22:49:35 UTC	(20070411_2-23829)
+  Log:
+  - when merging services, use dlink_add_tail so helpfile ordering doesn't
+    move around when its rehashed
+  
+
+  Modified:
+	rserv/trunk/src/service.c (File Modified) 
+
+
 leeh        2007/04/11 22:48:39 UTC	(20070411_1-23827)
   Log:
   - make watchserv support merging into operserv
