@@ -62,13 +62,13 @@ static struct client *banserv_p;
 static int o_banserv_kline(struct client *, struct lconn *, const char **, int);
 static int o_banserv_xline(struct client *, struct lconn *, const char **, int);
 static int o_banserv_resv(struct client *, struct lconn *, const char **, int);
-static int o_banserv_regexp(struct client *, struct lconn *, const char **, int);
-static int o_banserv_regexpneg(struct client *, struct lconn *, const char **, int);
+static int o_banserv_addregexp(struct client *, struct lconn *, const char **, int);
+static int o_banserv_addregexpneg(struct client *, struct lconn *, const char **, int);
 static int o_banserv_unkline(struct client *, struct lconn *, const char **, int);
 static int o_banserv_unxline(struct client *, struct lconn *, const char **, int);
 static int o_banserv_unresv(struct client *, struct lconn *, const char **, int);
-static int o_banserv_unregexp(struct client *, struct lconn *, const char **, int);
-static int o_banserv_unregexpneg(struct client *, struct lconn *, const char **, int);
+static int o_banserv_delregexp(struct client *, struct lconn *, const char **, int);
+static int o_banserv_delregexpneg(struct client *, struct lconn *, const char **, int);
 static int o_banserv_sync(struct client *, struct lconn *, const char **, int);
 static int o_banserv_findkline(struct client *, struct lconn *, const char **, int);
 static int o_banserv_findxline(struct client *, struct lconn *, const char **, int);
@@ -77,40 +77,40 @@ static int o_banserv_listregexps(struct client *, struct lconn *, const char **,
 
 static struct service_command banserv_command[] =
 {
-	{ "KLINE",	&o_banserv_kline,	2, NULL, 1, 0L, 0, 0, CONF_OPER_BAN_KLINE },
-	{ "XLINE",	&o_banserv_xline,	2, NULL, 1, 0L, 0, 0, CONF_OPER_BAN_XLINE },
-	{ "RESV",	&o_banserv_resv,	2, NULL, 1, 0L, 0, 0, CONF_OPER_BAN_RESV },
-	{ "REGEXP",	&o_banserv_regexp,	2, NULL, 1, 0L, 0, 0, CONF_OPER_BAN_REGEXP	},
-	{ "REGEXPNEG",	&o_banserv_regexpneg,	2, NULL, 1, 0L, 0, 0, CONF_OPER_BAN_REGEXP	},
-	{ "UNKLINE",	&o_banserv_unkline,	1, NULL, 1, 0L, 0, 0, CONF_OPER_BAN_KLINE },
-	{ "UNXLINE",	&o_banserv_unxline,	1, NULL, 1, 0L, 0, 0, CONF_OPER_BAN_XLINE },
-	{ "UNRESV",	&o_banserv_unresv,	1, NULL, 1, 0L, 0, 0, CONF_OPER_BAN_RESV },
-	{ "UNREGEXP",	&o_banserv_unregexp,	1, NULL, 1, 0L, 0, 0, CONF_OPER_BAN_REGEXP	},
-	{ "UNREGEXPNEG",&o_banserv_unregexpneg,	1, NULL, 1, 0L, 0, 0, CONF_OPER_BAN_REGEXP	},
-	{ "SYNC",	&o_banserv_sync,	1, NULL, 1, 0L, 0, 0, 0 },
-	{ "FINDKLINE",	&o_banserv_findkline,	1, NULL, 1, 0L, 0, 0, CONF_OPER_BAN_KLINE },
-	{ "FINDXLINE",	&o_banserv_findxline,	1, NULL, 1, 0L, 0, 0, CONF_OPER_BAN_XLINE },
-	{ "FINDRESV",	&o_banserv_findresv,	1, NULL, 1, 0L, 0, 0, CONF_OPER_BAN_RESV 	},
-	{ "LISTREGEXPS",&o_banserv_listregexps,	0, NULL, 1, 0L, 0, 0, CONF_OPER_BAN_REGEXP	}
+	{ "KLINE",		&o_banserv_kline,	2, NULL, 1, 0L, 0, 0, CONF_OPER_BAN_KLINE 	},
+	{ "XLINE",		&o_banserv_xline,	2, NULL, 1, 0L, 0, 0, CONF_OPER_BAN_XLINE 	},
+	{ "RESV",		&o_banserv_resv,	2, NULL, 1, 0L, 0, 0, CONF_OPER_BAN_RESV 	},
+	{ "ADDREGEXP",		&o_banserv_addregexp,	2, NULL, 1, 0L, 0, 0, CONF_OPER_BAN_REGEXP	},
+	{ "ADDREGEXPNEG",	&o_banserv_addregexpneg,2, NULL, 1, 0L, 0, 0, CONF_OPER_BAN_REGEXP	},
+	{ "UNKLINE",		&o_banserv_unkline,	1, NULL, 1, 0L, 0, 0, CONF_OPER_BAN_KLINE 	},
+	{ "UNXLINE",		&o_banserv_unxline,	1, NULL, 1, 0L, 0, 0, CONF_OPER_BAN_XLINE 	},
+	{ "UNRESV",		&o_banserv_unresv,	1, NULL, 1, 0L, 0, 0, CONF_OPER_BAN_RESV 	},
+	{ "DELREGEXP",		&o_banserv_delregexp,	1, NULL, 1, 0L, 0, 0, CONF_OPER_BAN_REGEXP	},
+	{ "DELREGEXPNEG",	&o_banserv_delregexpneg,1, NULL, 1, 0L, 0, 0, CONF_OPER_BAN_REGEXP	},
+	{ "SYNC",		&o_banserv_sync,	1, NULL, 1, 0L, 0, 0, 0 			},
+	{ "FINDKLINE",		&o_banserv_findkline,	1, NULL, 1, 0L, 0, 0, CONF_OPER_BAN_KLINE 	},
+	{ "FINDXLINE",		&o_banserv_findxline,	1, NULL, 1, 0L, 0, 0, CONF_OPER_BAN_XLINE 	},
+	{ "FINDRESV",		&o_banserv_findresv,	1, NULL, 1, 0L, 0, 0, CONF_OPER_BAN_RESV 	},
+	{ "LISTREGEXPS",	&o_banserv_listregexps,	0, NULL, 1, 0L, 0, 0, CONF_OPER_BAN_REGEXP	}
 };
 
 static struct ucommand_handler banserv_ucommand[] =
 {
-	{ "kline",	o_banserv_kline,	0, CONF_OPER_BAN_KLINE, 2, NULL },
-	{ "xline",	o_banserv_xline,	0, CONF_OPER_BAN_XLINE, 2, NULL },
-	{ "resv",	o_banserv_resv,		0, CONF_OPER_BAN_RESV, 2, NULL },
-	{ "regexp",	o_banserv_regexp,	0, CONF_OPER_BAN_REGEXP, 2, NULL },
-	{ "regexpneg",	o_banserv_regexpneg,	0, CONF_OPER_BAN_REGEXP, 2, NULL },
-	{ "unkline",	o_banserv_unkline,	0, CONF_OPER_BAN_KLINE, 1, NULL },
-	{ "unxline",	o_banserv_unxline,	0, CONF_OPER_BAN_XLINE, 1, NULL },
-	{ "unresv",	o_banserv_unresv,	0, CONF_OPER_BAN_RESV, 1, NULL },
-	{ "unregexp",	o_banserv_unregexp,	0, CONF_OPER_BAN_REGEXP, 1, NULL },
-	{ "unregexpneg",o_banserv_unregexpneg,	0, CONF_OPER_BAN_REGEXP, 1, NULL },
-	{ "findkline",	o_banserv_findkline,	0, CONF_OPER_BAN_KLINE, 1, NULL },
-	{ "findxline",	o_banserv_findxline,	0, CONF_OPER_BAN_XLINE, 1, NULL },
-	{ "findresv",	o_banserv_findresv,	0, CONF_OPER_BAN_RESV, 1, NULL },
-	{ "sync",	o_banserv_sync,		0, 0, 1, NULL },
-	{ "listregexps",o_banserv_listregexps,	0, CONF_OPER_BAN_REGEXP, 0, NULL	},
+	{ "kline",		o_banserv_kline,	0, CONF_OPER_BAN_KLINE, 2, NULL },
+	{ "xline",		o_banserv_xline,	0, CONF_OPER_BAN_XLINE, 2, NULL },
+	{ "resv",		o_banserv_resv,		0, CONF_OPER_BAN_RESV, 2, NULL },
+	{ "addregexp",		o_banserv_regexp,	0, CONF_OPER_BAN_REGEXP, 2, NULL },
+	{ "addregexpneg",	o_banserv_regexpneg,	0, CONF_OPER_BAN_REGEXP, 2, NULL },
+	{ "unkline",		o_banserv_unkline,	0, CONF_OPER_BAN_KLINE, 1, NULL },
+	{ "unxline",		o_banserv_unxline,	0, CONF_OPER_BAN_XLINE, 1, NULL },
+	{ "unresv",		o_banserv_unresv,	0, CONF_OPER_BAN_RESV, 1, NULL },
+	{ "delregexp",		o_banserv_delregexp,	0, CONF_OPER_BAN_REGEXP, 1, NULL },
+	{ "delregexpneg",	o_banserv_delregexpneg,	0, CONF_OPER_BAN_REGEXP, 1, NULL },
+	{ "findkline",		o_banserv_findkline,	0, CONF_OPER_BAN_KLINE, 1, NULL },
+	{ "findxline",		o_banserv_findxline,	0, CONF_OPER_BAN_XLINE, 1, NULL },
+	{ "findresv",		o_banserv_findresv,	0, CONF_OPER_BAN_RESV, 1, NULL },
+	{ "sync",		o_banserv_sync,		0, 0, 1, NULL },
+	{ "listregexps",	o_banserv_listregexps,	0, CONF_OPER_BAN_REGEXP, 0, NULL	},
 	{ "\0", NULL, 0, 0, 0, NULL }
 };
 
@@ -858,7 +858,7 @@ o_banserv_resv(struct client *client_p, struct lconn *conn_p, const char *parv[]
 }
 
 static int
-o_banserv_regexp(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
+o_banserv_addregexp(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	static pcre *regexp_validity = NULL;
 	pcre *regexp_comp;
@@ -930,7 +930,7 @@ o_banserv_regexp(struct client *client_p, struct lconn *conn_p, const char *parv
 	if(EmptyString(reason))
 	{
 		service_snd(banserv_p, client_p, conn_p, SVC_NEEDMOREPARAMS,
-				banserv_p->name, "RESV");
+				banserv_p->name, "ADDREGEXP");
 		return 0;
 	}
 
@@ -969,7 +969,7 @@ o_banserv_regexp(struct client *client_p, struct lconn *conn_p, const char *parv
 			banserv_p->name, mask, matches);
 
 	zlog(banserv_p, 1, WATCH_BANSERV, 1, client_p, conn_p,
-		"REGEXP %s %s %s",
+		"ADDREGEXP %s %s %s",
 		temptime ? get_short_duration(temptime) : "perm",
 		mask, reason);
 
@@ -977,7 +977,7 @@ o_banserv_regexp(struct client *client_p, struct lconn *conn_p, const char *parv
 }
 
 static int
-o_banserv_regexpneg(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
+o_banserv_addregexpneg(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	static pcre *regexp_validity = NULL;
 	pcre *regexp_comp;
@@ -1059,10 +1059,10 @@ o_banserv_regexpneg(struct client *client_p, struct lconn *conn_p, const char *p
 			parent_p->id, parv[1], OPER_NAME(client_p, conn_p));
 
 	service_snd(banserv_p, client_p, conn_p, SVC_SUCCESSFULON,
-			banserv_p->name, "REGEXPNEG", parv[1]);
+			banserv_p->name, "ADDREGEXPNEG", parv[1]);
 
 	zlog(banserv_p, 1, WATCH_BANSERV, 1, client_p, conn_p,
-		"REGEXPNEG %u %s",
+		"ADDREGEXPNEG %u %s",
 		parent_p->id, parv[1]);
 
 	return 0;
@@ -1219,7 +1219,7 @@ o_banserv_unresv(struct client *client_p, struct lconn *conn_p, const char *parv
 }
 
 static int
-o_banserv_unregexp(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
+o_banserv_delregexp(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct regexp_ban *regexp_p;
 	dlink_node *ptr;
@@ -1254,7 +1254,7 @@ o_banserv_unregexp(struct client *client_p, struct lconn *conn_p, const char *pa
 		if(hit)
 		{
 			service_snd(banserv_p, client_p, conn_p, SVC_NOACCESS,
-					banserv_p->name, "UNREGEXP");
+					banserv_p->name, "DELREGEXP");
 			return 0;
 		}
 	}
@@ -1263,16 +1263,16 @@ o_banserv_unregexp(struct client *client_p, struct lconn *conn_p, const char *pa
 	regexp_free(regexp_p, 0);
 
 	service_snd(banserv_p, client_p, conn_p, SVC_SUCCESSFULON,
-			banserv_p->name, "UNREGEXP", parv[0]);
+			banserv_p->name, "DELREGEXP", parv[0]);
 
 	zlog(banserv_p, 1, WATCH_BANSERV, 1, client_p, conn_p,
-		"UNREGEXP %s", parv[0]);
+		"DELREGEXP %s", parv[0]);
 
 	return 0;
 }
 
 static int
-o_banserv_unregexpneg(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
+o_banserv_delregexpneg(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct regexp_ban *regexp_p;
 	struct regexp_ban *parent_p;
@@ -1326,7 +1326,7 @@ o_banserv_unregexpneg(struct client *client_p, struct lconn *conn_p, const char 
 		if(hit)
 		{
 			service_snd(banserv_p, client_p, conn_p, SVC_NOACCESS,
-					banserv_p->name, "UNREGEXPNEG");
+					banserv_p->name, "DELREGEXPNEG");
 			return 0;
 		}
 	}
@@ -1337,10 +1337,10 @@ o_banserv_unregexpneg(struct client *client_p, struct lconn *conn_p, const char 
 	regexp_free(regexp_p, 1);
 
 	service_snd(banserv_p, client_p, conn_p, SVC_SUCCESSFULON,
-			banserv_p->name, "UNREGEXPNEG", parv[1]);
+			banserv_p->name, "DELREGEXPNEG", parv[1]);
 
 	zlog(banserv_p, 1, WATCH_BANSERV, 1, client_p, conn_p,
-		"UNREGEXPNEG %s", parv[1]);
+		"DELREGEXPNEG %s", parv[1]);
 
 	return 0;
 }
