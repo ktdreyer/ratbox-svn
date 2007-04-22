@@ -1,3 +1,12 @@
+leeh        2007/04/22 10:53:35 UTC	(20070422_2-23841)
+  Log:
+  - forgot to rename function calls for dcc commands
+  
+
+  Modified:
+	rserv/trunk/src/s_banserv.c (File Modified) 
+
+
 leeh        2007/04/22 10:23:52 UTC	(20070422_1-23839)
   Log:
   - example.conf needs to know about regexp flag to operator {};
