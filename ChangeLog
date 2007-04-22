@@ -1,3 +1,12 @@
+leeh        2007/04/22 10:23:52 UTC	(20070422_1-23839)
+  Log:
+  - example.conf needs to know about regexp flag to operator {};
+  
+
+  Modified:
+	rserv/trunk/doc/example.conf (File Modified) 
+
+
 leeh        2007/04/22 10:21:45 UTC	(20070422_0-23837)
   Log:
   - add helpfiles for regular expressions
