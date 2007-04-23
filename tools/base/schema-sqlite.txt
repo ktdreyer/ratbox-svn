@@ -10,6 +10,7 @@ CREATE TABLE nicks (
 );
 
 CREATE TABLE users (
+	id INTEGER PRIMARY KEY,
 	username TEXT,
 	password TEXT,
 	email TEXT,
@@ -20,9 +21,9 @@ CREATE TABLE users (
 	last_time INTEGER,
 	flags INTEGER,
 	verify_token TEXT,
-	language TEXT DEFAULT '',
-	PRIMARY KEY(username)
+	language TEXT DEFAULT ''
 );
+CREATE UNIQUE INDEX users_username_unique ON users (username);
 
 CREATE TABLE users_resetpass (
 	username TEXT,

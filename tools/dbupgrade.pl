@@ -264,6 +264,9 @@ if($currentver < 6)
 		print "    oper VARCHAR(" . $vals{"OPERNAMELEN"} . ") NOT NULL,\n";
 		print "    PRIMARY KEY(id)\n";
 		print ");\n";
+		print "ALTER TABLE users DROP PRIMARY KEY;\n";
+		print "ALTER TABLE users ADD COLUMN id INTEGER AUTO_INCREMENT PRIMARY KEY FIRST;\n";
+		print "ALTER TABLE users ADD UNIQUE(username);\n";
 	}
 	elsif($dbtype eq "pgsql")
 	{
@@ -291,6 +294,11 @@ if($currentver < 6)
 		print "    oper VARCHAR(" . $vals{"OPERNAMELEN"} . ") NOT NULL,\n";
 		print "    PRIMARY KEY(id)\n";
 		print ");\n";
+		print "ALTER TABLE users DROP CONSTRAINT users_pkey CASCADE;\n";
+		print "ALTER TABLE users ADD UNIQUE(username);\n";
+		print "ALTER TABLE members ADD FOREIGN KEY (username) REFERENCES users (username) MATCH FULL;\n";
+		print "ALTER TABLE nicks ADD FOREIGN KEY (username) REFERENCES users (username) MATCH FULL;\n";
+		print "ALTER TABLE users ADD COLUMN id SERIAL PRIMARY KEY;\n";
 	}
 	else
 	{
@@ -316,6 +324,18 @@ if($currentver < 6)
 		print "    regex TEXT NOT NULL,\n";
 		print "    oper TEXT NOT NULL\n";
 		print ");\n";
+		print "CREATE TABLE users_tmpmerge (\n";
+		print "    id INTEGER PRIMARY KEY, username TEXT, password TEXT, email TEXT, suspender TEXT,\n";
+		print "    suspend_reason TEXT, suspend_time INTEGER DEFAULT '0', reg_time INTEGER,\n";
+		print "    last_time INTEGER, flags INTEGER, verify_token TEXT, language TEXT DEFAULT ''\n";
+		print ");\n";
+		print "INSERT INTO users_tmpmerge (username, password, email, suspender, suspend_reason,\n";
+		print "suspend_time, reg_time, last_time, flags, verify_token, language)\n";
+		print "SELECT username, password, email, suspender, suspend_reason,\n";
+		print "suspend_time, reg_time, last_time, flags, verify_token, language FROM users;\n";
+		print "ALTER TABLE users RENAME TO users_pre_dbupgrade;\n";
+		print "ALTER TABLE users_tmpmerge RENAME TO users;\n";
+		print "CREATE UNIQUE INDEX users_username_unique ON users (username);\n";
 	}
 
 	print "\n";

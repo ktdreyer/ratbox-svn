@@ -1,6 +1,7 @@
 -- $Id$
 
 CREATE TABLE users (
+	id SERIAL,
 	username VARCHAR(USERREGNAME_LEN) NOT NULL,
 	password VARCHAR(PASSWDLEN) NOT NULL,
 	email VARCHAR(EMAILLEN),
@@ -12,8 +13,9 @@ CREATE TABLE users (
 	flags INTEGER,
 	verify_token VARCHAR(8),
 	language VARCHAR(255) DEFAULT '',
-	PRIMARY KEY(username)
+	PRIMARY KEY(id)
 );
+ALTER TABLE users ADD UNIQUE(username);
 
 CREATE TABLE users_resetpass (
 	username VARCHAR(USERREGNAME_LEN) NOT NULL,
