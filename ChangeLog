@@ -1,3 +1,15 @@
+leeh        2007/04/23 20:05:43 UTC	(20070423_1-23867)
+  Log:
+  - rework the users table so that it has an id field
+  
+
+  Modified:
+	rserv/trunk/tools/base/schema-mysql.txt (File Modified) 
+	rserv/trunk/tools/base/schema-pgsql.txt (File Modified) 
+	rserv/trunk/tools/base/schema-sqlite.txt (File Modified) 
+	rserv/trunk/tools/dbupgrade.pl (File Modified) 
+
+
 leeh        2007/04/23 18:06:00 UTC	(20070423_0-23865)
   Log:
   - add userserv::set::nomemos, to forbid memos being sent to the user
