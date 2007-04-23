@@ -4,4 +4,5 @@ Sets various username options.
   EMAIL    [email]   : Sets email address to [email].
   PRIVATE  [on|off]  : Hides information about username.
   NOACCESS [on|off]  : Prevents username from being added to channels.
+  NOMEMOS  [on|off]  : Prevents username from receiving memos.
   LANGUAGE [lang]    : Sets language to [language].  See LANGUAGE helpfile.
