@@ -1,3 +1,15 @@
+leeh        2007/04/24 20:17:01 UTC	(20070424_1-23877)
+  Log:
+  - make rsdb_hook_schedule() take a callback function for once its executed
+    the sql
+  
+
+  Modified:
+	rserv/trunk/include/dbhook.h (File Modified) 
+	rserv/trunk/src/dbhook.c (File Modified) 
+	rserv/trunk/src/s_userserv.c (File Modified) 
+
+
 leeh        2007/04/24 19:56:17 UTC	(20070424_0-23875)
   Log:
   - store the id field for the row from users table, and when inserting rows
