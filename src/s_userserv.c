@@ -146,7 +146,7 @@ init_s_userserv(void)
 
 	rsdb_exec(user_db_callback, 
 			"SELECT username, password, email, suspender, suspend_reason, "
-			"suspend_time, reg_time, last_time, flags, language FROM users");
+			"suspend_time, reg_time, last_time, flags, language, id FROM users");
 
 	rsdb_hook_add("users_sync", "REGISTER", 900, dbh_user_register);
 	rsdb_hook_add("users_sync", "SETPASS", 900, dbh_user_setpass);
@@ -236,6 +236,8 @@ user_db_callback(int argc, const char **argv)
 	/* entries may not have a language */
 	if(!EmptyString(argv[9]))
 		reg_p->language = lang_get_langcode(argv[9]);
+
+	reg_p->id = atoi(argv[10]);
 
 	add_user_reg(reg_p);
 
@@ -628,7 +630,8 @@ o_user_userregister(struct client *client_p, struct lconn *conn_p, const char *p
 
 	add_user_reg(reg_p);
 
-	rsdb_exec(NULL, "INSERT INTO users (username, password, email, reg_time, last_time, flags, language) "
+	rsdb_exec_insert(&reg_p->id, "users", "id",
+			"INSERT INTO users (username, password, email, reg_time, last_time, flags, language) "
 			"VALUES('%Q', '%Q', '%Q', '%lu', '%lu', '%u', '')",
 			reg_p->name, reg_p->password, 
 			EmptyString(reg_p->email) ? "" : reg_p->email, 
@@ -1225,7 +1228,8 @@ s_user_register(struct client *client_p, struct lconn *conn_p, const char *parv[
 
 	add_user_reg(reg_p);
 
-	rsdb_exec(NULL, "INSERT INTO users (username, password, email, reg_time, last_time, flags, verify_token, language) "
+	rsdb_exec_insert(&reg_p->id, "users", "id",
+			"INSERT INTO users (username, password, email, reg_time, last_time, flags, verify_token, language) "
 			"VALUES('%Q', '%Q', '%Q', '%lu', '%lu', '%u', '%Q', '')",
 			reg_p->name, reg_p->password, 
 			EmptyString(reg_p->email) ? "" : reg_p->email, 
