@@ -354,8 +354,9 @@ dbh_user_register(struct rsdb_hook *dbh, const char *c_data)
 
 	add_user_reg(ureg_p);
 
-	rsdb_hook_schedule("INSERT INTO users (username, password, email, reg_time, last_time, flags, language) "
-				"VALUES('%Q','%Q','%Q','%lu','%lu','0', '')",
+	rsdb_hook_schedule(NULL, NULL, 
+			"INSERT INTO users (username, password, email, reg_time, last_time, flags, language) "
+			"VALUES('%Q','%Q','%Q','%lu','%lu','0', '')",
 			ureg_p->name, ureg_p->password, ureg_p->email,
 			ureg_p->reg_time, ureg_p->last_time);
 	return 1;
@@ -381,7 +382,7 @@ dbh_user_setpass(struct rsdb_hook *dbh, const char *c_data)
 	my_free(ureg_p->password);
 	ureg_p->password = my_strdup(argv[1]);
 
-	rsdb_hook_schedule("UPDATE users SET password='%Q' WHERE username='%Q'",
+	rsdb_hook_schedule(NULL, NULL, "UPDATE users SET password='%Q' WHERE username='%Q'",
 			ureg_p->password, ureg_p->name);
 
 	return 1;
@@ -407,7 +408,7 @@ dbh_user_setemail(struct rsdb_hook *dbh, const char *c_data)
 	my_free(ureg_p->email);
 	ureg_p->email = my_strdup(argv[1]);
 
-	rsdb_hook_schedule("UPDATE users SET email='%Q' WHERE username='%Q'",
+	rsdb_hook_schedule(NULL, NULL, "UPDATE users SET email='%Q' WHERE username='%Q'",
 			ureg_p->email, ureg_p->name);
 
 	return 1;

@@ -161,9 +161,10 @@ rsdb_hook_call(void *v_dbh)
 }
 
 void
-rsdb_hook_schedule(const char *format, ...)
+rsdb_hook_schedule(dbh_schedule_callback callback, void *arg, const char *format, ...)
 {
 	static char buf[BUFSIZE*4];
+	struct dbh_schedule *sched_p;
 	va_list args;
 	int i;
 
@@ -177,19 +178,32 @@ rsdb_hook_schedule(const char *format, ...)
 		die(0, "problem with compiling sql statement");
 	}
 
-	dlink_add_alloc(my_strdup(buf), &dbh_schedule_list);
+	sched_p = my_malloc(sizeof(struct dbh_schedule));
+	sched_p->callback = callback;
+	sched_p->arg = arg;
+	sched_p->sql = my_strdup(buf);
+
+	dlink_add(sched_p, &sched_p->ptr, &dbh_schedule_list);
 }
 
 static void
 rsdb_hook_schedule_execute(void)
 {
+	struct dbh_schedule *sched_p;
 	dlink_node *ptr, *next_ptr;
 
 	DLINK_FOREACH_SAFE(ptr, next_ptr, dbh_schedule_list.head)
 	{
-		rsdb_exec(NULL, "%s", (const char *) ptr->data);
-		my_free(ptr->data);
-		dlink_destroy(ptr, &dbh_schedule_list);
+		sched_p = ptr->data;
+
+		rsdb_exec(NULL, "%s", sched_p->sql);
+
+		if(sched_p->callback)
+			(sched_p->callback)(sched_p->arg);
+
+		dlink_delete(&sched_p->ptr, &dbh_schedule_list);
+		my_free(sched_p->sql);
+		my_free(sched_p);
 	}
 }
 
