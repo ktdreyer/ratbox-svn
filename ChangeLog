@@ -1,3 +1,12 @@
+leeh        2007/04/25 18:32:30 UTC	(20070425_0-23879)
+  Log:
+  - make the dbhook for registering users update ids via a callback
+  
+
+  Modified:
+	rserv/trunk/src/s_userserv.c (File Modified) 
+
+
 leeh        2007/04/24 20:17:01 UTC	(20070424_1-23877)
   Log:
   - make rsdb_hook_schedule() take a callback function for once its executed
