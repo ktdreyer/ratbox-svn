@@ -325,6 +325,29 @@ logout_user_reg(struct user_reg *ureg_p)
 	}
 }
 
+static void
+dbh_user_register_update_id(void *arg)
+{
+	struct user_reg *ureg_p = arg;
+	struct rsdb_table data;
+
+	rsdb_exec_fetch(&data, "SELECT id FROM users WHERE username='%Q'",
+			ureg_p->name);
+
+	if(data.row_count == 0)
+	{
+		mlog("warning: Unable to retrieve ID for dbhook registered username %s, deleting user",
+			ureg_p->name);
+
+		rsdb_exec_fetch_end(&data);
+		free_user_reg(ureg_p);
+		return;
+	}
+
+	ureg_p->id = atoi(data.row[0][0]);
+	rsdb_exec_fetch_end(&data);
+}
+
 static int
 dbh_user_register(struct rsdb_hook *dbh, const char *c_data)
 {
@@ -354,7 +377,7 @@ dbh_user_register(struct rsdb_hook *dbh, const char *c_data)
 
 	add_user_reg(ureg_p);
 
-	rsdb_hook_schedule(NULL, NULL, 
+	rsdb_hook_schedule(dbh_user_register_update_id, ureg_p,
 			"INSERT INTO users (username, password, email, reg_time, last_time, flags, language) "
 			"VALUES('%Q','%Q','%Q','%lu','%lu','0', '')",
 			ureg_p->name, ureg_p->password, ureg_p->email,
