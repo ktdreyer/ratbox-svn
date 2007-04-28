@@ -42,7 +42,11 @@ my %versionlist = (
 	"1.1.0beta2"	=> 2,
 	"1.1.0beta3"	=> 2,
 	"1.1.0beta4"	=> 3,
-	"1.1.0rc1"	=> 4
+	"1.1.0rc1"	=> 4,
+	"1.1.0rc2"	=> 5,
+	"1.1.0rc3"	=> 5,
+	"1.1.0"		=> 5,
+	"1.1.1"		=> 5
 );
 
 my $version = $ARGV[0];
@@ -267,6 +271,15 @@ if($currentver < 6)
 		print "ALTER TABLE users DROP PRIMARY KEY;\n";
 		print "ALTER TABLE users ADD COLUMN id INTEGER AUTO_INCREMENT PRIMARY KEY FIRST;\n";
 		print "ALTER TABLE users ADD UNIQUE(username);\n";
+		print "CREATE TABLE memos(\n";
+		print "    id INTEGER AUTO_INCREMENT,\n";
+		print "    user_id INTEGER NOT NULL,\n";
+		print "    source_id INTEGER NOT NULL,\n";
+		print "    timestamp INTEGER UNSIGNED DEFAULT '0',\n";
+		print "    flags INTEGER UNSIGNED DEFAULT '0',\n";
+		print "    text TEXT,\n";
+		print "    PRIMARY KEY(id)\n";
+		print ");\n";
 	}
 	elsif($dbtype eq "pgsql")
 	{
@@ -299,6 +312,17 @@ if($currentver < 6)
 		print "ALTER TABLE members ADD FOREIGN KEY (username) REFERENCES users (username) MATCH FULL;\n";
 		print "ALTER TABLE nicks ADD FOREIGN KEY (username) REFERENCES users (username) MATCH FULL;\n";
 		print "ALTER TABLE users ADD COLUMN id SERIAL PRIMARY KEY;\n";
+		print "CREATE TABLE memos (\n";
+		print "    id SERIAL,\n";
+		print "    user_id BIGINT NOT NULL,\n";
+		print "    source_id BIGINT NOT NULL,\n";
+		print "    timestamp INTEGER DEFAULT '0',\n";
+		print "    flags INTEGER DEFAULT '0',\n";
+		print "    text TEXT,\n";
+		print "    PRIMARY KEY(id),\n";
+		print "    FOREIGN KEY (user_id) REFERENCES users (id) MATCH FULL,\n";
+		print "    FOREIGN KEY (source_id) REFERENCES users(id) MATCH FULL\n";
+		print ");\n";
 	}
 	else
 	{
@@ -336,6 +360,14 @@ if($currentver < 6)
 		print "ALTER TABLE users RENAME TO users_pre_dbupgrade;\n";
 		print "ALTER TABLE users_tmpmerge RENAME TO users;\n";
 		print "CREATE UNIQUE INDEX users_username_unique ON users (username);\n";
+		print "CREATE TABLE memos (\n";
+		print "    id INTEGER PRIMARY KEY,\n";
+		print "    user_id INTEGER NOT NULL,\n";
+		print "    source_id INTEGER NOT NULL,\n";
+		print "    timestamp INTEGER DEFAULT '0',\n";
+		print "    flags INTEGER DEFAULT '0',\n";
+		print "    text TEXT\n";
+		print ");\n";
 	}
 
 	print "\n";
