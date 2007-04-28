@@ -233,6 +233,9 @@ struct _lang_internal lang_internal[] =
 	{ SVC_MEMO_RECEIVED,		"You have received memo #%u from %s"			},
 	{ SVC_MEMO_SENT,		"Memo to %s sent"					},
 	{ SVC_MEMO_TOOMANYMEMOS,	"Unable to send memo to %s, user has reached maximum memo limit"	},
+	{ SVC_MEMO_INVALID,		"Invalid memo number %s"				},
+	{ SVC_MEMO_DELETED,		"Deleted memo #%u"					},
+	{ SVC_MEMO_DELETEDALL,		"Deleted memos"						},
 
 	/* this must be last */
 	{ SVC_LAST,		"\0"	},

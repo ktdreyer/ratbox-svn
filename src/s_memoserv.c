@@ -147,6 +147,54 @@ s_memo_send(struct client *client_p, struct lconn *conn_p, const char *parv[], i
 static int
 s_memo_delete(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
+	char *endptr;
+	const char *id_str;
+	unsigned int id;
+
+	id_str = parv[0];
+
+	if(*id_str == '#')
+		id_str++;
+
+	id = strtol(id_str, &endptr, 10);
+
+	if(!strcasecmp(id_str, "ALL"))
+	{
+		rsdb_exec(NULL, "DELETE FROM memos WHERE user_id='%u'",
+			client_p->user->user_reg->id);
+
+		service_err(memoserv_p, client_p, SVC_MEMO_DELETEDALL);
+	}
+	else if(EmptyString(endptr) && id > 0)
+	{
+		struct rsdb_table data;
+		unsigned int user_id;
+
+		rsdb_exec_fetch(&data, "SELECT user_id FROM memos WHERE id='%u'", id);
+
+		if(data.row_count == 0)
+		{
+			service_err(memoserv_p, client_p, SVC_MEMO_INVALID, parv[0]);
+			rsdb_exec_fetch_end(&data);
+			return 1;
+		}
+
+		user_id = atoi(data.row[0][0]);
+		rsdb_exec_fetch_end(&data);
+
+		if(user_id == client_p->user->user_reg->id)
+		{
+			rsdb_exec(NULL, "DELETE FROM memos WHERE id='%u'", id);
+			service_err(memoserv_p, client_p, SVC_MEMO_DELETED, id);
+		}
+		else
+			service_err(memoserv_p, client_p, SVC_MEMO_INVALID, parv[0]);
+	}
+	else
+	{
+		service_err(memoserv_p, client_p, SVC_MEMO_INVALID, parv[0]);
+	}
+
 	return 0;
 }
 

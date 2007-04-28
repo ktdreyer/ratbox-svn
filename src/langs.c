@@ -249,6 +249,9 @@ const char *svc_notice_string[] =
 	"SVC_MEMO_RECEIVED",
 	"SVC_MEMO_SENT",
 	"SVC_MEMO_TOOMANYMEMOS",
+	"SVC_MEMO_INVALID",
+	"SVC_MEMO_DELETED",
+	"SVC_MEMO_DELETEDALL",
 
 	/* must be last */
 	"\0"
