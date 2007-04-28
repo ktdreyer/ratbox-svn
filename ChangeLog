@@ -1,3 +1,15 @@
+leeh        2007/04/28 15:37:59 UTC	(20070428_3-23892)
+  Log:
+  - add in code for deleting memos
+  
+
+  Modified:
+	rserv/trunk/include/langs.h (File Modified) 
+	rserv/trunk/src/langs.c (File Modified) 
+	rserv/trunk/src/messages.c (File Modified) 
+	rserv/trunk/src/s_memoserv.c (File Modified) 
+
+
 leeh        2007/04/28 15:16:03 UTC	(20070428_2-23890)
   Log:
   - add in conf stuff for memoserv, including max_memos to define maximum
