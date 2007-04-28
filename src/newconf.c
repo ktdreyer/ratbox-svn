@@ -1185,6 +1185,12 @@ static struct ConfEntry conf_watchserv_table[] =
 	{ "\0", 0, NULL, 0, NULL }
 };
 
+static struct ConfEntry conf_memoserv_table[] =
+{
+	{ "max_memos",		CF_INT,  NULL, 0, &config_file.ms_max_memos	},
+	{ "\0", 0, NULL, 0, NULL }
+};
+
 void
 newconf_init()
 {
@@ -1205,4 +1211,5 @@ newconf_init()
 	add_conf_extension("service", "alis", conf_alis_table);
 	add_conf_extension("service", "banserv", conf_banserv_table);
 	add_conf_extension("service", "watchserv", conf_watchserv_table);
+	add_conf_extension("service", "memoserv", conf_memoserv_table);
 }

@@ -120,6 +120,9 @@ struct _config_file
 	/* watchserv */
 	int ws_merge_into_operserv;
 
+	/* memoserv */
+	int ms_max_memos;
+
 	/* alis */
 	int max_matches;
 };

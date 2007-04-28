@@ -229,8 +229,10 @@ struct _lang_internal lang_internal[] =
 	/* alis */
 	{ SVC_ALIS_LISTSTART,		"Returning maximum of %d channel names matching '%s'"	},
 
+	/* memoserv */
 	{ SVC_MEMO_RECEIVED,		"You have received memo #%u from %s"			},
 	{ SVC_MEMO_SENT,		"Memo to %s sent"					},
+	{ SVC_MEMO_TOOMANYMEMOS,	"Unable to send memo to %s, user has reached maximum memo limit"	},
 
 	/* this must be last */
 	{ SVC_LAST,		"\0"	},

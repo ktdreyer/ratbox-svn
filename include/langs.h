@@ -237,6 +237,7 @@ enum svc_notice_enum
 	/* memoserv */
 	SVC_MEMO_RECEIVED,
 	SVC_MEMO_SENT,
+	SVC_MEMO_TOOMANYMEMOS,
 
 	/* this must be last */
 	SVC_LAST

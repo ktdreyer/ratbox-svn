@@ -90,6 +90,7 @@ s_memo_send(struct client *client_p, struct lconn *conn_p, const char *parv[], i
 {
 	const char *msg;
 	struct user_reg *ureg_p;
+	struct rsdb_table data;
 	unsigned int memo_id;
 	dlink_node *ptr;
 
@@ -103,6 +104,25 @@ s_memo_send(struct client *client_p, struct lconn *conn_p, const char *parv[], i
 				ureg_p->name, "NOMEMOS", "ON");
 		return 1;
 	}
+
+	rsdb_exec_fetch(&data, "SELECT COUNT(*) FROM memos WHERE user_id='%u'",
+			ureg_p->id);
+
+	if(data.row_count == 0)
+	{
+		mlog("fatal error: SELECT COUNT() returned 0 rows in s_memo_send()");
+		die(0, "problem with db file");
+	}
+
+	if(atoi(data.row[0][0]) >= config_file.ms_max_memos)
+	{
+		service_err(memoserv_p, client_p, SVC_MEMO_TOOMANYMEMOS,
+				ureg_p->name);
+		rsdb_exec_fetch_end(&data);
+		return 1;
+	}
+
+	rsdb_exec_fetch_end(&data);
 
 	msg = rebuild_params(parv, parc, 1);
 

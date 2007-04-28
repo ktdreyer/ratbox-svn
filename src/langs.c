@@ -248,6 +248,7 @@ const char *svc_notice_string[] =
 	/* memoserv */
 	"SVC_MEMO_RECEIVED",
 	"SVC_MEMO_SENT",
+	"SVC_MEMO_TOOMANYMEMOS",
 
 	/* must be last */
 	"\0"
