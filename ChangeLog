@@ -1,3 +1,15 @@
+leeh        2007/04/28 14:34:55 UTC	(20070428_0-23886)
+  Log:
+  - schemas for memos table
+  
+
+  Modified:
+	rserv/trunk/tools/base/schema-mysql.txt (File Modified) 
+	rserv/trunk/tools/base/schema-pgsql.txt (File Modified) 
+	rserv/trunk/tools/base/schema-sqlite.txt (File Modified) 
+	rserv/trunk/tools/dbupgrade.pl (File Modified) 
+
+
 leeh        2007/04/25 18:32:30 UTC	(20070425_0-23879)
   Log:
   - make the dbhook for registering users update ids via a callback
