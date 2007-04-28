@@ -245,6 +245,10 @@ const char *svc_notice_string[] =
 	/* alis */
 	"SVC_ALIS_LISTSTART",
 
+	/* memoserv */
+	"SVC_MEMO_RECEIVED",
+	"SVC_MEMO_SENT",
+
 	/* must be last */
 	"\0"
 };

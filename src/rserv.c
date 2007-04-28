@@ -363,6 +363,9 @@ main(int argc, char *argv[])
 #ifdef ENABLE_WATCHSERV
 	preinit_s_watchserv();
 #endif
+#ifdef ENABLE_MEMOSERV
+	preinit_s_memoserv();
+#endif
 
 	/* load specific commands */
         add_scommand_handler(&error_command);

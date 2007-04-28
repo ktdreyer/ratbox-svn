@@ -15,6 +15,9 @@
 /* Jupe Service */
 #undef ENABLE_JUPESERV
 
+/* Memo Service */
+#undef ENABLE_MEMOSERV
+
 /* Nickname Service */
 #undef ENABLE_NICKSERV
 

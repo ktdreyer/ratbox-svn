@@ -690,6 +690,7 @@ DB_BACKEND
 S_NICKSERV
 S_CHANSERV
 S_USERSERV
+S_MEMOSERV
 S_OPERSERV
 S_ALIS
 S_JUPESERV
@@ -1286,6 +1287,7 @@ Optional Features:
  --disable-nickserv        Disable Nickname Service
  --disable-chanserv        Disable Channel Service
  --disable-userserv        Disable User Service
+ --disable-memoserv        Disable Memo Service
  --disable-operserv        Disable Oper Service
  --disable-alis            Disable (List Service)
  --disable-jupeserv        Disable Jupe Service
@@ -5145,6 +5147,31 @@ else
 echo "${ECHO_T}no" >&6; }
 fi
 
+{ echo "$as_me:$LINENO: checking Memo Service" >&5
+echo $ECHO_N "checking Memo Service... $ECHO_C" >&6; }
+# Check whether --enable-memoserv was given.
+if test "${enable_memoserv+set}" = set; then
+  enableval=$enable_memoserv;  cf_enable_memoserv=$enableval
+else
+   cf_enable_memoserv=yes
+fi
+
+
+if test "X$cf_enable_memoserv" = "Xyes"; then
+	S_MEMOSERV="s_memoserv.c"
+
+cat >>confdefs.h <<\_ACEOF
+#define ENABLE_MEMOSERV 1
+_ACEOF
+
+	{ echo "$as_me:$LINENO: result: yes" >&5
+echo "${ECHO_T}yes" >&6; }
+else
+	S_MEMOSERV=""
+	{ echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6; }
+fi
+
 { echo "$as_me:$LINENO: checking Oper Service" >&5
 echo $ECHO_N "checking Oper Service... $ECHO_C" >&6; }
 # Check whether --enable-operserv was given.
@@ -6620,6 +6647,7 @@ _ACEOF
 
 
 
+
 ac_config_files="$ac_config_files Makefile help/Makefile langs/Makefile src/Makefile"
 
 cat >confcache <<\_ACEOF
@@ -7316,6 +7344,7 @@ DB_BACKEND!$DB_BACKEND$ac_delim
 S_NICKSERV!$S_NICKSERV$ac_delim
 S_CHANSERV!$S_CHANSERV$ac_delim
 S_USERSERV!$S_USERSERV$ac_delim
+S_MEMOSERV!$S_MEMOSERV$ac_delim
 S_OPERSERV!$S_OPERSERV$ac_delim
 S_ALIS!$S_ALIS$ac_delim
 S_JUPESERV!$S_JUPESERV$ac_delim
@@ -7327,7 +7356,7 @@ LIBOBJS!$LIBOBJS$ac_delim
 LTLIBOBJS!$LTLIBOBJS$ac_delim
 _ACEOF
 
-  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 84; then
+  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 85; then
     break
   elif $ac_last_try; then
     { { echo "$as_me:$LINENO: error: could not make $CONFIG_STATUS" >&5
@@ -7945,6 +7974,7 @@ echo Database backend ........... $DB_BACKEND
 echo
 echo Nickname Services .......... $cf_enable_nickserv
 echo User Services .............. $cf_enable_userserv
+echo Memo Services .............. $cf_enable_memoserv
 echo Channel Services ........... $cf_enable_chanserv
 echo Oper Services .............. $cf_enable_operserv
 echo Jupe Services .............. $cf_enable_jupe

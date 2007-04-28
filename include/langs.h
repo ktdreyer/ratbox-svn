@@ -234,6 +234,10 @@ enum svc_notice_enum
 	/* alis */
 	SVC_ALIS_LISTSTART,
 
+	/* memoserv */
+	SVC_MEMO_RECEIVED,
+	SVC_MEMO_SENT,
+
 	/* this must be last */
 	SVC_LAST
 } svc_notice_id;
