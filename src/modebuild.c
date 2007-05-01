@@ -62,8 +62,13 @@ modebuild_init(void)
 void
 modebuild_start(struct client *source_p, struct channel *chptr)
 {
-	mlen = snprintf(modebuf, sizeof(modebuf), ":%s MODE %s ",
-			source_p->name, chptr->name);
+	if (server_p && !EmptyString(server_p->sid))
+		mlen = snprintf(modebuf, sizeof(modebuf), ":%s TMODE %lu %s ",
+				source_p->uid, (unsigned long) chptr->tsinfo,
+				chptr->name);
+	else
+		mlen = snprintf(modebuf, sizeof(modebuf), ":%s MODE %s ",
+				source_p->name, chptr->name);
 
 	modebuild_init();
 }
