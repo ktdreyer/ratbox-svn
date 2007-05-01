@@ -1,3 +1,17 @@
+jilles      2007/05/01 21:57:39 UTC	(20070501_4-23902)
+  Log:
+  modebuild: Use TMODE instead of MODE if the uplink supports
+  TS6. The TS6 spec wants this and it can avoid certain
+  desyncs involving multiple server restarts. In particular
+  this will affect autoop/autovoice on join. There are other
+  places using MODE which this commit does not change;
+  they need a smarter approach (sendto_server_mode()?).
+  
+
+  Modified:
+	rserv/trunk/src/modebuild.c (File Modified) 
+
+
 jilles      2007/05/01 21:33:48 UTC	(20070501_3-23900)
   Log:
   Allow WARNOVERRIDE to work without AUTOJOIN with
