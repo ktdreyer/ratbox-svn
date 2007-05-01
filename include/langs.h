@@ -241,6 +241,8 @@ enum svc_notice_enum
 	SVC_MEMO_INVALID,
 	SVC_MEMO_DELETED,
 	SVC_MEMO_DELETEDALL,
+	SVC_MEMO_LIST,
+	SVC_MEMO_LISTSTART,
 
 	/* this must be last */
 	SVC_LAST

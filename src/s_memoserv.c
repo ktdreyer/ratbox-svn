@@ -45,6 +45,8 @@
 #include "conf.h"
 #include "s_userserv.h"
 
+#define MS_FLAGS_READ			0x0001
+
 static struct client *memoserv_p;
 
 static int s_memo_list(struct client *, struct lconn *, const char **, int);
@@ -75,7 +77,39 @@ preinit_s_memoserv(void)
 static int
 s_memo_list(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
-	return 0;
+	struct rsdb_table data;
+	int i;
+	unsigned int read_count = 0;
+	unsigned int unread_count = 0;
+
+	rsdb_exec_fetch(&data, "SELECT id, source, timestamp, flags FROM memos WHERE user_id='%d'",
+			client_p->user->user_reg->id);
+
+	for(i = 0; i < data.row_count; i++)
+	{
+		if((atoi(data.row[i][3]) & MS_FLAGS_READ) == 0)
+			unread_count++;
+		else
+			read_count++;
+	}
+
+	service_err(memoserv_p, client_p, SVC_MEMO_LIST, unread_count, read_count);
+
+	if(unread_count == 0 && read_count == 0)
+		return 1;
+
+	service_err(memoserv_p, client_p, SVC_MEMO_LISTSTART);
+
+	for(i = 0; i < data.row_count; i++)
+	{
+		service_error(memoserv_p, client_p, "   %c %9d %s %s",
+				(atoi(data.row[i][3]) & MS_FLAGS_READ) ? ' ' : '*',
+				atoi(data.row[i][0]), get_time(atoi(data.row[i][2]), 0),
+				data.row[i][1]);
+	}
+
+	service_err(memoserv_p, client_p, SVC_ENDOFLIST);
+	return 1;
 }
 
 static int
@@ -127,10 +161,10 @@ s_memo_send(struct client *client_p, struct lconn *conn_p, const char *parv[], i
 	msg = rebuild_params(parv, parc, 1);
 
 	rsdb_exec_insert(&memo_id, "memos", "id",
-			"INSERT INTO memos (user_id, source_id, timestamp, flags, text)"
-			"VALUES('%u', '%u', '%ld', '0', '%Q')",
-			ureg_p->id, client_p->user->user_reg->id,
-			CURRENT_TIME, msg);
+			"INSERT INTO memos (user_id, source, source_id, timestamp, flags, text)"
+			"VALUES('%u', '%Q', '%u', '%ld', '0', '%Q')",
+			ureg_p->id, client_p->user->user_reg->name,
+			client_p->user->user_reg->id, CURRENT_TIME, msg);
 
 	service_err(memoserv_p, client_p, SVC_MEMO_SENT, ureg_p->name);
 

@@ -236,6 +236,8 @@ struct _lang_internal lang_internal[] =
 	{ SVC_MEMO_INVALID,		"Invalid memo number %s"				},
 	{ SVC_MEMO_DELETED,		"Deleted memo #%u"					},
 	{ SVC_MEMO_DELETEDALL,		"Deleted memos"						},
+	{ SVC_MEMO_LIST,		"%u new memos, %u old memos"				},
+	{ SVC_MEMO_LISTSTART,		"  New    Id    Date       Time  Sender"		},
 
 	/* this must be last */
 	{ SVC_LAST,		"\0"	},
