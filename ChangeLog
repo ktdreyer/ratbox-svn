@@ -1,3 +1,15 @@
+leeh        2007/05/01 17:24:07 UTC	(20070501_0-23894)
+  Log:
+  - store a text based version of the source as well
+  
+
+  Modified:
+	rserv/trunk/tools/base/schema-mysql.txt (File Modified) 
+	rserv/trunk/tools/base/schema-pgsql.txt (File Modified) 
+	rserv/trunk/tools/base/schema-sqlite.txt (File Modified) 
+	rserv/trunk/tools/dbupgrade.pl (File Modified) 
+
+
 leeh        2007/04/28 15:37:59 UTC	(20070428_3-23892)
   Log:
   - add in code for deleting memos
