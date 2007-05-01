@@ -19,7 +19,7 @@ extern char *my_strndup(const char *, size_t);
 
 extern const char *get_duration(time_t seconds);
 extern const char *get_short_duration(time_t seconds);
-extern const char *get_time(time_t when);
+extern const char *get_time(time_t when, int show_tz);
 
 time_t get_temp_time(const char *duration);
 

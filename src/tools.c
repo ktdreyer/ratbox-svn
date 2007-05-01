@@ -163,7 +163,7 @@ get_short_duration(time_t seconds)
 }
 
 const char *
-get_time(time_t when)
+get_time(time_t when, int tz)
 {
 	static char timebuffer[BUFSIZE];
 	struct tm *tmptr;
@@ -172,7 +172,12 @@ get_time(time_t when)
 		when = CURRENT_TIME;
 
 	tmptr = localtime(&when);
-	strftime(timebuffer, MAX_DATE_STRING, "%d/%m/%Y %H:%M %Z", tmptr);
+
+	if(tz)
+		strftime(timebuffer, MAX_DATE_STRING, "%d/%m/%Y %H:%M %Z", tmptr);
+	else
+		strftime(timebuffer, MAX_DATE_STRING, "%d/%m/%Y %H:%M", tmptr);
+
 	return timebuffer;
 }
 
