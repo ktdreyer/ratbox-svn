@@ -3099,11 +3099,20 @@ s_chan_invite(struct client *client_p, struct lconn *conn_p, const char *parv[],
 	sendto_server(":%s INVITE %s %s",
 			chanserv_p->name, UID(client_p), chptr->name);
 
-	if(reg_p->channel_reg->flags & CS_FLAGS_WARNOVERRIDE &&
-	   reg_p->channel_reg->flags & CS_FLAGS_AUTOJOIN)
-		sendto_server(":%s NOTICE @%s :INVITE requested by %s:%s",
-				chanserv_p->name, chptr->name,
-				reg_p->user_reg->name, client_p->user->mask);
+	if(reg_p->channel_reg->flags & CS_FLAGS_WARNOVERRIDE)
+	{
+		if(reg_p->channel_reg->flags & CS_FLAGS_AUTOJOIN)
+			sendto_server(":%s NOTICE @%s :INVITE requested by %s:%s",
+					SVC_UID(chanserv_p), chptr->name,
+					reg_p->user_reg->name,
+					client_p->user->mask);
+		else
+			sendto_server(":%s NOTICE @%s :[%s:@%s] INVITE requested by %s:%s",
+					MYUID, chptr->name,
+					chanserv_p->name, chptr->name,
+					reg_p->user_reg->name,
+					client_p->user->mask);
+	}
 
 	return 1;
 }
@@ -3135,12 +3144,20 @@ s_chan_getkey(struct client *client_p, struct lconn *conn_p, const char *parv[],
 	service_err(chanserv_p, client_p, SVC_CHAN_QUERYOPTION,
 			parv[0], "+k", chptr->mode.key);
 
-	if(mreg_p->channel_reg->flags & CS_FLAGS_WARNOVERRIDE &&
-	   mreg_p->channel_reg->flags & CS_FLAGS_AUTOJOIN)
-		sendto_server(":%s NOTICE @%s :GETKEY requested by %s:%s",
-				chanserv_p->name, chptr->name,
-				mreg_p->user_reg->name, client_p->user->mask);
-
+	if(mreg_p->channel_reg->flags & CS_FLAGS_WARNOVERRIDE)
+	{
+		if(mreg_p->channel_reg->flags & CS_FLAGS_AUTOJOIN)
+			sendto_server(":%s NOTICE @%s :GETKEY requested by %s:%s",
+					SVC_UID(chanserv_p), chptr->name,
+					mreg_p->user_reg->name,
+					client_p->user->mask);
+		else
+			sendto_server(":%s NOTICE @%s :[%s:@%s] GETKEY requested by %s:%s",
+					MYUID, chptr->name,
+					chanserv_p->name, chptr->name,
+					mreg_p->user_reg->name,
+					client_p->user->mask);
+	}
 	return 1;
 }
 
