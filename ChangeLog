@@ -1,3 +1,14 @@
+jilles      2007/05/01 21:33:48 UTC	(20070501_3-23900)
+  Log:
+  Allow WARNOVERRIDE to work without AUTOJOIN with
+  ircd-ratbox 2.2.3 or newer (by sending it from the
+  server if !AUTOJOIN).
+  
+
+  Modified:
+	rserv/trunk/src/s_chanserv.c (File Modified) 
+
+
 leeh        2007/05/01 18:04:09 UTC	(20070501_2-23898)
   Log:
   - memoserv::list
