@@ -176,11 +176,11 @@ CREATE TABLE memos (
 	id SERIAL,
 	user_id BIGINT NOT NULL,
 	source_id BIGINT NOT NULL,
+	source VARCHAR(USERREGNAME_LEN) NOT NULL,
 	timestamp INTEGER DEFAULT '0',
 	flags INTEGER DEFAULT '0',
 	text TEXT,
 	PRIMARY KEY(id),
-	FOREIGN KEY (user_id) REFERENCES users (id) MATCH FULL,
-	FOREIGN KEY (source_id) REFERENCES users(id) MATCH FULL
+	FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 );
 

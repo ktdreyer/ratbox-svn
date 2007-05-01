@@ -275,6 +275,7 @@ if($currentver < 6)
 		print "    id INTEGER AUTO_INCREMENT,\n";
 		print "    user_id INTEGER NOT NULL,\n";
 		print "    source_id INTEGER NOT NULL,\n";
+		print "    source VARCHAR(" . $vals{"USERREGNAME_LEN"} . ") NOT NULL,\n";
 		print "    timestamp INTEGER UNSIGNED DEFAULT '0',\n";
 		print "    flags INTEGER UNSIGNED DEFAULT '0',\n";
 		print "    text TEXT,\n";
@@ -316,12 +317,12 @@ if($currentver < 6)
 		print "    id SERIAL,\n";
 		print "    user_id BIGINT NOT NULL,\n";
 		print "    source_id BIGINT NOT NULL,\n";
+		print "    source VARCHAR(" . $vals{"USERREGNAME_LEN"} . ") NOT NULL,\n";
 		print "    timestamp INTEGER DEFAULT '0',\n";
 		print "    flags INTEGER DEFAULT '0',\n";
 		print "    text TEXT,\n";
 		print "    PRIMARY KEY(id),\n";
-		print "    FOREIGN KEY (user_id) REFERENCES users (id) MATCH FULL,\n";
-		print "    FOREIGN KEY (source_id) REFERENCES users(id) MATCH FULL\n";
+		print "    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE\n";
 		print ");\n";
 	}
 	else
@@ -364,6 +365,7 @@ if($currentver < 6)
 		print "    id INTEGER PRIMARY KEY,\n";
 		print "    user_id INTEGER NOT NULL,\n";
 		print "    source_id INTEGER NOT NULL,\n";
+		print "    source TEXT NOT NULL,\n";
 		print "    timestamp INTEGER DEFAULT '0',\n";
 		print "    flags INTEGER DEFAULT '0',\n";
 		print "    text TEXT\n";

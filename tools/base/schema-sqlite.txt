@@ -157,6 +157,7 @@ CREATE TABLE memos (
 	id INTEGER PRIMARY KEY,
 	user_id INTEGER NOT NULL,
 	source_id INTEGER NOT NULL,
+	source TEXT NOT NULL,
 	timestamp INTEGER DEFAULT '0',
 	flags INTEGER,
 	text TEXT
