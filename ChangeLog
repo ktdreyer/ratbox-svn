@@ -1,3 +1,17 @@
+leeh        2007/05/02 19:13:03 UTC	(20070502_1-23906)
+  Log:
+  - extend cache_file() so it takes an option to add a blank line at the end
+    of files
+  - tidy up loading of index helpfiles so they add a blank line at end
+  
+
+  Modified:
+	rserv/trunk/include/cache.h (File Modified) 
+	rserv/trunk/src/cache.c (File Modified) 
+	rserv/trunk/src/service.c (File Modified) 
+	rserv/trunk/src/ucommand.c (File Modified) 
+
+
 leeh        2007/05/02 18:52:40 UTC	(20070502_0-23904)
   Log:
   - memoserv::read
