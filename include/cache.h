@@ -24,7 +24,7 @@ struct cacheline
 extern struct cacheline *emptyline;
 
 extern void init_cache(void);
-extern struct cachefile *cache_file(const char *, const char *);
+extern struct cachefile *cache_file(const char *, const char *, int add_blank);
 extern void free_cachefile(struct cachefile *);
 
 extern void send_cachefile(struct cachefile *, struct lconn *);

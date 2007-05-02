@@ -61,12 +61,13 @@ init_cache(void)
 
 /* cache_file()
  *
- * inputs	- file to cache, files "shortname", flags to set
+ * inputs	- file to cache, files "shortname", whether to add blank
+ * 		  line at end
  * outputs	- pointer to file cached, else NULL
  * side effects -
  */
 struct cachefile *
-cache_file(const char *filename, const char *shortname)
+cache_file(const char *filename, const char *shortname, int add_blank)
 {
 	FILE *in;
 	struct cachefile *cacheptr;
@@ -96,6 +97,9 @@ cache_file(const char *filename, const char *shortname)
 		else
 			dlink_add_tail_alloc(emptyline, &cacheptr->contents);
 	}
+
+	if(add_blank)
+		dlink_add_tail_alloc(emptyline, &cacheptr->contents);
 
 	fclose(in);
 	return cacheptr;

@@ -144,10 +144,10 @@ load_service_help(struct client *service_p)
 	{
 		snprintf(filename, sizeof(filename), "%s/%s/%s/index",
 			HELP_PATH, langs_available[i], lcase(service_p->service->id));
-		service_p->service->help[i] = cache_file(filename, "index");
+		service_p->service->help[i] = cache_file(filename, "index", 1);
 
 		strlcat(filename, "-admin", sizeof(filename));
-		service_p->service->helpadmin[i] = cache_file(filename, "index-admin");
+		service_p->service->helpadmin[i] = cache_file(filename, "index-admin", 1);
 	}
 }
 
@@ -169,16 +169,12 @@ append_service_help(struct client *service_p, const char *service_id)
 	{
 		snprintf(filename, sizeof(filename), "%s/%s/%s/index",
 			HELP_PATH, langs_available[i], lcase(service_id));
-		fileptr = cache_file(filename, "index");
+		fileptr = cache_file(filename, "index", 1);
 
 		contents_fileptr = service_p->service->help[i];
 
 		if(contents_fileptr != NULL && fileptr != NULL)
 		{
-			/* add a blank line to the start of this file to
-			 * separate them
-			 */
-			dlink_add_alloc(emptyline, &fileptr->contents);
 			dlink_move_list_tail(&fileptr->contents, &contents_fileptr->contents);
 		}
 		else if(fileptr != NULL)
@@ -187,7 +183,7 @@ append_service_help(struct client *service_p, const char *service_id)
 		free_cachefile(fileptr);
 
 		strlcat(filename, "-admin", sizeof(filename));
-		fileptr = cache_file(filename, "index-admin");
+		fileptr = cache_file(filename, "index-admin", 1);
 
 		contents_fileptr = service_p->service->helpadmin[i];
 
@@ -228,7 +224,7 @@ load_service_command_help(struct service_command *scommand, int maxlen,
 			strlcat(filename, lcase(scommand[i].cmd),
 				sizeof(filename));
 
-			scommand[i].helpfile[j] = cache_file(filename, scommand[i].cmd);
+			scommand[i].helpfile[j] = cache_file(filename, scommand[i].cmd, 0);
 		}
 
 #ifdef ENABLE_USERSERV
@@ -278,7 +274,7 @@ load_service_command_help(struct service_command *scommand, int maxlen,
                 		 HELP_PATH, langs_available[j], lcase(service_id));
 		        strlcat(filename, lcase(ucommand->cmd), sizeof(filename));
 
-	        	ucommand[i].helpfile[j] = cache_file(filename, ucommand->cmd);
+	        	ucommand[i].helpfile[j] = cache_file(filename, ucommand->cmd, 0);
 		}
 	}
 }

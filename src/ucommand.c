@@ -208,7 +208,7 @@ load_ucommand_help(void)
 		{
 			snprintf(filename, sizeof(filename), "%s/%s/main/u-%s",
 				HELP_PATH, langs_available[i], lcase(ucommand->cmd));
-			ucommand->helpfile[i] = cache_file(filename, ucommand->cmd);
+			ucommand->helpfile[i] = cache_file(filename, ucommand->cmd, 0);
 		}
 	}
 }
