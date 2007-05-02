@@ -1,3 +1,15 @@
+leeh        2007/05/02 18:52:40 UTC	(20070502_0-23904)
+  Log:
+  - memoserv::read
+  
+
+  Modified:
+	rserv/trunk/include/langs.h (File Modified) 
+	rserv/trunk/src/langs.c (File Modified) 
+	rserv/trunk/src/messages.c (File Modified) 
+	rserv/trunk/src/s_memoserv.c (File Modified) 
+
+
 jilles      2007/05/01 21:57:39 UTC	(20070501_4-23902)
   Log:
   modebuild: Use TMODE instead of MODE if the uplink supports
