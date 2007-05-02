@@ -1,3 +1,18 @@
+leeh        2007/05/02 19:15:10 UTC	(20070502_2-23908)
+  Log:
+  - tidy up the helpfiles slightly for when they're merged
+  - fix the userserv language help so its nicer with genindex
+  
+
+  Modified:
+	rserv/trunk/help/en/banserv/general (File Modified) 
+	rserv/trunk/help/en/banserv/index (File Modified) 
+	rserv/trunk/help/en/userserv/index (File Modified) 
+	rserv/trunk/help/en/userserv/language (File Modified) 
+	rserv/trunk/help/en/watchserv/general (File Modified) 
+	rserv/trunk/help/en/watchserv/index (File Modified) 
+
+
 leeh        2007/05/02 19:13:03 UTC	(20070502_1-23906)
   Log:
   - extend cache_file() so it takes an option to add a blank line at the end
