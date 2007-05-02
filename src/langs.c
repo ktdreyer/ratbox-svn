@@ -254,6 +254,7 @@ const char *svc_notice_string[] =
 	"SVC_MEMO_DELETEDALL",
 	"SVC_MEMO_LIST",
 	"SVC_MEMO_LISTSTART",
+	"SVC_MEMO_READ",
 
 	/* must be last */
 	"\0"

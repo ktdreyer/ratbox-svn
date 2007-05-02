@@ -109,13 +109,70 @@ s_memo_list(struct client *client_p, struct lconn *conn_p, const char *parv[], i
 	}
 
 	service_err(memoserv_p, client_p, SVC_ENDOFLIST);
-	return 1;
+	return 2;
 }
 
 static int
 s_memo_read(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
-	return 0;
+	struct rsdb_table data;
+	char *endptr;
+	unsigned int id;
+
+	id = strtol(parv[0], &endptr, 10);
+
+	if(!strcasecmp(parv[0], "ALL"))
+	{
+		int i;
+
+		rsdb_exec_fetch(&data, "SELECT id, source, timestamp, text FROM memos WHERE user_id='%u'",
+				client_p->user->user_reg->id);
+
+		for(i = 0; i < data.row_count; i++)
+		{
+			service_err(memoserv_p, client_p, SVC_MEMO_READ,
+					atoi(data.row[i][0]), get_time(atoi(data.row[i][2]), 0),
+					data.row[i][1], data.row[i][3]);
+		}
+
+		rsdb_exec_fetch_end(&data);
+
+		rsdb_exec(NULL, "UPDATE memos SET flags = (flags|%u) WHERE user_id='%u'",
+				MS_FLAGS_READ, client_p->user->user_reg->id);
+
+		service_err(memoserv_p, client_p, SVC_ENDOFLIST);
+		return 2;
+	}
+	else if(EmptyString(endptr) && id > 0)
+	{
+		rsdb_exec_fetch(&data, "SELECT id, source, timestamp, text FROM memos WHERE user_id='%u' AND id='%u'",
+				client_p->user->user_reg->id, id);
+
+		if(data.row_count < 1)
+		{
+			service_err(memoserv_p, client_p, SVC_MEMO_INVALID, parv[0]);
+			rsdb_exec_fetch_end(&data);
+			return 1;
+		}
+
+		service_err(memoserv_p, client_p, SVC_MEMO_READ,
+				atoi(data.row[0][0]), get_time(atoi(data.row[0][2]), 0),
+				data.row[0][1], data.row[0][3]);
+
+		rsdb_exec_fetch_end(&data);
+
+		rsdb_exec(NULL, "UPDATE memos SET flags = (flags|%u) WHERE id='%u'",
+				MS_FLAGS_READ, id);
+
+		return 1;
+	}
+	else
+	{
+		service_err(memoserv_p, client_p, SVC_MEMO_INVALID, parv[0]);
+		return 1;
+	}
+
+	return 1;
 }
 
 
