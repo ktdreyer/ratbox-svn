@@ -1,5 +1,8 @@
-SET::LANGUAGE <language>
-Changes language used when receiving information from services.
+LANGUAGE
+Information about translations of messages from services.
 
-It is possible to have messages from services use a language other
-than English.  The available languages are:
+It is possible to change the language used when receiving messages
+from services, by using the following command:
+    SET::LANGUAGE <language>
+
+The available languages are:

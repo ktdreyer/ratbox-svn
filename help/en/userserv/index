@@ -7,6 +7,7 @@ username can be used.
 Available commands:
  ACTIVATE    - With email verification, activates the given username so it may be used.
  INFO        - Gives information about the given username.
+ LANGUAGE    - Information about translations of messages from services.
  LOGIN       - Logs in to the given username.
  LOGOUT      - Logs out of services.
  REGISTER    - Registers given username.
