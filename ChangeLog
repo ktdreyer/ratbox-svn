@@ -1,3 +1,16 @@
+jilles      2007/05/04 23:00:20 UTC	(20070504_0-23916)
+  Log:
+  As in ircd-ratbox 2.2 r23037, search the shortest list
+  (user's or channel's) to look up a channel membership.
+  This fixes abysmal performance on burst with clients
+  which are in very many channels.
+  Tested by ongeboren.
+  
+
+  Modified:
+	rserv/trunk/src/channel.c (File Modified) 
+
+
 leeh        2007/05/02 19:15:10 UTC	(20070502_2-23908)
   Log:
   - tidy up the helpfiles slightly for when they're merged
