@@ -243,11 +243,23 @@ find_chmember(struct channel *chptr, struct client *target_p)
 	struct chmember *mptr;
 	dlink_node *ptr;
 
-	DLINK_FOREACH(ptr, target_p->user->channels.head)
+	if (dlink_list_length(&chptr->users) < dlink_list_length(&target_p->user->channels))
 	{
-		mptr = ptr->data;
-		if(mptr->chptr == chptr)
-			return mptr;
+		DLINK_FOREACH(ptr, chptr->users.head)
+		{
+			mptr = ptr->data;
+			if(mptr->client_p == target_p)
+				return mptr;
+		}
+	}
+	else
+	{
+		DLINK_FOREACH(ptr, target_p->user->channels.head)
+		{
+			mptr = ptr->data;
+			if(mptr->chptr == chptr)
+				return mptr;
+		}
 	}
 
 	return NULL;
