@@ -124,6 +124,8 @@ free_cachefile(struct cachefile *cacheptr)
 	{
 		if(ptr->data != emptyline)
 			BlockHeapFree(cacheline_heap, ptr->data);
+		else
+			free_dlink_node(ptr);
 	}
 
 	BlockHeapFree(cachefile_heap, cacheptr);
