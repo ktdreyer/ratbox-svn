@@ -1,3 +1,12 @@
+leeh        2007/05/07 14:23:03 UTC	(20070507_0-23922)
+  Log:
+  - memleak fix in free_cachefile()
+  
+
+  Modified:
+	rserv/trunk/src/cache.c (File Modified) 
+
+
 jilles      2007/05/04 23:00:20 UTC	(20070504_0-23916)
   Log:
   As in ircd-ratbox 2.2 r23037, search the shortest list
