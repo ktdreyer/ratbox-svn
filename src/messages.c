@@ -211,6 +211,7 @@ struct _lang_internal lang_internal[] =
 	{ SVC_BAN_LISTSTART,		"Ban list matching %s"					},
 	{ SVC_BAN_NOPERMACCESS,		"No access to set a permanent %s"			},
 	{ SVC_BAN_REGEXPSUCCESS,	"%s::ADDREGEXP successful on %s, issued %u kline(s)"	},
+	{ SVC_BAN_TOOMANYREGEXPMATCHES,	"Expression %s matches %u (> %d) users"			},
 
 	/* global */
 	{ SVC_GLOBAL_WELCOMETOOLONG,	"Welcome message too long (%u > %u)",			},

@@ -116,6 +116,7 @@ struct _config_file
 	int bs_autosync_frequency;
 	int bs_regexp_time;
 	int bs_merge_into_operserv;
+	int bs_max_regexp_matches;
 
 	/* watchserv */
 	int ws_merge_into_operserv;

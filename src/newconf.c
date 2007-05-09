@@ -1175,6 +1175,7 @@ static struct ConfEntry conf_banserv_table[] =
 	{ "temp_workaround",	CF_YESNO,NULL, 0, &config_file.bs_temp_workaround },
 	{ "regexp_time",	CF_TIME, NULL, 0, &config_file.bs_regexp_time	},
 	{ "merge_into_operserv",CF_YESNO,NULL, 0, &config_file.bs_merge_into_operserv	},
+	{ "max_regexp_matches",	CF_INT,  NULL, 0, &config_file.bs_max_regexp_matches	},
 	{ "autosync_frequency",	CF_TIME, 	conf_set_banserv_autosync, 0, NULL },
 	{ "\0", 0, NULL, 0, NULL }
 };
@@ -1188,7 +1189,7 @@ static struct ConfEntry conf_watchserv_table[] =
 static struct ConfEntry conf_memoserv_table[] =
 {
 	{ "max_memos",			CF_INT,  NULL, 0, &config_file.ms_max_memos		},
-	{ "ms_memo_regtime_duration",	CF_TIME, NULL, 0, &config_file.ms_memo_regtime_duration	},
+	{ "memo_regtime_duration",	CF_TIME, NULL, 0, &config_file.ms_memo_regtime_duration	},
 	{ "\0", 0, NULL, 0, NULL }
 };
 

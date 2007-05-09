@@ -553,7 +553,7 @@ sync_bans(const char *target, char banletter)
 }
 
 static int
-regexp_match(struct regexp_ban *regexp_p, int kline)
+regexp_match(pcre *regexp, int kline, const char *kline_reason)
 {
 	char buf[BUFSIZE];
 	int ovector[30];
@@ -569,7 +569,7 @@ regexp_match(struct regexp_ban *regexp_p, int kline)
 		buflen = snprintf(buf, sizeof(buf), "%s#%s", 
 				target_p->user->mask, target_p->info);
 
-		if(pcre_exec(regexp_p->regexp, NULL, buf, buflen, 0, 0, ovector, 30) >= 0)
+		if(pcre_exec(regexp, NULL, buf, buflen, 0, 0, ovector, 30) >= 0)
 		{
 			matches++;
 
@@ -578,7 +578,7 @@ regexp_match(struct regexp_ban *regexp_p, int kline)
 				sendto_server(":%s ENCAP %s KLINE %u * %s :%s",
 						SVC_UID(banserv_p), target_p->user->servername,
 						config_file.bs_regexp_time,
-						target_p->user->host, regexp_p->reason);
+						target_p->user->host, kline_reason);
 			}
 		}	
 	}
@@ -946,6 +946,19 @@ o_banserv_addregexp(struct client *client_p, struct lconn *conn_p, const char *p
 		return 0;
 	}
 
+	/* run the regexp over clients to see how many it matches */
+	matches = regexp_match(regexp_comp, 0, NULL);
+
+	/* then check its not over the limit */
+	if(config_file.bs_max_regexp_matches && (matches > config_file.bs_max_regexp_matches))
+	{
+		pcre_free(regexp_comp);
+
+		service_snd(banserv_p, client_p, conn_p, SVC_BAN_TOOMANYREGEXPMATCHES,
+				mask, matches, config_file.bs_max_regexp_matches);
+		return 0;
+	}
+
 	regexp_p = my_malloc(sizeof(struct regexp_ban));
 	regexp_p->regexp = regexp_comp;
 	regexp_p->regexp_str = my_strdup(mask);
@@ -963,7 +976,7 @@ o_banserv_addregexp(struct client *client_p, struct lconn *conn_p, const char *p
 			temptime ? CURRENT_TIME + temptime : 0,
 			CURRENT_TIME, OPER_NAME(client_p, conn_p));
 
-	matches = regexp_match(regexp_p, 1);
+	matches = regexp_match(regexp_p->regexp, 1, regexp_p->reason);
 
 	service_snd(banserv_p, client_p, conn_p, SVC_BAN_REGEXPSUCCESS,
 			banserv_p->name, mask, matches);
