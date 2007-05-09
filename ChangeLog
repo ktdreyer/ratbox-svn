@@ -1,3 +1,20 @@
+leeh        2007/05/09 18:10:26 UTC	(20070509_1-23928)
+  Log:
+  - add max_regexp_matches to banserver {}; which controls how many users a
+    regexp can match before being disallowed
+  
+
+  Modified:
+	rserv/trunk/doc/example.conf (File Modified) 
+	rserv/trunk/include/conf.h (File Modified) 
+	rserv/trunk/include/langs.h (File Modified) 
+	rserv/trunk/src/conf.c (File Modified) 
+	rserv/trunk/src/langs.c (File Modified) 
+	rserv/trunk/src/messages.c (File Modified) 
+	rserv/trunk/src/newconf.c (File Modified) 
+	rserv/trunk/src/s_banserv.c (File Modified) 
+
+
 leeh        2007/05/09 17:45:20 UTC	(20070509_0-23926)
   Log:
   - add memo_regtime_duration to memoserv {};, controlling how long a username
