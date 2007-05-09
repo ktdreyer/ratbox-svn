@@ -185,6 +185,15 @@ s_memo_send(struct client *client_p, struct lconn *conn_p, const char *parv[], i
 	unsigned int memo_id;
 	dlink_node *ptr;
 
+	/* check their username has been registered long enough */
+	if(config_file.ms_memo_regtime_duration &&
+	   (CURRENT_TIME - client_p->user->user_reg->reg_time) < config_file.ms_memo_regtime_duration)
+	{
+		service_err(memoserv_p, client_p, SVC_USER_DURATIONTOOSHORT,
+				client_p->user->user_reg->name, memoserv_p->name, "SEND");
+		return 1;
+	}
+
 	if((ureg_p = find_user_reg_nick(client_p, parv[0])) == NULL)
 		return 1;
 

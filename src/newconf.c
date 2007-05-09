@@ -1187,7 +1187,8 @@ static struct ConfEntry conf_watchserv_table[] =
 
 static struct ConfEntry conf_memoserv_table[] =
 {
-	{ "max_memos",		CF_INT,  NULL, 0, &config_file.ms_max_memos	},
+	{ "max_memos",			CF_INT,  NULL, 0, &config_file.ms_max_memos		},
+	{ "ms_memo_regtime_duration",	CF_TIME, NULL, 0, &config_file.ms_memo_regtime_duration	},
 	{ "\0", 0, NULL, 0, NULL }
 };
 

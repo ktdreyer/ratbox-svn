@@ -122,6 +122,7 @@ struct _config_file
 
 	/* memoserv */
 	int ms_max_memos;
+	int ms_memo_regtime_duration;
 
 	/* alis */
 	int max_matches;
