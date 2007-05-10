@@ -46,7 +46,8 @@ my %versionlist = (
 	"1.1.0rc2"	=> 5,
 	"1.1.0rc3"	=> 5,
 	"1.1.0"		=> 5,
-	"1.1.1"		=> 5
+	"1.1.1"		=> 5,
+	"1.2.0beta1"	=> 6
 );
 
 my $version = $ARGV[0];
@@ -238,7 +239,7 @@ if($currentver < 5)
 
 if($currentver < 6)
 {
-	print "-- To UNRELEASED VERSION\n";
+	print "-- To version 1.2.0beta1\n";
 
 	print "ALTER TABLE users ADD COLUMN language VARCHAR(255) DEFAULT '';\n";
 
