@@ -1,3 +1,13 @@
+leeh        2007/05/10 20:04:28 UTC	(20070510_2-23935)
+  Log:
+  - retag configure as development
+  
+
+  Modified:
+	rserv/trunk/autoconf/configure.in (File Modified) 
+	rserv/trunk/configure (File Modified) 
+
+
 leeh        2007/05/10 20:01:49 UTC	(20070510_1-23933)
   Log:
   - sort dbupgrade.pl out in preparation for 1.2.0beta1
