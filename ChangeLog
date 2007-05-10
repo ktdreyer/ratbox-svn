@@ -1,3 +1,14 @@
+leeh        2007/05/10 20:34:22 UTC	(20070510_5-23941)
+  Log:
+  - update RELEASE_NOTES
+  - revved patchlevel to 1.2.0beta1
+  
+
+  Modified:
+	rserv/trunk/RELEASE_NOTES (File Modified) 
+	rserv/trunk/include/config.h (File Modified) 
+
+
 leeh        2007/05/10 20:31:37 UTC	(20070510_4-23939)
   Log:
   - memoserv help
