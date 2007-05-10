@@ -1,3 +1,12 @@
+leeh        2007/05/10 20:23:11 UTC	(20070510_3-23937)
+  Log:
+  - add in whats-new-1.2.txt
+  
+
+  Modified:
+	rserv/trunk/doc/whats-new-1.2.txt (File Added) 
+
+
 leeh        2007/05/10 20:04:28 UTC	(20070510_2-23935)
   Log:
   - retag configure as development
