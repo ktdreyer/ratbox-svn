@@ -8,7 +8,7 @@
 # index first gets the contents of the "general" file.
 
 LANGS="en bg"
-SERVICES="alis operbot chanserv userserv jupeserv operserv nickserv global banserv watchserv"
+SERVICES="alis operbot chanserv userserv jupeserv operserv nickserv global banserv watchserv memoserv"
 
 for k in $LANGS; do
 	for i in $SERVICES; do
