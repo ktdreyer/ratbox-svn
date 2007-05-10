@@ -1,3 +1,19 @@
+leeh        2007/05/10 20:31:37 UTC	(20070510_4-23939)
+  Log:
+  - memoserv help
+  
+
+  Modified:
+	rserv/trunk/help/en/memoserv/ (File Added) 
+	rserv/trunk/help/en/memoserv/delete (File Added) 
+	rserv/trunk/help/en/memoserv/general (File Added) 
+	rserv/trunk/help/en/memoserv/index (File Added) 
+	rserv/trunk/help/en/memoserv/list (File Added) 
+	rserv/trunk/help/en/memoserv/read (File Added) 
+	rserv/trunk/help/en/memoserv/send (File Added) 
+	rserv/trunk/help/genindex.sh (File Modified) 
+
+
 leeh        2007/05/10 20:23:11 UTC	(20070510_3-23937)
   Log:
   - add in whats-new-1.2.txt
