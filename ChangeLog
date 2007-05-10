@@ -1,3 +1,13 @@
+leeh        2007/05/10 19:47:39 UTC	(20070510_0-23930)
+  Log:
+  - add optional logging to memoserv
+  
+
+  Modified:
+	rserv/trunk/doc/example.conf (File Modified) 
+	rserv/trunk/src/s_memoserv.c (File Modified) 
+
+
 leeh        2007/05/09 18:10:26 UTC	(20070509_1-23928)
   Log:
   - add max_regexp_matches to banserver {}; which controls how many users a
