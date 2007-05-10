@@ -82,6 +82,9 @@ s_memo_list(struct client *client_p, struct lconn *conn_p, const char *parv[], i
 	unsigned int read_count = 0;
 	unsigned int unread_count = 0;
 
+	/* if they have no memos, we wont reach the bottom of this function */
+	zlog(memoserv_p, 3, 0, 0, client_p, NULL, "LIST");
+
 	rsdb_exec_fetch(&data, "SELECT id, source, timestamp, flags FROM memos WHERE user_id='%d'",
 			client_p->user->user_reg->id);
 
@@ -109,6 +112,7 @@ s_memo_list(struct client *client_p, struct lconn *conn_p, const char *parv[], i
 	}
 
 	service_err(memoserv_p, client_p, SVC_ENDOFLIST);
+
 	return 2;
 }
 
@@ -171,6 +175,8 @@ s_memo_read(struct client *client_p, struct lconn *conn_p, const char *parv[], i
 		service_err(memoserv_p, client_p, SVC_MEMO_INVALID, parv[0]);
 		return 1;
 	}
+
+	zlog(memoserv_p, 3, 0, 0, client_p, NULL, "READ");
 
 	return 1;
 }
@@ -240,6 +246,9 @@ s_memo_send(struct client *client_p, struct lconn *conn_p, const char *parv[], i
 				memo_id, client_p->name);
 	}
 
+	zlog(memoserv_p, 2, 0, 0, client_p, NULL, "SEND %s",
+		client_p->user->user_reg->name);
+
 	return 0;
 }
 
@@ -294,6 +303,8 @@ s_memo_delete(struct client *client_p, struct lconn *conn_p, const char *parv[],
 	{
 		service_err(memoserv_p, client_p, SVC_MEMO_INVALID, parv[0]);
 	}
+
+	zlog(memoserv_p, 1, 0, 0, client_p, NULL, "DELETE");
 
 	return 0;
 }
