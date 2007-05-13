@@ -1,3 +1,13 @@
+leeh        2007/05/13 20:53:00 UTC	(20070513_0-23947)
+  Log:
+  - via ongeboren
+    - fix global capability test for RSFNC which was breaking nickserv::regain
+  
+
+  Modified:
+	rserv/trunk/src/scommand.c (File Modified) 
+
+
 leeh        2007/05/10 20:34:22 UTC	(20070510_5-23941)
   Log:
   - update RELEASE_NOTES
