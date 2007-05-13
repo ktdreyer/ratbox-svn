@@ -313,7 +313,7 @@ c_encap(struct client *client_p, const char *parv[], int parc)
 
 		if((p = strstr(parv[2], "RSFNC")))
 		{
-			if(*(p+6) == '\0' || *(p+6) == ' ')
+			if(*(p+5) == '\0' || *(p+5) == ' ')
 				client_p->flags |= FLAGS_RSFNC;
 		}
 	}
