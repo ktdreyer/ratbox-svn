@@ -1,3 +1,13 @@
+leeh        2007/07/14 19:59:40 UTC	(20070714_2-23983)
+  Log:
+  - via ongeboren
+    - memoserv commands need to require users are logged in
+  
+
+  Modified:
+	rserv/trunk/src/s_memoserv.c (File Modified) 
+
+
 leeh        2007/07/14 19:57:12 UTC	(20070714_1-23981)
   Log:
   - add HASH_WALK_SAFE_POS which walks a hash, starting/ending at a certain
