@@ -56,10 +56,10 @@ static int s_memo_delete(struct client *, struct lconn *, const char **, int);
 
 static struct service_command memoserv_command[] =
 {
-	{ "LIST",	&s_memo_list,	0, NULL, 1, 0L, 0, 0, 0 },
-	{ "READ",	&s_memo_read,	1, NULL, 1, 0L, 0, 0, 0 },
-	{ "SEND",	&s_memo_send,	2, NULL, 1, 0L, 0, 0, 0 },
-	{ "DELETE",	&s_memo_delete,	1, NULL, 1, 0L, 0, 0, 0 },
+	{ "LIST",	&s_memo_list,	0, NULL, 1, 0L, 1, 0, 0 },
+	{ "READ",	&s_memo_read,	1, NULL, 1, 0L, 1, 0, 0 },
+	{ "SEND",	&s_memo_send,	2, NULL, 1, 0L, 1, 0, 0 },
+	{ "DELETE",	&s_memo_delete,	1, NULL, 1, 0L, 1, 0, 0 },
 };
 
 static struct service_handler memoserv_service = {
