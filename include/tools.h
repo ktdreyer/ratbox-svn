@@ -131,6 +131,17 @@ dlink_node *dlink_find_string(const char *data, dlink_list *list);
 #define HASH_WALK_SAFE(i, max, ptr, nptr, table) for (i = 0; i < max; i++) { DLINK_FOREACH_SAFE(ptr, nptr, table[i].head)
 #define HASH_WALK_END }
 
+#define HASH_WALK_SAFE_POS(i, start, max, max_bound, ptr, nptr, table) for (i = start; i < start+max && i < max_bound; i++) { DLINK_FOREACH_SAFE(ptr, nptr, table[i].head)
+#define HASH_WALK_SAFE_POS_END(i, start, max_bound) 		\
+				}				\
+				do				\
+				if(i >= max_bound) {		\
+					start = 0;		\
+				} else {			\
+					start = i;		\
+				}				\
+				while(0)
+
 #ifndef HARD_ASSERT
 #ifdef __GNUC__
 #define s_assert(expr)	do						\
