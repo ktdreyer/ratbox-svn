@@ -54,6 +54,8 @@
 #include "dbhook.h"
 #include "watch.h"
 
+#define MAX_HASH_WALK	1024
+
 static void init_s_userserv(void);
 
 static struct client *userserv_p;
@@ -155,7 +157,7 @@ init_s_userserv(void)
 	hook_add(h_user_burst_login, HOOK_BURST_LOGIN);
 	hook_add(h_user_dbsync, HOOK_DBSYNC);
 
-	eventAdd("userserv_expire", e_user_expire, NULL, 21600);
+	eventAdd("userserv_expire", e_user_expire, NULL, 900);
 	eventAdd("userserv_expire_reset", e_user_expire_reset, NULL, 3600);
 }
 
@@ -532,6 +534,7 @@ expire_bonus(time_t duration)
 static void
 e_user_expire(void *unused)
 {
+	static int hash_pos = 0;
 	struct user_reg *ureg_p;
 	dlink_node *ptr, *next_ptr;
 	int i;
@@ -539,7 +542,7 @@ e_user_expire(void *unused)
 	/* Start a transaction, we're going to make a lot of changes */
 	rsdb_transaction(RSDB_TRANS_START);
 
-	HASH_WALK_SAFE(i, MAX_NAME_HASH, ptr, next_ptr, user_reg_table)
+	HASH_WALK_SAFE_POS(i, hash_pos, MAX_HASH_WALK, MAX_NAME_HASH, ptr, next_ptr, user_reg_table)
 	{
 		ureg_p = ptr->data;
 
@@ -578,7 +581,7 @@ e_user_expire(void *unused)
 
 		free_user_reg(ureg_p);
 	}
-	HASH_WALK_END
+	HASH_WALK_SAFE_POS_END(i, hash_pos, MAX_NAME_HASH);
 
 	rsdb_transaction(RSDB_TRANS_END);
 }
