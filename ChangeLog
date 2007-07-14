@@ -1,3 +1,13 @@
+leeh        2007/07/14 19:57:12 UTC	(20070714_1-23981)
+  Log:
+  - add HASH_WALK_SAFE_POS which walks a hash, starting/ending at a certain
+    hash position
+  
+
+  Modified:
+	rserv/trunk/include/tools.h (File Modified) 
+
+
 leeh        2007/07/14 19:55:54 UTC	(20070714_0-23979)
   Log:
   - install memoserv helpfiles
