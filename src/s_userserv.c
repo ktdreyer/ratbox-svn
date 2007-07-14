@@ -1713,7 +1713,7 @@ s_user_resetemail(struct client *client_p, struct lconn *conn_p, const char *par
 
 				rsdb_exec_fetch_end(&data);
 
-				if(!send_email(reg_p->email, "E-Mail reset",
+				if(!send_email(email, "E-Mail reset",
 						"%s!%s@%s has requested an e-mail change for username %s to "
 						"this email address.\n\n"
 						"To authenticate this request, send %s RESETEMAIL AUTH %s\n\n"
@@ -1733,7 +1733,7 @@ s_user_resetemail(struct client *client_p, struct lconn *conn_p, const char *par
 				rsdb_exec(NULL, "DELETE FROM users_resetemail WHERE username='%Q'",
 						reg_p->name);
 				rsdb_exec(NULL, "INSERT INTO users_resetemail (username, token, time, email) VALUES('%Q', '%Q', '%lu', '%s')",
-						reg_p->name, token, CURRENT_TIME, parv[2]);
+						reg_p->name, token, CURRENT_TIME, email);
 
 				zlog(userserv_p, 3, 0, 0, client_p, NULL,
 						"RESETEMAIL %s %s (confirm)", reg_p->name, email);
