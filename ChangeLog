@@ -1,3 +1,12 @@
+leeh        2007/07/14 19:55:54 UTC	(20070714_0-23979)
+  Log:
+  - install memoserv helpfiles
+  
+
+  Modified:
+	rserv/trunk/help/Makefile.in (File Modified) 
+
+
 leeh        2007/05/13 20:54:57 UTC	(20070513_1-23951)
   Log:
   - ongeboren needs to be in CREDITS
