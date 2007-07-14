@@ -1,3 +1,13 @@
+leeh        2007/07/14 20:03:25 UTC	(20070714_3-23985)
+  Log:
+  - move the userserv expire code which walks the hash expiring/updating users
+    last access iterate the hash in bits to stop it hogging cpu
+  
+
+  Modified:
+	rserv/trunk/src/s_userserv.c (File Modified) 
+
+
 leeh        2007/07/14 19:59:40 UTC	(20070714_2-23983)
   Log:
   - via ongeboren
