@@ -1,3 +1,14 @@
+leeh        2007/07/14 20:06:09 UTC	(20070714_4-23987)
+  Log:
+  - via ongeboren
+    - userserv::resetemail was sending the second confirmation out to the old
+      address, rather than the new address
+  
+
+  Modified:
+	rserv/trunk/src/s_userserv.c (File Modified) 
+
+
 leeh        2007/07/14 20:03:25 UTC	(20070714_3-23985)
   Log:
   - move the userserv expire code which walks the hash expiring/updating users
