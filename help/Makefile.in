@@ -10,7 +10,7 @@ helpdir=@helpdir@
 datarootdir=@datarootdir@
 
 LANGS=en bg
-SERVICES=alis main operbot chanserv userserv jupeserv operserv nickserv global banserv watchserv
+SERVICES=alis main operbot chanserv userserv jupeserv operserv nickserv global banserv watchserv memoserv
 
 install: 
 	@if [ -d $(DESTDIR)$(helpdir)-old ]; then \
