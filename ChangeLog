@@ -1,3 +1,13 @@
+leeh        2007/08/15 18:49:31 UTC	(20070815_0-24213)
+  Log:
+  - extend chanserv::chansuspend to support suspend times
+    I have no idea how I missed this..
+  
+
+  Modified:
+	rserv/trunk/src/s_chanserv.c (File Modified) 
+
+
 leeh        2007/07/14 20:06:09 UTC	(20070714_4-23987)
   Log:
   - via ongeboren
