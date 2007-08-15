@@ -1576,19 +1576,26 @@ o_chan_chansuspend(struct client *client_p, struct lconn *conn_p, const char *pa
 {
 	struct chan_reg *reg_p;
 	const char *reason;
+	time_t suspend_time;
+	int para = 0;
 
-	if((reg_p = find_channel_reg(NULL, parv[0])) == NULL)
+	if((suspend_time = get_temp_time(parv[0])))
+		para++;
+
+	if((reg_p = find_channel_reg(NULL, parv[para])) == NULL)
 	{
-		service_snd(chanserv_p, client_p, conn_p, SVC_CHAN_NOTREG, parv[0]);
+		service_snd(chanserv_p, client_p, conn_p, SVC_CHAN_NOTREG, parv[para]);
 		return 0;
 	}
+
+	para++;
 
 	if(reg_p->flags & CS_FLAGS_SUSPENDED)
 	{
 		if(!CHAN_SUSPEND_EXPIRED(reg_p))
 		{
 			service_snd(chanserv_p, client_p, conn_p, SVC_CHAN_QUERYOPTIONALREADY,
-					parv[0], "SUSPEND", "ON");
+					reg_p->name, "SUSPEND", "ON");
 			return 0;
 		}
 		/* cleanup memory */
@@ -1596,20 +1603,32 @@ o_chan_chansuspend(struct client *client_p, struct lconn *conn_p, const char *pa
 			expire_chan_suspend(reg_p);
 	}
 
-	reason = rebuild_params(parv, parc, 1);
+	reason = rebuild_params(parv, parc, para);
+
+	if(EmptyString(reason))
+	{
+		service_err(chanserv_p, client_p, SVC_NEEDMOREPARAMS,
+				reg_p->name, "CHANREGISTER");
+		return 0;
+	}
 
 	zlog(chanserv_p, 1, WATCH_CSADMIN, 1, client_p, conn_p,
-		"CHANSUSPEND %s %s", parv[0], reason);
+		"CHANSUSPEND %s %s", reg_p->name, reason);
 
 	reg_p->flags |= CS_FLAGS_SUSPENDED;
 	reg_p->suspender = my_strdup(OPER_NAME(client_p, conn_p));
 	reg_p->suspend_reason = my_strndup(reason, SUSPENDREASONLEN);
 	reg_p->last_time = CURRENT_TIME;
 
+	if(suspend_time)
+		reg_p->suspend_time = CURRENT_TIME + suspend_time;
+	else
+		reg_p->suspend_time = 0;
+
 	rsdb_exec(NULL, "UPDATE channels SET flags='%d', suspender='%Q', "
-			"suspend_reason='%Q', last_time='%lu' WHERE chname = '%Q'",
+			"suspend_reason='%Q', last_time='%lu', suspend_time='%lu' WHERE chname = '%Q'",
 			reg_p->flags, reg_p->suspender, reg_p->suspend_reason,
-			reg_p->last_time, reg_p->name);
+			reg_p->last_time, reg_p->suspend_time, reg_p->name);
 
 	service_snd(chanserv_p, client_p, conn_p, SVC_CHAN_CHANGEDOPTION,
 			parv[0], "SUSPEND", "ON");
