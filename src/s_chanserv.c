@@ -1631,7 +1631,7 @@ o_chan_chansuspend(struct client *client_p, struct lconn *conn_p, const char *pa
 			reg_p->last_time, reg_p->suspend_time, reg_p->name);
 
 	service_snd(chanserv_p, client_p, conn_p, SVC_CHAN_CHANGEDOPTION,
-			parv[0], "SUSPEND", "ON");
+			reg_p->name, "SUSPEND", "ON");
 	return 0;
 }
 
