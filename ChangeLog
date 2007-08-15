@@ -1,3 +1,13 @@
+leeh        2007/08/15 20:35:22 UTC	(20070815_3-24219)
+  Log:
+  - fix chanserv::info parameter ordering when issuing the notice about
+    suspends
+  
+
+  Modified:
+	rserv/trunk/src/s_chanserv.c (File Modified) 
+
+
 leeh        2007/08/15 20:30:52 UTC	(20070815_2-24217)
   Log:
   - swap parv[0] for reg_p->name in chanserv::chansuspend
