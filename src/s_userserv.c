@@ -570,6 +570,9 @@ e_user_expire(void *unused)
 
 		if(ureg_p->flags & US_FLAGS_SUSPENDED)
 		{
+			if(USER_SUSPEND_EXPIRED(ureg_p))
+				expire_user_suspend(ureg_p);
+
 			if(!config_file.uexpire_suspended_time)
 				continue;
 
