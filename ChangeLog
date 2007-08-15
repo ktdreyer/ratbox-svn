@@ -1,3 +1,12 @@
+leeh        2007/08/15 18:55:45 UTC	(20070815_1-24215)
+  Log:
+  - when we expire usernames, expiry any temporary suspends too
+  
+
+  Modified:
+	rserv/trunk/src/s_userserv.c (File Modified) 
+
+
 leeh        2007/08/15 18:49:31 UTC	(20070815_0-24213)
   Log:
   - extend chanserv::chansuspend to support suspend times
