@@ -9,7 +9,7 @@ prefix=@prefix@
 helpdir=@helpdir@
 datarootdir=@datarootdir@
 
-LANGS=en bg
+LANGS=en bg ru
 SERVICES=alis main operbot chanserv userserv jupeserv operserv nickserv global banserv watchserv memoserv
 
 install: 
