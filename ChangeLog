@@ -1,3 +1,12 @@
+leeh        2007/09/11 20:30:30 UTC	(20070911_1-24406)
+  Log:
+  - err, I really do mean usernames
+  
+
+  Modified:
+	rserv/trunk/help/en/userserv/userlist (File Modified) 
+
+
 leeh        2007/09/11 20:29:51 UTC	(20070911_0-24404)
   Log:
   - s/channels/usernames
