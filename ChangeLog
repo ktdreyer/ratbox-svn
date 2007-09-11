@@ -1,3 +1,12 @@
+leeh        2007/09/11 20:29:51 UTC	(20070911_0-24404)
+  Log:
+  - s/channels/usernames
+  
+
+  Modified:
+	rserv/trunk/help/en/userserv/userlist (File Modified) 
+
+
 leeh        2007/09/08 13:36:57 UTC	(20070908_0-24402)
   Log:
   - russian translations, via
