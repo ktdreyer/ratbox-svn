@@ -4,7 +4,7 @@
 
 #include "setup.h"
 
-#define EmptyString(x) (!(x) || (*(x) == '\0'))
+#define EmptyString(x) ((x == NULL) || (*(x) == '\0'))
 #define MAXPARA	15
 
 extern void init_tools(void);
