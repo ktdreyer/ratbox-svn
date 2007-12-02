@@ -1,3 +1,14 @@
+leeh        2007/12/02 16:00:54 UTC	(20071202_1-24655)
+  Log:
+  - add russian cyrillic translations, via Valery Yatsko
+    <darkwire.tl@gmail.com>
+  
+
+  Modified:
+	rserv/trunk/langs/Makefile.in (File Modified) 
+	rserv/trunk/langs/ru.lang (File Added) 
+
+
 leeh        2007/12/02 15:42:29 UTC	(20071202_0-24652)
   Log:
   - new gcc complains about using !(x) in EmptyString macro on static strings
