@@ -32,11 +32,17 @@
 // Unittest for scanner, especially GetNextComments and GetComments()
 // functionality.
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <stdio.h>
 #include <string>
 #include <vector>
-#include <pcre_stringpiece.h>
-#include <pcre_scanner.h>
+
+#include "pcrecpp.h"
+#include "pcre_stringpiece.h"
+#include "pcre_scanner.h"
 
 #define FLAGS_unittest_stack_size   49152
 
@@ -122,8 +128,8 @@ static void TestScanner() {
 static void TestBigComment() {
   string input;
   for (int i = 0; i < 1024; ++i) {
-    char buf[1024];
-    snprintf(buf, sizeof(buf), "    # Comment %d\n", i);
+    char buf[1024];  // definitely big enough
+    sprintf(buf, "    # Comment %d\n", i);
     input += buf;
   }
   input += "name = value;\n";

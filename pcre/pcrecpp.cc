@@ -29,6 +29,10 @@
 //
 // Author: Sanjay Ghemawat
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <ctype.h>
@@ -37,13 +41,11 @@
 #include <errno.h>
 #include <string>
 #include <algorithm>
-#include "config.h"
-// We need this to compile the proper dll on windows/msys.  This is copied
-// from pcre_internal.h.  It would probably be better just to include that.
-#define PCRE_DEFINITION  /* Win32 __declspec(export) trigger for .dll */
+
+#include "pcrecpp_internal.h"
 #include "pcre.h"
-#include "pcre_stringpiece.h"
 #include "pcrecpp.h"
+#include "pcre_stringpiece.h"
 
 
 namespace pcrecpp {
@@ -53,7 +55,7 @@ static const int kMaxArgs = 16;
 static const int kVecSize = (1 + kMaxArgs) * 3;  // results + PCRE workspace
 
 // Special object that stands-in for no argument
-Arg no_arg((void*)NULL);
+PCRECPP_EXP_DEFN Arg no_arg((void*)NULL);
 
 // If a regular expression has no error, its error_ field points here
 static const string empty_string;
@@ -74,25 +76,14 @@ void RE::Init(const string& pat, const RE_Options* options) {
 
   re_partial_ = Compile(UNANCHORED);
   if (re_partial_ != NULL) {
-    // Check for complicated patterns.  The following change is
-    // conservative in that it may treat some "simple" patterns
-    // as "complex" (e.g., if the vertical bar is in a character
-    // class or is escaped).  But it seems good enough.
-    if (strchr(pat.c_str(), '|') == NULL) {
-      // Simple pattern: we can use position-based checks to perform
-      // fully anchored matches
-      re_full_ = re_partial_;
-    } else {
-      // We need a special pattern for anchored matches
-      re_full_ = Compile(ANCHOR_BOTH);
-    }
+    re_full_ = Compile(ANCHOR_BOTH);
   }
 }
 
 void RE::Cleanup() {
-  if (re_full_ != NULL && re_full_ != re_partial_) (*pcre_free)(re_full_);
-  if (re_partial_ != NULL)                         (*pcre_free)(re_partial_);
-  if (error_ != &empty_string)                     delete error_;
+  if (re_full_ != NULL)         (*pcre_free)(re_full_);
+  if (re_partial_ != NULL)      (*pcre_free)(re_partial_);
+  if (error_ != &empty_string)  delete error_;
 }
 
 
@@ -340,13 +331,17 @@ bool RE::Replace(const StringPiece& rewrite,
 
 // Returns PCRE_NEWLINE_CRLF, PCRE_NEWLINE_CR, or PCRE_NEWLINE_LF.
 // Note that PCRE_NEWLINE_CRLF is defined to be P_N_CR | P_N_LF.
+// Modified by PH to add PCRE_NEWLINE_ANY and PCRE_NEWLINE_ANYCRLF.
+
 static int NewlineMode(int pcre_options) {
   // TODO: if we can make it threadsafe, cache this var
   int newline_mode = 0;
   /* if (newline_mode) return newline_mode; */  // do this once it's cached
-  if (pcre_options & (PCRE_NEWLINE_CRLF|PCRE_NEWLINE_CR|PCRE_NEWLINE_LF)) {
+  if (pcre_options & (PCRE_NEWLINE_CRLF|PCRE_NEWLINE_CR|PCRE_NEWLINE_LF|
+                      PCRE_NEWLINE_ANY|PCRE_NEWLINE_ANYCRLF)) {
     newline_mode = (pcre_options &
-                    (PCRE_NEWLINE_CRLF|PCRE_NEWLINE_CR|PCRE_NEWLINE_LF));
+                    (PCRE_NEWLINE_CRLF|PCRE_NEWLINE_CR|PCRE_NEWLINE_LF|
+                     PCRE_NEWLINE_ANY|PCRE_NEWLINE_ANYCRLF));
   } else {
     int newline;
     pcre_config(PCRE_CONFIG_NEWLINE, &newline);
@@ -356,6 +351,10 @@ static int NewlineMode(int pcre_options) {
       newline_mode = PCRE_NEWLINE_CR;
     else if (newline == 3338)
       newline_mode = PCRE_NEWLINE_CRLF;
+    else if (newline == -1)
+      newline_mode = PCRE_NEWLINE_ANY;
+    else if (newline == -2)
+      newline_mode = PCRE_NEWLINE_ANYCRLF;
     else
       assert("" == "Unexpected return value from pcre_config(NEWLINE)");
   }
@@ -385,9 +384,13 @@ int RE::GlobalReplace(const StringPiece& rewrite,
       // Note it's better to call pcre_fullinfo() than to examine
       // all_options(), since options_ could have changed bewteen
       // compile-time and now, but this is simpler and safe enough.
+      // Modified by PH to add ANY and ANYCRLF.
       if (start+1 < static_cast<int>(str->length()) &&
           (*str)[start] == '\r' && (*str)[start+1] == '\n' &&
-          NewlineMode(options_.all_options()) == PCRE_NEWLINE_CRLF) {
+          (NewlineMode(options_.all_options()) == PCRE_NEWLINE_CRLF ||
+           NewlineMode(options_.all_options()) == PCRE_NEWLINE_ANY ||
+           NewlineMode(options_.all_options()) == PCRE_NEWLINE_ANYCRLF)
+          ) {
         matchend++;
       }
       // We also need to advance more than one char if we're in utf8 mode.
@@ -471,7 +474,7 @@ int RE::TryMatch(const StringPiece& text,
     return 0;
   }
 
-  pcre_extra extra = { 0 };
+  pcre_extra extra = { 0, 0, 0, 0, 0, 0 };
   if (options_.match_limit() > 0) {
     extra.flags |= PCRE_EXTRA_MATCH_LIMIT;
     extra.match_limit = options_.match_limit();
@@ -502,13 +505,6 @@ int RE::TryMatch(const StringPiece& text,
     // When this happens, there is a match and the output vector
     // is filled, but we miss out on the positions of the extra subpatterns.
     rc = vecsize / 2;
-  }
-
-  if ((anchor == ANCHOR_BOTH) && (re_full_ == re_partial_)) {
-    // We need an extra check to make sure that the match extended
-    // to the end of the input string
-    assert(vec[0] == 0);                 // PCRE_ANCHORED forces starting match
-    if (vec[1] != text.size()) return 0; // Did not get ending match
   }
 
   return rc;
@@ -715,7 +711,7 @@ bool Arg::parse_short_radix(const char* str,
   long r;
   if (!parse_long_radix(str, n, &r, radix)) return false; // Could not parse
   if (r < SHRT_MIN || r > SHRT_MAX) return false;       // Out of range
-  *(reinterpret_cast<short*>(dest)) = r;
+  *(reinterpret_cast<short*>(dest)) = static_cast<short>(r);
   return true;
 }
 
@@ -726,7 +722,7 @@ bool Arg::parse_ushort_radix(const char* str,
   unsigned long r;
   if (!parse_ulong_radix(str, n, &r, radix)) return false; // Could not parse
   if (r > USHRT_MAX) return false;                      // Out of range
-  *(reinterpret_cast<unsigned short*>(dest)) = r;
+  *(reinterpret_cast<unsigned short*>(dest)) = static_cast<unsigned short>(r);
   return true;
 }
 
@@ -768,6 +764,8 @@ bool Arg::parse_longlong_radix(const char* str,
   long long r = strtoq(str, &end, radix);
 #elif defined HAVE_STRTOLL
   long long r = strtoll(str, &end, radix);
+#elif defined HAVE__STRTOI64
+  long long r = _strtoi64(str, &end, radix);
 #else
 #error parse_longlong_radix: cannot convert input to a long-long
 #endif
@@ -795,6 +793,8 @@ bool Arg::parse_ulonglong_radix(const char* str,
   unsigned long long r = strtouq(str, &end, radix);
 #elif defined HAVE_STRTOLL
   unsigned long long r = strtoull(str, &end, radix);
+#elif defined HAVE__STRTOI64
+  unsigned long long r = _strtoui64(str, &end, radix);
 #else
 #error parse_ulonglong_radix: cannot convert input to a long-long
 #endif

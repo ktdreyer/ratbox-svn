@@ -33,10 +33,13 @@
 //
 // TODO: Test extractions for PartialMatch/Consume
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <stdio.h>
 #include <cassert>
 #include <vector>
-#include "config.h"
 #include "pcrecpp.h"
 
 using pcrecpp::StringPiece;
@@ -107,8 +110,8 @@ static void LeakTest() {
       initial_size = VirtualProcessSize();
       printf("Size after 50000: %llu\n", initial_size);
     }
-    char buf[100];
-    snprintf(buf, sizeof(buf), "pat%09d", i);
+    char buf[100];  // definitely big enough
+    sprintf(buf, "pat%09d", i);
     RE newre(buf);
   }
   uint64 final_size = VirtualProcessSize();
@@ -806,8 +809,11 @@ int main(int argc, char** argv) {
   /***** FullMatch with no args *****/
 
   CHECK(RE("h.*o").FullMatch("hello"));
-  CHECK(!RE("h.*o").FullMatch("othello"));
-  CHECK(!RE("h.*o").FullMatch("hello!"));
+  CHECK(!RE("h.*o").FullMatch("othello"));     // Must be anchored at front
+  CHECK(!RE("h.*o").FullMatch("hello!"));      // Must be anchored at end
+  CHECK(RE("a*").FullMatch("aaaa"));           // Fullmatch with normal op
+  CHECK(RE("a*?").FullMatch("aaaa"));          // Fullmatch with nongreedy op
+  CHECK(RE("a*?\\z").FullMatch("aaaa"));       // Two unusual ops
 
   /***** FullMatch with args *****/
 
@@ -902,27 +908,34 @@ int main(int argc, char** argv) {
     CHECK(!RE("(\\d+)").FullMatch("4294967296", &v));
   }
 #ifdef HAVE_LONG_LONG
+# if defined(__MINGW__) || defined(__MINGW32__)
+#   define LLD "%I64d"
+#   define LLU "%I64u"
+# else
+#   define LLD "%lld"
+#   define LLU "%llu"
+# endif
   {
     long long v;
     static const long long max_value = 0x7fffffffffffffffLL;
     static const long long min_value = -max_value - 1;
-    char buf[32];
+    char buf[32];  // definitely big enough for a long long
 
     CHECK(RE("(-?\\d+)").FullMatch("100", &v)); CHECK_EQ(v, 100);
     CHECK(RE("(-?\\d+)").FullMatch("-100",&v)); CHECK_EQ(v, -100);
 
-    snprintf(buf, sizeof(buf), "%lld", max_value);
+    sprintf(buf, LLD, max_value);
     CHECK(RE("(-?\\d+)").FullMatch(buf,&v)); CHECK_EQ(v, max_value);
 
-    snprintf(buf, sizeof(buf), "%lld", min_value);
+    sprintf(buf, LLD, min_value);
     CHECK(RE("(-?\\d+)").FullMatch(buf,&v)); CHECK_EQ(v, min_value);
 
-    snprintf(buf, sizeof(buf), "%lld", max_value);
+    sprintf(buf, LLD, max_value);
     assert(buf[strlen(buf)-1] != '9');
     buf[strlen(buf)-1]++;
     CHECK(!RE("(-?\\d+)").FullMatch(buf, &v));
 
-    snprintf(buf, sizeof(buf), "%lld", min_value);
+    sprintf(buf, LLD, min_value);
     assert(buf[strlen(buf)-1] != '9');
     buf[strlen(buf)-1]++;
     CHECK(!RE("(-?\\d+)").FullMatch(buf, &v));
@@ -933,12 +946,12 @@ int main(int argc, char** argv) {
     unsigned long long v;
     long long v2;
     static const unsigned long long max_value = 0xffffffffffffffffULL;
-    char buf[32];
+    char buf[32];  // definitely big enough for a unsigned long long
 
     CHECK(RE("(-?\\d+)").FullMatch("100",&v)); CHECK_EQ(v, 100);
     CHECK(RE("(-?\\d+)").FullMatch("-100",&v2)); CHECK_EQ(v2, -100);
 
-    snprintf(buf, sizeof(buf), "%llu", max_value);
+    sprintf(buf, LLU, max_value);
     CHECK(RE("(-?\\d+)").FullMatch(buf,&v)); CHECK_EQ(v, max_value);
 
     assert(buf[strlen(buf)-1] != '9');
@@ -1119,13 +1132,13 @@ int main(int argc, char** argv) {
     printf("Testing UTF-8 handling\n");
 
     // Three Japanese characters (nihongo)
-    const char utf8_string[] = {
+    const unsigned char utf8_string[] = {
          0xe6, 0x97, 0xa5, // 65e5
          0xe6, 0x9c, 0xac, // 627c
          0xe8, 0xaa, 0x9e, // 8a9e
          0
     };
-    const char utf8_pattern[] = {
+    const unsigned char utf8_pattern[] = {
          '.',
          0xe6, 0x9c, 0xac, // 627c
          '.',

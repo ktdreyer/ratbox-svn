@@ -7,6 +7,7 @@ LIBS=@LIBS@
 LDFLAGS=@LDFLAGS@
 
 SUBDIRS=@SQLITE_SUBDIR@ @PCRE_SUBDIR@ src help langs
+SUBDIRS_NOINSTALL=@SQLITE_SUBDIR@ src help langs
 
 prefix=@prefix@
 exec_prefix=@prefix@
@@ -57,7 +58,7 @@ install: build
 	$(INSTALL) -m 640 include/channel.h $(DESTDIR)$(includedir)
 	$(INSTALL) -m 640 include/client.h $(DESTDIR)$(includedir)
 
-	@for i in $(SUBDIRS); do \
+	@for i in $(SUBDIRS_NOINSTALL); do \
 		echo "install -> $$i"; \
 		cd $$i; \
 		$(MAKE) install; cd ..; \
