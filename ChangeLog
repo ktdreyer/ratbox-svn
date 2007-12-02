@@ -1,3 +1,12 @@
+leeh        2007/12/02 15:42:29 UTC	(20071202_0-24652)
+  Log:
+  - new gcc complains about using !(x) in EmptyString macro on static strings
+  
+
+  Modified:
+	rserv/trunk/include/tools.h (File Modified) 
+
+
 leeh        2007/09/11 20:30:30 UTC	(20070911_1-24406)
   Log:
   - err, I really do mean usernames
