@@ -359,7 +359,8 @@ find_ban(const char *mask, char type)
 
 	if(data.row_count)
 	{
-		if(atoi(data.row[0][0]) == 1)
+		/* pgsql stores booleans as t/f */
+		if(atoi(data.row[0][0]) == 1 || (data.row[0][0] && data.row[0][0][0] == 't'))
 			retval = -1;
 		else
 			retval = 1;
