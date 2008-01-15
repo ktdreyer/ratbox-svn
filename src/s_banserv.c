@@ -591,6 +591,8 @@ static int
 o_banserv_kline(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	const char *mask;
+	char *username;
+	char *host;
 	char *reason;
 	time_t temptime = 0;
 	int para = 0;
@@ -630,7 +632,7 @@ o_banserv_kline(struct client *client_p, struct lconn *conn_p, const char *parv[
 
 	mask = parv[para++];
 
-	if(!split_ban(mask, NULL, NULL))
+	if(!split_ban(mask, &username, &host))
 	{
 		service_snd(banserv_p, client_p, conn_p, SVC_BAN_INVALID,
 				"KLINE", mask);
@@ -648,6 +650,28 @@ o_banserv_kline(struct client *client_p, struct lconn *conn_p, const char *parv[
 
 	if(strlen(reason) > REASONLEN)
 		reason[REASONLEN] = '\0';
+
+	if(config_file.bs_max_kline_matches)
+	{
+		struct client *target_p;
+		unsigned int matches = 0;
+		dlink_node *ptr;
+
+		DLINK_FOREACH(ptr, user_list.head)
+		{
+			target_p = ptr->data;
+
+			if(match(username, target_p->user->username) && match(host, target_p->user->host))
+				matches++;
+		}
+
+		if(matches > config_file.bs_max_kline_matches)
+		{
+			service_snd(banserv_p, client_p, conn_p, SVC_BAN_TOOMANYMATCHES,
+					username, "@", host, matches, config_file.bs_max_kline_matches);
+			return 0;
+		}
+	}
 
 	if(res)
 		rsdb_exec(NULL, "UPDATE operbans SET reason='%Q', "
