@@ -1,3 +1,14 @@
+leeh        2008/01/15 19:07:14 UTC	(20080115_1-24952)
+  Log:
+  - add a new message for when a generic ban matches too many users
+  
+
+  Modified:
+	rserv/trunk/include/langs.h (File Modified) 
+	rserv/trunk/src/langs.c (File Modified) 
+	rserv/trunk/src/messages.c (File Modified) 
+
+
 leeh        2008/01/15 18:57:39 UTC	(20080115_0-24950)
   Log:
   - add new conf options for max kline/resv/xline matches
