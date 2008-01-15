@@ -390,7 +390,7 @@ find_ban_remove(const char *mask, char type)
 	rsdb_exec_fetch(&data, "SELECT remove, oper FROM operbans WHERE type='%c' AND mask=LOWER('%Q') LIMIT 1",
 			type, mask);
 
-	if(data.row_count && (atoi(data.row[0][0]) == 0))
+	if(data.row_count && (atoi(data.row[0][0]) == 0 || (data.row[0][0] && data.row[0][0][0] == 'f')))
 	{
 		strlcpy(buf, data.row[0][1], sizeof(buf));
 		retval = buf;
