@@ -1,3 +1,12 @@
+leeh        2008/01/15 21:27:52 UTC	(20080115_4-24958)
+  Log:
+  - add a pgsql boolean check into find_ban_remove() too
+  
+
+  Modified:
+	rserv/trunk/src/s_banserv.c (File Modified) 
+
+
 leeh        2008/01/15 21:26:18 UTC	(20080115_3-24956)
   Log:
   - make the find_ban() check match against pgsqls boolean t/f, so that it can
