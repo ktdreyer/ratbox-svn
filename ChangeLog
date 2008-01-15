@@ -1,3 +1,12 @@
+leeh        2008/01/15 21:25:08 UTC	(20080115_2-24954)
+  Log:
+  - need some more parameters in that too many matches one for banserv..
+  
+
+  Modified:
+	rserv/trunk/src/messages.c (File Modified) 
+
+
 leeh        2008/01/15 19:07:14 UTC	(20080115_1-24952)
   Log:
   - add a new message for when a generic ban matches too many users
