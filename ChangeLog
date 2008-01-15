@@ -1,3 +1,14 @@
+leeh        2008/01/15 18:57:39 UTC	(20080115_0-24950)
+  Log:
+  - add new conf options for max kline/resv/xline matches
+  
+
+  Modified:
+	rserv/trunk/include/conf.h (File Modified) 
+	rserv/trunk/src/conf.c (File Modified) 
+	rserv/trunk/src/newconf.c (File Modified) 
+
+
 leeh        2007/12/02 16:00:54 UTC	(20071202_1-24655)
   Log:
   - add russian cyrillic translations, via Valery Yatsko
