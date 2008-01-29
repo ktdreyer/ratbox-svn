@@ -36,6 +36,7 @@ BSRCS = 		\
 	c_mode.c	\
         cache.c         \
 	channel.c	\
+	cidr.c		\
 	client.c	\
 	crypt.c		\
 	conf.c		\
