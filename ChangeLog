@@ -1,3 +1,13 @@
+leeh        2008/01/29 20:00:23 UTC	(20080129_0-25052)
+  Log:
+  - add cidr.c from atheme-services for doing ip mask matches
+  
+
+  Modified:
+	rserv/trunk/src/Makefile.in (File Modified) 
+	rserv/trunk/src/cidr.c (File Added) 
+
+
 leeh        2008/01/15 21:31:42 UTC	(20080115_5-24960)
   Log:
   - add code for checking maximum number of clients to match on kline
