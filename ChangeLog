@@ -1,3 +1,16 @@
+leeh        2008/02/08 21:23:13 UTC	(20080208_2-25066)
+  Log:
+  - add new oper flag to banserv, "nomax" which will allow an oper to exceed
+    maximum kline/xline matches
+  
+
+  Modified:
+	rserv/trunk/include/conf.h (File Modified) 
+	rserv/trunk/src/conf.c (File Modified) 
+	rserv/trunk/src/newconf.c (File Modified) 
+	rserv/trunk/src/s_banserv.c (File Modified) 
+
+
 leeh        2008/02/08 21:16:19 UTC	(20080208_1-25064)
   Log:
   - missing prototypes for cidr.c
