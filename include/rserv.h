@@ -38,6 +38,10 @@ int valid_sid(const char *);
 struct client;
 void count_memory(struct client *);
 
+/* cidr.c */
+int match_ips(const char *s1, const char *s2);
+int match_cidr(const char *s1, const char *s2);
+
 /* snprintf.c */
 int rs_snprintf(char *, const size_t, const char *, ...);
 int rs_vsnprintf(char *, const size_t, const char *, va_list);
