@@ -1,3 +1,12 @@
+leeh        2008/02/08 21:16:19 UTC	(20080208_1-25064)
+  Log:
+  - missing prototypes for cidr.c
+  
+
+  Modified:
+	rserv/trunk/include/rserv.h (File Modified) 
+
+
 leeh        2008/02/08 20:27:59 UTC	(20080208_0-25062)
   Log:
   - add the relevant checks for max_xline_matches
