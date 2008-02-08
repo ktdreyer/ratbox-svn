@@ -1,3 +1,12 @@
+leeh        2008/02/08 20:27:59 UTC	(20080208_0-25062)
+  Log:
+  - add the relevant checks for max_xline_matches
+  
+
+  Modified:
+	rserv/trunk/src/s_banserv.c (File Modified) 
+
+
 leeh        2008/01/29 20:00:23 UTC	(20080129_0-25052)
   Log:
   - add cidr.c from atheme-services for doing ip mask matches
