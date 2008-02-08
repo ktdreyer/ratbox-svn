@@ -763,6 +763,28 @@ o_banserv_xline(struct client *client_p, struct lconn *conn_p, const char *parv[
 	if(strlen(reason) > REASONLEN)
 		reason[REASONLEN] = '\0';
 
+	if(config_file.bs_max_xline_matches)
+	{
+		struct client *target_p;
+		unsigned int matches = 0;
+		dlink_node *ptr;
+
+		DLINK_FOREACH(ptr, user_list.head)
+		{
+			target_p = ptr->data;
+
+			if(match(gecos, target_p->info))
+				matches++;
+		}
+
+		if(matches > config_file.bs_max_xline_matches)
+		{
+			service_snd(banserv_p, client_p, conn_p, SVC_BAN_TOOMANYMATCHES,
+					gecos, "", "", matches, config_file.bs_max_xline_matches);
+			return 0;
+		}
+	}
+
 	if(res)
 		rsdb_exec(NULL, "UPDATE operbans SET reason='%Q', "
 				"hold='%ld', oper='%Q', remove='0' WHERE "
