@@ -429,6 +429,7 @@ static struct sflag_table
 	{ 8, "banserv",  CONF_OPER_BAN_PERM,	"perm"		},
 	{ 8, "banserv",  CONF_OPER_BAN_REMOVE,	"remove"	},
 	{ 8, "banserv",  CONF_OPER_BAN_SYNC,	"sync"		},
+	{ 8, "banserv",	 CONF_OPER_BAN_NOMAX,	"nomax"		},
 #else
 	{ 1, "OS", CONF_OPER_OS_MAINTAIN,	"M" },
 	{ 1, "OS", CONF_OPER_OS_IGNORE,		"I" },
@@ -458,6 +459,7 @@ static struct sflag_table
 	{ 8, "BS", CONF_OPER_BAN_PERM,		"P" },
 	{ 8, "BS", CONF_OPER_BAN_REMOVE,	"V" },
 	{ 8, "BS", CONF_OPER_BAN_SYNC,		"S" },
+	{ 8, "BS", CONF_OPER_BAN_NOMAX,		"M" },
 #endif
 	{ 0, NULL, 0, NULL }
 };

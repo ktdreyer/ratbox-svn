@@ -105,6 +105,7 @@ static struct mode_table banserv_table[] = {
 	{ "perm",	CONF_OPER_BAN_PERM	},
 	{ "remove",	CONF_OPER_BAN_REMOVE	},
 	{ "sync",	CONF_OPER_BAN_SYNC	},
+	{ "nomax",	CONF_OPER_BAN_NOMAX	},
 	{ "\0", 0 }
 };
 

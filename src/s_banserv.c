@@ -651,11 +651,13 @@ o_banserv_kline(struct client *client_p, struct lconn *conn_p, const char *parv[
 	if(strlen(reason) > REASONLEN)
 		reason[REASONLEN] = '\0';
 
-	if(config_file.bs_max_kline_matches)
+	if(config_file.bs_max_kline_matches &&
+		!((client_p && client_p->user->oper->sflags & CONF_OPER_BAN_NOMAX) || (conn_p && conn_p->sprivs & CONF_OPER_BAN_NOMAX)))
 	{
 		struct client *target_p;
 		unsigned int matches = 0;
 		dlink_node *ptr;
+
 
 		DLINK_FOREACH(ptr, user_list.head)
 		{
@@ -763,7 +765,8 @@ o_banserv_xline(struct client *client_p, struct lconn *conn_p, const char *parv[
 	if(strlen(reason) > REASONLEN)
 		reason[REASONLEN] = '\0';
 
-	if(config_file.bs_max_xline_matches)
+	if(config_file.bs_max_xline_matches &&
+		!((client_p && client_p->user->oper->sflags & CONF_OPER_BAN_NOMAX) || (conn_p && conn_p->sprivs & CONF_OPER_BAN_NOMAX)))
 	{
 		struct client *target_p;
 		unsigned int matches = 0;
