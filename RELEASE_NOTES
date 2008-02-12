@@ -1,6 +1,27 @@
 
 This is the current development version of ratbox-services.
 
+-- ratbox-services-1.2.0beta2
+- fix global capability test which was breaking nickserv::regain
+- fix installation of memoserv helpfiles
+- fix crash with memoserv not requiring users be logged in
+- move the userserv expire code which walks the hash expiring/updating users
+  last access iterate the hash in bits to stop it hogging cpu
+- userserv::resetemail was sending the second confirmation out to the old
+  address rather than the new address
+- fix chanserv::chansuspend to properly support suspend times
+- russian translations, via
+  Valery Yatsko <darkwire.tl@gmail.com>
+- new banserv {}; conf option: max_kline_matches = <number>;
+  controls the maximum number of clients a kline can match for it to be
+  allowed
+- new banserv {}; conf option: max_xline_matches = <number>;
+  controls the maximum number of clients an xline can match for it to be
+  allowed
+- fix a problem with postgresql and banserv klines
+- new oper {}; flag to banserv: nomax
+  Allows an oper to exceed max_kline_matches and max_xline_matches
+
 -- ratbox-services-1.2.0beta1
 - initial release, read doc/whats-new-1.2.txt
 
