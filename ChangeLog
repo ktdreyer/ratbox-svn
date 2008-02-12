@@ -1,3 +1,14 @@
+leeh        2008/02/12 20:37:54 UTC	(20080212_0-25070)
+  Log:
+  - update RELEASE_NOTES
+  - revved patchlevel to 1.2.0beta2
+  
+
+  Modified:
+	rserv/trunk/RELEASE_NOTES (File Modified) 
+	rserv/trunk/include/config.h (File Modified) 
+
+
 leeh        2008/02/08 21:23:35 UTC	(20080208_3-25068)
   Log:
   - update example.conf
