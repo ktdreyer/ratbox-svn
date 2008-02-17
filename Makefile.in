@@ -29,7 +29,6 @@ all: build
 autoconf:
 	autoconf autoconf/configure.in >configure
 	autoheader -l autoconf autoconf/configure.in > include/setup.h.in
-	$(RM) -f config.cache
 
 build:
 	@for i in $(SUBDIRS); do \

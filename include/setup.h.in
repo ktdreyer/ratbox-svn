@@ -69,8 +69,14 @@
 /* Define to 1 if you have the `mmap' function. */
 #undef HAVE_MMAP
 
+/* Define to 1 if MySQL libraries are available */
+#undef HAVE_MYSQL
+
 /* Define if you have nanosleep */
 #undef HAVE_NANOSLEEP
+
+/* Define to 1 if PostgreSQL libraries are available */
+#undef HAVE_POSTGRESQL
 
 /* Define to 1 if you have the `select' function. */
 #undef HAVE_SELECT
@@ -131,9 +137,6 @@
 
 /* Build packaged PCRE */
 #undef PCRE_BUILD
-
-/* Use alternate pgsql include path */
-#undef PGSQL_ALTERNATE_INCLUDE
 
 /* Define as the return type of signal handlers (`int' or `void'). */
 #undef RETSIGTYPE

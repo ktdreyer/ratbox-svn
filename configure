@@ -680,6 +680,14 @@ logdir
 rundir
 helpdir
 langdir
+MYSQL_CONFIG
+MYSQL_VERSION
+MYSQL_CFLAGS
+MYSQL_LDFLAGS
+PG_CONFIG
+POSTGRESQL_VERSION
+POSTGRESQL_CFLAGS
+POSTGRESQL_LDFLAGS
 subdirs
 DB_INCLUDES
 DB_LIBS
@@ -1297,10 +1305,10 @@ Optional Features:
  --disable-watchserv       Disable command watching service
  --enable-sqlite3=DIR    Default: Enable sqlite3 backend, optionally search
                            DIR/include/ for headers and DIR/lib/ for libs
- --enable-mysql=DIR      Enable mysql backend, optionally search
-                           DIR/include/ for headers and DIR/lib/ for libs
- --enable-pgsql=DIR     Enable pgsql backend, optionally search
-                          DIR/include/ for headers and DIR/lib/ for libs
+  --enable-mysql=[ARG]    Enable MySQL backend [default=no], optionally
+                          specify path to mysql_config
+  --enable-pgsql=[ARG]    Enable pgsql backend [default=no], optionally
+                          specify path to pg_config
  --enable-pcre=DIR    Default: Enable PCRE engine, optionally search
                            DIR/include/ for headers and DIR/lib/ for libs
 
@@ -5349,17 +5357,10 @@ fi
 
 ac_cv_sqlite3_val=""
 ac_cv_mysql_val=""
-ac_cv_pgsql_val=""
+ac_cv_postgresql_val=""
 ac_cv_sqlite3_path=""
-ac_cv_mysql_path=""
-ac_cv_pgsql_path=""
 ac_cv_found_sqlite3_inc="no"
 ac_cv_found_sqlite3_lib="no"
-ac_cv_found_mysql_inc="no"
-ac_cv_found_mysql_lib="no"
-ac_cv_found_pgsql_inc="no"
-ac_cv_found_pgsql_lib="no"
-ac_cv_pgsql_altinclude="no"
 ac_cv_database=""
 
 
@@ -5606,663 +5607,306 @@ echo "${ECHO_T}no" >&6; }
 fi
 
 
-# Check whether --enable-mysql was given.
+
+    # Check whether --enable-mysql was given.
 if test "${enable_mysql+set}" = set; then
-  enableval=$enable_mysql; ac_cv_mysql_val=$enableval
-fi
-
-
-if test "${ac_cv_header_mysql_mysql_h+set}" = set; then
-  { echo "$as_me:$LINENO: checking for mysql/mysql.h" >&5
-echo $ECHO_N "checking for mysql/mysql.h... $ECHO_C" >&6; }
-if test "${ac_cv_header_mysql_mysql_h+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-fi
-{ echo "$as_me:$LINENO: result: $ac_cv_header_mysql_mysql_h" >&5
-echo "${ECHO_T}$ac_cv_header_mysql_mysql_h" >&6; }
+  enableval=$enable_mysql;  ac_cv_mysql_val=$enableval
 else
-  # Is the header compilable?
-{ echo "$as_me:$LINENO: checking mysql/mysql.h usability" >&5
-echo $ECHO_N "checking mysql/mysql.h usability... $ECHO_C" >&6; }
-cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-$ac_includes_default
-#include <mysql/mysql.h>
-_ACEOF
-rm -f conftest.$ac_objext
-if { (ac_try="$ac_compile"
-case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
-  (eval "$ac_compile") 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } && {
-	 test -z "$ac_c_werror_flag" ||
-	 test ! -s conftest.err
-       } && test -s conftest.$ac_objext; then
-  ac_header_compiler=yes
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-	ac_header_compiler=no
-fi
-
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-{ echo "$as_me:$LINENO: result: $ac_header_compiler" >&5
-echo "${ECHO_T}$ac_header_compiler" >&6; }
-
-# Is the header present?
-{ echo "$as_me:$LINENO: checking mysql/mysql.h presence" >&5
-echo $ECHO_N "checking mysql/mysql.h presence... $ECHO_C" >&6; }
-cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-#include <mysql/mysql.h>
-_ACEOF
-if { (ac_try="$ac_cpp conftest.$ac_ext"
-case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
-  (eval "$ac_cpp conftest.$ac_ext") 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } >/dev/null && {
-	 test -z "$ac_c_preproc_warn_flag$ac_c_werror_flag" ||
-	 test ! -s conftest.err
-       }; then
-  ac_header_preproc=yes
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-  ac_header_preproc=no
-fi
-
-rm -f conftest.err conftest.$ac_ext
-{ echo "$as_me:$LINENO: result: $ac_header_preproc" >&5
-echo "${ECHO_T}$ac_header_preproc" >&6; }
-
-# So?  What about this header?
-case $ac_header_compiler:$ac_header_preproc:$ac_c_preproc_warn_flag in
-  yes:no: )
-    { echo "$as_me:$LINENO: WARNING: mysql/mysql.h: accepted by the compiler, rejected by the preprocessor!" >&5
-echo "$as_me: WARNING: mysql/mysql.h: accepted by the compiler, rejected by the preprocessor!" >&2;}
-    { echo "$as_me:$LINENO: WARNING: mysql/mysql.h: proceeding with the compiler's result" >&5
-echo "$as_me: WARNING: mysql/mysql.h: proceeding with the compiler's result" >&2;}
-    ac_header_preproc=yes
-    ;;
-  no:yes:* )
-    { echo "$as_me:$LINENO: WARNING: mysql/mysql.h: present but cannot be compiled" >&5
-echo "$as_me: WARNING: mysql/mysql.h: present but cannot be compiled" >&2;}
-    { echo "$as_me:$LINENO: WARNING: mysql/mysql.h:     check for missing prerequisite headers?" >&5
-echo "$as_me: WARNING: mysql/mysql.h:     check for missing prerequisite headers?" >&2;}
-    { echo "$as_me:$LINENO: WARNING: mysql/mysql.h: see the Autoconf documentation" >&5
-echo "$as_me: WARNING: mysql/mysql.h: see the Autoconf documentation" >&2;}
-    { echo "$as_me:$LINENO: WARNING: mysql/mysql.h:     section \"Present But Cannot Be Compiled\"" >&5
-echo "$as_me: WARNING: mysql/mysql.h:     section \"Present But Cannot Be Compiled\"" >&2;}
-    { echo "$as_me:$LINENO: WARNING: mysql/mysql.h: proceeding with the preprocessor's result" >&5
-echo "$as_me: WARNING: mysql/mysql.h: proceeding with the preprocessor's result" >&2;}
-    { echo "$as_me:$LINENO: WARNING: mysql/mysql.h: in the future, the compiler will take precedence" >&5
-echo "$as_me: WARNING: mysql/mysql.h: in the future, the compiler will take precedence" >&2;}
-
-    ;;
-esac
-{ echo "$as_me:$LINENO: checking for mysql/mysql.h" >&5
-echo $ECHO_N "checking for mysql/mysql.h... $ECHO_C" >&6; }
-if test "${ac_cv_header_mysql_mysql_h+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  ac_cv_header_mysql_mysql_h=$ac_header_preproc
-fi
-{ echo "$as_me:$LINENO: result: $ac_cv_header_mysql_mysql_h" >&5
-echo "${ECHO_T}$ac_cv_header_mysql_mysql_h" >&6; }
+   ac_cv_mysql_val="no"
 
 fi
-if test $ac_cv_header_mysql_mysql_h = yes; then
 
-	ac_cv_found_mysql_inc="yes"
 
-else
+    MYSQL_CFLAGS=""
+    MYSQL_LDFLAGS=""
+    MYSQL_VERSION=""
 
-	{ echo "$as_me:$LINENO: checking for mysql/mysql.h in given path" >&5
-echo $ECHO_N "checking for mysql/mysql.h in given path... $ECHO_C" >&6; }
-	if test -f "$ac_cv_mysql_val/include/mysql/mysql.h"; then
-		{ echo "$as_me:$LINENO: result: yes" >&5
-echo "${ECHO_T}yes" >&6; }
-		ac_cv_found_mysql_inc="yes"
-		ac_cv_mysql_path="$ac_cv_mysql_val"
-	else
-		{ echo "$as_me:$LINENO: result: no" >&5
-echo "${ECHO_T}no" >&6; }
+
+    if test "$ac_cv_mysql_val" = "yes"; then
+
+	if test "X$ac_cv_mysql_val" != "X" &&
+	   test "$ac_cv_mysql_val" != "no" &&
+	   test "$ac_cv_mysql_val" != "yes"; then
+	    MYSQL_CONFIG=$ac_cv_mysql_val
 	fi
 
-fi
-
-
-
-{ echo "$as_me:$LINENO: checking for mysql_init in -lmysqlclient" >&5
-echo $ECHO_N "checking for mysql_init in -lmysqlclient... $ECHO_C" >&6; }
-if test "${ac_cv_lib_mysqlclient_mysql_init+set}" = set; then
+        if test -z "$MYSQL_CONFIG" -o test; then
+            # Extract the first word of "mysql_config", so it can be a program name with args.
+set dummy mysql_config; ac_word=$2
+{ echo "$as_me:$LINENO: checking for $ac_word" >&5
+echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6; }
+if test "${ac_cv_path_MYSQL_CONFIG+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lmysqlclient  $LIBS"
-cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
+  case $MYSQL_CONFIG in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_MYSQL_CONFIG="$MYSQL_CONFIG" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+  for ac_exec_ext in '' $ac_executable_extensions; do
+  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
+    ac_cv_path_MYSQL_CONFIG="$as_dir/$ac_word$ac_exec_ext"
+    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+done
+IFS=$as_save_IFS
 
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char mysql_init ();
-int
-main ()
-{
-return mysql_init ();
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (ac_try="$ac_link"
-case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
+  test -z "$ac_cv_path_MYSQL_CONFIG" && ac_cv_path_MYSQL_CONFIG="no"
+  ;;
 esac
-eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
-  (eval "$ac_link") 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } && {
-	 test -z "$ac_c_werror_flag" ||
-	 test ! -s conftest.err
-       } && test -s conftest$ac_exeext &&
-       $as_test_x conftest$ac_exeext; then
-  ac_cv_lib_mysqlclient_mysql_init=yes
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-	ac_cv_lib_mysqlclient_mysql_init=no
 fi
-
-rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
-      conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ echo "$as_me:$LINENO: result: $ac_cv_lib_mysqlclient_mysql_init" >&5
-echo "${ECHO_T}$ac_cv_lib_mysqlclient_mysql_init" >&6; }
-if test $ac_cv_lib_mysqlclient_mysql_init = yes; then
-
-	ac_cv_found_mysql_lib="yes"
-
+MYSQL_CONFIG=$ac_cv_path_MYSQL_CONFIG
+if test -n "$MYSQL_CONFIG"; then
+  { echo "$as_me:$LINENO: result: $MYSQL_CONFIG" >&5
+echo "${ECHO_T}$MYSQL_CONFIG" >&6; }
 else
-
-	{ echo "$as_me:$LINENO: checking for -lmysqlclient in given path" >&5
-echo $ECHO_N "checking for -lmysqlclient in given path... $ECHO_C" >&6; }
-	if test -e "$ac_cv_mysql_path/lib/libmysqlclient.so"; then
-		{ echo "$as_me:$LINENO: result: yes" >&5
-echo "${ECHO_T}yes" >&6; }
-		ac_cv_found_mysql_lib="yes"
-	else
-		{ echo "$as_me:$LINENO: result: no" >&5
+  { echo "$as_me:$LINENO: result: no" >&5
 echo "${ECHO_T}no" >&6; }
-	fi
-
 fi
 
 
-# Check whether --enable-pgsql was given.
-if test "${enable_pgsql+set}" = set; then
-  enableval=$enable_pgsql; ac_cv_pgsql_val=$enableval
-fi
+        fi
 
+        if test "$MYSQL_CONFIG" != "no"; then
+            { echo "$as_me:$LINENO: checking for MySQL libraries" >&5
+echo $ECHO_N "checking for MySQL libraries... $ECHO_C" >&6; }
 
-if test "${ac_cv_header_pgsql_libpq_fe_h+set}" = set; then
-  { echo "$as_me:$LINENO: checking for pgsql/libpq-fe.h" >&5
-echo $ECHO_N "checking for pgsql/libpq-fe.h... $ECHO_C" >&6; }
-if test "${ac_cv_header_pgsql_libpq_fe_h+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-fi
-{ echo "$as_me:$LINENO: result: $ac_cv_header_pgsql_libpq_fe_h" >&5
-echo "${ECHO_T}$ac_cv_header_pgsql_libpq_fe_h" >&6; }
-else
-  # Is the header compilable?
-{ echo "$as_me:$LINENO: checking pgsql/libpq-fe.h usability" >&5
-echo $ECHO_N "checking pgsql/libpq-fe.h usability... $ECHO_C" >&6; }
-cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-$ac_includes_default
-#include <pgsql/libpq-fe.h>
-_ACEOF
-rm -f conftest.$ac_objext
-if { (ac_try="$ac_compile"
-case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
-  (eval "$ac_compile") 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } && {
-	 test -z "$ac_c_werror_flag" ||
-	 test ! -s conftest.err
-       } && test -s conftest.$ac_objext; then
-  ac_header_compiler=yes
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
+            MYSQL_CFLAGS="`$MYSQL_CONFIG --cflags`"
+            MYSQL_LDFLAGS="`$MYSQL_CONFIG --libs`"
 
-	ac_header_compiler=no
-fi
+            MYSQL_VERSION=`$MYSQL_CONFIG --version`
 
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-{ echo "$as_me:$LINENO: result: $ac_header_compiler" >&5
-echo "${ECHO_T}$ac_header_compiler" >&6; }
-
-# Is the header present?
-{ echo "$as_me:$LINENO: checking pgsql/libpq-fe.h presence" >&5
-echo $ECHO_N "checking pgsql/libpq-fe.h presence... $ECHO_C" >&6; }
-cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-#include <pgsql/libpq-fe.h>
-_ACEOF
-if { (ac_try="$ac_cpp conftest.$ac_ext"
-case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
-  (eval "$ac_cpp conftest.$ac_ext") 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } >/dev/null && {
-	 test -z "$ac_c_preproc_warn_flag$ac_c_werror_flag" ||
-	 test ! -s conftest.err
-       }; then
-  ac_header_preproc=yes
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-  ac_header_preproc=no
-fi
-
-rm -f conftest.err conftest.$ac_ext
-{ echo "$as_me:$LINENO: result: $ac_header_preproc" >&5
-echo "${ECHO_T}$ac_header_preproc" >&6; }
-
-# So?  What about this header?
-case $ac_header_compiler:$ac_header_preproc:$ac_c_preproc_warn_flag in
-  yes:no: )
-    { echo "$as_me:$LINENO: WARNING: pgsql/libpq-fe.h: accepted by the compiler, rejected by the preprocessor!" >&5
-echo "$as_me: WARNING: pgsql/libpq-fe.h: accepted by the compiler, rejected by the preprocessor!" >&2;}
-    { echo "$as_me:$LINENO: WARNING: pgsql/libpq-fe.h: proceeding with the compiler's result" >&5
-echo "$as_me: WARNING: pgsql/libpq-fe.h: proceeding with the compiler's result" >&2;}
-    ac_header_preproc=yes
-    ;;
-  no:yes:* )
-    { echo "$as_me:$LINENO: WARNING: pgsql/libpq-fe.h: present but cannot be compiled" >&5
-echo "$as_me: WARNING: pgsql/libpq-fe.h: present but cannot be compiled" >&2;}
-    { echo "$as_me:$LINENO: WARNING: pgsql/libpq-fe.h:     check for missing prerequisite headers?" >&5
-echo "$as_me: WARNING: pgsql/libpq-fe.h:     check for missing prerequisite headers?" >&2;}
-    { echo "$as_me:$LINENO: WARNING: pgsql/libpq-fe.h: see the Autoconf documentation" >&5
-echo "$as_me: WARNING: pgsql/libpq-fe.h: see the Autoconf documentation" >&2;}
-    { echo "$as_me:$LINENO: WARNING: pgsql/libpq-fe.h:     section \"Present But Cannot Be Compiled\"" >&5
-echo "$as_me: WARNING: pgsql/libpq-fe.h:     section \"Present But Cannot Be Compiled\"" >&2;}
-    { echo "$as_me:$LINENO: WARNING: pgsql/libpq-fe.h: proceeding with the preprocessor's result" >&5
-echo "$as_me: WARNING: pgsql/libpq-fe.h: proceeding with the preprocessor's result" >&2;}
-    { echo "$as_me:$LINENO: WARNING: pgsql/libpq-fe.h: in the future, the compiler will take precedence" >&5
-echo "$as_me: WARNING: pgsql/libpq-fe.h: in the future, the compiler will take precedence" >&2;}
-
-    ;;
-esac
-{ echo "$as_me:$LINENO: checking for pgsql/libpq-fe.h" >&5
-echo $ECHO_N "checking for pgsql/libpq-fe.h... $ECHO_C" >&6; }
-if test "${ac_cv_header_pgsql_libpq_fe_h+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  ac_cv_header_pgsql_libpq_fe_h=$ac_header_preproc
-fi
-{ echo "$as_me:$LINENO: result: $ac_cv_header_pgsql_libpq_fe_h" >&5
-echo "${ECHO_T}$ac_cv_header_pgsql_libpq_fe_h" >&6; }
-
-fi
-if test $ac_cv_header_pgsql_libpq_fe_h = yes; then
-
-	ac_cv_found_pgsql_inc="yes"
-
-else
-
-	{ echo "$as_me:$LINENO: checking for pgsql/libpq-fe.h in given path" >&5
-echo $ECHO_N "checking for pgsql/libpq-fe.h in given path... $ECHO_C" >&6; }
-	if test -f "$ac_cv_pgsql_val/include/pgsql/libpq-fe.h"; then
-		{ echo "$as_me:$LINENO: result: yes" >&5
-echo "${ECHO_T}yes" >&6; }
-		ac_cv_found_pgsql_inc="yes"
-		ac_cv_pgsql_path="$ac_cv_pgsql_val"
-	else
-		{ echo "$as_me:$LINENO: result: no" >&5
-echo "${ECHO_T}no" >&6; }
-
-		if test "${ac_cv_header_postgresql_libpq_fe_h+set}" = set; then
-  { echo "$as_me:$LINENO: checking for postgresql/libpq-fe.h" >&5
-echo $ECHO_N "checking for postgresql/libpq-fe.h... $ECHO_C" >&6; }
-if test "${ac_cv_header_postgresql_libpq_fe_h+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-fi
-{ echo "$as_me:$LINENO: result: $ac_cv_header_postgresql_libpq_fe_h" >&5
-echo "${ECHO_T}$ac_cv_header_postgresql_libpq_fe_h" >&6; }
-else
-  # Is the header compilable?
-{ echo "$as_me:$LINENO: checking postgresql/libpq-fe.h usability" >&5
-echo $ECHO_N "checking postgresql/libpq-fe.h usability... $ECHO_C" >&6; }
-cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-$ac_includes_default
-#include <postgresql/libpq-fe.h>
-_ACEOF
-rm -f conftest.$ac_objext
-if { (ac_try="$ac_compile"
-case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
-  (eval "$ac_compile") 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } && {
-	 test -z "$ac_c_werror_flag" ||
-	 test ! -s conftest.err
-       } && test -s conftest.$ac_objext; then
-  ac_header_compiler=yes
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-	ac_header_compiler=no
-fi
-
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-{ echo "$as_me:$LINENO: result: $ac_header_compiler" >&5
-echo "${ECHO_T}$ac_header_compiler" >&6; }
-
-# Is the header present?
-{ echo "$as_me:$LINENO: checking postgresql/libpq-fe.h presence" >&5
-echo $ECHO_N "checking postgresql/libpq-fe.h presence... $ECHO_C" >&6; }
-cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-#include <postgresql/libpq-fe.h>
-_ACEOF
-if { (ac_try="$ac_cpp conftest.$ac_ext"
-case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
-  (eval "$ac_cpp conftest.$ac_ext") 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } >/dev/null && {
-	 test -z "$ac_c_preproc_warn_flag$ac_c_werror_flag" ||
-	 test ! -s conftest.err
-       }; then
-  ac_header_preproc=yes
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-  ac_header_preproc=no
-fi
-
-rm -f conftest.err conftest.$ac_ext
-{ echo "$as_me:$LINENO: result: $ac_header_preproc" >&5
-echo "${ECHO_T}$ac_header_preproc" >&6; }
-
-# So?  What about this header?
-case $ac_header_compiler:$ac_header_preproc:$ac_c_preproc_warn_flag in
-  yes:no: )
-    { echo "$as_me:$LINENO: WARNING: postgresql/libpq-fe.h: accepted by the compiler, rejected by the preprocessor!" >&5
-echo "$as_me: WARNING: postgresql/libpq-fe.h: accepted by the compiler, rejected by the preprocessor!" >&2;}
-    { echo "$as_me:$LINENO: WARNING: postgresql/libpq-fe.h: proceeding with the compiler's result" >&5
-echo "$as_me: WARNING: postgresql/libpq-fe.h: proceeding with the compiler's result" >&2;}
-    ac_header_preproc=yes
-    ;;
-  no:yes:* )
-    { echo "$as_me:$LINENO: WARNING: postgresql/libpq-fe.h: present but cannot be compiled" >&5
-echo "$as_me: WARNING: postgresql/libpq-fe.h: present but cannot be compiled" >&2;}
-    { echo "$as_me:$LINENO: WARNING: postgresql/libpq-fe.h:     check for missing prerequisite headers?" >&5
-echo "$as_me: WARNING: postgresql/libpq-fe.h:     check for missing prerequisite headers?" >&2;}
-    { echo "$as_me:$LINENO: WARNING: postgresql/libpq-fe.h: see the Autoconf documentation" >&5
-echo "$as_me: WARNING: postgresql/libpq-fe.h: see the Autoconf documentation" >&2;}
-    { echo "$as_me:$LINENO: WARNING: postgresql/libpq-fe.h:     section \"Present But Cannot Be Compiled\"" >&5
-echo "$as_me: WARNING: postgresql/libpq-fe.h:     section \"Present But Cannot Be Compiled\"" >&2;}
-    { echo "$as_me:$LINENO: WARNING: postgresql/libpq-fe.h: proceeding with the preprocessor's result" >&5
-echo "$as_me: WARNING: postgresql/libpq-fe.h: proceeding with the preprocessor's result" >&2;}
-    { echo "$as_me:$LINENO: WARNING: postgresql/libpq-fe.h: in the future, the compiler will take precedence" >&5
-echo "$as_me: WARNING: postgresql/libpq-fe.h: in the future, the compiler will take precedence" >&2;}
-
-    ;;
-esac
-{ echo "$as_me:$LINENO: checking for postgresql/libpq-fe.h" >&5
-echo $ECHO_N "checking for postgresql/libpq-fe.h... $ECHO_C" >&6; }
-if test "${ac_cv_header_postgresql_libpq_fe_h+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  ac_cv_header_postgresql_libpq_fe_h=$ac_header_preproc
-fi
-{ echo "$as_me:$LINENO: result: $ac_cv_header_postgresql_libpq_fe_h" >&5
-echo "${ECHO_T}$ac_cv_header_postgresql_libpq_fe_h" >&6; }
-
-fi
-if test $ac_cv_header_postgresql_libpq_fe_h = yes; then
-
-			ac_cv_found_pgsql_inc="yes"
-			ac_cv_pgsql_altinclude="yes"
-
-else
-
-			{ echo "$as_me:$LINENO: checking for postgresql/libpq-fe.h in given path" >&5
-echo $ECHO_N "checking for postgresql/libpq-fe.h in given path... $ECHO_C" >&6; }
-			if test -f "$ac_cv_pgsql_val/include/postgresql/libpq-fe.h"; then
-				{ echo "$as_me:$LINENO: result: yes" >&5
-echo "${ECHO_T}yes" >&6; }
-				ac_cv_found_pgsql_inc="yes"
-				ac_cv_pgsql_altinclude="yes"
-				ac_cv_pgsql_path="$ac_cv_pgsql_val"
-			else
-				{ echo "$as_me:$LINENO: result: no" >&5
-echo "${ECHO_T}no" >&6; }
-			fi
-
-fi
-
-
-	fi
-
-fi
-
-
-
-if test "X$ac_cv_pgsql_altinclude" = "Xyes"; then
 
 cat >>confdefs.h <<\_ACEOF
-#define PGSQL_ALTERNATE_INCLUDE 1
+#define HAVE_MYSQL 1
 _ACEOF
 
-fi
 
-{ echo "$as_me:$LINENO: checking for PQconnectdb in -lpq" >&5
-echo $ECHO_N "checking for PQconnectdb in -lpq... $ECHO_C" >&6; }
-if test "${ac_cv_lib_pq_PQconnectdb+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lpq  $LIBS"
-cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char PQconnectdb ();
-int
-main ()
-{
-return PQconnectdb ();
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (ac_try="$ac_link"
-case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
-  (eval "$ac_link") 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } && {
-	 test -z "$ac_c_werror_flag" ||
-	 test ! -s conftest.err
-       } && test -s conftest$ac_exeext &&
-       $as_test_x conftest$ac_exeext; then
-  ac_cv_lib_pq_PQconnectdb=yes
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-	ac_cv_lib_pq_PQconnectdb=no
-fi
-
-rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
-      conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ echo "$as_me:$LINENO: result: $ac_cv_lib_pq_PQconnectdb" >&5
-echo "${ECHO_T}$ac_cv_lib_pq_PQconnectdb" >&6; }
-if test $ac_cv_lib_pq_PQconnectdb = yes; then
-
-	ac_cv_found_pgsql_lib="yes"
-
-else
-
-	{ echo "$as_me:$LINENO: checking for -lpq in given path" >&5
-echo $ECHO_N "checking for -lpq in given path... $ECHO_C" >&6; }
-	if test -e "$ac_cv_pgsql_path/lib/libpq.so"; then
-		{ echo "$as_me:$LINENO: result: yes" >&5
+            found_mysql="yes"
+            { echo "$as_me:$LINENO: result: yes" >&5
 echo "${ECHO_T}yes" >&6; }
-		ac_cv_found_pgsql_lib="yes"
-	else
-		{ echo "$as_me:$LINENO: result: no" >&5
+        else
+            found_mysql="no"
+            { echo "$as_me:$LINENO: result: no" >&5
 echo "${ECHO_T}no" >&6; }
+        fi
+    fi
+
+
+
+    mysql_version_req=
+
+    if test "$found_mysql" = "yes" -a -n "$mysql_version_req"; then
+
+        { echo "$as_me:$LINENO: checking if MySQL version is >= $mysql_version_req" >&5
+echo $ECHO_N "checking if MySQL version is >= $mysql_version_req... $ECHO_C" >&6; }
+
+                        mysql_version_req_major=`expr $mysql_version_req : '\([0-9]*\)'`
+        mysql_version_req_minor=`expr $mysql_version_req : '[0-9]*\.\([0-9]*\)'`
+        mysql_version_req_micro=`expr $mysql_version_req : '[0-9]*\.[0-9]*\.\([0-9]*\)'`
+        if test "x$mysql_version_req_micro" = "x"; then
+            mysql_version_req_micro="0"
+        fi
+
+        mysql_version_req_number=`expr $mysql_version_req_major \* 1000000 \
+                                   \+ $mysql_version_req_minor \* 1000 \
+                                   \+ $mysql_version_req_micro`
+
+                        mysql_version_major=`expr $MYSQL_VERSION : '\([0-9]*\)'`
+        mysql_version_minor=`expr $MYSQL_VERSION : '[0-9]*\.\([0-9]*\)'`
+        mysql_version_micro=`expr $MYSQL_VERSION : '[0-9]*\.[0-9]*\.\([0-9]*\)'`
+        if test "x$mysql_version_micro" = "x"; then
+            mysql_version_micro="0"
+        fi
+
+        mysql_version_number=`expr $mysql_version_major \* 1000000 \
+                                   \+ $mysql_version_minor \* 1000 \
+                                   \+ $mysql_version_micro`
+
+        mysql_version_check=`expr $mysql_version_number \>\= $mysql_version_req_number`
+        if test "$mysql_version_check" = "1"; then
+            { echo "$as_me:$LINENO: result: yes" >&5
+echo "${ECHO_T}yes" >&6; }
+        else
+            { echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6; }
+        fi
+    fi
+
+
+
+
+
+
+
+    # Check whether --enable-pgsql was given.
+if test "${enable_pgsql+set}" = set; then
+  enableval=$enable_pgsql;  ac_cv_postgresql_val=$enableval
+else
+   ac_cv_postgresql_val="no"
+
+fi
+
+
+    POSTGRESQL_CFLAGS=""
+    POSTGRESQL_LDFLAGS=""
+    POSTGRESQL_POSTGRESQL=""
+
+
+    if test "$ac_cv_postgresql_val" = "yes"; then
+
+	if test "X$ac_cv_postgresql_val" != "X" &&
+	   test "$ac_cv_postgresql_val" != "no" &&
+	   test "$ac_cv_postgresql_val" != "yes"; then
+	    PG_CONFIG=$ac_cv_postgresql_val
 	fi
 
+        if test -z "$PG_CONFIG" -o test; then
+            # Extract the first word of "pg_config", so it can be a program name with args.
+set dummy pg_config; ac_word=$2
+{ echo "$as_me:$LINENO: checking for $ac_word" >&5
+echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6; }
+if test "${ac_cv_path_PG_CONFIG+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  case $PG_CONFIG in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_PG_CONFIG="$PG_CONFIG" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+  for ac_exec_ext in '' $ac_executable_extensions; do
+  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
+    ac_cv_path_PG_CONFIG="$as_dir/$ac_word$ac_exec_ext"
+    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+done
+IFS=$as_save_IFS
+
+  test -z "$ac_cv_path_PG_CONFIG" && ac_cv_path_PG_CONFIG="no"
+  ;;
+esac
 fi
+PG_CONFIG=$ac_cv_path_PG_CONFIG
+if test -n "$PG_CONFIG"; then
+  { echo "$as_me:$LINENO: result: $PG_CONFIG" >&5
+echo "${ECHO_T}$PG_CONFIG" >&6; }
+else
+  { echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6; }
+fi
+
+
+        fi
+
+        if test "$PG_CONFIG" != "no"; then
+            { echo "$as_me:$LINENO: checking for PostgreSQL libraries" >&5
+echo $ECHO_N "checking for PostgreSQL libraries... $ECHO_C" >&6; }
+
+            POSTGRESQL_CFLAGS="-I`$PG_CONFIG --includedir`"
+            POSTGRESQL_LDFLAGS="-L`$PG_CONFIG --libdir` -lpq"
+
+            POSTGRESQL_VERSION=`$PG_CONFIG --version | sed -e 's#PostgreSQL ##'`
+
+
+cat >>confdefs.h <<\_ACEOF
+#define HAVE_POSTGRESQL 1
+_ACEOF
+
+
+            found_postgresql="yes"
+            { echo "$as_me:$LINENO: result: yes" >&5
+echo "${ECHO_T}yes" >&6; }
+        else
+            found_postgresql="no"
+            { echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6; }
+        fi
+    fi
+
+
+
+    postgresql_version_req=
+
+    if test "$found_postgresql" = "yes" -a -n "$postgresql_version_req"; then
+
+        { echo "$as_me:$LINENO: checking if PostgreSQL version is >= $postgresql_version_req" >&5
+echo $ECHO_N "checking if PostgreSQL version is >= $postgresql_version_req... $ECHO_C" >&6; }
+
+                        postgresql_version_req_major=`expr $postgresql_version_req : '\([0-9]*\)'`
+        postgresql_version_req_minor=`expr $postgresql_version_req : '[0-9]*\.\([0-9]*\)'`
+        postgresql_version_req_micro=`expr $postgresql_version_req : '[0-9]*\.[0-9]*\.\([0-9]*\)'`
+        if test "x$postgresql_version_req_micro" = "x"; then
+            postgresql_version_req_micro="0"
+        fi
+
+        postgresql_version_req_number=`expr $postgresql_version_req_major \* 1000000 \
+                                   \+ $postgresql_version_req_minor \* 1000 \
+                                   \+ $postgresql_version_req_micro`
+
+                        postgresql_version_major=`expr $POSTGRESQL_VERSION : '\([0-9]*\)'`
+        postgresql_version_minor=`expr $POSTGRESQL_VERSION : '[0-9]*\.\([0-9]*\)'`
+        postgresql_version_micro=`expr $POSTGRESQL_VERSION : '[0-9]*\.[0-9]*\.\([0-9]*\)'`
+        if test "x$postgresql_version_micro" = "x"; then
+            postgresql_version_micro="0"
+        fi
+
+        postgresql_version_number=`expr $postgresql_version_major \* 1000000 \
+                                   \+ $postgresql_version_minor \* 1000 \
+                                   \+ $postgresql_version_micro`
+
+        postgresql_version_check=`expr $postgresql_version_number \>\= $postgresql_version_req_number`
+        if test "$postgresql_version_check" = "1"; then
+            { echo "$as_me:$LINENO: result: yes" >&5
+echo "${ECHO_T}yes" >&6; }
+        else
+            { echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6; }
+        fi
+    fi
+
+
+
+
 
 
 { echo "$as_me:$LINENO: checking which database to use" >&5
 echo $ECHO_N "checking which database to use... $ECHO_C" >&6; }
 
 if test "X$ac_cv_mysql_val" != "X" &&
-   test "X$ac_cv_found_mysql_inc" = "Xyes" &&
-   test "X$ac_cv_found_mysql_lib" = "Xyes" &&
+   test "X$ac_cv_mysql_val" != "Xno" &&
+   test "X$found_mysql" = "Xyes" &&
    test "X$ac_cv_sqlitebuild" != "Xyes"; then
 	{ echo "$as_me:$LINENO: result: mysql" >&5
 echo "${ECHO_T}mysql" >&6; }
 	DB_BACKEND="mysql"
 
-	DB_LIBS="$DB_LIBS -lmysqlclient"
-
-	if test "X$ac_cv_mysql_path" != "X"; then
-		DB_INCLUDES="$DB_INCLUDES -I $ac_cv_mysql_path/include/"
-		LDFLAGS="$LDFLAGS -L $ac_cv_mysql_path/lib/"
-	fi
+	DB_LIBS="$DB_LIBS $MYSQL_LDFLAGS"
+	DB_INCLUDES="$DB_INCLUDES $MYSQL_CFLAGS"
 else
-if test "X$ac_cv_pgsql_val" != "X" &&
-   test "X$ac_cv_found_pgsql_inc" = "Xyes" &&
-   test "X$ac_cv_found_pgsql_lib" = "Xyes" &&
+if test "X$ac_cv_postgresql_val" != "X" &&
+   test "X$ac_cv_postgresql_val" != "Xno" &&
+   test "X$found_postgresql" = "Xyes" &&
    test "X$ac_cv_sqlitebuild" != "Xyes"; then
 	{ echo "$as_me:$LINENO: result: pgsql" >&5
 echo "${ECHO_T}pgsql" >&6; }
 	DB_BACKEND="pgsql"
 
-	DB_LIBS="$DB_LIBS -lpq"
-
-	if test "X$ac_cv_pgsql_path" != "X"; then
-		DB_INCLUDES="$DB_INCLUDES -I $ac_cv_pgsql_path/include/"
-		LDFLAGS="$LDFLAGS -L $ac_cv_pgsql_path/lib/"
-	fi
+	DB_LIBS="$DB_LIBS $POSTGRESQL_LDFLAGS"
+	DB_INCLUDES="$DB_INCLUDES $POSTGRESQL_CFLAGS"
 else
 	if test "X$ac_cv_found_sqlite3_inc" = "Xyes" &&
 	   test "X$ac_cv_found_sqlite3_lib" = "Xyes" &&
@@ -7334,6 +6978,14 @@ logdir!$logdir$ac_delim
 rundir!$rundir$ac_delim
 helpdir!$helpdir$ac_delim
 langdir!$langdir$ac_delim
+MYSQL_CONFIG!$MYSQL_CONFIG$ac_delim
+MYSQL_VERSION!$MYSQL_VERSION$ac_delim
+MYSQL_CFLAGS!$MYSQL_CFLAGS$ac_delim
+MYSQL_LDFLAGS!$MYSQL_LDFLAGS$ac_delim
+PG_CONFIG!$PG_CONFIG$ac_delim
+POSTGRESQL_VERSION!$POSTGRESQL_VERSION$ac_delim
+POSTGRESQL_CFLAGS!$POSTGRESQL_CFLAGS$ac_delim
+POSTGRESQL_LDFLAGS!$POSTGRESQL_LDFLAGS$ac_delim
 subdirs!$subdirs$ac_delim
 DB_INCLUDES!$DB_INCLUDES$ac_delim
 DB_LIBS!$DB_LIBS$ac_delim
@@ -7356,7 +7008,7 @@ LIBOBJS!$LIBOBJS$ac_delim
 LTLIBOBJS!$LTLIBOBJS$ac_delim
 _ACEOF
 
-  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 85; then
+  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 93; then
     break
   elif $ac_last_try; then
     { { echo "$as_me:$LINENO: error: could not make $CONFIG_STATUS" >&5
