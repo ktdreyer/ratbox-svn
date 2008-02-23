@@ -1,3 +1,12 @@
+leeh        2008/02/23 18:58:53 UTC	(20080223_0-25085)
+  Log:
+  - swap match_cidr() so its return val is consistent with rserv
+  
+
+  Modified:
+	rserv/trunk/src/cidr.c (File Modified) 
+
+
 leeh        2008/02/17 15:33:40 UTC	(20080217_0-25079)
   Log:
   - merge from 1.1 branch:
