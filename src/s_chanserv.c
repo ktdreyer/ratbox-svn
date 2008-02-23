@@ -3490,6 +3490,7 @@ s_chan_listbans(struct client *client_p, struct lconn *conn_p, const char *parv[
 static int
 s_chan_unban(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
+	char ipmask[NICKUSERHOSTLEN+1];
 	struct channel *chptr;
 	struct member_reg *mreg_p;
 	dlink_node *ptr, *next_ptr;
@@ -3514,11 +3515,28 @@ s_chan_unban(struct client *client_p, struct lconn *conn_p, const char *parv[], 
 		return 1;
 	}
 
+	if(client_p->user->ip)
+		snprintf(ipmask, sizeof(ipmask), "%s!%s@%s", 
+			client_p->name, client_p->user->username, client_p->user->ip);
+	else
+		ipmask[0] = '\0';
+
 	modebuild_start(chanserv_p, chptr);
 
 	DLINK_FOREACH_SAFE(ptr, next_ptr, chptr->bans.head)
 	{
-		if(match((const char *) ptr->data, client_p->user->mask))
+		const char *data = (const char *) ptr->data;
+		int match_found = 0;
+
+		if(match(data, client_p->user->mask))
+			match_found++;
+		else if(strchr(data, '/') != NULL && ipmask[0] != '\0')
+		{
+			if(match_cidr(data, ipmask))
+				match_found++;
+		}
+
+		if(match_found)
 		{
 			modebuild_add(DIR_DEL, "b", (const char *) ptr->data);
 			my_free(ptr->data);
