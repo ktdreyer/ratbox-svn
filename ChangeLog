@@ -1,3 +1,14 @@
+leeh        2008/02/23 19:17:13 UTC	(20080223_2-25089)
+  Log:
+  - update RELEASE_NOTES
+  - revved patchlevel to 1.2.0rc1
+  
+
+  Modified:
+	rserv/trunk/RELEASE_NOTES (File Modified) 
+	rserv/trunk/include/config.h (File Modified) 
+
+
 leeh        2008/02/23 18:59:53 UTC	(20080223_1-25087)
   Log:
   - add support for matching cidr bans
