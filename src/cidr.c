@@ -1,14 +1,16 @@
 /*
- * atheme-services: A collection of minimalist IRC services   
- * cidr.c: CIDR matching.
+ * src/cidr.c
+ *   Contains code for CIDR matching
+ *
+ * This code was taken from atheme-services.
  *
  * Most code in this file has been copied from ratbox, src/match.c and
  * src/irc_string.c. It provides CIDR matching for IPv4 and IPv6 without
  * special OS support.
  *
  * Copyright (c) 1996-2002 Hybrid Development Team
- * Copyright (c) 2002-2005 ircd-ratbox development team
- * Copyright (c) 2005-2007 Atheme Project (http://www.atheme.org)           
+ * Copyright (c) 2002-2005,2008 ircd-ratbox development team
+ * Copyright (c) 2005-2007 Atheme Project (http://www.atheme.org)
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -304,8 +306,8 @@ int match_ips(const char *s1, const char *s2)
 /* match_cidr()
  *
  * Input - mask n!u@i/c, address n!u@i
- * Output - 0 = Matched 1 = Did not match
- * switched 0 and 1 to be consistent with atheme's match() -- jilles
+ * Output - 1 = Matched 0 = Did not match
+ * switched 0 and 1 to be consistent with rserv's match() 
  */
 int
 match_cidr(const char *s1, const char *s2)
@@ -323,46 +325,50 @@ match_cidr(const char *s1, const char *s2)
 
 	ipmask = strrchr(mask, '@');
 	if (ipmask == NULL)
-		return 1;
+		return 0;
 
 	*ipmask++ = '\0';
 
 	ip = strrchr(address, '@');
 	if (ip == NULL)
-		return 1;
+		return 0;
 	*ip++ = '\0';
 
 	len = strrchr(ipmask, '/');
 	if (len == NULL)
-		return 1;
+		return 0;
 
 	*len++ = '\0';
 
 	cidrlen = atoi(len);
 	if (cidrlen == 0)
-		return 1;
+		return 0;
 
 	if (strchr(ip, ':') && strchr(ipmask, ':'))
 	{
 		if (cidrlen > 128)
-			return 1;
+			return 0;
 		if (!inet_pton6(ip, ipaddr))
-			return 1;
+			return 0;
 		if (!inet_pton6(ipmask, maskaddr))
+			return 0;
+		if(comp_with_mask(ipaddr, maskaddr, cidrlen) && match(mask, address))
 			return 1;
-		return !comp_with_mask(ipaddr, maskaddr, cidrlen) ||
-			match(mask, address);
+
+		return 0;
 	}
 	else if (!strchr(ip, ':') && !strchr(ipmask, ':'))
 	{
 		if (cidrlen > 32)
-			return 1;
+			return 0;
 		if (!inet_pton4(ip, ipaddr))
-			return 1;
+			return 0;
 		if (!inet_pton4(ipmask, maskaddr))
+			return 0;
+		if(comp_with_mask(ipaddr, maskaddr, cidrlen) && match(mask, address))
 			return 1;
-		return !comp_with_mask(ipaddr, maskaddr, cidrlen) ||
-			match(mask, address);
+
+		return 0;
 	}
 	else
 		return 1;
