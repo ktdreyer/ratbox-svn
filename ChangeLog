@@ -1,3 +1,12 @@
+leeh        2008/02/23 18:59:53 UTC	(20080223_1-25087)
+  Log:
+  - add support for matching cidr bans
+  
+
+  Modified:
+	rserv/trunk/src/s_chanserv.c (File Modified) 
+
+
 leeh        2008/02/23 18:58:53 UTC	(20080223_0-25085)
   Log:
   - swap match_cidr() so its return val is consistent with rserv
