@@ -8,6 +8,8 @@ SET <канал> <опция> [parameter]
 			   за OP до канала
   NOVOICES     [on|off] : Забрана за получаване на voice на всеки потребител
   NOVOICECMD   [on|off] : Забрана за ползването на команда VOICE в канала
+  NOUSERBANS   [on|off] : Спира забраните за влизане в канал, които не са
+                           сложени през ChanServ.
   WARNOVERRIDE [on|off] : Предупреждава при употреба на INVITE/GETKEY
                            (Нужен е AUTOJOIN)
   CREATEMODES  [modes]  : Канални режими, използвани при създаването на канал
