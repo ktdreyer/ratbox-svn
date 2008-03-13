@@ -1,3 +1,27 @@
+leeh        2008/03/13 21:42:48 UTC	(20080313_0-25121)
+  Log:
+  - via ongeboren
+    - updated bulgarian translations
+  
+
+  Modified:
+	rserv/trunk/help/bg/banserv/index-admin (File Modified) 
+	rserv/trunk/help/bg/chanserv/addban (File Modified) 
+	rserv/trunk/help/bg/chanserv/chansuspend (File Modified) 
+	rserv/trunk/help/bg/chanserv/set (File Modified) 
+	rserv/trunk/help/bg/chanserv/u-chansuspend (File Modified) 
+	rserv/trunk/help/bg/main/u-rehash (File Modified) 
+	rserv/trunk/help/bg/operserv/index-admin (File Modified) 
+	rserv/trunk/help/bg/userserv/index (File Modified) 
+	rserv/trunk/help/bg/userserv/index-admin (File Modified) 
+	rserv/trunk/help/bg/userserv/language (File Modified) 
+	rserv/trunk/help/bg/userserv/set (File Modified) 
+	rserv/trunk/help/bg/userserv/userlist (File Modified) 
+	rserv/trunk/help/bg/watchserv/general (File Modified) 
+	rserv/trunk/help/bg/watchserv/index (File Modified) 
+	rserv/trunk/langs/bg.lang (File Modified) 
+
+
 leeh        2008/02/23 19:17:13 UTC	(20080223_2-25089)
   Log:
   - update RELEASE_NOTES
