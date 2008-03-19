@@ -1,3 +1,32 @@
+leeh        2008/03/19 18:46:41 UTC	(20080319_0-25141)
+  Log:
+  - via ongeboren
+    - missing help files for bulgarian translations
+  
+
+  Modified:
+	rserv/trunk/help/bg/banserv/addregexp (File Added) 
+	rserv/trunk/help/bg/banserv/addregexpneg (File Added) 
+	rserv/trunk/help/bg/banserv/delregexp (File Added) 
+	rserv/trunk/help/bg/banserv/delregexpneg (File Added) 
+	rserv/trunk/help/bg/banserv/listregexps (File Added) 
+	rserv/trunk/help/bg/memoserv/ (File Added) 
+	rserv/trunk/help/bg/memoserv/delete (File Added) 
+	rserv/trunk/help/bg/memoserv/general (File Added) 
+	rserv/trunk/help/bg/memoserv/index (File Added) 
+	rserv/trunk/help/bg/memoserv/list (File Added) 
+	rserv/trunk/help/bg/memoserv/read (File Added) 
+	rserv/trunk/help/bg/memoserv/send (File Added) 
+	rserv/trunk/help/bg/operserv/addignore (File Added) 
+	rserv/trunk/help/bg/operserv/delignore (File Added) 
+	rserv/trunk/help/bg/operserv/listignores (File Added) 
+	rserv/trunk/help/bg/operserv/u-addignore (File Added) 
+	rserv/trunk/help/bg/operserv/u-delignore (File Added) 
+	rserv/trunk/help/bg/operserv/u-listignores (File Added) 
+	rserv/trunk/help/bg/userserv/u-usersetemail (File Added) 
+	rserv/trunk/help/bg/userserv/usersetemail (File Added) 
+
+
 leeh        2008/03/13 21:42:48 UTC	(20080313_0-25121)
   Log:
   - via ongeboren
