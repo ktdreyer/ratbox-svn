@@ -4223,7 +4223,7 @@ if test "${enable_shared+set}" = set; then
       ;;
     esac
 else
-  enable_shared=yes
+  enable_shared=no
 fi
 
 
@@ -20354,7 +20354,7 @@ fi
 if test "${enable_cpp+set}" = set; then
   enableval=$enable_cpp;
 else
-  enable_cpp=yes
+  enable_cpp=no
 fi
 
 

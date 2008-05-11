@@ -1278,7 +1278,7 @@ check-am: all-am
 	$(MAKE) $(AM_MAKEFLAGS) $(check_SCRIPTS)
 	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
 check: check-am
-all-am: Makefile $(LTLIBRARIES) $(PROGRAMS) $(SCRIPTS) $(MANS) $(DATA) \
+all-am: Makefile $(LTLIBRARIES) $(PROGRAMS) $(SCRIPTS) \
 		$(HEADERS) config.h
 install-binPROGRAMS: install-libLTLIBRARIES
 
