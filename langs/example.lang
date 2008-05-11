@@ -1,10 +1,10 @@
-# example.lang.x
+# example.lang
 #   Contains a base translation file to rework into other languages
 #
-# Copyright (C) 2007 Lee Hardy <leeh@leeh.co.uk>
-# Copyright (C) 2007 ircd-ratbox development team
+# Copyright (C) 2007-2008 Lee Hardy <leeh@leeh.co.uk>
+# Copyright (C) 2007-2008 ircd-ratbox development team
 
-# The "code" of the language
+# The 'code' of the language
 set LANG_CODE		"en"
 
 # The description of the language, which appears in the help
@@ -28,6 +28,7 @@ SVC_NOTLOGGEDIN,		"%s::%s requires you are logged in"
 SVC_ENDOFLIST,			"End of list"
 SVC_ENDOFLISTLIMIT,		"End of list, limit reached"
 SVC_USECOMMANDSHORTCUT,		"Commands to this service must be issued via /%s instead of by name."
+SVC_INVALIDMASK,		"Invalid mask %s"
 
 # general irc related
 SVC_IRC_NOSUCHCHANNEL,		"Channel %s does not exist"
@@ -73,11 +74,12 @@ SVC_USER_LOGINUNACTIVATED,	"Login failed, username has not been activated.  Use 
 SVC_USER_LOGINMAX,		"Login failed, username has %d logged in users"
 SVC_USER_ALREADYLOGGEDIN,	"You are already logged in"
 SVC_USER_NICKNOTLOGGEDIN,	"Nickname %s is not logged in"
+SVC_USER_SUSPENDED,		"Username %s is suspended"
 SVC_USER_NOEMAIL,		"Username %s does not have an email address"
 SVC_USER_CHANGEDPASSWORD,	"Username %s password changed"
 SVC_USER_CHANGEDOPTION,		"Username %s %s set to %s"
 SVC_USER_QUERYOPTION,		"Username %s %s is set to %s"
-SVC_USER_QUERYOPTIONALREADY,	"Username %s %s is already set to %s",
+SVC_USER_QUERYOPTIONALREADY,	"Username %s %s is already set to %s"
 SVC_USER_REQUESTISSUED,		"Username %s has been sent an email to confirm the %s request"
 SVC_USER_REQUESTPENDING,	"Username %s already has a pending %s request"
 SVC_USER_REQUESTNONE,		"Username %s does not have a pending %s request"
@@ -96,14 +98,14 @@ SVC_USER_RP_LOGGEDIN,		"You cannot request a password reset whilst logged in"
 # userserv::userlist
 SVC_USER_UL_START,		"Username list matching %s, limit %u%s"
 
-# userserv::info
+# userserv::info 
 # chanserv::info
-# nickserv::info
+# nickserv::info 
 SVC_INFO_REGDURATIONUSER,	"[%s] Username registered for %s"
 SVC_INFO_REGDURATIONCHAN,	"[%s] Channel registered to %s for %s"
 SVC_INFO_REGDURATIONNICK,	"[%s] Nickname registered to %s for %s"
-SVC_INFO_SUSPENDED,		"[%s] Suspended by %s: %s"
-SVC_INFO_SUSPENDEDADMIN,	"[%s] Suspended by services admin"
+SVC_INFO_SUSPENDED,		"[%s] Suspended by %s (expires %s): %s"
+SVC_INFO_SUSPENDEDADMIN,	"[%s] Suspended by services admin (expires %s)%s%s"
 SVC_INFO_ACCESSLIST,		"[%s] Access list: %s"
 SVC_INFO_NICKNAMES,		"[%s] Registered nicknames: %s"
 SVC_INFO_EMAIL,			"[%s] Email: %s"
@@ -173,6 +175,9 @@ SVC_OPER_CONNECTIONSSTART,	"Current connections (%s)"
 SVC_OPER_CONNECTIONSEND,	"End of connections"
 SVC_OPER_SERVERNAMEMISMATCH,	"Servernames do not match"
 SVC_OPER_OSPARTACCESS,		"No access to %s::OSPART on channels joined through %s"
+SVC_OPER_IGNORENOTFOUND,	"Ignore %s not found"
+SVC_OPER_IGNOREALREADY,		"Ignore %s matches existing ignore %s"
+SVC_OPER_IGNORELIST,		"Ignore list:"
 
 # banserv
 SVC_BAN_ISSUED,			"Issued %s for %s"
@@ -181,9 +186,12 @@ SVC_BAN_NOTPLACED,		"%s not placed on %s"
 SVC_BAN_INVALID,		"Invalid %s: %s"
 SVC_BAN_LISTSTART,		"Ban list matching %s"
 SVC_BAN_NOPERMACCESS,		"No access to set a permanent %s"
+SVC_BAN_REGEXPSUCCESS,		"%s::ADDREGEXP successful on %s, issued %u kline(s)"
+SVC_BAN_TOOMANYMATCHES,		"Ban %s%s%s matches %u (> %d) users"
+SVC_BAN_TOOMANYREGEXPMATCHES,	"Expression %s matches %u (> %d) users"
 
 # global
-SVC_GLOBAL_WELCOMETOOLONG,	"Welcome message too long (%u > %u)",
+SVC_GLOBAL_WELCOMETOOLONG,	"Welcome message too long (%u > %u)"
 SVC_GLOBAL_WELCOMEINVALID,	"Welcome id invalid (%u >= %u)"
 SVC_GLOBAL_WELCOMESET,		"Welcome message %u set"
 SVC_GLOBAL_WELCOMENOTSET,	"Welcome message %u not set"
@@ -199,3 +207,13 @@ SVC_JUPE_PENDINGLIST,		"Pending jupes:"
 # alis
 SVC_ALIS_LISTSTART,		"Returning maximum of %d channel names matching '%s'"
 
+# memoserv
+SVC_MEMO_RECEIVED,		"You have received memo #%u from %s"
+SVC_MEMO_SENT,			"Memo to %s sent"
+SVC_MEMO_TOOMANYMEMOS,		"Unable to send memo to %s, user has reached maximum memo limit"
+SVC_MEMO_INVALID,		"Invalid memo number %s"
+SVC_MEMO_DELETED,		"Deleted memo #%u"
+SVC_MEMO_DELETEDALL,		"Deleted memos"
+SVC_MEMO_LIST,			"%u new memos, %u old memos"
+SVC_MEMO_LISTSTART,		"  New    Id    Date       Time  Sender"
+SVC_MEMO_READ,			"Id %u Sent %s Sender %s: %s"
