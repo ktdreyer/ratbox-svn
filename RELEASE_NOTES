@@ -1,6 +1,11 @@
 
 This is the current development version of ratbox-services.
 
+-- ratbox-services-1.2.0rc2
+- updated bulgarian translations from ongeboren
+- update example.lang translation file
+- update packaged pcre to 7.7
+
 -- ratbox-services-1.2.0rc1
 - improved checks for mysql and postgresql 
 - support for matching CIDR bans in chanserv::unban
