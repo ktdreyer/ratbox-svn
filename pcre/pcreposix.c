@@ -6,7 +6,7 @@
 and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
-           Copyright (c) 1997-2007 University of Cambridge
+           Copyright (c) 1997-2008 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -124,7 +124,10 @@ static const int eint[] = {
   REG_INVARG,  /* inconsistent NEWLINE options */
   REG_BADPAT,  /* \g is not followed followed by an (optionally braced) non-zero number */
   REG_BADPAT,  /* (?+ or (?- must be followed by a non-zero number */
-  REG_BADPAT   /* number is too big */
+  REG_BADPAT,  /* number is too big */
+  REG_BADPAT,  /* subpattern name expected */
+  REG_BADPAT,  /* digit expected after (?+ */
+  REG_BADPAT   /* ] is an invalid data character in JavaScript compatibility mode */
 };
 
 /* Table of texts corresponding to POSIX error codes */
@@ -261,7 +264,7 @@ PCREPOSIX_EXP_DEFN int
 regexec(const regex_t *preg, const char *string, size_t nmatch,
   regmatch_t pmatch[], int eflags)
 {
-int rc;
+int rc, so, eo;
 int options = 0;
 int *ovector = NULL;
 int small_ovector[POSIX_MALLOC_THRESHOLD * 3];
@@ -294,7 +297,23 @@ else if (nmatch > 0)
     }
   }
 
-rc = pcre_exec((const pcre *)preg->re_pcre, NULL, string, (int)strlen(string),
+/* REG_STARTEND is a BSD extension, to allow for non-NUL-terminated strings.
+The man page from OS X says "REG_STARTEND affects only the location of the
+string, not how it is matched". That is why the "so" value is used to bump the
+start location rather than being passed as a PCRE "starting offset". */
+
+if ((eflags & REG_STARTEND) != 0)
+  {
+  so = pmatch[0].rm_so;
+  eo = pmatch[0].rm_eo;
+  }
+else
+  {
+  so = 0;
+  eo = strlen(string);
+  }
+
+rc = pcre_exec((const pcre *)preg->re_pcre, NULL, string + so, (eo - so),
   0, options, ovector, nmatch * 3);
 
 if (rc == 0) rc = nmatch;    /* All captured slots were filled in */

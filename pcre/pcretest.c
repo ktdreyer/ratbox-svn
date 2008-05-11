@@ -48,6 +48,14 @@ POSSIBILITY OF SUCH DAMAGE.
 #include <locale.h>
 #include <errno.h>
 
+#ifdef SUPPORT_LIBREADLINE
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+#include <readline/readline.h>
+#include <readline/history.h>
+#endif
+
 
 /* A number of things vary for Windows builds. Originally, pcretest opened its
 input and output without "b"; then I was told that "b" was needed in some
@@ -62,6 +70,9 @@ input mode under Windows. */
 #include <fcntl.h>             /* For _O_BINARY */
 #define INPUT_MODE   "r"
 #define OUTPUT_MODE  "wb"
+
+#define isatty _isatty         /* This is what Windows calls them, I'm told */
+#define fileno _fileno
 
 #else
 #include <sys/time.h>          /* These two includes are needed */
@@ -189,6 +200,7 @@ optimal way of handling this, but hey, this is just a test program!
 Arguments:
   f            the file to read
   start        where in buffer to start (this *must* be within buffer)
+  prompt       for stdin or readline()
 
 Returns:       pointer to the start of new data
                could be a copy of start, or could be moved
@@ -196,7 +208,7 @@ Returns:       pointer to the start of new data
 */
 
 static uschar *
-extend_inputline(FILE *f, uschar *start)
+extend_inputline(FILE *f, uschar *start, const char *prompt)
 {
 uschar *here = start;
 
@@ -207,8 +219,36 @@ for (;;)
   if (rlen > 1000)
     {
     int dlen;
-    if (fgets((char *)here, rlen,  f) == NULL)
-      return (here == start)? NULL : start;
+
+    /* If libreadline support is required, use readline() to read a line if the
+    input is a terminal. Note that readline() removes the trailing newline, so
+    we must put it back again, to be compatible with fgets(). */
+
+#ifdef SUPPORT_LIBREADLINE
+    if (isatty(fileno(f)))
+      {
+      size_t len;
+      char *s = readline(prompt);
+      if (s == NULL) return (here == start)? NULL : start;
+      len = strlen(s);
+      if (len > 0) add_history(s);
+      if (len > rlen - 1) len = rlen - 1;
+      memcpy(here, s, len);
+      here[len] = '\n';
+      here[len+1] = 0;
+      free(s);
+      }
+    else
+#endif
+
+    /* Read the next line by normal means, prompting if the file is stdin. */
+
+      {
+      if (f == stdin) printf(prompt);
+      if (fgets((char *)here, rlen,  f) == NULL)
+        return (here == start)? NULL : start;
+      }
+
     dlen = (int)strlen((char *)here);
     if (dlen > 0 && here[dlen - 1] == '\n') return start;
     here += dlen;
@@ -728,7 +768,14 @@ return 0;
 static void
 usage(void)
 {
-printf("Usage:     pcretest [options] [<input> [<output>]]\n");
+printf("Usage:     pcretest [options] [<input file> [<output file>]]\n\n");
+printf("Input and output default to stdin and stdout.\n");
+#ifdef SUPPORT_LIBREADLINE
+printf("If input is a terminal, readline() is used to read from it.\n");
+#else
+printf("This version of pcretest is not linked with readline().\n");
+#endif
+printf("\nOptions:\n");
 printf("  -b       show compiled code (bytecode)\n");
 printf("  -C       show PCRE compile-time options and exit\n");
 printf("  -d       debug: show compiled code and information (-b and -i)\n");
@@ -997,8 +1044,7 @@ while (!done)
   use_utf8 = 0;
   debug_lengths = 1;
 
-  if (infile == stdin) printf("  re> ");
-  if (extend_inputline(infile, buffer) == NULL) break;
+  if (extend_inputline(infile, buffer, "  re> ") == NULL) break;
   if (infile != stdin) fprintf(outfile, "%s", (char *)buffer);
   fflush(outfile);
 
@@ -1098,7 +1144,7 @@ while (!done)
 
   if (isalnum(delimiter) || delimiter == '\\')
     {
-    fprintf(outfile, "** Delimiter must not be alphameric or \\\n");
+    fprintf(outfile, "** Delimiter must not be alphanumeric or \\\n");
     goto SKIP_DATA;
     }
 
@@ -1114,8 +1160,7 @@ while (!done)
       pp++;
       }
     if (*pp != 0) break;
-    if (infile == stdin) printf("    > ");
-    if ((pp = extend_inputline(infile, pp)) == NULL)
+    if ((pp = extend_inputline(infile, pp, "    > ")) == NULL)
       {
       fprintf(outfile, "** Unexpected EOF\n");
       done = 1;
@@ -1207,10 +1252,18 @@ while (!done)
 
       case '<':
         {
-        int x = check_newline(pp, outfile);
-        if (x == 0) goto SKIP_DATA;
-        options |= x;
-        while (*pp++ != '>');
+        if (strncmp((char *)pp, "JS>", 3) == 0)
+          {
+          options |= PCRE_JAVASCRIPT_COMPAT;
+          pp += 3;
+          }
+        else
+          {
+          int x = check_newline(pp, outfile);
+          if (x == 0) goto SKIP_DATA;
+          options |= x;
+          while (*pp++ != '>');
+          }
         }
       break;
 
@@ -1289,7 +1342,7 @@ while (!done)
         {
         for (;;)
           {
-          if (extend_inputline(infile, buffer) == NULL)
+          if (extend_inputline(infile, buffer, NULL) == NULL)
             {
             done = 1;
             goto CONTINUE;
@@ -1684,8 +1737,7 @@ while (!done)
     len = 0;
     for (;;)
       {
-      if (infile == stdin) printf("data> ");
-      if (extend_inputline(infile, buffer + len) == NULL)
+      if (extend_inputline(infile, buffer + len, "data> ") == NULL)
         {
         if (len > 0) break;
         done = 1;
