@@ -1,3 +1,12 @@
+leeh        2008/05/11 13:33:31 UTC	(20080511_2-25347)
+  Log:
+  - update example.lang
+  
+
+  Modified:
+	rserv/trunk/langs/example.lang (File Modified) 
+
+
 leeh        2008/05/11 13:32:49 UTC	(20080511_1-25345)
   Log:
   - perl script to generate example.lang
