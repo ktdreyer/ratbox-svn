@@ -1,8 +1,8 @@
 /* src/messages.c
  *   Contains the base english translations
  *
- * Copyright (C) 2007 Lee Hardy <leeh@leeh.co.uk>
- * Copyright (C) 2007 ircd-ratbox development team
+ * Copyright (C) 2007-2008 Lee Hardy <leeh@leeh.co.uk>
+ * Copyright (C) 2007-2008 ircd-ratbox development team
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -34,6 +34,7 @@
 
 struct _lang_internal lang_internal[] = 
 {
+/* START_GENEXAMPLE_PARSING -- for genexample.pl in langs/ */
 	/* general service */
 	{ SVC_UNKNOWNCOMMAND,		"Invalid command %s::%s"				},
 	{ SVC_SUCCESSFUL,		"%s::%s successful"					},
@@ -103,7 +104,7 @@ struct _lang_internal lang_internal[] =
 	{ SVC_USER_CHANGEDPASSWORD,	"Username %s password changed"				},
 	{ SVC_USER_CHANGEDOPTION,	"Username %s %s set to %s"				},
 	{ SVC_USER_QUERYOPTION,		"Username %s %s is set to %s"				},
-	{ SVC_USER_QUERYOPTIONALREADY,	"Username %s %s is already set to %s",			},
+	{ SVC_USER_QUERYOPTIONALREADY,	"Username %s %s is already set to %s"			},
 	{ SVC_USER_REQUESTISSUED,	"Username %s has been sent an email to confirm the %s request"			},
 	{ SVC_USER_REQUESTPENDING,	"Username %s already has a pending %s request"		},
 	{ SVC_USER_REQUESTNONE,		"Username %s does not have a pending %s request"	},
@@ -122,9 +123,11 @@ struct _lang_internal lang_internal[] =
 	/* userserv::userlist */
 	{ SVC_USER_UL_START,		"Username list matching %s, limit %u%s"			},
 
-	/* userserv::info */
-	/* chanserv::info */
-	/* nickserv::info */
+	/* 
+	 * userserv::info 
+	 * chanserv::info
+	 * nickserv::info 
+	 */
 	{ SVC_INFO_REGDURATIONUSER,	"[%s] Username registered for %s"			},
 	{ SVC_INFO_REGDURATIONCHAN,	"[%s] Channel registered to %s for %s"			},
 	{ SVC_INFO_REGDURATIONNICK,	"[%s] Nickname registered to %s for %s"			},
@@ -215,7 +218,7 @@ struct _lang_internal lang_internal[] =
 	{ SVC_BAN_TOOMANYREGEXPMATCHES,	"Expression %s matches %u (> %d) users"			},
 
 	/* global */
-	{ SVC_GLOBAL_WELCOMETOOLONG,	"Welcome message too long (%u > %u)",			},
+	{ SVC_GLOBAL_WELCOMETOOLONG,	"Welcome message too long (%u > %u)"			},
 	{ SVC_GLOBAL_WELCOMEINVALID,	"Welcome id invalid (%u >= %u)"				},
 	{ SVC_GLOBAL_WELCOMESET,	"Welcome message %u set"				},
 	{ SVC_GLOBAL_WELCOMENOTSET,	"Welcome message %u not set"				},
@@ -241,6 +244,7 @@ struct _lang_internal lang_internal[] =
 	{ SVC_MEMO_LIST,		"%u new memos, %u old memos"				},
 	{ SVC_MEMO_LISTSTART,		"  New    Id    Date       Time  Sender"		},
 	{ SVC_MEMO_READ,		"Id %u Sent %s Sender %s: %s"				},
+/* STOP_GENEXAMPLE_PARSING -- for genexample.pl in langs/ */
 
 	/* this must be last */
 	{ SVC_LAST,		"\0"	},
