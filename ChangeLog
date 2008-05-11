@@ -1,3 +1,13 @@
+leeh        2008/05/11 13:31:02 UTC	(20080511_0-25343)
+  Log:
+  - some cosmetic alterations to messages.c so my new perl script to generate
+    example.lang works
+  
+
+  Modified:
+	rserv/trunk/src/messages.c (File Modified) 
+
+
 leeh        2008/03/19 18:46:41 UTC	(20080319_0-25141)
   Log:
   - via ongeboren
