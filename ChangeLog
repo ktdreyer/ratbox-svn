@@ -1,3 +1,14 @@
+leeh        2008/05/11 13:59:49 UTC	(20080511_3-25350)
+  Log:
+  - force disable of shared modules and C++ interface
+  - disable building of docs
+  
+
+  Modified:
+	rserv/trunk/pcre/Makefile.in (File Modified) 
+	rserv/trunk/pcre/configure (File Modified) 
+
+
 leeh        2008/05/11 13:33:31 UTC	(20080511_2-25347)
   Log:
   - update example.lang
