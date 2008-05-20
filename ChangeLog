@@ -1,3 +1,13 @@
+leeh        2008/05/20 20:28:18 UTC	(20080520_8-25422)
+  Log:
+  - disable threading and handlers in sqlite by default
+  
+
+  Modified:
+	rserv/trunk/sqlite3/configure (File Modified) 
+	rserv/trunk/sqlite3/configure.ac (File Modified) 
+
+
 leeh        2008/05/20 20:16:44 UTC	(20080520_7-25420)
   Log:
   - add new sqlite amalgamation sources
