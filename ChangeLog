@@ -1,3 +1,13 @@
+leeh        2008/05/20 19:10:18 UTC	(20080520_1-25403)
+  Log:
+  - update dbupgrade.pl with the latest versions, and make it note when no
+    upgrade is required
+  
+
+  Modified:
+	rserv/trunk/tools/dbupgrade.pl (File Modified) 
+
+
 leeh        2008/05/20 19:07:22 UTC	(20080520_0-25401)
   Log:
   - update autoconf tag to 'stable'
