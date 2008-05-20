@@ -1,3 +1,29 @@
+leeh        2008/05/20 20:16:44 UTC	(20080520_7-25420)
+  Log:
+  - add new sqlite amalgamation sources
+  
+
+  Modified:
+	rserv/trunk/sqlite3/INSTALL (File Added) 
+	rserv/trunk/sqlite3/Makefile.am (File Added) 
+	rserv/trunk/sqlite3/Makefile.in (File Added) 
+	rserv/trunk/sqlite3/README (File Added) 
+	rserv/trunk/sqlite3/aclocal.m4 (File Added) 
+	rserv/trunk/sqlite3/bootstrap.sh (File Added) 
+	rserv/trunk/sqlite3/config.guess (File Added) 
+	rserv/trunk/sqlite3/config.sub (File Added) 
+	rserv/trunk/sqlite3/configure (File Added) 
+	rserv/trunk/sqlite3/configure.ac (File Added) 
+	rserv/trunk/sqlite3/depcomp (File Added) 
+	rserv/trunk/sqlite3/install-sh (File Added) 
+	rserv/trunk/sqlite3/ltmain.sh (File Added) 
+	rserv/trunk/sqlite3/missing (File Added) 
+	rserv/trunk/sqlite3/shell.c (File Added) 
+	rserv/trunk/sqlite3/sqlite3.c (File Added) 
+	rserv/trunk/sqlite3/sqlite3.h (File Added) 
+	rserv/trunk/sqlite3/sqlite3ext.h (File Added) 
+
+
 leeh        2008/05/20 20:14:44 UTC	(20080520_6-25418)
   Log:
   - remove the old sqlite3 sources in preparation for new amalgamation
