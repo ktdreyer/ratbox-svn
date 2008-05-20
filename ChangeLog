@@ -1,3 +1,14 @@
+leeh        2008/05/20 19:11:01 UTC	(20080520_2-25405)
+  Log:
+  - update RELEASE_NOTES
+  - revved patchlevel to 1.2.0
+  
+
+  Modified:
+	rserv/trunk/RELEASE_NOTES (File Modified) 
+	rserv/trunk/include/config.h (File Modified) 
+
+
 leeh        2008/05/20 19:10:18 UTC	(20080520_1-25403)
   Log:
   - update dbupgrade.pl with the latest versions, and make it note when no
