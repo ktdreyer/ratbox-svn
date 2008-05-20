@@ -1,3 +1,15 @@
+leeh        2008/05/20 20:05:41 UTC	(20080520_5-25416)
+  Log:
+  - move the sqlite schema over to being contained in the core code
+  
+
+  Modified:
+	rserv/trunk/include/schema-sqlite.h (File Added) 
+	rserv/trunk/src/rsdb_sqlite3.c (File Modified) 
+	rserv/trunk/tools/base/schema-sqlite.txt (File Deleted) 
+	rserv/trunk/tools/generate-schema.pl (File Modified) 
+
+
 leeh        2008/05/20 19:54:51 UTC	(20080520_4-25414)
   Log:
   - I always forget to update the documentation..
