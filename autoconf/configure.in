@@ -3,7 +3,7 @@ dnl $Id$
 dnl Sneaky way to get an Id tag into the configure script
 AC_COPYRIGHT([$Id$])
 
-AC_INIT([ratbox-services],[development])
+AC_INIT([ratbox-services],[stable])
 
 AC_CONFIG_AUX_DIR(autoconf)
 AC_CONFIG_HEADER(include/setup.h)
