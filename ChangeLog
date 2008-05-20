@@ -1,3 +1,13 @@
+leeh        2008/05/20 19:07:22 UTC	(20080520_0-25401)
+  Log:
+  - update autoconf tag to 'stable'
+  
+
+  Modified:
+	rserv/trunk/autoconf/configure.in (File Modified) 
+	rserv/trunk/configure (File Modified) 
+
+
 leeh        2008/05/11 14:04:39 UTC	(20080511_4-25352)
   Log:
   - update RELEASE_NOTES
