@@ -1,1 +1,12 @@
+leeh        2008/05/20 19:52:47 UTC	(20080520_3-25412)
+  Log:
+  - this is now 1.3.0beta
+  
+
+  Modified:
+	rserv/trunk/autoconf/configure.in (File Modified) 
+	rserv/trunk/configure (File Modified) 
+	rserv/trunk/include/config.h (File Modified) 
+
+
 
