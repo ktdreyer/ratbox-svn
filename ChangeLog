@@ -1,3 +1,31 @@
+leeh        2008/05/20 20:14:44 UTC	(20080520_6-25418)
+  Log:
+  - remove the old sqlite3 sources in preparation for new amalgamation
+  
+
+  Modified:
+	rserv/trunk/sqlite3/Makefile.in (File Deleted) 
+	rserv/trunk/sqlite3/README (File Deleted) 
+	rserv/trunk/sqlite3/VERSION (File Deleted) 
+	rserv/trunk/sqlite3/aclocal.m4 (File Deleted) 
+	rserv/trunk/sqlite3/config.guess (File Deleted) 
+	rserv/trunk/sqlite3/config.sub (File Deleted) 
+	rserv/trunk/sqlite3/configure (File Deleted) 
+	rserv/trunk/sqlite3/configure.ac (File Deleted) 
+	rserv/trunk/sqlite3/install-sh (File Deleted) 
+	rserv/trunk/sqlite3/ltmain.sh (File Deleted) 
+	rserv/trunk/sqlite3/main.mk (File Deleted) 
+	rserv/trunk/sqlite3/mkso.sh (File Deleted) 
+	rserv/trunk/sqlite3/spec.template (File Deleted) 
+	rserv/trunk/sqlite3/sqlite.pc.in (File Deleted) 
+	rserv/trunk/sqlite3/sqlite3.1 (File Deleted) 
+	rserv/trunk/sqlite3/sqlite3.def (File Deleted) 
+	rserv/trunk/sqlite3/sqlite3.h (File Deleted) 
+	rserv/trunk/sqlite3/sqlite3.pc.in (File Deleted) 
+	rserv/trunk/sqlite3/src/ (File Deleted) 
+	rserv/trunk/sqlite3/tool/ (File Deleted) 
+
+
 leeh        2008/05/20 20:05:41 UTC	(20080520_5-25416)
   Log:
   - move the sqlite schema over to being contained in the core code
