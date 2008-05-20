@@ -6,6 +6,8 @@
 #   --enable-readline
 #   --enable-dynamic-extensions
 #
+# RATBOX-SERVICES NOTE:
+# threadsafe/shared module/dynamic extensions are disabled here.
 
 AC_PREREQ(2.61)
 AC_INIT(sqlite, 3.5.9, http://www.sqlite.org)
@@ -50,7 +52,7 @@ AC_SUBST(READLINE_LIBS)
 #
 AC_ARG_ENABLE(threadsafe, [AS_HELP_STRING(
   [--enable-threadsafe], [build a thread-safe library [default=yes]])], 
-  [], [enable_threadsafe=yes])
+  [], [enable_threadsafe=no])
 THREADSAFE_FLAGS=-DSQLITE_THREADSAFE=0
 if test x"$enable_threadsafe" != "xno"; then
   THREADSAFE_FLAGS=-DSQLITE_THREADSAFE=1
@@ -64,7 +66,7 @@ AC_SUBST(THREADSAFE_FLAGS)
 #
 AC_ARG_ENABLE(tempstore, [AS_HELP_STRING(
   [--enable-dynamic-extensions], [support loadable extensions [default=yes]])], 
-  [], [enable_dynamic_extensions=yes])
+  [], [enable_dynamic_extensions=no])
 if test x"$enable_dynamic_extensions" != "xno"; then
   AC_SEARCH_LIBS(dlopen, dl)
 else

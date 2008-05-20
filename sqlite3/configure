@@ -4751,7 +4751,7 @@ if test "${enable_shared+set}" = set; then
       ;;
     esac
 else
-  enable_shared=no
+  enable_shared=yes
 fi
 
 
@@ -20939,7 +20939,7 @@ fi
 if test "${enable_threadsafe+set}" = set; then
   enableval=$enable_threadsafe;
 else
-  enable_threadsafe=yes
+  enable_threadsafe=no
 fi
 
 THREADSAFE_FLAGS=-DSQLITE_THREADSAFE=0
@@ -21039,7 +21039,7 @@ fi
 if test "${enable_tempstore+set}" = set; then
   enableval=$enable_tempstore;
 else
-  enable_dynamic_extensions=yes
+  enable_dynamic_extensions=no
 fi
 
 if test x"$enable_dynamic_extensions" != "xno"; then
