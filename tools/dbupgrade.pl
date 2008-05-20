@@ -47,7 +47,11 @@ my %versionlist = (
 	"1.1.0rc3"	=> 5,
 	"1.1.0"		=> 5,
 	"1.1.1"		=> 5,
-	"1.2.0beta1"	=> 6
+	"1.2.0beta1"	=> 6,
+	"1.2.0beta2"	=> 6,
+	"1.2.0rc1"	=> 6,
+	"1.2.0rc2"	=> 6,
+	"1.2.0"		=> 6
 );
 
 my $version = $ARGV[0];
@@ -57,6 +61,7 @@ my %vals;
 $version =~ s/^ircd-ratbox-//;
 
 my $currentver = $versionlist{"$version"};
+my $upgraded = 0;
 
 if(!$currentver)
 {
@@ -138,6 +143,8 @@ if($currentver < 2)
 	print ");\n";
 
 	print "\n";
+
+	$upgraded = 1;
 }
 
 if($currentver < 3)
@@ -185,6 +192,8 @@ if($currentver < 3)
 	print "UPDATE operbot SET chname=LOWER(chname);\n";
 	print "UPDATE operbans SET mask=LOWER(mask);\n";
 	print "\n";
+
+	$upgraded = 1;
 }
 
 if($currentver < 4)
@@ -207,6 +216,8 @@ if($currentver < 4)
 	}
 
 	print "\n";
+
+	$upgraded = 1;
 }
 
 if($currentver < 5)
@@ -235,6 +246,8 @@ if($currentver < 5)
 	}
 
 	print "\n";
+
+	$upgraded = 1;
 }
 
 if($currentver < 6)
@@ -374,6 +387,13 @@ if($currentver < 6)
 	}
 
 	print "\n";
+
+	$upgraded = 1;
+}
+
+if($upgraded == 0)
+{
+	print "No database modification required.\n";
 }
 
 exit;
