@@ -34,6 +34,7 @@
 #include "rsdb.h"
 #include "rserv.h"
 #include "log.h"
+#include "schema-sqlite.h"
 
 /* build sqlite, so use local version */
 #ifdef SQLITE_BUILD
