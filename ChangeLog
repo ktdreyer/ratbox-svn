@@ -1,3 +1,12 @@
+leeh        2008/05/23 21:41:53 UTC	(20080523_5-25446)
+  Log:
+  - add new '-c' option to binary to create the initial database table set
+  
+
+  Modified:
+	rserv/trunk/src/rserv.c (File Modified) 
+
+
 leeh        2008/05/23 21:33:18 UTC	(20080523_4-25444)
   Log:
   - base stuff for the schema generation
