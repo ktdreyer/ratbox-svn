@@ -37,6 +37,7 @@
 
 static void rsdb_schema_generate_table(const char *name, const char *primary_key, struct rsdb_schema *schema);
 
+/* table: users */
 static struct rsdb_schema rsdb_schema_users[] = 
 {
 	{ RSDB_SCHEMA_SERIAL,	0,			0, "id",		NULL		},
@@ -54,10 +55,20 @@ static struct rsdb_schema rsdb_schema_users[] =
 	{ 0, 0, 0, NULL, NULL }
 };
 
+/* table: users_resetpass */
+static struct rsdb_schema rsdb_schema_users_resetpass[] =
+{
+	{ RSDB_SCHEMA_VARCHAR,	USERREGNAME_LEN,	1, "username",		NULL		},
+	{ RSDB_SCHEMA_VARCHAR,	10,			0, "token",		NULL		},
+	{ RSDB_SCHEMA_UINT,	0,			0, "time",		NULL		},
+	{ 0, 0, 0, NULL, NULL }
+};
+
 void
 rsdb_schema_generate(void)
 {
 	rsdb_schema_generate_table("users", "id", rsdb_schema_users);
+	rsdb_schema_generate_table("users_resetpass", "username", rsdb_schema_users_resetpass);
 }
 
 static void
@@ -144,18 +155,19 @@ rsdb_schema_generate_table(const char *name, const char *primary_key, struct rsd
 			 */
 			if(schema[i+1].name == NULL)
 			{
+/* primary keys are defined with the SERIAL value in sqlite */
+#if defined(RSERV_DB_PGSQL) || defined(RSERV_DB_MYSQL)
 				/* this field has a primary key, add it now */
 				if(primary_key)
 				{
 					char tmpbuf[BUFSIZE];
 					tmpbuf[0] = '\0';
 
-#if defined(RSERV_DB_PGSQL) || defined(RSERV_DB_MYSQL)
 					snprintf(tmpbuf, sizeof(tmpbuf), "PRIMARY KEY(%s)", primary_key);
-#endif
 					strlcat(buf, tmpbuf, sizeof(buf));
 				}
 				else
+#endif
 				{
 					char *x = strchr(buf, ',');
 					if(x)
