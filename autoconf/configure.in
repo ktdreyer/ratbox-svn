@@ -327,11 +327,11 @@ else
 		AC_MSG_RESULT(internal packaged sqlite3)
 		DB_BACKEND="sqlite3"
 
-		AC_CONFIG_SUBDIRS(sqlite3)
+		AC_CONFIG_SUBDIRS(ratbox-sqlite3)
 		AC_DEFINE(SQLITE_BUILD, 1, Build packaged sqlite3)
-		SQLITE_SUBDIR="sqlite3"
-		DB_INCLUDES="$DB_INCLUDES -I ../sqlite3/"
-		DB_LIBS="$DB_LIBS ../sqlite3/.libs/libsqlite3.a"
+		SQLITE_SUBDIR="ratbox-sqlite3"
+		DB_INCLUDES="$DB_INCLUDES -I ../ratbox-sqlite3/"
+		DB_LIBS="$DB_LIBS ../ratbox-sqlite3/.libs/libsqlite3.a"
 	fi
 fi
 fi

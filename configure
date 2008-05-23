@@ -720,7 +720,7 @@ CPPFLAGS
 YACC
 YFLAGS
 CPP'
-ac_subdirs_all='sqlite3
+ac_subdirs_all='ratbox-sqlite3
 pcre'
 
 # Initialize some variables set by options.
@@ -5926,16 +5926,16 @@ echo "${ECHO_T}sqlite3" >&6; }
 echo "${ECHO_T}internal packaged sqlite3" >&6; }
 		DB_BACKEND="sqlite3"
 
-		subdirs="$subdirs sqlite3"
+		subdirs="$subdirs ratbox-sqlite3"
 
 
 cat >>confdefs.h <<\_ACEOF
 #define SQLITE_BUILD 1
 _ACEOF
 
-		SQLITE_SUBDIR="sqlite3"
-		DB_INCLUDES="$DB_INCLUDES -I ../sqlite3/"
-		DB_LIBS="$DB_LIBS ../sqlite3/.libs/libsqlite3.a"
+		SQLITE_SUBDIR="ratbox-sqlite3"
+		DB_INCLUDES="$DB_INCLUDES -I ../ratbox-sqlite3/"
+		DB_LIBS="$DB_LIBS ../ratbox-sqlite3/.libs/libsqlite3.a"
 	fi
 fi
 fi
