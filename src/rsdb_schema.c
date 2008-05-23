@@ -174,7 +174,7 @@ rsdb_schema_generate_table(const char *name, const char *primary_key, struct rsd
 /* primary keys are defined with the SERIAL value in sqlite */
 #if defined(RSERV_DB_PGSQL) || defined(RSERV_DB_MYSQL)
 				/* this field has a primary key, add it now */
-				if(primary_key)
+				if(!EmptyString(primary_key))
 				{
 					char tmpbuf[BUFSIZE];
 					tmpbuf[0] = '\0';
