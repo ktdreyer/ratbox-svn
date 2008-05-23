@@ -1,3 +1,15 @@
+leeh        2008/05/23 21:27:15 UTC	(20080523_2-25440)
+  Log:
+  - create defines for RSERV_DB_MYSQL/RSERV_DB_PGSQL/RSERV_DB_SQLITE as
+    appropriate
+  
+
+  Modified:
+	rserv/trunk/autoconf/configure.in (File Modified) 
+	rserv/trunk/configure (File Modified) 
+	rserv/trunk/include/setup.h.in (File Modified) 
+
+
 leeh        2008/05/23 21:26:22 UTC	(20080523_1-25438)
   Log:
   - build target for sqlite is now ratbox-sqlite3
