@@ -1,3 +1,12 @@
+leeh        2008/05/23 21:30:08 UTC	(20080523_3-25442)
+  Log:
+  - apply ratbox-sqlite3 externals flag
+  
+
+  Modified:
+	rserv/trunk/  (Property Modified)
+
+
 leeh        2008/05/23 21:27:15 UTC	(20080523_2-25440)
   Log:
   - create defines for RSERV_DB_MYSQL/RSERV_DB_PGSQL/RSERV_DB_SQLITE as
