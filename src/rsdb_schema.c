@@ -64,11 +64,27 @@ static struct rsdb_schema rsdb_schema_users_resetpass[] =
 	{ 0, 0, 0, NULL, NULL }
 };
 
+static struct rsdb_schema_set
+{
+	const char *table_name;
+	struct rsdb_schema *schema;
+	const char *primary_key;
+} rsdb_schema_tables[] = {
+	{ "users",		rsdb_schema_users,		"id"		},
+	{ "users_resetpass",	rsdb_schema_users_resetpass,	"username"	},
+	{ NULL, NULL, NULL }
+};
+
 void
 rsdb_schema_generate(void)
 {
-	rsdb_schema_generate_table("users", "id", rsdb_schema_users);
-	rsdb_schema_generate_table("users_resetpass", "username", rsdb_schema_users_resetpass);
+	int i;
+
+	for(i = 0; rsdb_schema_tables[i].table_name; i++)
+	{
+		rsdb_schema_generate_table(rsdb_schema_tables[i].table_name, rsdb_schema_tables[i].primary_key,
+						rsdb_schema_tables[i].schema);
+	}
 }
 
 static void
