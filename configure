@@ -5892,6 +5892,11 @@ if test "X$ac_cv_mysql_val" != "X" &&
    test "X$ac_cv_sqlitebuild" != "Xyes"; then
 	{ echo "$as_me:$LINENO: result: mysql" >&5
 echo "${ECHO_T}mysql" >&6; }
+
+cat >>confdefs.h <<\_ACEOF
+#define RSERV_DB_MYSQL 1
+_ACEOF
+
 	DB_BACKEND="mysql"
 
 	DB_LIBS="$DB_LIBS $MYSQL_LDFLAGS"
@@ -5903,6 +5908,11 @@ if test "X$ac_cv_postgresql_val" != "X" &&
    test "X$ac_cv_sqlitebuild" != "Xyes"; then
 	{ echo "$as_me:$LINENO: result: pgsql" >&5
 echo "${ECHO_T}pgsql" >&6; }
+
+cat >>confdefs.h <<\_ACEOF
+#define RSERV_DB_PGSQL 1
+_ACEOF
+
 	DB_BACKEND="pgsql"
 
 	DB_LIBS="$DB_LIBS $POSTGRESQL_LDFLAGS"
@@ -5913,6 +5923,11 @@ else
 	   test "X$ac_cv_sqlitebuild" != "Xyes"; then
 		{ echo "$as_me:$LINENO: result: sqlite3" >&5
 echo "${ECHO_T}sqlite3" >&6; }
+
+cat >>confdefs.h <<\_ACEOF
+#define RSERV_DB_SQLITE 1
+_ACEOF
+
 		DB_BACKEND="sqlite3"
 
 		DB_LIBS="$DB_LIBS -lsqlite3"
@@ -5924,6 +5939,11 @@ echo "${ECHO_T}sqlite3" >&6; }
 	else
 		{ echo "$as_me:$LINENO: result: internal packaged sqlite3" >&5
 echo "${ECHO_T}internal packaged sqlite3" >&6; }
+
+cat >>confdefs.h <<\_ACEOF
+#define RSERV_DB_SQLITE 1
+_ACEOF
+
 		DB_BACKEND="sqlite3"
 
 		subdirs="$subdirs ratbox-sqlite3"

@@ -141,6 +141,15 @@
 /* Define as the return type of signal handlers (`int' or `void'). */
 #undef RETSIGTYPE
 
+/* Using mysql backend */
+#undef RSERV_DB_MYSQL
+
+/* Using pgsql backend */
+#undef RSERV_DB_PGSQL
+
+/* Using sqlite backend */
+#undef RSERV_DB_SQLITE
+
 /* Build packaged sqlite3 */
 #undef SQLITE_BUILD
 

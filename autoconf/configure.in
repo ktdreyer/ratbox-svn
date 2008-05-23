@@ -296,6 +296,7 @@ if test "X$ac_cv_mysql_val" != "X" &&
    test "X$found_mysql" = "Xyes" &&
    test "X$ac_cv_sqlitebuild" != "Xyes"; then
 	AC_MSG_RESULT(mysql)
+	AC_DEFINE(RSERV_DB_MYSQL, 1, [Using mysql backend])
 	DB_BACKEND="mysql"
 
 	DB_LIBS="$DB_LIBS $MYSQL_LDFLAGS"
@@ -306,6 +307,7 @@ if test "X$ac_cv_postgresql_val" != "X" &&
    test "X$found_postgresql" = "Xyes" &&
    test "X$ac_cv_sqlitebuild" != "Xyes"; then
 	AC_MSG_RESULT(pgsql)
+	AC_DEFINE(RSERV_DB_PGSQL, 1, [Using pgsql backend])
 	DB_BACKEND="pgsql"
 
 	DB_LIBS="$DB_LIBS $POSTGRESQL_LDFLAGS"
@@ -315,6 +317,7 @@ else
 	   test "X$ac_cv_found_sqlite3_lib" = "Xyes" &&
 	   test "X$ac_cv_sqlitebuild" != "Xyes"; then
 		AC_MSG_RESULT(sqlite3)
+		AC_DEFINE(RSERV_DB_SQLITE, 1, [Using sqlite backend])
 		DB_BACKEND="sqlite3"
 
 		DB_LIBS="$DB_LIBS -lsqlite3"
@@ -325,6 +328,7 @@ else
 		fi
 	else
 		AC_MSG_RESULT(internal packaged sqlite3)
+		AC_DEFINE(RSERV_DB_SQLITE, 1, [Using sqlite backend])
 		DB_BACKEND="sqlite3"
 
 		AC_CONFIG_SUBDIRS(ratbox-sqlite3)
