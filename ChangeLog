@@ -1,3 +1,12 @@
+leeh        2008/05/23 17:58:30 UTC	(20080523_0-25435)
+  Log:
+  - remove sqlite3 sources, in preparation for it being an externals
+  
+
+  Modified:
+	rserv/trunk/sqlite3/ (File Deleted) 
+
+
 leeh        2008/05/20 20:28:18 UTC	(20080520_8-25422)
   Log:
   - disable threading and handlers in sqlite by default
