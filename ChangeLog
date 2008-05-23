@@ -1,3 +1,14 @@
+leeh        2008/05/23 22:24:52 UTC	(20080523_8-25452)
+  Log:
+  - add in users_resetpass table to the schema generation
+  - fix so we don't generate primary key fields at the end for sqlite, as they
+    go inline with the INTEGER declaration
+  
+
+  Modified:
+	rserv/trunk/src/rsdb_schema.c (File Modified) 
+
+
 leeh        2008/05/23 22:07:09 UTC	(20080523_7-25450)
   Log:
   - add id properties on rsdb_schema.{c|h}
