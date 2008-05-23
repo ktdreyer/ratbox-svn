@@ -1,3 +1,14 @@
+leeh        2008/05/23 21:33:18 UTC	(20080523_4-25444)
+  Log:
+  - base stuff for the schema generation
+  
+
+  Modified:
+	rserv/trunk/include/rsdb_schema.h (File Added) 
+	rserv/trunk/src/Makefile.in (File Modified) 
+	rserv/trunk/src/rsdb_schema.c (File Added) 
+
+
 leeh        2008/05/23 21:30:08 UTC	(20080523_3-25442)
   Log:
   - apply ratbox-sqlite3 externals flag
