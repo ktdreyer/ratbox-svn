@@ -1,3 +1,12 @@
+leeh        2008/05/23 22:37:01 UTC	(20080523_9-25454)
+  Log:
+  - add a superstruct to amalgamate the structures of schema tables
+  
+
+  Modified:
+	rserv/trunk/src/rsdb_schema.c (File Modified) 
+
+
 leeh        2008/05/23 22:24:52 UTC	(20080523_8-25452)
   Log:
   - add in users_resetpass table to the schema generation
