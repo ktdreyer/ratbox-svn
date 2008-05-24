@@ -21,6 +21,13 @@ struct rsdb_schema
 	const char *def;
 };
 
+struct rsdb_schema_set
+{
+	const char *table_name;
+	struct rsdb_schema *schema;
+	const char *primary_key;
+};
+
 void rsdb_schema_generate(void);
 
 #endif

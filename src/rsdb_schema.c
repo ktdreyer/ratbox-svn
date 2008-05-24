@@ -35,7 +35,7 @@
 #include "rsdb.h"
 #include "rsdb_schema.h"
 
-static void rsdb_schema_generate_table(const char *name, const char *primary_key, struct rsdb_schema *schema);
+static void rsdb_schema_generate_table(struct rsdb_schema_set *schema_set);
 
 /* table: users */
 static struct rsdb_schema rsdb_schema_users[] = 
@@ -64,12 +64,7 @@ static struct rsdb_schema rsdb_schema_users_resetpass[] =
 	{ 0, 0, 0, NULL, NULL }
 };
 
-static struct rsdb_schema_set
-{
-	const char *table_name;
-	struct rsdb_schema *schema;
-	const char *primary_key;
-} rsdb_schema_tables[] = {
+static struct rsdb_schema_set rsdb_schema_tables[] = {
 	{ "users",		rsdb_schema_users,		"id"		},
 	{ "users_resetpass",	rsdb_schema_users_resetpass,	"username"	},
 	{ NULL, NULL, NULL }
@@ -82,14 +77,14 @@ rsdb_schema_generate(void)
 
 	for(i = 0; rsdb_schema_tables[i].table_name; i++)
 	{
-		rsdb_schema_generate_table(rsdb_schema_tables[i].table_name, rsdb_schema_tables[i].primary_key,
-						rsdb_schema_tables[i].schema);
+		rsdb_schema_generate_table(&rsdb_schema_tables[i]);
 	}
 }
 
 static void
-rsdb_schema_generate_table(const char *name, const char *primary_key, struct rsdb_schema *schema)
+rsdb_schema_generate_table(struct rsdb_schema_set *schema_set)
 {
+	struct rsdb_schema *schema;
 	dlink_list table_data;
 	static char buf[BUFSIZE];
 	int i;
@@ -97,7 +92,9 @@ rsdb_schema_generate_table(const char *name, const char *primary_key, struct rsd
 
 	memset(&table_data, 0, sizeof(struct _dlink_list));
 
-	snprintf(buf, sizeof(buf), "CREATE TABLE %s (", name);
+	schema = schema_set->schema;
+
+	snprintf(buf, sizeof(buf), "CREATE TABLE %s (", schema_set->table_name);
 	dlink_add_tail_alloc(my_strdup(buf), &table_data);
 
 	for(i = 0; schema[i].name; i++)
@@ -174,12 +171,12 @@ rsdb_schema_generate_table(const char *name, const char *primary_key, struct rsd
 /* primary keys are defined with the SERIAL value in sqlite */
 #if defined(RSERV_DB_PGSQL) || defined(RSERV_DB_MYSQL)
 				/* this field has a primary key, add it now */
-				if(!EmptyString(primary_key))
+				if(!EmptyString(schema_set->primary_key))
 				{
 					char tmpbuf[BUFSIZE];
 					tmpbuf[0] = '\0';
 
-					snprintf(tmpbuf, sizeof(tmpbuf), "PRIMARY KEY(%s)", primary_key);
+					snprintf(tmpbuf, sizeof(tmpbuf), "PRIMARY KEY(%s)", schema_set->primary_key);
 					strlcat(buf, tmpbuf, sizeof(buf));
 				}
 				else
