@@ -2,7 +2,7 @@
 #ifndef INCLUDED_rsdb_schema_h
 #define INCLUDED_rsdb_schema_h
 
-enum rsdb_schema_option
+typedef enum rsdb_schema_option
 {
 	RSDB_SCHEMA_SERIAL,
 	RSDB_SCHEMA_BOOLEAN,
@@ -10,11 +10,12 @@ enum rsdb_schema_option
 	RSDB_SCHEMA_UINT,
 	RSDB_SCHEMA_VARCHAR,
 	RSDB_SCHEMA_TEXT
-};
+}
+rsdb_schema_option;
 
 struct rsdb_schema
 {
-	unsigned int option;
+	rsdb_schema_option option;
 	unsigned int length;
 	unsigned int not_null;
 	const char *name;
