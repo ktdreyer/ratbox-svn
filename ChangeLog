@@ -1,3 +1,12 @@
+leeh        2008/05/27 20:48:20 UTC	(20080527_3-25466)
+  Log:
+  - missing break;
+  
+
+  Modified:
+	rserv/trunk/src/rsdb_schema.c (File Modified) 
+
+
 leeh        2008/05/27 19:27:19 UTC	(20080527_2-25464)
   Log:
   - extend rsdb_schema to support booleans, and references to SERIAL values
