@@ -10,6 +10,7 @@ typedef enum rsdb_schema_option
 	RSDB_SCHEMA_INT,
 	RSDB_SCHEMA_UINT,
 	RSDB_SCHEMA_VARCHAR,
+	RSDB_SCHEMA_CHAR,
 	RSDB_SCHEMA_TEXT
 }
 rsdb_schema_option;

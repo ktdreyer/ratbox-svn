@@ -145,6 +145,22 @@ rsdb_schema_generate_table(struct rsdb_schema_set *schema_set)
 #endif
 				break;
 
+			case RSDB_SCHEMA_CHAR:
+#if defined(RSERV_DB_PGSQL) || defined(RSERV_DB_MYSQL)
+				snprintf(buf, sizeof(buf), "%s CHAR(%u)%s%s%s, ",
+					schema[i].name, schema[i].length,
+					(schema[i].not_null ? " NOT NULL" : ""),
+					(schema[i].def != NULL ? " DEFAULT " : ""),
+					(schema[i].def != NULL ? schema[i].def : ""));
+#elif defined(RSERV_DB_SQLITE)
+				snprintf(buf, sizeof(buf), "%s TEXT%s%s%s, ",
+					schema[i].name,
+					(schema[i].not_null ? " NOT NULL" : ""),
+					(schema[i].def != NULL ? " DEFAULT " : ""),
+					(schema[i].def != NULL ? schema[i].def : ""));
+#endif
+				break;
+
 			case RSDB_SCHEMA_TEXT:
 				snprintf(buf, sizeof(buf), "%s TEXT%s%s%s, ",
 					schema[i].name,
