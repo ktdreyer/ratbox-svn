@@ -41,7 +41,7 @@
 static struct rsdb_schema rsdb_schema_users[] = 
 {
 	{ RSDB_SCHEMA_SERIAL,	0,			0, "id",		NULL		},
-	{ RSDB_SCHEMA_VARCHAR,	USERREGNAME_LEN,	1, "username",		NULL		},
+	{ RSDB_SCHEMA_VARCHAR,	USERREGNAME_LEN-1,	1, "username",		NULL		},
 	{ RSDB_SCHEMA_VARCHAR,	PASSWDLEN,		1, "password",		NULL		},
 	{ RSDB_SCHEMA_VARCHAR,	EMAILLEN,		0, "email",		NULL		},
 	{ RSDB_SCHEMA_VARCHAR,	OPERNAMELEN,		0, "suspender",		NULL		},
@@ -57,7 +57,7 @@ static struct rsdb_schema rsdb_schema_users[] =
 /* table: users_resetpass */
 static struct rsdb_schema rsdb_schema_users_resetpass[] =
 {
-	{ RSDB_SCHEMA_VARCHAR,	USERREGNAME_LEN,	1, "username",		NULL		},
+	{ RSDB_SCHEMA_VARCHAR,	USERREGNAME_LEN-1,	1, "username",		NULL		},
 	{ RSDB_SCHEMA_VARCHAR,	10,			0, "token",		NULL		},
 	{ RSDB_SCHEMA_UINT,	0,			0, "time",		NULL		},
 	{ 0, 0, 0, NULL, NULL }
@@ -65,7 +65,7 @@ static struct rsdb_schema rsdb_schema_users_resetpass[] =
 /* table: users_resetemail */
 static struct rsdb_schema rsdb_schema_users_resetemail[] =
 {
-	{ RSDB_SCHEMA_VARCHAR,	USERREGNAME_LEN,	1, "username",		NULL		},
+	{ RSDB_SCHEMA_VARCHAR,	USERREGNAME_LEN-1,	1, "username",		NULL		},
 	{ RSDB_SCHEMA_VARCHAR,	10,			0, "token",		NULL		},
 	{ RSDB_SCHEMA_VARCHAR,	EMAILLEN,		0, "email",		"NULL"		},
 	{ RSDB_SCHEMA_UINT,	0,			0, "time",		NULL		},
@@ -82,8 +82,8 @@ static struct rsdb_schema rsdb_schema_users_sync[] =
 /* table: nicks */
 static struct rsdb_schema rsdb_schema_nicks[] =
 {
-	{ RSDB_SCHEMA_VARCHAR,	NICKLEN,		1, "nickname",		NULL		},
-	{ RSDB_SCHEMA_VARCHAR,	USERREGNAME_LEN,	1, "username",		NULL		},
+	{ RSDB_SCHEMA_VARCHAR,	NICKLEN-1,		1, "nickname",		NULL		},
+	{ RSDB_SCHEMA_VARCHAR,	USERREGNAME_LEN-1,	1, "username",		NULL		},
 	{ RSDB_SCHEMA_UINT,	0,			0, "reg_time",		NULL		},
 	{ RSDB_SCHEMA_UINT,	0,			0, "last_time",		NULL		},
 	{ RSDB_SCHEMA_UINT,	0,			0, "flags",		NULL		},
@@ -93,7 +93,7 @@ static struct rsdb_schema rsdb_schema_nicks[] =
 static struct rsdb_schema rsdb_schema_channels[] =
 {
 	{ RSDB_SCHEMA_VARCHAR,	CHANNELLEN,		1, "chname",		NULL		},
-	{ RSDB_SCHEMA_VARCHAR,	TOPICLEN,		0, "topic",		NULL		},
+	{ RSDB_SCHEMA_VARCHAR,	TOPICLEN-1,		0, "topic",		NULL		},
 	{ RSDB_SCHEMA_VARCHAR,	URLLEN,			0, "url",		NULL		},
 	{ RSDB_SCHEMA_VARCHAR,	50,			0, "createmodes",	NULL		},
 	{ RSDB_SCHEMA_VARCHAR,	50,			0, "enforcemodes",	NULL		},
@@ -106,14 +106,147 @@ static struct rsdb_schema rsdb_schema_channels[] =
 	{ RSDB_SCHEMA_UINT,	0,			0, "suspend_time",	"0"		},
 	{ 0, 0, 0, NULL, NULL }
 };
+/* table: channels_dropowner */
+static struct rsdb_schema rsdb_schema_channels_dropowner[] =
+{
+	{ RSDB_SCHEMA_VARCHAR,	CHANNELLEN,		1, "chname",		NULL		},
+	{ RSDB_SCHEMA_VARCHAR,	10,			0, "token",		NULL		},
+	{ RSDB_SCHEMA_UINT,	0,			0, "time",		NULL		},
+	{ 0, 0, 0, NULL, NULL }
+};
+/* table: members */
+static struct rsdb_schema rsdb_schema_members[] =
+{
+	{ RSDB_SCHEMA_VARCHAR,	CHANNELLEN,		1, "chname",		NULL		},
+	{ RSDB_SCHEMA_VARCHAR,	USERREGNAME_LEN-1,	1, "username",		NULL		},
+	{ RSDB_SCHEMA_VARCHAR,	USERREGNAME_LEN-1,	1, "lastmod",		NULL		},
+	{ RSDB_SCHEMA_INT,	0,			0, "level",		NULL		},
+	{ RSDB_SCHEMA_UINT,	0,			0, "flags",		NULL		},
+	{ RSDB_SCHEMA_INT,	0,			0, "suspend",		NULL		},
+	{ 0, 0, 0, NULL, NULL }
+};
+/* table: bans */
+static struct rsdb_schema rsdb_schema_bans[] =
+{
+	{ RSDB_SCHEMA_VARCHAR,	CHANNELLEN,		1, "chname",		NULL		},
+	{ RSDB_SCHEMA_VARCHAR,	NICKUSERHOSTLEN-1,	1, "mask",		NULL		},
+	{ RSDB_SCHEMA_VARCHAR,	50,			1, "reason",		NULL		},
+	{ RSDB_SCHEMA_VARCHAR,	USERREGNAME_LEN-1,	1, "username",		NULL		},
+	{ RSDB_SCHEMA_INT,	0,			0, "level",		NULL		},
+	{ RSDB_SCHEMA_UINT,	0,			0, "hold",		NULL		},
+	{ 0, 0, 0, NULL, NULL }
+};
+/* table: operbot */
+static struct rsdb_schema rsdb_schema_operbot[] =
+{
+	{ RSDB_SCHEMA_VARCHAR,	CHANNELLEN,		1, "chname",		NULL		},
+	{ RSDB_SCHEMA_UINT,	0,			0, "tsinfo",		NULL		},
+	{ RSDB_SCHEMA_VARCHAR,	OPERNAMELEN,		0, "oper",		NULL		},
+	{ 0, 0, 0, NULL, NULL }
+};
+/* table: operserv */
+static struct rsdb_schema rsdb_schema_operserv[] =
+{
+	{ RSDB_SCHEMA_VARCHAR,	CHANNELLEN,		1, "chname",		NULL		},
+	{ RSDB_SCHEMA_UINT,	0,			0, "tsinfo",		NULL		},
+	{ RSDB_SCHEMA_VARCHAR,	OPERNAMELEN,		0, "oper",		NULL		},
+	{ 0, 0, 0, NULL, NULL }
+};
+/* table: jupes */
+static struct rsdb_schema rsdb_schema_jupes[] =
+{
+	{ RSDB_SCHEMA_VARCHAR,	HOSTLEN,		1, "servername",	NULL		},
+	{ RSDB_SCHEMA_VARCHAR,	50,			1, "reason",		NULL		},
+	{ 0, 0, 0, NULL, NULL }
+};
+/* table: operbans */
+static struct rsdb_schema rsdb_schema_operbans[] =
+{
+	{ RSDB_SCHEMA_CHAR,	1,			1, "type",		NULL		},
+	{ RSDB_SCHEMA_VARCHAR,	CHANNELLEN,		1, "mask",		NULL		},
+	{ RSDB_SCHEMA_VARCHAR,	REASONLEN,		1, "reason",		NULL		},
+	{ RSDB_SCHEMA_VARCHAR,	REASONLEN,		0, "operreason",	NULL		},
+	{ RSDB_SCHEMA_UINT,	0,			0, "hold",		NULL		},
+	{ RSDB_SCHEMA_UINT,	0,			0, "create_time",	NULL		},
+	{ RSDB_SCHEMA_VARCHAR,	OPERNAMELEN,		0, "oper",		NULL		},
+	{ RSDB_SCHEMA_BOOLEAN,	0,			0, "remove",		NULL		},
+	{ RSDB_SCHEMA_UINT,	0,			0, "flags",		NULL		},
+	{ 0, 0, 0, NULL, NULL }
+};
+/* table: operbans_regexp */
+static struct rsdb_schema rsdb_schema_operbans_regexp[] =
+{
+	{ RSDB_SCHEMA_SERIAL,	0,			0, "id",		NULL		},
+	{ RSDB_SCHEMA_VARCHAR,	255,			1, "regex",		NULL		},
+	{ RSDB_SCHEMA_VARCHAR,	REASONLEN,		1, "reason",		NULL		},
+	{ RSDB_SCHEMA_UINT,	0,			0, "hold",		NULL		},
+	{ RSDB_SCHEMA_UINT,	0,			0, "create_time",	NULL		},
+	{ RSDB_SCHEMA_VARCHAR,	OPERNAMELEN,		0, "oper",		NULL		},
+	{ 0, 0, 0, NULL, NULL }
+};
+/* table: operbans_regexp_neg */
+static struct rsdb_schema rsdb_schema_operbans_regexp_neg[] =
+{
+	{ RSDB_SCHEMA_SERIAL,	0,			0, "id",		NULL		},
+	{ RSDB_SCHEMA_SERIAL_REF, 0,			1, "parent_id",		NULL		},
+	{ RSDB_SCHEMA_VARCHAR,	255,			1, "regex",		NULL		},
+	{ RSDB_SCHEMA_VARCHAR,	OPERNAMELEN,		1, "oper",		NULL		},
+	{ 0, 0, 0, NULL, NULL }
+};
+/* table: global_welcome */
+static struct rsdb_schema rsdb_schema_global_welcome[] =
+{
+	{ RSDB_SCHEMA_INT,	0,			0, "id",		NULL		},
+	{ RSDB_SCHEMA_TEXT,	0,			0, "text",		NULL		},
+	{ 0, 0, 0, NULL, NULL }
+};
+/* table: email_banned_domain */
+static struct rsdb_schema rsdb_schema_email_banned_domain[] =
+{
+	{ RSDB_SCHEMA_VARCHAR,	255,			1, "domain",		NULL		},
+	{ 0, 0, 0, NULL, NULL }
+};
+/* table: ignore_hosts */
+static struct rsdb_schema rsdb_schema_ignore_hosts[] =
+{
+	{ RSDB_SCHEMA_VARCHAR,	255,			1, "hostname",		NULL		},
+	{ RSDB_SCHEMA_VARCHAR,	OPERNAMELEN,		1, "oper",		NULL		},
+	{ RSDB_SCHEMA_VARCHAR,	255,			1, "reason",		NULL		},
+	{ 0, 0, 0, NULL, NULL }
+};
+/* table: memos */
+static struct rsdb_schema rsdb_schema_memos[] =
+{
+	{ RSDB_SCHEMA_SERIAL,	0,			0, "id",		NULL		},
+	{ RSDB_SCHEMA_SERIAL_REF, 0,			1, "user_id",		NULL		},
+	{ RSDB_SCHEMA_SERIAL_REF, 0,			1, "source_id",		NULL		},
+	{ RSDB_SCHEMA_VARCHAR,	USERREGNAME_LEN-1,	1, "source",		NULL		},
+	{ RSDB_SCHEMA_UINT,	0,			0, "timestamp",		"0"		},
+	{ RSDB_SCHEMA_UINT,	0,			0, "flags",		"0"		},
+	{ RSDB_SCHEMA_TEXT,	0,			0, "text",		NULL		},
+	{ 0, 0, 0, NULL, NULL }
+};
 
 static struct rsdb_schema_set rsdb_schema_tables[] = {
-	{ "users",		rsdb_schema_users,		"id"		},
-	{ "users_resetpass",	rsdb_schema_users_resetpass,	"username"	},
-	{ "users_resetemail",	rsdb_schema_users_resetemail,	"username"	},
-	{ "users_sync",		rsdb_schema_users_sync,		"id"		},
-	{ "nicks",		rsdb_schema_nicks,		"nickname"	},
-	{ "channels",		rsdb_schema_channels,		"chname"	},
+	{ "users",		rsdb_schema_users,		"id"			},
+	{ "users_resetpass",	rsdb_schema_users_resetpass,	"username"		},
+	{ "users_resetemail",	rsdb_schema_users_resetemail,	"username"		},
+	{ "users_sync",		rsdb_schema_users_sync,		"id"			},
+	{ "nicks",		rsdb_schema_nicks,		"nickname"		},
+	{ "channels",		rsdb_schema_channels,		"chname"		},
+	{ "channels_dropowner",	rsdb_schema_channels_dropowner,	"chname"		},
+	{ "members",		rsdb_schema_members,		"chname, username"	},
+	{ "bans",		rsdb_schema_bans,		"chname, mask"		},
+	{ "operbot",		rsdb_schema_operbot,		"chname"		},
+	{ "operserv",		rsdb_schema_operserv,		"chname"		},
+	{ "jupes",		rsdb_schema_jupes,		"servername"		},
+	{ "operbans",		rsdb_schema_operbans,		"type, mask"		},
+	{ "operbans_regexp",	rsdb_schema_operbans_regexp,	"id"			},
+	{ "operbans_regexp_neg",rsdb_schema_operbans_regexp_neg,"id"			},
+	{ "global_welcome",	rsdb_schema_global_welcome,	"id"			},
+	{ "email_banned_domain",rsdb_schema_email_banned_domain, "domain"		},
+	{ "ignore_hosts",	rsdb_schema_ignore_hosts,	"hostname"		},
+	{ "memos",		rsdb_schema_memos,		"id"			},
 	{ NULL, NULL, NULL }
 };
 
