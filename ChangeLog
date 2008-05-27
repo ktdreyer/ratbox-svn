@@ -1,3 +1,18 @@
+leeh        2008/05/27 17:53:28 UTC	(20080527_0-25460)
+  Log:
+  - move the schema out into schema.c
+  - add support for 'TEXT' values
+  
+
+  Modified:
+	rserv/trunk/include/rsdb_schema.h (File Modified) 
+	rserv/trunk/include/rserv.h (File Modified) 
+	rserv/trunk/src/Makefile.in (File Modified) 
+	rserv/trunk/src/rsdb_schema.c (File Modified) 
+	rserv/trunk/src/rserv.c (File Modified) 
+	rserv/trunk/src/schema.c (File Added) 
+
+
 leeh        2008/05/24 08:33:14 UTC	(20080524_0-25458)
   Log:
   - globalise rsdb_schema_set, and pass that around instead of the raw values
