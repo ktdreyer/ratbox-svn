@@ -94,6 +94,7 @@ rsdb_schema_generate_table(struct rsdb_schema_set *schema_set)
 					(schema[i].def != NULL ? " DEFAULT " : ""),
 					(schema[i].def != NULL ? schema[i].def : ""));
 #endif
+				break;
 
 			case RSDB_SCHEMA_BOOLEAN:
 #if defined(RSERV_DB_PGSQL) || defined(RSERV_DB_MYSQL)
