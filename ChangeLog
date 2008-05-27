@@ -1,3 +1,12 @@
+leeh        2008/05/27 20:57:20 UTC	(20080527_5-25470)
+  Log:
+  - finish updating the base schema
+  
+
+  Modified:
+	rserv/trunk/src/schema.c (File Modified) 
+
+
 leeh        2008/05/27 20:50:46 UTC	(20080527_4-25468)
   Log:
   - add 'CHAR' type to schema generation
