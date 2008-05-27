@@ -1,3 +1,13 @@
+leeh        2008/05/27 20:50:46 UTC	(20080527_4-25468)
+  Log:
+  - add 'CHAR' type to schema generation
+  
+
+  Modified:
+	rserv/trunk/include/rsdb_schema.h (File Modified) 
+	rserv/trunk/src/rsdb_schema.c (File Modified) 
+
+
 leeh        2008/05/27 20:48:20 UTC	(20080527_3-25466)
   Log:
   - missing break;
