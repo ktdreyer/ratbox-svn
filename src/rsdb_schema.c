@@ -37,47 +37,14 @@
 
 static void rsdb_schema_generate_table(struct rsdb_schema_set *schema_set);
 
-/* table: users */
-static struct rsdb_schema rsdb_schema_users[] = 
-{
-	{ RSDB_SCHEMA_SERIAL,	0,			0, "id",		NULL		},
-	{ RSDB_SCHEMA_VARCHAR,	USERREGNAME_LEN,	1, "username",		NULL		},
-	{ RSDB_SCHEMA_VARCHAR,	PASSWDLEN,		1, "password",		NULL		},
-	{ RSDB_SCHEMA_VARCHAR,	EMAILLEN,		0, "email",		NULL		},
-	{ RSDB_SCHEMA_VARCHAR,	OPERNAMELEN,		0, "suspender",		NULL		},
-	{ RSDB_SCHEMA_VARCHAR,	SUSPENDREASONLEN,	0, "suspend_reason",	NULL		},
-	{ RSDB_SCHEMA_UINT,	0,			0, "suspend_time",	"0"		},
-	{ RSDB_SCHEMA_UINT,	0,			0, "reg_time",		NULL		},
-	{ RSDB_SCHEMA_UINT,	0,			0, "last_time",		NULL		},
-	{ RSDB_SCHEMA_UINT,	0,			0, "flags",		NULL		},
-	{ RSDB_SCHEMA_VARCHAR,	8,			0, "verify_token",	NULL		},
-	{ RSDB_SCHEMA_VARCHAR,	255,			0, "language",		"''"		},
-	{ 0, 0, 0, NULL, NULL }
-};
-
-/* table: users_resetpass */
-static struct rsdb_schema rsdb_schema_users_resetpass[] =
-{
-	{ RSDB_SCHEMA_VARCHAR,	USERREGNAME_LEN,	1, "username",		NULL		},
-	{ RSDB_SCHEMA_VARCHAR,	10,			0, "token",		NULL		},
-	{ RSDB_SCHEMA_UINT,	0,			0, "time",		NULL		},
-	{ 0, 0, 0, NULL, NULL }
-};
-
-static struct rsdb_schema_set rsdb_schema_tables[] = {
-	{ "users",		rsdb_schema_users,		"id"		},
-	{ "users_resetpass",	rsdb_schema_users_resetpass,	"username"	},
-	{ NULL, NULL, NULL }
-};
-
 void
-rsdb_schema_generate(void)
+rsdb_schema_generate(struct rsdb_schema_set *schema_set)
 {
 	int i;
 
-	for(i = 0; rsdb_schema_tables[i].table_name; i++)
+	for(i = 0; schema_set[i].table_name; i++)
 	{
-		rsdb_schema_generate_table(&rsdb_schema_tables[i]);
+		rsdb_schema_generate_table(&schema_set[i]);
 	}
 }
 
@@ -158,6 +125,11 @@ rsdb_schema_generate_table(struct rsdb_schema_set *schema_set)
 				break;
 
 			case RSDB_SCHEMA_TEXT:
+				snprintf(buf, sizeof(buf), "%s TEXT%s%s%s, ",
+					schema[i].name,
+					(schema[i].not_null ? " NOT NULL" : ""),
+					(schema[i].def != NULL ? " DEFAULT " : ""),
+					(schema[i].def != NULL ? schema[i].def : ""));
 				break;
 		}
 

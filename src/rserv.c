@@ -405,7 +405,7 @@ main(int argc, char *argv[])
 
 	if(create_schema)
 	{
-		rsdb_schema_generate();
+		schema_init();
 		exit(0);
 	}
 

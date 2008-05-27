@@ -54,6 +54,7 @@ BSRCS = 		\
         newconf.c       \
 	rsdb_schema.c	\
 	rserv.c		\
+	schema.c	\
 	scommand.c	\
 	service.c	\
 	snprintf.c	\

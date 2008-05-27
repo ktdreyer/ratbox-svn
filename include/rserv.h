@@ -46,4 +46,7 @@ int match_cidr(const char *s1, const char *s2);
 int rs_snprintf(char *, const size_t, const char *, ...);
 int rs_vsnprintf(char *, const size_t, const char *, va_list);
 
+/* schema.c */
+void schema_init(void);
+
 #endif

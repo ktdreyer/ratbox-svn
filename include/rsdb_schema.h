@@ -28,6 +28,6 @@ struct rsdb_schema_set
 	const char *primary_key;
 };
 
-void rsdb_schema_generate(void);
+void rsdb_schema_generate(struct rsdb_schema_set *schema_set);
 
 #endif
