@@ -75,12 +75,32 @@ rsdb_schema_generate_table(struct rsdb_schema_set *schema_set)
 				snprintf(buf, sizeof(buf), "%s SERIAL, ", schema[i].name);
 #elif defined(RSERV_DB_MYSQL)
 				snprintf(buf, sizeof(buf), "%s INTEGER AUTO_INCREMENT, ", schema[i].name);
-#elif defined(RSDB_DB_SQLITE)
+#elif defined(RSERV_DB_SQLITE)
 				snprintf(buf, sizeof(buf), "%s INTEGER PRIMARY KEY, ", schema[i].name);
 #endif
 				break;
 
+			case RSDB_SCHEMA_SERIAL_REF:
+#if defined(RSERV_DB_PGSQL)
+				snprintf(buf, sizeof(buf), "%s BIGINT%s%s%s, ",
+					schema[i].name,
+					(schema[i].not_null ? " NOT NULL" : ""),
+					(schema[i].def != NULL ? " DEFAULT " : ""),
+					(schema[i].def != NULL ? schema[i].def : ""));
+#elif defined(RSERV_DB_MYSQL) || defined(RSERV_DB_SQLITE)
+				snprintf(buf, sizeof(buf), "%s INTEGER%s%s%s, ",
+					schema[i].name,
+					(schema[i].not_null ? " NOT NULL" : ""),
+					(schema[i].def != NULL ? " DEFAULT " : ""),
+					(schema[i].def != NULL ? schema[i].def : ""));
+#endif
+
 			case RSDB_SCHEMA_BOOLEAN:
+#if defined(RSERV_DB_PGSQL) || defined(RSERV_DB_MYSQL)
+				snprintf(buf, sizeof(buf), "%s BOOL, ", schema[i].name);
+#elif defined(RSERV_DB_SQLITE)
+				snprintf(buf, sizeof(buf), "%s INTEGER, ", schema[i].name);
+#endif
 				break;
 
 			case RSDB_SCHEMA_INT:
