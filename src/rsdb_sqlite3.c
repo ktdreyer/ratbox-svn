@@ -258,3 +258,89 @@ rsdb_transaction(rsdb_transtype type)
 		rsdb_exec(NULL, "COMMIT TRANSACTION");
 }
 
+void
+rsdb_schema_generate_element(const char *table_name, struct rsdb_schema *schema_element,
+				dlink_list *table_data, dlink_list *key_data)
+{
+	static char buf[BUFSIZE];
+	int is_key = 0;
+
+	buf[0] = '\0';
+
+	switch(schema_element->option)
+	{
+		case RSDB_SCHEMA_SERIAL:
+			snprintf(buf, sizeof(buf), "%s INTEGER PRIMARY KEY", schema_element->name);
+			break;
+
+		case RSDB_SCHEMA_SERIAL_REF:
+			snprintf(buf, sizeof(buf), "%s INTEGER%s%s%s",
+				schema_element->name,
+				(schema_element->not_null ? " NOT NULL" : ""),
+				(schema_element->def != NULL ? " DEFAULT " : ""),
+				(schema_element->def != NULL ? schema_element->def : ""));
+			break;
+
+		case RSDB_SCHEMA_BOOLEAN:
+			snprintf(buf, sizeof(buf), "%s INTEGER", schema_element->name);
+			break;
+
+		case RSDB_SCHEMA_INT:
+			snprintf(buf, sizeof(buf), "%s INTEGER%s%s%s",
+				schema_element->name,
+				(schema_element->not_null ? " NOT NULL" : ""),
+				(schema_element->def != NULL ? " DEFAULT " : ""),
+				(schema_element->def != NULL ? schema_element->def : ""));
+			break;
+
+		case RSDB_SCHEMA_UINT:
+			snprintf(buf, sizeof(buf), "%s INTEGER%s%s%s",
+				schema_element->name,
+				(schema_element->not_null ? " NOT NULL" : ""),
+				(schema_element->def != NULL ? " DEFAULT " : ""),
+				(schema_element->def != NULL ? schema_element->def : ""));
+			break;
+
+		case RSDB_SCHEMA_VARCHAR:
+			snprintf(buf, sizeof(buf), "%s TEXT%s%s%s",
+				schema_element->name,
+				(schema_element->not_null ? " NOT NULL" : ""),
+				(schema_element->def != NULL ? " DEFAULT " : ""),
+				(schema_element->def != NULL ? schema_element->def : ""));
+			break;
+
+		case RSDB_SCHEMA_CHAR:
+			snprintf(buf, sizeof(buf), "%s TEXT%s%s%s",
+				schema_element->name,
+				(schema_element->not_null ? " NOT NULL" : ""),
+				(schema_element->def != NULL ? " DEFAULT " : ""),
+				(schema_element->def != NULL ? schema_element->def : ""));
+			break;
+
+		case RSDB_SCHEMA_TEXT:
+			snprintf(buf, sizeof(buf), "%s TEXT%s%s%s",
+				schema_element->name,
+				(schema_element->not_null ? " NOT NULL" : ""),
+				(schema_element->def != NULL ? " DEFAULT " : ""),
+				(schema_element->def != NULL ? schema_element->def : ""));
+			break;
+
+		case RSDB_SCHEMA_KEY_UNIQUE:
+			is_key = 1;
+			snprintf(buf, sizeof(buf), "CREATE UNIQUE INDEX %s_%s_unique ON %s (%s);",
+				table_name, schema_element->name,
+				table_name, schema_element->name);
+			break;
+
+		case RSDB_SCHEMA_KEY_INDEX:
+			is_key = 1;
+			snprintf(buf, sizeof(buf), "CREATE INDEX %s_%s_idx ON %s (%s);",
+				table_name, schema_element->name,
+				table_name, schema_element->name);
+			break;
+	}
+
+	if(!EmptyString(buf))
+		dlink_add_tail_alloc(my_strdup(buf), (is_key ? key_data : table_data));
+}
+

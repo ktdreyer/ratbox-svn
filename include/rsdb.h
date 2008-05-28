@@ -34,4 +34,32 @@ void rsdb_exec_fetch_end(struct rsdb_table *data);
 
 void rsdb_transaction(rsdb_transtype type);
 
+/* schema generation */
+typedef enum rsdb_schema_option
+{
+	RSDB_SCHEMA_SERIAL,		/* serial/autoincrement id field */
+	RSDB_SCHEMA_SERIAL_REF,		/* reference to a serial */
+	RSDB_SCHEMA_BOOLEAN,		/* boolean */
+	RSDB_SCHEMA_INT,		/* integer */
+	RSDB_SCHEMA_UINT,		/* unsigned integer */
+	RSDB_SCHEMA_VARCHAR,		/* varchar */
+	RSDB_SCHEMA_CHAR,		/* char */
+	RSDB_SCHEMA_TEXT,		/* text */
+	RSDB_SCHEMA_KEY_UNIQUE,		/* UNIQUE constraint */
+	RSDB_SCHEMA_KEY_INDEX		/* normal INDEX */
+}
+rsdb_schema_option;
+
+struct rsdb_schema
+{
+	rsdb_schema_option option;
+	unsigned int length;
+	unsigned int not_null;
+	const char *name;
+	const char *def;
+};
+
+void rsdb_schema_generate_element(const char *table_name, struct rsdb_schema *schema_element,
+				dlink_list *table_data, dlink_list *key_data);
+
 #endif
