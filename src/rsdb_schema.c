@@ -53,16 +53,15 @@ rsdb_schema_generate_table(struct rsdb_schema_set *schema_set)
 {
 	struct rsdb_schema *schema;
 	dlink_list table_data;
+	dlink_list key_data;
 	static char buf[BUFSIZE];
 	int i;
-	dlink_node *ptr;
+	dlink_node *ptr, *ptr_next;
 
 	memset(&table_data, 0, sizeof(struct _dlink_list));
+	memset(&key_data, 0, sizeof(struct _dlink_list));
 
 	schema = schema_set->schema;
-
-	snprintf(buf, sizeof(buf), "CREATE TABLE %s (", schema_set->table_name);
-	dlink_add_tail_alloc(my_strdup(buf), &table_data);
 
 	for(i = 0; schema[i].name; i++)
 	{
@@ -72,23 +71,23 @@ rsdb_schema_generate_table(struct rsdb_schema_set *schema_set)
 		{
 			case RSDB_SCHEMA_SERIAL:
 #if defined(RSERV_DB_PGSQL)
-				snprintf(buf, sizeof(buf), "%s SERIAL, ", schema[i].name);
+				snprintf(buf, sizeof(buf), "%s SERIAL", schema[i].name);
 #elif defined(RSERV_DB_MYSQL)
-				snprintf(buf, sizeof(buf), "%s INTEGER AUTO_INCREMENT, ", schema[i].name);
+				snprintf(buf, sizeof(buf), "%s INTEGER AUTO_INCREMENT", schema[i].name);
 #elif defined(RSERV_DB_SQLITE)
-				snprintf(buf, sizeof(buf), "%s INTEGER PRIMARY KEY, ", schema[i].name);
+				snprintf(buf, sizeof(buf), "%s INTEGER PRIMARY KEY", schema[i].name);
 #endif
 				break;
 
 			case RSDB_SCHEMA_SERIAL_REF:
 #if defined(RSERV_DB_PGSQL)
-				snprintf(buf, sizeof(buf), "%s BIGINT%s%s%s, ",
+				snprintf(buf, sizeof(buf), "%s BIGINT%s%s%s",
 					schema[i].name,
 					(schema[i].not_null ? " NOT NULL" : ""),
 					(schema[i].def != NULL ? " DEFAULT " : ""),
 					(schema[i].def != NULL ? schema[i].def : ""));
 #elif defined(RSERV_DB_MYSQL) || defined(RSERV_DB_SQLITE)
-				snprintf(buf, sizeof(buf), "%s INTEGER%s%s%s, ",
+				snprintf(buf, sizeof(buf), "%s INTEGER%s%s%s",
 					schema[i].name,
 					(schema[i].not_null ? " NOT NULL" : ""),
 					(schema[i].def != NULL ? " DEFAULT " : ""),
@@ -98,14 +97,14 @@ rsdb_schema_generate_table(struct rsdb_schema_set *schema_set)
 
 			case RSDB_SCHEMA_BOOLEAN:
 #if defined(RSERV_DB_PGSQL) || defined(RSERV_DB_MYSQL)
-				snprintf(buf, sizeof(buf), "%s BOOL, ", schema[i].name);
+				snprintf(buf, sizeof(buf), "%s BOOL", schema[i].name);
 #elif defined(RSERV_DB_SQLITE)
-				snprintf(buf, sizeof(buf), "%s INTEGER, ", schema[i].name);
+				snprintf(buf, sizeof(buf), "%s INTEGER", schema[i].name);
 #endif
 				break;
 
 			case RSDB_SCHEMA_INT:
-				snprintf(buf, sizeof(buf), "%s INTEGER%s%s%s, ",
+				snprintf(buf, sizeof(buf), "%s INTEGER%s%s%s",
 					schema[i].name,
 					(schema[i].not_null ? " NOT NULL" : ""),
 					(schema[i].def != NULL ? " DEFAULT " : ""),
@@ -115,13 +114,13 @@ rsdb_schema_generate_table(struct rsdb_schema_set *schema_set)
 			case RSDB_SCHEMA_UINT:
 				/* no unsigned ints here */
 #if defined(RSERV_DB_PGSQL) || defined(RSERV_DB_SQLITE)
-				snprintf(buf, sizeof(buf), "%s INTEGER%s%s%s, ",
+				snprintf(buf, sizeof(buf), "%s INTEGER%s%s%s",
 					schema[i].name,
 					(schema[i].not_null ? " NOT NULL" : ""),
 					(schema[i].def != NULL ? " DEFAULT " : ""),
 					(schema[i].def != NULL ? schema[i].def : ""));
 #else
-				snprintf(buf, sizeof(buf), "%s INTEGER UNSIGNED%s%s%s, ",
+				snprintf(buf, sizeof(buf), "%s INTEGER UNSIGNED%s%s%s",
 					schema[i].name,
 					(schema[i].not_null ? " NOT NULL" : ""),
 					(schema[i].def != NULL ? " DEFAULT " : ""),
@@ -131,13 +130,13 @@ rsdb_schema_generate_table(struct rsdb_schema_set *schema_set)
 
 			case RSDB_SCHEMA_VARCHAR:
 #if defined(RSERV_DB_PGSQL) || defined(RSERV_DB_MYSQL)
-				snprintf(buf, sizeof(buf), "%s VARCHAR(%u)%s%s%s, ",
+				snprintf(buf, sizeof(buf), "%s VARCHAR(%u)%s%s%s",
 					schema[i].name, schema[i].length,
 					(schema[i].not_null ? " NOT NULL" : ""),
 					(schema[i].def != NULL ? " DEFAULT " : ""),
 					(schema[i].def != NULL ? schema[i].def : ""));
 #elif defined(RSERV_DB_SQLITE)
-				snprintf(buf, sizeof(buf), "%s TEXT%s%s%s, ",
+				snprintf(buf, sizeof(buf), "%s TEXT%s%s%s",
 					schema[i].name,
 					(schema[i].not_null ? " NOT NULL" : ""),
 					(schema[i].def != NULL ? " DEFAULT " : ""),
@@ -147,13 +146,13 @@ rsdb_schema_generate_table(struct rsdb_schema_set *schema_set)
 
 			case RSDB_SCHEMA_CHAR:
 #if defined(RSERV_DB_PGSQL) || defined(RSERV_DB_MYSQL)
-				snprintf(buf, sizeof(buf), "%s CHAR(%u)%s%s%s, ",
+				snprintf(buf, sizeof(buf), "%s CHAR(%u)%s%s%s",
 					schema[i].name, schema[i].length,
 					(schema[i].not_null ? " NOT NULL" : ""),
 					(schema[i].def != NULL ? " DEFAULT " : ""),
 					(schema[i].def != NULL ? schema[i].def : ""));
 #elif defined(RSERV_DB_SQLITE)
-				snprintf(buf, sizeof(buf), "%s TEXT%s%s%s, ",
+				snprintf(buf, sizeof(buf), "%s TEXT%s%s%s",
 					schema[i].name,
 					(schema[i].not_null ? " NOT NULL" : ""),
 					(schema[i].def != NULL ? " DEFAULT " : ""),
@@ -162,54 +161,70 @@ rsdb_schema_generate_table(struct rsdb_schema_set *schema_set)
 				break;
 
 			case RSDB_SCHEMA_TEXT:
-				snprintf(buf, sizeof(buf), "%s TEXT%s%s%s, ",
+				snprintf(buf, sizeof(buf), "%s TEXT%s%s%s",
 					schema[i].name,
 					(schema[i].not_null ? " NOT NULL" : ""),
 					(schema[i].def != NULL ? " DEFAULT " : ""),
 					(schema[i].def != NULL ? schema[i].def : ""));
 				break;
-		}
 
-		if(buf[0])
-		{
-			/* this field is the last element, either add a
-			 * primary key value, or remove the trailing ','
-			 */
-			if(schema[i+1].name == NULL)
-			{
-/* primary keys are defined with the SERIAL value in sqlite */
+			case RSDB_SCHEMA_KEY_UNIQUE:
 #if defined(RSERV_DB_PGSQL) || defined(RSERV_DB_MYSQL)
-				/* this field has a primary key, add it now */
-				if(!EmptyString(schema_set->primary_key))
-				{
-					char tmpbuf[BUFSIZE];
-					tmpbuf[0] = '\0';
-
-					snprintf(tmpbuf, sizeof(tmpbuf), "PRIMARY KEY(%s)", schema_set->primary_key);
-					strlcat(buf, tmpbuf, sizeof(buf));
-				}
-				else
+				snprintf(buf, sizeof(buf), "ALTER TABLE %s ADD UNIQUE(%s);",
+					schema_set->table_name, schema[i].name);
+#elif defined(RSERV_DB_SQLITE)
+				snprintf(buf, sizeof(buf), "CREATE UNIQUE INDEX %s_%s_unique ON %s (%s);",
+					schema_set->table_name, schema[i].name,
+					schema_set->table_name, schema[i].name);
 #endif
+				if(!EmptyString(buf))
 				{
-					char *x = strchr(buf, ',');
-					if(x)
-						*x = '\0';
+					dlink_add_tail_alloc(my_strdup(buf), &key_data);
+					buf[0] = '\0';
 				}
-			}
 
-			dlink_add_tail_alloc(my_strdup(buf), &table_data);
+				break;
+
+			case RSDB_SCHEMA_KEY_INDEX:
+#if defined(RSERV_DB_PGSQL) || defined(RSERV_DB_SQLITE)
+				snprintf(buf, sizeof(buf), "CREATE INDEX %s_%s_idx ON %s (%s);",
+					schema_set->table_name, schema[i].name,
+					schema_set->table_name, schema[i].name);
+#elif defined(RSERV_DB_MYSQL)
+				snprintf(buf, sizeof(buf), "ALTER TABLE %s ADD INDEX (%s);",
+					schema_set->table_name, schema[i].name);
+#endif
+
+				if(!EmptyString(buf))
+				{
+					dlink_add_tail_alloc(my_strdup(buf), &key_data);
+					buf[0] = '\0';
+				}
+
+				break;
 		}
-	}
 
-	snprintf(buf, sizeof(buf), ");");
-	dlink_add_tail_alloc(my_strdup(buf), &table_data);
+		if(!EmptyString(buf))
+			dlink_add_tail_alloc(my_strdup(buf), &table_data);
+	}
 
 #if 1
-	DLINK_FOREACH(ptr, table_data.head)
+	fprintf(stderr, "CREATE TABLE %s (", schema_set->table_name);
+	DLINK_FOREACH_SAFE(ptr, ptr_next, table_data.head)
 	{
 		fprintf(stderr, "%s", (const char *) ptr->data);
-	}
 
-	fprintf(stderr, "\n");
+		if(ptr_next)
+			fprintf(stderr, ", ");
+		else if(!EmptyString(schema_set->primary_key))
+			fprintf(stderr, ", PRIMARY KEY(%s)", schema_set->primary_key);
+	}
+	fprintf(stderr, ");\n");
+
+	DLINK_FOREACH(ptr, key_data.head)
+	{
+		fprintf(stderr, "%s", (const char *) ptr->data);
+		fprintf(stderr, "\n");
+	}
 #endif
 }

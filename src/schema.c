@@ -40,35 +40,38 @@
 /* table: users */
 static struct rsdb_schema rsdb_schema_users[] = 
 {
-	{ RSDB_SCHEMA_SERIAL,	0,			0, "id",		NULL		},
-	{ RSDB_SCHEMA_VARCHAR,	USERREGNAME_LEN-1,	1, "username",		NULL		},
-	{ RSDB_SCHEMA_VARCHAR,	PASSWDLEN,		1, "password",		NULL		},
-	{ RSDB_SCHEMA_VARCHAR,	EMAILLEN,		0, "email",		NULL		},
-	{ RSDB_SCHEMA_VARCHAR,	OPERNAMELEN,		0, "suspender",		NULL		},
-	{ RSDB_SCHEMA_VARCHAR,	SUSPENDREASONLEN,	0, "suspend_reason",	NULL		},
-	{ RSDB_SCHEMA_UINT,	0,			0, "suspend_time",	"0"		},
-	{ RSDB_SCHEMA_UINT,	0,			0, "reg_time",		NULL		},
-	{ RSDB_SCHEMA_UINT,	0,			0, "last_time",		NULL		},
-	{ RSDB_SCHEMA_UINT,	0,			0, "flags",		NULL		},
-	{ RSDB_SCHEMA_VARCHAR,	8,			0, "verify_token",	NULL		},
-	{ RSDB_SCHEMA_VARCHAR,	255,			0, "language",		"''"		},
+	{ RSDB_SCHEMA_SERIAL,		0,			0, "id",		NULL		},
+	{ RSDB_SCHEMA_VARCHAR,		USERREGNAME_LEN-1,	1, "username",		NULL		},
+	{ RSDB_SCHEMA_VARCHAR,		PASSWDLEN,		1, "password",		NULL		},
+	{ RSDB_SCHEMA_VARCHAR,		EMAILLEN,		0, "email",		NULL		},
+	{ RSDB_SCHEMA_VARCHAR,		OPERNAMELEN,		0, "suspender",		NULL		},
+	{ RSDB_SCHEMA_VARCHAR,		SUSPENDREASONLEN,	0, "suspend_reason",	NULL		},
+	{ RSDB_SCHEMA_UINT,		0,			0, "suspend_time",	"0"		},
+	{ RSDB_SCHEMA_UINT,		0,			0, "reg_time",		NULL		},
+	{ RSDB_SCHEMA_UINT,		0,			0, "last_time",		NULL		},
+	{ RSDB_SCHEMA_UINT,		0,			0, "flags",		NULL		},
+	{ RSDB_SCHEMA_VARCHAR,		8,			0, "verify_token",	NULL		},
+	{ RSDB_SCHEMA_VARCHAR,		255,			0, "language",		"''"		},
+	{ RSDB_SCHEMA_KEY_UNIQUE,	0,			0, "username",		NULL		},
 	{ 0, 0, 0, NULL, NULL }
 };
 /* table: users_resetpass */
 static struct rsdb_schema rsdb_schema_users_resetpass[] =
 {
-	{ RSDB_SCHEMA_VARCHAR,	USERREGNAME_LEN-1,	1, "username",		NULL		},
-	{ RSDB_SCHEMA_VARCHAR,	10,			0, "token",		NULL		},
-	{ RSDB_SCHEMA_UINT,	0,			0, "time",		NULL		},
+	{ RSDB_SCHEMA_VARCHAR,		USERREGNAME_LEN-1,	1, "username",		NULL		},
+	{ RSDB_SCHEMA_VARCHAR,		10,			0, "token",		NULL		},
+	{ RSDB_SCHEMA_UINT,		0,			0, "time",		NULL		},
+	{ RSDB_SCHEMA_KEY_INDEX,	0,			0, "time",		NULL		},
 	{ 0, 0, 0, NULL, NULL }
 };
 /* table: users_resetemail */
 static struct rsdb_schema rsdb_schema_users_resetemail[] =
 {
-	{ RSDB_SCHEMA_VARCHAR,	USERREGNAME_LEN-1,	1, "username",		NULL		},
-	{ RSDB_SCHEMA_VARCHAR,	10,			0, "token",		NULL		},
-	{ RSDB_SCHEMA_VARCHAR,	EMAILLEN,		0, "email",		"NULL"		},
-	{ RSDB_SCHEMA_UINT,	0,			0, "time",		NULL		},
+	{ RSDB_SCHEMA_VARCHAR,		USERREGNAME_LEN-1,	1, "username",		NULL		},
+	{ RSDB_SCHEMA_VARCHAR,		10,			0, "token",		NULL		},
+	{ RSDB_SCHEMA_VARCHAR,		EMAILLEN,		0, "email",		"NULL"		},
+	{ RSDB_SCHEMA_UINT,		0,			0, "time",		NULL		},
+	{ RSDB_SCHEMA_KEY_INDEX,	0,			0, "time",		NULL		},
 	{ 0, 0, 0, NULL, NULL }
 };
 /* table: users_sync */
@@ -109,31 +112,35 @@ static struct rsdb_schema rsdb_schema_channels[] =
 /* table: channels_dropowner */
 static struct rsdb_schema rsdb_schema_channels_dropowner[] =
 {
-	{ RSDB_SCHEMA_VARCHAR,	CHANNELLEN,		1, "chname",		NULL		},
-	{ RSDB_SCHEMA_VARCHAR,	10,			0, "token",		NULL		},
-	{ RSDB_SCHEMA_UINT,	0,			0, "time",		NULL		},
+	{ RSDB_SCHEMA_VARCHAR,		CHANNELLEN,		1, "chname",		NULL		},
+	{ RSDB_SCHEMA_VARCHAR,		10,			0, "token",		NULL		},
+	{ RSDB_SCHEMA_UINT,		0,			0, "time",		NULL		},
+	{ RSDB_SCHEMA_KEY_INDEX,	0,			0, "time",		NULL		},
 	{ 0, 0, 0, NULL, NULL }
 };
 /* table: members */
 static struct rsdb_schema rsdb_schema_members[] =
 {
-	{ RSDB_SCHEMA_VARCHAR,	CHANNELLEN,		1, "chname",		NULL		},
-	{ RSDB_SCHEMA_VARCHAR,	USERREGNAME_LEN-1,	1, "username",		NULL		},
-	{ RSDB_SCHEMA_VARCHAR,	USERREGNAME_LEN-1,	1, "lastmod",		NULL		},
-	{ RSDB_SCHEMA_INT,	0,			0, "level",		NULL		},
-	{ RSDB_SCHEMA_UINT,	0,			0, "flags",		NULL		},
-	{ RSDB_SCHEMA_INT,	0,			0, "suspend",		NULL		},
+	{ RSDB_SCHEMA_VARCHAR,		CHANNELLEN,		1, "chname",		NULL		},
+	{ RSDB_SCHEMA_VARCHAR,		USERREGNAME_LEN-1,	1, "username",		NULL		},
+	{ RSDB_SCHEMA_VARCHAR,		USERREGNAME_LEN-1,	1, "lastmod",		NULL		},
+	{ RSDB_SCHEMA_INT,		0,			0, "level",		NULL		},
+	{ RSDB_SCHEMA_UINT,		0,			0, "flags",		NULL		},
+	{ RSDB_SCHEMA_INT,		0,			0, "suspend",		NULL		},
+	{ RSDB_SCHEMA_KEY_INDEX,	0,			0, "chname",		NULL		},
+	{ RSDB_SCHEMA_KEY_INDEX,	0,			0, "username",		NULL		},
 	{ 0, 0, 0, NULL, NULL }
 };
 /* table: bans */
 static struct rsdb_schema rsdb_schema_bans[] =
 {
-	{ RSDB_SCHEMA_VARCHAR,	CHANNELLEN,		1, "chname",		NULL		},
-	{ RSDB_SCHEMA_VARCHAR,	NICKUSERHOSTLEN-1,	1, "mask",		NULL		},
-	{ RSDB_SCHEMA_VARCHAR,	50,			1, "reason",		NULL		},
-	{ RSDB_SCHEMA_VARCHAR,	USERREGNAME_LEN-1,	1, "username",		NULL		},
-	{ RSDB_SCHEMA_INT,	0,			0, "level",		NULL		},
-	{ RSDB_SCHEMA_UINT,	0,			0, "hold",		NULL		},
+	{ RSDB_SCHEMA_VARCHAR,		CHANNELLEN,		1, "chname",		NULL		},
+	{ RSDB_SCHEMA_VARCHAR,		NICKUSERHOSTLEN-1,	1, "mask",		NULL		},
+	{ RSDB_SCHEMA_VARCHAR,		50,			1, "reason",		NULL		},
+	{ RSDB_SCHEMA_VARCHAR,		USERREGNAME_LEN-1,	1, "username",		NULL		},
+	{ RSDB_SCHEMA_INT,		0,			0, "level",		NULL		},
+	{ RSDB_SCHEMA_UINT,		0,			0, "hold",		NULL		},
+	{ RSDB_SCHEMA_KEY_INDEX,	0,			0, "chname",		NULL		},
 	{ 0, 0, 0, NULL, NULL }
 };
 /* table: operbot */

@@ -4,14 +4,16 @@
 
 typedef enum rsdb_schema_option
 {
-	RSDB_SCHEMA_SERIAL,
-	RSDB_SCHEMA_SERIAL_REF,
-	RSDB_SCHEMA_BOOLEAN,
-	RSDB_SCHEMA_INT,
-	RSDB_SCHEMA_UINT,
-	RSDB_SCHEMA_VARCHAR,
-	RSDB_SCHEMA_CHAR,
-	RSDB_SCHEMA_TEXT
+	RSDB_SCHEMA_SERIAL,		/* serial/autoincrement id field */
+	RSDB_SCHEMA_SERIAL_REF,		/* reference to a serial */
+	RSDB_SCHEMA_BOOLEAN,		/* boolean */
+	RSDB_SCHEMA_INT,		/* integer */
+	RSDB_SCHEMA_UINT,		/* unsigned integer */
+	RSDB_SCHEMA_VARCHAR,		/* varchar */
+	RSDB_SCHEMA_CHAR,		/* char */
+	RSDB_SCHEMA_TEXT,		/* text */
+	RSDB_SCHEMA_KEY_UNIQUE,		/* UNIQUE constraint */
+	RSDB_SCHEMA_KEY_INDEX		/* normal INDEX */
 }
 rsdb_schema_option;
 
