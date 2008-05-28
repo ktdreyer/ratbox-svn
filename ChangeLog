@@ -1,3 +1,19 @@
+leeh        2008/05/28 19:09:51 UTC	(20080528_1-25484)
+  Log:
+  - refactor some code so that there is a rsdb_schema_generate_element() to
+    generate the sql for each table element, which is contained within the
+    relevant rsdb_ src code
+  
+
+  Modified:
+	rserv/trunk/include/rsdb.h (File Modified) 
+	rserv/trunk/include/rsdb_schema.h (File Modified) 
+	rserv/trunk/src/rsdb_mysql.c (File Modified) 
+	rserv/trunk/src/rsdb_pgsql.c (File Modified) 
+	rserv/trunk/src/rsdb_schema.c (File Modified) 
+	rserv/trunk/src/rsdb_sqlite3.c (File Modified) 
+
+
 leeh        2008/05/28 18:30:10 UTC	(20080528_0-25472)
   Log:
   - add support for indexes/uniques to the schema generation
