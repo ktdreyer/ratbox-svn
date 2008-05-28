@@ -1,3 +1,15 @@
+leeh        2008/05/28 18:30:10 UTC	(20080528_0-25472)
+  Log:
+  - add support for indexes/uniques to the schema generation
+  - generate the field values independently, without separators
+  
+
+  Modified:
+	rserv/trunk/include/rsdb_schema.h (File Modified) 
+	rserv/trunk/src/rsdb_schema.c (File Modified) 
+	rserv/trunk/src/schema.c (File Modified) 
+
+
 leeh        2008/05/27 20:57:20 UTC	(20080527_5-25470)
   Log:
   - finish updating the base schema
