@@ -68,22 +68,22 @@ rsdb_schema_generate_table(struct rsdb_schema_set *schema_set)
 	}
 
 #if 1
-	fprintf(stderr, "CREATE TABLE %s (", schema_set->table_name);
+	fprintf(stdout, "CREATE TABLE %s (", schema_set->table_name);
 	DLINK_FOREACH_SAFE(ptr, ptr_next, table_data.head)
 	{
-		fprintf(stderr, "%s", (const char *) ptr->data);
+		fprintf(stdout, "%s", (const char *) ptr->data);
 
 		if(ptr_next)
-			fprintf(stderr, ", ");
+			fprintf(stdout, ", ");
 		else if(!EmptyString(schema_set->primary_key))
-			fprintf(stderr, ", PRIMARY KEY(%s)", schema_set->primary_key);
+			fprintf(stdout, ", PRIMARY KEY(%s)", schema_set->primary_key);
 	}
-	fprintf(stderr, ");\n");
+	fprintf(stdout, ");\n");
 
 	DLINK_FOREACH(ptr, key_data.head)
 	{
-		fprintf(stderr, "%s", (const char *) ptr->data);
-		fprintf(stderr, "\n");
+		fprintf(stdout, "%s", (const char *) ptr->data);
+		fprintf(stdout, "\n");
 	}
 #endif
 }
