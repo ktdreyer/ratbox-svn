@@ -1,3 +1,19 @@
+leeh        2008/05/29 19:35:11 UTC	(20080529_1-25490)
+  Log:
+  - add in support for foreign keys to pgsql, mysql/sqlite don't do these
+    properly
+  - extend the schema with the foreign keys.  pgsql now appears to be
+    correct..
+  
+
+  Modified:
+	rserv/trunk/include/rsdb.h (File Modified) 
+	rserv/trunk/src/rsdb_mysql.c (File Modified) 
+	rserv/trunk/src/rsdb_pgsql.c (File Modified) 
+	rserv/trunk/src/rsdb_sqlite3.c (File Modified) 
+	rserv/trunk/src/schema.c (File Modified) 
+
+
 leeh        2008/05/29 19:27:26 UTC	(20080529_0-25488)
   Log:
   - change debugging to print sql to stdout
