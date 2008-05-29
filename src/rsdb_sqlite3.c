@@ -338,6 +338,11 @@ rsdb_schema_generate_element(const char *table_name, struct rsdb_schema *schema_
 				table_name, schema_element->name,
 				table_name, schema_element->name);
 			break;
+
+		/* sqlite tables don't properly support foreign keys */
+		case RSDB_SCHEMA_KEY_F_MATCH:
+		case RSDB_SCHEMA_KEY_F_CASCADE:
+			break;
 	}
 
 	if(!EmptyString(buf))

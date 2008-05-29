@@ -85,11 +85,12 @@ static struct rsdb_schema rsdb_schema_users_sync[] =
 /* table: nicks */
 static struct rsdb_schema rsdb_schema_nicks[] =
 {
-	{ RSDB_SCHEMA_VARCHAR,	NICKLEN-1,		1, "nickname",		NULL		},
-	{ RSDB_SCHEMA_VARCHAR,	USERREGNAME_LEN-1,	1, "username",		NULL		},
-	{ RSDB_SCHEMA_UINT,	0,			0, "reg_time",		NULL		},
-	{ RSDB_SCHEMA_UINT,	0,			0, "last_time",		NULL		},
-	{ RSDB_SCHEMA_UINT,	0,			0, "flags",		NULL		},
+	{ RSDB_SCHEMA_VARCHAR,		NICKLEN-1,		1, "nickname",		NULL			},
+	{ RSDB_SCHEMA_VARCHAR,		USERREGNAME_LEN-1,	1, "username",		NULL			},
+	{ RSDB_SCHEMA_UINT,		0,			0, "reg_time",		NULL			},
+	{ RSDB_SCHEMA_UINT,		0,			0, "last_time",		NULL			},
+	{ RSDB_SCHEMA_UINT,		0,			0, "flags",		NULL			},
+	{ RSDB_SCHEMA_KEY_F_MATCH,	0,			0, "username",		"users (username)"	},
 	{ 0, 0, 0, NULL, NULL }
 };
 /* table: channels */
@@ -121,26 +122,29 @@ static struct rsdb_schema rsdb_schema_channels_dropowner[] =
 /* table: members */
 static struct rsdb_schema rsdb_schema_members[] =
 {
-	{ RSDB_SCHEMA_VARCHAR,		CHANNELLEN,		1, "chname",		NULL		},
-	{ RSDB_SCHEMA_VARCHAR,		USERREGNAME_LEN-1,	1, "username",		NULL		},
-	{ RSDB_SCHEMA_VARCHAR,		USERREGNAME_LEN-1,	1, "lastmod",		NULL		},
-	{ RSDB_SCHEMA_INT,		0,			0, "level",		NULL		},
-	{ RSDB_SCHEMA_UINT,		0,			0, "flags",		NULL		},
-	{ RSDB_SCHEMA_INT,		0,			0, "suspend",		NULL		},
-	{ RSDB_SCHEMA_KEY_INDEX,	0,			0, "chname",		NULL		},
-	{ RSDB_SCHEMA_KEY_INDEX,	0,			0, "username",		NULL		},
+	{ RSDB_SCHEMA_VARCHAR,		CHANNELLEN,		1, "chname",		NULL			},
+	{ RSDB_SCHEMA_VARCHAR,		USERREGNAME_LEN-1,	1, "username",		NULL			},
+	{ RSDB_SCHEMA_VARCHAR,		USERREGNAME_LEN-1,	1, "lastmod",		NULL			},
+	{ RSDB_SCHEMA_INT,		0,			0, "level",		NULL			},
+	{ RSDB_SCHEMA_UINT,		0,			0, "flags",		NULL			},
+	{ RSDB_SCHEMA_INT,		0,			0, "suspend",		NULL			},
+	{ RSDB_SCHEMA_KEY_INDEX,	0,			0, "chname",		NULL			},
+	{ RSDB_SCHEMA_KEY_INDEX,	0,			0, "username",		NULL			},
+	{ RSDB_SCHEMA_KEY_F_MATCH,	0,			0, "chname",		"channels (chname)"	},
+	{ RSDB_SCHEMA_KEY_F_MATCH,	0,			0, "username",		"users (username)"	},
 	{ 0, 0, 0, NULL, NULL }
 };
 /* table: bans */
 static struct rsdb_schema rsdb_schema_bans[] =
 {
-	{ RSDB_SCHEMA_VARCHAR,		CHANNELLEN,		1, "chname",		NULL		},
-	{ RSDB_SCHEMA_VARCHAR,		NICKUSERHOSTLEN-1,	1, "mask",		NULL		},
-	{ RSDB_SCHEMA_VARCHAR,		50,			1, "reason",		NULL		},
-	{ RSDB_SCHEMA_VARCHAR,		USERREGNAME_LEN-1,	1, "username",		NULL		},
-	{ RSDB_SCHEMA_INT,		0,			0, "level",		NULL		},
-	{ RSDB_SCHEMA_UINT,		0,			0, "hold",		NULL		},
-	{ RSDB_SCHEMA_KEY_INDEX,	0,			0, "chname",		NULL		},
+	{ RSDB_SCHEMA_VARCHAR,		CHANNELLEN,		1, "chname",		NULL			},
+	{ RSDB_SCHEMA_VARCHAR,		NICKUSERHOSTLEN-1,	1, "mask",		NULL			},
+	{ RSDB_SCHEMA_VARCHAR,		50,			1, "reason",		NULL			},
+	{ RSDB_SCHEMA_VARCHAR,		USERREGNAME_LEN-1,	1, "username",		NULL			},
+	{ RSDB_SCHEMA_INT,		0,			0, "level",		NULL			},
+	{ RSDB_SCHEMA_UINT,		0,			0, "hold",		NULL			},
+	{ RSDB_SCHEMA_KEY_INDEX,	0,			0, "chname",		NULL			},
+	{ RSDB_SCHEMA_KEY_F_MATCH,	0,			0, "chname",		"channels (chname)"	},
 	{ 0, 0, 0, NULL, NULL }
 };
 /* table: operbot */
@@ -224,13 +228,14 @@ static struct rsdb_schema rsdb_schema_ignore_hosts[] =
 /* table: memos */
 static struct rsdb_schema rsdb_schema_memos[] =
 {
-	{ RSDB_SCHEMA_SERIAL,	0,			0, "id",		NULL		},
-	{ RSDB_SCHEMA_SERIAL_REF, 0,			1, "user_id",		NULL		},
-	{ RSDB_SCHEMA_SERIAL_REF, 0,			1, "source_id",		NULL		},
-	{ RSDB_SCHEMA_VARCHAR,	USERREGNAME_LEN-1,	1, "source",		NULL		},
-	{ RSDB_SCHEMA_UINT,	0,			0, "timestamp",		"0"		},
-	{ RSDB_SCHEMA_UINT,	0,			0, "flags",		"0"		},
-	{ RSDB_SCHEMA_TEXT,	0,			0, "text",		NULL		},
+	{ RSDB_SCHEMA_SERIAL,		0,			0, "id",		NULL		},
+	{ RSDB_SCHEMA_SERIAL_REF, 	0,			1, "user_id",		NULL		},
+	{ RSDB_SCHEMA_SERIAL_REF, 	0,			1, "source_id",		NULL		},
+	{ RSDB_SCHEMA_VARCHAR,		USERREGNAME_LEN-1,	1, "source",		NULL		},
+	{ RSDB_SCHEMA_UINT,		0,			0, "timestamp",		"0"		},
+	{ RSDB_SCHEMA_UINT,		0,			0, "flags",		"0"		},
+	{ RSDB_SCHEMA_TEXT,		0,			0, "text",		NULL		},
+	{ RSDB_SCHEMA_KEY_F_CASCADE,	0,			0, "user_id",		"users (id)"	},
 	{ 0, 0, 0, NULL, NULL }
 };
 

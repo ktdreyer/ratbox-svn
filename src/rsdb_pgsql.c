@@ -449,6 +449,18 @@ rsdb_schema_generate_element(const char *table_name, struct rsdb_schema *schema_
 				table_name, schema_element->name,
 				table_name, schema_element->name);
 			break;
+
+		case RSDB_SCHEMA_KEY_F_MATCH:
+			is_key = 1;
+			snprintf(buf, sizeof(buf), "ALTER TABLE %s ADD FOREIGN KEY(%s) REFERENCES %s MATCH FULL;",
+				table_name, schema_element->name, schema_element->def);
+			break;
+
+		case RSDB_SCHEMA_KEY_F_CASCADE:
+			is_key = 1;
+			snprintf(buf, sizeof(buf), "ALTER TABLE %s ADD FOREIGN KEY(%s) REFERENCES %s ON DELETE CASCADE;",
+				table_name, schema_element->name, schema_element->def);
+			break;
 	}
 
 	if(!EmptyString(buf))

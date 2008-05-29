@@ -425,6 +425,11 @@ rsdb_schema_generate_element(const char *table_name, struct rsdb_schema *schema_
 			snprintf(buf, sizeof(buf), "ALTER TABLE %s ADD INDEX (%s);",
 				table_name, schema_element->name);
 			break;
+
+		/* MyISAM tables don't support foreign keys */
+		case RSDB_SCHEMA_KEY_F_MATCH:
+		case RSDB_SCHEMA_KEY_F_CASCADE:
+			break;
 	}
 
 	if(!EmptyString(buf))

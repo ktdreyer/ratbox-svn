@@ -46,7 +46,9 @@ typedef enum rsdb_schema_option
 	RSDB_SCHEMA_CHAR,		/* char */
 	RSDB_SCHEMA_TEXT,		/* text */
 	RSDB_SCHEMA_KEY_UNIQUE,		/* UNIQUE constraint */
-	RSDB_SCHEMA_KEY_INDEX		/* normal INDEX */
+	RSDB_SCHEMA_KEY_INDEX,		/* normal INDEX */
+	RSDB_SCHEMA_KEY_F_MATCH,	/* FOREIGN KEY -- MATCH FULL */
+	RSDB_SCHEMA_KEY_F_CASCADE	/* FOREIGN KEY -- CASCADE DELETE */
 }
 rsdb_schema_option;
 
