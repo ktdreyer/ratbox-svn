@@ -1,3 +1,14 @@
+leeh        2008/05/30 18:40:06 UTC	(20080530_2-25496)
+  Log:
+  - first attempt at schema syncing for pgsql
+  
+
+  Modified:
+	rserv/trunk/include/rsdb.h (File Modified) 
+	rserv/trunk/src/rsdb_pgsql.c (File Modified) 
+	rserv/trunk/src/schema.c (File Modified) 
+
+
 leeh        2008/05/30 17:24:53 UTC	(20080530_1-25494)
   Log:
   - merge the remains of rsdb_schema.h into rsdb.h
