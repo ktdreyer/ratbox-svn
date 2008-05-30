@@ -46,6 +46,12 @@ int rsdb_doing_transaction;
 
 static int rsdb_connect(int initial);
 
+static void rsdb_schema_check_table(struct rsdb_schema_set *schema_set);
+static void rsdb_schema_generate_table(struct rsdb_schema_set *schema_set);
+static void rsdb_schema_generate_element(const char *table_name, struct rsdb_schema *schema_element,
+					dlink_list *table_data, dlink_list *key_data);
+static int rsdb_schema_is_key(rsdb_schema_option data);
+
 /* rsdb_init()
  */
 void
@@ -370,6 +376,105 @@ rsdb_transaction(rsdb_transtype type)
 }
 
 void
+rsdb_schema_check(struct rsdb_schema_set *schema_set)
+{
+	struct rsdb_table data;
+	int i;
+
+	for(i = 0; schema_set[i].table_name; i++)
+	{
+		rsdb_exec_fetch(&data, "SELECT table_name FROM information_schema.tables WHERE table_name='%Q'",
+				schema_set[i].table_name);
+
+		if(data.row_count > 0)
+			rsdb_schema_check_table(&schema_set[i]);
+		else
+			rsdb_schema_generate_table(&schema_set[i]);
+	}
+}
+
+static void
+rsdb_schema_debug(const char *table_name, dlink_list *table_data, dlink_list *key_data, int create)
+{
+	dlink_node *ptr, *next_ptr;
+
+	if(create && dlink_list_length(table_data))
+	{
+		fprintf(stdout, "CREATE TABLE %s (", table_name);
+
+		DLINK_FOREACH_SAFE(ptr, next_ptr, table_data->head)
+		{
+			fprintf(stdout, "%s", (const char *) ptr->data);
+
+			if(next_ptr)
+				fprintf(stdout, ", ");
+		}
+
+		fprintf(stdout, ");\n");
+	}
+	else
+	{
+		DLINK_FOREACH(ptr, table_data->head)
+		{
+			fprintf(stdout, "ALTER TABLE %s ADD COLUMN %s;\n", table_name, (const char *) ptr->data);
+		}
+	}
+}
+
+static void
+rsdb_schema_check_table(struct rsdb_schema_set *schema_set)
+{
+	struct rsdb_table data;
+	struct rsdb_schema *schema;
+	dlink_list table_data;
+	dlink_list key_data;
+	int i;
+
+	memset(&table_data, 0, sizeof(struct _dlink_list));
+	memset(&key_data, 0, sizeof(struct _dlink_list));
+
+	schema = schema_set->schema;
+
+	for(i = 0; schema[i].name; i++)
+	{
+		if(rsdb_schema_is_key(schema[i].option))
+		{
+		}
+		else
+		{
+			rsdb_exec_fetch(&data, "SELECT column_name FROM information_schema.columns WHERE table_name='%Q' AND column_name='%Q'",
+					schema_set->table_name, schema[i].name);
+
+			if(data.row_count == 0)
+				rsdb_schema_generate_element(schema_set->table_name, &schema[i], &table_data, &key_data);
+		}
+	}
+
+	rsdb_schema_debug(schema_set->table_name, &table_data, &key_data, 0);
+}
+
+static void
+rsdb_schema_generate_table(struct rsdb_schema_set *schema_set)
+{
+	struct rsdb_schema *schema;
+	dlink_list table_data;
+	dlink_list key_data;
+	int i;
+
+	memset(&table_data, 0, sizeof(struct _dlink_list));
+	memset(&key_data, 0, sizeof(struct _dlink_list));
+
+	schema = schema_set->schema;
+
+	for(i = 0; schema[i].name; i++)
+	{
+		rsdb_schema_generate_element(schema_set->table_name, &schema[i], &table_data, &key_data);
+	}
+
+	rsdb_schema_debug(schema_set->table_name, &table_data, &key_data, 1);
+}
+
+void
 rsdb_schema_generate_element(const char *table_name, struct rsdb_schema *schema_element,
 				dlink_list *table_data, dlink_list *key_data)
 {
@@ -470,5 +575,32 @@ rsdb_schema_generate_element(const char *table_name, struct rsdb_schema *schema_
 
 	if(!EmptyString(buf))
 		dlink_add_tail_alloc(my_strdup(buf), (is_key ? key_data : table_data));
+}
+
+static int
+rsdb_schema_is_key(rsdb_schema_option data)
+{
+	switch(data)
+	{
+		case RSDB_SCHEMA_SERIAL:
+		case RSDB_SCHEMA_SERIAL_REF:
+		case RSDB_SCHEMA_BOOLEAN:
+		case RSDB_SCHEMA_INT:
+		case RSDB_SCHEMA_UINT:
+		case RSDB_SCHEMA_VARCHAR:
+		case RSDB_SCHEMA_CHAR:
+		case RSDB_SCHEMA_TEXT:
+			return 0;
+			break;
+
+		case RSDB_SCHEMA_KEY_PRIMARY:
+		case RSDB_SCHEMA_KEY_UNIQUE:
+		case RSDB_SCHEMA_KEY_INDEX:
+		case RSDB_SCHEMA_KEY_F_MATCH:
+		case RSDB_SCHEMA_KEY_F_CASCADE:
+			return 1;
+	}
+
+	return -1;
 }
 

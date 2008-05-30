@@ -68,8 +68,6 @@ struct rsdb_schema_set
 	struct rsdb_schema *schema;
 };
 
-void rsdb_schema_generate(struct rsdb_schema_set *schema_set);
-void rsdb_schema_generate_element(const char *table_name, struct rsdb_schema *schema_element,
-				dlink_list *table_data, dlink_list *key_data);
+void rsdb_schema_check(struct rsdb_schema_set *schema_set);
 
 #endif
