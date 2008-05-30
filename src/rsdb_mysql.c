@@ -414,6 +414,12 @@ rsdb_schema_generate_element(const char *table_name, struct rsdb_schema *schema_
 				(schema_element->def != NULL ? schema_element->def : ""));
 			break;
 
+		case RSDB_SCHEMA_KEY_PRIMARY:
+			is_key = 1;
+			snprintf(buf, sizeof(buf), "ALTER TABLE %s ADD PRIMARY KEY(%s);",
+				table_name, schema_element->name);
+			break;
+
 		case RSDB_SCHEMA_KEY_UNIQUE:
 			is_key = 1;
 			snprintf(buf, sizeof(buf), "ALTER TABLE %s ADD UNIQUE(%s);",

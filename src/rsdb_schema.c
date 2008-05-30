@@ -75,8 +75,6 @@ rsdb_schema_generate_table(struct rsdb_schema_set *schema_set)
 
 		if(ptr_next)
 			fprintf(stdout, ", ");
-		else if(!EmptyString(schema_set->primary_key))
-			fprintf(stdout, ", PRIMARY KEY(%s)", schema_set->primary_key);
 	}
 	fprintf(stdout, ");\n");
 

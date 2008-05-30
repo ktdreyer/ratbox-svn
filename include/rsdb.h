@@ -45,6 +45,7 @@ typedef enum rsdb_schema_option
 	RSDB_SCHEMA_VARCHAR,		/* varchar */
 	RSDB_SCHEMA_CHAR,		/* char */
 	RSDB_SCHEMA_TEXT,		/* text */
+	RSDB_SCHEMA_KEY_PRIMARY,	/* PRIMARY KEY */
 	RSDB_SCHEMA_KEY_UNIQUE,		/* UNIQUE constraint */
 	RSDB_SCHEMA_KEY_INDEX,		/* normal INDEX */
 	RSDB_SCHEMA_KEY_F_MATCH,	/* FOREIGN KEY -- MATCH FULL */

@@ -325,6 +325,13 @@ rsdb_schema_generate_element(const char *table_name, struct rsdb_schema *schema_
 				(schema_element->def != NULL ? schema_element->def : ""));
 			break;
 
+		case RSDB_SCHEMA_KEY_PRIMARY:
+			is_key = 1;
+			snprintf(buf, sizeof(buf), "CREATE UNIQUE INDEX %s_%s_prikey ON %s (%s);",
+				table_name, schema_element->name,
+				table_name, schema_element->name);
+			break;
+
 		case RSDB_SCHEMA_KEY_UNIQUE:
 			is_key = 1;
 			snprintf(buf, sizeof(buf), "CREATE UNIQUE INDEX %s_%s_unique ON %s (%s);",
