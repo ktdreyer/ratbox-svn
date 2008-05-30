@@ -1,3 +1,17 @@
+leeh        2008/05/30 17:24:53 UTC	(20080530_1-25494)
+  Log:
+  - merge the remains of rsdb_schema.h into rsdb.h
+  
+
+  Modified:
+	rserv/trunk/include/rsdb.h (File Modified) 
+	rserv/trunk/include/rsdb_schema.h (File Deleted) 
+	rserv/trunk/src/rsdb_pgsql.c (File Modified) 
+	rserv/trunk/src/rsdb_schema.c (File Modified) 
+	rserv/trunk/src/rserv.c (File Modified) 
+	rserv/trunk/src/schema.c (File Modified) 
+
+
 leeh        2008/05/30 17:22:23 UTC	(20080530_0-25492)
   Log:
   - move primary keys into the db schema
