@@ -63,7 +63,6 @@
 #include "serno.h"
 #include "s_userserv.h"
 #include "s_chanserv.h"
-#include "rsdb_schema.h"
 
 struct timeval system_time;
 

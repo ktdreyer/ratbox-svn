@@ -33,7 +33,6 @@
 #include "stdinc.h"
 #include "rserv.h"
 #include "rsdb.h"
-#include "rsdb_schema.h"
 #include "client.h"
 #include "channel.h"
 

@@ -33,7 +33,6 @@
 #include "stdinc.h"
 #include "rserv.h"
 #include "rsdb.h"
-#include "rsdb_schema.h"
 
 static void rsdb_schema_generate_table(struct rsdb_schema_set *schema_set);
 

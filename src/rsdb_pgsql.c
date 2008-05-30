@@ -34,7 +34,6 @@
 #include "stdinc.h"
 #include <libpq-fe.h>
 #include "rsdb.h"
-#include "rsdb_schema.h"
 #include "rserv.h"
 #include "conf.h"
 #include "log.h"
