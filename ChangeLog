@@ -1,3 +1,18 @@
+leeh        2008/05/30 17:22:23 UTC	(20080530_0-25492)
+  Log:
+  - move primary keys into the db schema
+  
+
+  Modified:
+	rserv/trunk/include/rsdb.h (File Modified) 
+	rserv/trunk/include/rsdb_schema.h (File Modified) 
+	rserv/trunk/src/rsdb_mysql.c (File Modified) 
+	rserv/trunk/src/rsdb_pgsql.c (File Modified) 
+	rserv/trunk/src/rsdb_schema.c (File Modified) 
+	rserv/trunk/src/rsdb_sqlite3.c (File Modified) 
+	rserv/trunk/src/schema.c (File Modified) 
+
+
 leeh        2008/05/29 19:35:11 UTC	(20080529_1-25490)
   Log:
   - add in support for foreign keys to pgsql, mysql/sqlite don't do these
