@@ -1,3 +1,17 @@
+leeh        2008/05/31 08:14:47 UTC	(20080531_2-25502)
+  Log:
+  - move some code out into rsdb_common.c
+  
+
+  Modified:
+	rserv/trunk/include/rsdb.h (File Modified) 
+	rserv/trunk/src/Makefile.in (File Modified) 
+	rserv/trunk/src/rsdb_common.c (File Added) 
+	rserv/trunk/src/rsdb_mysql.c (File Modified) 
+	rserv/trunk/src/rsdb_pgsql.c (File Modified) 
+	rserv/trunk/src/rsdb_sqlite3.c (File Modified) 
+
+
 leeh        2008/05/31 07:55:29 UTC	(20080531_1-25500)
   Log:
   - rsdb_schema.c is unused nowadays
