@@ -52,7 +52,6 @@ BSRCS = 		\
 	messages.c	\
 	modebuild.c	\
         newconf.c       \
-	rsdb_schema.c	\
 	rserv.c		\
 	schema.c	\
 	scommand.c	\
