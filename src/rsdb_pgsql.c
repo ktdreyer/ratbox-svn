@@ -50,7 +50,6 @@ static void rsdb_schema_check_table(struct rsdb_schema_set *schema_set);
 static void rsdb_schema_generate_table(struct rsdb_schema_set *schema_set);
 static void rsdb_schema_generate_element(const char *table_name, struct rsdb_schema *schema_element,
 					dlink_list *table_data, dlink_list *key_data);
-static int rsdb_schema_is_key(rsdb_schema_option data);
 
 /* rsdb_init()
  */
@@ -419,6 +418,48 @@ rsdb_schema_debug(const char *table_name, dlink_list *table_data, dlink_list *ke
 			fprintf(stdout, "ALTER TABLE %s ADD COLUMN %s;\n", table_name, (const char *) ptr->data);
 		}
 	}
+
+	DLINK_FOREACH(ptr, key_data->head)
+	{
+		fprintf(stdout, "%s\n", (const char *) ptr->data);
+	}
+
+}
+
+static struct _dlink_list *
+rsdb_schema_split_key(const char *key_fields)
+{
+	static dlink_list field_list = { NULL, NULL, 0 };
+	dlink_node *ptr, *next_ptr;
+	char *key;
+	char *p, *s, *q;
+
+	DLINK_FOREACH_SAFE(ptr, next_ptr, field_list.head)
+	{
+		my_free(ptr->data);
+		dlink_destroy(ptr, &field_list);
+	}
+
+	key = LOCAL_COPY(key_fields);
+
+	for(s = key; !EmptyString(s); s = p)
+	{
+		/* strip leading spaces */
+		while(*s == ' ')
+			s++;
+
+		/* point p to the next field */
+		if((p = strchr(s, ',')) != NULL)
+			*p++ = '\0';
+
+		/* strip out any trailing spaces */
+		if((q = strchr(s, ' ')) != NULL)
+			*q = '\0';
+
+		dlink_add_alloc(my_strdup(s), &field_list);
+	}
+
+	return &field_list;
 }
 
 static void
@@ -428,7 +469,11 @@ rsdb_schema_check_table(struct rsdb_schema_set *schema_set)
 	struct rsdb_schema *schema;
 	dlink_list table_data;
 	dlink_list key_data;
+	dlink_list *field_list;
+	dlink_node *ptr;
+	int add_key;
 	int i;
+	int j;
 
 	memset(&table_data, 0, sizeof(struct _dlink_list));
 	memset(&key_data, 0, sizeof(struct _dlink_list));
@@ -437,16 +482,91 @@ rsdb_schema_check_table(struct rsdb_schema_set *schema_set)
 
 	for(i = 0; schema[i].name; i++)
 	{
-		if(rsdb_schema_is_key(schema[i].option))
-		{
-		}
-		else
-		{
-			rsdb_exec_fetch(&data, "SELECT column_name FROM information_schema.columns WHERE table_name='%Q' AND column_name='%Q'",
-					schema_set->table_name, schema[i].name);
+		add_key = 0;
 
-			if(data.row_count == 0)
-				rsdb_schema_generate_element(schema_set->table_name, &schema[i], &table_data, &key_data);
+		switch(schema[i].option)
+		{
+			case RSDB_SCHEMA_SERIAL:
+			case RSDB_SCHEMA_SERIAL_REF:
+			case RSDB_SCHEMA_BOOLEAN:
+			case RSDB_SCHEMA_INT:
+			case RSDB_SCHEMA_UINT:
+			case RSDB_SCHEMA_VARCHAR:
+			case RSDB_SCHEMA_CHAR:
+			case RSDB_SCHEMA_TEXT:
+				rsdb_exec_fetch(&data, "SELECT column_name FROM information_schema.columns WHERE table_name='%Q' AND column_name='%Q'",
+						schema_set->table_name, schema[i].name);
+
+				if(data.row_count == 0)
+					rsdb_schema_generate_element(schema_set->table_name, &schema[i], &table_data, &key_data);
+
+				break;
+
+			case RSDB_SCHEMA_KEY_PRIMARY:
+				field_list = rsdb_schema_split_key(schema[i].name);
+
+				DLINK_FOREACH(ptr, field_list->head)
+				{
+					rsdb_exec_fetch(&data, "SELECT ccu.column_name FROM information_schema.constraint_column_usage ccu "
+								"JOIN information_schema.table_constraints tc "
+								"ON ccu.constraint_name=tc.constraint_name "
+								"WHERE tc.constraint_type='PRIMARY KEY' AND ccu.column_name='%Q' AND ccu.table_name='%Q'",
+							(char *) ptr->data, schema_set->table_name);
+
+					if(data.row_count == 0)
+						add_key++;
+
+					rsdb_exec_fetch_end(&data);
+				}
+
+				/* drop any existing primary keys */
+				if(add_key)
+				{
+					char buf[BUFSIZE];
+
+					rsdb_exec_fetch(&data, "SELECT tc.constraint_name FROM information_schema.table_constraints tc "
+								"WHERE tc.constraint_type='PRIMARY KEY' AND tc.table_name='%Q'",
+							schema_set->table_name);
+
+					for(j = 0; j < data.row_count; j++)
+					{
+						rs_snprintf(buf, sizeof(buf), "ALTER TABLE %Q DROP CONSTRAINT %Q CASCADE;",
+							schema_set->table_name, data.row[j][0]);
+						dlink_add_alloc(my_strdup(buf), &key_data);
+					}
+
+					rsdb_exec_fetch_end(&data);
+
+					rsdb_schema_generate_element(schema_set->table_name, &schema[i], &table_data, &key_data);
+				}
+
+				break;
+
+			case RSDB_SCHEMA_KEY_UNIQUE:
+				field_list = rsdb_schema_split_key(schema[i].name);
+
+				DLINK_FOREACH(ptr, field_list->head)
+				{
+					rsdb_exec_fetch(&data, "SELECT ccu.column_name FROM information_schema.constraint_column_usage ccu "
+								"JOIN information_schema.table_constraints tc "
+								"ON ccu.constraint_name=tc.constraint_name "
+								"WHERE tc.constraint_type='UNIQUE' AND ccu.column_name='%Q' AND ccu.table_name='%Q'",
+							(char *) ptr->data, schema_set->table_name);
+
+					if(data.row_count == 0)
+						add_key++;
+				}
+
+				if(add_key)
+					rsdb_schema_generate_element(schema_set->table_name, &schema[i], &table_data, &key_data);
+
+				break;
+
+
+			case RSDB_SCHEMA_KEY_INDEX: // pg_catalog.pg_index
+			case RSDB_SCHEMA_KEY_F_MATCH:
+			case RSDB_SCHEMA_KEY_F_CASCADE:
+				break;
 		}
 	}
 
@@ -575,32 +695,5 @@ rsdb_schema_generate_element(const char *table_name, struct rsdb_schema *schema_
 
 	if(!EmptyString(buf))
 		dlink_add_tail_alloc(my_strdup(buf), (is_key ? key_data : table_data));
-}
-
-static int
-rsdb_schema_is_key(rsdb_schema_option data)
-{
-	switch(data)
-	{
-		case RSDB_SCHEMA_SERIAL:
-		case RSDB_SCHEMA_SERIAL_REF:
-		case RSDB_SCHEMA_BOOLEAN:
-		case RSDB_SCHEMA_INT:
-		case RSDB_SCHEMA_UINT:
-		case RSDB_SCHEMA_VARCHAR:
-		case RSDB_SCHEMA_CHAR:
-		case RSDB_SCHEMA_TEXT:
-			return 0;
-			break;
-
-		case RSDB_SCHEMA_KEY_PRIMARY:
-		case RSDB_SCHEMA_KEY_UNIQUE:
-		case RSDB_SCHEMA_KEY_INDEX:
-		case RSDB_SCHEMA_KEY_F_MATCH:
-		case RSDB_SCHEMA_KEY_F_CASCADE:
-			return 1;
-	}
-
-	return -1;
 }
 
