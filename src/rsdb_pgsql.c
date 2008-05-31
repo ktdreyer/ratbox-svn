@@ -47,9 +47,6 @@ int rsdb_doing_transaction;
 static int rsdb_connect(int initial);
 
 static void rsdb_schema_check_table(struct rsdb_schema_set *schema_set);
-static void rsdb_schema_generate_table(struct rsdb_schema_set *schema_set);
-static void rsdb_schema_generate_element(const char *table_name, struct rsdb_schema *schema_element,
-					dlink_list *table_data, dlink_list *key_data);
 
 /* rsdb_init()
  */
@@ -347,15 +344,7 @@ rsdb_exec_fetch(struct rsdb_table *table, const char *format, ...)
 void
 rsdb_exec_fetch_end(struct rsdb_table *table)
 {
-	int i;
-
-	for(i = 0; i < table->row_count; i++)
-	{
-		my_free(table->row[i]);
-	}
-
-	my_free(table->row);
-
+	rsdb_common_fetch_end(table);
 	PQclear(table->arg);
 }
 
@@ -390,76 +379,6 @@ rsdb_schema_check(struct rsdb_schema_set *schema_set)
 		else
 			rsdb_schema_generate_table(&schema_set[i]);
 	}
-}
-
-static void
-rsdb_schema_debug(const char *table_name, dlink_list *table_data, dlink_list *key_data, int create)
-{
-	dlink_node *ptr, *next_ptr;
-
-	if(create && dlink_list_length(table_data))
-	{
-		fprintf(stdout, "CREATE TABLE %s (", table_name);
-
-		DLINK_FOREACH_SAFE(ptr, next_ptr, table_data->head)
-		{
-			fprintf(stdout, "%s", (const char *) ptr->data);
-
-			if(next_ptr)
-				fprintf(stdout, ", ");
-		}
-
-		fprintf(stdout, ");\n");
-	}
-	else
-	{
-		DLINK_FOREACH(ptr, table_data->head)
-		{
-			fprintf(stdout, "ALTER TABLE %s ADD COLUMN %s;\n", table_name, (const char *) ptr->data);
-		}
-	}
-
-	DLINK_FOREACH(ptr, key_data->head)
-	{
-		fprintf(stdout, "%s\n", (const char *) ptr->data);
-	}
-
-}
-
-static struct _dlink_list *
-rsdb_schema_split_key(const char *key_fields)
-{
-	static dlink_list field_list = { NULL, NULL, 0 };
-	dlink_node *ptr, *next_ptr;
-	char *key;
-	char *p, *s, *q;
-
-	DLINK_FOREACH_SAFE(ptr, next_ptr, field_list.head)
-	{
-		my_free(ptr->data);
-		dlink_destroy(ptr, &field_list);
-	}
-
-	key = LOCAL_COPY(key_fields);
-
-	for(s = key; !EmptyString(s); s = p)
-	{
-		/* strip leading spaces */
-		while(*s == ' ')
-			s++;
-
-		/* point p to the next field */
-		if((p = strchr(s, ',')) != NULL)
-			*p++ = '\0';
-
-		/* strip out any trailing spaces */
-		if((q = strchr(s, ' ')) != NULL)
-			*q = '\0';
-
-		dlink_add_alloc(my_strdup(s), &field_list);
-	}
-
-	return &field_list;
 }
 
 static void
@@ -571,27 +490,6 @@ rsdb_schema_check_table(struct rsdb_schema_set *schema_set)
 	}
 
 	rsdb_schema_debug(schema_set->table_name, &table_data, &key_data, 0);
-}
-
-static void
-rsdb_schema_generate_table(struct rsdb_schema_set *schema_set)
-{
-	struct rsdb_schema *schema;
-	dlink_list table_data;
-	dlink_list key_data;
-	int i;
-
-	memset(&table_data, 0, sizeof(struct _dlink_list));
-	memset(&key_data, 0, sizeof(struct _dlink_list));
-
-	schema = schema_set->schema;
-
-	for(i = 0; schema[i].name; i++)
-	{
-		rsdb_schema_generate_element(schema_set->table_name, &schema[i], &table_data, &key_data);
-	}
-
-	rsdb_schema_debug(schema_set->table_name, &table_data, &key_data, 1);
 }
 
 void

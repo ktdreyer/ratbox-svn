@@ -320,15 +320,7 @@ rsdb_exec_fetch(struct rsdb_table *table, const char *format, ...)
 void
 rsdb_exec_fetch_end(struct rsdb_table *table)
 {
-	int i;
-
-	for(i = 0; i < table->row_count; i++)
-	{
-		my_free(table->row[i]);
-	}
-
-	my_free(table->row);
-
+	rsdb_common_fetch_end(table);
 	mysql_free_result((MYSQL_RES *) table->arg);
 }
 
