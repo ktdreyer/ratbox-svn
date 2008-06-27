@@ -1,3 +1,14 @@
+leeh        2008/06/27 17:56:02 UTC	(20080627_0-25623)
+  Log:
+  - fix pcre header test, which had an extra 's' in the variable name which
+    broke the header test
+  
+
+  Modified:
+	rserv/branches/1_2/autoconf/configure.in (File Modified) 
+	rserv/branches/1_2/configure (File Modified) 
+
+
 leeh        2008/05/20 19:13:34 UTC	(20080520_3-25409)
   Log:
   - branch off 1.2
