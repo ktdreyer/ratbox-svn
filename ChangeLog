@@ -1,3 +1,13 @@
+leeh        2008/06/27 21:17:20 UTC	(20080627_0-25627)
+  Log:
+  - fix autoconf test for pcre header
+  
+
+  Modified:
+	rserv/trunk/autoconf/configure.in (File Modified) 
+	rserv/trunk/configure (File Modified) 
+
+
 leeh        2008/05/31 08:14:47 UTC	(20080531_2-25502)
   Log:
   - move some code out into rsdb_common.c
