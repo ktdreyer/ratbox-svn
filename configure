@@ -6088,7 +6088,7 @@ else
 
 	{ echo "$as_me:$LINENO: checking for pcre.h in given path" >&5
 echo $ECHO_N "checking for pcre.h in given path... $ECHO_C" >&6; }
-	if test -f "$ac_cv_spcre_val/include/pcre.h"; then
+	if test -f "$ac_cv_pcre_val/include/pcre.h"; then
 		{ echo "$as_me:$LINENO: result: yes" >&5
 echo "${ECHO_T}yes" >&6; }
 		ac_cv_found_pcre_inc="yes"

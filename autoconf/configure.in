@@ -351,7 +351,7 @@ AC_CHECK_HEADER(pcre.h,
 	ac_cv_found_pcre_inc="yes"
 ], [
 	AC_MSG_CHECKING(for pcre.h in given path)
-	if test -f "$ac_cv_spcre_val/include/pcre.h"; then
+	if test -f "$ac_cv_pcre_val/include/pcre.h"; then
 		AC_MSG_RESULT(yes)
 		ac_cv_found_pcre_inc="yes"
 		ac_cv_pcre_path="$ac_cv_pcre_val"
