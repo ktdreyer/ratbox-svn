@@ -1,3 +1,15 @@
+leeh        2008/06/27 18:15:17 UTC	(20080627_1-25625)
+  Log:
+  - update a few copyrights
+  
+
+  Modified:
+	rserv/branches/1_2/src/conf.c (File Modified) 
+	rserv/branches/1_2/src/langs.c (File Modified) 
+	rserv/branches/1_2/src/s_banserv.c (File Modified) 
+	rserv/branches/1_2/src/s_chanserv.c (File Modified) 
+
+
 leeh        2008/06/27 17:56:02 UTC	(20080627_0-25623)
   Log:
   - fix pcre header test, which had an extra 's' in the variable name which
