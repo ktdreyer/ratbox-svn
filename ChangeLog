@@ -1,3 +1,14 @@
+leeh        2008/06/28 08:56:48 UTC	(20080628_1-25639)
+  Log:
+  - update RELEASE_NOTES
+  - revved patchlevel to 1.2.1
+  
+
+  Modified:
+	rserv/branches/1_2/RELEASE_NOTES (File Modified) 
+	rserv/branches/1_2/include/config.h (File Modified) 
+
+
 leeh        2008/06/28 08:55:35 UTC	(20080628_0-25637)
   Log:
   - fix an unquoted sql string related to email, that could be used for
