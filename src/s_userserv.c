@@ -1735,7 +1735,7 @@ s_user_resetemail(struct client *client_p, struct lconn *conn_p, const char *par
 
 				rsdb_exec(NULL, "DELETE FROM users_resetemail WHERE username='%Q'",
 						reg_p->name);
-				rsdb_exec(NULL, "INSERT INTO users_resetemail (username, token, time, email) VALUES('%Q', '%Q', '%lu', '%s')",
+				rsdb_exec(NULL, "INSERT INTO users_resetemail (username, token, time, email) VALUES('%Q', '%Q', '%lu', '%Q')",
 						reg_p->name, token, CURRENT_TIME, email);
 
 				zlog(userserv_p, 3, 0, 0, client_p, NULL,
