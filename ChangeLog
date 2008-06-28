@@ -1,3 +1,13 @@
+leeh        2008/06/28 08:55:35 UTC	(20080628_0-25637)
+  Log:
+  - fix an unquoted sql string related to email, that could be used for
+    sql injection
+  
+
+  Modified:
+	rserv/branches/1_2/src/s_userserv.c (File Modified) 
+
+
 leeh        2008/06/27 18:15:17 UTC	(20080627_1-25625)
   Log:
   - update a few copyrights
