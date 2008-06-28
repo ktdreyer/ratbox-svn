@@ -1,6 +1,11 @@
 
 This is the current development version of ratbox-services.
 
+-- ratbox-services-1.2.1
+- fix an unquoted sql string related to email, that could be used for
+  sql injection
+- fix the configure test for --with-pcre
+
 -- ratbox-services-1.2.0
 - no changes
 
