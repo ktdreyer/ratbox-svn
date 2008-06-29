@@ -1,3 +1,12 @@
+leeh        2008/06/29 19:30:37 UTC	(20080629_2-25649)
+  Log:
+  - I will deal with foreign keys for pgsql later
+  
+
+  Modified:
+	rserv/trunk/src/rsdb_pgsql.c (File Modified) 
+
+
 leeh        2008/06/29 18:54:50 UTC	(20080629_1-25647)
   Log:
   - fix up the schema checking for indexes, as well as can be done with pgsql
