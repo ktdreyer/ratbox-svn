@@ -498,18 +498,53 @@ rsdb_schema_check_table(struct rsdb_schema_set *schema_set)
 			case RSDB_SCHEMA_KEY_UNIQUE:
 				field_list = rsdb_schema_split_key(schema[i].name);
 
+				/* build a sql statement, to grab the count of elements in our primary key
+				 * for the table, that match any of the columns specified.  The count value 
+				 * returned should equal the number of fields we're searching for.
+				 */
+				rs_snprintf(buf, sizeof(buf), "SELECT COUNT(ccu.column_name) FROM information_schema.constraint_column_usage ccu "
+							"JOIN information_schema.table_constraints tc "
+							"ON ccu.constraint_name=tc.constraint_name "
+							"WHERE tc.constraint_type='UNIQUE' AND ccu.table_name='%Q'",
+						schema_set->table_name);
+
 				DLINK_FOREACH(ptr, field_list->head)
 				{
-					rsdb_exec_fetch(&data, "SELECT ccu.column_name FROM information_schema.constraint_column_usage ccu "
-								"JOIN information_schema.table_constraints tc "
-								"ON ccu.constraint_name=tc.constraint_name "
-								"WHERE tc.constraint_type='UNIQUE' AND ccu.column_name='%Q' AND ccu.table_name='%Q'",
-							(char *) ptr->data, schema_set->table_name);
+					/* we want to OR the column names together to find the count of all the
+					 * matching entries -- but this OR block itself needs an AND for the first
+					 * element to join it to the buffer above
+					 */
+					if(ptr == field_list->head)
+						rs_snprintf(lbuf, sizeof(lbuf), " AND (ccu.column_name='%Q'",
+								(char *) ptr->data);
+					else
+						rs_snprintf(lbuf, sizeof(lbuf), " OR ccu.column_name='%Q'",
+								(char *) ptr->data);
 
-					if(data.row_count == 0)
-						add_key++;
+					strlcat(buf, lbuf, sizeof(buf));
 				}
 
+				/* close the sql brace */
+				strlcat(buf, ")", sizeof(buf));
+
+				rsdb_exec_fetch(&data, "%s", buf);
+
+				if(data.row_count == 0)
+				{
+					mlog("fatal error: SELECT COUNT() returned 0 rows in rsdb_schema_check_table()");
+					die(0, "problem with db file");
+				}
+
+				/* this field should be the count of all the elements in the primary key
+				 * that match the list of fields we're searching for.  Therefore, they
+				 * should be equal if the key is correct.
+				 */
+				if(atoi(data.row[0][0]) != dlink_list_length(field_list))
+					add_key++;
+
+				rsdb_exec_fetch_end(&data);
+
+				/* drop any existing primary keys */
 				if(add_key)
 					rsdb_schema_generate_element(schema_set->table_name, &schema[i], &table_data, &key_data);
 
