@@ -1,3 +1,13 @@
+leeh        2008/06/29 18:54:50 UTC	(20080629_1-25647)
+  Log:
+  - fix up the schema checking for indexes, as well as can be done with pgsql
+  - make the sql generation for indexes work for multiple fields
+  
+
+  Modified:
+	rserv/trunk/src/rsdb_pgsql.c (File Modified) 
+
+
 leeh        2008/06/29 18:10:48 UTC	(20080629_0-25645)
   Log:
   - fix up UNIQUE constraints for pgsql
