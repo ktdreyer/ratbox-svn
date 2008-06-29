@@ -551,7 +551,42 @@ rsdb_schema_check_table(struct rsdb_schema_set *schema_set)
 				break;
 
 
-			case RSDB_SCHEMA_KEY_INDEX: // pg_catalog.pg_index
+			/* I never found a nice way to check the indexes in pgsql, so just attempt to find
+			 * an index with a name of what is appropriate (e.g. an index for the table bans
+			 * on the field chname, should be called bans_chname_idx), and leave it at that.
+			 */
+			case RSDB_SCHEMA_KEY_INDEX:
+				field_list = rsdb_schema_split_key(schema[i].name);
+
+				rs_snprintf(buf, sizeof(buf), "%s_", schema_set->table_name);
+
+				DLINK_FOREACH(ptr, field_list->head)
+				{
+					strlcat(buf, (char *) ptr->data, sizeof(buf));
+					strlcat(buf, "_", sizeof(buf));
+				}
+
+				strlcat(buf, "idx", sizeof(buf));
+
+				rsdb_exec_fetch(&data, "SELECT COUNT(*) FROM pg_catalog.pg_class WHERE relname='%Q'", buf);
+
+				if(data.row_count == 0)
+				{
+					mlog("fatal error: SELECT COUNT() returned 0 rows in rsdb_schema_check_table()");
+					die(0, "problem with db file");
+				}
+
+				/* if the index exists, presume it is ok */
+				if(atoi(data.row[0][0]) == 0)
+					add_key++;
+
+				rsdb_exec_fetch_end(&data);
+
+				if(add_key)
+					rsdb_schema_generate_element(schema_set->table_name, &schema[i], &table_data, &key_data);
+
+				break;
+
 			case RSDB_SCHEMA_KEY_F_MATCH:
 			case RSDB_SCHEMA_KEY_F_CASCADE:
 				break;
@@ -641,11 +676,29 @@ rsdb_schema_generate_element(const char *table_name, struct rsdb_schema *schema_
 			break;
 
 		case RSDB_SCHEMA_KEY_INDEX:
+		{
+			char lbuf[BUFSIZE];
+			dlink_list *field_list;
+			dlink_node *ptr;
+
 			is_key = 1;
-			snprintf(buf, sizeof(buf), "CREATE INDEX %s_%s_idx ON %s (%s);",
-				table_name, schema_element->name,
-				table_name, schema_element->name);
+
+			field_list = rsdb_schema_split_key(schema_element->name);
+
+			snprintf(lbuf, sizeof(lbuf), "%s_", table_name);
+
+			DLINK_FOREACH(ptr, field_list->head)
+			{
+				strlcat(lbuf, (char *) ptr->data, sizeof(lbuf));
+				strlcat(lbuf, "_", sizeof(lbuf));
+			}
+
+			strlcat(lbuf, "idx", sizeof(lbuf));
+
+			snprintf(buf, sizeof(buf), "CREATE INDEX %s ON %s (%s);",
+				lbuf, table_name, schema_element->name);
 			break;
+		}
 
 		case RSDB_SCHEMA_KEY_F_MATCH:
 			is_key = 1;
