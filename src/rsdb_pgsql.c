@@ -701,15 +701,19 @@ rsdb_schema_generate_element(const char *table_name, struct rsdb_schema *schema_
 		}
 
 		case RSDB_SCHEMA_KEY_F_MATCH:
+#if 0
 			is_key = 1;
 			snprintf(buf, sizeof(buf), "ALTER TABLE %s ADD FOREIGN KEY(%s) REFERENCES %s MATCH FULL;",
 				table_name, schema_element->name, schema_element->def);
+#endif
 			break;
 
 		case RSDB_SCHEMA_KEY_F_CASCADE:
+#if 0
 			is_key = 1;
 			snprintf(buf, sizeof(buf), "ALTER TABLE %s ADD FOREIGN KEY(%s) REFERENCES %s ON DELETE CASCADE;",
 				table_name, schema_element->name, schema_element->def);
+#endif
 			break;
 	}
 
