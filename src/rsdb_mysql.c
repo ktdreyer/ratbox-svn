@@ -160,8 +160,9 @@ rsdb_handle_error(MYSQL_RES **rsdb_result, const char *buf)
 			break;
 
 		default:
-			mlog("fatal error: problem with db file: %s",
+			mlog("fatal error: problem with database: %s",
 				mysql_error(rsdb_database));
+			mlog("fatal error: last sql: %s", buf);
 			die(0, "problem with db file");
 			return;
 	}
@@ -172,6 +173,7 @@ rsdb_handle_error(MYSQL_RES **rsdb_result, const char *buf)
 		{
 			mlog("fatal error: problem with db file: %s",
 				mysql_error(rsdb_database));
+			mlog("fatal error: last sql: %s", buf);
 			die(0, "problem with db file");
 		}
 	}
@@ -381,11 +383,17 @@ rsdb_schema_check(struct rsdb_schema_set *schema_set)
 static void
 rsdb_schema_check_table(struct rsdb_schema_set *schema_set)
 {
+	char buf[BUFSIZE*2];
+	char lbuf[BUFSIZE];
 	struct rsdb_table data;
 	struct rsdb_schema *schema;
 	dlink_list table_data;
 	dlink_list key_data;
+	dlink_list *field_list;
+	dlink_node *ptr;
+	int add_key;
 	int i;
+	int numval;
 
 	memset(&table_data, 0, sizeof(struct _dlink_list));
 	memset(&key_data, 0, sizeof(struct _dlink_list));
@@ -394,6 +402,8 @@ rsdb_schema_check_table(struct rsdb_schema_set *schema_set)
 
 	for(i = 0; schema[i].name; i++)
 	{
+		add_key = 0;
+
 		switch(schema[i].option)
 		{
 			case RSDB_SCHEMA_SERIAL:
@@ -417,6 +427,84 @@ rsdb_schema_check_table(struct rsdb_schema_set *schema_set)
 				break;
 
 			case RSDB_SCHEMA_KEY_PRIMARY:
+				field_list = rsdb_schema_split_key(schema[i].name);
+
+				/* build a sql statement, to grab the count of elements in our primary key
+				 * for the table, that match any of the columns specified.  The count value
+				 * returned should equal the number of fields we're searching for.
+				 */
+				rs_snprintf(buf, sizeof(buf), "SELECT COUNT(COLUMN_NAME) FROM information_schema.KEY_COLUMN_USAGE AS ccu "
+								"JOIN information_schema.TABLE_CONSTRAINTS AS tc "
+								"ON tc.TABLE_NAME=ccu.TABLE_NAME "
+								"WHERE tc.CONSTRAINT_TYPE='PRIMARY KEY' "
+								"AND tc.TABLE_SCHEMA='%Q' AND tc.TABLE_NAME='%Q'",
+						config_file.db_name, schema_set->table_name);
+
+				DLINK_FOREACH(ptr, field_list->head)
+				{
+					/* we want to OR the column names together to find the count of all the
+					 * matching entries -- but this OR block itself needs an AND for the first
+					 * element to join it to the buffer above
+					 */
+					if(ptr == field_list->head)
+						rs_snprintf(lbuf, sizeof(lbuf), " AND (ccu.COLUMN_NAME='%Q'",
+								(char *) ptr->data);
+					else
+						rs_snprintf(lbuf, sizeof(lbuf), " OR ccu.COLUMN_NAME='%Q'",
+								(char *) ptr->data);
+
+					strlcat(buf, lbuf, sizeof(buf));
+				}
+
+				/* close the sql brace */
+				strlcat(buf, ")", sizeof(buf));
+
+				rsdb_exec_fetch(&data, "%s", buf);
+
+				if(data.row_count == 0)
+				{
+					mlog("fatal error: SELECT COUNT() returned 0 rows in rsdb_schema_check_table()");
+					die(0, "problem with db file");
+				}
+
+				/* this field should be the count of all the elements in the primary key
+				 * that match the list of fields we're searching for.  Therefore, they
+				 * should be equal if the key is correct.
+				 */
+				if(atoi(data.row[0][0]) != dlink_list_length(field_list))
+					add_key++;
+
+				rsdb_exec_fetch_end(&data);
+
+				/* drop any existing primary keys */
+				if(add_key)
+				{
+					rsdb_exec_fetch(&data, "SELECT COUNT(TABLE_NAME) FROM information_schema.TABLE_CONSTRAINTS "
+								"WHERE CONSTRAINT_TYPE='PRIMARY KEY' "
+								"AND TABLE_SCHEMA='%Q' AND TABLE_NAME='%Q'",
+							config_file.db_name, schema_set->table_name);
+
+					if(data.row_count == 0)
+					{
+						mlog("fatal error: SELECT COUNT() returned 0 rows in rsdb_schema_check_table()");
+						die(0, "problem with db file");
+					}
+
+					numval = atoi(data.row[0][0]);
+
+					rsdb_exec_fetch_end(&data);
+
+					if(numval)
+					{
+						rs_snprintf(buf, sizeof(buf), "ALTER TABLE %Q DROP PRIMARY KEY", schema_set->table_name);
+						dlink_add_alloc(my_strdup(buf), &key_data);
+					}
+
+					rsdb_schema_generate_element(schema_set->table_name, &schema[i], &table_data, &key_data);
+				}
+
+				break;
+
 			case RSDB_SCHEMA_KEY_UNIQUE:
 			case RSDB_SCHEMA_KEY_INDEX:
 			case RSDB_SCHEMA_KEY_F_MATCH:
@@ -424,6 +512,8 @@ rsdb_schema_check_table(struct rsdb_schema_set *schema_set)
 				break;
 		}
 	}
+
+	rsdb_schema_debug(schema_set->table_name, &table_data, &key_data, 0);
 }
 
 void
