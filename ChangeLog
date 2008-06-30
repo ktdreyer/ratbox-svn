@@ -1,3 +1,12 @@
+leeh        2008/06/30 20:11:33 UTC	(20080630_2-25667)
+  Log:
+  - primary keys for mysql schema check
+  
+
+  Modified:
+	rserv/trunk/src/rsdb_mysql.c (File Modified) 
+
+
 leeh        2008/06/30 19:32:40 UTC	(20080630_1-25665)
   Log:
   - start on the mysql schema checking
