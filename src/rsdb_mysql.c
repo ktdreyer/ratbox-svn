@@ -46,6 +46,8 @@ int rsdb_doing_transaction;
 
 static int rsdb_connect(int initial);
 
+static void rsdb_schema_check_table(struct rsdb_schema_set *schema_set);
+
 /* rsdb_init()
  */
 void
@@ -336,6 +338,91 @@ rsdb_transaction(rsdb_transtype type)
 	{
 		rsdb_exec(NULL, "COMMIT");
 		rsdb_doing_transaction = 0;
+	}
+}
+
+/* rsdb_schema_check()
+ * Checks the schema against the database
+ *
+ * inputs	- the schema set to check
+ * outputs	- 
+ * side effects - checks the schema
+ */
+void
+rsdb_schema_check(struct rsdb_schema_set *schema_set)
+{
+	struct rsdb_table data;
+	int i;
+
+	for(i = 0; schema_set[i].table_name; i++)
+	{
+		/* check whether the table exists */
+		rsdb_exec_fetch(&data, "SELECT TABLE_NAME FROM information_schema.tables "
+					"WHERE TABLE_SCHEMA='%Q' AND TABLE_NAME='%Q'",
+				config_file.db_name, schema_set[i].table_name);
+
+		/* if the table exists, check the table itself, otherwise just create it */
+		if(data.row_count > 0)
+			rsdb_schema_check_table(&schema_set[i]);
+		else
+			rsdb_schema_generate_table(&schema_set[i]);
+
+		rsdb_exec_fetch_end(&data);
+	}
+}
+
+/* rsdb_schema_check_table()
+ * Checks a specific table against the schema
+ *
+ * inputs	- the schema entry for the table
+ * outputs	-
+ * side effects	- checks the table against the schema
+ */
+static void
+rsdb_schema_check_table(struct rsdb_schema_set *schema_set)
+{
+	struct rsdb_table data;
+	struct rsdb_schema *schema;
+	dlink_list table_data;
+	dlink_list key_data;
+	int i;
+
+	memset(&table_data, 0, sizeof(struct _dlink_list));
+	memset(&key_data, 0, sizeof(struct _dlink_list));
+
+	schema = schema_set->schema;
+
+	for(i = 0; schema[i].name; i++)
+	{
+		switch(schema[i].option)
+		{
+			case RSDB_SCHEMA_SERIAL:
+			case RSDB_SCHEMA_SERIAL_REF:
+			case RSDB_SCHEMA_BOOLEAN:
+			case RSDB_SCHEMA_INT:
+			case RSDB_SCHEMA_UINT:
+			case RSDB_SCHEMA_VARCHAR:
+			case RSDB_SCHEMA_CHAR:
+			case RSDB_SCHEMA_TEXT:
+				rsdb_exec_fetch(&data, "SELECT COLUMN_NAME FROM information_schema.columns "
+							"WHERE TABLE_SCHEMA='%Q' AND TABLE_NAME='%Q' AND COLUMN_NAME='%Q'",
+						config_file.db_name, schema_set->table_name,
+						schema[i].name);
+
+				if(data.row_count == 0)
+					rsdb_schema_generate_element(schema_set->table_name, &schema[i], &table_data, &key_data);
+
+				rsdb_exec_fetch_end(&data);
+
+				break;
+
+			case RSDB_SCHEMA_KEY_PRIMARY:
+			case RSDB_SCHEMA_KEY_UNIQUE:
+			case RSDB_SCHEMA_KEY_INDEX:
+			case RSDB_SCHEMA_KEY_F_MATCH:
+			case RSDB_SCHEMA_KEY_F_CASCADE:
+				break;
+		}
 	}
 }
 
