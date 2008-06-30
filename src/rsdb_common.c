@@ -34,6 +34,13 @@
 #include "stdinc.h"
 #include "rsdb.h"
 
+/* rsdb_common_fetch_end()
+ * free()'s the memory after rsdb_exec_fetch()
+ *
+ * inputs	- table entry used for rsdb_exec_fetch()
+ * outputs	-
+ * side effects	- memory allocated for the table entry is free()'d
+ */
 void
 rsdb_common_fetch_end(struct rsdb_table *table)
 {
@@ -81,6 +88,13 @@ rsdb_schema_debug(const char *table_name, dlink_list *table_data, dlink_list *ke
 
 }
 
+/* rsdb_schema_split_key()
+ * Splits a key value into its individual parts
+ *
+ * inputs	- comma delimited field string
+ * outputs	- linked list of fields
+ * side effects	-
+ */
 struct _dlink_list *
 rsdb_schema_split_key(const char *key_fields)
 {
@@ -117,6 +131,13 @@ rsdb_schema_split_key(const char *key_fields)
 	return &field_list;
 }
 
+/* rsdb_schema_generate_table()
+ * Generates the sql for an entire table without checking schema
+ *
+ * inputs	- schema set
+ * outputs	-
+ * side effects - generates the sql for the relevant schema set
+ */
 void
 rsdb_schema_generate_table(struct rsdb_schema_set *schema_set)
 {

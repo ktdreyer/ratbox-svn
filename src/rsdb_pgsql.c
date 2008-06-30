@@ -371,13 +371,17 @@ rsdb_schema_check(struct rsdb_schema_set *schema_set)
 
 	for(i = 0; schema_set[i].table_name; i++)
 	{
+		/* check whether the table exists */
 		rsdb_exec_fetch(&data, "SELECT table_name FROM information_schema.tables WHERE table_name='%Q'",
 				schema_set[i].table_name);
 
+		/* if the table exists, check the table itself, otherwise just create it */
 		if(data.row_count > 0)
 			rsdb_schema_check_table(&schema_set[i]);
 		else
 			rsdb_schema_generate_table(&schema_set[i]);
+
+		rsdb_exec_fetch_end(&data);
 	}
 }
 
@@ -420,6 +424,8 @@ rsdb_schema_check_table(struct rsdb_schema_set *schema_set)
 
 				if(data.row_count == 0)
 					rsdb_schema_generate_element(schema_set->table_name, &schema[i], &table_data, &key_data);
+
+				rsdb_exec_fetch_end(&data);
 
 				break;
 
