@@ -1,3 +1,12 @@
+leeh        2008/06/30 19:32:40 UTC	(20080630_1-25665)
+  Log:
+  - start on the mysql schema checking
+  
+
+  Modified:
+	rserv/trunk/src/rsdb_mysql.c (File Modified) 
+
+
 leeh        2008/06/30 19:32:03 UTC	(20080630_0-25663)
   Log:
   - add a few missing rsdb_exec_fetch_end(), and some comments
