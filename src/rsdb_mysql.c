@@ -506,6 +506,60 @@ rsdb_schema_check_table(struct rsdb_schema_set *schema_set)
 				break;
 
 			case RSDB_SCHEMA_KEY_UNIQUE:
+				field_list = rsdb_schema_split_key(schema[i].name);
+
+				/* build a sql statement, to grab the count of elements in our primary key
+				 * for the table, that match any of the columns specified.  The count value
+				 * returned should equal the number of fields we're searching for.
+				 */
+				rs_snprintf(buf, sizeof(buf), "SELECT COUNT(COLUMN_NAME) FROM information_schema.KEY_COLUMN_USAGE AS ccu "
+								"JOIN information_schema.TABLE_CONSTRAINTS AS tc "
+								"ON tc.TABLE_NAME=ccu.TABLE_NAME "
+								"WHERE tc.CONSTRAINT_TYPE='UNIQUE' "
+								"AND tc.TABLE_SCHEMA='%Q' AND tc.TABLE_NAME='%Q'",
+						config_file.db_name, schema_set->table_name);
+
+				DLINK_FOREACH(ptr, field_list->head)
+				{
+					/* we want to OR the column names together to find the count of all the
+					 * matching entries -- but this OR block itself needs an AND for the first
+					 * element to join it to the buffer above
+					 */
+					if(ptr == field_list->head)
+						rs_snprintf(lbuf, sizeof(lbuf), " AND (ccu.COLUMN_NAME='%Q'",
+								(char *) ptr->data);
+					else
+						rs_snprintf(lbuf, sizeof(lbuf), " OR ccu.COLUMN_NAME='%Q'",
+								(char *) ptr->data);
+
+					strlcat(buf, lbuf, sizeof(buf));
+				}
+
+				/* close the sql brace */
+				strlcat(buf, ")", sizeof(buf));
+
+				rsdb_exec_fetch(&data, "%s", buf);
+
+				if(data.row_count == 0)
+				{
+					mlog("fatal error: SELECT COUNT() returned 0 rows in rsdb_schema_check_table()");
+					die(0, "problem with db file");
+				}
+
+				/* this field should be the count of all the elements in the primary key
+				 * that match the list of fields we're searching for.  Therefore, they
+				 * should be equal if the key is correct.
+				 */
+				if(atoi(data.row[0][0]) != dlink_list_length(field_list))
+					add_key++;
+
+				rsdb_exec_fetch_end(&data);
+
+				if(add_key)
+					rsdb_schema_generate_element(schema_set->table_name, &schema[i], &table_data, &key_data);
+
+				break;
+
 			case RSDB_SCHEMA_KEY_INDEX:
 			case RSDB_SCHEMA_KEY_F_MATCH:
 			case RSDB_SCHEMA_KEY_F_CASCADE:
