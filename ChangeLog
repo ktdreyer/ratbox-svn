@@ -1,3 +1,12 @@
+leeh        2008/07/01 18:24:11 UTC	(20080701_0-25671)
+  Log:
+  - support for unique indexes to schema generation
+  
+
+  Modified:
+	rserv/trunk/src/rsdb_mysql.c (File Modified) 
+
+
 leeh        2008/06/30 20:11:33 UTC	(20080630_2-25667)
   Log:
   - primary keys for mysql schema check
