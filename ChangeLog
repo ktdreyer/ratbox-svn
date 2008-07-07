@@ -1,3 +1,12 @@
+leeh        2008/07/07 20:43:06 UTC	(20080707_0-25687)
+  Log:
+  - fix up schema index generation for mysql
+  
+
+  Modified:
+	rserv/trunk/src/rsdb_mysql.c (File Modified) 
+
+
 leeh        2008/07/01 18:24:11 UTC	(20080701_0-25671)
   Log:
   - support for unique indexes to schema generation
