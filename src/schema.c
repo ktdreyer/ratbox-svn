@@ -28,7 +28,7 @@
  * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  * 
- * $Id: rsdb_schema.c 25456 2008-05-23 22:40:10Z leeh $
+ * $Id$
  */
 #include "stdinc.h"
 #include "rserv.h"

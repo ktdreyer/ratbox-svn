@@ -28,7 +28,7 @@
  * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  * 
- * $Id: s_alis.c 23596 2007-02-05 21:35:27Z leeh $
+ * $Id$
  */
 #include "stdinc.h"
 
