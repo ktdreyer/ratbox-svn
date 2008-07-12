@@ -71,7 +71,7 @@ rsdb_schema_check(struct rsdb_schema_set *schema_set)
 	for(i = 0; schema_set[i].table_name; i++)
 	{
 		/* run the relevant sql handler to check whether the table exists */
-		buf = rsdb_schema_check_sql(schema_set[i].table_name);
+		buf = rsdbs_sql_check_table(schema_set[i].table_name);
 
 		rsdb_exec_fetch(&data, "%s", buf);
 

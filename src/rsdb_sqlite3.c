@@ -252,7 +252,7 @@ rsdb_transaction(rsdb_transtype type)
 }
 
 
-/* rsdb_schema_check_sql()
+/* rsdbs_sql_check_table()
  * Returns the SQL for checking whether a table exists
  * 
  * inputs       - table name to check
@@ -260,7 +260,7 @@ rsdb_transaction(rsdb_transtype type)
  * side effects - 
  */
 const char *
-rsdb_schema_check_sql(const char *table_name)
+rsdbs_sql_check_table(const char *table_name)
 {
 	static char buf[BUFSIZE*2];
 
