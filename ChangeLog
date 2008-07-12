@@ -1,3 +1,37 @@
+leeh        2008/07/12 08:55:14 UTC	(20080712_2-25731)
+  Log:
+  - add Id svn property
+  
+
+  Modified:
+	rserv/trunk/src/cidr.c  (Property Modified)
+	rserv/trunk/src/email.c (File Modified) (Property Modified)
+	rserv/trunk/src/langs_format.c (File Modified) (Property Modified)
+	rserv/trunk/src/log.c  (Property Modified)
+	rserv/trunk/src/match.c  (Property Modified)
+	rserv/trunk/src/modebuild.c  (Property Modified)
+	rserv/trunk/src/newconf.c  (Property Modified)
+	rserv/trunk/src/rsdb_pgsql.c (File Modified) (Property Modified)
+	rserv/trunk/src/rserv.c  (Property Modified)
+	rserv/trunk/src/s_alis.c  (Property Modified)
+	rserv/trunk/src/s_banserv.c  (Property Modified)
+	rserv/trunk/src/s_chanserv.c  (Property Modified)
+	rserv/trunk/src/s_global.c  (Property Modified)
+	rserv/trunk/src/s_jupeserv.c  (Property Modified)
+	rserv/trunk/src/s_memoserv.c (File Modified) (Property Modified)
+	rserv/trunk/src/s_nickserv.c  (Property Modified)
+	rserv/trunk/src/s_operbot.c  (Property Modified)
+	rserv/trunk/src/s_operserv.c  (Property Modified)
+	rserv/trunk/src/s_userserv.c  (Property Modified)
+	rserv/trunk/src/schema.c (File Modified) (Property Modified)
+	rserv/trunk/src/scommand.c  (Property Modified)
+	rserv/trunk/src/service.c  (Property Modified)
+	rserv/trunk/src/snprintf.c (File Modified) (Property Modified)
+	rserv/trunk/src/tools.c  (Property Modified)
+	rserv/trunk/src/u_stats.c  (Property Modified)
+	rserv/trunk/src/ucommand.c  (Property Modified)
+
+
 leeh        2008/07/12 08:51:09 UTC	(20080712_1-25729)
   Log:
   - rename a couple of functions
