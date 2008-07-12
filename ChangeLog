@@ -1,3 +1,17 @@
+leeh        2008/07/12 08:39:38 UTC	(20080712_0-25727)
+  Log:
+  - move the hard work of checking whether a table exists for the schema into
+    rsdb_common.c, and have the db implementations just return the SQL
+  
+
+  Modified:
+	rserv/trunk/include/rsdb.h (File Modified) 
+	rserv/trunk/src/rsdb_common.c (File Modified) 
+	rserv/trunk/src/rsdb_mysql.c (File Modified) 
+	rserv/trunk/src/rsdb_pgsql.c (File Modified) 
+	rserv/trunk/src/rsdb_sqlite3.c (File Modified) 
+
+
 leeh        2008/07/07 20:43:06 UTC	(20080707_0-25687)
   Log:
   - fix up schema index generation for mysql
