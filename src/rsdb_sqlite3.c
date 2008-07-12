@@ -251,6 +251,29 @@ rsdb_transaction(rsdb_transtype type)
 		rsdb_exec(NULL, "COMMIT TRANSACTION");
 }
 
+
+/* rsdb_schema_check_sql()
+ * Returns the SQL for checking whether a table exists
+ * 
+ * inputs       - table name to check
+ * outputs      - SQL
+ * side effects - 
+ */
+const char *
+rsdb_schema_check_sql(const char *table_name)
+{
+	static char buf[BUFSIZE*2];
+
+	rs_snprintf(buf, sizeof(buf), "SELECT tbl_name FROM sqlite_master WHERE type='table' AND tbl_name='%Q'",
+			table_name);
+	return buf;
+}
+
+void
+rsdb_schema_check_table(struct rsdb_schema_set *schema_set)
+{
+}
+
 void
 rsdb_schema_generate_element(const char *table_name, struct rsdb_schema *schema_element,
 				dlink_list *table_data, dlink_list *key_data)

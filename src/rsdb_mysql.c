@@ -46,8 +46,6 @@ int rsdb_doing_transaction;
 
 static int rsdb_connect(int initial);
 
-static void rsdb_schema_check_table(struct rsdb_schema_set *schema_set);
-
 /* rsdb_init()
  */
 void
@@ -343,34 +341,23 @@ rsdb_transaction(rsdb_transtype type)
 	}
 }
 
-/* rsdb_schema_check()
- * Checks the schema against the database
+/* rsdb_schema_check_sql()
+ * Returns the SQL for checking whether a table exists
  *
- * inputs	- the schema set to check
- * outputs	- 
- * side effects - checks the schema
+ * inputs	- table name to check
+ * outputs	- SQL
+ * side effects - 
  */
-void
-rsdb_schema_check(struct rsdb_schema_set *schema_set)
+const char *
+rsdb_schema_check_sql(const char *table_name)
 {
-	struct rsdb_table data;
-	int i;
+	static char buf[BUFSIZE*2];
 
-	for(i = 0; schema_set[i].table_name; i++)
-	{
-		/* check whether the table exists */
-		rsdb_exec_fetch(&data, "SELECT TABLE_NAME FROM information_schema.tables "
-					"WHERE TABLE_SCHEMA='%Q' AND TABLE_NAME='%Q'",
-				config_file.db_name, schema_set[i].table_name);
-
-		/* if the table exists, check the table itself, otherwise just create it */
-		if(data.row_count > 0)
-			rsdb_schema_check_table(&schema_set[i]);
-		else
-			rsdb_schema_generate_table(&schema_set[i]);
-
-		rsdb_exec_fetch_end(&data);
-	}
+	rs_snprintf(buf, sizeof(buf), 
+			"SELECT TABLE_NAME FROM information_schema.tables "
+			"WHERE TABLE_SCHEMA='%Q' AND TABLE_NAME='%Q'",
+			config_file.db_name, table_name);
+	return buf;
 }
 
 /* rsdb_schema_check_table()
@@ -380,7 +367,7 @@ rsdb_schema_check(struct rsdb_schema_set *schema_set)
  * outputs	-
  * side effects	- checks the table against the schema
  */
-static void
+void
 rsdb_schema_check_table(struct rsdb_schema_set *schema_set)
 {
 	char buf[BUFSIZE*2];

@@ -54,6 +54,36 @@ rsdb_common_fetch_end(struct rsdb_table *table)
 	my_free(table->row);
 }
 
+/* rsdb_schema_check()
+ * Checks the database against the schema
+ *
+ * inputs	- schema set
+ * outputs	-
+ * side effects - runs checks for all tables in the schema
+ */
+void
+rsdb_schema_check(struct rsdb_schema_set *schema_set)
+{
+	struct rsdb_table data;
+	const char *buf;
+	int i;
+
+	for(i = 0; schema_set[i].table_name; i++)
+	{
+		/* run the relevant sql handler to check whether the table exists */
+		buf = rsdb_schema_check_sql(schema_set[i].table_name);
+
+		rsdb_exec_fetch(&data, "%s", buf);
+
+		if(data.row_count > 0)
+			rsdb_schema_check_table(&schema_set[i]);
+		else
+			rsdb_schema_generate_table(&schema_set[i]);
+
+		rsdb_exec_fetch_end(&data);
+	}
+}
+
 void
 rsdb_schema_debug(const char *table_name, dlink_list *table_data, dlink_list *key_data, int create)
 {
