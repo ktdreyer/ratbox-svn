@@ -66,6 +66,7 @@ struct rsdb_schema_set
 {
 	const char *table_name;
 	struct rsdb_schema *schema;
+	int has_serial;
 };
 
 const char *rsdbs_sql_check_table(const char *table_name);

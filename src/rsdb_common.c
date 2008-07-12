@@ -64,9 +64,28 @@ rsdb_common_fetch_end(struct rsdb_table *table)
 void
 rsdb_schema_check(struct rsdb_schema_set *schema_set)
 {
+	struct rsdb_schema *schema_element;
 	struct rsdb_table data;
 	const char *buf;
-	int i;
+	int i, j;
+
+	/* first fill out the has_serial column of the schema_set */
+	for(i = 0; schema_set[i].table_name; i++)
+	{
+		/* mark this as off unless we find a serial later */
+		schema_set[i].has_serial = 0;
+
+		schema_element = schema_set[i].schema;
+
+		for(j = 0; schema_element[j].name; j++)
+		{
+			if(schema_element[j].option == RSDB_SCHEMA_SERIAL)
+			{
+				schema_set[i].has_serial = 1;
+				break;
+			}
+		}
+	}
 
 	for(i = 0; schema_set[i].table_name; i++)
 	{
