@@ -1,3 +1,14 @@
+leeh        2008/07/13 09:52:19 UTC	(20080713_2-25739)
+  Log:
+  - fill in rsdb_schema_check_table for sqlite for hunting columns
+    This is pretty nasty, as there is no SELECT statement to return the
+    information, so we have to wade through a PRAGMA table_info(..)
+  
+
+  Modified:
+	rserv/trunk/src/rsdb_sqlite3.c (File Modified) 
+
+
 leeh        2008/07/13 08:09:02 UTC	(20080713_1-25737)
   Log:
   - update the schema to have NULL rather than 0 for serial_field
