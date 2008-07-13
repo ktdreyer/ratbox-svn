@@ -595,6 +595,7 @@ rsdb_schema_generate_element(struct rsdb_schema_set *schema_set, struct rsdb_sch
 				dlink_list *table_data, dlink_list *key_data)
 {
 	static char buf[BUFSIZE];
+	const char *idx_name;
 	int is_key = 0;
 
 	buf[0] = '\0';
@@ -665,34 +666,21 @@ rsdb_schema_generate_element(struct rsdb_schema_set *schema_set, struct rsdb_sch
 
 		case RSDB_SCHEMA_KEY_UNIQUE:
 			is_key = 1;
-			snprintf(buf, sizeof(buf), "ALTER TABLE %s ADD UNIQUE(%s);",
-				schema_set->table_name, schema_element->name);
+			idx_name = rsdbs_generate_key_name(schema_set->table_name, schema_element->name,
+								schema_element->option);
+
+			rs_snprintf(buf, sizeof(buf), "ALTER TABLE %Q ADD UNIQUE %Q (%Q);",
+				schema_set->table_name, idx_name, schema_element->name);
 			break;
 
 		case RSDB_SCHEMA_KEY_INDEX:
-		{
-			char lbuf[BUFSIZE];
-			dlink_list *field_list;
-			dlink_node *ptr;
-
 			is_key = 1;
+			idx_name = rsdbs_generate_key_name(schema_set->table_name, schema_element->name,
+								schema_element->option);
 
-			field_list = rsdb_schema_split_key(schema_element->name);
-
-			snprintf(lbuf, sizeof(lbuf), "%s_", schema_set->table_name);
-
-			DLINK_FOREACH(ptr, field_list->head)
-			{
-				strlcat(lbuf, (char *) ptr->data, sizeof(lbuf));
-				strlcat(lbuf, "_", sizeof(lbuf));
-			}
-
-			strlcat(lbuf, "idx", sizeof(lbuf));
-
-			snprintf(buf, sizeof(buf), "ALTER TABLE %s ADD INDEX %s (%s);",
-				schema_set->table_name, lbuf, schema_element->name);
+			rs_snprintf(buf, sizeof(buf), "ALTER TABLE %s ADD INDEX %s (%s);",
+				schema_set->table_name, idx_name, schema_element->name);
 			break;
-		}
 
 		/* MyISAM tables don't support foreign keys */
 		case RSDB_SCHEMA_KEY_F_MATCH:
