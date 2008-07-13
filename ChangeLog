@@ -1,3 +1,14 @@
+leeh        2008/07/13 21:00:07 UTC	(20080713_7-25749)
+  Log:
+  - make mysql/pgsql use rsdbs_generate_key_name() for generating the sql for
+    unique columns and indexes
+  
+
+  Modified:
+	rserv/trunk/src/rsdb_mysql.c (File Modified) 
+	rserv/trunk/src/rsdb_pgsql.c (File Modified) 
+
+
 leeh        2008/07/13 16:38:34 UTC	(20080713_6-25747)
   Log:
   - add rsdbs_generate_key_name() to return the name of a key
