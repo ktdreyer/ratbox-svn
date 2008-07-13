@@ -69,11 +69,13 @@ rsdb_schema_check(struct rsdb_schema_set *schema_set)
 	const char *buf;
 	int i, j;
 
-	/* first fill out the has_serial column of the schema_set */
+	/* first fill out the serial_name column of the schema_set with the
+	 * name of the serial column in the table, if it has one
+	 */
 	for(i = 0; schema_set[i].table_name; i++)
 	{
 		/* mark this as off unless we find a serial later */
-		schema_set[i].has_serial = 0;
+		schema_set[i].serial_field = NULL;
 
 		schema_element = schema_set[i].schema;
 
@@ -81,21 +83,26 @@ rsdb_schema_check(struct rsdb_schema_set *schema_set)
 		{
 			if(schema_element[j].option == RSDB_SCHEMA_SERIAL)
 			{
-				schema_set[i].has_serial = 1;
+				schema_set[i].serial_field = schema_element[j].name;
 				break;
 			}
 		}
 	}
 
+	/* now walk the schema set to check it */
 	for(i = 0; schema_set[i].table_name; i++)
 	{
-		/* run the relevant sql handler to check whether the table exists */
+		/* run the relevant sql handler to get us the sql to check 
+		 * whether the table exists 
+		 */
 		buf = rsdbs_sql_check_table(schema_set[i].table_name);
 
 		rsdb_exec_fetch(&data, "%s", buf);
 
+		/* table exists, run checks on each field */
 		if(data.row_count > 0)
 			rsdb_schema_check_table(&schema_set[i]);
+		/* table doesn't exist.. just flat generate it */
 		else
 			rsdb_schema_generate_table(&schema_set[i]);
 
