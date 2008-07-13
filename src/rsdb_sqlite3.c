@@ -367,7 +367,7 @@ rsdb_schema_check_table(struct rsdb_schema_set *schema_set)
 			case RSDB_SCHEMA_CHAR:
 			case RSDB_SCHEMA_TEXT:
 				if(!rsdbs_check_column(schema_set->table_name, schema[i].name))
-					rsdb_schema_generate_element(schema_set->table_name, &schema[i], 
+					rsdb_schema_generate_element(schema_set, &schema[i], 
 									&table_data, &key_data);
 				break;
 
@@ -384,7 +384,7 @@ rsdb_schema_check_table(struct rsdb_schema_set *schema_set)
 }
 
 void
-rsdb_schema_generate_element(const char *table_name, struct rsdb_schema *schema_element,
+rsdb_schema_generate_element(struct rsdb_schema_set *schema_set, struct rsdb_schema *schema_element,
 				dlink_list *table_data, dlink_list *key_data)
 {
 	static char buf[BUFSIZE];
@@ -451,24 +451,27 @@ rsdb_schema_generate_element(const char *table_name, struct rsdb_schema *schema_
 			break;
 
 		case RSDB_SCHEMA_KEY_PRIMARY:
+			if(schema_set->has_serial)
+				break;
+
 			is_key = 1;
 			snprintf(buf, sizeof(buf), "CREATE UNIQUE INDEX %s_%s_prikey ON %s (%s);",
-				table_name, schema_element->name,
-				table_name, schema_element->name);
+				schema_set->table_name, schema_element->name,
+				schema_set->table_name, schema_element->name);
 			break;
 
 		case RSDB_SCHEMA_KEY_UNIQUE:
 			is_key = 1;
 			snprintf(buf, sizeof(buf), "CREATE UNIQUE INDEX %s_%s_unique ON %s (%s);",
-				table_name, schema_element->name,
-				table_name, schema_element->name);
+				schema_set->table_name, schema_element->name,
+				schema_set->table_name, schema_element->name);
 			break;
 
 		case RSDB_SCHEMA_KEY_INDEX:
 			is_key = 1;
 			snprintf(buf, sizeof(buf), "CREATE INDEX %s_%s_idx ON %s (%s);",
-				table_name, schema_element->name,
-				table_name, schema_element->name);
+				schema_set->table_name, schema_element->name,
+				schema_set->table_name, schema_element->name);
 			break;
 
 		/* sqlite tables don't properly support foreign keys */

@@ -209,7 +209,7 @@ rsdb_schema_generate_table(struct rsdb_schema_set *schema_set)
 
 	for(i = 0; schema[i].name; i++)
 	{
-		rsdb_schema_generate_element(schema_set->table_name, &schema[i], &table_data, &key_data);
+		rsdb_schema_generate_element(schema_set, &schema[i], &table_data, &key_data);
 	}
 
 	rsdb_schema_debug(schema_set->table_name, &table_data, &key_data, 1);

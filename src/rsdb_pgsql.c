@@ -416,7 +416,7 @@ rsdb_schema_check_table(struct rsdb_schema_set *schema_set)
 						schema_set->table_name, schema[i].name);
 
 				if(data.row_count == 0)
-					rsdb_schema_generate_element(schema_set->table_name, &schema[i], &table_data, &key_data);
+					rsdb_schema_generate_element(schema_set, &schema[i], &table_data, &key_data);
 
 				rsdb_exec_fetch_end(&data);
 
@@ -489,7 +489,7 @@ rsdb_schema_check_table(struct rsdb_schema_set *schema_set)
 					rsdb_exec_fetch_end(&data);
 
 					/* add in the sql for the primary key */
-					rsdb_schema_generate_element(schema_set->table_name, &schema[i], &table_data, &key_data);
+					rsdb_schema_generate_element(schema_set, &schema[i], &table_data, &key_data);
 				}
 
 				break;
@@ -545,7 +545,7 @@ rsdb_schema_check_table(struct rsdb_schema_set *schema_set)
 
 				/* drop any existing primary keys */
 				if(add_key)
-					rsdb_schema_generate_element(schema_set->table_name, &schema[i], &table_data, &key_data);
+					rsdb_schema_generate_element(schema_set, &schema[i], &table_data, &key_data);
 
 				break;
 
@@ -582,7 +582,7 @@ rsdb_schema_check_table(struct rsdb_schema_set *schema_set)
 				rsdb_exec_fetch_end(&data);
 
 				if(add_key)
-					rsdb_schema_generate_element(schema_set->table_name, &schema[i], &table_data, &key_data);
+					rsdb_schema_generate_element(schema_set, &schema[i], &table_data, &key_data);
 
 				break;
 
@@ -596,7 +596,7 @@ rsdb_schema_check_table(struct rsdb_schema_set *schema_set)
 }
 
 void
-rsdb_schema_generate_element(const char *table_name, struct rsdb_schema *schema_element,
+rsdb_schema_generate_element(struct rsdb_schema_set *schema_set, struct rsdb_schema *schema_element,
 				dlink_list *table_data, dlink_list *key_data)
 {
 	static char buf[BUFSIZE];
@@ -665,13 +665,13 @@ rsdb_schema_generate_element(const char *table_name, struct rsdb_schema *schema_
 		case RSDB_SCHEMA_KEY_PRIMARY:
 			is_key = 1;
 			snprintf(buf, sizeof(buf), "ALTER TABLE %s ADD PRIMARY KEY(%s);",
-				table_name, schema_element->name);
+				schema_set->table_name, schema_element->name);
 			break;
 
 		case RSDB_SCHEMA_KEY_UNIQUE:
 			is_key = 1;
 			snprintf(buf, sizeof(buf), "ALTER TABLE %s ADD UNIQUE(%s);",
-				table_name, schema_element->name);
+				schema_set->table_name, schema_element->name);
 			break;
 
 		case RSDB_SCHEMA_KEY_INDEX:
@@ -684,7 +684,7 @@ rsdb_schema_generate_element(const char *table_name, struct rsdb_schema *schema_
 
 			field_list = rsdb_schema_split_key(schema_element->name);
 
-			snprintf(lbuf, sizeof(lbuf), "%s_", table_name);
+			snprintf(lbuf, sizeof(lbuf), "%s_", schema_set->table_name);
 
 			DLINK_FOREACH(ptr, field_list->head)
 			{
@@ -695,7 +695,7 @@ rsdb_schema_generate_element(const char *table_name, struct rsdb_schema *schema_
 			strlcat(lbuf, "idx", sizeof(lbuf));
 
 			snprintf(buf, sizeof(buf), "CREATE INDEX %s ON %s (%s);",
-				lbuf, table_name, schema_element->name);
+				lbuf, schema_set->table_name, schema_element->name);
 			break;
 		}
 
@@ -703,7 +703,7 @@ rsdb_schema_generate_element(const char *table_name, struct rsdb_schema *schema_
 #if 0
 			is_key = 1;
 			snprintf(buf, sizeof(buf), "ALTER TABLE %s ADD FOREIGN KEY(%s) REFERENCES %s MATCH FULL;",
-				table_name, schema_element->name, schema_element->def);
+				schema_set->table_name, schema_element->name, schema_element->def);
 #endif
 			break;
 
@@ -711,7 +711,7 @@ rsdb_schema_generate_element(const char *table_name, struct rsdb_schema *schema_
 #if 0
 			is_key = 1;
 			snprintf(buf, sizeof(buf), "ALTER TABLE %s ADD FOREIGN KEY(%s) REFERENCES %s ON DELETE CASCADE;",
-				table_name, schema_element->name, schema_element->def);
+				schema_set->table_name, schema_element->name, schema_element->def);
 #endif
 			break;
 	}
