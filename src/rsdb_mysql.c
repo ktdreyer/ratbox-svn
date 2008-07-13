@@ -603,7 +603,7 @@ rsdb_schema_generate_element(struct rsdb_schema_set *schema_set, struct rsdb_sch
 	switch(schema_element->option)
 	{
 		case RSDB_SCHEMA_SERIAL:
-			snprintf(buf, sizeof(buf), "%s INTEGER AUTO_INCREMENT", schema_element->name);
+			snprintf(buf, sizeof(buf), "%s INTEGER AUTO_INCREMENT PRIMARY KEY", schema_element->name);
 			break;
 
 		case RSDB_SCHEMA_SERIAL_REF:
@@ -659,6 +659,12 @@ rsdb_schema_generate_element(struct rsdb_schema_set *schema_set, struct rsdb_sch
 			break;
 
 		case RSDB_SCHEMA_KEY_PRIMARY:
+			/* mysql requires AUTO_INCREMENT columns are defined as PRIMARY KEY when 
+			 * they're added, so skip the primary key if this is the case.
+			 */
+			if(schema_set->has_serial)
+				break;
+
 			is_key = 1;
 			snprintf(buf, sizeof(buf), "ALTER TABLE %s ADD PRIMARY KEY(%s);",
 				schema_set->table_name, schema_element->name);
