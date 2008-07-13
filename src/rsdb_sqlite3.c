@@ -269,9 +269,109 @@ rsdbs_sql_check_table(const char *table_name)
 	return buf;
 }
 
+static int
+rsdbs_check_column(const char *table_name, const char *column_name)
+{
+	struct rsdb_table data;
+	char **res_data;
+	int pos_name = -1;
+	int i;
+
+	rsdb_exec_fetch(&data, "PRAGMA table_info(%Q)", table_name);
+
+	/* the rsdb_exec_fetch() loaded the result set of columns, however
+	 * this is purely the results, without any column headers.
+	 *
+	 * Because we are using a PRAGMA rather than a SELECT, it's possible
+	 * the results here could be in any order.  We therefore need the
+	 * column headers to work out which column is which.
+	 *
+	 * We are looking for a column called 'name' in the result set, so
+	 * hunt through to work out which position it is at.
+	 */
+	res_data = data.arg;
+
+	for(i = 0; i < data.col_count; i++)
+	{
+		if(!strcmp(res_data[i], "name"))
+		{
+			pos_name = i;
+			break;
+		}
+	}
+
+	/* didn't find a column caled 'name' -- so we have no idea where the
+	 * column names are held..
+	 */
+	if(pos_name < 0)
+	{
+		mlog("fatal error: problem with db file: PRAGMA table_info() did not have a 'name' column");
+		die(0, "problem with db file");
+	}
+
+	/* At this point, we know which column in the result set has the
+	 * name of the column within the table we are looking for (pos_name).
+	 *
+	 * So now, hunt through the rows in the result set, checking if we
+	 * can find the column we are hunting for in the results..
+	 */
+	for(i = 0; i < data.row_count; i++)
+	{
+		/* found it! */
+		if(!strcmp(data.row[i][pos_name], column_name))
+		{
+			rsdb_exec_fetch_end(&data);
+			return 1;
+		}
+	}
+
+	rsdb_exec_fetch_end(&data);
+	return 0;
+}
+
 void
 rsdb_schema_check_table(struct rsdb_schema_set *schema_set)
 {
+	struct rsdb_schema *schema;
+	dlink_list table_data;
+	dlink_list key_data;
+	int add_key;
+	int i;
+
+	memset(&table_data, 0, sizeof(struct _dlink_list));
+	memset(&key_data, 0, sizeof(struct _dlink_list));
+
+	schema = schema_set->schema;
+
+	for(i = 0; schema[i].name; i++)
+	{
+		add_key = 0;
+
+		switch(schema[i].option)
+		{
+			case RSDB_SCHEMA_SERIAL:
+			case RSDB_SCHEMA_SERIAL_REF:
+			case RSDB_SCHEMA_BOOLEAN:
+			case RSDB_SCHEMA_INT:
+			case RSDB_SCHEMA_UINT:
+			case RSDB_SCHEMA_VARCHAR:
+			case RSDB_SCHEMA_CHAR:
+			case RSDB_SCHEMA_TEXT:
+				if(!rsdbs_check_column(schema_set->table_name, schema[i].name))
+					rsdb_schema_generate_element(schema_set->table_name, &schema[i], 
+									&table_data, &key_data);
+				break;
+
+			case RSDB_SCHEMA_KEY_PRIMARY:
+			case RSDB_SCHEMA_KEY_UNIQUE:
+			case RSDB_SCHEMA_KEY_INDEX:
+			case RSDB_SCHEMA_KEY_F_MATCH:
+			case RSDB_SCHEMA_KEY_F_CASCADE:
+				break;
+		}
+	}
+
+	rsdb_schema_debug(schema_set->table_name, &table_data, &key_data, 0);
 }
 
 void
