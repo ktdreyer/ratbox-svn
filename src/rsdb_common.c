@@ -75,7 +75,7 @@ rsdb_schema_check(struct rsdb_schema_set *schema_set)
 	for(i = 0; schema_set[i].table_name; i++)
 	{
 		/* mark this as off unless we find a serial later */
-		schema_set[i].serial_field = NULL;
+		schema_set[i].has_serial = 0;
 
 		schema_element = schema_set[i].schema;
 
@@ -83,7 +83,7 @@ rsdb_schema_check(struct rsdb_schema_set *schema_set)
 		{
 			if(schema_element[j].option == RSDB_SCHEMA_SERIAL)
 			{
-				schema_set[i].serial_field = schema_element[j].name;
+				schema_set[i].has_serial = 1;
 				break;
 			}
 		}

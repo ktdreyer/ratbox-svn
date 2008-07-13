@@ -258,26 +258,26 @@ static struct rsdb_schema rsdb_schema_memos[] =
 };
 
 static struct rsdb_schema_set rsdb_schema_tables[] = {
-	{ "users",		rsdb_schema_users,		NULL },
-	{ "users_resetpass",	rsdb_schema_users_resetpass,	NULL },
-	{ "users_resetemail",	rsdb_schema_users_resetemail,	NULL },
-	{ "users_sync",		rsdb_schema_users_sync,		NULL },
-	{ "nicks",		rsdb_schema_nicks,		NULL },
-	{ "channels",		rsdb_schema_channels,		NULL },
-	{ "channels_dropowner",	rsdb_schema_channels_dropowner,	NULL },
-	{ "members",		rsdb_schema_members,		NULL },
-	{ "bans",		rsdb_schema_bans,		NULL },
-	{ "operbot",		rsdb_schema_operbot,		NULL },
-	{ "operserv",		rsdb_schema_operserv,		NULL },
-	{ "jupes",		rsdb_schema_jupes,		NULL },
-	{ "operbans",		rsdb_schema_operbans,		NULL },
-	{ "operbans_regexp",	rsdb_schema_operbans_regexp,	NULL },
-	{ "operbans_regexp_neg",rsdb_schema_operbans_regexp_neg,NULL },
-	{ "global_welcome",	rsdb_schema_global_welcome,	NULL },
-	{ "email_banned_domain",rsdb_schema_email_banned_domain,NULL },
-	{ "ignore_hosts",	rsdb_schema_ignore_hosts,	NULL },
-	{ "memos",		rsdb_schema_memos,		NULL },
-	{ NULL, NULL, NULL }
+	{ "users",		rsdb_schema_users,		0 },
+	{ "users_resetpass",	rsdb_schema_users_resetpass,	0 },
+	{ "users_resetemail",	rsdb_schema_users_resetemail,	0 },
+	{ "users_sync",		rsdb_schema_users_sync,		0 },
+	{ "nicks",		rsdb_schema_nicks,		0 },
+	{ "channels",		rsdb_schema_channels,		0 },
+	{ "channels_dropowner",	rsdb_schema_channels_dropowner,	0 },
+	{ "members",		rsdb_schema_members,		0 },
+	{ "bans",		rsdb_schema_bans,		0 },
+	{ "operbot",		rsdb_schema_operbot,		0 },
+	{ "operserv",		rsdb_schema_operserv,		0 },
+	{ "jupes",		rsdb_schema_jupes,		0 },
+	{ "operbans",		rsdb_schema_operbans,		0 },
+	{ "operbans_regexp",	rsdb_schema_operbans_regexp,	0 },
+	{ "operbans_regexp_neg",rsdb_schema_operbans_regexp_neg,0 },
+	{ "global_welcome",	rsdb_schema_global_welcome,	0 },
+	{ "email_banned_domain",rsdb_schema_email_banned_domain,0 },
+	{ "ignore_hosts",	rsdb_schema_ignore_hosts,	0 },
+	{ "memos",		rsdb_schema_memos,		0 },
+	{ NULL, NULL, 0 }
 };
 
 void
