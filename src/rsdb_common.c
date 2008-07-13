@@ -32,6 +32,7 @@
  * $Id$
  */
 #include "stdinc.h"
+#include "rserv.h"
 #include "rsdb.h"
 
 /* rsdb_common_fetch_end()
@@ -108,6 +109,35 @@ rsdb_schema_check(struct rsdb_schema_set *schema_set)
 
 		rsdb_exec_fetch_end(&data);
 	}
+}
+
+const char *
+rsdbs_generate_key_name(const char *table_name, const char *field_list_text, rsdb_schema_option option)
+{
+	static char buf[BUFSIZE];
+	dlink_list *field_list;
+	dlink_node *ptr;
+
+	field_list = rsdb_schema_split_key(field_list_text);
+
+	snprintf(buf, sizeof(buf), "%s_", table_name);
+
+	DLINK_FOREACH(ptr, field_list->head)
+	{
+		strlcat(buf, (char *) ptr->data, sizeof(buf));
+		strlcat(buf, "_", sizeof(buf));
+	}
+
+	if(option == RSDB_SCHEMA_KEY_PRIMARY)
+		strlcat(buf, "prikey", sizeof(buf));
+	else if(option == RSDB_SCHEMA_KEY_UNIQUE)
+		strlcat(buf, "unique", sizeof(buf));
+	else if(option == RSDB_SCHEMA_KEY_INDEX)
+		strlcat(buf, "idx", sizeof(buf));
+	else
+		strlcat(buf, "unknown", sizeof(buf));
+
+	return buf;
 }
 
 void
