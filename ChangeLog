@@ -1,3 +1,13 @@
+leeh        2008/07/13 16:38:34 UTC	(20080713_6-25747)
+  Log:
+  - add rsdbs_generate_key_name() to return the name of a key
+  
+
+  Modified:
+	rserv/trunk/include/rsdb.h (File Modified) 
+	rserv/trunk/src/rsdb_common.c (File Modified) 
+
+
 leeh        2008/07/13 16:09:23 UTC	(20080713_5-25745)
   Log:
   - has_serial should be an integer
