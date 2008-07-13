@@ -1,3 +1,13 @@
+leeh        2008/07/13 09:55:08 UTC	(20080713_3-25741)
+  Log:
+  - fix an edge case where rsdbs_check_column() is called on a table that
+    doesn't exist..
+  
+
+  Modified:
+	rserv/trunk/src/rsdb_sqlite3.c (File Modified) 
+
+
 leeh        2008/07/13 09:52:19 UTC	(20080713_2-25739)
   Log:
   - fill in rsdb_schema_check_table for sqlite for hunting columns
