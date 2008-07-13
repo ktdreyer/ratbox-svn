@@ -279,6 +279,15 @@ rsdbs_check_column(const char *table_name, const char *column_name)
 
 	rsdb_exec_fetch(&data, "PRAGMA table_info(%Q)", table_name);
 
+	/* we should never be asked to check the existence of a column in a
+	 * table that doesn't exist..
+	 */
+	if(data.row_count == 0)
+	{
+		mlog("fatal error: problem with db file: rsdbs_check_column() had an empty result set");
+		die(0, "problem with db file");
+	}
+
 	/* the rsdb_exec_fetch() loaded the result set of columns, however
 	 * this is purely the results, without any column headers.
 	 *
