@@ -1,3 +1,14 @@
+leeh        2008/07/13 08:08:09 UTC	(20080713_0-25735)
+  Log:
+  - swap has_serial for serial_name, and make it point to the name of the
+    serial field
+  
+
+  Modified:
+	rserv/trunk/include/rsdb.h (File Modified) 
+	rserv/trunk/src/rsdb_common.c (File Modified) 
+
+
 leeh        2008/07/12 09:13:56 UTC	(20080712_3-25733)
   Log:
   - flag each table in the schema as to whether it has a SERIAL reference or
