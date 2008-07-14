@@ -1,3 +1,12 @@
+leeh        2008/07/14 20:19:50 UTC	(20080714_0-25753)
+  Log:
+  - move some stuff out of rsdb_schema_check_table() and into functions
+  
+
+  Modified:
+	rserv/trunk/src/rsdb_pgsql.c (File Modified) 
+
+
 leeh        2008/07/13 21:19:19 UTC	(20080713_8-25751)
   Log:
   - mysql requires the primary key is inline when adding AUTO_INCREMENT
