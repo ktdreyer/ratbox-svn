@@ -1,3 +1,25 @@
+leeh        2008/07/14 20:36:35 UTC	(20080714_1-25755)
+  Log:
+  - remove unused include/schema-sqlite.h
+  - move all of the schema stuff out of rsdb_* and into rsdbs_*
+  
+
+  Modified:
+	rserv/trunk/include/rsdb.h (File Modified) 
+	rserv/trunk/include/rsdbs.h (File Added) 
+	rserv/trunk/include/schema-sqlite.h (File Deleted) 
+	rserv/trunk/src/Makefile.in (File Modified) 
+	rserv/trunk/src/rsdb_common.c (File Modified) 
+	rserv/trunk/src/rsdb_mysql.c (File Modified) 
+	rserv/trunk/src/rsdb_pgsql.c (File Modified) 
+	rserv/trunk/src/rsdb_sqlite3.c (File Modified) 
+	rserv/trunk/src/rsdbs_common.c (File Added) 
+	rserv/trunk/src/rsdbs_mysql.c (File Added) 
+	rserv/trunk/src/rsdbs_pgsql.c (File Added) 
+	rserv/trunk/src/rsdbs_sqlite3.c (File Added) 
+	rserv/trunk/src/schema.c (File Modified) 
+
+
 leeh        2008/07/14 20:19:50 UTC	(20080714_0-25753)
   Log:
   - move some stuff out of rsdb_schema_check_table() and into functions
