@@ -53,6 +53,7 @@ BSRCS = 		\
 	modebuild.c	\
         newconf.c       \
 	rsdb_common.c	\
+	rsdbs_common.c	\
 	rserv.c		\
 	schema.c	\
 	scommand.c	\
@@ -64,7 +65,7 @@ BSRCS = 		\
 
 SRCS = ${BSRCS} @S_NICKSERV@ @S_USERSERV@ @S_CHANSERV@ @S_OPERSERV@ @S_ALIS@\
 	@S_OPERBOT@ @S_JUPESERV@ @S_GLOBAL@ @S_BANSERV@ @S_WATCHSERV@\
-	@S_MEMOSERV@ rsdb_@DB_BACKEND@.c
+	@S_MEMOSERV@ rsdb_@DB_BACKEND@.c rsdbs_@DB_BACKEND@.c
 
 OBJS=$(SRCS:.c=.o)
 
