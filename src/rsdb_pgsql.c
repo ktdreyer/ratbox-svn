@@ -378,20 +378,120 @@ rsdbs_sql_check_table(const char *table_name)
 	return buf;
 }
 
+static int
+rsdbs_check_column(const char *table_name, const char *column_name)
+{
+	struct rsdb_table data;
+
+	rsdb_exec_fetch(&data, "SELECT column_name FROM information_schema.columns WHERE table_name='%Q' AND column_name='%Q'",
+			table_name, column_name);
+
+	if(data.row_count > 0)
+	{
+		rsdb_exec_fetch_end(&data);
+		return 1;
+	}
+
+	rsdb_exec_fetch_end(&data);
+	return 0;
+}
+
+static int
+rsdbs_check_key_is(const char *table_name, const char *key_list_str, rsdb_schema_option option)
+{
+	static const char option_str_pri[] = "PRIMARY KEY";
+	static const char option_str_unique[] = "UNIQUE";
+	char buf[BUFSIZE*2];
+	char lbuf[BUFSIZE*2];
+	struct rsdb_table data;
+	dlink_list *field_list;
+	dlink_node *ptr;
+	const char *option_str;
+
+	if(option == RSDB_SCHEMA_KEY_PRIMARY)
+		option_str = option_str_pri;
+	else if(option == RSDB_SCHEMA_KEY_UNIQUE)
+		option_str = option_str_unique;
+	else
+		return 0;
+
+	field_list = rsdb_schema_split_key(key_list_str);
+
+	/* build a sql statement, to grab the count of elements in our key
+	 * for the table, that match any of the columns specified.  The count value 
+	 * returned should equal the number of fields we're searching for.
+	 */
+	/* XXX There is a flaw with this code -- in that if a key includes the values we
+	 * are searching for, along with others that shouldn't be there, it will not find
+	 * any problems..
+	 */
+	rs_snprintf(buf, sizeof(buf), "SELECT ccu.column_name FROM information_schema.constraint_column_usage ccu "
+					"JOIN information_schema.table_constraints tc "
+					"ON ccu.constraint_name=tc.constraint_name "
+					"WHERE tc.constraint_type='%Q' AND ccu.table_name='%Q'",
+			option_str, table_name);
+
+	DLINK_FOREACH(ptr, field_list->head)
+	{
+		/* we want to OR the column names together to find the count of all the
+		 * matching entries -- but this OR block itself needs an AND for the first
+		 * element to join it to the buffer above
+		 */
+		if(ptr == field_list->head)
+			rs_snprintf(lbuf, sizeof(lbuf), " AND (ccu.column_name='%Q'",
+					(char *) ptr->data);
+		else
+			rs_snprintf(lbuf, sizeof(lbuf), " OR ccu.column_name='%Q'",
+					(char *) ptr->data);
+
+		strlcat(buf, lbuf, sizeof(buf));
+	}
+
+	/* close the sql brace */
+	strlcat(buf, ")", sizeof(buf));
+
+	rsdb_exec_fetch(&data, "%s", buf);
+
+	/* the SQL above should have returned a row per match -- so the number of elements
+	 * in the primary key we are adding should match this..
+	 */
+	if(data.row_count == dlink_list_length(field_list))
+	{
+		rsdb_exec_fetch_end(&data);
+		return 1;
+	}
+
+	rsdb_exec_fetch_end(&data);
+	return 0;
+}
+
+static int
+rsdbs_check_key_index(const char *table_name, const char *key_list_str)
+{
+	struct rsdb_table data;
+	const char *idx_name;
+
+	idx_name = rsdbs_generate_key_name(table_name, key_list_str, RSDB_SCHEMA_KEY_INDEX);
+
+	rsdb_exec_fetch(&data, "SELECT * FROM pg_catalog.pg_class WHERE relname='%Q'", idx_name);
+
+	if(data.row_count > 0)
+	{
+		rsdb_exec_fetch_end(&data);
+		return 1;
+	}
+
+	rsdb_exec_fetch_end(&data);
+	return 0;
+}
+
 void
 rsdb_schema_check_table(struct rsdb_schema_set *schema_set)
 {
-	char buf[BUFSIZE*2];
-	char lbuf[BUFSIZE];
-	struct rsdb_table data;
 	struct rsdb_schema *schema;
 	dlink_list table_data;
 	dlink_list key_data;
-	dlink_list *field_list;
-	dlink_node *ptr;
-	int add_key;
 	int i;
-	int j;
 
 	memset(&table_data, 0, sizeof(struct _dlink_list));
 	memset(&key_data, 0, sizeof(struct _dlink_list));
@@ -400,8 +500,6 @@ rsdb_schema_check_table(struct rsdb_schema_set *schema_set)
 
 	for(i = 0; schema[i].name; i++)
 	{
-		add_key = 0;
-
 		switch(schema[i].option)
 		{
 			case RSDB_SCHEMA_SERIAL:
@@ -412,68 +510,20 @@ rsdb_schema_check_table(struct rsdb_schema_set *schema_set)
 			case RSDB_SCHEMA_VARCHAR:
 			case RSDB_SCHEMA_CHAR:
 			case RSDB_SCHEMA_TEXT:
-				rsdb_exec_fetch(&data, "SELECT column_name FROM information_schema.columns WHERE table_name='%Q' AND column_name='%Q'",
-						schema_set->table_name, schema[i].name);
-
-				if(data.row_count == 0)
+				if(!rsdbs_check_column(schema_set->table_name, schema[i].name))
 					rsdb_schema_generate_element(schema_set, &schema[i], &table_data, &key_data);
-
-				rsdb_exec_fetch_end(&data);
 
 				break;
 
 			case RSDB_SCHEMA_KEY_PRIMARY:
-				field_list = rsdb_schema_split_key(schema[i].name);
-
-				/* build a sql statement, to grab the count of elements in our primary key
-				 * for the table, that match any of the columns specified.  The count value 
-				 * returned should equal the number of fields we're searching for.
-				 */
-				rs_snprintf(buf, sizeof(buf), "SELECT COUNT(ccu.column_name) FROM information_schema.constraint_column_usage ccu "
-							"JOIN information_schema.table_constraints tc "
-							"ON ccu.constraint_name=tc.constraint_name "
-							"WHERE tc.constraint_type='PRIMARY KEY' AND ccu.table_name='%Q'",
-						schema_set->table_name);
-
-				DLINK_FOREACH(ptr, field_list->head)
+				/* check if the constraint exists */
+				if(!rsdbs_check_key_is(schema_set->table_name, schema[i].name, schema[i].option))
 				{
-					/* we want to OR the column names together to find the count of all the
-					 * matching entries -- but this OR block itself needs an AND for the first
-					 * element to join it to the buffer above
-					 */
-					if(ptr == field_list->head)
-						rs_snprintf(lbuf, sizeof(lbuf), " AND (ccu.column_name='%Q'",
-								(char *) ptr->data);
-					else
-						rs_snprintf(lbuf, sizeof(lbuf), " OR ccu.column_name='%Q'",
-								(char *) ptr->data);
+					char buf[BUFSIZE*2];
+					struct rsdb_table data;
+					int j;
 
-					strlcat(buf, lbuf, sizeof(buf));
-				}
-
-				/* close the sql brace */
-				strlcat(buf, ")", sizeof(buf));
-
-				rsdb_exec_fetch(&data, "%s", buf);
-
-				if(data.row_count == 0)
-				{
-					mlog("fatal error: SELECT COUNT() returned 0 rows in rsdb_schema_check_table()");
-					die(0, "problem with db file");
-				}
-
-				/* this field should be the count of all the elements in the primary key
-				 * that match the list of fields we're searching for.  Therefore, they
-				 * should be equal if the key is correct.
-				 */
-				if(atoi(data.row[0][0]) != dlink_list_length(field_list))
-					add_key++;
-
-				rsdb_exec_fetch_end(&data);
-
-				/* drop any existing primary keys */
-				if(add_key)
-				{
+					/* drop any existing primary keys -- there can be only one. */
 					/* find the name of the constraint, and drop it specifically */
 					rsdb_exec_fetch(&data, "SELECT tc.constraint_name FROM information_schema.table_constraints tc "
 								"WHERE tc.constraint_type='PRIMARY KEY' AND tc.table_name='%Q'",
@@ -495,56 +545,8 @@ rsdb_schema_check_table(struct rsdb_schema_set *schema_set)
 				break;
 
 			case RSDB_SCHEMA_KEY_UNIQUE:
-				field_list = rsdb_schema_split_key(schema[i].name);
-
-				/* build a sql statement, to grab the count of elements in our primary key
-				 * for the table, that match any of the columns specified.  The count value 
-				 * returned should equal the number of fields we're searching for.
-				 */
-				rs_snprintf(buf, sizeof(buf), "SELECT COUNT(ccu.column_name) FROM information_schema.constraint_column_usage ccu "
-							"JOIN information_schema.table_constraints tc "
-							"ON ccu.constraint_name=tc.constraint_name "
-							"WHERE tc.constraint_type='UNIQUE' AND ccu.table_name='%Q'",
-						schema_set->table_name);
-
-				DLINK_FOREACH(ptr, field_list->head)
-				{
-					/* we want to OR the column names together to find the count of all the
-					 * matching entries -- but this OR block itself needs an AND for the first
-					 * element to join it to the buffer above
-					 */
-					if(ptr == field_list->head)
-						rs_snprintf(lbuf, sizeof(lbuf), " AND (ccu.column_name='%Q'",
-								(char *) ptr->data);
-					else
-						rs_snprintf(lbuf, sizeof(lbuf), " OR ccu.column_name='%Q'",
-								(char *) ptr->data);
-
-					strlcat(buf, lbuf, sizeof(buf));
-				}
-
-				/* close the sql brace */
-				strlcat(buf, ")", sizeof(buf));
-
-				rsdb_exec_fetch(&data, "%s", buf);
-
-				if(data.row_count == 0)
-				{
-					mlog("fatal error: SELECT COUNT() returned 0 rows in rsdb_schema_check_table()");
-					die(0, "problem with db file");
-				}
-
-				/* this field should be the count of all the elements in the primary key
-				 * that match the list of fields we're searching for.  Therefore, they
-				 * should be equal if the key is correct.
-				 */
-				if(atoi(data.row[0][0]) != dlink_list_length(field_list))
-					add_key++;
-
-				rsdb_exec_fetch_end(&data);
-
-				/* drop any existing primary keys */
-				if(add_key)
+				/* check if the constraint exists */
+				if(!rsdbs_check_key_is(schema_set->table_name, schema[i].name, schema[i].option))
 					rsdb_schema_generate_element(schema_set, &schema[i], &table_data, &key_data);
 
 				break;
@@ -555,33 +557,7 @@ rsdb_schema_check_table(struct rsdb_schema_set *schema_set)
 			 * on the field chname, should be called bans_chname_idx), and leave it at that.
 			 */
 			case RSDB_SCHEMA_KEY_INDEX:
-				field_list = rsdb_schema_split_key(schema[i].name);
-
-				rs_snprintf(buf, sizeof(buf), "%s_", schema_set->table_name);
-
-				DLINK_FOREACH(ptr, field_list->head)
-				{
-					strlcat(buf, (char *) ptr->data, sizeof(buf));
-					strlcat(buf, "_", sizeof(buf));
-				}
-
-				strlcat(buf, "idx", sizeof(buf));
-
-				rsdb_exec_fetch(&data, "SELECT COUNT(*) FROM pg_catalog.pg_class WHERE relname='%Q'", buf);
-
-				if(data.row_count == 0)
-				{
-					mlog("fatal error: SELECT COUNT() returned 0 rows in rsdb_schema_check_table()");
-					die(0, "problem with db file");
-				}
-
-				/* if the index exists, presume it is ok */
-				if(atoi(data.row[0][0]) == 0)
-					add_key++;
-
-				rsdb_exec_fetch_end(&data);
-
-				if(add_key)
+				if(!rsdbs_check_key_index(schema_set->table_name, schema[i].name))
 					rsdb_schema_generate_element(schema_set, &schema[i], &table_data, &key_data);
 
 				break;
