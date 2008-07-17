@@ -1,3 +1,16 @@
+leeh        2008/07/17 19:48:35 UTC	(20080717_0-25763)
+  Log:
+  - Id props
+  
+
+  Modified:
+	rserv/trunk/include/rsdbs.h (File Modified) (Property Modified)
+	rserv/trunk/src/rsdbs_common.c (File Modified) (Property Modified)
+	rserv/trunk/src/rsdbs_mysql.c (File Modified) (Property Modified)
+	rserv/trunk/src/rsdbs_pgsql.c (File Modified) (Property Modified)
+	rserv/trunk/src/rsdbs_sqlite3.c (File Modified) (Property Modified)
+
+
 leeh        2008/07/14 20:36:35 UTC	(20080714_1-25755)
   Log:
   - remove unused include/schema-sqlite.h
