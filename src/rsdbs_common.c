@@ -28,7 +28,7 @@
  * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  * 
- * $Id: rsdb_common.c 25747 2008-07-13 16:38:34Z leeh $
+ * $Id$
  */
 #include "stdinc.h"
 #include "rserv.h"

@@ -28,7 +28,7 @@
  * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  * 
- * $Id: rsdb_mysql.c 25751 2008-07-13 21:19:19Z leeh $
+ * $Id$
  */
 #include "stdinc.h"
 #include "rsdb.h"

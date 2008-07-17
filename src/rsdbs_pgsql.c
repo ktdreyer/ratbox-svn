@@ -28,7 +28,7 @@
  * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  * 
- * $Id: rsdb_pgsql.c 25749 2008-07-13 21:00:07Z leeh $
+ * $Id$
  */
 #include "stdinc.h"
 #include "rsdb.h"
