@@ -1,3 +1,27 @@
+leeh        2008/07/24 21:06:13 UTC	(20080724_6-25787)
+  Log:
+  - move the rsdb stuff into libratboxdb
+  
+
+  Modified:
+	rserv/trunk/libratboxdb/rsdb_common.c (File Added) 
+	rserv/trunk/libratboxdb/rsdb_mysql.c (File Added) 
+	rserv/trunk/libratboxdb/rsdb_pgsql.c (File Added) 
+	rserv/trunk/libratboxdb/rsdb_sqlite3.c (File Added) 
+	rserv/trunk/libratboxdb/rsdbs_common.c (File Added) 
+	rserv/trunk/libratboxdb/rsdbs_mysql.c (File Added) 
+	rserv/trunk/libratboxdb/rsdbs_pgsql.c (File Added) 
+	rserv/trunk/libratboxdb/rsdbs_sqlite3.c (File Added) 
+	rserv/trunk/src/rsdb_common.c (File Deleted) 
+	rserv/trunk/src/rsdb_mysql.c (File Deleted) 
+	rserv/trunk/src/rsdb_pgsql.c (File Deleted) 
+	rserv/trunk/src/rsdb_sqlite3.c (File Deleted) 
+	rserv/trunk/src/rsdbs_common.c (File Deleted) 
+	rserv/trunk/src/rsdbs_mysql.c (File Deleted) 
+	rserv/trunk/src/rsdbs_pgsql.c (File Deleted) 
+	rserv/trunk/src/rsdbs_sqlite3.c (File Deleted) 
+
+
 leeh        2008/07/24 21:04:21 UTC	(20080724_5-25785)
   Log:
   - add in libratboxdb folder
