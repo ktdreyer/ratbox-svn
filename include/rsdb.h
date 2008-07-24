@@ -2,6 +2,17 @@
 #ifndef INCLUDED_rsdb_h
 #define INCLUDED_rsdb_h
 
+struct _rsdb_conf
+{
+	const char *db_name;
+	const char *db_host;
+	const char *db_username;
+	const char *db_password;
+};
+
+extern struct _rsdb_conf rsdb_conf;
+
+
 typedef int (*rsdb_callback) (int, const char **);
 
 typedef enum rsdb_transtype
@@ -19,7 +30,8 @@ struct rsdb_table
 	void *arg;
 };
 
-void rsdb_init(void);
+void rsdb_init(const char *db_name, const char *db_host, const char *db_username, 
+		const char *db_password);
 void rsdb_shutdown(void);
 
 const char *rsdb_quote(const char *src);

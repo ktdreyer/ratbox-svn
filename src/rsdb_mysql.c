@@ -49,13 +49,27 @@ static int rsdb_connect(int initial);
 /* rsdb_init()
  */
 void
-rsdb_init(void)
+rsdb_init(const char *db_name, const char *db_host, const char *db_username, const char *db_password)
 {
-	if(EmptyString(config_file.db_name) || EmptyString(config_file.db_host) ||
-	   EmptyString(config_file.db_username) || EmptyString(config_file.db_password))
-	{
-		die(0, "Missing conf options in database {};");
-	}
+	if(!EmptyString(db_name))
+		rsdb_conf.db_name = my_strdup(db_name);
+	else
+		die(0, "No database name specified");
+
+	if(!EmptyString(db_host))
+		rsdb_conf.db_host = my_strdup(db_host);
+	else
+		die(0, "No database host specified");
+
+	if(!EmptyString(db_username))
+		rsdb_conf.db_username = my_strdup(db_username);
+	else
+		die(0, "No database username specified");
+
+	if(!EmptyString(db_password))
+		rsdb_conf.db_password = my_strdup(db_password);
+	else
+		die(0, "No database password specified");
 
 	if((rsdb_database = mysql_init(NULL)) == NULL)
 		die(0, "Out of memory -- failed to initialise mysql pointer");

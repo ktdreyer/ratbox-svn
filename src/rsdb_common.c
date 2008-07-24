@@ -35,6 +35,8 @@
 #include "rserv.h"
 #include "rsdb.h"
 
+struct _rsdb_conf rsdb_conf;
+
 /* rsdb_common_fetch_end()
  * free()'s the memory after rsdb_exec_fetch()
  *

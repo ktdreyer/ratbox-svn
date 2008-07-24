@@ -47,8 +47,11 @@ struct sqlite3 *rserv_db;
 /* rsdb_init()
  */
 void
-rsdb_init(void)
+rsdb_init(const char *db_name, const char *db_host, const char *db_username, const char *db_password)
 {
+	/* sqlite3 doesn't use any config parameters, rsdb_conf is left as NULL */
+	memset(&rsdb_conf, 0, sizeof(struct _rsdb_conf));
+
 	if(sqlite3_open(DB_PATH, &rserv_db))
 	{
 		die(0, "Failed to open db file: %s", sqlite3_errmsg(rserv_db));

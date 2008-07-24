@@ -400,7 +400,8 @@ main(int argc, char *argv[])
 	}
 
 	/* must be done after parsing the config, for database {}; */
-	rsdb_init();
+	rsdb_init(config_file.db_name, config_file.db_host, config_file.db_username,
+			config_file.db_password);
 
 	if(create_schema)
 	{
