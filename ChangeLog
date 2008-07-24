@@ -1,3 +1,17 @@
+leeh        2008/07/24 20:56:12 UTC	(20080724_3-25781)
+  Log:
+  - add in a struct _rsdb_conf to hold the db config values
+  
+
+  Modified:
+	rserv/trunk/include/rsdb.h (File Modified) 
+	rserv/trunk/src/rsdb_common.c (File Modified) 
+	rserv/trunk/src/rsdb_mysql.c (File Modified) 
+	rserv/trunk/src/rsdb_pgsql.c (File Modified) 
+	rserv/trunk/src/rsdb_sqlite3.c (File Modified) 
+	rserv/trunk/src/rserv.c (File Modified) 
+
+
 leeh        2008/07/24 20:35:38 UTC	(20080724_2-25779)
   Log:
   - fix up sqlite3 dbs so it compiles, adding some dummy function handlers
