@@ -1,3 +1,13 @@
+leeh        2008/07/24 20:35:38 UTC	(20080724_2-25779)
+  Log:
+  - fix up sqlite3 dbs so it compiles, adding some dummy function handlers
+    that need to be fleshed out
+  
+
+  Modified:
+	rserv/trunk/src/rsdbs_sqlite3.c (File Modified) 
+
+
 leeh        2008/07/24 20:32:09 UTC	(20080724_1-25777)
   Log:
   - move rsdb_schema_check_table() into rsdbs_common.c as rsdbs_check_table()
