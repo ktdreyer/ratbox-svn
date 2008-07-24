@@ -1,3 +1,16 @@
+leeh        2008/07/24 20:32:09 UTC	(20080724_1-25777)
+  Log:
+  - move rsdb_schema_check_table() into rsdbs_common.c as rsdbs_check_table()
+  - make various functions rsdb_schema_check_table() calls external
+  
+
+  Modified:
+	rserv/trunk/include/rsdbs.h (File Modified) 
+	rserv/trunk/src/rsdbs_common.c (File Modified) 
+	rserv/trunk/src/rsdbs_mysql.c (File Modified) 
+	rserv/trunk/src/rsdbs_pgsql.c (File Modified) 
+
+
 leeh        2008/07/24 20:26:49 UTC	(20080724_0-25775)
   Log:
   - for pgsql, add rsdbs_check_key_pri() and rsdbs_check_key_unique() generic
