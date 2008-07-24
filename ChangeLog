@@ -1,3 +1,12 @@
+leeh        2008/07/24 21:04:21 UTC	(20080724_5-25785)
+  Log:
+  - add in libratboxdb folder
+  
+
+  Modified:
+	rserv/trunk/libratboxdb/ (File Added) 
+
+
 leeh        2008/07/24 21:00:43 UTC	(20080724_4-25783)
   Log:
   - stop rsdb_* and rsdbs_* referencing the config file directly, and make
