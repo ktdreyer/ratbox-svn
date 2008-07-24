@@ -36,6 +36,7 @@
 #include "rsdbs.h"
 
 
+static void rsdbs_check_table(struct rsdb_schema_set *schema_set);
 
 /* rsdb_schema_check()
  * Checks the database against the schema
@@ -84,7 +85,7 @@ rsdb_schema_check(struct rsdb_schema_set *schema_set)
 
 		/* table exists, run checks on each field */
 		if(data.row_count > 0)
-			rsdb_schema_check_table(&schema_set[i]);
+			rsdbs_check_table(&schema_set[i]);
 		/* table doesn't exist.. just flat generate it */
 		else
 			rsdb_schema_generate_table(&schema_set[i]);
@@ -92,6 +93,76 @@ rsdb_schema_check(struct rsdb_schema_set *schema_set)
 		rsdb_exec_fetch_end(&data);
 	}
 }
+
+static void
+rsdbs_check_table(struct rsdb_schema_set *schema_set)
+{
+	struct rsdb_schema *schema;
+	dlink_list table_data;
+	dlink_list key_data;
+	int i;
+
+	memset(&table_data, 0, sizeof(struct _dlink_list));
+	memset(&key_data, 0, sizeof(struct _dlink_list));
+
+	schema = schema_set->schema;
+
+	for(i = 0; schema[i].name; i++)
+	{
+		switch(schema[i].option)
+		{
+			case RSDB_SCHEMA_SERIAL:
+			case RSDB_SCHEMA_SERIAL_REF:
+			case RSDB_SCHEMA_BOOLEAN:
+			case RSDB_SCHEMA_INT:
+			case RSDB_SCHEMA_UINT:
+			case RSDB_SCHEMA_VARCHAR:
+			case RSDB_SCHEMA_CHAR:
+			case RSDB_SCHEMA_TEXT:
+				if(!rsdbs_check_column(schema_set->table_name, schema[i].name))
+					rsdb_schema_generate_element(schema_set, &schema[i], &table_data, &key_data);
+
+				break;
+
+			case RSDB_SCHEMA_KEY_PRIMARY:
+				/* check if the constraint exists */
+				if(!rsdbs_check_key_pri(schema_set->table_name, schema[i].name))
+				{
+					const char *drop_sql = rsdbs_sql_drop_key_pri(schema_set->table_name);
+
+					/* drop existing primary keys if found */
+					if(drop_sql)
+						dlink_add_alloc(my_strdup(drop_sql), &key_data);
+
+					/* add in the sql for the primary key */
+					rsdb_schema_generate_element(schema_set, &schema[i], &table_data, &key_data);
+				}
+
+				break;
+
+			case RSDB_SCHEMA_KEY_UNIQUE:
+				/* check if the constraint exists */
+				if(!rsdbs_check_key_unique(schema_set->table_name, schema[i].name))
+					rsdb_schema_generate_element(schema_set, &schema[i], &table_data, &key_data);
+
+				break;
+
+
+			case RSDB_SCHEMA_KEY_INDEX:
+				if(!rsdbs_check_key_index(schema_set->table_name, schema[i].name))
+					rsdb_schema_generate_element(schema_set, &schema[i], &table_data, &key_data);
+
+				break;
+
+			case RSDB_SCHEMA_KEY_F_MATCH:
+			case RSDB_SCHEMA_KEY_F_CASCADE:
+				break;
+		}
+	}
+
+	rsdb_schema_debug(schema_set->table_name, &table_data, &key_data, 0);
+}
+
 
 const char *
 rsdbs_generate_key_name(const char *table_name, const char *field_list_text, rsdb_schema_option option)

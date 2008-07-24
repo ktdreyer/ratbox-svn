@@ -38,9 +38,15 @@ struct rsdb_schema_set
 };
 
 const char *rsdbs_sql_check_table(const char *table_name);
-void rsdb_schema_check_table(struct rsdb_schema_set *schema_set);
+const char *rsdbs_sql_drop_key_pri(const char *table_name);
+
 void rsdb_schema_generate_element(struct rsdb_schema_set *schema_set, struct rsdb_schema *schema_element,
 				dlink_list *table_data, dlink_list *key_data);
+
+int rsdbs_check_column(const char *table_name, const char *column_name);
+int rsdbs_check_key_pri(const char *table_name, const char *key_list_str);
+int rsdbs_check_key_unique(const char *table_name, const char *key_list_str);
+int rsdbs_check_key_index(const char *table_name, const char *key_list_str);
 
 /* rsdbs_common.c */
 void rsdb_schema_check(struct rsdb_schema_set *schema_set);
