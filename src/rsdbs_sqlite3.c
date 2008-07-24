@@ -53,7 +53,13 @@ rsdbs_sql_check_table(const char *table_name)
 	return buf;
 }
 
-static int
+const char *
+rsdbs_sql_drop_key_pri(const char *table_name)
+{
+	return NULL;
+}
+
+int
 rsdbs_check_column(const char *table_name, const char *column_name)
 {
 	struct rsdb_table data;
@@ -122,49 +128,22 @@ rsdbs_check_column(const char *table_name, const char *column_name)
 	return 0;
 }
 
-void
-rsdb_schema_check_table(struct rsdb_schema_set *schema_set)
+int
+rsdbs_check_key_pri(const char *table_name, const char *key_list_str)
 {
-	struct rsdb_schema *schema;
-	dlink_list table_data;
-	dlink_list key_data;
-	int add_key;
-	int i;
+	return 0;
+}
 
-	memset(&table_data, 0, sizeof(struct _dlink_list));
-	memset(&key_data, 0, sizeof(struct _dlink_list));
+int
+rsdbs_check_key_unique(const char *table_name, const char *key_list_str)
+{
+	return 0;
+}
 
-	schema = schema_set->schema;
-
-	for(i = 0; schema[i].name; i++)
-	{
-		add_key = 0;
-
-		switch(schema[i].option)
-		{
-			case RSDB_SCHEMA_SERIAL:
-			case RSDB_SCHEMA_SERIAL_REF:
-			case RSDB_SCHEMA_BOOLEAN:
-			case RSDB_SCHEMA_INT:
-			case RSDB_SCHEMA_UINT:
-			case RSDB_SCHEMA_VARCHAR:
-			case RSDB_SCHEMA_CHAR:
-			case RSDB_SCHEMA_TEXT:
-				if(!rsdbs_check_column(schema_set->table_name, schema[i].name))
-					rsdb_schema_generate_element(schema_set, &schema[i], 
-									&table_data, &key_data);
-				break;
-
-			case RSDB_SCHEMA_KEY_PRIMARY:
-			case RSDB_SCHEMA_KEY_UNIQUE:
-			case RSDB_SCHEMA_KEY_INDEX:
-			case RSDB_SCHEMA_KEY_F_MATCH:
-			case RSDB_SCHEMA_KEY_F_CASCADE:
-				break;
-		}
-	}
-
-	rsdb_schema_debug(schema_set->table_name, &table_data, &key_data, 0);
+int
+rsdbs_check_key_index(const char *table_name, const char *key_list_str)
+{
+	return 0;
 }
 
 void
