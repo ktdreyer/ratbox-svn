@@ -52,6 +52,31 @@ rsdbs_sql_check_table(const char *table_name)
 	return buf;
 }
 
+static const char *
+rsdbs_sql_drop_key_pri(const char *table_name)
+{
+	static char buf[BUFSIZE*2];
+	struct rsdb_table data;
+	const char *buf_ptr = NULL;
+
+	/* drop any existing primary keys -- there can be only one. */
+	/* find the name of the constraint, and drop it specifically */
+	rsdb_exec_fetch(&data, "SELECT tc.constraint_name FROM information_schema.table_constraints tc "
+				"WHERE tc.constraint_type='PRIMARY KEY' AND tc.table_name='%Q'",
+			table_name);
+
+	if(data.row_count > 0)
+	{
+		rs_snprintf(buf, sizeof(buf), "ALTER TABLE %Q DROP CONSTRAINT %Q CASCADE;",
+				table_name, data.row[0][0]);
+		buf_ptr = buf;
+	}
+
+	rsdb_exec_fetch_end(&data);
+
+	return buf_ptr;
+}
+
 static int
 rsdbs_check_column(const char *table_name, const char *column_name)
 {
@@ -140,6 +165,18 @@ rsdbs_check_key_is(const char *table_name, const char *key_list_str, rsdb_schema
 }
 
 static int
+rsdbs_check_key_pri(const char *table_name, const char *key_list_str)
+{
+	return rsdbs_check_key_is(table_name, key_list_str, RSDB_SCHEMA_KEY_PRIMARY);
+}
+
+static int
+rsdbs_check_key_unique(const char *table_name, const char *key_list_str)
+{
+	return rsdbs_check_key_is(table_name, key_list_str, RSDB_SCHEMA_KEY_PRIMARY);
+}
+
+static int
 rsdbs_check_key_index(const char *table_name, const char *key_list_str)
 {
 	struct rsdb_table data;
@@ -147,6 +184,10 @@ rsdbs_check_key_index(const char *table_name, const char *key_list_str)
 
 	idx_name = rsdbs_generate_key_name(table_name, key_list_str, RSDB_SCHEMA_KEY_INDEX);
 
+	/* I never found a nice way to check the indexes in pgsql, so just attempt to find
+	 * an index with a name of what is appropriate (e.g. an index for the table bans
+	 * on the field chname, should be called bans_chname_idx), and leave it at that.
+	 */
 	rsdb_exec_fetch(&data, "SELECT * FROM pg_catalog.pg_class WHERE relname='%Q'", idx_name);
 
 	if(data.row_count > 0)
@@ -191,26 +232,13 @@ rsdb_schema_check_table(struct rsdb_schema_set *schema_set)
 
 			case RSDB_SCHEMA_KEY_PRIMARY:
 				/* check if the constraint exists */
-				if(!rsdbs_check_key_is(schema_set->table_name, schema[i].name, schema[i].option))
+				if(!rsdbs_check_key_pri(schema_set->table_name, schema[i].name))
 				{
-					char buf[BUFSIZE*2];
-					struct rsdb_table data;
-					int j;
+					const char *drop_sql = rsdbs_sql_drop_key_pri(schema_set->table_name);
 
-					/* drop any existing primary keys -- there can be only one. */
-					/* find the name of the constraint, and drop it specifically */
-					rsdb_exec_fetch(&data, "SELECT tc.constraint_name FROM information_schema.table_constraints tc "
-								"WHERE tc.constraint_type='PRIMARY KEY' AND tc.table_name='%Q'",
-							schema_set->table_name);
-
-					for(j = 0; j < data.row_count; j++)
-					{
-						rs_snprintf(buf, sizeof(buf), "ALTER TABLE %Q DROP CONSTRAINT %Q CASCADE;",
-							schema_set->table_name, data.row[j][0]);
-						dlink_add_alloc(my_strdup(buf), &key_data);
-					}
-
-					rsdb_exec_fetch_end(&data);
+					/* drop existing primary keys if found */
+					if(drop_sql)
+						dlink_add_alloc(my_strdup(drop_sql), &key_data);
 
 					/* add in the sql for the primary key */
 					rsdb_schema_generate_element(schema_set, &schema[i], &table_data, &key_data);
@@ -220,16 +248,12 @@ rsdb_schema_check_table(struct rsdb_schema_set *schema_set)
 
 			case RSDB_SCHEMA_KEY_UNIQUE:
 				/* check if the constraint exists */
-				if(!rsdbs_check_key_is(schema_set->table_name, schema[i].name, schema[i].option))
+				if(!rsdbs_check_key_unique(schema_set->table_name, schema[i].name))
 					rsdb_schema_generate_element(schema_set, &schema[i], &table_data, &key_data);
 
 				break;
 
 
-			/* I never found a nice way to check the indexes in pgsql, so just attempt to find
-			 * an index with a name of what is appropriate (e.g. an index for the table bans
-			 * on the field chname, should be called bans_chname_idx), and leave it at that.
-			 */
 			case RSDB_SCHEMA_KEY_INDEX:
 				if(!rsdbs_check_key_index(schema_set->table_name, schema[i].name))
 					rsdb_schema_generate_element(schema_set, &schema[i], &table_data, &key_data);

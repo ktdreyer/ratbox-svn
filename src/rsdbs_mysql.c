@@ -56,6 +56,29 @@ rsdbs_sql_check_table(const char *table_name)
 	return buf;
 }
 
+static const char *
+rsdbs_sql_drop_key_pri(const char *table_name)
+{
+	static char buf[BUFSIZE*2];
+	struct rsdb_table data;
+	const char *buf_ptr = NULL;
+
+	rsdb_exec_fetch(&data, "SELECT TABLE_NAME FROM information_schema.TABLE_CONSTRAINTS "
+				"WHERE CONSTRAINT_TYPE='PRIMARY KEY' "
+				"AND TABLE_SCHEMA='%Q' AND TABLE_NAME='%Q'",
+			config_file.db_name, table_name);
+
+	if(data.row_count > 0)
+	{
+		rs_snprintf(buf, sizeof(buf), "ALTER TABLE %Q DROP PRIMARY KEY", table_name);
+		buf_ptr = buf;
+	}
+
+	rsdb_exec_fetch_end(&data);
+
+	return buf_ptr;
+}
+
 static int
 rsdbs_check_column(const char *table_name, const char *column_name)
 {
@@ -215,21 +238,12 @@ rsdb_schema_check_table(struct rsdb_schema_set *schema_set)
 				/* check if the constraint exists */
 				if(!rsdbs_check_key_pri(schema_set->table_name, schema[i].name))
 				{
-					char buf[BUFSIZE*2];
-					struct rsdb_table data;
+					const char *drop_sql = rsdbs_sql_drop_key_pri(schema_set->table_name);
 
-					rsdb_exec_fetch(&data, "SELECT TABLE_NAME FROM information_schema.TABLE_CONSTRAINTS "
-								"WHERE CONSTRAINT_TYPE='PRIMARY KEY' "
-								"AND TABLE_SCHEMA='%Q' AND TABLE_NAME='%Q'",
-							config_file.db_name, schema_set->table_name);
+					/* drop existing primary keys if found */
+					if(drop_sql)
+						dlink_add_alloc(my_strdup(drop_sql), &key_data);
 
-					if(data.row_count > 0)
-					{
-						rs_snprintf(buf, sizeof(buf), "ALTER TABLE %Q DROP PRIMARY KEY", schema_set->table_name);
-						dlink_add_alloc(my_strdup(buf), &key_data);
-					}
-
-					rsdb_exec_fetch_end(&data);
 					rsdb_schema_generate_element(schema_set, &schema[i], &table_data, &key_data);
 				}
 
