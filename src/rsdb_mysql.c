@@ -87,9 +87,9 @@ rsdb_init(const char *db_name, const char *db_host, const char *db_username, con
 static int
 rsdb_connect(int initial)
 {
-	void *unused = mysql_real_connect(rsdb_database, config_file.db_host,
-				config_file.db_username, config_file.db_password,
-				config_file.db_name, 0, NULL, 0);
+	void *unused = mysql_real_connect(rsdb_database, rsdb_conf.db_host,
+				rsdb_conf.db_username, rsdb_conf.db_password,
+				rsdb_conf.db_name, 0, NULL, 0);
 
 	if(unused)
 		return 0;

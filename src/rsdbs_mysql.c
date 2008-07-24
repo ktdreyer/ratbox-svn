@@ -52,7 +52,7 @@ rsdbs_sql_check_table(const char *table_name)
 	rs_snprintf(buf, sizeof(buf), 
 			"SELECT TABLE_NAME FROM information_schema.tables "
 			"WHERE TABLE_SCHEMA='%Q' AND TABLE_NAME='%Q'",
-			config_file.db_name, table_name);
+			rsdb_conf.db_name, table_name);
 	return buf;
 }
 
@@ -66,7 +66,7 @@ rsdbs_sql_drop_key_pri(const char *table_name)
 	rsdb_exec_fetch(&data, "SELECT TABLE_NAME FROM information_schema.TABLE_CONSTRAINTS "
 				"WHERE CONSTRAINT_TYPE='PRIMARY KEY' "
 				"AND TABLE_SCHEMA='%Q' AND TABLE_NAME='%Q'",
-			config_file.db_name, table_name);
+			rsdb_conf.db_name, table_name);
 
 	if(data.row_count > 0)
 	{
@@ -87,7 +87,7 @@ rsdbs_check_column(const char *table_name, const char *column_name)
 
 	rsdb_exec_fetch(&data, "SELECT COLUMN_NAME FROM information_schema.columns "
 				"WHERE TABLE_SCHEMA='%Q' AND TABLE_NAME='%Q' AND COLUMN_NAME='%Q'",
-			config_file.db_name, table_name, column_name);
+			rsdb_conf.db_name, table_name, column_name);
 	row_count = data.row_count;
 	rsdb_exec_fetch_end(&data);
 
@@ -127,7 +127,7 @@ rsdbs_check_key_kcu(const char *table_name, const char *key_list_str, rsdb_schem
 					"ON tc.TABLE_NAME=ccu.TABLE_NAME "
 					"WHERE tc.CONSTRAINT_TYPE='%Q' "
 					"AND tc.TABLE_SCHEMA='%Q' AND tc.TABLE_NAME='%Q'",
-			option_str, config_file.db_name, table_name);
+			option_str, rsdb_conf.db_name, table_name);
 
 	DLINK_FOREACH(ptr, field_list->head)
 	{
@@ -187,7 +187,7 @@ rsdbs_check_key_index(const char *table_name, const char *key_list_str)
 
 	rsdb_exec_fetch(&data, "SELECT * FROM information_schema.statistics "
 				"WHERE TABLE_SCHEMA='%Q' AND TABLE_NAME='%Q' AND INDEX_NAME='%Q'",
-			config_file.db_name, table_name, idx_name);
+			rsdb_conf.db_name, table_name, idx_name);
 	row_count = data.row_count;
 	rsdb_exec_fetch_end(&data);
 

@@ -85,9 +85,9 @@ static int
 rsdb_connect(int initial)
 {
 
-	rsdb_database = PQsetdbLogin(config_file.db_host, NULL, NULL, NULL, 
-	                             config_file.db_name, config_file.db_username, 
-	                             config_file.db_password);
+	rsdb_database = PQsetdbLogin(rsdb_conf.db_host, NULL, NULL, NULL, 
+	                             rsdb_conf.db_name, rsdb_conf.db_username, 
+	                             rsdb_conf.db_password);
 
 	if(rsdb_database != NULL && PQstatus(rsdb_database) == CONNECTION_OK)
 		return 0;
