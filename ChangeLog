@@ -1,3 +1,16 @@
+leeh        2008/07/24 20:26:49 UTC	(20080724_0-25775)
+  Log:
+  - for pgsql, add rsdbs_check_key_pri() and rsdbs_check_key_unique() generic
+    wrappers around the rsdbs_check_key_is() function
+  - for pgsql/mysql, add rsdbs_sql_drop_key_pri() to return the SQL for
+    dropping the primary key
+  
+
+  Modified:
+	rserv/trunk/src/rsdbs_mysql.c (File Modified) 
+	rserv/trunk/src/rsdbs_pgsql.c (File Modified) 
+
+
 leeh        2008/07/17 20:28:05 UTC	(20080717_1-25765)
   Log:
   - split the mysql rsdb_schema_check_table() into multiple functions
