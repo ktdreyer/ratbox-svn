@@ -1,3 +1,21 @@
+leeh        2008/07/25 17:56:15 UTC	(20080725_0-25789)
+  Log:
+  - move rsdb stuff back to src/
+    do the library stuff later, once libratbox has stabilised
+  
+
+  Modified:
+	rserv/trunk/libratboxdb/ (File Deleted) 
+	rserv/trunk/src/rsdb_common.c (File Added) 
+	rserv/trunk/src/rsdb_mysql.c (File Added) 
+	rserv/trunk/src/rsdb_pgsql.c (File Added) 
+	rserv/trunk/src/rsdb_sqlite3.c (File Added) 
+	rserv/trunk/src/rsdbs_common.c (File Added) 
+	rserv/trunk/src/rsdbs_mysql.c (File Added) 
+	rserv/trunk/src/rsdbs_pgsql.c (File Added) 
+	rserv/trunk/src/rsdbs_sqlite3.c (File Added) 
+
+
 leeh        2008/07/24 21:06:13 UTC	(20080724_6-25787)
   Log:
   - move the rsdb stuff into libratboxdb
