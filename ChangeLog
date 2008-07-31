@@ -1,3 +1,17 @@
+leeh        2008/07/31 22:16:22 UTC	(20080731_0-25803)
+  Log:
+  - morph rsdb_schema_generate_element() over to a sql generating function,
+    rsdbs_sql_create_element()
+  
+
+  Modified:
+	rserv/trunk/include/rsdbs.h (File Modified) 
+	rserv/trunk/src/rsdbs_common.c (File Modified) 
+	rserv/trunk/src/rsdbs_mysql.c (File Modified) 
+	rserv/trunk/src/rsdbs_pgsql.c (File Modified) 
+	rserv/trunk/src/rsdbs_sqlite3.c (File Modified) 
+
+
 leeh        2008/07/25 17:56:15 UTC	(20080725_0-25789)
   Log:
   - move rsdb stuff back to src/
