@@ -146,68 +146,79 @@ rsdbs_check_key_index(const char *table_name, const char *key_list_str)
 	return 0;
 }
 
-void
-rsdb_schema_generate_element(struct rsdb_schema_set *schema_set, struct rsdb_schema *schema_element,
-				dlink_list *table_data, dlink_list *key_data)
+const char *
+rsdbs_sql_create_element(struct rsdb_schema_set *schema_set, struct rsdb_schema *schema_element,
+			int alter_table)
 {
-	static char buf[BUFSIZE];
-	int is_key = 0;
+	static char buf[BUFSIZE*2];
+	static char empty_string[] = "";
+	char *alter_table_str = empty_string;
+
+	/* prepare the 'ALTER TABLE .. ADD COLUMN' prefix if required */
+	if(alter_table)
+	{
+		rs_snprintf(buf, sizeof(buf), "ALTER TABLE %s ADD COLUMN ", schema_set->table_name);
+
+		/* create a temporary copy of the buffer in alter_table_str */
+		alter_table_str = LOCAL_COPY(buf);
+	}
 
 	buf[0] = '\0';
 
 	switch(schema_element->option)
 	{
 		case RSDB_SCHEMA_SERIAL:
-			snprintf(buf, sizeof(buf), "%s INTEGER PRIMARY KEY", schema_element->name);
+			snprintf(buf, sizeof(buf), "%s%s INTEGER PRIMARY KEY", 
+				alter_table_str, schema_element->name);
 			break;
 
 		case RSDB_SCHEMA_SERIAL_REF:
-			snprintf(buf, sizeof(buf), "%s INTEGER%s%s%s",
-				schema_element->name,
+			snprintf(buf, sizeof(buf), "%s%s INTEGER%s%s%s",
+				alter_table_str, schema_element->name,
 				(schema_element->not_null ? " NOT NULL" : ""),
 				(schema_element->def != NULL ? " DEFAULT " : ""),
 				(schema_element->def != NULL ? schema_element->def : ""));
 			break;
 
 		case RSDB_SCHEMA_BOOLEAN:
-			snprintf(buf, sizeof(buf), "%s INTEGER", schema_element->name);
+			snprintf(buf, sizeof(buf), "%s%s INTEGER", alter_table_str, schema_element->name);
 			break;
 
 		case RSDB_SCHEMA_INT:
-			snprintf(buf, sizeof(buf), "%s INTEGER%s%s%s",
-				schema_element->name,
+			snprintf(buf, sizeof(buf), "%s%s INTEGER%s%s%s",
+				alter_table_str, schema_element->name,
 				(schema_element->not_null ? " NOT NULL" : ""),
 				(schema_element->def != NULL ? " DEFAULT " : ""),
 				(schema_element->def != NULL ? schema_element->def : ""));
 			break;
 
 		case RSDB_SCHEMA_UINT:
-			snprintf(buf, sizeof(buf), "%s INTEGER%s%s%s",
-				schema_element->name,
+			snprintf(buf, sizeof(buf), "%s%s INTEGER%s%s%s",
+				alter_table_str, schema_element->name,
 				(schema_element->not_null ? " NOT NULL" : ""),
 				(schema_element->def != NULL ? " DEFAULT " : ""),
 				(schema_element->def != NULL ? schema_element->def : ""));
 			break;
 
 		case RSDB_SCHEMA_VARCHAR:
-			snprintf(buf, sizeof(buf), "%s TEXT%s%s%s",
-				schema_element->name,
+			snprintf(buf, sizeof(buf), "%s%s TEXT%s%s%s",
+				alter_table_str, schema_element->name,
 				(schema_element->not_null ? " NOT NULL" : ""),
 				(schema_element->def != NULL ? " DEFAULT " : ""),
 				(schema_element->def != NULL ? schema_element->def : ""));
 			break;
 
 		case RSDB_SCHEMA_CHAR:
-			snprintf(buf, sizeof(buf), "%s TEXT%s%s%s",
-				schema_element->name,
+			snprintf(buf, sizeof(buf), "%s%s TEXT%s%s%s",
+				alter_table_str, schema_element->name,
 				(schema_element->not_null ? " NOT NULL" : ""),
 				(schema_element->def != NULL ? " DEFAULT " : ""),
 				(schema_element->def != NULL ? schema_element->def : ""));
 			break;
 
 		case RSDB_SCHEMA_TEXT:
-			snprintf(buf, sizeof(buf), "%s TEXT%s%s%s",
-				schema_element->name,
+			snprintf(buf, sizeof(buf), "%s%s TEXT%s%s%s",
+				alter_table_str, schema_element->name,
 				(schema_element->not_null ? " NOT NULL" : ""),
 				(schema_element->def != NULL ? " DEFAULT " : ""),
 				(schema_element->def != NULL ? schema_element->def : ""));
@@ -217,21 +228,18 @@ rsdb_schema_generate_element(struct rsdb_schema_set *schema_set, struct rsdb_sch
 			if(schema_set->has_serial)
 				break;
 
-			is_key = 1;
 			snprintf(buf, sizeof(buf), "CREATE UNIQUE INDEX %s_%s_prikey ON %s (%s);",
 				schema_set->table_name, schema_element->name,
 				schema_set->table_name, schema_element->name);
 			break;
 
 		case RSDB_SCHEMA_KEY_UNIQUE:
-			is_key = 1;
 			snprintf(buf, sizeof(buf), "CREATE UNIQUE INDEX %s_%s_unique ON %s (%s);",
 				schema_set->table_name, schema_element->name,
 				schema_set->table_name, schema_element->name);
 			break;
 
 		case RSDB_SCHEMA_KEY_INDEX:
-			is_key = 1;
 			snprintf(buf, sizeof(buf), "CREATE INDEX %s_%s_idx ON %s (%s);",
 				schema_set->table_name, schema_element->name,
 				schema_set->table_name, schema_element->name);
@@ -240,10 +248,13 @@ rsdb_schema_generate_element(struct rsdb_schema_set *schema_set, struct rsdb_sch
 		/* sqlite tables don't properly support foreign keys */
 		case RSDB_SCHEMA_KEY_F_MATCH:
 		case RSDB_SCHEMA_KEY_F_CASCADE:
+			return NULL;
 			break;
 	}
 
 	if(!EmptyString(buf))
-		dlink_add_tail_alloc(my_strdup(buf), (is_key ? key_data : table_data));
+		return buf;
+
+	return NULL;
 }
 
