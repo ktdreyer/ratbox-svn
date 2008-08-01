@@ -1,3 +1,14 @@
+leeh        2008/08/01 21:18:55 UTC	(20080801_2-25809)
+  Log:
+  - move the sql handlers over to the new split schema structs
+  
+
+  Modified:
+	rserv/trunk/src/rsdbs_mysql.c (File Modified) 
+	rserv/trunk/src/rsdbs_pgsql.c (File Modified) 
+	rserv/trunk/src/rsdbs_sqlite3.c (File Modified) 
+
+
 leeh        2008/08/01 21:09:48 UTC	(20080801_1-25807)
   Log:
   - split the schema into separate structs for columns/keys
