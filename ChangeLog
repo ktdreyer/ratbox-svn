@@ -1,3 +1,13 @@
+leeh        2008/08/01 21:52:30 UTC	(20080801_3-25811)
+  Log:
+  - rename schema.c to rsdbs_schema.c
+  
+
+  Modified:
+	rserv/trunk/src/rsdbs_schema.c (File Added) 
+	rserv/trunk/src/schema.c (File Deleted) 
+
+
 leeh        2008/08/01 21:18:55 UTC	(20080801_2-25809)
   Log:
   - move the sql handlers over to the new split schema structs
