@@ -206,8 +206,6 @@ rsdbs_sql_create_element(struct rsdb_schema_set *schema_set, struct rsdb_schema 
 	char *alter_table_str = empty_string;
 	const char *idx_name;
 
-	buf[0] = '\0';
-
 	/* prepare the 'ALTER TABLE .. ADD COLUMN' prefix if required */
 	if(alter_table)
 	{
@@ -216,6 +214,8 @@ rsdbs_sql_create_element(struct rsdb_schema_set *schema_set, struct rsdb_schema 
 		/* create a temporary copy of the buffer in alter_table_str */
 		alter_table_str = LOCAL_COPY(buf);
 	}
+
+	buf[0] = '\0';
 
 	switch(schema_element->option)
 	{
