@@ -1,3 +1,12 @@
+leeh        2008/08/01 21:08:50 UTC	(20080801_0-25805)
+  Log:
+  - move a buf[0] = '\0'; slightly lower
+  
+
+  Modified:
+	rserv/trunk/src/rsdbs_mysql.c (File Modified) 
+
+
 leeh        2008/07/31 22:16:22 UTC	(20080731_0-25803)
   Log:
   - morph rsdb_schema_generate_element() over to a sql generating function,
