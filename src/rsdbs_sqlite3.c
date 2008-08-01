@@ -147,7 +147,7 @@ rsdbs_check_key_index(const char *table_name, const char *key_list_str)
 }
 
 const char *
-rsdbs_sql_create_element(struct rsdb_schema_set *schema_set, struct rsdb_schema *schema_element,
+rsdbs_sql_create_col(struct rsdb_schema_set *schema_set, struct rsdbs_schema_col *schema_element,
 			int alter_table)
 {
 	static char buf[BUFSIZE*2];
@@ -223,7 +223,23 @@ rsdbs_sql_create_element(struct rsdb_schema_set *schema_set, struct rsdb_schema 
 				(schema_element->def != NULL ? " DEFAULT " : ""),
 				(schema_element->def != NULL ? schema_element->def : ""));
 			break;
+	}
 
+	if(!EmptyString(buf))
+		return buf;
+
+	return NULL;
+}
+
+const char *
+rsdbs_sql_create_key(struct rsdb_schema_set *schema_set, struct rsdbs_schema_key *schema_element)
+{
+	static char buf[BUFSIZE*2];
+
+	buf[0] = '\0';
+
+	switch(schema_element->option)
+	{
 		case RSDB_SCHEMA_KEY_PRIMARY:
 			if(schema_set->has_serial)
 				break;

@@ -98,7 +98,7 @@ rsdbs_check_column(const char *table_name, const char *column_name)
 }
 
 static int
-rsdbs_check_key_kcu(const char *table_name, const char *key_list_str, rsdb_schema_option option)
+rsdbs_check_key_kcu(const char *table_name, const char *key_list_str, rsdbs_schema_key_option option)
 {
 	static const char option_str_pri[] = "PRIMARY KEY";
 	static const char option_str_unique[] = "UNIQUE";
@@ -198,13 +198,12 @@ rsdbs_check_key_index(const char *table_name, const char *key_list_str)
 }
 
 const char *
-rsdbs_sql_create_element(struct rsdb_schema_set *schema_set, struct rsdb_schema *schema_element,
+rsdbs_sql_create_col(struct rsdb_schema_set *schema_set, struct rsdbs_schema_col *schema_element,
 				int alter_table)
 {
 	static char buf[BUFSIZE*2];
 	static char empty_string[] = "";
 	char *alter_table_str = empty_string;
-	const char *idx_name;
 
 	/* prepare the 'ALTER TABLE .. ADD COLUMN' prefix if required */
 	if(alter_table)
@@ -275,7 +274,24 @@ rsdbs_sql_create_element(struct rsdb_schema_set *schema_set, struct rsdb_schema 
 				(schema_element->def != NULL ? " DEFAULT " : ""),
 				(schema_element->def != NULL ? schema_element->def : ""));
 			break;
+	}
 
+	if(!EmptyString(buf))
+		return buf;
+
+	return NULL;
+}
+
+const char *
+rsdbs_sql_create_key(struct rsdb_schema_set *schema_set, struct rsdbs_schema_key *schema_element)
+{
+	static char buf[BUFSIZE*2];
+	const char *idx_name;
+
+	buf[0] = '\0';
+
+	switch(schema_element->option)
+	{
 		case RSDB_SCHEMA_KEY_PRIMARY:
 			/* mysql requires AUTO_INCREMENT columns are defined as PRIMARY KEY when 
 			 * they're added, so skip the primary key if this is the case.
@@ -314,4 +330,3 @@ rsdbs_sql_create_element(struct rsdb_schema_set *schema_set, struct rsdb_schema 
 
 	return NULL;
 }
-
