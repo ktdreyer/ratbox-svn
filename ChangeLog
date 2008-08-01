@@ -1,3 +1,13 @@
+leeh        2008/08/01 21:57:49 UTC	(20080801_5-25815)
+  Log:
+  - make sure the sql statements get added to the tail of the dlink, rather
+    than the head
+  
+
+  Modified:
+	rserv/trunk/src/rsdbs_common.c (File Modified) 
+
+
 leeh        2008/08/01 21:54:33 UTC	(20080801_4-25813)
   Log:
   - fix Makefile for renaming of schema.c to rsdbs_schema.c
