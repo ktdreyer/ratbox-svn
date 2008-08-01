@@ -123,7 +123,7 @@ rsdbs_check_table(struct rsdb_schema_set *schema_set)
 					const char *add_sql = rsdbs_sql_create_col(schema_set, &schema_col[i], 1);
 
 					if(add_sql)
-						dlink_add_alloc(my_strdup(add_sql), &table_data);
+						dlink_add_tail_alloc(my_strdup(add_sql), &table_data);
 				}
 
 				break;
@@ -143,13 +143,13 @@ rsdbs_check_table(struct rsdb_schema_set *schema_set)
 
 					/* drop existing primary keys if found */
 					if(sql_str)
-						dlink_add_alloc(my_strdup(sql_str), &table_data);
+						dlink_add_tail_alloc(my_strdup(sql_str), &table_data);
 
 					/* add in the sql for the primary key */
 					sql_str = rsdbs_sql_create_key(schema_set, &schema_key[i]);
 
 					if(sql_str)
-						dlink_add_alloc(my_strdup(sql_str), &table_data);
+						dlink_add_tail_alloc(my_strdup(sql_str), &table_data);
 				}
 
 				break;
@@ -161,7 +161,7 @@ rsdbs_check_table(struct rsdb_schema_set *schema_set)
 					const char *add_sql = rsdbs_sql_create_key(schema_set, &schema_key[i]);
 
 					if(add_sql)
-						dlink_add_alloc(my_strdup(add_sql), &table_data);
+						dlink_add_tail_alloc(my_strdup(add_sql), &table_data);
 				}
 
 				break;
@@ -173,7 +173,7 @@ rsdbs_check_table(struct rsdb_schema_set *schema_set)
 					const char *add_sql = rsdbs_sql_create_key(schema_set, &schema_key[i]);
 
 					if(add_sql)
-						dlink_add_alloc(my_strdup(add_sql), &table_data);
+						dlink_add_tail_alloc(my_strdup(add_sql), &table_data);
 				}
 
 				break;
@@ -304,13 +304,13 @@ rsdb_schema_generate_table(struct rsdb_schema_set *schema_set)
 
 	strlcat(buf, ")", sizeof(buf));
 
-	dlink_add_alloc(my_strdup(buf), &table_data);
+	dlink_add_tail_alloc(my_strdup(buf), &table_data);
 
 	schema_key = schema_set->schema_key;
 
 	for(i = 0; schema_key[i].name; i++)
 	{
-		dlink_add_alloc(my_strdup(rsdbs_sql_create_key(schema_set, &schema_key[i])), &table_data);
+		dlink_add_tail_alloc(my_strdup(rsdbs_sql_create_key(schema_set, &schema_key[i])), &table_data);
 	}
 
 	rsdb_schema_debug(schema_set->table_name, &table_data);
