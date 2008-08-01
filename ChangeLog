@@ -1,3 +1,12 @@
+leeh        2008/08/01 21:54:33 UTC	(20080801_4-25813)
+  Log:
+  - fix Makefile for renaming of schema.c to rsdbs_schema.c
+  
+
+  Modified:
+	rserv/trunk/src/Makefile.in (File Modified) 
+
+
 leeh        2008/08/01 21:52:30 UTC	(20080801_3-25811)
   Log:
   - rename schema.c to rsdbs_schema.c
