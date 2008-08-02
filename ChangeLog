@@ -1,3 +1,14 @@
+leeh        2008/08/02 20:26:56 UTC	(20080802_1-25819)
+  Log:
+  - add a quick variable to allow writing the schema straight to the database
+  
+
+  Modified:
+	rserv/trunk/include/rsdbs.h (File Modified) 
+	rserv/trunk/src/rsdbs_common.c (File Modified) 
+	rserv/trunk/src/rsdbs_schema.c (File Modified) 
+
+
 leeh        2008/08/02 19:52:30 UTC	(20080802_0-25817)
   Log:
   - initial start of a schema test program
