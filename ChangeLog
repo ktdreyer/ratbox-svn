@@ -1,3 +1,15 @@
+leeh        2008/08/02 20:35:50 UTC	(20080802_2-25821)
+  Log:
+  - move the schema_init() prototype from rserv.h to rsdbs.h
+  - make schema_init() take a value to pass down to rsdbs_check_schema()
+  
+
+  Modified:
+	rserv/trunk/include/rsdbs.h (File Modified) 
+	rserv/trunk/include/rserv.h (File Modified) 
+	rserv/trunk/src/rsdbs_schema.c (File Modified) 
+
+
 leeh        2008/08/02 20:26:56 UTC	(20080802_1-25819)
   Log:
   - add a quick variable to allow writing the schema straight to the database
