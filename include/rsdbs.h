@@ -65,12 +65,11 @@ int rsdbs_check_key_unique(const char *table_name, const char *key_list_str);
 int rsdbs_check_key_index(const char *table_name, const char *key_list_str);
 
 /* rsdbs_common.c */
-void rsdb_schema_check(struct rsdb_schema_set *schema_set);
+void rsdb_schema_check(struct rsdb_schema_set *schema_set, int write_sql);
 
-void rsdb_schema_debug(const char *table_name, dlink_list *table_data);
 struct _dlink_list *rsdb_schema_split_key(const char *key_fields);
 
-void rsdb_schema_generate_table(struct rsdb_schema_set *schema_set);
+struct _dlink_list *rsdb_schema_generate_table(struct rsdb_schema_set *schema_set);
 const char *rsdbs_generate_key_name(const char *table_name, const char *field_list_text, rsdbs_schema_key_option option);
 
 #endif

@@ -36,7 +36,7 @@
 #include "rsdbs.h"
 
 
-static void rsdbs_check_table(struct rsdb_schema_set *schema_set);
+static dlink_list *rsdbs_check_table(struct rsdb_schema_set *schema_set);
 
 /* rsdb_schema_check()
  * Checks the database against the schema
@@ -46,8 +46,10 @@ static void rsdbs_check_table(struct rsdb_schema_set *schema_set);
  * side effects - runs checks for all tables in the schema
  */
 void
-rsdb_schema_check(struct rsdb_schema_set *schema_set)
+rsdb_schema_check(struct rsdb_schema_set *schema_set, int write_sql)
 {
+	dlink_list *table_data;
+	dlink_node *ptr;
 	struct rsdbs_schema_col *schema_element;
 	struct rsdb_table data;
 	const char *buf;
@@ -85,21 +87,29 @@ rsdb_schema_check(struct rsdb_schema_set *schema_set)
 
 		/* table exists, run checks on each field */
 		if(data.row_count > 0)
-			rsdbs_check_table(&schema_set[i]);
+			table_data = rsdbs_check_table(&schema_set[i]);
 		/* table doesn't exist.. just flat generate it */
 		else
-			rsdb_schema_generate_table(&schema_set[i]);
+			table_data = rsdb_schema_generate_table(&schema_set[i]);
+
+		DLINK_FOREACH(ptr, table_data->head)
+		{
+			if(write_sql)
+				rsdb_exec(NULL, "%s", (const char *) ptr->data);
+			else
+				fprintf(stdout, "%s;\n", (const char *) ptr->data);
+		}
 
 		rsdb_exec_fetch_end(&data);
 	}
 }
 
-static void
+static dlink_list *
 rsdbs_check_table(struct rsdb_schema_set *schema_set)
 {
+	static dlink_list table_data;
 	struct rsdbs_schema_col *schema_col;
 	struct rsdbs_schema_key *schema_key;
-	dlink_list table_data;
 	int i;
 
 	memset(&table_data, 0, sizeof(struct _dlink_list));
@@ -184,7 +194,7 @@ rsdbs_check_table(struct rsdb_schema_set *schema_set)
 		}
 	}
 
-	rsdb_schema_debug(schema_set->table_name, &table_data);
+	return &table_data;
 }
 
 
@@ -215,17 +225,6 @@ rsdbs_generate_key_name(const char *table_name, const char *field_list_text, rsd
 		strlcat(buf, "unknown", sizeof(buf));
 
 	return buf;
-}
-
-void
-rsdb_schema_debug(const char *table_name, dlink_list *table_data)
-{
-	dlink_node *ptr;
-
-	DLINK_FOREACH(ptr, table_data->head)
-	{
-		fprintf(stdout, "%s;\n", (const char *) ptr->data);
-	}
 }
 
 /* rsdb_schema_split_key()
@@ -278,13 +277,13 @@ rsdb_schema_split_key(const char *key_fields)
  * outputs	-
  * side effects - generates the sql for the relevant schema set
  */
-void
+dlink_list *
 rsdb_schema_generate_table(struct rsdb_schema_set *schema_set)
 {
 	char buf[BUFSIZE*2];
 	struct rsdbs_schema_col *schema_col;
 	struct rsdbs_schema_key *schema_key;
-	dlink_list table_data;
+	static dlink_list table_data;
 	int i;
 
 	memset(&table_data, 0, sizeof(struct _dlink_list));
@@ -313,7 +312,7 @@ rsdb_schema_generate_table(struct rsdb_schema_set *schema_set)
 		dlink_add_tail_alloc(my_strdup(rsdbs_sql_create_key(schema_set, &schema_key[i])), &table_data);
 	}
 
-	rsdb_schema_debug(schema_set->table_name, &table_data);
+	return &table_data;
 }
 
 

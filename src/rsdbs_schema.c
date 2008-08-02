@@ -377,6 +377,6 @@ static struct rsdb_schema_set rsdb_schema_tables[] = {
 void
 schema_init(void)
 {
-	rsdb_schema_check(rsdb_schema_tables);
+	rsdb_schema_check(rsdb_schema_tables, 0);
 }
 
