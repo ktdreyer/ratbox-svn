@@ -1,3 +1,12 @@
+leeh        2008/08/02 20:38:01 UTC	(20080802_4-25825)
+  Log:
+  - rerun make depend
+  
+
+  Modified:
+	rserv/trunk/src/.depend (File Modified) 
+
+
 leeh        2008/08/02 20:36:37 UTC	(20080802_3-25823)
   Log:
   - make the mlog() and die() functions in schematest real
