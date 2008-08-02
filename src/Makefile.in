@@ -8,6 +8,7 @@ LEX=@LEX@
 LEXLIB=@LEXLIB@
 YACC=@YACC@
 BIN=ratbox-services@EXEEXT@
+STESTBIN=schematest@EXEEXT@
 INCLUDES=-I ../include/ @DB_INCLUDES@ @PCRE_INCLUDES@
 LDFLAGS=@LDFLAGS@
 LIBS=@LIBS@
@@ -27,7 +28,7 @@ CFLAGS=@CPPFLAGS@ @CFLAGS@ -DPREFIX=\"$(prefix)\" -DSYSCONFDIR=\"$(sysconfdir)\"
 	-DLOGDIR=\"$(logdir)\" -DRUNDIR=\"$(rundir)\" -DHELPDIR=\"$(helpdir)\" -DLANGDIR=\"$(langdir)\"
 
 # Anything marked with the .PHONY attribute is always considered "out of date"
-.PHONY: $(BIN)
+.PHONY: $(BIN) $(STESTBIN)
 
 BSRCS = 		\
         balloc.c        \
@@ -63,16 +64,32 @@ BSRCS = 		\
         u_stats.c       \
 	ucommand.c	
 
+STESTBSRCS =		\
+	balloc.c	\
+	match.c		\
+	rsdb_common.c   \
+	rsdbs_common.c  \
+	snprintf.c	\
+	stest_main.c	\
+	stest_schema.c	\
+	tools.c
+
 SRCS = ${BSRCS} @S_NICKSERV@ @S_USERSERV@ @S_CHANSERV@ @S_OPERSERV@ @S_ALIS@\
 	@S_OPERBOT@ @S_JUPESERV@ @S_GLOBAL@ @S_BANSERV@ @S_WATCHSERV@\
 	@S_MEMOSERV@ rsdb_@DB_BACKEND@.c rsdbs_@DB_BACKEND@.c
 
-OBJS=$(SRCS:.c=.o)
+STESTSRCS = ${STESTBSRCS} rsdb_@DB_BACKEND@.c rsdbs_@DB_BACKEND@.c
 
-all: $(BIN)
+OBJS=$(SRCS:.c=.o)
+STESTOBJS=$(STESTSRCS:.c=.o)
+
+all: $(BIN) 
 
 $(BIN): $(OBJS) y.tab.o lex.yy.o
 	${CC} ${CFLAGS} ${LDFLAGS} -o $@ ${OBJS} y.tab.o lex.yy.o $(DB_LIBS) $(LIBS) $(LEXLIB)
+
+$(STESTBIN): $(STESTOBJS)
+	${CC} ${CFLAGS} ${LDFLAGS} -o $@ ${STESTOBJS} ${DB_LIBS} ${LIBS}
 
 .c.o:
 	${CC} $(INCLUDES) ${CFLAGS} -c $<
@@ -92,7 +109,7 @@ lex.yy.c:	lexer.l
 build: $(BIN)
 
 clean:
-	$(RM) -f $(BIN) *.o y.tab.* lex.yy.c
+	$(RM) -f $(BIN) $(STESTBIN) *.o y.tab.* lex.yy.c
 
 distclean: clean
 	$(RM) Makefile
