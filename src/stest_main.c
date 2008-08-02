@@ -35,26 +35,102 @@
 #include "event.h"
 #include "balloc.h"
 #include "rsdb.h"
+#include "rsdbs.h"
 #include "log.h"
 #include "io.h"
 
-void die(int graceful, const char *format, ...) { }
-void mlog(const char *format, ...) { }
 void sendto_all(const char *format, ...) { }
 void eventAdd(const char *name, EVH * func, void *arg, time_t when) { }
 void set_time(void) { }
 
 struct timeval system_time;
 
+void
+mlog(const char *format, ...)
+{
+	va_list args;
+	char buf[BUFSIZE];
+
+	va_start(args, format);
+	vsnprintf(buf, sizeof(buf), format, args);
+	va_end(args);
+
+	fprintf(stdout, "%s\n", buf);
+}
+
+void
+die(int graceful, const char *format, ...)
+{
+	va_list args;
+	char buf[BUFSIZE];
+
+	va_start(args, format);
+	vsnprintf(buf, sizeof(buf), format, args);
+	va_end(args);
+
+	fprintf(stdout, "%s\n", buf);
+	exit(0);
+}
+
+static void
+print_help(void)
+{
+	printf("schematest [-h] [-i] <-d dbname|-t dbhost|-u dbusername|-p dbpassword>\n");
+}
+
 int
 main(int argc, char *argv[])
 {
+	char *db_name = NULL;
+	char *db_host = NULL;
+	char *db_username = NULL;
+	char *db_password = NULL;
+	int db_create = 0;
+	char c;
+
+	while((c = getopt(argc, argv, "hid:t:u:p:")) != -1)
+	{
+		switch(c)
+		{
+			case 'h':
+				print_help();
+				exit(0);
+				break;
+
+			case 'i':
+				db_create = 1;
+				break;
+
+			case 'd':
+				db_name = my_strdup(optarg);
+				break;
+
+			case 't':
+				db_host = my_strdup(optarg);
+				break;
+
+			case 'u':
+				db_username = my_strdup(optarg);
+				break;
+
+			case 'p':
+				db_password = my_strdup(optarg);
+				break;
+		}
+	}
+
+	if(EmptyString(db_name) || EmptyString(db_host) || EmptyString(db_username) || EmptyString(db_password))
+	{
+		print_help();
+		exit(0);
+	}
+
 	init_balloc();
 	init_tools();
 
-//	rsdb_init();
+	rsdb_init(db_name, db_host, db_username, db_password);
 
-	schema_init();
+	schema_init(db_create);
 
 	exit(0);
 }

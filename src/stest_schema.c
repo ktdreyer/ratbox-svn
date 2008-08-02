@@ -92,8 +92,10 @@ static struct rsdb_schema_set stest_schema2_tables[] =
 };
 
 void
-schema_init(void)
+schema_init(int create)
 {
-	rsdb_schema_check(stest_schema1_tables);
-	rsdb_schema_check(stest_schema2_tables);
+	if(create)
+		rsdb_schema_check(stest_schema1_tables, 1);
+	else
+		rsdb_schema_check(stest_schema2_tables, 0);
 }
