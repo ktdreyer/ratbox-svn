@@ -2,6 +2,9 @@
 #ifndef INCLUDED_rsdbs_h
 #define INCLUDED_rsdbs_h
 
+/* rsdbs_schema.c */
+void schema_init(int);
+
 /* schema generation */
 typedef enum rsdbs_schema_col_option
 {
