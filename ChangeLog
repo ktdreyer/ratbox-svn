@@ -1,3 +1,14 @@
+leeh        2008/08/02 20:36:37 UTC	(20080802_3-25823)
+  Log:
+  - make the mlog() and die() functions in schematest real
+  - fix how schema_init() is called
+  
+
+  Modified:
+	rserv/trunk/src/stest_main.c (File Modified) 
+	rserv/trunk/src/stest_schema.c (File Modified) 
+
+
 leeh        2008/08/02 20:35:50 UTC	(20080802_2-25821)
   Log:
   - move the schema_init() prototype from rserv.h to rsdbs.h
