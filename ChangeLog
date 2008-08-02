@@ -1,3 +1,14 @@
+leeh        2008/08/02 19:52:30 UTC	(20080802_0-25817)
+  Log:
+  - initial start of a schema test program
+  
+
+  Modified:
+	rserv/trunk/src/Makefile.in (File Modified) 
+	rserv/trunk/src/stest_main.c (File Added) 
+	rserv/trunk/src/stest_schema.c (File Added) 
+
+
 leeh        2008/08/01 21:57:49 UTC	(20080801_5-25815)
   Log:
   - make sure the sql statements get added to the tail of the dlink, rather
