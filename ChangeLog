@@ -1,3 +1,13 @@
+leeh        2008/08/03 18:19:13 UTC	(20080803_1-25829)
+  Log:
+  - flesh out the schema testing somewhat and make it multi-pass
+  
+
+  Modified:
+	rserv/trunk/src/stest_main.c (File Modified) 
+	rserv/trunk/src/stest_schema.c (File Modified) 
+
+
 leeh        2008/08/03 18:13:18 UTC	(20080803_0-25827)
   Log:
   - make rsdbs_common handle getting a schema set without columns/keys
