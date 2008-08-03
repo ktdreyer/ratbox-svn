@@ -75,7 +75,7 @@ die(int graceful, const char *format, ...)
 static void
 print_help(void)
 {
-	printf("schematest [-h] [-i] <-d dbname|-t dbhost|-u dbusername|-p dbpassword>\n");
+	printf("schematest [-h] <-d dbname|-t dbhost|-u dbusername|-p dbpassword>\n");
 }
 
 int
@@ -85,7 +85,6 @@ main(int argc, char *argv[])
 	char *db_host = NULL;
 	char *db_username = NULL;
 	char *db_password = NULL;
-	int db_create = 0;
 	char c;
 
 	while((c = getopt(argc, argv, "hid:t:u:p:")) != -1)
@@ -95,10 +94,6 @@ main(int argc, char *argv[])
 			case 'h':
 				print_help();
 				exit(0);
-				break;
-
-			case 'i':
-				db_create = 1;
 				break;
 
 			case 'd':
@@ -130,7 +125,7 @@ main(int argc, char *argv[])
 
 	rsdb_init(db_name, db_host, db_username, db_password);
 
-	schema_init(db_create);
+	schema_init(0);
 
 	exit(0);
 }

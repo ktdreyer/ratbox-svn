@@ -32,9 +32,11 @@
  */
 #include "stdinc.h"
 #include "rserv.h"
+#include "rsdb.h"
 #include "rsdbs.h"
+#include "log.h"
 
-static struct rsdbs_schema_col stest_cs1_nochange[] =
+static struct rsdbs_schema_col stest_cs_nochange[] =
 {
 	{ RSDB_SCHEMA_SERIAL,		0,	0, "id",	NULL	},
 	{ RSDB_SCHEMA_SERIAL_REF,	0,	0, "id_ref",	NULL	},
@@ -46,7 +48,7 @@ static struct rsdbs_schema_col stest_cs1_nochange[] =
 	{ RSDB_SCHEMA_TEXT,		0,	0, "v_text",	"''"	},
 	{ 0, 0, 0, NULL, NULL }
 };
-static struct rsdbs_schema_key stest_ks1_nochange[] =
+static struct rsdbs_schema_key stest_ks_nochange[] =
 {
 	{ RSDB_SCHEMA_KEY_PRIMARY,	0,	0, "id",		NULL	},
 	{ RSDB_SCHEMA_KEY_UNIQUE,	0,	0, "v_text",		NULL	},
@@ -55,47 +57,113 @@ static struct rsdbs_schema_key stest_ks1_nochange[] =
 	{ RSDB_SCHEMA_KEY_INDEX,	0,	0, "v_int, v_uint",	NULL	},
 	{ 0, 0, 0, NULL, NULL }
 };
-static struct rsdbs_schema_col stest_cs2_nochange[] =
+
+static struct rsdbs_schema_col stest_cs1_addserial[] =
+{
+	{ RSDB_SCHEMA_BOOLEAN,		0,	0, "v_bool",	NULL	},
+	{ 0, 0, 0, NULL, NULL }
+};
+static struct rsdbs_schema_col stest_cs2_addserial[] =
 {
 	{ RSDB_SCHEMA_SERIAL,		0,	0, "id",	NULL	},
-	{ RSDB_SCHEMA_SERIAL_REF,	0,	0, "id_ref",	NULL	},
 	{ RSDB_SCHEMA_BOOLEAN,		0,	0, "v_bool",	NULL	},
-	{ RSDB_SCHEMA_INT,		0,	0, "v_int",	"0"	},
-	{ RSDB_SCHEMA_UINT,		0,	0, "v_uint",	"0"	},
-	{ RSDB_SCHEMA_VARCHAR,		100,	0, "v_varchar",	"''"	},
-	{ RSDB_SCHEMA_CHAR,		100,	0, "v_char",	"''"	},
-	{ RSDB_SCHEMA_TEXT,		0,	0, "v_text",	"''"	},
 	{ 0, 0, 0, NULL, NULL }
 };
-static struct rsdbs_schema_key stest_ks2_nochange[] =
+static struct rsdbs_schema_key stest_ks2_addserial[] =
 {
-	{ RSDB_SCHEMA_KEY_PRIMARY,	0,	0, "id",		NULL	},
-	{ RSDB_SCHEMA_KEY_UNIQUE,	0,	0, "v_text",		NULL	},
-	{ RSDB_SCHEMA_KEY_UNIQUE,	0,	0, "v_varchar, v_char",	NULL	},
-	{ RSDB_SCHEMA_KEY_INDEX,	0,	0, "v_bool",		NULL	},
-	{ RSDB_SCHEMA_KEY_INDEX,	0,	0, "v_int, v_uint",	NULL	},
+	{ RSDB_SCHEMA_KEY_PRIMARY,	0,	0, "id",	NULL	},
 	{ 0, 0, 0, NULL, NULL }
 };
 
-
-
-static struct rsdb_schema_set stest_schema1_tables[] =
+static struct stest_schema_set
 {
-	{ "nochange",		stest_cs1_nochange,		stest_ks1_nochange,		0 },
-	{ NULL, NULL, NULL, 0 }
-};
-
-static struct rsdb_schema_set stest_schema2_tables[] =
-{
-	{ "nochange",		stest_cs2_nochange,		stest_ks2_nochange,		0 },
-	{ NULL, NULL, NULL, 0 }
+	const char *table_name;
+	struct rsdbs_schema_col *schema1_col;
+	struct rsdbs_schema_col *schema2_col;
+	struct rsdbs_schema_key *schema1_key;
+	struct rsdbs_schema_key *schema2_key;
+	const char *description;
+} stest_schema_tables[] = {
+	{ 
+		"nochange",	
+		stest_cs_nochange,		stest_cs_nochange,	
+		stest_ks_nochange,		stest_ks_nochange,	
+		"No changes to this table"
+	},
+	{
+		"addserial",
+		stest_cs1_addserial,		stest_cs2_addserial,
+		NULL,				stest_ks2_addserial,
+		"Adding a SERIAL field"
+	},
+	{ NULL, NULL, NULL, NULL, NULL, NULL }
 };
 
 void
 schema_init(int create)
 {
-	if(create)
-		rsdb_schema_check(stest_schema1_tables, 1);
-	else
-		rsdb_schema_check(stest_schema2_tables, 0);
+	struct rsdb_table data;
+	struct rsdb_schema_set *schema_set;
+	const char *sql;
+	size_t schema_size;
+	int i;
+
+	/* run a quick check to make sure the tables dont exist */
+	for(i = 0; stest_schema_tables[i].table_name; i++)
+	{
+		sql = rsdbs_sql_check_table(stest_schema_tables[i].table_name);
+
+		rsdb_exec_fetch(&data, "%s", sql);
+
+		/* table exists, it shouldn't */
+		if(data.row_count > 0)
+		{
+			die(0, "Found already existing table '%s'.  Please run with a clean database.",
+				stest_schema_tables[i].table_name);
+		}
+	}
+
+	schema_size = sizeof(struct rsdb_schema_set) * (sizeof(stest_schema_tables) / sizeof(struct stest_schema_set));
+
+	mlog("First pass, creating initial schema.");
+
+	schema_set = my_malloc(schema_size);
+
+	for(i = 0; stest_schema_tables[i].table_name; i++)
+	{
+		schema_set[i].table_name = stest_schema_tables[i].table_name;
+		schema_set[i].schema_col = stest_schema_tables[i].schema1_col;
+		schema_set[i].schema_key = stest_schema_tables[i].schema1_key;
+
+	}
+
+	rsdb_schema_check(schema_set, 1);
+
+	mlog("Second pass, checking modifications.");
+
+	for(i = 0; stest_schema_tables[i].table_name; i++)
+	{
+		mlog("%s", stest_schema_tables[i].description);
+
+		memset(schema_set, 0, schema_size);
+		schema_set[0].table_name = stest_schema_tables[i].table_name;
+		schema_set[0].schema_col = stest_schema_tables[i].schema2_col;
+		schema_set[0].schema_key = stest_schema_tables[i].schema2_key;
+		rsdb_schema_check(schema_set, 1);
+	}
+
+	rsdb_schema_check(schema_set, 1);
+
+	mlog("Third pass, no further modifications should be needed.");
+
+	memset(schema_set, 0, sizeof(struct rsdb_schema_set) * (sizeof(stest_schema_tables) / sizeof(struct stest_schema_set)));
+
+	for(i = 0; stest_schema_tables[i].table_name; i++)
+	{
+		schema_set[i].table_name = stest_schema_tables[i].table_name;
+		schema_set[i].schema_col = stest_schema_tables[i].schema2_col;
+		schema_set[i].schema_key = stest_schema_tables[i].schema2_key;
+	}
+
+	rsdb_schema_check(schema_set, 1);
 }
