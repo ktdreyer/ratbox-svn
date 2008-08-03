@@ -108,89 +108,94 @@ static dlink_list *
 rsdbs_check_table(struct rsdb_schema_set *schema_set)
 {
 	static dlink_list table_data;
-	struct rsdbs_schema_col *schema_col;
-	struct rsdbs_schema_key *schema_key;
 	int i;
 
 	memset(&table_data, 0, sizeof(struct _dlink_list));
 
-	schema_col = schema_set->schema_col;
-
-	for(i = 0; schema_col[i].name; i++)
+	if(schema_set->schema_col)
 	{
-		switch(schema_col[i].option)
+		struct rsdbs_schema_col *schema_col = schema_set->schema_col;
+
+		for(i = 0; schema_col[i].name; i++)
 		{
-			case RSDB_SCHEMA_SERIAL:
-			case RSDB_SCHEMA_SERIAL_REF:
-			case RSDB_SCHEMA_BOOLEAN:
-			case RSDB_SCHEMA_INT:
-			case RSDB_SCHEMA_UINT:
-			case RSDB_SCHEMA_VARCHAR:
-			case RSDB_SCHEMA_CHAR:
-			case RSDB_SCHEMA_TEXT:
-				if(!rsdbs_check_column(schema_set->table_name, schema_col[i].name))
-				{
-					const char *add_sql = rsdbs_sql_create_col(schema_set, &schema_col[i], 1);
+			switch(schema_col[i].option)
+			{
+				case RSDB_SCHEMA_SERIAL:
+				case RSDB_SCHEMA_SERIAL_REF:
+				case RSDB_SCHEMA_BOOLEAN:
+				case RSDB_SCHEMA_INT:
+				case RSDB_SCHEMA_UINT:
+				case RSDB_SCHEMA_VARCHAR:
+				case RSDB_SCHEMA_CHAR:
+				case RSDB_SCHEMA_TEXT:
+					if(!rsdbs_check_column(schema_set->table_name, schema_col[i].name))
+					{
+						const char *add_sql = rsdbs_sql_create_col(schema_set, &schema_col[i], 1);
 
-					if(add_sql)
-						dlink_add_tail_alloc(my_strdup(add_sql), &table_data);
-				}
+						if(add_sql)
+							dlink_add_tail_alloc(my_strdup(add_sql), &table_data);
+					}
 
-				break;
+					break;
+			}
 		}
 	}
 
-	schema_key = schema_set->schema_key;
-	for(i = 0; schema_key[i].name; i++)
+	if(schema_set->schema_key)
 	{
-		switch(schema_key[i].option)
+		struct rsdbs_schema_key *schema_key = schema_set->schema_key;
+
+		for(i = 0; schema_key[i].name; i++)
 		{
-			case RSDB_SCHEMA_KEY_PRIMARY:
-				/* check if the constraint exists */
-				if(!rsdbs_check_key_pri(schema_set->table_name, schema_key[i].name))
-				{
-					const char *sql_str = rsdbs_sql_drop_key_pri(schema_set->table_name);
+			switch(schema_key[i].option)
+			{
+				case RSDB_SCHEMA_KEY_PRIMARY:
+					/* check if the constraint exists */
+					if(!rsdbs_check_key_pri(schema_set->table_name, schema_key[i].name))
+					{
+						const char *sql_str = rsdbs_sql_drop_key_pri(schema_set->table_name);
 
-					/* drop existing primary keys if found */
-					if(sql_str)
-						dlink_add_tail_alloc(my_strdup(sql_str), &table_data);
+						/* drop existing primary keys if found */
+						if(sql_str)
+							dlink_add_tail_alloc(my_strdup(sql_str), &table_data);
 
-					/* add in the sql for the primary key */
-					sql_str = rsdbs_sql_create_key(schema_set, &schema_key[i]);
+						/* add in the sql for the primary key */
+						sql_str = rsdbs_sql_create_key(schema_set, &schema_key[i]);
 
-					if(sql_str)
-						dlink_add_tail_alloc(my_strdup(sql_str), &table_data);
-				}
+						if(sql_str)
+							dlink_add_tail_alloc(my_strdup(sql_str), &table_data);
+					}
 
-				break;
+					break;
 
-			case RSDB_SCHEMA_KEY_UNIQUE:
-				/* check if the constraint exists */
-				if(!rsdbs_check_key_unique(schema_set->table_name, schema_key[i].name))
-				{
-					const char *add_sql = rsdbs_sql_create_key(schema_set, &schema_key[i]);
+				case RSDB_SCHEMA_KEY_UNIQUE:
+					/* check if the constraint exists */
+					if(!rsdbs_check_key_unique(schema_set->table_name, schema_key[i].name))
+					{
+						const char *add_sql = rsdbs_sql_create_key(schema_set, &schema_key[i]);
 
-					if(add_sql)
-						dlink_add_tail_alloc(my_strdup(add_sql), &table_data);
-				}
+						if(add_sql)
+							dlink_add_tail_alloc(my_strdup(add_sql), &table_data);
+					}
 
-				break;
+					break;
 
 
-			case RSDB_SCHEMA_KEY_INDEX:
-				if(!rsdbs_check_key_index(schema_set->table_name, schema_key[i].name))
-				{
-					const char *add_sql = rsdbs_sql_create_key(schema_set, &schema_key[i]);
+				case RSDB_SCHEMA_KEY_INDEX:
+					if(!rsdbs_check_key_index(schema_set->table_name, schema_key[i].name))
+					{
+						const char *add_sql = rsdbs_sql_create_key(schema_set, &schema_key[i]);
 
-					if(add_sql)
-						dlink_add_tail_alloc(my_strdup(add_sql), &table_data);
-				}
+						if(add_sql)
+							dlink_add_tail_alloc(my_strdup(add_sql), &table_data);
+					}
 
-				break;
+					break;
 
-			case RSDB_SCHEMA_KEY_F_MATCH:
-			case RSDB_SCHEMA_KEY_F_CASCADE:
-				break;
+				case RSDB_SCHEMA_KEY_F_MATCH:
+				case RSDB_SCHEMA_KEY_F_CASCADE:
+					break;
+			}
 		}
 	}
 
@@ -281,35 +286,39 @@ dlink_list *
 rsdb_schema_generate_table(struct rsdb_schema_set *schema_set)
 {
 	char buf[BUFSIZE*2];
-	struct rsdbs_schema_col *schema_col;
-	struct rsdbs_schema_key *schema_key;
 	static dlink_list table_data;
 	int i;
 
 	memset(&table_data, 0, sizeof(struct _dlink_list));
 
-	schema_col = schema_set->schema_col;
-
-	snprintf(buf, sizeof(buf), "CREATE TABLE %s (", schema_set->table_name);
-
-	for(i = 0; schema_col[i].name; i++)
+	if(schema_set->schema_col)
 	{
-		/* all entries except the first will need a comma delimiter */
-		if(i > 0)
-			strlcat(buf, ", ", sizeof(buf));
+		struct rsdbs_schema_col *schema_col = schema_set->schema_col;
 
-		strlcat(buf, rsdbs_sql_create_col(schema_set, &schema_col[i], 0), sizeof(buf));
+		snprintf(buf, sizeof(buf), "CREATE TABLE %s (", schema_set->table_name);
+
+		for(i = 0; schema_col[i].name; i++)
+		{
+			/* all entries except the first will need a comma delimiter */
+			if(i > 0)
+				strlcat(buf, ", ", sizeof(buf));
+
+			strlcat(buf, rsdbs_sql_create_col(schema_set, &schema_col[i], 0), sizeof(buf));
+		}
+
+		strlcat(buf, ")", sizeof(buf));
+
+		dlink_add_tail_alloc(my_strdup(buf), &table_data);
 	}
 
-	strlcat(buf, ")", sizeof(buf));
-
-	dlink_add_tail_alloc(my_strdup(buf), &table_data);
-
-	schema_key = schema_set->schema_key;
-
-	for(i = 0; schema_key[i].name; i++)
+	if(schema_set->schema_key)
 	{
-		dlink_add_tail_alloc(my_strdup(rsdbs_sql_create_key(schema_set, &schema_key[i])), &table_data);
+		struct rsdbs_schema_key *schema_key = schema_set->schema_key;
+
+		for(i = 0; schema_key[i].name; i++)
+		{
+			dlink_add_tail_alloc(my_strdup(rsdbs_sql_create_key(schema_set, &schema_key[i])), &table_data);
+		}
 	}
 
 	return &table_data;
