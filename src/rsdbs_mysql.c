@@ -124,7 +124,7 @@ rsdbs_check_key_kcu(const char *table_name, const char *key_list_str, rsdbs_sche
 	 */
 	rs_snprintf(buf, sizeof(buf), "SELECT COLUMN_NAME FROM information_schema.KEY_COLUMN_USAGE AS ccu "
 					"JOIN information_schema.TABLE_CONSTRAINTS AS tc "
-					"ON tc.TABLE_NAME=ccu.TABLE_NAME "
+					"ON tc.TABLE_NAME=ccu.TABLE_NAME AND tc.CONSTRAINT_NAME=ccu.CONSTRAINT_NAME "
 					"WHERE tc.CONSTRAINT_TYPE='%Q' "
 					"AND tc.TABLE_SCHEMA='%Q' AND tc.TABLE_NAME='%Q'",
 			option_str, rsdb_conf.db_name, table_name);

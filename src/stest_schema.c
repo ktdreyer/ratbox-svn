@@ -51,8 +51,8 @@ static struct rsdbs_schema_col stest_cs_nochange[] =
 static struct rsdbs_schema_key stest_ks_nochange[] =
 {
 	{ RSDB_SCHEMA_KEY_PRIMARY,	0,	0, "id",		NULL	},
-	{ RSDB_SCHEMA_KEY_UNIQUE,	0,	0, "v_text",		NULL	},
-	{ RSDB_SCHEMA_KEY_UNIQUE,	0,	0, "v_varchar, v_char",	NULL	},
+	{ RSDB_SCHEMA_KEY_UNIQUE,	0,	0, "v_char",	NULL	},
+	{ RSDB_SCHEMA_KEY_UNIQUE,	0,	0, "v_varchar, v_int",	NULL	},
 	{ RSDB_SCHEMA_KEY_INDEX,	0,	0, "v_bool",		NULL	},
 	{ RSDB_SCHEMA_KEY_INDEX,	0,	0, "v_int, v_uint",	NULL	},
 	{ 0, 0, 0, NULL, NULL }

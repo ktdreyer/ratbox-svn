@@ -314,10 +314,17 @@ rsdb_schema_generate_table(struct rsdb_schema_set *schema_set)
 	if(schema_set->schema_key)
 	{
 		struct rsdbs_schema_key *schema_key = schema_set->schema_key;
+		const char *sql_key;
 
 		for(i = 0; schema_key[i].name; i++)
 		{
-			dlink_add_tail_alloc(my_strdup(rsdbs_sql_create_key(schema_set, &schema_key[i])), &table_data);
+			sql_key = rsdbs_sql_create_key(schema_set, &schema_key[i]);
+
+			/* this returns NULL when we're ignoring a PRIMARY KEY for a SERIAL field
+			 * for example
+			 */
+			if(sql_key)
+				dlink_add_tail_alloc(my_strdup(sql_key), &table_data);
 		}
 	}
 
