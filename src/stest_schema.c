@@ -75,6 +75,25 @@ static struct rsdbs_schema_key stest_ks2_addserial[] =
 	{ 0, 0, 0, NULL, NULL }
 };
 
+static struct rsdbs_schema_col stest_cs_addunique[] =
+{
+	{ RSDB_SCHEMA_VARCHAR,		100,	0, "v1_varchar",	"''"	},
+	{ RSDB_SCHEMA_VARCHAR,		100,	0, "v21_varchar",	"''"	},
+	{ RSDB_SCHEMA_VARCHAR,		100,	0, "v22_varchar",	"''"	},
+	{ RSDB_SCHEMA_VARCHAR,		100,	0, "v31_varchar",	"''"	},
+	{ RSDB_SCHEMA_VARCHAR,		100,	0, "v32_varchar",	"''"	},
+	{ RSDB_SCHEMA_VARCHAR,		100,	0, "v33_varchar",	"''"	},
+	{ 0, 0, 0, NULL, NULL }
+};
+static struct rsdbs_schema_key stest_ks2_addunique[] =
+{
+	{ RSDB_SCHEMA_KEY_UNIQUE,	0,	0, "v1_varchar",				NULL	},
+	{ RSDB_SCHEMA_KEY_UNIQUE,	0,	0, "v21_varchar, v22_varchar",	NULL	},
+	{ RSDB_SCHEMA_KEY_UNIQUE,	0,	0, "v31_varchar, v32_varchar, v33_varchar", NULL },
+	{ 0, 0, 0, NULL, NULL }
+};
+
+
 static struct stest_schema_set
 {
 	const char *table_name;
@@ -92,9 +111,15 @@ static struct stest_schema_set
 	},
 	{
 		"addserial",
-		stest_cs1_addserial,		stest_cs2_addserial,
-		NULL,				stest_ks2_addserial,
+		stest_cs1_addserial,	stest_cs2_addserial,
+		NULL,					stest_ks2_addserial,
 		"Adding a SERIAL field"
+	},
+	{
+		"addunique",
+		stest_cs_addunique,		stest_cs_addunique,
+		NULL,					stest_ks2_addunique,
+		"Adding UNIQUE constraints"
 	},
 	{ NULL, NULL, NULL, NULL, NULL, NULL }
 };
@@ -107,6 +132,8 @@ schema_init(int create)
 	const char *sql;
 	size_t schema_size;
 	int i;
+
+	mlog("First pass, checking for a clean database.");
 
 	/* run a quick check to make sure the tables dont exist */
 	for(i = 0; stest_schema_tables[i].table_name; i++)
@@ -125,7 +152,7 @@ schema_init(int create)
 
 	schema_size = sizeof(struct rsdb_schema_set) * (sizeof(stest_schema_tables) / sizeof(struct stest_schema_set));
 
-	mlog("First pass, creating initial schema.");
+	mlog("Second pass, creating initial schema.");
 
 	schema_set = my_malloc(schema_size);
 
@@ -139,7 +166,7 @@ schema_init(int create)
 
 	rsdb_schema_check(schema_set, 1);
 
-	mlog("Second pass, checking modifications.");
+	mlog("Third pass, checking modifications.");
 
 	for(i = 0; stest_schema_tables[i].table_name; i++)
 	{
@@ -154,7 +181,7 @@ schema_init(int create)
 
 	rsdb_schema_check(schema_set, 1);
 
-	mlog("Third pass, no further modifications should be needed.");
+	mlog("Fourth pass, no further modifications should be needed.");
 
 	memset(schema_set, 0, sizeof(struct rsdb_schema_set) * (sizeof(stest_schema_tables) / sizeof(struct stest_schema_set)));
 
