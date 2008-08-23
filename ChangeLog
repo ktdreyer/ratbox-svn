@@ -1,3 +1,13 @@
+leeh        2008/08/23 22:09:47 UTC	(20080823_1-25945)
+  Log:
+  - add in a schema test for adding unique constraints
+  - renumber the passes we make
+  
+
+  Modified:
+	rserv/trunk/src/stest_schema.c (File Modified) 
+
+
 leeh        2008/08/23 21:54:54 UTC	(20080823_0-25941)
   Log:
   - fix the mysql JOIN for checking primary/unique keys to not duplicate
