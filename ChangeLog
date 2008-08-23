@@ -1,3 +1,19 @@
+leeh        2008/08/23 21:54:54 UTC	(20080823_0-25941)
+  Log:
+  - fix the mysql JOIN for checking primary/unique keys to not duplicate
+    results
+  - mysql can't handle uniques on text fields without a length, so just swap
+    the test schema out
+  - make the schema generation handle a NULL key string, for the databases
+    where the primary key is done in the table creation
+  
+
+  Modified:
+	rserv/trunk/src/rsdbs_common.c (File Modified) 
+	rserv/trunk/src/rsdbs_mysql.c (File Modified) 
+	rserv/trunk/src/stest_schema.c (File Modified) 
+
+
 leeh        2008/08/03 18:19:13 UTC	(20080803_1-25829)
   Log:
   - flesh out the schema testing somewhat and make it multi-pass
