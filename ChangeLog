@@ -1,3 +1,18 @@
+leeh        2008/08/24 09:18:26 UTC	(20080824_1-25951)
+  Log:
+  - extend the schema generation to support removing UNIQUE constraints that
+    no longer exist in the schema
+  - still need to flesh out pgsql/sqlite
+  
+
+  Modified:
+	rserv/trunk/include/rsdbs.h (File Modified) 
+	rserv/trunk/src/rsdbs_common.c (File Modified) 
+	rserv/trunk/src/rsdbs_mysql.c (File Modified) 
+	rserv/trunk/src/rsdbs_pgsql.c (File Modified) 
+	rserv/trunk/src/rsdbs_sqlite3.c (File Modified) 
+
+
 leeh        2008/08/24 08:28:18 UTC	(20080824_0-25949)
   Log:
   - expand the test schema some more, and fix some indenting
