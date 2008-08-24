@@ -59,6 +59,12 @@ rsdbs_sql_drop_key_pri(const char *table_name)
 	return NULL;
 }
 
+const char *
+rsdbs_sql_drop_key_unique(const char *table_name, const char *key_name)
+{
+	return NULL;
+}
+
 int
 rsdbs_check_column(const char *table_name, const char *column_name)
 {
@@ -144,6 +150,11 @@ int
 rsdbs_check_key_index(const char *table_name, const char *key_list_str)
 {
 	return 0;
+}
+
+void
+rsdbs_check_deletekey_unique(const char *table_name, dlink_list *key_list, dlink_list *table_data)
+{
 }
 
 const char *

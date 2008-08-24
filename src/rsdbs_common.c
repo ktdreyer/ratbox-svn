@@ -144,6 +144,42 @@ rsdbs_check_table(struct rsdb_schema_set *schema_set)
 	if(schema_set->schema_key)
 	{
 		struct rsdbs_schema_key *schema_key = schema_set->schema_key;
+		dlink_list unique_list;
+
+		memset(&unique_list, 0, sizeof(dlink_list));
+
+		/* first pass on the keys, build a list of unique constraints so
+		 * we can find any that shouldn't exist
+		 */
+		for(i = 0; schema_key[i].name; i++)
+		{
+			switch(schema_key[i].option)
+			{
+				case RSDB_SCHEMA_KEY_PRIMARY:
+					break;
+
+				case RSDB_SCHEMA_KEY_UNIQUE:
+				{
+					const char *key_str = rsdbs_generate_key_name(schema_set->table_name, schema_key[i].name, 
+											schema_key[i].option);
+
+					if(key_str)
+						dlink_add_alloc(my_strdup(key_str), &unique_list);
+
+					break;
+				}
+
+				case RSDB_SCHEMA_KEY_INDEX:
+					break;
+
+				case RSDB_SCHEMA_KEY_F_MATCH:
+				case RSDB_SCHEMA_KEY_F_CASCADE:
+					break;
+			}
+		}
+
+		if(dlink_list_length(&unique_list) > 0)
+			rsdbs_check_deletekey_unique(schema_set->table_name, &unique_list, &table_data);
 
 		for(i = 0; schema_key[i].name; i++)
 		{

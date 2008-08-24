@@ -79,6 +79,15 @@ rsdbs_sql_drop_key_pri(const char *table_name)
 	return buf_ptr;
 }
 
+const char *
+rsdbs_sql_drop_key_unique(const char *table_name, const char *key_name)
+{
+	static char buf[BUFSIZE*2];
+
+	rs_snprintf(buf, sizeof(buf), "ALTER TABLE %Q DROP INDEX %Q", table_name, key_name);
+	return buf;
+}
+
 int
 rsdbs_check_column(const char *table_name, const char *column_name)
 {
@@ -195,6 +204,55 @@ rsdbs_check_key_index(const char *table_name, const char *key_list_str)
 		return 1;
 	
 	return 0;
+}
+
+void
+rsdbs_check_deletekey_unique(const char *table_name, dlink_list *key_list, dlink_list *table_data)
+{
+	char buf[BUFSIZE*2];
+	char lbuf[BUFSIZE*2];
+	struct rsdb_table data;
+	dlink_node *ptr;
+	int i;
+
+	/* build a sql statement, to grab the names of all UNIQUE constraints, that don't
+	 * match the key names specified
+	 */
+	rs_snprintf(buf, sizeof(buf), "SELECT ccu.CONSTRAINT_NAME FROM information_schema.KEY_COLUMN_USAGE AS ccu "
+					"JOIN information_schema.TABLE_CONSTRAINTS AS tc "
+					"ON tc.TABLE_NAME=ccu.TABLE_NAME AND tc.CONSTRAINT_NAME=ccu.CONSTRAINT_NAME "
+					"WHERE tc.CONSTRAINT_TYPE='UNIQUE' "
+					"AND tc.TABLE_SCHEMA='%Q' AND tc.TABLE_NAME='%Q'",
+			rsdb_conf.db_name, table_name);
+
+	DLINK_FOREACH(ptr, key_list->head)
+	{
+		/* we want to AND the constraint names together, to find all constraints
+		 * with names different to the valid ones
+		 */
+		if(ptr == key_list->head)
+			rs_snprintf(lbuf, sizeof(lbuf), " AND (ccu.CONSTRAINT_NAME <> '%Q'",
+					(char *) ptr->data);
+		else
+			rs_snprintf(lbuf, sizeof(lbuf), " AND ccu.CONSTRAINT_NAME <> '%Q'",
+					(char *) ptr->data);
+
+		strlcat(buf, lbuf, sizeof(buf));
+	}
+
+	/* close the sql brace */
+	strlcat(buf, ")", sizeof(buf));
+
+	rsdb_exec_fetch(&data, "%s", buf);
+
+	/* this is the list of all UNIQUE constraints that aren't in our schema.. */
+	for(i = 0; i < data.row_count; i++)
+	{
+		const char *sql_str = rsdbs_sql_drop_key_unique(table_name, data.row[i][0]);
+
+		if(sql_str)
+			dlink_add_tail_alloc(my_strdup(sql_str), table_data);
+	}
 }
 
 const char *
