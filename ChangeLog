@@ -1,3 +1,14 @@
+leeh        2008/08/24 08:28:18 UTC	(20080824_0-25949)
+  Log:
+  - expand the test schema some more, and fix some indenting
+  - generate the key names in the correct field order
+  
+
+  Modified:
+	rserv/trunk/src/rsdbs_common.c (File Modified) 
+	rserv/trunk/src/stest_schema.c (File Modified) 
+
+
 leeh        2008/08/23 22:09:47 UTC	(20080823_1-25945)
   Log:
   - add in a schema test for adding unique constraints
