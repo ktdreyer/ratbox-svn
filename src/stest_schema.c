@@ -87,12 +87,46 @@ static struct rsdbs_schema_col stest_cs_addunique[] =
 };
 static struct rsdbs_schema_key stest_ks2_addunique[] =
 {
-	{ RSDB_SCHEMA_KEY_UNIQUE,	0,	0, "v1_varchar",				NULL	},
+	{ RSDB_SCHEMA_KEY_UNIQUE,	0,	0, "v1_varchar",		NULL	},
 	{ RSDB_SCHEMA_KEY_UNIQUE,	0,	0, "v21_varchar, v22_varchar",	NULL	},
 	{ RSDB_SCHEMA_KEY_UNIQUE,	0,	0, "v31_varchar, v32_varchar, v33_varchar", NULL },
 	{ 0, 0, 0, NULL, NULL }
 };
 
+static struct rsdbs_schema_col stest_cs_expandunique[] =
+{
+	{ RSDB_SCHEMA_VARCHAR,		100,	0, "v21_varchar",	"''"	},
+	{ RSDB_SCHEMA_VARCHAR,		100,	0, "v22_varchar",	"''"	},
+	{ 0, 0, 0, NULL, NULL }
+};
+static struct rsdbs_schema_key stest_ks1_expandunique[] =
+{
+	{ RSDB_SCHEMA_KEY_UNIQUE,	0,	0, "v21_varchar",		NULL	},
+	{ 0, 0, 0, NULL, NULL }
+};
+static struct rsdbs_schema_key stest_ks2_expandunique[] =
+{
+	{ RSDB_SCHEMA_KEY_UNIQUE,	0,	0, "v21_varchar, v22_varchar",	NULL	},
+	{ 0, 0, 0, NULL, NULL }
+};
+
+static struct rsdbs_schema_col stest_cs_addindex[] =
+{
+	{ RSDB_SCHEMA_VARCHAR,		100,	0, "v1_varchar",	"''"	},
+	{ RSDB_SCHEMA_VARCHAR,		100,	0, "v21_varchar",	"''"	},
+	{ RSDB_SCHEMA_VARCHAR,		100,	0, "v22_varchar",	"''"	},
+	{ RSDB_SCHEMA_VARCHAR,		100,	0, "v31_varchar",	"''"	},
+	{ RSDB_SCHEMA_VARCHAR,		100,	0, "v32_varchar",	"''"	},
+	{ RSDB_SCHEMA_VARCHAR,		100,	0, "v33_varchar",	"''"	},
+	{ 0, 0, 0, NULL, NULL }
+};
+static struct rsdbs_schema_key stest_ks2_addindex[] =
+{
+	{ RSDB_SCHEMA_KEY_INDEX,	0,	0, "v1_varchar",		NULL	},
+	{ RSDB_SCHEMA_KEY_INDEX,	0,	0, "v21_varchar, v22_varchar",	NULL	},
+	{ RSDB_SCHEMA_KEY_INDEX,	0,	0, "v31_varchar, v32_varchar, v33_varchar", NULL },
+	{ 0, 0, 0, NULL, NULL }
+};
 
 static struct stest_schema_set
 {
@@ -105,21 +139,33 @@ static struct stest_schema_set
 } stest_schema_tables[] = {
 	{ 
 		"nochange",	
-		stest_cs_nochange,		stest_cs_nochange,	
-		stest_ks_nochange,		stest_ks_nochange,	
+		stest_cs_nochange,	stest_cs_nochange,	
+		stest_ks_nochange,	stest_ks_nochange,	
 		"No changes to this table"
 	},
 	{
 		"addserial",
 		stest_cs1_addserial,	stest_cs2_addserial,
-		NULL,					stest_ks2_addserial,
+		NULL,			stest_ks2_addserial,
 		"Adding a SERIAL field"
 	},
 	{
 		"addunique",
-		stest_cs_addunique,		stest_cs_addunique,
-		NULL,					stest_ks2_addunique,
+		stest_cs_addunique,	stest_cs_addunique,
+		NULL,			stest_ks2_addunique,
 		"Adding UNIQUE constraints"
+	},
+	{
+		"expandunique",
+		stest_cs_expandunique,	stest_cs_expandunique,
+		stest_ks1_expandunique,	stest_ks2_expandunique,
+		"Expanding UNIQUE constraint to additional field"
+	},
+	{
+		"addindex",
+		stest_cs_addindex,	stest_cs_addindex,
+		NULL,			stest_ks2_addindex,
+		"Adding INDEXes"
 	},
 	{ NULL, NULL, NULL, NULL, NULL, NULL }
 };

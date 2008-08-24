@@ -269,7 +269,7 @@ rsdb_schema_split_key(const char *key_fields)
 		if((q = strchr(s, ' ')) != NULL)
 			*q = '\0';
 
-		dlink_add_alloc(my_strdup(s), &field_list);
+		dlink_add_tail_alloc(my_strdup(s), &field_list);
 	}
 
 	return &field_list;
