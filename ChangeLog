@@ -1,3 +1,12 @@
+leeh        2008/09/07 10:33:15 UTC	(20080907_0-26028)
+  Log:
+  - pgsql support for dropping unique constraints
+  
+
+  Modified:
+	rserv/trunk/src/rsdbs_pgsql.c (File Modified) 
+
+
 leeh        2008/08/24 09:18:26 UTC	(20080824_1-25951)
   Log:
   - extend the schema generation to support removing UNIQUE constraints that
