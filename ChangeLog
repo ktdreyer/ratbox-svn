@@ -1,3 +1,18 @@
+leeh        2008/09/07 11:19:09 UTC	(20080907_1-26030)
+  Log:
+  - make schema_init() take no params
+  - remove the param schema_init() passed into rsdb_schema_check()
+  - rserv.c needs rsdbs.h
+  
+
+  Modified:
+	rserv/trunk/include/rsdbs.h (File Modified) 
+	rserv/trunk/src/rsdbs_common.c (File Modified) 
+	rserv/trunk/src/rsdbs_schema.c (File Modified) 
+	rserv/trunk/src/rserv.c (File Modified) 
+	rserv/trunk/src/stest_schema.c (File Modified) 
+
+
 leeh        2008/09/07 10:33:15 UTC	(20080907_0-26028)
   Log:
   - pgsql support for dropping unique constraints
