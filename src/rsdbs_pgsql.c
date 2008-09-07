@@ -80,7 +80,25 @@ rsdbs_sql_drop_key_pri(const char *table_name)
 const char *
 rsdbs_sql_drop_key_unique(const char *table_name, const char *key_name)
 {
-	return NULL;
+	static char buf[BUFSIZE*2];
+	struct rsdb_table data;
+	const char *buf_ptr = NULL;
+
+	/* find the name of the constraint, and drop it specifically */
+	rsdb_exec_fetch(&data, "SELECT tc.constraint_name FROM information_schema.table_constraints tc "
+				"WHERE tc.constraint_type='UNIQUE' AND tc.table_name='%Q'",
+			table_name);
+
+	if(data.row_count > 0)
+	{
+		rs_snprintf(buf, sizeof(buf), "ALTER TABLE %Q DROP CONSTRAINT %Q CASCADE;",
+				table_name, data.row[0][0]);
+		buf_ptr = buf;
+	}
+
+	rsdb_exec_fetch_end(&data);
+
+	return buf_ptr;
 }
 
 int
