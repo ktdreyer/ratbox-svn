@@ -45,6 +45,7 @@
 #include "rserv.h"
 #include "langs.h"
 #include "rsdb.h"
+#include "rsdbs.h"
 #include "conf.h"
 #include "io.h"
 #include "event.h"

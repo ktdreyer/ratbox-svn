@@ -171,7 +171,7 @@ static struct stest_schema_set
 };
 
 void
-schema_init(int create)
+schema_init(void)
 {
 	struct rsdb_table data;
 	struct rsdb_schema_set *schema_set;

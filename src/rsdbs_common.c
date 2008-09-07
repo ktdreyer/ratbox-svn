@@ -46,7 +46,7 @@ static dlink_list *rsdbs_check_table(struct rsdb_schema_set *schema_set);
  * side effects - runs checks for all tables in the schema
  */
 void
-rsdb_schema_check(struct rsdb_schema_set *schema_set, int write_sql)
+rsdb_schema_check(struct rsdb_schema_set *schema_set)
 {
 	dlink_list *table_data;
 	dlink_node *ptr;
@@ -94,10 +94,8 @@ rsdb_schema_check(struct rsdb_schema_set *schema_set, int write_sql)
 
 		DLINK_FOREACH(ptr, table_data->head)
 		{
-			if(write_sql)
-				rsdb_exec(NULL, "%s", (const char *) ptr->data);
-			else
-				fprintf(stdout, "%s;\n", (const char *) ptr->data);
+			rsdb_exec(NULL, "%s", (const char *) ptr->data);
+			fprintf(stdout, "%s;\n", (const char *) ptr->data);
 		}
 
 		rsdb_exec_fetch_end(&data);
