@@ -36,6 +36,18 @@
 #include "rsdbs.h"
 #include "log.h"
 
+/* Standard collection of VARCHAR columns */
+static struct rsdbs_schema_col stest_cs_std_varchar[] =
+{
+	{ RSDB_SCHEMA_VARCHAR,		100,	0, "v1_varchar",	"''"	},
+	{ RSDB_SCHEMA_VARCHAR,		100,	0, "v21_varchar",	"''"	},
+	{ RSDB_SCHEMA_VARCHAR,		100,	0, "v22_varchar",	"''"	},
+	{ RSDB_SCHEMA_VARCHAR,		100,	0, "v31_varchar",	"''"	},
+	{ RSDB_SCHEMA_VARCHAR,		100,	0, "v32_varchar",	"''"	},
+	{ RSDB_SCHEMA_VARCHAR,		100,	0, "v33_varchar",	"''"	},
+	{ 0, 0, 0, NULL, NULL }
+};
+
 static struct rsdbs_schema_col stest_cs_nochange[] =
 {
 	{ RSDB_SCHEMA_SERIAL,		0,	0, "id",	NULL	},
@@ -75,16 +87,6 @@ static struct rsdbs_schema_key stest_ks2_addserial[] =
 	{ 0, 0, 0, NULL, NULL }
 };
 
-static struct rsdbs_schema_col stest_cs_addunique[] =
-{
-	{ RSDB_SCHEMA_VARCHAR,		100,	0, "v1_varchar",	"''"	},
-	{ RSDB_SCHEMA_VARCHAR,		100,	0, "v21_varchar",	"''"	},
-	{ RSDB_SCHEMA_VARCHAR,		100,	0, "v22_varchar",	"''"	},
-	{ RSDB_SCHEMA_VARCHAR,		100,	0, "v31_varchar",	"''"	},
-	{ RSDB_SCHEMA_VARCHAR,		100,	0, "v32_varchar",	"''"	},
-	{ RSDB_SCHEMA_VARCHAR,		100,	0, "v33_varchar",	"''"	},
-	{ 0, 0, 0, NULL, NULL }
-};
 static struct rsdbs_schema_key stest_ks2_addunique[] =
 {
 	{ RSDB_SCHEMA_KEY_UNIQUE,	0,	0, "v1_varchar",		NULL	},
@@ -93,12 +95,20 @@ static struct rsdbs_schema_key stest_ks2_addunique[] =
 	{ 0, 0, 0, NULL, NULL }
 };
 
-static struct rsdbs_schema_col stest_cs_expandunique[] =
+static struct rsdbs_schema_key stest_ks1_dropunique[] =
 {
-	{ RSDB_SCHEMA_VARCHAR,		100,	0, "v21_varchar",	"''"	},
-	{ RSDB_SCHEMA_VARCHAR,		100,	0, "v22_varchar",	"''"	},
+	{ RSDB_SCHEMA_KEY_UNIQUE,	0,	0, "v1_varchar",		NULL	},
+	{ RSDB_SCHEMA_KEY_UNIQUE,	0,	0, "v21_varchar, v22_varchar",	NULL	},
+	{ RSDB_SCHEMA_KEY_UNIQUE,	0,	0, "v31_varchar, v32_varchar, v33_varchar", NULL },
 	{ 0, 0, 0, NULL, NULL }
 };
+static struct rsdbs_schema_key stest_ks2_dropunique[] =
+{
+	{ RSDB_SCHEMA_KEY_UNIQUE,	0,	0, "v1_varchar",		NULL	},
+	{ RSDB_SCHEMA_KEY_UNIQUE,	0,	0, "v31_varchar, v32_varchar, v33_varchar", NULL },
+	{ 0, 0, 0, NULL, NULL }
+};
+
 static struct rsdbs_schema_key stest_ks1_expandunique[] =
 {
 	{ RSDB_SCHEMA_KEY_UNIQUE,	0,	0, "v21_varchar",		NULL	},
@@ -168,13 +178,19 @@ static struct stest_schema_set
 	},
 	{
 		"addunique",
-		stest_cs_addunique,	stest_cs_addunique,
+		stest_cs_std_varchar,	stest_cs_std_varchar,
 		NULL,			stest_ks2_addunique,
 		"Adding UNIQUE constraints"
 	},
 	{
+		"dropunique",
+		stest_cs_std_varchar,	stest_cs_std_varchar,
+		stest_ks1_dropunique,	stest_ks2_dropunique,
+		"Dropping UNIQUE constraint"
+	},
+	{
 		"expandunique",
-		stest_cs_expandunique,	stest_cs_expandunique,
+		stest_cs_std_varchar,	stest_cs_std_varchar,
 		stest_ks1_expandunique,	stest_ks2_expandunique,
 		"Expanding UNIQUE constraint to additional field"
 	},
