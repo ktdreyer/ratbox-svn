@@ -1,3 +1,14 @@
+leeh        2008/11/16 19:02:13 UTC	(20081116_3-26204)
+  Log:
+  - simplify rsdbs_check_key_is() so that it matches on constraint names, and
+    make it differentiate situations where the key is correct, the key is
+    incorrect (i.e. missing/extra fields), or the key does not exist at all
+  
+
+  Modified:
+	rserv/trunk/src/rsdbs_pgsql.c (File Modified) 
+
+
 leeh        2008/11/16 18:57:00 UTC	(20081116_2-26202)
   Log:
   - move the logic in rsdbs_sql_create_key() into a new
