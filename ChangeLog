@@ -1,3 +1,19 @@
+leeh        2008/11/16 22:07:37 UTC	(20081116_9-26216)
+  Log:
+  - add in rsdbs_sql_drop_key_index(), to return the SQL for dropping an INDEX
+  - add in rsdbs_check_deletekey_index(), which will check a table and remove
+    any indexes that shouldn't exist
+  - make schema_test() check for unwanted indexes
+  - extend the schematest to test dropping an index
+  
+
+  Modified:
+	rserv/trunk/include/rsdbs.h (File Modified) 
+	rserv/trunk/src/rsdbs_common.c (File Modified) 
+	rserv/trunk/src/rsdbs_pgsql.c (File Modified) 
+	rserv/trunk/src/stest_schema.c (File Modified) 
+
+
 leeh        2008/11/16 20:09:06 UTC	(20081116_8-26214)
   Log:
   - remove an unused variable
