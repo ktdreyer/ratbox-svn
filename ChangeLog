@@ -1,3 +1,12 @@
+leeh        2008/11/16 20:09:06 UTC	(20081116_8-26214)
+  Log:
+  - remove an unused variable
+  
+
+  Modified:
+	rserv/trunk/src/rsdbs_common.c (File Modified) 
+
+
 leeh        2008/11/16 20:08:28 UTC	(20081116_7-26212)
   Log:
   - rsdbs_sql_drop_key_unique() was missing the table_name part from the SQL
