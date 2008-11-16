@@ -704,6 +704,20 @@ dlink_find_string(const char *data, dlink_list *list)
 	return NULL;
 }
 
+int
+dlink_find_string_destroy(const char *data, dlink_list *list)
+{
+	dlink_node *ptr = dlink_find_string(data, list);
+
+	if(ptr != NULL)
+	{
+		dlink_destroy(ptr, list);
+		return 1;
+	}
+
+	return 0;
+}
+
 void
 dlink_move_node(dlink_node * m, dlink_list * oldlist, dlink_list * newlist)
 {
