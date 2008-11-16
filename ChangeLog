@@ -1,3 +1,14 @@
+leeh        2008/11/16 18:57:00 UTC	(20081116_2-26202)
+  Log:
+  - move the logic in rsdbs_sql_create_key() into a new
+    rsdbs_sql_create_key_str() which takes the raw params, and make
+    rsdbs_sql_create_key() simply pass it the correct params
+  
+
+  Modified:
+	rserv/trunk/src/rsdbs_pgsql.c (File Modified) 
+
+
 leeh        2008/11/16 18:06:55 UTC	(20081116_1-26200)
   Log:
   - add in dlink_find_string_destroy()
