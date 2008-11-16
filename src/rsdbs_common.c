@@ -143,8 +143,10 @@ rsdbs_check_table(struct rsdb_schema_set *schema_set)
 	{
 		struct rsdbs_schema_key *schema_key = schema_set->schema_key;
 		dlink_list unique_list;
+		dlink_list index_list;
 
 		memset(&unique_list, 0, sizeof(dlink_list));
+		memset(&index_list, 0, sizeof(dlink_list));
 
 		/* first pass on the keys, build a list of unique constraints so
 		 * we can find any that shouldn't exist
@@ -161,6 +163,7 @@ rsdbs_check_table(struct rsdb_schema_set *schema_set)
 					break;
 
 				case RSDB_SCHEMA_KEY_INDEX:
+					dlink_add_alloc(my_strdup(schema_key[i].name), &index_list);
 					break;
 
 				case RSDB_SCHEMA_KEY_F_MATCH:
@@ -171,6 +174,8 @@ rsdbs_check_table(struct rsdb_schema_set *schema_set)
 
 		if(dlink_list_length(&unique_list) > 0)
 			rsdbs_check_deletekey_unique(schema_set->table_name, &unique_list, &table_data);
+		if(dlink_list_length(&index_list) > 0)
+			rsdbs_check_deletekey_index(schema_set->table_name, &index_list, &table_data);
 
 		for(i = 0; schema_key[i].name; i++)
 		{

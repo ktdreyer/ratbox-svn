@@ -120,20 +120,24 @@ static struct rsdbs_schema_key stest_ks2_expandunique[] =
 	{ 0, 0, 0, NULL, NULL }
 };
 
-static struct rsdbs_schema_col stest_cs_addindex[] =
-{
-	{ RSDB_SCHEMA_VARCHAR,		100,	0, "v1_varchar",	"''"	},
-	{ RSDB_SCHEMA_VARCHAR,		100,	0, "v21_varchar",	"''"	},
-	{ RSDB_SCHEMA_VARCHAR,		100,	0, "v22_varchar",	"''"	},
-	{ RSDB_SCHEMA_VARCHAR,		100,	0, "v31_varchar",	"''"	},
-	{ RSDB_SCHEMA_VARCHAR,		100,	0, "v32_varchar",	"''"	},
-	{ RSDB_SCHEMA_VARCHAR,		100,	0, "v33_varchar",	"''"	},
-	{ 0, 0, 0, NULL, NULL }
-};
 static struct rsdbs_schema_key stest_ks2_addindex[] =
 {
 	{ RSDB_SCHEMA_KEY_INDEX,	0,	0, "v1_varchar",		NULL	},
 	{ RSDB_SCHEMA_KEY_INDEX,	0,	0, "v21_varchar, v22_varchar",	NULL	},
+	{ RSDB_SCHEMA_KEY_INDEX,	0,	0, "v31_varchar, v32_varchar, v33_varchar", NULL },
+	{ 0, 0, 0, NULL, NULL }
+};
+
+static struct rsdbs_schema_key stest_ks1_dropindex[] =
+{
+	{ RSDB_SCHEMA_KEY_INDEX,	0,	0, "v1_varchar",		NULL	},
+	{ RSDB_SCHEMA_KEY_INDEX,	0,	0, "v21_varchar, v22_varchar",	NULL	},
+	{ RSDB_SCHEMA_KEY_INDEX,	0,	0, "v31_varchar, v32_varchar, v33_varchar", NULL },
+	{ 0, 0, 0, NULL, NULL }
+};
+static struct rsdbs_schema_key stest_ks2_dropindex[] =
+{
+	{ RSDB_SCHEMA_KEY_INDEX,	0,	0, "v1_varchar",		NULL	},
 	{ RSDB_SCHEMA_KEY_INDEX,	0,	0, "v31_varchar, v32_varchar, v33_varchar", NULL },
 	{ 0, 0, 0, NULL, NULL }
 };
@@ -196,9 +200,15 @@ static struct stest_schema_set
 	},
 	{
 		"addindex",
-		stest_cs_addindex,	stest_cs_addindex,
+		stest_cs_std_varchar,	stest_cs_std_varchar,
 		NULL,			stest_ks2_addindex,
 		"Adding INDEXes"
+	},
+	{
+		"dropindex",
+		stest_cs_std_varchar,	stest_cs_std_varchar,
+		stest_ks1_dropindex,	stest_ks2_dropindex,
+		"Dropping INDEX"
 	},
 	{
 		"addcols",

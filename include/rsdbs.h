@@ -62,6 +62,7 @@ const char *rsdbs_sql_create_col(struct rsdb_schema_set *schema_set, struct rsdb
 const char *rsdbs_sql_create_key(struct rsdb_schema_set *schema_set, struct rsdbs_schema_key *schema_element);
 const char *rsdbs_sql_drop_key_pri(const char *table_name);
 const char *rsdbs_sql_drop_key_unique(const char *table_name, const char *key_name);
+const char *rsdbs_sql_drop_key_index(const char *table_name, const char *key_name);
 
 int rsdbs_check_column(const char *table_name, const char *column_name);
 int rsdbs_check_key_pri(const char *table_name, const char *key_list_str);
@@ -69,6 +70,7 @@ int rsdbs_check_key_unique(const char *table_name, const char *key_list_str);
 int rsdbs_check_key_index(const char *table_name, const char *key_list_str);
 
 void rsdbs_check_deletekey_unique(const char *table_name, dlink_list *unique_list, dlink_list *table_data);
+void rsdbs_check_deletekey_index(const char *table_name, dlink_list *unique_list, dlink_list *table_data);
 
 /* rsdbs_common.c */
 void rsdb_schema_check(struct rsdb_schema_set *schema_set);
