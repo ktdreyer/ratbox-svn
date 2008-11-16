@@ -197,25 +197,17 @@ rsdbs_check_table(struct rsdb_schema_set *schema_set)
 					break;
 
 				case RSDB_SCHEMA_KEY_UNIQUE:
-					/* check if the constraint exists */
-					retval = rsdbs_check_key_unique(schema_set->table_name,	schema_key[i].name);
-
-					/* key doesn't exist, or is wrong */
-					if(retval <= 0)
+					if(!rsdbs_check_key_unique(schema_set->table_name, schema_key[i].name))
 					{
 						const char *add_sql;
+						const char *key_name;
 
-						/* key is wrong -- delete it and recreate */
-						if(retval == 0)
-						{
-							const char *key_name;
+						key_name = rsdbs_generate_key_name(schema_set->table_name, schema_key[i].name, RSDB_SCHEMA_KEY_UNIQUE);
+						add_sql = rsdbs_sql_drop_key_unique(schema_set->table_name, key_name);
 
-							key_name = rsdbs_generate_key_name(schema_set->table_name, schema_key[i].name, RSDB_SCHEMA_KEY_UNIQUE);
-							add_sql = rsdbs_sql_drop_key_unique(schema_set->table_name, key_name);
-
-							if(add_sql)
-								dlink_add_tail_alloc(my_strdup(add_sql), &table_data);
-						}
+						/* This will be NULL if the key does not exist */
+						if(add_sql)
+							dlink_add_tail_alloc(my_strdup(add_sql), &table_data);
 
 						add_sql = rsdbs_sql_create_key(schema_set, &schema_key[i]);
 

@@ -86,13 +86,13 @@ rsdbs_sql_drop_key_unique(const char *table_name, const char *key_name)
 
 	/* find the name of the constraint, and drop it specifically */
 	rsdb_exec_fetch(&data, "SELECT tc.constraint_name FROM information_schema.table_constraints tc "
-				"WHERE tc.constraint_type='UNIQUE' AND tc.table_name='%Q'",
-			table_name);
+				"WHERE tc.constraint_type='UNIQUE' AND tc.table_name='%Q' AND tc.constraint_name='%Q'",
+			table_name, key_name);
 
 	if(data.row_count > 0)
 	{
 		rs_snprintf(buf, sizeof(buf), "ALTER TABLE %Q DROP CONSTRAINT %Q CASCADE;",
-				table_name, data.row[0][0]);
+				table_name, key_name);
 		buf_ptr = buf;
 	}
 
@@ -123,7 +123,7 @@ rsdbs_check_column(const char *table_name, const char *column_name)
  * Checks a PRIMARY KEY/UNIQUE constraint against the information_schema
  *
  * inputs	- table_name, list of columns in key, key type
- * outputs	- 1 if correct, 0 if incorrect, -1 if key does not exist
+ * outputs	- 1 if correct, 0 if incorrect or if key does not exist
  * side effects	-
  */
 static int
@@ -172,7 +172,7 @@ rsdbs_check_key_is(const char *table_name, const char *key_list_str, rsdbs_schem
 	if(data.row_count != dlink_list_length(field_list))
 	{
 		rsdb_exec_fetch_end(&data);
-		return -1;
+		return 0;
 	}
 
 	/* The number of keys is right, so walk through the list of columns we got back and 
@@ -236,6 +236,7 @@ rsdbs_check_deletekey_unique(const char *table_name, dlink_list *key_list, dlink
 	struct rsdb_table data;
 	dlink_node *ptr;
 	const char *key_list_str;
+	const char *idx_name;
 	int i;
 
 	rs_snprintf(buf, sizeof(buf), "SELECT constraint_name FROM information_schema.table_constraints AS tc "
@@ -245,6 +246,7 @@ rsdbs_check_deletekey_unique(const char *table_name, dlink_list *key_list, dlink
 	DLINK_FOREACH(ptr, key_list->head)
 	{
 		key_list_str = ptr->data;
+		idx_name = rsdbs_generate_key_name(table_name, key_list_str, RSDB_SCHEMA_KEY_UNIQUE);
 
 		rs_snprintf(lbuf, sizeof(lbuf), " AND tc.constraint_name <> '%Q'",
 				rsdbs_generate_key_name(table_name, key_list_str, RSDB_SCHEMA_KEY_UNIQUE));
@@ -256,11 +258,9 @@ rsdbs_check_deletekey_unique(const char *table_name, dlink_list *key_list, dlink
 	/* delete any extra keys we got back.. */
 	for(i = 0; i < data.row_count; i++)
 	{
-		const char *key_name;
 		const char *add_sql;
 
-		key_name = rsdbs_generate_key_name(table_name, key_list_str, RSDB_SCHEMA_KEY_UNIQUE);
-		add_sql  = rsdbs_sql_drop_key_unique(table_name, key_name);
+		add_sql  = rsdbs_sql_drop_key_unique(table_name, data.row[i][0]);
 
 		if(add_sql)
 			dlink_add_tail_alloc(my_strdup(add_sql), table_data);
