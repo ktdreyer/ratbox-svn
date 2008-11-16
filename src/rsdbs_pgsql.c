@@ -121,6 +121,13 @@ rsdbs_check_column(const char *table_name, const char *column_name)
 	return 0;
 }
 
+/* rsdbs_check_key_is()
+ * Checks a PRIMARY KEY/UNIQUE constraint against the information_schema
+ *
+ * inputs	- table_name, list of columns in key, key type
+ * outputs	- 1 if correct, 0 if incorrect, -1 if key does not exist
+ * side effects	-
+ */
 static int
 rsdbs_check_key_is(const char *table_name, const char *key_list_str, rsdbs_schema_key_option option)
 {
@@ -130,8 +137,8 @@ rsdbs_check_key_is(const char *table_name, const char *key_list_str, rsdbs_schem
 	char lbuf[BUFSIZE*2];
 	struct rsdb_table data;
 	dlink_list *field_list;
-	dlink_node *ptr;
 	const char *option_str;
+	int i;
 
 	if(option == RSDB_SCHEMA_KEY_PRIMARY)
 		option_str = option_str_pri;
@@ -142,51 +149,48 @@ rsdbs_check_key_is(const char *table_name, const char *key_list_str, rsdbs_schem
 
 	field_list = rsdb_schema_split_key(key_list_str);
 
-	/* build a sql statement, to grab the count of elements in our key
-	 * for the table, that match any of the columns specified.  The count value 
-	 * returned should equal the number of fields we're searching for.
-	 */
-	/* XXX There is a flaw with this code -- in that if a key includes the values we
-	 * are searching for, along with others that shouldn't be there, it will not find
-	 * any problems..
-	 */
+	/* grab the names of all columns in our key */
 	rs_snprintf(buf, sizeof(buf), "SELECT ccu.column_name FROM information_schema.constraint_column_usage ccu "
 					"JOIN information_schema.table_constraints tc "
 					"ON ccu.constraint_name=tc.constraint_name "
-					"WHERE tc.constraint_type='%Q' AND ccu.table_name='%Q'",
+					"WHERE tc.constraint_type='%Q' AND ccu.table_name='%Q' ",
 			option_str, table_name);
 
-	DLINK_FOREACH(ptr, field_list->head)
+	/* if its a PRIMARY KEY there can only be one possible constraint per table, but if it's
+	 * UNIQUE then we can have multiple -- so grab the one for our key name
+	 */
+	if(option == RSDB_SCHEMA_KEY_UNIQUE)
 	{
-		/* we want to OR the column names together to find the count of all the
-		 * matching entries -- but this OR block itself needs an AND for the first
-		 * element to join it to the buffer above
-		 */
-		if(ptr == field_list->head)
-			rs_snprintf(lbuf, sizeof(lbuf), " AND (ccu.column_name='%Q'",
-					(char *) ptr->data);
-		else
-			rs_snprintf(lbuf, sizeof(lbuf), " OR ccu.column_name='%Q'",
-					(char *) ptr->data);
-
+		rs_snprintf(lbuf, sizeof(lbuf), " AND ccu.constraint_name='%Q'",
+				rsdbs_generate_key_name(table_name, key_list_str, option));
 		strlcat(buf, lbuf, sizeof(buf));
 	}
-
-	/* close the sql brace */
-	strlcat(buf, ")", sizeof(buf));
 
 	rsdb_exec_fetch(&data, "%s", buf);
 
 	/* the SQL above should have returned a row per match -- so the number of elements
 	 * in the primary key we are adding should match this..
 	 */
-	if(data.row_count == dlink_list_length(field_list))
+	if(data.row_count != dlink_list_length(field_list))
 	{
 		rsdb_exec_fetch_end(&data);
-		return 1;
+		return -1;
+	}
+
+	/* The number of keys is right, so walk through the list of columns we got back and 
+	 * remove matches from field_list.  If the lists are a match, we should end up with
+	 * field_list being empty..
+	 */
+	for(i = 0; i < data.row_count; i++)
+	{
+		dlink_find_string_destroy(data.row[i][0], field_list);
 	}
 
 	rsdb_exec_fetch_end(&data);
+
+	if(dlink_list_length(field_list) == 0)
+		return 1;
+
 	return 0;
 }
 
