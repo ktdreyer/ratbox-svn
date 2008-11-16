@@ -35,8 +35,6 @@
 #include "rsdbs.h"
 #include "rserv.h"
 
-static const char *rsdbs_sql_create_key_str(const char *table_name, const char *key_list_str, rsdbs_schema_key_option option);
-
 /* rsdbs_sql_check_table()
  * Returns the SQL for checking whether a table exists
  *
@@ -356,33 +354,35 @@ rsdbs_sql_create_col(struct rsdb_schema_set *schema_set, struct rsdbs_schema_col
 	return NULL;
 }
 
-static const char *
-rsdbs_sql_create_key_str(const char *table_name, const char *key_list_str, rsdbs_schema_key_option option)
+const char *
+rsdbs_sql_create_key(struct rsdb_schema_set *schema_set, struct rsdbs_schema_key *schema_element)
 {
 	static char buf[BUFSIZE*2];
 	const char *idx_name;
 
 	buf[0] = '\0';
 
-	switch(option)
+	switch(schema_element->option)
 	{
 		case RSDB_SCHEMA_KEY_PRIMARY:
 			snprintf(buf, sizeof(buf), "ALTER TABLE %s ADD PRIMARY KEY(%s)",
-				table_name, key_list_str);
+				schema_set->table_name, schema_element->name);
 			break;
 
 		case RSDB_SCHEMA_KEY_UNIQUE:
-			idx_name = rsdbs_generate_key_name(table_name, key_list_str, option);
+			idx_name = rsdbs_generate_key_name(schema_set->table_name, schema_element->name, 
+								schema_element->option);
 
 			rs_snprintf(buf, sizeof(buf), "ALTER TABLE %Q ADD CONSTRAINT %Q UNIQUE (%Q)",
-				table_name, idx_name, key_list_str);
+				schema_set->table_name, idx_name, schema_element->name);
 			break;
 
 		case RSDB_SCHEMA_KEY_INDEX:
-			idx_name = rsdbs_generate_key_name(table_name, key_list_str, option);
+			idx_name = rsdbs_generate_key_name(schema_set->table_name, schema_element->name, 
+								schema_element->option);
 
 			rs_snprintf(buf, sizeof(buf), "CREATE INDEX %Q ON %Q (%Q)",
-				idx_name, table_name, key_list_str);
+				idx_name, schema_set->table_name, schema_element->name);
 			break;
 
 		case RSDB_SCHEMA_KEY_F_MATCH:
@@ -395,16 +395,4 @@ rsdbs_sql_create_key_str(const char *table_name, const char *key_list_str, rsdbs
 		return buf;
 
 	return NULL;
-
 }
-
-const char *
-rsdbs_sql_create_key(struct rsdb_schema_set *schema_set, struct rsdbs_schema_key *schema_element)
-{
-	const char *retval;
-
-	retval = rsdbs_sql_create_key_str(schema_set->table_name, schema_element->name, schema_element->option);
-
-	return retval;
-}
-
