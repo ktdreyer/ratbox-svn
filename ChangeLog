@@ -1,3 +1,22 @@
+leeh        2008/11/16 20:08:28 UTC	(20081116_7-26212)
+  Log:
+  - rsdbs_sql_drop_key_unique() was missing the table_name part from the SQL
+    to check if the constraint exists
+  - rsdbs_check_key_is() does not need to return whether the constraint exists
+    or not, that is handled by rsdbs_sql_drop_key_unique() later
+  - rsdbs_check_deletekey_unique() wasn't generating the index name from the
+    parameters
+  - fix rsdbs_check_deletekey_unique() testing the wrong list for things to
+    delete
+  - fix rsdbs_check_table() so that it trusts rsdbs_sql_drop_key_unique() on
+    whether the constraint exists
+  
+
+  Modified:
+	rserv/trunk/src/rsdbs_common.c (File Modified) 
+	rserv/trunk/src/rsdbs_pgsql.c (File Modified) 
+
+
 leeh        2008/11/16 19:59:01 UTC	(20081116_6-26210)
   Log:
   - expand the schematest with a unique constraint to drop
