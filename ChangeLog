@@ -1,3 +1,12 @@
+leeh        2008/11/16 19:59:01 UTC	(20081116_6-26210)
+  Log:
+  - expand the schematest with a unique constraint to drop
+  
+
+  Modified:
+	rserv/trunk/src/stest_schema.c (File Modified) 
+
+
 leeh        2008/11/16 19:23:32 UTC	(20081116_5-26208)
   Log:
   - revert r26202, turns out I don't need it:
