@@ -128,6 +128,23 @@ static struct rsdbs_schema_key stest_ks2_addindex[] =
 	{ 0, 0, 0, NULL, NULL }
 };
 
+static struct rsdbs_schema_col stest_cs1_addcols[] =
+{
+	{ RSDB_SCHEMA_SERIAL,		0,	0, "id",	NULL	},
+	{ 0, 0, 0, NULL, NULL }
+};
+static struct rsdbs_schema_col stest_cs2_addcols[] =
+{
+	{ RSDB_SCHEMA_SERIAL,		0,	0, "id",	NULL	},
+	{ RSDB_SCHEMA_BOOLEAN,		0,	0, "v_bool",	NULL	},
+	{ RSDB_SCHEMA_INT,		0,	0, "v_int",	"0"	},
+	{ RSDB_SCHEMA_UINT,		0,	0, "v_uint",	"0"	},
+	{ RSDB_SCHEMA_VARCHAR,		100,	0, "v_varchar",	"''"	},
+	{ RSDB_SCHEMA_CHAR,		100,	0, "v_char",	"''"	},
+	{ RSDB_SCHEMA_TEXT,		0,	0, "v_text",	"''"	},
+	{ 0, 0, 0, NULL, NULL }
+};
+
 static struct stest_schema_set
 {
 	const char *table_name;
@@ -147,7 +164,7 @@ static struct stest_schema_set
 		"addserial",
 		stest_cs1_addserial,	stest_cs2_addserial,
 		NULL,			stest_ks2_addserial,
-		"Adding a SERIAL field"
+		"Adding a SERIAL field (PRIMARY KEY)"
 	},
 	{
 		"addunique",
@@ -166,6 +183,12 @@ static struct stest_schema_set
 		stest_cs_addindex,	stest_cs_addindex,
 		NULL,			stest_ks2_addindex,
 		"Adding INDEXes"
+	},
+	{
+		"addcols",
+		stest_cs1_addcols,	stest_cs2_addcols,
+		NULL,			NULL,
+		"Adding various columns"
 	},
 	{ NULL, NULL, NULL, NULL, NULL, NULL }
 };
@@ -210,7 +233,7 @@ schema_init(void)
 
 	}
 
-	rsdb_schema_check(schema_set, 1);
+	rsdb_schema_check(schema_set);
 
 	mlog("Third pass, checking modifications.");
 
@@ -222,10 +245,10 @@ schema_init(void)
 		schema_set[0].table_name = stest_schema_tables[i].table_name;
 		schema_set[0].schema_col = stest_schema_tables[i].schema2_col;
 		schema_set[0].schema_key = stest_schema_tables[i].schema2_key;
-		rsdb_schema_check(schema_set, 1);
+		rsdb_schema_check(schema_set);
 	}
 
-	rsdb_schema_check(schema_set, 1);
+	rsdb_schema_check(schema_set);
 
 	mlog("Fourth pass, no further modifications should be needed.");
 
@@ -238,5 +261,5 @@ schema_init(void)
 		schema_set[i].schema_key = stest_schema_tables[i].schema2_key;
 	}
 
-	rsdb_schema_check(schema_set, 1);
+	rsdb_schema_check(schema_set);
 }

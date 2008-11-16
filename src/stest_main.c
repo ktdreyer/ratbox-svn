@@ -125,7 +125,7 @@ main(int argc, char *argv[])
 
 	rsdb_init(db_name, db_host, db_username, db_password);
 
-	schema_init(0);
+	schema_init();
 
 	exit(0);
 }
