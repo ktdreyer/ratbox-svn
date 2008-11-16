@@ -143,7 +143,6 @@ rsdbs_check_table(struct rsdb_schema_set *schema_set)
 	{
 		struct rsdbs_schema_key *schema_key = schema_set->schema_key;
 		dlink_list unique_list;
-		int retval;
 
 		memset(&unique_list, 0, sizeof(dlink_list));
 
