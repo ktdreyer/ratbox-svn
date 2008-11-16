@@ -143,6 +143,7 @@ rsdbs_check_table(struct rsdb_schema_set *schema_set)
 	{
 		struct rsdbs_schema_key *schema_key = schema_set->schema_key;
 		dlink_list unique_list;
+		int retval;
 
 		memset(&unique_list, 0, sizeof(dlink_list));
 
@@ -157,15 +158,8 @@ rsdbs_check_table(struct rsdb_schema_set *schema_set)
 					break;
 
 				case RSDB_SCHEMA_KEY_UNIQUE:
-				{
-					const char *key_str = rsdbs_generate_key_name(schema_set->table_name, schema_key[i].name, 
-											schema_key[i].option);
-
-					if(key_str)
-						dlink_add_alloc(my_strdup(key_str), &unique_list);
-
+					dlink_add_alloc(my_strdup(schema_key[i].name), &unique_list);
 					break;
-				}
 
 				case RSDB_SCHEMA_KEY_INDEX:
 					break;
@@ -204,9 +198,26 @@ rsdbs_check_table(struct rsdb_schema_set *schema_set)
 
 				case RSDB_SCHEMA_KEY_UNIQUE:
 					/* check if the constraint exists */
-					if(!rsdbs_check_key_unique(schema_set->table_name, schema_key[i].name))
+					retval = rsdbs_check_key_unique(schema_set->table_name,	schema_key[i].name);
+
+					/* key doesn't exist, or is wrong */
+					if(retval <= 0)
 					{
-						const char *add_sql = rsdbs_sql_create_key(schema_set, &schema_key[i]);
+						const char *add_sql;
+
+						/* key is wrong -- delete it and recreate */
+						if(retval == 0)
+						{
+							const char *key_name;
+
+							key_name = rsdbs_generate_key_name(schema_set->table_name, schema_key[i].name, RSDB_SCHEMA_KEY_UNIQUE);
+							add_sql = rsdbs_sql_drop_key_unique(schema_set->table_name, key_name);
+
+							if(add_sql)
+								dlink_add_tail_alloc(my_strdup(add_sql), &table_data);
+						}
+
+						add_sql = rsdbs_sql_create_key(schema_set, &schema_key[i]);
 
 						if(add_sql)
 							dlink_add_tail_alloc(my_strdup(add_sql), &table_data);

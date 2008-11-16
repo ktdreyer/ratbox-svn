@@ -233,6 +233,42 @@ rsdbs_check_key_index(const char *table_name, const char *key_list_str)
 void
 rsdbs_check_deletekey_unique(const char *table_name, dlink_list *key_list, dlink_list *table_data)
 {
+	char buf[BUFSIZE*2];
+	char lbuf[BUFSIZE*2];
+	struct rsdb_table data;
+	dlink_node *ptr;
+	const char *key_list_str;
+	int i;
+
+	rs_snprintf(buf, sizeof(buf), "SELECT constraint_name FROM information_schema.table_constraints AS tc "
+					"WHERE tc.constraint_type='UNIQUE' AND tc.table_name='%Q' ",
+					table_name);
+
+	DLINK_FOREACH(ptr, key_list->head)
+	{
+		key_list_str = ptr->data;
+
+		rs_snprintf(lbuf, sizeof(lbuf), " AND tc.constraint_name <> '%Q'",
+				rsdbs_generate_key_name(table_name, key_list_str, RSDB_SCHEMA_KEY_UNIQUE));
+		strlcat(buf, lbuf, sizeof(buf));
+	}
+
+	rsdb_exec_fetch(&data, buf);
+
+	/* delete any extra keys we got back.. */
+	for(i = 0; i < data.row_count; i++)
+	{
+		const char *key_name;
+		const char *add_sql;
+
+		key_name = rsdbs_generate_key_name(table_name, key_list_str, RSDB_SCHEMA_KEY_UNIQUE);
+		add_sql  = rsdbs_sql_drop_key_unique(table_name, key_name);
+
+		if(add_sql)
+			dlink_add_tail_alloc(my_strdup(add_sql), table_data);
+	}
+
+	rsdb_exec_fetch_end(&data);
 }
 
 const char *
