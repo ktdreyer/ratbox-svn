@@ -1,3 +1,15 @@
+leeh        2008/11/18 21:35:51 UTC	(20081118_1-26222)
+  Log:
+  - add in a special exception when checking the schema, so that if we are
+    adding a SERIAL field that we drop any existing PRIMARY KEY before we add
+    the SERIAL field itself
+  
+
+  Modified:
+	rserv/trunk/include/rsdbs.h (File Modified) 
+	rserv/trunk/src/rsdbs_common.c (File Modified) 
+
+
 leeh        2008/11/18 21:28:30 UTC	(20081118_0-26220)
   Log:
   - add in a schema test for adding a SERIAL column into a table with an
