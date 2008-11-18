@@ -1,3 +1,13 @@
+leeh        2008/11/18 21:28:30 UTC	(20081118_0-26220)
+  Log:
+  - add in a schema test for adding a SERIAL column into a table with an
+    existing PRIMARY KEY
+  
+
+  Modified:
+	rserv/trunk/src/stest_schema.c (File Modified) 
+
+
 leeh        2008/11/16 22:07:37 UTC	(20081116_9-26216)
   Log:
   - add in rsdbs_sql_drop_key_index(), to return the SQL for dropping an INDEX
