@@ -87,6 +87,28 @@ static struct rsdbs_schema_key stest_ks2_addserial[] =
 	{ 0, 0, 0, NULL, NULL }
 };
 
+static struct rsdbs_schema_col stest_cs1_addserial_existingkey[] =
+{
+	{ RSDB_SCHEMA_VARCHAR,		100,	0, "v_varchar",	NULL	},
+	{ 0, 0, 0, NULL, NULL }
+};
+static struct rsdbs_schema_col stest_cs2_addserial_existingkey[] =
+{
+	{ RSDB_SCHEMA_SERIAL,		0,	0, "id",	NULL	},
+	{ RSDB_SCHEMA_VARCHAR,		100,	0, "v_varchar",	NULL	},
+	{ 0, 0, 0, NULL, NULL }
+};
+static struct rsdbs_schema_key stest_ks1_addserial_existingkey[] =
+{
+	{ RSDB_SCHEMA_KEY_PRIMARY,	0,	0, "v_varchar",	NULL	},
+	{ 0, 0, 0, NULL, NULL }
+};
+static struct rsdbs_schema_key stest_ks2_addserial_existingkey[] =
+{
+	{ RSDB_SCHEMA_KEY_PRIMARY,	0,	0, "id",	NULL	},
+	{ 0, 0, 0, NULL, NULL }
+};
+
 static struct rsdbs_schema_key stest_ks2_addunique[] =
 {
 	{ RSDB_SCHEMA_KEY_UNIQUE,	0,	0, "v1_varchar",		NULL	},
@@ -179,6 +201,12 @@ static struct stest_schema_set
 		stest_cs1_addserial,	stest_cs2_addserial,
 		NULL,			stest_ks2_addserial,
 		"Adding a SERIAL field (PRIMARY KEY)"
+	},
+	{
+		"addserial_existingkey",
+		stest_cs1_addserial_existingkey,	stest_cs2_addserial_existingkey,
+		stest_ks1_addserial_existingkey,	stest_ks2_addserial_existingkey,
+		"Adding a SERIAL field (PRIMARY KEY) to a table with a PRIMARY KEY"
 	},
 	{
 		"addunique",
