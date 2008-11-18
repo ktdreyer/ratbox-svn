@@ -164,6 +164,17 @@ static struct rsdbs_schema_key stest_ks2_dropindex[] =
 	{ 0, 0, 0, NULL, NULL }
 };
 
+static struct rsdbs_schema_key stest_ks1_expandindex[] =
+{
+	{ RSDB_SCHEMA_KEY_UNIQUE,	0,	0, "v21_varchar",		NULL	},
+	{ 0, 0, 0, NULL, NULL }
+};
+static struct rsdbs_schema_key stest_ks2_expandindex[] =
+{
+	{ RSDB_SCHEMA_KEY_UNIQUE,	0,	0, "v21_varchar, v22_varchar",	NULL	},
+	{ 0, 0, 0, NULL, NULL }
+};
+
 static struct rsdbs_schema_col stest_cs1_addcols[] =
 {
 	{ RSDB_SCHEMA_SERIAL,		0,	0, "id",	NULL	},
@@ -237,6 +248,12 @@ static struct stest_schema_set
 		stest_cs_std_varchar,	stest_cs_std_varchar,
 		stest_ks1_dropindex,	stest_ks2_dropindex,
 		"Dropping INDEX"
+	},
+	{
+		"expandindex",
+		stest_cs_std_varchar,	stest_cs_std_varchar,
+		stest_ks1_expandindex,	stest_ks2_expandindex,
+		"Expanding INDEX to additional field"
 	},
 	{
 		"addcols",
