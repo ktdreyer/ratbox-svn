@@ -54,6 +54,7 @@ struct rsdb_schema_set
 	struct rsdbs_schema_col *schema_col;
 	struct rsdbs_schema_key *schema_key;
 	int has_serial;
+	int dropped_primary_key;
 };
 
 const char *rsdbs_sql_check_table(const char *table_name);

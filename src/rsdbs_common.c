@@ -128,7 +128,24 @@ rsdbs_check_table(struct rsdb_schema_set *schema_set)
 				case RSDB_SCHEMA_TEXT:
 					if(!rsdbs_check_column(schema_set->table_name, schema_col[i].name))
 					{
-						const char *add_sql = rsdbs_sql_create_col(schema_set, &schema_col[i], 1);
+						const char *add_sql;
+
+						/* if we are adding a SERIAL column, then it must also become a 
+						 * PRIMARY KEY for mysql, so ensure we drop any existing PKEY.
+						 */
+						if(schema_col[i].option == RSDB_SCHEMA_SERIAL)
+						{
+							add_sql = rsdbs_sql_drop_key_pri(schema_set->table_name);
+
+							/* this will only return a result if we dropped the PKEY */
+							if(add_sql)
+							{
+								dlink_add_tail_alloc(my_strdup(add_sql), &table_data);
+								schema_set->dropped_primary_key = 1;
+							}
+						}
+
+						add_sql = rsdbs_sql_create_col(schema_set, &schema_col[i], 1);
 
 						if(add_sql)
 							dlink_add_tail_alloc(my_strdup(add_sql), &table_data);
@@ -188,7 +205,8 @@ rsdbs_check_table(struct rsdb_schema_set *schema_set)
 						const char *sql_str = rsdbs_sql_drop_key_pri(schema_set->table_name);
 
 						/* drop existing primary keys if found */
-						if(sql_str)
+						/* and we haven't already dropped it.. */
+						if(sql_str && !schema_set->dropped_primary_key)
 							dlink_add_tail_alloc(my_strdup(sql_str), &table_data);
 
 						/* add in the sql for the primary key */
