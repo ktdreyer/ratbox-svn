@@ -1,3 +1,12 @@
+leeh        2008/11/19 19:23:15 UTC	(20081119_1-26228)
+  Log:
+  - rsdbs_check_deletekey_unique() for mysql
+  
+
+  Modified:
+	rserv/trunk/src/rsdbs_mysql.c (File Modified) 
+
+
 leeh        2008/11/19 19:16:39 UTC	(20081119_0-26226)
   Log:
   - fix rsdbs_sql_drop_key_unique() so it only generates SQL if its needed
