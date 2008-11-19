@@ -1,3 +1,15 @@
+leeh        2008/11/19 19:38:26 UTC	(20081119_2-26230)
+  Log:
+  - fix rsdbs_check_key_index() to not locate UNIQUE constraints
+  - fill in rsdbs_check_deletekey_index()
+  - add rsdbs_sql_drop_key_index() to check if an INDEX exists, and return the
+    sql to drop it
+  
+
+  Modified:
+	rserv/trunk/src/rsdbs_mysql.c (File Modified) 
+
+
 leeh        2008/11/19 19:23:15 UTC	(20081119_1-26228)
   Log:
   - rsdbs_check_deletekey_unique() for mysql
