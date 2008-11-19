@@ -83,9 +83,24 @@ const char *
 rsdbs_sql_drop_key_unique(const char *table_name, const char *key_name)
 {
 	static char buf[BUFSIZE*2];
+	struct rsdb_table data;
+	const char *buf_ptr = NULL;
 
-	rs_snprintf(buf, sizeof(buf), "ALTER TABLE %Q DROP INDEX %Q", table_name, key_name);
-	return buf;
+	rsdb_exec_fetch(&data, "SELECT CONSTRAINT_NAME FROM information_schema.TABLE_CONSTRAINTS "
+				"WHERE CONSTRAINT_TYPE='UNIQUE' "
+				"AND TABLE_SCHEMA='%Q' AND TABLE_NAME='%Q' "
+				"AND CONSTRAINT_NAME='%Q'",
+			rsdb_conf.db_name, table_name, key_name);
+
+	if(data.row_count > 0)
+	{
+		rs_snprintf(buf, sizeof(buf), "ALTER TABLE %Q DROP INDEX %Q", table_name, key_name);
+		buf_ptr = buf;
+	}
+
+	rsdb_exec_fetch_end(&data);
+
+	return buf_ptr;
 }
 
 int
@@ -115,8 +130,8 @@ rsdbs_check_key_kcu(const char *table_name, const char *key_list_str, rsdbs_sche
 	char lbuf[BUFSIZE*2];
 	struct rsdb_table data;
 	dlink_list *field_list;
-	dlink_node *ptr;
 	const char *option_str;
+	int i;
 
 	if(option == RSDB_SCHEMA_KEY_PRIMARY)
 		option_str = option_str_pri;
@@ -127,10 +142,7 @@ rsdbs_check_key_kcu(const char *table_name, const char *key_list_str, rsdbs_sche
 
 	field_list = rsdb_schema_split_key(key_list_str);
 
-	/* build a sql statement, to grab the count of elements in our primary key
-	 * for the table, that match any of the columns specified.  The count value
-	 * returned should equal the number of fields we're searching for.
-	 */
+	/* grab the names of all columns in our key */
 	rs_snprintf(buf, sizeof(buf), "SELECT COLUMN_NAME FROM information_schema.KEY_COLUMN_USAGE AS ccu "
 					"JOIN information_schema.TABLE_CONSTRAINTS AS tc "
 					"ON tc.TABLE_NAME=ccu.TABLE_NAME AND tc.CONSTRAINT_NAME=ccu.CONSTRAINT_NAME "
@@ -138,37 +150,42 @@ rsdbs_check_key_kcu(const char *table_name, const char *key_list_str, rsdbs_sche
 					"AND tc.TABLE_SCHEMA='%Q' AND tc.TABLE_NAME='%Q'",
 			option_str, rsdb_conf.db_name, table_name);
 
-	DLINK_FOREACH(ptr, field_list->head)
+	/* if its a PRIMARY KEY there can only be one possible constraint per table, but if it's
+	 * UNIQUE then we can have multiple -- so grab the one for our key name
+	 */
+	if(option == RSDB_SCHEMA_KEY_UNIQUE)
 	{
-		/* we want to OR the column names together to find the count of all the
-		 * matching entries -- but this OR block itself needs an AND for the first
-		 * element to join it to the buffer above
-		 */
-		if(ptr == field_list->head)
-			rs_snprintf(lbuf, sizeof(lbuf), " AND (ccu.COLUMN_NAME='%Q'",
-					(char *) ptr->data);
-		else
-			rs_snprintf(lbuf, sizeof(lbuf), " OR ccu.COLUMN_NAME='%Q'",
-					(char *) ptr->data);
-
+		rs_snprintf(lbuf, sizeof(lbuf), " AND ccu.CONSTRAINT_NAME='%Q'",
+				rsdbs_generate_key_name(table_name, key_list_str, option));
 		strlcat(buf, lbuf, sizeof(buf));
 	}
-
-	/* close the sql brace */
-	strlcat(buf, ")", sizeof(buf));
 
 	rsdb_exec_fetch(&data, "%s", buf);
 
 	/* the SQL above should have returned a row per match -- so the number of elements
 	 * in the key should match this
 	 */
-	if(data.row_count == dlink_list_length(field_list))
+	if(data.row_count != dlink_list_length(field_list))
 	{
 		rsdb_exec_fetch_end(&data);
-		return 1;
+		return 0;
+	}
+
+	/* The number of keys is right, so walk through the list of columns we got back and
+	 * remove matches from field_list.  If the lists are a match, we should end up with
+	 * field_list being empty..
+	 */
+
+	for(i = 0; i < data.row_count; i++)
+	{
+		dlink_find_string_destroy(data.row[i][0], field_list);
 	}
 
 	rsdb_exec_fetch_end(&data);
+
+	if(dlink_list_length(field_list) == 0)
+		return 1;
+
 	return 0;
 }
 
@@ -209,50 +226,11 @@ rsdbs_check_key_index(const char *table_name, const char *key_list_str)
 void
 rsdbs_check_deletekey_unique(const char *table_name, dlink_list *key_list, dlink_list *table_data)
 {
-	char buf[BUFSIZE*2];
-	char lbuf[BUFSIZE*2];
-	struct rsdb_table data;
-	dlink_node *ptr;
-	int i;
+}
 
-	/* build a sql statement, to grab the names of all UNIQUE constraints, that don't
-	 * match the key names specified
-	 */
-	rs_snprintf(buf, sizeof(buf), "SELECT ccu.CONSTRAINT_NAME FROM information_schema.KEY_COLUMN_USAGE AS ccu "
-					"JOIN information_schema.TABLE_CONSTRAINTS AS tc "
-					"ON tc.TABLE_NAME=ccu.TABLE_NAME AND tc.CONSTRAINT_NAME=ccu.CONSTRAINT_NAME "
-					"WHERE tc.CONSTRAINT_TYPE='UNIQUE' "
-					"AND tc.TABLE_SCHEMA='%Q' AND tc.TABLE_NAME='%Q'",
-			rsdb_conf.db_name, table_name);
-
-	DLINK_FOREACH(ptr, key_list->head)
-	{
-		/* we want to AND the constraint names together, to find all constraints
-		 * with names different to the valid ones
-		 */
-		if(ptr == key_list->head)
-			rs_snprintf(lbuf, sizeof(lbuf), " AND (ccu.CONSTRAINT_NAME <> '%Q'",
-					(char *) ptr->data);
-		else
-			rs_snprintf(lbuf, sizeof(lbuf), " AND ccu.CONSTRAINT_NAME <> '%Q'",
-					(char *) ptr->data);
-
-		strlcat(buf, lbuf, sizeof(buf));
-	}
-
-	/* close the sql brace */
-	strlcat(buf, ")", sizeof(buf));
-
-	rsdb_exec_fetch(&data, "%s", buf);
-
-	/* this is the list of all UNIQUE constraints that aren't in our schema.. */
-	for(i = 0; i < data.row_count; i++)
-	{
-		const char *sql_str = rsdbs_sql_drop_key_unique(table_name, data.row[i][0]);
-
-		if(sql_str)
-			dlink_add_tail_alloc(my_strdup(sql_str), table_data);
-	}
+void
+rsdbs_check_deletekey_index(const char *table_name, dlink_list *key_list, dlink_list *table_data)
+{
 }
 
 const char *
