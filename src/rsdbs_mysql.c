@@ -103,6 +103,29 @@ rsdbs_sql_drop_key_unique(const char *table_name, const char *key_name)
 	return buf_ptr;
 }
 
+const char *
+rsdbs_sql_drop_key_index(const char *table_name, const char *key_name)
+{
+	static char buf[BUFSIZE*2];
+	struct rsdb_table data;
+	const char *buf_ptr = NULL;
+
+	rsdb_exec_fetch(&data, "SELECT INDEX_NAME FROM information_schema.STATISTICS "
+				"WHERE NON_UNIQUE=1 AND TABLE_SCHEMA='%Q' AND TABLE_NAME='%Q' "
+				"AND INDEX_NAME='%Q'",
+			rsdb_conf.db_name, table_name, key_name);
+
+	if(data.row_count > 0)
+	{
+		rs_snprintf(buf, sizeof(buf), "ALTER TABLE %Q DROP INDEX %Q", table_name, key_name);
+		buf_ptr = buf;
+	}
+
+	rsdb_exec_fetch_end(&data);
+
+	return buf_ptr;
+}
+
 int
 rsdbs_check_column(const char *table_name, const char *column_name)
 {
@@ -212,7 +235,7 @@ rsdbs_check_key_index(const char *table_name, const char *key_list_str)
 	idx_name = rsdbs_generate_key_name(table_name, key_list_str, RSDB_SCHEMA_KEY_INDEX);
 
 	rsdb_exec_fetch(&data, "SELECT * FROM information_schema.statistics "
-				"WHERE TABLE_SCHEMA='%Q' AND TABLE_NAME='%Q' AND INDEX_NAME='%Q'",
+				"WHERE NON_UNIQUE=1 AND TABLE_SCHEMA='%Q' AND TABLE_NAME='%Q' AND INDEX_NAME='%Q'",
 			rsdb_conf.db_name, table_name, idx_name);
 	row_count = data.row_count;
 	rsdb_exec_fetch_end(&data);
@@ -267,6 +290,41 @@ rsdbs_check_deletekey_unique(const char *table_name, dlink_list *key_list, dlink
 void
 rsdbs_check_deletekey_index(const char *table_name, dlink_list *key_list, dlink_list *table_data)
 {
+	char buf[BUFSIZE*2];
+	char lbuf[BUFSIZE*2];
+	struct rsdb_table data;
+	dlink_node *ptr;
+	const char *key_list_str;
+	const char *idx_name;
+	int i;
+
+	rs_snprintf(buf, sizeof(buf), "SELECT DISTINCT INDEX_NAME FROM information_schema.STATISTICS "
+					"WHERE NON_UNIQUE=1 AND TABLE_SCHEMA='%Q' AND TABLE_NAME='%Q'",
+			rsdb_conf.db_name, table_name);
+
+	DLINK_FOREACH(ptr, key_list->head)
+	{
+		key_list_str = ptr->data;
+		idx_name = rsdbs_generate_key_name(table_name, key_list_str, RSDB_SCHEMA_KEY_INDEX);
+
+		rs_snprintf(lbuf, sizeof(lbuf), " AND INDEX_NAME <> '%Q'", idx_name);
+		strlcat(buf, lbuf, sizeof(buf));
+	}
+
+	rsdb_exec_fetch(&data, buf);
+
+	/* delete any extra keys we got back.. */
+	for(i = 0; i < data.row_count; i++)
+	{
+		const char *add_sql;
+
+		add_sql  = rsdbs_sql_drop_key_index(table_name, data.row[i][0]);
+
+		if(add_sql)
+			dlink_add_tail_alloc(my_strdup(add_sql), table_data);
+	}
+
+	rsdb_exec_fetch_end(&data);
 }
 
 const char *
