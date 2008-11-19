@@ -1,3 +1,14 @@
+leeh        2008/11/19 19:16:39 UTC	(20081119_0-26226)
+  Log:
+  - fix rsdbs_sql_drop_key_unique() so it only generates SQL if its needed
+  - improve rsdbs_check_key_kcu() so it properly checks the fields are correct
+  - clean out rsdbs_check_deletekey_unique() until it can be done properly
+  
+
+  Modified:
+	rserv/trunk/src/rsdbs_mysql.c (File Modified) 
+
+
 leeh        2008/11/18 21:39:06 UTC	(20081118_2-26224)
   Log:
   - add a schema test for expanding an INDEX
