@@ -1,3 +1,18 @@
+leeh        2008/11/24 20:56:15 UTC	(20081124_1-26244)
+  Log:
+  - add rsdbs_pragma_header_pos(), to run a pragma and go back through the
+    header line to find the position of a given column
+  - make rsdbs_check_column() use rsdbs_pragma_header_pos()
+  - add rsdbs_check_key_index_list() to search an index list for a given
+    constraint
+  - make rsdbs_check_key_unique() and rsdbs_check_key_index() call
+    rsdbs_check_key_index_list()
+  
+
+  Modified:
+	rserv/trunk/src/rsdbs_sqlite3.c (File Modified) 
+
+
 leeh        2008/11/24 20:29:13 UTC	(20081124_0-26242)
   Log:
   - move an fprintf() up slightly so we can tell what sql its executing
