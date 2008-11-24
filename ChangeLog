@@ -1,3 +1,18 @@
+leeh        2008/11/24 22:17:53 UTC	(20081124_4-26250)
+  Log:
+  - make rsdb_schema_check() take an optional param of whether to run the sql
+    or not, and make it return the number of sql commands it found to do
+  - extend the schema test to run another quick couple of passes to check
+    there are no mods to do
+  
+
+  Modified:
+	rserv/trunk/include/rsdbs.h (File Modified) 
+	rserv/trunk/src/rsdbs_common.c (File Modified) 
+	rserv/trunk/src/rsdbs_schema.c (File Modified) 
+	rserv/trunk/src/stest_schema.c (File Modified) 
+
+
 leeh        2008/11/24 21:53:02 UTC	(20081124_3-26248)
   Log:
   - should be testing non-unique indexes for unique being 0, not 1
