@@ -1,3 +1,12 @@
+leeh        2008/11/24 21:53:02 UTC	(20081124_3-26248)
+  Log:
+  - should be testing non-unique indexes for unique being 0, not 1
+  
+
+  Modified:
+	rserv/trunk/src/rsdbs_sqlite3.c (File Modified) 
+
+
 leeh        2008/11/24 21:50:24 UTC	(20081124_2-26246)
   Log:
   - fill in rsdbs_check_key_pri()
