@@ -128,7 +128,7 @@ rsdbs_check_column(const char *table_name, const char *column_name)
 	}
 
 	/* load the result set */
-	rsdb_exec_fetch(&data, "PRAGMA index_list(%Q)", table_name);
+	rsdb_exec_fetch(&data, "PRAGMA table_info(%Q)", table_name);
 
 	/* At this point, we know which column in the result set has the
 	 * name of the column within the table we are looking for (pos_name).
@@ -212,6 +212,52 @@ rsdbs_check_key_index_list(const char *table_name, const char *key_list_str, rsd
 int
 rsdbs_check_key_pri(const char *table_name, const char *key_list_str)
 {
+	struct rsdb_table data;
+	dlink_list *field_list;
+	int pos_name = -1;
+	int pos_pkey = -1;
+	int key_count = 0;
+	int list_count = 0;
+	int i;
+
+	pos_name = rsdbs_pragma_header_pos(table_name, "table_info", "name");
+	pos_pkey = rsdbs_pragma_header_pos(table_name, "table_info", "pk");
+
+	/* didn't find a column caled 'name' -- so we have no idea where the
+	 * column names are held..
+	 */
+	if(pos_name < 0 || pos_pkey < 0)
+	{
+		mlog("fatal error: problem with db file: PRAGMA table_info() did not have a 'name'/'pk' column");
+		die(0, "problem with db file");
+	}
+
+	/* split up our key */
+	field_list = rsdb_schema_split_key(key_list_str);
+	list_count = dlink_list_length(field_list);
+
+	/* load the result set */
+	rsdb_exec_fetch(&data, "PRAGMA table_info(%Q)", table_name);
+
+	/* Hunt through the result set, finding all elements that are marked PRIMARY KEY,
+	 * and knock them out of the field_list one by one.
+	 */
+	for(i = 0; i < data.row_count; i++)
+	{
+		if(atoi(data.row[i][pos_pkey]) == 1)
+		{
+			key_count++;
+
+			dlink_find_string_destroy(data.row[i][pos_name], field_list);
+		}
+	}
+
+	rsdb_exec_fetch_end(&data);
+
+	/* in the end, field list should be empty, and the number of keys found should match */
+	if(dlink_list_length(field_list) == 0 && key_count == list_count)
+		return 1;
+
 	return 0;
 }
 
