@@ -1,3 +1,18 @@
+leeh        2008/11/24 20:29:13 UTC	(20081124_0-26242)
+  Log:
+  - move an fprintf() up slightly so we can tell what sql its executing
+  - make rsdb_init() for sqlite handle the dbname param.  This should probably
+    be reworked slightly, as it means the conf can influence the dbpath..
+  - add shell for rsdbs_check_deletekey_index()
+  - fix rsdbs_sql_create_key() to handle index names like the others
+  
+
+  Modified:
+	rserv/trunk/src/rsdb_sqlite3.c (File Modified) 
+	rserv/trunk/src/rsdbs_common.c (File Modified) 
+	rserv/trunk/src/rsdbs_sqlite3.c (File Modified) 
+
+
 leeh        2008/11/19 19:38:26 UTC	(20081119_2-26230)
   Log:
   - fix rsdbs_check_key_index() to not locate UNIQUE constraints
