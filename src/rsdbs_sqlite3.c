@@ -193,7 +193,7 @@ rsdbs_check_key_index_list(const char *table_name, const char *key_list_str, rsd
 		if(!strcmp(data.row[i][pos_name], idx_name))
 		{
 			if((option == RSDB_SCHEMA_KEY_UNIQUE && atoi(data.row[i][pos_unique]) == 1) ||
-			   (option == RSDB_SCHEMA_KEY_INDEX && atoi(data.row[i][pos_unique]) == 1))
+			   (option == RSDB_SCHEMA_KEY_INDEX && atoi(data.row[i][pos_unique]) == 0))
 			{
 				rsdb_exec_fetch_end(&data);
 				return 1;
