@@ -65,45 +65,58 @@ rsdbs_sql_drop_key_unique(const char *table_name, const char *key_name)
 	return NULL;
 }
 
-int
-rsdbs_check_column(const char *table_name, const char *column_name)
+/* rsdbs_pragma_header_pos()
+ * Runs a pragma function, and uses it to work out the position of a given column.
+ *
+ * inputs	- table to search, pragma function to issue, column to search for
+ * outputs	- position of column, -1 if not found, -2 if no results
+ * side effects	-
+ */
+static int
+rsdbs_pragma_header_pos(const char *table_name, const char *pragma_str, const char *column_name)
 {
 	struct rsdb_table data;
 	char **res_data;
-	int pos_name = -1;
+	int pos = -1;
 	int i;
 
-	rsdb_exec_fetch(&data, "PRAGMA table_info(%Q)", table_name);
+	rsdb_exec_fetch(&data, "PRAGMA %s(%Q)", pragma_str, table_name);
 
-	/* we should never be asked to check the existence of a column in a
-	 * table that doesn't exist..
-	 */
+	/* no results, so no column headers either */
 	if(data.row_count == 0)
 	{
-		mlog("fatal error: problem with db file: rsdbs_check_column() had an empty result set");
-		die(0, "problem with db file");
+		rsdb_exec_fetch_end(&data);
+		return -2;
 	}
 
-	/* the rsdb_exec_fetch() loaded the result set of columns, however
-	 * this is purely the results, without any column headers.
+	/* rsdb_exec_fetch() loaded the results into its columns, however it skipped the column
+	 * headers, and we need that information to work out the column position.
 	 *
-	 * Because we are using a PRAGMA rather than a SELECT, it's possible
-	 * the results here could be in any order.  We therefore need the
-	 * column headers to work out which column is which.
-	 *
-	 * We are looking for a column called 'name' in the result set, so
-	 * hunt through to work out which position it is at.
+	 * Go back to the raw result set, and hunt for it there..
 	 */
 	res_data = data.arg;
 
 	for(i = 0; i < data.col_count; i++)
 	{
-		if(!strcmp(res_data[i], "name"))
+		if(!strcmp(res_data[i], column_name))
 		{
-			pos_name = i;
+			pos = i;
 			break;
 		}
 	}
+
+	rsdb_exec_fetch_end(&data);
+	return pos;
+}
+
+int
+rsdbs_check_column(const char *table_name, const char *column_name)
+{
+	struct rsdb_table data;
+	int pos_name = -1;
+	int i;
+
+	pos_name = rsdbs_pragma_header_pos(table_name, "table_info", "name");
 
 	/* didn't find a column caled 'name' -- so we have no idea where the
 	 * column names are held..
@@ -113,6 +126,9 @@ rsdbs_check_column(const char *table_name, const char *column_name)
 		mlog("fatal error: problem with db file: PRAGMA table_info() did not have a 'name' column");
 		die(0, "problem with db file");
 	}
+
+	/* load the result set */
+	rsdb_exec_fetch(&data, "PRAGMA index_list(%Q)", table_name);
 
 	/* At this point, we know which column in the result set has the
 	 * name of the column within the table we are looking for (pos_name).
@@ -134,6 +150,65 @@ rsdbs_check_column(const char *table_name, const char *column_name)
 	return 0;
 }
 
+static int
+rsdbs_check_key_index_list(const char *table_name, const char *key_list_str, rsdbs_schema_key_option option)
+{
+	struct rsdb_table data;
+	const char *idx_name;
+	int pos_name = -1;
+	int pos_unique = -1;
+	int i;
+
+	pos_name = rsdbs_pragma_header_pos(table_name, "index_list", "name");
+	pos_unique = rsdbs_pragma_header_pos(table_name, "index_list", "unique");
+
+	/* didn't find a column caled 'name' or unique -- so we have no idea where the
+	 * index names are held..
+	 */
+	if(pos_name == -1 || pos_unique == -1)
+	{
+		mlog("fatal error: problem with db file: PRAGMA index_list() did not have a 'name'/'unique' column");
+		die(0, "problem with db file");
+	}
+
+	/* no indexes */
+	if(pos_name < 0 || pos_unique < 0)
+		return 0;
+
+	/* load the result set */
+	rsdb_exec_fetch(&data, "PRAGMA index_list(%Q)", table_name);
+
+	/* generate our index name */
+	idx_name = rsdbs_generate_key_name(table_name, key_list_str, option);
+
+	/* At this point, we know which column in the result set has the
+	 * name of the column within the table we are looking for (pos_name).
+	 *
+	 * So now, hunt through the rows in the result set, checking if we
+	 * can find the column we are hunting for in the results..
+	 */
+	for(i = 0; i < data.row_count; i++)
+	{
+		/* found it! */
+		if(!strcmp(data.row[i][pos_name], idx_name))
+		{
+			if((option == RSDB_SCHEMA_KEY_UNIQUE && atoi(data.row[i][pos_unique]) == 1) ||
+			   (option == RSDB_SCHEMA_KEY_INDEX && atoi(data.row[i][pos_unique]) == 1))
+			{
+				rsdb_exec_fetch_end(&data);
+				return 1;
+			}
+
+			rsdb_exec_fetch_end(&data);
+			return 0;
+		}
+	}
+
+	rsdb_exec_fetch_end(&data);
+	return 0;
+
+}
+
 int
 rsdbs_check_key_pri(const char *table_name, const char *key_list_str)
 {
@@ -143,13 +218,13 @@ rsdbs_check_key_pri(const char *table_name, const char *key_list_str)
 int
 rsdbs_check_key_unique(const char *table_name, const char *key_list_str)
 {
-	return 0;
+	return rsdbs_check_key_index_list(table_name, key_list_str, RSDB_SCHEMA_KEY_UNIQUE);
 }
 
 int
 rsdbs_check_key_index(const char *table_name, const char *key_list_str)
 {
-	return 0;
+	return rsdbs_check_key_index_list(table_name, key_list_str, RSDB_SCHEMA_KEY_INDEX);
 }
 
 void
