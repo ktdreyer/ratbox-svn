@@ -94,8 +94,8 @@ rsdb_schema_check(struct rsdb_schema_set *schema_set)
 
 		DLINK_FOREACH(ptr, table_data->head)
 		{
-			rsdb_exec(NULL, "%s", (const char *) ptr->data);
 			fprintf(stdout, "%s;\n", (const char *) ptr->data);
+			rsdb_exec(NULL, "%s", (const char *) ptr->data);
 		}
 
 		rsdb_exec_fetch_end(&data);

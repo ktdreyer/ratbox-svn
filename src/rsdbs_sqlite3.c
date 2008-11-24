@@ -157,6 +157,11 @@ rsdbs_check_deletekey_unique(const char *table_name, dlink_list *key_list, dlink
 {
 }
 
+void
+rsdbs_check_deletekey_index(const char *table_name, dlink_list *key_list, dlink_list *table_data)
+{
+}
+
 const char *
 rsdbs_sql_create_col(struct rsdb_schema_set *schema_set, struct rsdbs_schema_col *schema_element,
 			int alter_table)
@@ -246,8 +251,11 @@ const char *
 rsdbs_sql_create_key(struct rsdb_schema_set *schema_set, struct rsdbs_schema_key *schema_element)
 {
 	static char buf[BUFSIZE*2];
+	const char *idx_name;
 
 	buf[0] = '\0';
+
+	idx_name = rsdbs_generate_key_name(schema_set->table_name, schema_element->name, schema_element->option);
 
 	switch(schema_element->option)
 	{
@@ -255,21 +263,18 @@ rsdbs_sql_create_key(struct rsdb_schema_set *schema_set, struct rsdbs_schema_key
 			if(schema_set->has_serial)
 				break;
 
-			snprintf(buf, sizeof(buf), "CREATE UNIQUE INDEX %s_%s_prikey ON %s (%s);",
-				schema_set->table_name, schema_element->name,
-				schema_set->table_name, schema_element->name);
+			rs_snprintf(buf, sizeof(buf), "CREATE UNIQUE INDEX %Q ON %Q (%Q);",
+				idx_name, schema_set->table_name, schema_element->name);
 			break;
 
 		case RSDB_SCHEMA_KEY_UNIQUE:
-			snprintf(buf, sizeof(buf), "CREATE UNIQUE INDEX %s_%s_unique ON %s (%s);",
-				schema_set->table_name, schema_element->name,
-				schema_set->table_name, schema_element->name);
+			rs_snprintf(buf, sizeof(buf), "CREATE UNIQUE INDEX %Q ON %Q (%Q);",
+				idx_name, schema_set->table_name, schema_element->name);
 			break;
 
 		case RSDB_SCHEMA_KEY_INDEX:
-			snprintf(buf, sizeof(buf), "CREATE INDEX %s_%s_idx ON %s (%s);",
-				schema_set->table_name, schema_element->name,
-				schema_set->table_name, schema_element->name);
+			rs_snprintf(buf, sizeof(buf), "CREATE INDEX %Q ON %Q (%Q);",
+				idx_name, schema_set->table_name, schema_element->name);
 			break;
 
 		/* sqlite tables don't properly support foreign keys */
