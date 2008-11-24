@@ -41,18 +41,19 @@ static dlink_list *rsdbs_check_table(struct rsdb_schema_set *schema_set);
 /* rsdb_schema_check()
  * Checks the database against the schema
  *
- * inputs	- schema set
+ * inputs	- schema set, whether to run the SQL to correct the schema
  * outputs	-
  * side effects - runs checks for all tables in the schema
  */
-void
-rsdb_schema_check(struct rsdb_schema_set *schema_set)
+int
+rsdb_schema_check(struct rsdb_schema_set *schema_set, int run_sql)
 {
-	dlink_list *table_data;
+	dlink_list *table_data = NULL;
 	dlink_node *ptr;
 	struct rsdbs_schema_col *schema_element;
 	struct rsdb_table data;
 	const char *buf;
+	int sql_count = 0;
 	int i, j;
 
 	/* first fill out the serial_name column of the schema_set with the
@@ -92,14 +93,20 @@ rsdb_schema_check(struct rsdb_schema_set *schema_set)
 		else
 			table_data = rsdb_schema_generate_table(&schema_set[i]);
 
+		sql_count += dlink_list_length(table_data);
+
 		DLINK_FOREACH(ptr, table_data->head)
 		{
 			fprintf(stdout, "%s;\n", (const char *) ptr->data);
-			rsdb_exec(NULL, "%s", (const char *) ptr->data);
+
+			if(run_sql)
+				rsdb_exec(NULL, "%s", (const char *) ptr->data);
 		}
 
 		rsdb_exec_fetch_end(&data);
 	}
+
+	return sql_count;
 }
 
 static dlink_list *

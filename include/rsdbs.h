@@ -74,7 +74,7 @@ void rsdbs_check_deletekey_unique(const char *table_name, dlink_list *unique_lis
 void rsdbs_check_deletekey_index(const char *table_name, dlink_list *unique_list, dlink_list *table_data);
 
 /* rsdbs_common.c */
-void rsdb_schema_check(struct rsdb_schema_set *schema_set);
+int rsdb_schema_check(struct rsdb_schema_set *schema_set, int run_sql);
 
 struct _dlink_list *rsdb_schema_split_key(const char *key_fields);
 

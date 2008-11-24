@@ -271,6 +271,7 @@ schema_init(void)
 	struct rsdb_schema_set *schema_set;
 	const char *sql;
 	size_t schema_size;
+	int retval;
 	int i;
 
 	mlog("First pass, checking for a clean database.");
@@ -291,20 +292,28 @@ schema_init(void)
 	}
 
 	schema_size = sizeof(struct rsdb_schema_set) * (sizeof(stest_schema_tables) / sizeof(struct stest_schema_set));
+	schema_set = my_malloc(schema_size);
 
 	mlog("Second pass, creating initial schema.");
-
-	schema_set = my_malloc(schema_size);
 
 	for(i = 0; stest_schema_tables[i].table_name; i++)
 	{
 		schema_set[i].table_name = stest_schema_tables[i].table_name;
 		schema_set[i].schema_col = stest_schema_tables[i].schema1_col;
 		schema_set[i].schema_key = stest_schema_tables[i].schema1_key;
-
 	}
 
-	rsdb_schema_check(schema_set);
+	rsdb_schema_check(schema_set, 1);
+
+	mlog("Checking accuracy of schema..");
+
+	retval = rsdb_schema_check(schema_set, 0);
+
+	if(retval)
+	{
+		mlog("Schema is inaccurate(?)");
+		die(0, "Schema is inaccurate");
+	}
 
 	mlog("Third pass, checking modifications.");
 
@@ -316,14 +325,12 @@ schema_init(void)
 		schema_set[0].table_name = stest_schema_tables[i].table_name;
 		schema_set[0].schema_col = stest_schema_tables[i].schema2_col;
 		schema_set[0].schema_key = stest_schema_tables[i].schema2_key;
-		rsdb_schema_check(schema_set);
+		rsdb_schema_check(schema_set, 1);
 	}
-
-	rsdb_schema_check(schema_set);
 
 	mlog("Fourth pass, no further modifications should be needed.");
 
-	memset(schema_set, 0, sizeof(struct rsdb_schema_set) * (sizeof(stest_schema_tables) / sizeof(struct stest_schema_set)));
+	memset(schema_set, 0, schema_size);
 
 	for(i = 0; stest_schema_tables[i].table_name; i++)
 	{
@@ -332,5 +339,11 @@ schema_init(void)
 		schema_set[i].schema_key = stest_schema_tables[i].schema2_key;
 	}
 
-	rsdb_schema_check(schema_set);
+	retval = rsdb_schema_check(schema_set, 0);
+
+	if(retval)
+	{
+		mlog("Schema sync failed");
+		die(0, "Schema sync failed");
+	}
 }
