@@ -1,3 +1,12 @@
+leeh        2008/12/14 20:48:15 UTC	(20081214_0-26300)
+  Log:
+  - track the pass numbers through an integer
+  
+
+  Modified:
+	rserv/trunk/src/stest_schema.c (File Modified) 
+
+
 leeh        2008/11/24 22:17:53 UTC	(20081124_4-26250)
   Log:
   - make rsdb_schema_check() take an optional param of whether to run the sql
