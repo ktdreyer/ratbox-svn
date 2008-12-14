@@ -271,10 +271,11 @@ schema_init(void)
 	struct rsdb_schema_set *schema_set;
 	const char *sql;
 	size_t schema_size;
+	int passno = 1;
 	int retval;
 	int i;
 
-	mlog("First pass, checking for a clean database.");
+	mlog("Pass %d: Checking for a clean database.", passno++);
 
 	/* run a quick check to make sure the tables dont exist */
 	for(i = 0; stest_schema_tables[i].table_name; i++)
@@ -294,7 +295,7 @@ schema_init(void)
 	schema_size = sizeof(struct rsdb_schema_set) * (sizeof(stest_schema_tables) / sizeof(struct stest_schema_set));
 	schema_set = my_malloc(schema_size);
 
-	mlog("Second pass, creating initial schema.");
+	mlog("Pass %d: Creating initial schema.", passno++);
 
 	for(i = 0; stest_schema_tables[i].table_name; i++)
 	{
@@ -305,7 +306,7 @@ schema_init(void)
 
 	rsdb_schema_check(schema_set, 1);
 
-	mlog("Checking accuracy of schema..");
+	mlog("Pass %d: Checking accuracy of schema..", passno++);
 
 	retval = rsdb_schema_check(schema_set, 0);
 
@@ -315,7 +316,7 @@ schema_init(void)
 		die(0, "Schema is inaccurate");
 	}
 
-	mlog("Third pass, checking modifications.");
+	mlog("Pass %d: Checking modifications.", passno++);
 
 	for(i = 0; stest_schema_tables[i].table_name; i++)
 	{
@@ -328,7 +329,7 @@ schema_init(void)
 		rsdb_schema_check(schema_set, 1);
 	}
 
-	mlog("Fourth pass, no further modifications should be needed.");
+	mlog("Pass %d: No further modifications should be needed.", passno++);
 
 	memset(schema_set, 0, schema_size);
 
