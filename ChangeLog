@@ -1,3 +1,14 @@
+leeh        2008/12/14 20:52:11 UTC	(20081214_1-26302)
+  Log:
+  - add in the start of the code to check a schema itself for sanity
+  
+
+  Modified:
+	rserv/trunk/include/rsdbs.h (File Modified) 
+	rserv/trunk/src/Makefile.in (File Modified) 
+	rserv/trunk/src/rsdbs_sanity.c (File Added) 
+
+
 leeh        2008/12/14 20:48:15 UTC	(20081214_0-26300)
   Log:
   - track the pass numbers through an integer
