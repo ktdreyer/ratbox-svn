@@ -81,4 +81,7 @@ struct _dlink_list *rsdb_schema_split_key(const char *key_fields);
 struct _dlink_list *rsdb_schema_generate_table(struct rsdb_schema_set *schema_set);
 const char *rsdbs_generate_key_name(const char *table_name, const char *field_list_text, rsdbs_schema_key_option option);
 
+/* rsdbs_sanity.c */
+int rsdbs_san_check(struct rsdb_schema_set *schema_set);
+
 #endif

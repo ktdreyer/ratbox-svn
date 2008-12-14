@@ -55,6 +55,7 @@ BSRCS = 		\
         newconf.c       \
 	rsdb_common.c	\
 	rsdbs_common.c	\
+	rsdbs_sanity.c	\
 	rsdbs_schema.c	\
 	rserv.c		\
 	scommand.c	\
