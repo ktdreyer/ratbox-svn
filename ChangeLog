@@ -1,3 +1,11 @@
+androsyn    2008/12/21 03:20:04 UTC	(20081221_1-26347)
+  Log:
+  fix the line number bug that was inherited from ircd
+
+  Modified:
+	rserv/trunk/src/lexer.l (File Modified) 
+
+
 androsyn    2008/12/21 03:14:26 UTC	(20081221_0-26345)
   Log:
   deal with CRLF terminated conf files
