@@ -530,5 +530,10 @@ conf_fbgets(char *lbuf, int max_size)
 	if((buff = fgets(lbuf, max_size, conf_fbfile_in)) == NULL)
 		return (0);
 
+	if((p = strpbrk(lbuf, "\r\n")) != NULL)
+	{
+		*p++ = '\n';
+		*p = '\0';
+	}
 	return (strlen(lbuf));
 }
