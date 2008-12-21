@@ -168,6 +168,7 @@ void ccomment()
           while ((c = input()) == '*');
           if (c == '/') 
             break;
+          if (c == '\n') ++lineno;
         }
       if (c == EOF)
         {
