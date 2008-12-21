@@ -1,3 +1,11 @@
+androsyn    2008/12/21 03:14:26 UTC	(20081221_0-26345)
+  Log:
+  deal with CRLF terminated conf files
+
+  Modified:
+	rserv/trunk/src/conf.c (File Modified) 
+
+
 leeh        2008/12/14 20:52:11 UTC	(20081214_1-26302)
   Log:
   - add in the start of the code to check a schema itself for sanity
