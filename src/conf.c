@@ -525,8 +525,8 @@ yyerror(const char *msg)
 int
 conf_fbgets(char *lbuf, int max_size)
 {
-	char *buff;
-
+	char *buff, *p;
+	
 	if((buff = fgets(lbuf, max_size, conf_fbfile_in)) == NULL)
 		return (0);
 
