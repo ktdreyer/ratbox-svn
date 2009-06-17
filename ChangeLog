@@ -1,3 +1,18 @@
+jilles      2009/06/17 20:07:22 UTC	(20090617_1-26600)
+  Log:
+  Add support for the new channel mode +S (SSL only channel).
+  This is always enabled, which may be a little annoying
+  but not really dangerous because the +S will not have any
+  effect if disabled and can be turned off by any chanop.
+  
+
+  Modified:
+	rserv/trunk/include/channel.h (File Modified) 
+	rserv/trunk/src/c_mode.c (File Modified) 
+	rserv/trunk/src/channel.c (File Modified) 
+	rserv/trunk/src/s_alis.c (File Modified) 
+
+
 jilles      2009/06/17 19:43:11 UTC	(20090617_0-26598)
   Log:
   Disallow UIDs in .omode etc.
