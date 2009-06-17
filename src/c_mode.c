@@ -477,7 +477,10 @@ parse_full_mode(struct channel *chptr, struct client *source_p,
 				break;
 			}
 
-			if((target_p = find_user(nick, 1)) == NULL)
+			/* if source_p != NULL, assume this came from
+			 * an oper command and do not accept UIDs -- jilles
+			 */
+			if((target_p = find_user(nick, source_p == NULL)) == NULL)
 				break;
 
 			if((mptr = find_chmember(chptr, target_p)) == NULL)
