@@ -1,3 +1,12 @@
+jilles      2009/06/17 19:43:11 UTC	(20090617_0-26598)
+  Log:
+  Disallow UIDs in .omode etc.
+  
+
+  Modified:
+	rserv/trunk/src/c_mode.c (File Modified) 
+
+
 androsyn    2009/01/02 23:05:59 UTC	(20090102_0-26373)
   Log:
   make conf.c compile again
