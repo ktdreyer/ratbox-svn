@@ -62,6 +62,7 @@ struct chmember
 #define MODE_LIMIT		0x0040
 #define MODE_KEY		0x0080
 #define MODE_REGONLY		0x0100
+#define MODE_SSLONLY		0x0200
 
 #define MODE_OPPED		0x0001
 #define MODE_VOICED		0x0002

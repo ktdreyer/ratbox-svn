@@ -617,6 +617,8 @@ chmode_to_string(struct chmode *mode)
 		*p++ = 't';
 	if(mode->mode & MODE_REGONLY)
 		*p++ = 'r';
+	if(mode->mode & MODE_SSLONLY)
+		*p++ = 'S';
 
 	if(mode->limit && mode->key[0])
 	{
@@ -666,6 +668,8 @@ chmode_to_string_simple(struct chmode *mode)
 		*p++ = 't';
 	if(mode->mode & MODE_REGONLY)
 		*p++ = 'r';
+	if(mode->mode & MODE_SSLONLY)
+		*p++ = 'S';
 	if(mode->limit)
 		*p++ = 'l';
 	if(mode->key[0])
