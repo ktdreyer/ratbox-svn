@@ -619,7 +619,7 @@ o_banserv_kline(struct client *client_p, struct lconn *conn_p, const char *parv[
 			if(!(client_p->user->oper->sflags & CONF_OPER_BAN_PERM))
 				hit++;
 		}
-		else if(!conn_p->sprivs & CONF_OPER_BAN_PERM)
+		else if(!(conn_p->sprivs & CONF_OPER_BAN_PERM))
 			hit++;
 
 		if(hit)
@@ -734,7 +734,7 @@ o_banserv_xline(struct client *client_p, struct lconn *conn_p, const char *parv[
 			if(!(client_p->user->oper->sflags & CONF_OPER_BAN_PERM))
 				hit++;
 		}
-		else if(!conn_p->sprivs & CONF_OPER_BAN_PERM)
+		else if(!(conn_p->sprivs & CONF_OPER_BAN_PERM))
 			hit++;
 
 		if(hit)
@@ -847,7 +847,7 @@ o_banserv_resv(struct client *client_p, struct lconn *conn_p, const char *parv[]
 			if(!(client_p->user->oper->sflags & CONF_OPER_BAN_PERM))
 				hit++;
 		}
-		else if(!conn_p->sprivs & CONF_OPER_BAN_PERM)
+		else if(!(conn_p->sprivs & CONF_OPER_BAN_PERM))
 			hit++;
 
 		if(hit)
@@ -956,7 +956,7 @@ o_banserv_addregexp(struct client *client_p, struct lconn *conn_p, const char *p
 			if(!(client_p->user->oper->sflags & CONF_OPER_BAN_PERM))
 				hit++;
 		}
-		else if(!conn_p->sprivs & CONF_OPER_BAN_PERM)
+		else if(!(conn_p->sprivs & CONF_OPER_BAN_PERM))
 			hit++;
 
 		if(hit)
@@ -1154,7 +1154,7 @@ o_banserv_unkline(struct client *client_p, struct lconn *conn_p, const char *par
 			if(!(client_p->user->oper->sflags & CONF_OPER_BAN_REMOVE))
 				hit++;
 		}
-		else if(!conn_p->sprivs & CONF_OPER_BAN_REMOVE)
+		else if(!(conn_p->sprivs & CONF_OPER_BAN_REMOVE))
 			hit++;
 
 		if(hit)
@@ -1208,7 +1208,7 @@ o_banserv_unxline(struct client *client_p, struct lconn *conn_p, const char *par
 			if(!(client_p->user->oper->sflags & CONF_OPER_BAN_REMOVE))
 				hit++;
 		}
-		else if(!conn_p->sprivs & CONF_OPER_BAN_REMOVE)
+		else if(!(conn_p->sprivs & CONF_OPER_BAN_REMOVE))
 			hit++;
 
 		if(hit)
@@ -1255,7 +1255,7 @@ o_banserv_unresv(struct client *client_p, struct lconn *conn_p, const char *parv
 			if(!(client_p->user->oper->sflags & CONF_OPER_BAN_REMOVE))
 				hit++;
 		}
-		else if(!conn_p->sprivs & CONF_OPER_BAN_REMOVE)
+		else if(!(conn_p->sprivs & CONF_OPER_BAN_REMOVE))
 			hit++;
 
 		if(hit)
@@ -1311,7 +1311,7 @@ o_banserv_delregexp(struct client *client_p, struct lconn *conn_p, const char *p
 			if(!(client_p->user->oper->sflags & CONF_OPER_BAN_REMOVE))
 				hit++;
 		}
-		else if(!conn_p->sprivs & CONF_OPER_BAN_REMOVE)
+		else if(!(conn_p->sprivs & CONF_OPER_BAN_REMOVE))
 			hit++;
 
 		if(hit)
@@ -1383,7 +1383,7 @@ o_banserv_delregexpneg(struct client *client_p, struct lconn *conn_p, const char
 			if(!(client_p->user->oper->sflags & CONF_OPER_BAN_REMOVE))
 				hit++;
 		}
-		else if(!conn_p->sprivs & CONF_OPER_BAN_REMOVE)
+		else if(!(conn_p->sprivs & CONF_OPER_BAN_REMOVE))
 			hit++;
 
 		if(hit)
@@ -1425,7 +1425,7 @@ o_banserv_sync(struct client *client_p, struct lconn *conn_p, const char *parv[]
 			if(!client_p->user->oper || !(client_p->user->oper->sflags & CONF_OPER_BAN_SYNC))
 				hit++;
 		}
-		else if(!conn_p->sprivs & CONF_OPER_BAN_SYNC)
+		else if(!(conn_p->sprivs & CONF_OPER_BAN_SYNC))
 			hit++;
 
 		if(hit)
