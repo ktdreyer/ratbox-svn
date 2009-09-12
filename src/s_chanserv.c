@@ -866,7 +866,9 @@ e_chanserv_expireban(void *unused)
 	struct ban_reg *banreg_p;
 	dlink_node *hptr;
 	dlink_node *ptr, *next_ptr;
-	int i;
+	dlink_node *bptr;
+	int i, any;
+	struct channel *chptr;
 
 	/* Start a transaction, we're going to make a lot of changes */
 	rsdb_transaction(RSDB_TRANS_START);
@@ -874,6 +876,8 @@ e_chanserv_expireban(void *unused)
 	HASH_WALK(i, MAX_CHANNEL_TABLE, hptr, chan_reg_table)
 	{
 		chreg_p = hptr->data;
+		any = 0;
+		chptr = NULL;
 
 		DLINK_FOREACH_SAFE(ptr, next_ptr, chreg_p->bans.head)
 		{
@@ -882,11 +886,33 @@ e_chanserv_expireban(void *unused)
 			if(!banreg_p->hold || banreg_p->hold > CURRENT_TIME)
 				continue;
 
+			if (!any)
+			{
+				any = 1;
+				chptr = find_channel(chreg_p->name);
+				if (chptr != NULL)
+					modebuild_start(chanserv_p, chptr);
+			}
+			if (chptr != NULL)
+			{
+				DLINK_FOREACH(bptr, chptr->bans.head)
+				{
+					if (!irccmp(bptr->data, banreg_p->mask))
+					{
+						modebuild_add(DIR_DEL, "b", banreg_p->mask);
+						my_free(bptr->data);
+						dlink_destroy(bptr, &chptr->bans);
+						break;
+					}
+				}
+			}
 			rsdb_exec(NULL, "DELETE FROM bans "
 					"WHERE chname='%Q' and mask='%Q'",
 					chreg_p->name, banreg_p->mask);
 			free_ban_reg(chreg_p, banreg_p);
 		}
+		if (chptr != NULL)
+			modebuild_finish();
 	}
 	HASH_WALK_END
 
