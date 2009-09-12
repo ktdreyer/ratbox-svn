@@ -1,3 +1,13 @@
+leeh        2009/09/12 16:10:19 UTC	(20090912_0-26658)
+  Log:
+  - apply jilles patch to make chanserv also remove any channel bans when
+    expiring db bans
+  
+
+  Modified:
+	rserv/trunk/src/s_chanserv.c (File Modified) 
+
+
 jilles      2009/06/17 20:07:22 UTC	(20090617_1-26600)
   Log:
   Add support for the new channel mode +S (SSL only channel).
