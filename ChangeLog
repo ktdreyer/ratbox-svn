@@ -1,3 +1,13 @@
+leeh        2009/09/15 18:36:42 UTC	(20090915_0-26664)
+  Log:
+  - fix a crash in userserv::set::email, as reported by mankind86.
+    Remember: copy and paste is sometimes bad.
+  
+
+  Modified:
+	rserv/branches/1_2/src/s_userserv.c (File Modified) 
+
+
 leeh        2009/09/12 16:09:10 UTC	(20090912_0-26656)
   Log:
   - apply jilles patch to make rserv also remove channel bans when expiring
