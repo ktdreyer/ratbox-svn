@@ -1895,7 +1895,7 @@ s_user_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 			service_err(userserv_p, client_p, SVC_EMAIL_INVALID, arg);
 			return 1;
 		}
-		else if(!valid_email_domain(parv[2]))
+		else if(!valid_email_domain(arg))
 		{
 			service_err(userserv_p, client_p, SVC_EMAIL_BANNEDDOMAIN);
 			return 1;
