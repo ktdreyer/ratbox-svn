@@ -62,6 +62,7 @@ struct chmember
 #define MODE_LIMIT		0x0040
 #define MODE_KEY		0x0080
 #define MODE_REGONLY		0x0100
+#define MODE_SSLONLY		0x0200
 
 #define MODE_OPPED		0x0001
 #define MODE_VOICED		0x0002
@@ -107,7 +108,7 @@ int valid_ban(const char *banstr);
 /* DO NOT DEREFERENCE THE VOID POINTER RETURNED FROM THIS */
 void *del_ban(const char *banstr, dlink_list *list);
 
-int parse_simple_mode(struct chmode *, const char **, int, int);
-void parse_full_mode(struct channel *, struct client *, const char **, int, int);
+int parse_simple_mode(struct chmode *, const char **, int, int, int);
+void parse_full_mode(struct channel *, struct client *, const char **, int, int, int);
 
 #endif

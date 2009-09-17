@@ -521,7 +521,7 @@ channel_db_callback(int argc, const char **argv)
 		tmpmode = LOCAL_COPY(argv[3]);
 		modec = string_to_array(tmpmode, modev);
 
-		if(parse_simple_mode(&mode, (const char **) modev, modec, 0))
+		if(parse_simple_mode(&mode, (const char **) modev, modec, 0, 1))
 		{
 			reg_p->cmode.mode = mode.mode;
 			reg_p->cmode.limit = mode.limit;
@@ -529,6 +529,12 @@ channel_db_callback(int argc, const char **argv)
 			if(mode.key[0])
 				strlcpy(reg_p->cmode.key, mode.key,
 					sizeof(reg_p->cmode.key));
+
+			/* it's possible someone set a +S when allow_sslonly was enabled, 
+			 * and it's now disabled -- so just unset it if thats the case --anfl
+			 */
+			if(!config_file.allow_sslonly)
+				reg_p->cmode.mode &= ~MODE_SSLONLY;
 		}
 	}
 
@@ -538,7 +544,7 @@ channel_db_callback(int argc, const char **argv)
 		tmpmode = LOCAL_COPY(argv[4]);
 		modec = string_to_array(tmpmode, modev);
 
-		if(parse_simple_mode(&mode, (const char **) modev, modec, 0))
+		if(parse_simple_mode(&mode, (const char **) modev, modec, 0, 1))
 		{
 			reg_p->emode.mode = mode.mode;
 			reg_p->emode.limit = mode.limit;
@@ -546,6 +552,13 @@ channel_db_callback(int argc, const char **argv)
 			if(mode.key[0])
 				strlcpy(reg_p->emode.key, mode.key,
 					sizeof(reg_p->emode.key));
+
+			/* it's possible someone set a +S when allow_sslonly was enabled, 
+			 * and it's now disabled -- so just unset it if thats the case --anfl
+			 */
+			if(!config_file.allow_sslonly)
+				reg_p->emode.mode &= ~MODE_SSLONLY;
+
 		}
 	}
 
@@ -2483,25 +2496,30 @@ s_chan_clearmodes(struct client *client_p, struct lconn *conn_p, const char *par
 		return 1;
 
 	if(!chptr->mode.key[0] && !chptr->mode.limit &&
-	   !(chptr->mode.mode & MODE_INVITEONLY))
+	   !(chptr->mode.mode & (MODE_INVITEONLY|MODE_SSLONLY)))
 	{
+		/* use allow_sslonly to determine if we show availability of +S */
 		service_err(chanserv_p, client_p, SVC_CHAN_NOMODE,
-				chptr->name, "+ilk");
+				chptr->name, (config_file.allow_sslonly ? "+ilkS" : "+ilk"));
 		return 1;
 	}
 
 	zlog(chanserv_p, 4, 0, 0, client_p, NULL,
 		"CLEARMODES %s", parv[0]);
 
-	snprintf(modestr, sizeof(modestr), "-%s%s%s",
+	/* we allow CLEARMODES to always touch +S (sslonly) regardless of allow_sslonly, because
+	 * it could be a restriction that is stopping users joining a channel --anfl
+	 */
+	snprintf(modestr, sizeof(modestr), "-%s%s%s%s",
 			(chptr->mode.mode & MODE_INVITEONLY) ? "i" : "",
+			(chptr->mode.mode & MODE_SSLONLY) ? "S" : "",
 			chptr->mode.limit ? "l" : "",
 			chptr->mode.key[0] ? "k" : "");
 	modev[0] = modestr;
 	modev[1] = chptr->mode.key[0] ? def_wild : NULL;
 	modev[2] = NULL;
 
-	parse_full_mode(chptr, chanserv_p, modev, chptr->mode.key[0] ? 2 : 1, 0);
+	parse_full_mode(chptr, chanserv_p, modev, chptr->mode.key[0] ? 2 : 1, 0, 1);
 
 	service_err(chanserv_p, client_p, SVC_SUCCESSFULON,
 			chanserv_p->name, "CLEARMODES", chptr->name);
@@ -2813,7 +2831,8 @@ s_chan_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 		memset(&mode, 0, sizeof(struct chmode));
 
 		if(strchr(parv[2], '-') ||
-		   !parse_simple_mode(&mode, (const char **) parv, parc, 2))
+		   !parse_simple_mode(&mode, (const char **) parv, parc, 2,
+				   config_file.allow_sslonly))
 		{
 			service_err(chanserv_p, client_p, SVC_CHAN_INVALIDMODE, parv[2]);
 			return 1;
@@ -2855,7 +2874,8 @@ s_chan_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 		memset(&mode, 0, sizeof(struct chmode));
 
 		if(strchr(arg, '-') ||
-		   !parse_simple_mode(&mode, (const char **) parv, parc, 2))
+		   !parse_simple_mode(&mode, (const char **) parv, parc, 2,
+				   config_file.allow_sslonly))
 		{
 			service_err(chanserv_p, client_p, SVC_CHAN_INVALIDMODE, arg);
 			return 1;

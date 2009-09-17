@@ -165,7 +165,8 @@ del_ban(const char *banstr, dlink_list *list)
 
 
 int
-parse_simple_mode(struct chmode *mode, const char *parv[], int parc, int start)
+parse_simple_mode(struct chmode *mode, const char *parv[], int parc, 
+		int start, int allow_sslonly)
 {
 	const char *p = parv[start];
 	int dir = 1;
@@ -228,6 +229,18 @@ parse_simple_mode(struct chmode *mode, const char *parv[], int parc, int start)
 				else
 					mode->mode &= ~MODE_REGONLY;
 				break;
+			case 'S':
+				if(allow_sslonly)
+				{
+					if(dir)
+						mode->mode |= MODE_SSLONLY;
+					else
+						mode->mode &= ~MODE_SSLONLY;
+				}
+				else
+					return 0;
+
+				break;
 
 			case 'k':
 				if(EmptyString(parv[start]))
@@ -281,7 +294,7 @@ parse_simple_mode(struct chmode *mode, const char *parv[], int parc, int start)
 
 void
 parse_full_mode(struct channel *chptr, struct client *source_p,
-		const char **parv, int parc, int start)
+		const char **parv, int parc, int start, int allow_sslonly)
 {
 	const char *p = parv[start];
 	int dir = DIR_ADD;
@@ -373,6 +386,21 @@ parse_full_mode(struct channel *chptr, struct client *source_p,
 
 			if(source_p)
 				modebuild_add(dir, "r", NULL);
+
+			break;
+		case 'S':
+			if(allow_sslonly)
+			{
+				if(dir)
+					chptr->mode.mode |= MODE_SSLONLY;
+				else
+					chptr->mode.mode &= ~MODE_SSLONLY;
+
+				if(source_p)
+					modebuild_add(dir, "S", NULL);
+			}
+			else
+				return;
 
 			break;
 
@@ -607,7 +635,7 @@ handle_chmode(struct channel *chptr, struct client *source_p, int parc, const ch
 	else
 		strlcpy(oldmode.key, chptr->mode.key, sizeof(chptr->mode.key));
 
-	parse_full_mode(chptr, NULL, (const char **) parv, parc, 0);
+	parse_full_mode(chptr, NULL, (const char **) parv, parc, 0, 1);
 
 	if(dlink_list_length(&opped_list))
 		hook_call(HOOK_MODE_OP, chptr, &opped_list);
