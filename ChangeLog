@@ -1,3 +1,21 @@
+leeh        2009/09/17 18:49:37 UTC	(20090917_0-26666)
+  Log:
+  - add in parsing for the +S channel mode (ssl only channel)
+  - add in new config option, general::allow_sslonly = yes|no;, controls
+    whether users can use chanserv to set +S in modes
+  
+
+  Modified:
+	rserv/branches/1_2/doc/example.conf (File Modified) 
+	rserv/branches/1_2/include/channel.h (File Modified) 
+	rserv/branches/1_2/include/conf.h (File Modified) 
+	rserv/branches/1_2/src/c_mode.c (File Modified) 
+	rserv/branches/1_2/src/channel.c (File Modified) 
+	rserv/branches/1_2/src/newconf.c (File Modified) 
+	rserv/branches/1_2/src/s_chanserv.c (File Modified) 
+	rserv/branches/1_2/src/s_operserv.c (File Modified) 
+
+
 leeh        2009/09/15 18:36:42 UTC	(20090915_0-26664)
   Log:
   - fix a crash in userserv::set::email, as reported by mankind86.
