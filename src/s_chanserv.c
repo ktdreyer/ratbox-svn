@@ -2942,6 +2942,18 @@ s_chan_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 				"WHERE chname='%Q'",
 				chreg_p->topic, chreg_p->name);
 
+		/* send a topic update if services is in the channel.. */
+		if((chptr = find_channel(chreg_p->name)))
+		{
+			if(dlink_find(chanserv_p, &chptr->services) && irccmp(chptr->topic, chreg_p->topic))
+			{
+				sendto_server(":%s TOPIC %s :%s",
+						SVC_UID(chanserv_p), chptr->name, chreg_p->topic);
+				strlcpy(chptr->topic, chreg_p->topic, sizeof(chptr->topic));
+				strlcpy(chptr->topicwho, MYNAME, sizeof(chptr->topicwho));
+			}
+		}
+
 		service_err(chanserv_p, client_p, SVC_CHAN_CHANGEDOPTION,
 				chreg_p->name, "TOPIC", chreg_p->topic);
 		return 1;
