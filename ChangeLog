@@ -1,3 +1,12 @@
+leeh        2009/09/19 22:09:16 UTC	(20090919_0-26668)
+  Log:
+  - only set us as being in a list if we actually get to a second variable
+  
+
+  Modified:
+	rserv/branches/1_2/src/parser.y (File Modified) 
+
+
 leeh        2009/09/17 18:49:37 UTC	(20090917_0-26666)
   Log:
   - add in parsing for the +S channel mode (ssl only channel)
