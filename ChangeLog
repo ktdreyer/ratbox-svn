@@ -1,3 +1,13 @@
+leeh        2009/09/19 22:16:40 UTC	(20090919_1-26670)
+  Log:
+  - have chanserv issue a topic update to the channel on chanserv::set::topic
+    if its in there..
+  
+
+  Modified:
+	rserv/branches/1_2/src/s_chanserv.c (File Modified) 
+
+
 leeh        2009/09/19 22:09:16 UTC	(20090919_0-26668)
   Log:
   - only set us as being in a list if we actually get to a second variable
