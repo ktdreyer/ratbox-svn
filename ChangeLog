@@ -1,3 +1,23 @@
+leeh        2009/09/26 15:58:44 UTC	(20090926_2-26680)
+  Log:
+  - make the userserv struct include the +1 for the \0, having configure add
+    it is braindead, because it broke the test for whether a username was too
+    long.
+  - raise the default username registration length to 11, because thats what
+    it was actually behaving as sometimes -- except when it reloaded the db,
+    where it cut them back to 10.. though it still appears to have maintained
+    independent accounts
+  - rebuild configure
+  
+
+  Modified:
+	rserv/branches/1_2/autoconf/configure.in (File Modified) 
+	rserv/branches/1_2/configure (File Modified) 
+	rserv/branches/1_2/include/s_userserv.h (File Modified) 
+	rserv/branches/1_2/include/setup.h.in (File Modified) 
+	rserv/branches/1_2/src/s_userserv.c (File Modified) 
+
+
 leeh        2009/09/26 15:31:41 UTC	(20090926_1-26678)
   Log:
   - fix a bug where the expiry timeouts for chanserv on
