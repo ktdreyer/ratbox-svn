@@ -130,6 +130,8 @@ static void e_banserv_autosync(void *unused);
 
 static int h_banserv_new_client(void *_client_p, void *unused);
 
+static void expire_operbans(void);
+
 static void push_unban(const char *target, char type, const char *mask);
 static void sync_bans(const char *target, char banletter);
 
@@ -248,17 +250,23 @@ e_banserv_autosync(void *unused)
 }
 
 static void
+expire_operbans(void)
+{
+	/* these bans are temp, so they will expire automatically on 
+	 * servers
+	 */
+	rsdb_exec(NULL, "DELETE FROM operbans WHERE hold != '0' AND hold <= '%lu'",
+		CURRENT_TIME);
+}
+
+static void
 e_banserv_expire(void *unused)
 {
 	struct regexp_ban *regexp_p;
 	dlink_node *ptr;
 	dlink_node *next_ptr;
 
-	/* these bans are temp, so they will expire automatically on 
-	 * servers
-	 */
-	rsdb_exec(NULL, "DELETE FROM operbans WHERE hold != '0' AND hold <= '%lu'",
-			CURRENT_TIME);
+	expire_operbans();
 
 	DLINK_FOREACH_SAFE(ptr, next_ptr, regexp_list.head)
 	{
@@ -354,6 +362,13 @@ find_ban(const char *mask, char type)
 	struct rsdb_table data;
 	int retval;
 
+	/* The case of "ban exists but has expired" can be a bit of a pain to deal 
+	 * with, so shortcut it by simply expiring all bans prior to checking.
+	 *
+	 * This function shouldn't be used enough for it to be a problem --anfl
+	 */
+	expire_operbans();
+
 	rsdb_exec_fetch(&data, "SELECT remove FROM operbans WHERE type='%c' AND mask=LOWER('%Q') LIMIT 1",
 			type, mask);
 
@@ -386,6 +401,13 @@ find_ban_remove(const char *mask, char type)
 	static char buf[BUFSIZE];
 	struct rsdb_table data;
 	const char *retval;
+
+	/* The case of "ban exists but has expired" can be a bit of a pain to deal 
+	 * with, so shortcut it by simply expiring all bans prior to checking.
+	 *
+	 * This function shouldn't be used enough for it to be a problem --anfl
+	 */
+	expire_operbans();
 
 	rsdb_exec_fetch(&data, "SELECT remove, oper FROM operbans WHERE type='%c' AND mask=LOWER('%Q') LIMIT 1",
 			type, mask);
