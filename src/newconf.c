@@ -1133,6 +1133,7 @@ static struct ConfEntry conf_chanserv_table[] =
 	{ "max_bans",		CF_INT,	  NULL, 0, &config_file.cmax_bans		},
 	{ "expire_suspended_time",CF_TIME,NULL, 0, &config_file.cexpire_suspended_time	},
 	{ "expireban_frequency", CF_TIME,	conf_set_chanserv_expireban, 0, NULL	},
+	{ "expireban_on_join",	CF_YESNO, NULL, 0, &config_file.cexpireban_on_join	},
 	{ "enforcetopic_frequency", CF_TIME,	conf_set_chanserv_enforcetopic, 0, NULL },
 	{ "delowner_duration",	CF_TIME,  NULL, 0, &config_file.cdelowner_duration	},
 	{ "email_delowner",	CF_YESNO, NULL, 0, &config_file.cemail_delowner	},

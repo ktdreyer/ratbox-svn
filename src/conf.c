@@ -110,6 +110,7 @@ set_default_conf(void)
 	config_file.cexpire_suspended_time = 2419200; 	/* 4 weeks */
 	config_file.cmax_bans = 50;
 	config_file.cexpireban_frequency = 900;		/* 15 mins */
+	config_file.cexpireban_on_join = 0;
 	config_file.cenforcetopic_frequency = 3600;	/* 1 hour */
 	config_file.cdelowner_duration = 86400;	/* 1 day */
 	config_file.cemail_delowner = 0;
