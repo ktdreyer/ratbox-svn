@@ -1,3 +1,16 @@
+leeh        2009/09/26 15:27:16 UTC	(20090926_0-26676)
+  Log:
+  - expire operbans prior to checking if one exists for kline/unkline etc..
+    It would officially be nicer to not to this, but that introduces the
+    complexity of having to do a SQL UPDATE instead of an INSERT depending on
+    the situation -- for the amount kline etc are used, it's not particularly
+    bad..
+  
+
+  Modified:
+	rserv/branches/1_2/src/s_banserv.c (File Modified) 
+
+
 leeh        2009/09/19 22:16:40 UTC	(20090919_1-26670)
   Log:
   - have chanserv issue a topic update to the channel on chanserv::set::topic
