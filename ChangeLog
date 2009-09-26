@@ -1,3 +1,18 @@
+leeh        2009/09/26 15:31:41 UTC	(20090926_1-26678)
+  Log:
+  - fix a bug where the expiry timeouts for chanserv on
+    enforcetopic/enforceban were being ignored.
+    
+    the conf is parsed before chanserv is initialised nowadays, which means
+    when we add the events to expire them we can safely trust the conf values
+  
+
+  Modified:
+	rserv/branches/1_2/include/conf.h (File Modified) 
+	rserv/branches/1_2/src/conf.c (File Modified) 
+	rserv/branches/1_2/src/s_chanserv.c (File Modified) 
+
+
 leeh        2009/09/26 15:27:16 UTC	(20090926_0-26676)
   Log:
   - expire operbans prior to checking if one exists for kline/unkline etc..
