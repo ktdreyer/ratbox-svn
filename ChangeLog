@@ -1,3 +1,12 @@
+leeh        2009/09/26 16:41:42 UTC	(20090926_4-26684)
+  Log:
+  - clarify expireban_on_join a bit
+  
+
+  Modified:
+	rserv/branches/1_2/doc/example.conf (File Modified) 
+
+
 leeh        2009/09/26 16:40:06 UTC	(20090926_3-26682)
   Log:
   - make chanserv ignore expired channel bans when a user joins the channel
