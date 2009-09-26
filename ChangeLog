@@ -1,3 +1,21 @@
+leeh        2009/09/26 16:40:06 UTC	(20090926_3-26682)
+  Log:
+  - make chanserv ignore expired channel bans when a user joins the channel
+  - new conf option to chanserv {}; expireban_on_join = <yes|no>; controls
+    whether chanserv will expire bans whenever users join channels.  Its
+    looping anyway, so no particular harm done.
+  
+    Bit nasty for users though in my opinion..
+  
+
+  Modified:
+	rserv/branches/1_2/doc/example.conf (File Modified) 
+	rserv/branches/1_2/include/conf.h (File Modified) 
+	rserv/branches/1_2/src/conf.c (File Modified) 
+	rserv/branches/1_2/src/newconf.c (File Modified) 
+	rserv/branches/1_2/src/s_chanserv.c (File Modified) 
+
+
 leeh        2009/09/26 15:58:44 UTC	(20090926_2-26680)
   Log:
   - make the userserv struct include the +1 for the \0, having configure add
