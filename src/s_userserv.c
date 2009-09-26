@@ -643,7 +643,7 @@ o_user_userregister(struct client *client_p, struct lconn *conn_p, const char *p
 		parv[0], EmptyString(parv[2]) ? "-" : parv[2]);
 
 	reg_p = BlockHeapAlloc(user_reg_heap);
-	strcpy(reg_p->name, parv[0]);
+	strlcpy(reg_p->name, parv[0], sizeof(reg_p->name));
 
 	password = get_crypt(parv[1], NULL);
 	reg_p->password = my_strdup(password);
