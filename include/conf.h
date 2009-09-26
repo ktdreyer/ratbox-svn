@@ -7,8 +7,6 @@ struct FileBuf;
 
 #define MYNAME config_file.name
 
-#define DEFAULT_ENFORCETOPIC_FREQUENCY	3600	/* 1 hour */
-#define DEFAULT_EXPIREBAN_FREQUENCY	900	/* 15 mins */
 #define DEFAULT_AUTOSYNC_FREQUENCY	604800	/* 1 week */
 
 #define MAX_EMAIL_PROGRAM_ARGS		10

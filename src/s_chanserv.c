@@ -215,9 +215,9 @@ init_s_chanserv(void)
 	 * the conf..
 	 */
 	eventAdd("chanserv_expireban", e_chanserv_expireban, NULL,
-		DEFAULT_EXPIREBAN_FREQUENCY);
+		config_file.cexpireban_frequency);
 	eventAdd("chanserv_enforcetopic", e_chanserv_enforcetopic, NULL,
-		DEFAULT_ENFORCETOPIC_FREQUENCY);
+		config_file.cenforcetopic_frequency);
 	eventAdd("chanserv_expire_delowner", e_chanserv_expire_delowner, NULL, 3600);
 }
 
