@@ -1,3 +1,13 @@
+leeh        2009/09/29 19:09:42 UTC	(20090929_0-26686)
+  Log:
+  - if chanserv joins a channel because we need to for autojoin reasons, set
+    the topic if we have one
+  
+
+  Modified:
+	rserv/branches/1_2/src/s_chanserv.c (File Modified) 
+
+
 leeh        2009/09/26 16:41:42 UTC	(20090926_4-26684)
   Log:
   - clarify expireban_on_join a bit
