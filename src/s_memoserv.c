@@ -43,9 +43,12 @@
 #include "c_init.h"
 #include "log.h"
 #include "conf.h"
+#include "hook.h"
 #include "s_userserv.h"
 
 #define MS_FLAGS_READ			0x0001
+
+static void init_s_memoserv(void);
 
 static struct client *memoserv_p;
 
@@ -64,8 +67,10 @@ static struct service_command memoserv_command[] =
 
 static struct service_handler memoserv_service = {
 	"MEMOSERV", "MEMOSERV", "memoserv", "services.int", "Memo Services",
-        0, 0, memoserv_command, sizeof(memoserv_command), NULL, NULL, NULL
+        0, 0, memoserv_command, sizeof(memoserv_command), NULL, init_s_memoserv, NULL
 };
+
+static int h_memoserv_user_login(void *client, void *unused);
 
 void
 preinit_s_memoserv(void)
@@ -73,6 +78,39 @@ preinit_s_memoserv(void)
 	memoserv_p = add_service(&memoserv_service);
 }
 
+static void
+init_s_memoserv(void)
+{
+	hook_add(h_memoserv_user_login, HOOK_USER_LOGIN);
+}
+
+static int
+h_memoserv_user_login(void *v_client_p, void *unused)
+{
+	struct client *client_p;
+	struct user_reg *ureg_p;
+	struct rsdb_table data;
+	unsigned int memocount;
+
+	client_p = (struct client *) v_client_p;
+	ureg_p = client_p->user->user_reg;
+
+	rsdb_exec_fetch(&data, "SELECT COUNT(*) FROM memos WHERE user_id='%d' AND (flags & %u) = 0",
+			ureg_p->id, MS_FLAGS_READ);
+
+	if(data.row_count == 0)
+	{
+		mlog("fatal error: SELECT COUNT() returned 0 rows in s_memo_send()");
+		die(0, "problem with db file");
+	}
+
+	memocount = atoi(data.row[0][0]);
+
+	if(memocount > 0)
+		service_err(memoserv_p, client_p, SVC_MEMO_UNREAD_COUNT, memocount);
+
+	return 0;
+}
 
 static int
 s_memo_list(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)

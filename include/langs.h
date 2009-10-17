@@ -246,6 +246,7 @@ enum svc_notice_enum
 	SVC_MEMO_LIST,
 	SVC_MEMO_LISTSTART,
 	SVC_MEMO_READ,
+	SVC_MEMO_UNREAD_COUNT,
 
 	/* this must be last */
 	SVC_LAST
