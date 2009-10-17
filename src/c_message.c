@@ -99,7 +99,8 @@ c_message(struct client *client_p, const char *parv[], int parc)
 
 		oper_p = find_conf_oper(client_p->user->username,
 					client_p->user->host,
-					client_p->user->servername);
+					client_p->user->servername, 
+					NULL);
 
 		if(oper_p == NULL || !ConfOperDcc(oper_p))
 		{

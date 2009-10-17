@@ -844,7 +844,7 @@ handle_service(struct client *service_p, struct client *client_p,
 		 */
 		if(find_ignore(client_p) && 
 			(strcasecmp(command, "OLOGIN") ||
-			 find_conf_oper(client_p->user->username, client_p->user->host, client_p->user->servername) == NULL))
+			 find_conf_oper(client_p->user->username, client_p->user->host, client_p->user->servername, NULL) == NULL))
 			return;
 
 		if((client_p->user->flood_time + config_file.client_flood_time) < CURRENT_TIME)
@@ -928,7 +928,7 @@ handle_service(struct client *service_p, struct client *client_p,
 		}
 
 		if((oper_p = find_conf_oper(client_p->user->username, client_p->user->host,
-						client_p->user->servername)) == NULL)
+						client_p->user->servername, parv[0])) == NULL)
 		{
 			sendto_server(":%s NOTICE %s :No access to %s::OLOGIN",
 					MYUID, UID(client_p), ucase(service_p->name));

@@ -247,6 +247,6 @@ extern void free_conf_server(struct conf_server *conf_p);
 extern struct conf_server *find_conf_server(const char *name);
 
 extern struct conf_oper *find_conf_oper(const char *username, const char *host,
-					const char *server);
+					const char *server, const char *oper_username);
 
 #endif
