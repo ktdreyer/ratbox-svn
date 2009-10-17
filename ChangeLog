@@ -1,3 +1,15 @@
+leeh        2009/10/17 20:13:29 UTC	(20091017_0-26692)
+  Log:
+  - add notification of new memos when someone logs in
+  
+
+  Modified:
+	rserv/branches/1_2/include/langs.h (File Modified) 
+	rserv/branches/1_2/src/langs.c (File Modified) 
+	rserv/branches/1_2/src/messages.c (File Modified) 
+	rserv/branches/1_2/src/s_memoserv.c (File Modified) 
+
+
 leeh        2009/09/29 19:09:42 UTC	(20090929_0-26686)
   Log:
   - if chanserv joins a channel because we need to for autojoin reasons, set
