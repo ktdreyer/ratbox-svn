@@ -1,3 +1,12 @@
+leeh        2009/10/17 20:25:40 UTC	(20091017_2-26696)
+  Log:
+  - fix a missing '~' on clearing a bitmask when autojoin empty is on
+  
+
+  Modified:
+	rserv/branches/1_2/src/s_chanserv.c (File Modified) 
+
+
 leeh        2009/10/17 20:22:02 UTC	(20091017_1-26694)
   Log:
   - add proper username matching into OLOGIN/OPERLOGIN
