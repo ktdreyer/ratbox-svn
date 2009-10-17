@@ -1,3 +1,12 @@
+leeh        2009/10/17 20:29:21 UTC	(20091017_3-26698)
+  Log:
+  - fix missing example for autojoin_empty
+  
+
+  Modified:
+	rserv/branches/1_2/doc/example.conf (File Modified) 
+
+
 leeh        2009/10/17 20:25:40 UTC	(20091017_2-26696)
   Log:
   - fix a missing '~' on clearing a bitmask when autojoin empty is on
