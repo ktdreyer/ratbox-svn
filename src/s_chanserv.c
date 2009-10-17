@@ -1005,7 +1005,7 @@ e_chanserv_partinhabit(void *unused)
 			 */
 			if(config_file.cautojoin_empty && chreg_p->flags & CS_FLAGS_AUTOJOIN)
 			{
-				chreg_p->flags &= CS_FLAGS_INHABIT;
+				chreg_p->flags &= ~CS_FLAGS_INHABIT;
 				continue;
 			}
 
