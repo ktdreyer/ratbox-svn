@@ -1,3 +1,15 @@
+leeh        2009/10/17 20:22:02 UTC	(20091017_1-26694)
+  Log:
+  - add proper username matching into OLOGIN/OPERLOGIN
+  
+
+  Modified:
+	rserv/branches/1_2/include/conf.h (File Modified) 
+	rserv/branches/1_2/src/c_message.c (File Modified) 
+	rserv/branches/1_2/src/conf.c (File Modified) 
+	rserv/branches/1_2/src/service.c (File Modified) 
+
+
 leeh        2009/10/17 20:13:29 UTC	(20091017_0-26692)
   Log:
   - add notification of new memos when someone logs in
