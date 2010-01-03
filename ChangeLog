@@ -1,3 +1,15 @@
+leeh        2010/01/03 18:58:07 UTC	(20100103_2-26720)
+  Log:
+  - drop username length back to 10, these were being trimmed in the db anyway
+  - have userserv ignore (and warn) about accounts with long usernames
+  
+
+  Modified:
+	rserv/branches/1_2/autoconf/configure.in (File Modified) 
+	rserv/branches/1_2/configure (File Modified) 
+	rserv/branches/1_2/src/s_userserv.c (File Modified) 
+
+
 leeh        2010/01/03 18:43:02 UTC	(20100103_1-26718)
   Log:
   - remove a couple of unneeded variables
