@@ -1313,8 +1313,7 @@ h_chanserv_join(void *v_chptr, void *v_members)
 	struct chmember *member_p;
 	dlink_list *members = v_members;
 	dlink_node *ptr, *next_ptr;
-	dlink_node *bptr, *next_bptr;
-	dlink_node *cbptr;
+	dlink_node *bptr;
 	int hit;
 
 	/* another hook couldve altered this.. */
@@ -1348,7 +1347,7 @@ h_chanserv_join(void *v_chptr, void *v_members)
 		if(mreg_p != NULL && mreg_p->suspend)
 			mreg_p = NULL;
 
-		DLINK_FOREACH_SAFE(bptr, next_bptr, chreg_p->bans.head)
+		DLINK_FOREACH(bptr, chreg_p->bans.head)
 		{
 			banreg_p = bptr->data;
 
