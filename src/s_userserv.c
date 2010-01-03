@@ -215,6 +215,16 @@ user_db_callback(int argc, const char **argv)
 	if(EmptyString(argv[0]))
 		return 0;
 
+	/* don't particularly want to be trimming this down to fit in..
+	 * Ignore it, and move on.
+	 */
+	if(strlen(argv[0]) > USERREGNAME_LEN)
+	{
+		mlog("warning: Registered username %s exceeds username length limit, ignoring user",
+			argv[0]);
+		return 0;
+	}
+
 	reg_p = BlockHeapAlloc(user_reg_heap);
 	strlcpy(reg_p->name, argv[0], sizeof(reg_p->name));
 	reg_p->password = my_strdup(argv[1]);

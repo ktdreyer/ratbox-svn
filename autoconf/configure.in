@@ -417,7 +417,7 @@ AC_DEFINE_UNQUOTED(TOPICLEN, (${ac_cv_topiclen}+1), Topic Length)
 
 AC_ARG_WITH([userreglen],
 [ --with-userreglen=LENGTH  Sets registered username length to LENGTH],
-[ac_cv_userreglen=$withval], [ac_cv_userreglen="11"])
+[ac_cv_userreglen=$withval], [ac_cv_userreglen="10"])
 
 AC_MSG_RESULT([checking registered username length... $ac_cv_userreglen])
 AC_DEFINE_UNQUOTED(USERREGNAME_LEN, (${ac_cv_userreglen}), Registered Username Length)
