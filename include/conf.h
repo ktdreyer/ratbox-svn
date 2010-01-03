@@ -88,7 +88,6 @@ struct _config_file
 	int cexpire_suspended_time;
 	int cmax_bans;
 	int cexpireban_frequency;
-	int cexpireban_on_join;
 	int cenforcetopic_frequency;
 	int cdelowner_duration;
 	int cemail_delowner;

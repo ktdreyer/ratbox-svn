@@ -1354,35 +1354,7 @@ h_chanserv_join(void *v_chptr, void *v_members)
 
 			/* ban has expired? */
 			if(banreg_p->hold <= CURRENT_TIME)
-			{
-				/* do we clean up bans on join?  default is not, because 
-				 * in my opinion its a bit nasty for a join to trigger a 
-				 * -b (which can easily be misread as a +b) --anfl
-				 */
-				if(config_file.cexpireban_on_join)
-				{
-					/* check if the ban exists on the channel.. */
-					DLINK_FOREACH(cbptr, chptr->bans.head)
-					{
-						if (!irccmp(cbptr->data, banreg_p->mask))
-						{
-							modebuild_add(DIR_DEL, "b", banreg_p->mask);
-							my_free(cbptr->data);
-							dlink_destroy(cbptr, &chptr->bans);
-							break;
-						}
-					}
-
-					rsdb_exec(NULL, "DELETE FROM bans "
-							"WHERE chname='%Q' and mask='%Q'",
-							chreg_p->name, banreg_p->mask);
-
-					free_ban_reg(chreg_p, banreg_p);
-				}
-
-				/* either way, this ban doesnt apply. */
 				continue;
-			}
 
 			if(!match(banreg_p->mask, member_p->client_p->user->mask))
 				continue;
