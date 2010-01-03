@@ -1,3 +1,16 @@
+leeh        2010/01/03 18:30:48 UTC	(20100103_0-26716)
+  Log:
+  - remove expireban_on_join.. there's a better solution somewhere
+  
+
+  Modified:
+	rserv/branches/1_2/doc/example.conf (File Modified) 
+	rserv/branches/1_2/include/conf.h (File Modified) 
+	rserv/branches/1_2/src/conf.c (File Modified) 
+	rserv/branches/1_2/src/newconf.c (File Modified) 
+	rserv/branches/1_2/src/s_chanserv.c (File Modified) 
+
+
 leeh        2009/10/17 20:29:21 UTC	(20091017_3-26698)
   Log:
   - fix missing example for autojoin_empty
