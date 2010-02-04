@@ -1,6 +1,28 @@
 
 This is the current development version of ratbox-services.
 
+-- ratbox-services-1.2.2
+- fix compilation with gcc-4.4
+- chanserv will now remove bans from the channel when they expire in the
+  database
+- fix a potential crash by a user changing their email address with userserv
+- add in support for chanmode +S (ssl-only).  rserv will now always support
+  the ircd sending channel mode +S
+- new general {}; conf option: allow_sslonly = <yes|no>;
+  controls whether users can instruct chanserv to use the +S mode.
+  This should match the ircd setting
+- chanserv::set::topic will now cause chanserv to update the topic if it is
+  already present in the channel
+- banserv expires based on events, but this prevented a kline (etc) that had 
+  just expired from being reset.  Enforce an expiry of all bans prior to
+  handling a request from an oper
+- chanserv { expireban_frequency }; and chanserv { expiretopic_frequency };
+  were being ignored and defaults used in their place
+- memoserv will now notify users when they login if they have unread memos
+- OLOGIN/OPERLOGIN will now enforce usernames are correct
+- fix an issue with userserv allowing usernames above the maximum length.
+  It will now ignore these and warn about them on startup.
+
 -- ratbox-services-1.2.1
 - fix an unquoted sql string related to email, that could be used for
   sql injection
