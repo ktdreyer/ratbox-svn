@@ -1,3 +1,14 @@
+leeh        2010/02/04 19:16:21 UTC	(20100204_1-26775)
+  Log:
+  - update RELEASE_NOTES
+  - revved patchlevel to 1.2.2
+  
+
+  Modified:
+	rserv/branches/1_2/RELEASE_NOTES (File Modified) 
+	rserv/branches/1_2/include/config.h (File Modified) 
+
+
 leeh        2010/02/04 18:48:27 UTC	(20100204_0-26773)
   Log:
   - make dbupgrade.pl aware of version 1.2.1
