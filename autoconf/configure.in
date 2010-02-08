@@ -3,7 +3,7 @@ dnl $Id$
 dnl Sneaky way to get an Id tag into the configure script
 AC_COPYRIGHT([$Id$])
 
-AC_INIT([ratbox-services],[stable])
+AC_INIT([ratbox-services],[development])
 
 AC_CONFIG_AUX_DIR(autoconf)
 AC_CONFIG_HEADER(include/setup.h)
@@ -230,6 +230,21 @@ else
 	AC_MSG_RESULT(no)
 fi
 
+AC_MSG_CHECKING(Chanfix)
+AC_ARG_ENABLE(chanfix,
+[ --enable-chanfix          Enable chanfix],
+ [ cf_enable_chanfix=$enableval ],[ cf_enable_chanfix=no ])
+
+if test "X$cf_enable_chanfix" = "Xyes"; then
+	S_CHANFIX="s_chanfix.c"
+	AC_DEFINE(ENABLE_CHANFIX, 1, Chanfix)
+	AC_MSG_RESULT(yes)
+else
+	S_CHANFIX=""
+	AC_MSG_RESULT(no)
+fi
+
+
 ac_cv_sqlite3_val=""
 ac_cv_mysql_val=""
 ac_cv_postgresql_val=""
@@ -441,6 +456,7 @@ AC_SUBST(S_OPERBOT)
 AC_SUBST(S_GLOBAL)
 AC_SUBST(S_BANSERV)
 AC_SUBST(S_WATCHSERV)
+AC_SUBST(S_CHANFIX)
 
 AC_OUTPUT(			\
 	Makefile		\
@@ -466,6 +482,7 @@ echo Global Message Service ..... $cf_enable_global
 echo List Service ............... $cf_enable_alis
 echo Ban Service ................ $cf_enable_banserv
 echo Command Watching Service ... $cf_enable_watchserv
+echo Chanfix .................... $cf_enable_chanfix
 echo
 echo Nick Length ................ $ac_cv_nicklen
 echo Topic Length ............... $ac_cv_topiclen

@@ -6,6 +6,9 @@
 /* Ban Service */
 #undef ENABLE_BANSERV
 
+/* Chanfix */
+#undef ENABLE_CHANFIX
+
 /* Channel Service */
 #undef ENABLE_CHANSERV
 
