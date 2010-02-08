@@ -1,3 +1,12 @@
+leeh        2010/02/08 22:18:52 UTC	(20100208_2-26789)
+  Log:
+  - renumber to 1.3.0beta
+  
+
+  Modified:
+	rserv/trunk/include/config.h (File Modified) 
+
+
 leeh        2010/02/08 22:16:17 UTC	(20100208_1-26787)
   Log:
   - add in --enable-chanfix, disabled by default
