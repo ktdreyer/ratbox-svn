@@ -244,6 +244,7 @@ struct _lang_internal lang_internal[] =
 	{ SVC_MEMO_LIST,		"%u new memos, %u old memos"				},
 	{ SVC_MEMO_LISTSTART,		"  New    Id    Date       Time  Sender"		},
 	{ SVC_MEMO_READ,		"Id %u Sent %s Sender %s: %s"				},
+	{ SVC_MEMO_UNREAD_COUNT,	"You  have %u new memo(s)"				},
 /* STOP_GENEXAMPLE_PARSING -- for genexample.pl in langs/ */
 
 	/* this must be last */

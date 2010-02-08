@@ -1,8 +1,8 @@
 /* src/s_chanserv.c
  *   Contains code for channel registration service.
  *
- * Copyright (C) 2004-2007 Lee Hardy <lee -at- leeh.co.uk>
- * Copyright (C) 2004-2007 ircd-ratbox development team
+ * Copyright (C) 2004-2008 Lee Hardy <lee -at- leeh.co.uk>
+ * Copyright (C) 2004-2008 ircd-ratbox development team
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -215,9 +215,9 @@ init_s_chanserv(void)
 	 * the conf..
 	 */
 	eventAdd("chanserv_expireban", e_chanserv_expireban, NULL,
-		DEFAULT_EXPIREBAN_FREQUENCY);
+		config_file.cexpireban_frequency);
 	eventAdd("chanserv_enforcetopic", e_chanserv_enforcetopic, NULL,
-		DEFAULT_ENFORCETOPIC_FREQUENCY);
+		config_file.cenforcetopic_frequency);
 	eventAdd("chanserv_expire_delowner", e_chanserv_expire_delowner, NULL, 3600);
 }
 
@@ -521,7 +521,7 @@ channel_db_callback(int argc, const char **argv)
 		tmpmode = LOCAL_COPY(argv[3]);
 		modec = string_to_array(tmpmode, modev);
 
-		if(parse_simple_mode(&mode, (const char **) modev, modec, 0))
+		if(parse_simple_mode(&mode, (const char **) modev, modec, 0, 1))
 		{
 			reg_p->cmode.mode = mode.mode;
 			reg_p->cmode.limit = mode.limit;
@@ -529,6 +529,12 @@ channel_db_callback(int argc, const char **argv)
 			if(mode.key[0])
 				strlcpy(reg_p->cmode.key, mode.key,
 					sizeof(reg_p->cmode.key));
+
+			/* it's possible someone set a +S when allow_sslonly was enabled, 
+			 * and it's now disabled -- so just unset it if thats the case --anfl
+			 */
+			if(!config_file.allow_sslonly)
+				reg_p->cmode.mode &= ~MODE_SSLONLY;
 		}
 	}
 
@@ -538,7 +544,7 @@ channel_db_callback(int argc, const char **argv)
 		tmpmode = LOCAL_COPY(argv[4]);
 		modec = string_to_array(tmpmode, modev);
 
-		if(parse_simple_mode(&mode, (const char **) modev, modec, 0))
+		if(parse_simple_mode(&mode, (const char **) modev, modec, 0, 1))
 		{
 			reg_p->emode.mode = mode.mode;
 			reg_p->emode.limit = mode.limit;
@@ -546,6 +552,13 @@ channel_db_callback(int argc, const char **argv)
 			if(mode.key[0])
 				strlcpy(reg_p->emode.key, mode.key,
 					sizeof(reg_p->emode.key));
+
+			/* it's possible someone set a +S when allow_sslonly was enabled, 
+			 * and it's now disabled -- so just unset it if thats the case --anfl
+			 */
+			if(!config_file.allow_sslonly)
+				reg_p->emode.mode &= ~MODE_SSLONLY;
+
 		}
 	}
 
@@ -992,7 +1005,7 @@ e_chanserv_partinhabit(void *unused)
 			 */
 			if(config_file.cautojoin_empty && chreg_p->flags & CS_FLAGS_AUTOJOIN)
 			{
-				chreg_p->flags &= CS_FLAGS_INHABIT;
+				chreg_p->flags &= ~CS_FLAGS_INHABIT;
 				continue;
 			}
 
@@ -1338,6 +1351,10 @@ h_chanserv_join(void *v_chptr, void *v_members)
 		{
 			banreg_p = bptr->data;
 
+			/* ban has expired? */
+			if(banreg_p->hold <= CURRENT_TIME)
+				continue;
+
 			if(!match(banreg_p->mask, member_p->client_p->user->mask))
 				continue;
 
@@ -1420,7 +1437,18 @@ h_chanserv_join(void *v_chptr, void *v_members)
 
 		/* channel is marked autojoin and we're not in there.. */
 		if(chreg_p->flags & CS_FLAGS_AUTOJOIN && dlink_find(chanserv_p, &chptr->services) == NULL)
+		{
 			enable_inhabit(chreg_p, chptr, 1);
+
+			/* we have a topic to enforce, and channel one is different.. */
+			if(!EmptyString(chreg_p->topic) && irccmp(chreg_p->topic, chptr->topic))
+			{
+				sendto_server(":%s TOPIC %s :%s",
+						SVC_UID(chanserv_p), chptr->name, chreg_p->topic);
+				strlcpy(chptr->topic, chreg_p->topic, sizeof(chptr->topic));
+				strlcpy(chptr->topicwho, MYNAME, sizeof(chptr->topicwho));
+			}
+		}
 			
 		/* removed ops from them, or they joined opped.. cant be setting them */
 		if(hit)
@@ -2483,25 +2511,30 @@ s_chan_clearmodes(struct client *client_p, struct lconn *conn_p, const char *par
 		return 1;
 
 	if(!chptr->mode.key[0] && !chptr->mode.limit &&
-	   !(chptr->mode.mode & MODE_INVITEONLY))
+	   !(chptr->mode.mode & (MODE_INVITEONLY|MODE_SSLONLY)))
 	{
+		/* use allow_sslonly to determine if we show availability of +S */
 		service_err(chanserv_p, client_p, SVC_CHAN_NOMODE,
-				chptr->name, "+ilk");
+				chptr->name, (config_file.allow_sslonly ? "+ilkS" : "+ilk"));
 		return 1;
 	}
 
 	zlog(chanserv_p, 4, 0, 0, client_p, NULL,
 		"CLEARMODES %s", parv[0]);
 
-	snprintf(modestr, sizeof(modestr), "-%s%s%s",
+	/* we allow CLEARMODES to always touch +S (sslonly) regardless of allow_sslonly, because
+	 * it could be a restriction that is stopping users joining a channel --anfl
+	 */
+	snprintf(modestr, sizeof(modestr), "-%s%s%s%s",
 			(chptr->mode.mode & MODE_INVITEONLY) ? "i" : "",
+			(chptr->mode.mode & MODE_SSLONLY) ? "S" : "",
 			chptr->mode.limit ? "l" : "",
 			chptr->mode.key[0] ? "k" : "");
 	modev[0] = modestr;
 	modev[1] = chptr->mode.key[0] ? def_wild : NULL;
 	modev[2] = NULL;
 
-	parse_full_mode(chptr, chanserv_p, modev, chptr->mode.key[0] ? 2 : 1, 0);
+	parse_full_mode(chptr, chanserv_p, modev, chptr->mode.key[0] ? 2 : 1, 0, 1);
 
 	service_err(chanserv_p, client_p, SVC_SUCCESSFULON,
 			chanserv_p->name, "CLEARMODES", chptr->name);
@@ -2813,7 +2846,8 @@ s_chan_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 		memset(&mode, 0, sizeof(struct chmode));
 
 		if(strchr(parv[2], '-') ||
-		   !parse_simple_mode(&mode, (const char **) parv, parc, 2))
+		   !parse_simple_mode(&mode, (const char **) parv, parc, 2,
+				   config_file.allow_sslonly))
 		{
 			service_err(chanserv_p, client_p, SVC_CHAN_INVALIDMODE, parv[2]);
 			return 1;
@@ -2855,7 +2889,8 @@ s_chan_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 		memset(&mode, 0, sizeof(struct chmode));
 
 		if(strchr(arg, '-') ||
-		   !parse_simple_mode(&mode, (const char **) parv, parc, 2))
+		   !parse_simple_mode(&mode, (const char **) parv, parc, 2,
+				   config_file.allow_sslonly))
 		{
 			service_err(chanserv_p, client_p, SVC_CHAN_INVALIDMODE, arg);
 			return 1;
@@ -2921,6 +2956,18 @@ s_chan_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 		rsdb_exec(NULL, "UPDATE channels SET topic='%Q' "
 				"WHERE chname='%Q'",
 				chreg_p->topic, chreg_p->name);
+
+		/* send a topic update if services is in the channel.. */
+		if((chptr = find_channel(chreg_p->name)))
+		{
+			if(dlink_find(chanserv_p, &chptr->services) && irccmp(chptr->topic, chreg_p->topic))
+			{
+				sendto_server(":%s TOPIC %s :%s",
+						SVC_UID(chanserv_p), chptr->name, chreg_p->topic);
+				strlcpy(chptr->topic, chreg_p->topic, sizeof(chptr->topic));
+				strlcpy(chptr->topicwho, MYNAME, sizeof(chptr->topicwho));
+			}
+		}
 
 		service_err(chanserv_p, client_p, SVC_CHAN_CHANGEDOPTION,
 				chreg_p->name, "TOPIC", chreg_p->topic);

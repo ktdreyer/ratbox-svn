@@ -7,8 +7,6 @@ struct FileBuf;
 
 #define MYNAME config_file.name
 
-#define DEFAULT_ENFORCETOPIC_FREQUENCY	3600	/* 1 hour */
-#define DEFAULT_EXPIREBAN_FREQUENCY	900	/* 15 mins */
 #define DEFAULT_AUTOSYNC_FREQUENCY	604800	/* 1 week */
 
 #define MAX_EMAIL_PROGRAM_ARGS		10
@@ -30,6 +28,7 @@ struct _config_file
 	int ping_time;
 	int ratbox;
 	int allow_stats_o;
+	int allow_sslonly;
 	int default_language;
 
 	unsigned int client_flood_time;
@@ -247,6 +246,6 @@ extern void free_conf_server(struct conf_server *conf_p);
 extern struct conf_server *find_conf_server(const char *name);
 
 extern struct conf_oper *find_conf_oper(const char *username, const char *host,
-					const char *server);
+					const char *server, const char *oper_username);
 
 #endif

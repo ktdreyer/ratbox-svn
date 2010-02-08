@@ -10,7 +10,7 @@ struct user_reg
 {
 	unsigned int id;	/* database id */
 
-	char name[USERREGNAME_LEN];
+	char name[USERREGNAME_LEN+1];
 	char *password;
 	char *email;
 	char *suspender;

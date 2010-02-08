@@ -371,7 +371,7 @@ conf_call_set(struct TopConf *tc, const char *item, conf_parm_t * value, int typ
 
 	/* if it takes one thing, make sure they only passed one thing,
 	   and handle as needed. */
-	if(value->type & CF_FLIST && !cf->cf_type & CF_FLIST)
+	if(value->type & CF_FLIST && !(cf->cf_type & CF_FLIST))
 	{
 		conf_report_error("Option %s::%s does not take a list of values.",
 				  tc->tc_name, item);
@@ -1018,6 +1018,7 @@ static struct ConfEntry conf_serverinfo_table[] =
 	{ "ping_time",		CF_TIME,    NULL, 0, &config_file.ping_time	},
 	{ "ratbox",		CF_YESNO,   NULL, 0, &config_file.ratbox	},
 	{ "allow_stats_o",	CF_YESNO,   NULL, 0, &config_file.allow_stats_o },
+	{ "allow_sslonly",	CF_YESNO,   NULL, 0, &config_file.allow_sslonly },
 	{ "name",		CF_QSTRING, conf_set_serverinfo_name, 0, NULL	},
 	{ "sid",		CF_QSTRING, conf_set_serverinfo_sid, 0, NULL	},
 	{ "default_language",	CF_QSTRING, conf_set_serverinfo_lang, 0, NULL	},

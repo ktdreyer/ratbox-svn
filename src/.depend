@@ -24,8 +24,6 @@ channel.o: channel.c ../include/stdinc.h ../include/setup.h \
   ../include/client.h ../include/conf.h ../include/tools.h \
   ../include/channel.h ../include/scommand.h ../include/log.h \
   ../include/balloc.h ../include/io.h ../include/hook.h
-cidr.o: cidr.c ../include/stdinc.h ../include/setup.h ../include/config.h \
-  ../include/tools.h ../include/rserv.h ../include/client.h
 client.o: client.c ../include/stdinc.h ../include/setup.h \
   ../include/config.h ../include/tools.h ../include/rserv.h \
   ../include/langs.h ../include/client.h ../include/channel.h \
@@ -59,11 +57,7 @@ io.o: io.c ../include/stdinc.h ../include/setup.h ../include/config.h \
 langs.o: langs.c ../include/stdinc.h ../include/setup.h \
   ../include/config.h ../include/tools.h ../include/rserv.h \
   ../include/langs.h ../include/cache.h ../include/client.h \
-  ../include/io.h ../include/conf.h ../include/log.h \
-  ../include/s_userserv.h
-langs_format.o: langs_format.c ../include/stdinc.h ../include/setup.h \
-  ../include/config.h ../include/tools.h ../include/rserv.h \
-  ../include/langs.h ../include/log.h
+  ../include/io.h ../include/conf.h ../include/s_userserv.h
 log.o: log.c ../include/stdinc.h ../include/setup.h ../include/config.h \
   ../include/tools.h ../include/rserv.h ../include/langs.h \
   ../include/log.h ../include/io.h ../include/client.h \
@@ -82,15 +76,6 @@ newconf.o: newconf.c ../include/stdinc.h ../include/setup.h \
   ../include/client.h ../include/channel.h ../include/log.h \
   ../include/conf.h ../include/service.h ../include/io.h \
   ../include/event.h
-rsdb_common.o: rsdb_common.c ../include/stdinc.h ../include/setup.h \
-  ../include/config.h ../include/tools.h ../include/rserv.h \
-  ../include/rsdb.h
-rsdbs_common.o: rsdbs_common.c ../include/stdinc.h ../include/setup.h \
-  ../include/config.h ../include/tools.h ../include/rserv.h \
-  ../include/rsdb.h ../include/rsdbs.h
-rsdbs_schema.o: rsdbs_schema.c ../include/stdinc.h ../include/setup.h \
-  ../include/config.h ../include/tools.h ../include/rserv.h \
-  ../include/rsdbs.h ../include/client.h ../include/channel.h
 rserv.o: rserv.c ../include/stdinc.h ../include/setup.h \
   ../include/config.h ../include/tools.h ../include/rserv.h \
   ../include/langs.h ../include/rsdb.h ../include/conf.h ../include/io.h \
@@ -107,12 +92,11 @@ scommand.o: scommand.c ../include/stdinc.h ../include/setup.h \
   ../include/serno.h ../include/service.h ../include/log.h \
   ../include/hook.h ../include/s_userserv.h
 service.o: service.c ../include/stdinc.h ../include/setup.h \
-  ../include/config.h ../include/tools.h ../include/rsdb.h \
-  ../include/rserv.h ../include/langs.h ../include/service.h \
-  ../include/client.h ../include/scommand.h ../include/conf.h \
-  ../include/io.h ../include/log.h ../include/ucommand.h \
-  ../include/cache.h ../include/channel.h ../include/s_userserv.h \
-  ../include/watch.h ../include/balloc.h
+  ../include/config.h ../include/tools.h ../include/rserv.h \
+  ../include/langs.h ../include/service.h ../include/client.h \
+  ../include/scommand.h ../include/conf.h ../include/io.h \
+  ../include/log.h ../include/ucommand.h ../include/cache.h \
+  ../include/channel.h ../include/s_userserv.h ../include/watch.h
 snprintf.o: snprintf.c ../include/stdinc.h ../include/setup.h \
   ../include/config.h ../include/tools.h ../include/rserv.h \
   ../include/rsdb.h
@@ -155,60 +139,45 @@ s_chanserv.o: s_chanserv.c ../include/stdinc.h ../include/setup.h \
   ../include/event.h ../include/watch.h ../include/email.h
 s_operserv.o: s_operserv.c ../include/stdinc.h ../include/setup.h \
   ../include/config.h ../include/tools.h ../include/rsdb.h \
-  ../include/rserv.h ../include/langs.h ../include/io.h \
-  ../include/client.h ../include/service.h ../include/channel.h \
-  ../include/c_init.h ../include/conf.h ../include/hook.h \
-  ../include/ucommand.h ../include/modebuild.h ../include/log.h \
-  ../include/watch.h
+  ../include/rserv.h ../include/io.h ../include/client.h \
+  ../include/service.h ../include/channel.h ../include/c_init.h \
+  ../include/conf.h ../include/hook.h ../include/ucommand.h \
+  ../include/modebuild.h ../include/log.h ../include/watch.h
 s_alis.o: s_alis.c ../include/stdinc.h ../include/setup.h \
   ../include/config.h ../include/tools.h ../include/service.h \
-  ../include/rserv.h ../include/langs.h ../include/io.h \
-  ../include/client.h ../include/channel.h ../include/c_init.h \
-  ../include/log.h ../include/conf.h
+  ../include/rserv.h ../include/io.h ../include/client.h \
+  ../include/channel.h ../include/c_init.h ../include/log.h \
+  ../include/conf.h
 s_operbot.o: s_operbot.c ../include/stdinc.h ../include/setup.h \
   ../include/config.h ../include/tools.h ../include/rsdb.h \
-  ../include/rserv.h ../include/langs.h ../include/io.h \
-  ../include/service.h ../include/client.h ../include/channel.h \
-  ../include/c_init.h ../include/log.h ../include/conf.h \
-  ../include/hook.h ../include/ucommand.h ../include/newconf.h \
-  ../include/watch.h
+  ../include/rserv.h ../include/io.h ../include/service.h \
+  ../include/client.h ../include/channel.h ../include/c_init.h \
+  ../include/log.h ../include/conf.h ../include/hook.h \
+  ../include/ucommand.h ../include/newconf.h ../include/watch.h
 s_jupeserv.o: s_jupeserv.c ../include/stdinc.h ../include/setup.h \
   ../include/config.h ../include/tools.h ../include/rsdb.h \
-  ../include/rserv.h ../include/langs.h ../include/service.h \
-  ../include/client.h ../include/channel.h ../include/io.h \
-  ../include/c_init.h ../include/log.h ../include/conf.h \
-  ../include/ucommand.h ../include/newconf.h ../include/hook.h \
-  ../include/event.h ../include/watch.h
+  ../include/service.h ../include/client.h ../include/channel.h \
+  ../include/rserv.h ../include/io.h ../include/c_init.h ../include/log.h \
+  ../include/conf.h ../include/ucommand.h ../include/newconf.h \
+  ../include/hook.h ../include/event.h ../include/watch.h
 s_global.o: s_global.c ../include/stdinc.h ../include/setup.h \
   ../include/config.h ../include/tools.h ../include/rsdb.h \
-  ../include/rserv.h ../include/langs.h ../include/io.h \
-  ../include/service.h ../include/client.h ../include/c_init.h \
-  ../include/conf.h ../include/ucommand.h ../include/log.h \
-  ../include/hook.h ../include/watch.h
+  ../include/rserv.h ../include/io.h ../include/service.h \
+  ../include/client.h ../include/c_init.h ../include/conf.h \
+  ../include/ucommand.h ../include/log.h ../include/hook.h \
+  ../include/watch.h
 s_banserv.o: s_banserv.c ../include/stdinc.h ../include/setup.h \
   ../include/config.h ../include/tools.h ../include/rsdb.h \
-  ../include/rserv.h ../include/langs.h ../include/io.h \
-  ../include/service.h ../include/client.h ../include/channel.h \
-  ../include/c_init.h ../include/conf.h ../include/ucommand.h \
-  ../include/log.h ../include/event.h ../include/watch.h \
-  ../include/hook.h ../include/s_banserv.h
+  ../include/rserv.h ../include/io.h ../include/service.h \
+  ../include/client.h ../include/channel.h ../include/c_init.h \
+  ../include/conf.h ../include/ucommand.h ../include/log.h \
+  ../include/event.h ../include/watch.h
 s_watchserv.o: s_watchserv.c ../include/stdinc.h ../include/setup.h \
   ../include/config.h ../include/tools.h ../include/rserv.h \
   ../include/langs.h ../include/conf.h ../include/io.h \
   ../include/client.h ../include/service.h ../include/ucommand.h \
   ../include/c_init.h ../include/watch.h ../include/hook.h \
   ../include/s_userserv.h
-s_memoserv.o: s_memoserv.c ../include/stdinc.h ../include/setup.h \
-  ../include/config.h ../include/tools.h ../include/rsdb.h \
-  ../include/rserv.h ../include/langs.h ../include/service.h \
-  ../include/io.h ../include/client.h ../include/channel.h \
-  ../include/c_init.h ../include/log.h ../include/conf.h \
-  ../include/s_userserv.h
 rsdb_pgsql.o: rsdb_pgsql.c ../include/stdinc.h ../include/setup.h \
-  ../include/config.h ../include/tools.h \
-  /usr/include/postgresql/libpq-fe.h \
-  /usr/include/postgresql/postgres_ext.h ../include/rsdb.h \
-  ../include/rserv.h ../include/conf.h ../include/log.h
-rsdbs_pgsql.o: rsdbs_pgsql.c ../include/stdinc.h ../include/setup.h \
   ../include/config.h ../include/tools.h ../include/rsdb.h \
-  ../include/rsdbs.h ../include/rserv.h
+  ../include/rserv.h ../include/conf.h ../include/log.h

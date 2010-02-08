@@ -399,7 +399,7 @@ o_oper_omode(struct client *client_p, struct lconn *conn_p, const char *parv[], 
 		return 0;
 	}
 
-	parse_full_mode(chptr, operserv_p, parv, parc, 1);
+	parse_full_mode(chptr, operserv_p, parv, parc, 1, config_file.allow_sslonly);
 
 	zlog(operserv_p, 1, WATCH_OPERSERV, 1, client_p, conn_p,
 		"OMODE %s %s", chptr->name, rebuild_params(parv, parc, 1));

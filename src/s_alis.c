@@ -102,9 +102,6 @@ alis_parse_mode(const char *text, int *key, int *limit)
 			case 'r':
 				mode |= MODE_REGONLY;
 				break;
-			case 'S':
-				mode |= MODE_SSLONLY;
-				break;
 			case 'l':
 				*limit = 1;
 				break;

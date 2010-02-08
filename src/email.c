@@ -28,7 +28,7 @@
  * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  * 
- * $Id$
+ * $Id: cache.c 20234 2005-04-07 13:12:33Z leeh $
  */
 #include "stdinc.h"
 #include "rserv.h"

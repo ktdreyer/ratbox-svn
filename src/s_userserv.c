@@ -215,6 +215,16 @@ user_db_callback(int argc, const char **argv)
 	if(EmptyString(argv[0]))
 		return 0;
 
+	/* don't particularly want to be trimming this down to fit in..
+	 * Ignore it, and move on.
+	 */
+	if(strlen(argv[0]) > USERREGNAME_LEN)
+	{
+		mlog("warning: Registered username %s exceeds username length limit, ignoring user",
+			argv[0]);
+		return 0;
+	}
+
 	reg_p = BlockHeapAlloc(user_reg_heap);
 	strlcpy(reg_p->name, argv[0], sizeof(reg_p->name));
 	reg_p->password = my_strdup(argv[1]);
@@ -643,7 +653,7 @@ o_user_userregister(struct client *client_p, struct lconn *conn_p, const char *p
 		parv[0], EmptyString(parv[2]) ? "-" : parv[2]);
 
 	reg_p = BlockHeapAlloc(user_reg_heap);
-	strcpy(reg_p->name, parv[0]);
+	strlcpy(reg_p->name, parv[0], sizeof(reg_p->name));
 
 	password = get_crypt(parv[1], NULL);
 	reg_p->password = my_strdup(password);
@@ -1895,7 +1905,7 @@ s_user_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 			service_err(userserv_p, client_p, SVC_EMAIL_INVALID, arg);
 			return 1;
 		}
-		else if(!valid_email_domain(parv[2]))
+		else if(!valid_email_domain(arg))
 		{
 			service_err(userserv_p, client_p, SVC_EMAIL_BANNEDDOMAIN);
 			return 1;

@@ -49,27 +49,13 @@ static int rsdb_connect(int initial);
 /* rsdb_init()
  */
 void
-rsdb_init(const char *db_name, const char *db_host, const char *db_username, const char *db_password)
+rsdb_init(void)
 {
-	if(!EmptyString(db_name))
-		rsdb_conf.db_name = my_strdup(db_name);
-	else
-		die(0, "No database name specified");
-
-	if(!EmptyString(db_host))
-		rsdb_conf.db_host = my_strdup(db_host);
-	else
-		die(0, "No database host specified");
-
-	if(!EmptyString(db_username))
-		rsdb_conf.db_username = my_strdup(db_username);
-	else
-		die(0, "No database username specified");
-
-	if(!EmptyString(db_password))
-		rsdb_conf.db_password = my_strdup(db_password);
-	else
-		die(0, "No database password specified");
+	if(EmptyString(config_file.db_name) || EmptyString(config_file.db_host) ||
+	   EmptyString(config_file.db_username) || EmptyString(config_file.db_password))
+	{
+		die(0, "Missing conf options in database {};");
+	}
 
 	if((rsdb_database = mysql_init(NULL)) == NULL)
 		die(0, "Out of memory -- failed to initialise mysql pointer");
@@ -87,9 +73,9 @@ rsdb_init(const char *db_name, const char *db_host, const char *db_username, con
 static int
 rsdb_connect(int initial)
 {
-	void *unused = mysql_real_connect(rsdb_database, rsdb_conf.db_host,
-				rsdb_conf.db_username, rsdb_conf.db_password,
-				rsdb_conf.db_name, 0, NULL, 0);
+	void *unused = mysql_real_connect(rsdb_database, config_file.db_host,
+				config_file.db_username, config_file.db_password,
+				config_file.db_name, 0, NULL, 0);
 
 	if(unused)
 		return 0;
@@ -172,9 +158,8 @@ rsdb_handle_error(MYSQL_RES **rsdb_result, const char *buf)
 			break;
 
 		default:
-			mlog("fatal error: problem with database: %s",
+			mlog("fatal error: problem with db file: %s",
 				mysql_error(rsdb_database));
-			mlog("fatal error: last sql: %s", buf);
 			die(0, "problem with db file");
 			return;
 	}
@@ -185,7 +170,6 @@ rsdb_handle_error(MYSQL_RES **rsdb_result, const char *buf)
 		{
 			mlog("fatal error: problem with db file: %s",
 				mysql_error(rsdb_database));
-			mlog("fatal error: last sql: %s", buf);
 			die(0, "problem with db file");
 		}
 	}
@@ -336,7 +320,15 @@ rsdb_exec_fetch(struct rsdb_table *table, const char *format, ...)
 void
 rsdb_exec_fetch_end(struct rsdb_table *table)
 {
-	rsdb_common_fetch_end(table);
+	int i;
+
+	for(i = 0; i < table->row_count; i++)
+	{
+		my_free(table->row[i]);
+	}
+
+	my_free(table->row);
+
 	mysql_free_result((MYSQL_RES *) table->arg);
 }
 
@@ -354,5 +346,4 @@ rsdb_transaction(rsdb_transtype type)
 		rsdb_doing_transaction = 0;
 	}
 }
-
 

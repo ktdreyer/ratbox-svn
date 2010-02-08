@@ -45,7 +45,6 @@
 #include "rserv.h"
 #include "langs.h"
 #include "rsdb.h"
-#include "rsdbs.h"
 #include "conf.h"
 #include "io.h"
 #include "event.h"
@@ -178,12 +177,11 @@ write_pidfile(void)
 static void
 print_help(void)
 {
-	printf("ratbox-services [-h|-v|-f|-t|-c]\n");
+	printf("ratbox-services [-h|-v|-f|-t]\n");
 	printf(" -h show this help\n");
 	printf(" -v show version\n");
 	printf(" -f foreground mode\n");
 	printf(" -t test config\n");
-	printf(" -c create initial database tables\n");
 }
 
 static void
@@ -210,7 +208,6 @@ main(int argc, char *argv[])
 {
 	char c;
 	int nofork = 0;
-	int create_schema = 0;
 	int childpid;
 
 	if(geteuid() == 0)
@@ -230,7 +227,7 @@ main(int argc, char *argv[])
 
 	setup_corefile();
 
-	while((c = getopt(argc, argv, "hvftc")) != -1)
+	while((c = getopt(argc, argv, "hvft")) != -1)
 	{
 		switch(c)
 		{
@@ -249,8 +246,6 @@ main(int argc, char *argv[])
 			case 't':
 				testing_conf = 1;
 				break;
-			case 'c':
-				create_schema = 1;
 		}
 	}
 
@@ -260,7 +255,7 @@ main(int argc, char *argv[])
         nofork = 1;
 #endif
 
-	if(testing_conf || create_schema)
+	if(testing_conf)
 		nofork = 1;
 
         if(!testing_conf)
@@ -296,13 +291,8 @@ main(int argc, char *argv[])
 	/* log requires time is set */
 	open_logfile();
 
-	mlog("ratbox-services started");
-	
-	if(testing_conf)
-		mlog("ratbox-services starting config test");
-
-	if(create_schema)
-		mlog("ratbox-services starting creation of initial database tables");
+	mlog("ratbox-services started%s",
+		testing_conf ? " (config test)" : "");
 
 	signal(SIGHUP, sig_hup);
 	signal(SIGTERM, sig_term);
@@ -401,14 +391,7 @@ main(int argc, char *argv[])
 	}
 
 	/* must be done after parsing the config, for database {}; */
-	rsdb_init(config_file.db_name, config_file.db_host, config_file.db_username,
-			config_file.db_password);
-
-	if(create_schema)
-	{
-		schema_init();
-		exit(0);
-	}
+	rsdb_init();
 
 	/* db must be done before this */
 	init_services();

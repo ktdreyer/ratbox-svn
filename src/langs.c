@@ -1,8 +1,8 @@
 /* src/langs.c
  *   Contains code for dealing with translations
  *
- * Copyright (C) 2007 Lee Hardy <leeh@leeh.co.uk>
- * Copyright (C) 2007 ircd-ratbox development team
+ * Copyright (C) 2007-2008 Lee Hardy <leeh@leeh.co.uk>
+ * Copyright (C) 2007-2008 ircd-ratbox development team
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -257,6 +257,7 @@ const char *svc_notice_string[] =
 	"SVC_MEMO_LIST",
 	"SVC_MEMO_LISTSTART",
 	"SVC_MEMO_READ",
+	"SVC_MEMO_UNREAD_COUNT",
 
 	/* must be last */
 	"\0"

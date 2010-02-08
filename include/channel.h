@@ -108,7 +108,7 @@ int valid_ban(const char *banstr);
 /* DO NOT DEREFERENCE THE VOID POINTER RETURNED FROM THIS */
 void *del_ban(const char *banstr, dlink_list *list);
 
-int parse_simple_mode(struct chmode *, const char **, int, int);
-void parse_full_mode(struct channel *, struct client *, const char **, int, int);
+int parse_simple_mode(struct chmode *, const char **, int, int, int);
+void parse_full_mode(struct channel *, struct client *, const char **, int, int, int);
 
 #endif

@@ -1,8 +1,8 @@
 /* src/conf.c
  *   Contains code for parsing the config file
  *
- * Copyright (C) 2003-2007 Lee Hardy <leeh@leeh.co.uk>
- * Copyright (C) 2003-2007 ircd-ratbox development team
+ * Copyright (C) 2003-2008 Lee Hardy <leeh@leeh.co.uk>
+ * Copyright (C) 2003-2008 ircd-ratbox development team
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -109,8 +109,8 @@ set_default_conf(void)
 	config_file.cexpire_time = 2419200; 	/* 4 weeks */
 	config_file.cexpire_suspended_time = 2419200; 	/* 4 weeks */
 	config_file.cmax_bans = 50;
-	config_file.cexpireban_frequency = DEFAULT_EXPIREBAN_FREQUENCY;
-	config_file.cenforcetopic_frequency = DEFAULT_ENFORCETOPIC_FREQUENCY;
+	config_file.cexpireban_frequency = 900;		/* 15 mins */
+	config_file.cenforcetopic_frequency = 3600;	/* 1 hour */
 	config_file.cdelowner_duration = 86400;	/* 1 day */
 	config_file.cemail_delowner = 0;
 	config_file.cautojoin_empty = 0;
@@ -341,7 +341,8 @@ find_conf_server(const char *name)
 }
 
 struct conf_oper *
-find_conf_oper(const char *username, const char *host, const char *server)
+find_conf_oper(const char *username, const char *host, const char *server,
+		const char *oper_username)
 {
         struct conf_oper *oper_p;
         dlink_node *ptr;
@@ -352,7 +353,8 @@ find_conf_oper(const char *username, const char *host, const char *server)
 
                 if(match(oper_p->username, username) &&
                    match(oper_p->host, host) &&
-		   (EmptyString(oper_p->server) || match(oper_p->server, server)))
+		   (EmptyString(oper_p->server) || match(oper_p->server, server)) &&
+		   (EmptyString(oper_username) || !irccmp(oper_p->name, oper_username)))
                         return oper_p;
         }
 
@@ -525,15 +527,10 @@ yyerror(const char *msg)
 int
 conf_fbgets(char *lbuf, int max_size)
 {
-	char *buff, *p;
-	
+	char *buff;
+
 	if((buff = fgets(lbuf, max_size, conf_fbfile_in)) == NULL)
 		return (0);
 
-	if((p = strpbrk(lbuf, "\r\n")) != NULL)
-	{
-		*p++ = '\n';
-		*p = '\0';
-	}
 	return (strlen(lbuf));
 }

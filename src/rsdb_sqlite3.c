@@ -47,15 +47,9 @@ struct sqlite3 *rserv_db;
 /* rsdb_init()
  */
 void
-rsdb_init(const char *db_name, const char *db_host, const char *db_username, const char *db_password)
+rsdb_init(void)
 {
-	if(db_name == NULL)
-		db_name = DB_PATH;
-
-	/* sqlite3 doesn't use any config parameters, rsdb_conf is left as NULL */
-	memset(&rsdb_conf, 0, sizeof(struct _rsdb_conf));
-
-	if(sqlite3_open(db_name, &rserv_db))
+	if(sqlite3_open(DB_PATH, &rserv_db))
 	{
 		die(0, "Failed to open db file: %s", sqlite3_errmsg(rserv_db));
 	}
@@ -243,7 +237,14 @@ tryexec:
 void
 rsdb_exec_fetch_end(struct rsdb_table *table)
 {
-	rsdb_common_fetch_end(table);
+	int i;
+
+	for(i = 0; i < table->row_count; i++)
+	{
+		my_free(table->row[i]);
+	}
+	my_free(table->row);
+
 	sqlite3_free_table((char **) table->arg);
 }
 
@@ -255,6 +256,4 @@ rsdb_transaction(rsdb_transtype type)
 	else if(type == RSDB_TRANS_END)
 		rsdb_exec(NULL, "COMMIT TRANSACTION");
 }
-
-
 

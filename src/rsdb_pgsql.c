@@ -29,7 +29,7 @@
  * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  * 
- * $Id$
+ * $Id: rsdb_mysql.c 22247 2006-03-24 23:39:15Z leeh $
  */
 #include "stdinc.h"
 #include <libpq-fe.h>
@@ -49,27 +49,13 @@ static int rsdb_connect(int initial);
 /* rsdb_init()
  */
 void
-rsdb_init(const char *db_name, const char *db_host, const char *db_username, const char *db_password)
+rsdb_init(void)
 {
-	if(!EmptyString(db_name))
-		rsdb_conf.db_name = my_strdup(db_name);
-	else
-		die(0, "No database name specified");
-
-	if(!EmptyString(db_host))
-		rsdb_conf.db_host = my_strdup(db_host);
-	else
-		die(0, "No database host specified");
-
-	if(!EmptyString(db_username))
-		rsdb_conf.db_username = my_strdup(db_username);
-	else
-		die(0, "No database username specified");
-
-	if(!EmptyString(db_password))
-		rsdb_conf.db_password = my_strdup(db_password);
-	else
-		die(0, "No database password specified");
+	if(EmptyString(config_file.db_name) || EmptyString(config_file.db_host) ||
+	   EmptyString(config_file.db_username) || EmptyString(config_file.db_password))
+	{
+		die(0, "Missing conf options in database {};");
+	}
 
 	rsdb_connect(1);
 }
@@ -85,9 +71,9 @@ static int
 rsdb_connect(int initial)
 {
 
-	rsdb_database = PQsetdbLogin(rsdb_conf.db_host, NULL, NULL, NULL, 
-	                             rsdb_conf.db_name, rsdb_conf.db_username, 
-	                             rsdb_conf.db_password);
+	rsdb_database = PQsetdbLogin(config_file.db_host, NULL, NULL, NULL, 
+	                             config_file.db_name, config_file.db_username, 
+	                             config_file.db_password);
 
 	if(rsdb_database != NULL && PQstatus(rsdb_database) == CONNECTION_OK)
 		return 0;
@@ -356,7 +342,15 @@ rsdb_exec_fetch(struct rsdb_table *table, const char *format, ...)
 void
 rsdb_exec_fetch_end(struct rsdb_table *table)
 {
-	rsdb_common_fetch_end(table);
+	int i;
+
+	for(i = 0; i < table->row_count; i++)
+	{
+		my_free(table->row[i]);
+	}
+
+	my_free(table->row);
+
 	PQclear(table->arg);
 }
 
@@ -374,5 +368,4 @@ rsdb_transaction(rsdb_transtype type)
 		rsdb_doing_transaction = 0;
 	}
 }
-
 
