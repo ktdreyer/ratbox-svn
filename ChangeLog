@@ -1,3 +1,15 @@
+leeh        2010/02/08 22:16:17 UTC	(20100208_1-26787)
+  Log:
+  - add in --enable-chanfix, disabled by default
+  
+
+  Modified:
+	rserv/trunk/autoconf/configure.in (File Modified) 
+	rserv/trunk/configure (File Modified) 
+	rserv/trunk/include/setup.h.in (File Modified) 
+	rserv/trunk/src/Makefile.in (File Modified) 
+
+
 leeh        2010/02/08 21:13:38 UTC	(20100208_0-26785)
   Log:
   - rebranch 1.2 as trunk
