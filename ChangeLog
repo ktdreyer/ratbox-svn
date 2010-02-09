@@ -1,3 +1,18 @@
+moggie      2010/02/09 16:37:04 UTC	(20100209_0-26791)
+  Log:
+  Initial commit of prototype chanfix module and supporting code.
+  
+
+  Modified:
+	rserv/trunk/include/c_init.h (File Modified) 
+	rserv/trunk/include/langs.h (File Modified) 
+	rserv/trunk/langs/example.lang (File Modified) 
+	rserv/trunk/src/langs.c (File Modified) 
+	rserv/trunk/src/messages.c (File Modified) 
+	rserv/trunk/src/rserv.c (File Modified) 
+	rserv/trunk/src/s_chanfix.c (File Added) 
+
+
 leeh        2010/02/08 22:18:52 UTC	(20100208_2-26789)
   Log:
   - renumber to 1.3.0beta
