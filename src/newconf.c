@@ -1198,15 +1198,29 @@ static struct ConfEntry conf_memoserv_table[] =
 	{ "\0", 0, NULL, 0, NULL }
 };
 
+static struct ConfEntry conf_chanfix_table[] =
+{
+	{ "enable_autofix",	CF_YESNO, NULL, 0, &config_file.cf_enable_autofix	},
+	{ "enable_chanfix",	CF_YESNO,  NULL, 0, &config_file.cf_enable_chanfix		},
+	{ "network_servers",	CF_INT,   NULL, 0, &config_file.cf_network_servers	},
+	{ "minimum_servers", CF_INT,  NULL, 0, &config_file.cf_minimum_servers		},
+	{ "num_top_scores",CF_INT,  NULL, 0, &config_file.cf_num_top_scores	},
+	{ "min_clients",	CF_INT,  NULL, 0, &config_file.cf_min_clients		},
+	{ "client_needs_ident",		CF_YESNO,	  NULL, 0, &config_file.cf_client_needs_ident	},
+	{ "client_needs_rdns",	CF_YESNO,NULL, 0, &config_file.cf_client_needs_rdns	},
+	{ "cf_score_chanserv_chans",	CF_YESNO,NULL, 0, &config_file.cf_score_chanserv_chans	},
+	{ "\0", 0, NULL, 0, NULL }
+};
+
 void
 newconf_init()
 {
 	add_top_conf("serverinfo", NULL, NULL, conf_serverinfo_table);
 	add_top_conf("database", NULL, NULL, conf_database_table);
 	add_top_conf("email", NULL, NULL, conf_email_table);
-        add_top_conf("admin", NULL, NULL, conf_admin_table);
-        add_top_conf("connect", conf_begin_connect, conf_end_connect, conf_connect_table);
-        add_top_conf("operator", conf_begin_operator, conf_end_operator, 
+	add_top_conf("admin", NULL, NULL, conf_admin_table);
+	add_top_conf("connect", conf_begin_connect, conf_end_connect, conf_connect_table);
+	add_top_conf("operator", conf_begin_operator, conf_end_operator, 
 			conf_oper_table);
 	add_top_conf("service", conf_begin_service, conf_end_service, conf_service_table);
 
@@ -1219,4 +1233,5 @@ newconf_init()
 	add_conf_extension("service", "banserv", conf_banserv_table);
 	add_conf_extension("service", "watchserv", conf_watchserv_table);
 	add_conf_extension("service", "memoserv", conf_memoserv_table);
+	add_conf_extension("service", "chanfix", conf_chanfix_table);
 }

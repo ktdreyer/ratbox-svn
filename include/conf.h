@@ -129,6 +129,17 @@ struct _config_file
 
 	/* alis */
 	int max_matches;
+
+	/* chanfix */
+	int cf_enable_autofix;
+	int cf_enable_chanfix;
+	int cf_network_servers;
+	int cf_minimum_servers;
+	int cf_num_top_scores;
+	int cf_min_clients;
+	int cf_client_needs_ident;
+	int cf_client_needs_rdns;
+	int cf_score_chanserv_chans;
 };
 
 struct conf_server
