@@ -366,6 +366,9 @@ main(int argc, char *argv[])
 #ifdef ENABLE_MEMOSERV
 	preinit_s_memoserv();
 #endif
+#ifdef ENABLE_CHANFIX
+    preinit_s_chanfix();
+#endif
 
 	/* load specific commands */
         add_scommand_handler(&error_command);

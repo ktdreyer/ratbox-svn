@@ -40,6 +40,7 @@ struct _lang_internal lang_internal[] =
 	{ SVC_SUCCESSFUL,		"%s::%s successful"					},
 	{ SVC_SUCCESSFULON,		"%s::%s successful on %s"				},
 	{ SVC_ISSUED,			"%s::%s issued"						},
+	{ SVC_ISSUEDFORBY,		"%s::%s issued for %s by %s"				},
 	{ SVC_NEEDMOREPARAMS,		"Insufficient parameters to %s::%s"			},
 	{ SVC_ISDISABLED,		"%s::%s is disabled"					},
 	{ SVC_ISDISABLEDEMAIL,		"%s::%s is disabled as it cannot send emails"		},
@@ -245,6 +246,11 @@ struct _lang_internal lang_internal[] =
 	{ SVC_MEMO_LISTSTART,		"  New    Id    Date       Time  Sender"		},
 	{ SVC_MEMO_READ,		"Id %u Sent %s Sender %s: %s"				},
 	{ SVC_MEMO_UNREAD_COUNT,	"You  have %u new memo(s)"				},
+
+	/* chanfix */
+	{ SVC_CF_NOTENOUGHUSERS,	"Channel %s doesn't have enough users for me to act on"			},
+	{ SVC_CF_HASOPPEDUSERS,	"Channel %s already has opped users"			},
+	{ SVC_CF_CHECK,		"Channel '%s' appears to contain %d opped out of %d users"			},
 /* STOP_GENEXAMPLE_PARSING -- for genexample.pl in langs/ */
 
 	/* this must be last */

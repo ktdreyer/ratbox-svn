@@ -58,6 +58,7 @@ const char *svc_notice_string[] =
 	"SVC_SUCCESSFUL",
 	"SVC_SUCCESSFULON",
 	"SVC_ISSUED",
+	"SVC_ISSUEDFORBY",
 	"SVC_NEEDMOREPARAMS",
 	"SVC_ISDISABLED",
 	"SVC_ISDISABLEDEMAIL",
@@ -258,6 +259,11 @@ const char *svc_notice_string[] =
 	"SVC_MEMO_LISTSTART",
 	"SVC_MEMO_READ",
 	"SVC_MEMO_UNREAD_COUNT",
+
+	/* chanfix */
+	"SVC_CF_NOTENOUGHUSERS",
+	"SVC_CF_HASOPPEDUSERS",
+	"SVC_CF_CHECK",
 
 	/* must be last */
 	"\0"

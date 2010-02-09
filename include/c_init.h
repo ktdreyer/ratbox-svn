@@ -24,6 +24,7 @@ void preinit_s_global(void);
 void preinit_s_banserv(void);
 void preinit_s_watchserv(void);
 void preinit_s_memoserv(void);
+void preinit_s_chanfix(void);
 
 /* u_stats.c */
 extern struct ucommand_handler stats_ucommand;
