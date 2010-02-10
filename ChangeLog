@@ -1,3 +1,17 @@
+moggie      2010/02/10 01:50:19 UTC	(20100210_0-26795)
+  Log:
+  - Tidy up chanfix code.
+  - Improve chanfix 'status' command output.
+  - Rename config option 'minimum_servers' to 'min_server_percent'.
+  
+
+  Modified:
+	rserv/trunk/include/conf.h (File Modified) 
+	rserv/trunk/src/conf.c (File Modified) 
+	rserv/trunk/src/newconf.c (File Modified) 
+	rserv/trunk/src/s_chanfix.c (File Modified) 
+
+
 moggie      2010/02/09 22:32:24 UTC	(20100209_1-26793)
   Log:
   - Add support for config file options.
