@@ -44,9 +44,11 @@
 #include "log.h"
 #include "conf.h"
 #include "hook.h"
+#include "tools.h"
 #include "ucommand.h"
 #include "newconf.h"
 #include "watch.h"
+#include "s_chanfix.h"
 
 /* Please note that this CHANFIX module is very much a work in progress,
  * and that it is likely to change frequently & dramatically whilst being
@@ -57,6 +59,7 @@ static void init_s_chanfix(void);
 
 static struct client *chanfix_p;
 
+/* Services operator functions */
 static int o_chanfix_cfjoin(struct client *, struct lconn *, const char **, int);
 static int o_chanfix_cfpart(struct client *, struct lconn *, const char **, int);
 static int o_chanfix_chanfix(struct client *, struct lconn *, const char **, int);
@@ -64,6 +67,16 @@ static int o_chanfix_check(struct client *, struct lconn *, const char **, int);
 static int o_chanfix_set(struct client *, struct lconn *, const char **, int);
 static int o_chanfix_status(struct client *, struct lconn *, const char **, int);
 
+/* Internal chanfix functions */
+static int count_opped_users(struct channel *);
+static int num_of_linked_servers(void);
+static int is_network_split(void);
+static void send_chan_privmsg(struct channel *, const char *, ...);
+static void gather_channels(void);
+static void gather_channel_bucket(void);
+static void chan_takeover(struct channel *, int);
+static int chan_remove_modes(struct channel *);
+static int chan_remove_bans(struct channel *);
 
 static struct service_command chanfix_command[] =
 {
@@ -128,14 +141,14 @@ chanfix_db_callback(int argc, const char **argv)
 
 
 
-/* cf_count_opped_users()
+/* count_opped_users()
  *   Count the number of opped users in the channel. Does not include
  *   any services that may be in the channel.
  * inputs	- channel ptr
  * outputs	- number of opped users
  */
 static int
-cf_count_opped_users(struct channel *chptr) {
+count_opped_users(struct channel *chptr) {
 	int opcount = 0;
 	struct chmember *msptr;
 	dlink_node *ptr;
@@ -150,42 +163,42 @@ cf_count_opped_users(struct channel *chptr) {
 }
 
 
-/* cf_num_of_linked_servers()
+/* num_of_linked_servers()
  *   Returns the number of linked servers on the network.*/
 static int
-cf_num_of_linked_servers(void)
+num_of_linked_servers(void)
 {
 	return dlink_list_length(&server_list);
 }
 
-/* cf_check_min_servers_linked()
+/* is_network_split()
  *   Checks to see if the min number of servers are linked to know
  *   whether we're split or not.
  * inputs	-
  * outputs	- 1 if enough servers are linked, 0 is not
  */
 static int
-cf_check_min_servers_linked(void)
+is_network_split(void)
 {
-	int num_linked = cf_num_of_linked_servers();
+	int num_linked = num_of_linked_servers();
 	
 	if(num_linked * 100 >= config_file.cf_min_server_percent * config_file.cf_network_servers)
 	{
-		return 1;
+		return 0;
 	}
 
-	return 0;
+	return 1;
 }
 
 
-/* cf_send_chan_privmsg()
+/* send_chan_privmsg()
  *   Sends the given message and args to the channel.
  *
  * inputs	- channel ptr, formatted string, args
  * outputs	-
  */
 static void
-cf_send_chan_privmsg(struct channel *chptr, const char *format, ...)
+send_chan_privmsg(struct channel *chptr, const char *format, ...)
 {
 	static char buf[BUFSIZE];
 	va_list args;
@@ -203,7 +216,7 @@ cf_send_chan_privmsg(struct channel *chptr, const char *format, ...)
 
 /* preconditions: TS >= 2 and there is at least one user in the channel */
 static void
-cf_takeover(struct channel *chptr, int invite)
+chan_takeover(struct channel *chptr, int invite)
 {
 	dlink_node *ptr;
 
@@ -346,7 +359,7 @@ o_chanfix_chanfix(struct client *client_p, struct lconn *conn_p, const char *par
 	}
 
 	/* Check if anyone is opped, if they are we don't do anything unless someone forced us. */
-	if(cf_count_opped_users(chptr) > 0)
+	if(count_opped_users(chptr) > 0)
 	{
 		/* Check whether the OVERRIDE flag has been given */
 		if (parc > 1)
@@ -360,8 +373,8 @@ o_chanfix_chanfix(struct client *client_p, struct lconn *conn_p, const char *par
 					return 0;
 				}
 				/* override command has been given, so we should take-over the channel */
-				cf_takeover(chptr, 0);
-				cf_send_chan_privmsg(chptr, "Channel fix in progress, please stand by.");
+				chan_takeover(chptr, 0);
+				send_chan_privmsg(chptr, "Channel fix in progress, please stand by.");
 				override = 1;
 			}
 		}
@@ -425,9 +438,10 @@ o_chanfix_check(struct client *client_p, struct lconn *conn_p, const char *parv[
 	service_snd(chanfix_p, client_p, conn_p, SVC_ISSUEDFORBY,
 				chanfix_p->name, "CHECK", parv[0], client_p->name);
 
-	ops = cf_count_opped_users(chptr);
+	ops = count_opped_users(chptr);
 	users = dlink_list_length(&chptr->users);
 	service_snd(chanfix_p, client_p, conn_p, SVC_CF_CHECK, parv[0], ops, users);
+
 	return 0;
 }
 
@@ -512,16 +526,127 @@ o_chanfix_status(struct client *client_p, struct lconn *conn_p, const char *parv
 		service_send(chanfix_p, client_p, conn_p, "Manual channel fixing disabled.");
 
 	service_send(chanfix_p, client_p, conn_p,
-		"For normal operation, chanfix requires that at least %d out of %d (%d percent) network servers be linked.",
-				(config_file.cf_min_server_percent * config_file.cf_network_servers) / 100 + 1,
-				config_file.cf_network_servers, config_file.cf_min_server_percent);
+		"For scoring/fixing, chanfix requires that at least %d out of %d network servers be linked (~%d percent).",
+			(config_file.cf_min_server_percent * config_file.cf_network_servers) / 100 + 1,
+			config_file.cf_network_servers, config_file.cf_min_server_percent);
 
-	if(cf_check_min_servers_linked())
-		service_send(chanfix_p, client_p, conn_p, "Splitmode not active.");
+	if(is_network_split())
+		service_send(chanfix_p, client_p, conn_p, "Splitmode active. Channel scoring/fixing disabled.");
 	else
-		service_send(chanfix_p, client_p, conn_p, "Chanfix splitmode active. Channel scoring/fixing disabled.");
+		service_send(chanfix_p, client_p, conn_p, "Splitmode not active.");
 		
 	return 0;
 }
 
+/* General function to manage how we iterate over all the channels
+ * gathering score data.
+ */
+static void
+gather_channels(void)
+{
+	/*DAYS_SINCE_EPOCH config_file.cf_min_clients */
+
+	/* Rorate the scores if it's midnight. */
+
+
+
+
+}
+
+/* Process the score data for a bucket of channels. A bucket is a subset
+ * of the total network channels.
+ */
+static void
+gather_channel_bucket(void)
+{
+
+
+}
+
+/* Removes modes from a channel that might be preventing regular users
+ * from getting in.
+ */
+static int
+chan_remove_modes(struct channel *chptr)
+{
+	char modelist[] = "ilkrS", flag = '0';
+	int i;
+	int masklist[] = {
+		MODE_INVITEONLY,
+		MODE_LIMIT,
+		MODE_KEY,
+		MODE_REGONLY,
+		MODE_SSLONLY
+	};
+
+	modebuild_start(chanfix_p, chptr);
+
+	for(i = 0; i < sizeof(modelist)-1; i++)
+	{
+		if(chptr->mode.mode & masklist[i])
+		{
+			modebuild_add(DIR_DEL, &modelist[i], NULL);
+			chptr->mode.mode &= ~masklist[i];
+			flag = '1';
+
+			if(masklist[i] == MODE_KEY)
+			{
+				chptr->mode.key[0] = '\0';
+			}
+			else if(masklist[i] == MODE_LIMIT)
+			{
+				chptr->mode.limit = 0;
+			}
+		}
+	}
+
+	if(flag == '1')
+	{
+		join_service(chanfix_p, chptr->name, chptr->tsinfo, NULL, 0);
+		modebuild_finish();
+		send_chan_privmsg(chptr,
+		"Channel modes have been removed so users can re-join.");
+		return 1;
+	}
+
+	return 0;
+}
+
+/* Remove only the bans from a channel in case they're preventing people
+ * from getting in.
+ */
+static int
+chan_remove_bans(struct channel *chptr)
+{
+	dlink_node *ptr, *next_ptr;
+
+	if(dlink_list_length(&chptr->bans) < 1)
+	{
+		return 0;
+	}
+
+	join_service(chanfix_p, chptr->name, chptr->tsinfo, NULL, 0);
+
+	modebuild_start(chanfix_p, chptr);
+
+	DLINK_FOREACH(ptr, chptr->bans.head)
+	{
+		modebuild_add(DIR_DEL, "b", ptr->data);
+	}
+
+	DLINK_FOREACH_SAFE(ptr, next_ptr, chptr->bans.head)
+	{
+		my_free(ptr->data);
+		dlink_destroy(ptr, &chptr->bans);
+	}
+
+	/* apply the bans removal */
+	modebuild_finish();
+
+	send_chan_privmsg(chptr,
+		"%s's ban modes have been removed so users can re-join.",
+		chptr->name);
+
+	return 1;
+}
 #endif
