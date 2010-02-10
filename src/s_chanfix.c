@@ -69,7 +69,7 @@ static struct service_command chanfix_command[] =
 {
 	{ "CFJOIN",	&o_chanfix_cfjoin,	1, NULL, 1, 0L, 0, 1, 0 },
 	{ "CFPART",	&o_chanfix_cfpart,	1, NULL, 1, 0L, 0, 1, 0 },
-	/*{ "SCORE",&o_chanfix_cfpart,	1, NULL, 1, 0L, 0, 1, 0 },*/
+	/*{ "SCORE",&o_chanfix_score,	1, NULL, 1, 0L, 0, 1, 0 },*/
 	{ "CHANFIX",&o_chanfix_chanfix,	1, NULL, 1, 0L, 0, 1, 0 },
 	/*{ "HISTORY",&o_chanfix_history,	1, NULL, 1, 0L, 0, 1, 0 },
 	{ "INFO",	&o_chanfix_info,	1, NULL, 1, 0L, 0, 1, 0 },
@@ -435,22 +435,23 @@ o_chanfix_check(struct client *client_p, struct lconn *conn_p, const char *parv[
 static int
 o_chanfix_set(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
-	if(!irccmp(parv[0], "network_servers")) {
+	/* TODO: Make these messages into translation strings. */
+	if(!irccmp(parv[0], "servers")) {
 		if(parc > 1) {
 			int num;
 			num = atoi(parv[1]);
 			if(num > 0) {
 				config_file.cf_network_servers = num;
-				service_send(chanfix_p, client_p, conn_p, "Number of network_servers is now %d.", num);
+				service_send(chanfix_p, client_p, conn_p, "Number of network servers is now %d.", num);
 			} else {
-				service_send(chanfix_p, client_p, conn_p, "Invalid parameter. Use SET network_servers <integer>.");
+				service_send(chanfix_p, client_p, conn_p, "Invalid parameter. Use SET servers <integer>.");
 			}
 		} else {
 			/* Instead of returning an error here, we should show the current value */
-			service_err(chanfix_p, client_p, SVC_NEEDMOREPARAMS, chanfix_p->name, "SET::network_servers");
+			service_err(chanfix_p, client_p, SVC_NEEDMOREPARAMS, chanfix_p->name, "SET::servers");
 		}
 	}
-	else if(!irccmp(parv[0], "enable_autofix")) {
+	else if(!irccmp(parv[0], "autofix")) {
 		if(parc > 1) {
 			if(!irccmp(parv[1], "on") || !irccmp(parv[0], "yes")) {
 				service_send(chanfix_p, client_p, conn_p, "Automatic channel fixing enabled.");
@@ -460,14 +461,14 @@ o_chanfix_set(struct client *client_p, struct lconn *conn_p, const char *parv[],
 				service_send(chanfix_p, client_p, conn_p, "Automatic channel fixing disabled.");
 				config_file.cf_enable_autofix = 0;
 			} else {
-				service_send(chanfix_p, client_p, conn_p, "Invalid parameter. Use SET enable_autofix <on|off>.");
+				service_send(chanfix_p, client_p, conn_p, "Invalid parameter. Use SET autofix <on|off>.");
 			}
 		} else {
 			/* Instead of returning an error here, we should show the current value */
-			service_err(chanfix_p, client_p, SVC_NEEDMOREPARAMS, chanfix_p->name, "SET::enable_autofix");
+			service_err(chanfix_p, client_p, SVC_NEEDMOREPARAMS, chanfix_p->name, "SET::autofix");
 		}
 	}
-	else if(!irccmp(parv[0], "enable_chanfix")) {
+	else if(!irccmp(parv[0], "chanfix")) {
 		if(parc > 1)
 		{
 			if(!irccmp(parv[1], "on") || !irccmp(parv[0], "yes")) {
@@ -480,12 +481,12 @@ o_chanfix_set(struct client *client_p, struct lconn *conn_p, const char *parv[],
 			}
 			else
 			{
-				service_send(chanfix_p, client_p, conn_p, "Invalid parameter. Use SET enable_chanfix <on|off>.");
+				service_send(chanfix_p, client_p, conn_p, "Invalid parameter. Use SET chanfix <on|off>.");
 			}
 		}
 		else
 		{
-			service_err(chanfix_p, client_p, SVC_NEEDMOREPARAMS, chanfix_p->name, "SET::enable_chanfix");
+			service_err(chanfix_p, client_p, SVC_NEEDMOREPARAMS, chanfix_p->name, "SET::chanfix");
 		}
 	}
 	else {
