@@ -1,3 +1,29 @@
+moggie      2010/02/10 11:44:03 UTC	(20100210_2-26799)
+  Log:
+  Silly SVN didn't include these files in the previous commit.
+  
+
+  Modified:
+	rserv/trunk/help/en/chanfix/ (File Added) 
+	rserv/trunk/help/en/chanfix/addnote (File Added) 
+	rserv/trunk/help/en/chanfix/alert (File Added) 
+	rserv/trunk/help/en/chanfix/block (File Added) 
+	rserv/trunk/help/en/chanfix/chanfix (File Added) 
+	rserv/trunk/help/en/chanfix/check (File Added) 
+	rserv/trunk/help/en/chanfix/delnote (File Added) 
+	rserv/trunk/help/en/chanfix/general (File Added) 
+	rserv/trunk/help/en/chanfix/history (File Added) 
+	rserv/trunk/help/en/chanfix/index (File Added) 
+	rserv/trunk/help/en/chanfix/index-admin (File Added) 
+	rserv/trunk/help/en/chanfix/info (File Added) 
+	rserv/trunk/help/en/chanfix/oplist (File Added) 
+	rserv/trunk/help/en/chanfix/opnicks (File Added) 
+	rserv/trunk/help/en/chanfix/set (File Added) 
+	rserv/trunk/help/en/chanfix/status (File Added) 
+	rserv/trunk/help/en/chanfix/unalert (File Added) 
+	rserv/trunk/help/en/chanfix/unblock (File Added) 
+
+
 moggie      2010/02/10 11:21:38 UTC	(20100210_1-26797)
   Log:
   - Make a start on help file info.
