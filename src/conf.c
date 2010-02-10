@@ -152,7 +152,7 @@ set_default_conf(void)
 	config_file.cf_enable_autofix = 0;
 	config_file.cf_enable_chanfix = 0;
 	config_file.cf_network_servers = 1;
-	config_file.cf_minimum_servers = 75;
+	config_file.cf_min_server_percent = 75;
 	config_file.cf_num_top_scores = 10;
 	config_file.cf_min_clients = 4;
 	config_file.cf_client_needs_ident = 1;
@@ -204,10 +204,10 @@ validate_conf(void)
 		config_file.cf_num_top_scores = 10;
 
 	if(config_file.cf_network_servers < 1)
-		config_file.cf_network_servers= 1;
+		config_file.cf_network_servers = 1;
 
-	if(config_file.cf_minimum_servers < 0 || config_file.cf_network_servers > 100)
-		config_file.cf_network_servers = 75;
+	if(config_file.cf_min_server_percent < 0 || config_file.cf_min_server_percent > 100)
+		config_file.cf_min_server_percent = 75;
 
 	if(config_file.cf_min_clients < 2)
 		config_file.cf_min_clients = 2;

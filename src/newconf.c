@@ -1203,7 +1203,7 @@ static struct ConfEntry conf_chanfix_table[] =
 	{ "enable_autofix",	CF_YESNO, NULL, 0, &config_file.cf_enable_autofix	},
 	{ "enable_chanfix",	CF_YESNO,  NULL, 0, &config_file.cf_enable_chanfix		},
 	{ "network_servers",	CF_INT,   NULL, 0, &config_file.cf_network_servers	},
-	{ "minimum_servers", CF_INT,  NULL, 0, &config_file.cf_minimum_servers		},
+	{ "min_server_percent", CF_INT,  NULL, 0, &config_file.cf_min_server_percent		},
 	{ "num_top_scores",CF_INT,  NULL, 0, &config_file.cf_num_top_scores	},
 	{ "min_clients",	CF_INT,  NULL, 0, &config_file.cf_min_clients		},
 	{ "client_needs_ident",		CF_YESNO,	  NULL, 0, &config_file.cf_client_needs_ident	},

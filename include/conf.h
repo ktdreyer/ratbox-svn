@@ -134,7 +134,7 @@ struct _config_file
 	int cf_enable_autofix;
 	int cf_enable_chanfix;
 	int cf_network_servers;
-	int cf_minimum_servers;
+	int cf_min_server_percent;
 	int cf_num_top_scores;
 	int cf_min_clients;
 	int cf_client_needs_ident;

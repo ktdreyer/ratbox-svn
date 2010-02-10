@@ -109,10 +109,12 @@ static void
 init_s_chanfix(void)
 {
 	/*rsdb_exec(operbot_db_callback,
-			"SELECT chname, tsinfo FROM operbot");*/
+			"SELECT chname, tsinfo FROM operbot");
+	*/
 
 	/*eventAdd("chanfix_join", e_join_channels, NULL, 180);
-	eventAdd("chanfix_part", e_part_channels, NULL, 300);*/
+	eventAdd("chanfix_part", e_part_channels, NULL, 300);
+	*/
 }
 
 
@@ -121,7 +123,8 @@ chanfix_db_callback(int argc, const char **argv)
 {
 	join_service(chanfix_p, argv[0], atol(argv[1]), NULL, 0);
 	return 0;
-}*/
+}
+*/
 
 
 
@@ -136,6 +139,7 @@ cf_count_opped_users(struct channel *chptr) {
 	int opcount = 0;
 	struct chmember *msptr;
 	dlink_node *ptr;
+
 	DLINK_FOREACH(ptr, chptr->users.head)
 	{
 		msptr = ptr->data;
@@ -165,7 +169,7 @@ cf_check_min_servers_linked(void)
 {
 	int num_linked = cf_num_of_linked_servers();
 	
-	if(num_linked * 100 >= config_file.cf_minimum_servers * config_file.cf_network_servers)
+	if(num_linked * 100 >= config_file.cf_min_server_percent * config_file.cf_network_servers)
 	{
 		return 1;
 	}
@@ -270,8 +274,7 @@ o_chanfix_cfjoin(struct client *client_p, struct lconn *conn_p, const char *parv
 		return 0;
 	}
 
-	if((chptr = find_channel(parv[0])) && 
-	   dlink_find(chanfix_p, &chptr->services))
+	if((chptr = find_channel(parv[0])) && dlink_find(chanfix_p, &chptr->services))
 	{
 		service_snd(chanfix_p, client_p, conn_p, SVC_IRC_ALREADYONCHANNEL,
 				chanfix_p->name, chptr->name);
@@ -284,7 +287,8 @@ o_chanfix_cfjoin(struct client *client_p, struct lconn *conn_p, const char *parv
 	tsinfo = chptr != NULL ? chptr->tsinfo : CURRENT_TIME;
 
 	/*rsdb_exec(NULL, "INSERT INTO operbot (chname, tsinfo, oper) VALUES(LOWER('%Q'), '%lu', '%Q')",
-			parv[0], tsinfo, OPER_NAME(client_p, conn_p));*/
+			parv[0], tsinfo, OPER_NAME(client_p, conn_p));
+	*/
 
 	join_service(chanfix_p, parv[0], tsinfo, NULL, 0);
 
@@ -302,7 +306,8 @@ o_chanfix_cfpart(struct client *client_p, struct lconn *conn_p, const char *parv
 			"CFPART %s", parv[0]);
 
 		/*rsdb_exec(NULL, "DELETE FROM operbot WHERE chname = LOWER('%Q')",
-				parv[0]);*/
+				parv[0]);
+		*/
 		service_snd(chanfix_p, client_p, conn_p, SVC_SUCCESSFULON,
 				chanfix_p->name, "CFPART", parv[0]);
 	}
@@ -318,16 +323,23 @@ o_chanfix_chanfix(struct client *client_p, struct lconn *conn_p, const char *par
 {
 	struct channel *chptr;
 	int override = 0;
+	dlink_node *ptr;
+	struct chmember *msptr;
 
-	if(!valid_chname(parv[0])) {
+	if(!valid_chname(parv[0]))
+	{
 		service_snd(chanfix_p, client_p, conn_p, SVC_IRC_CHANNELINVALID, parv[0]);
 		return 0;
 	}
-	if((chptr = find_channel(parv[0])) == NULL) {
+
+	if((chptr = find_channel(parv[0])) == NULL)
+	{
 		service_snd(chanfix_p, client_p, conn_p, SVC_IRC_NOSUCHCHANNEL, parv[0]);
 		return 0;
 	}
-	if(dlink_list_length(&chptr->users) < config_file.cf_min_clients) {
+
+	if(dlink_list_length(&chptr->users) < config_file.cf_min_clients)
+	{
 		/* Not enough users in this channel */
 		service_snd(chanfix_p, client_p, conn_p, SVC_CF_NOTENOUGHUSERS, parv[0]);
 		return 0;
@@ -337,9 +349,12 @@ o_chanfix_chanfix(struct client *client_p, struct lconn *conn_p, const char *par
 	if(cf_count_opped_users(chptr) > 0)
 	{
 		/* Check whether the OVERRIDE flag has been given */
-		if (parc > 1) {
-			if (!irccmp(parv[1], "override") || parv[1][0] == '!') {
-				if(chptr->tsinfo < 2) {
+		if (parc > 1)
+		{
+			if (!irccmp(parv[1], "override") || parv[1][0] == '!')
+			{
+				if(chptr->tsinfo < 2)
+				{
 					service_send(chanfix_p, client_p, conn_p,
 									"Channel '%s' TS too low for takeover", parv[0]);
 					return 0;
@@ -368,8 +383,6 @@ o_chanfix_chanfix(struct client *client_p, struct lconn *conn_p, const char *par
 				chanfix_p->name, "CHANFIX", parv[0], client_p->name);
 
 	/* for now we'll just op everyone */
-	dlink_node *ptr;
-	struct chmember *msptr;
 	modebuild_start(chanfix_p, chptr);
 	/* Do I need to use DLINK_FOREACH_SAFE here? */
 	DLINK_FOREACH(ptr, chptr->users.head)
@@ -382,7 +395,8 @@ o_chanfix_chanfix(struct client *client_p, struct lconn *conn_p, const char *par
 	modebuild_finish();
 
 	/* Once the channel has been taken over, we should add it to the list of channels that need
-	to be fixed based on their scores. */
+	 * to be fixed based on their scores.
+	 */
 
 	part_service(chanfix_p, parv[0]);
 
@@ -397,11 +411,13 @@ o_chanfix_check(struct client *client_p, struct lconn *conn_p, const char *parv[
 	struct channel *chptr;
 	int users, ops;
 
-	if(!valid_chname(parv[0])) {
+	if(!valid_chname(parv[0]))
+	{
 		service_err(chanfix_p, client_p, SVC_IRC_CHANNELINVALID, chanfix_p->name, parv[0]);
 		return 0;
 	}
-	if((chptr = find_channel(parv[0])) == NULL) {
+	if((chptr = find_channel(parv[0])) == NULL)
+	{
 		service_err(chanfix_p, client_p, SVC_IRC_NOSUCHCHANNEL, chanfix_p->name, parv[0]);
 		return 0;
 	}
@@ -452,7 +468,8 @@ o_chanfix_set(struct client *client_p, struct lconn *conn_p, const char *parv[],
 		}
 	}
 	else if(!irccmp(parv[0], "enable_chanfix")) {
-		if(parc > 1) {
+		if(parc > 1)
+		{
 			if(!irccmp(parv[1], "on") || !irccmp(parv[0], "yes")) {
 				service_send(chanfix_p, client_p, conn_p, "Manual channel fixing enabled.");
 				config_file.cf_enable_chanfix = 1;
@@ -460,10 +477,14 @@ o_chanfix_set(struct client *client_p, struct lconn *conn_p, const char *parv[],
 			else if(!irccmp(parv[1], "off") || !irccmp(parv[0], "no")) {
 				service_send(chanfix_p, client_p, conn_p, "Manual channel fixing disabled.");
 				config_file.cf_enable_chanfix = 0;
-			} else {
+			}
+			else
+			{
 				service_send(chanfix_p, client_p, conn_p, "Invalid parameter. Use SET enable_chanfix <on|off>.");
 			}
-		} else {
+		}
+		else
+		{
 			service_err(chanfix_p, client_p, SVC_NEEDMOREPARAMS, chanfix_p->name, "SET::enable_chanfix");
 		}
 	}
@@ -477,8 +498,7 @@ o_chanfix_set(struct client *client_p, struct lconn *conn_p, const char *parv[],
 static int
 o_chanfix_status(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
-	service_send(chanfix_p, client_p, conn_p,
-		"This is ratbox-services version %s", MYNAME, RSERV_VERSION);
+	service_send(chanfix_p, client_p, conn_p, "Chanfix module status:");
 
 	if(config_file.cf_enable_autofix)
 		service_send(chanfix_p, client_p, conn_p, "Automatic channel fixing enabled.");
@@ -491,14 +511,14 @@ o_chanfix_status(struct client *client_p, struct lconn *conn_p, const char *parv
 		service_send(chanfix_p, client_p, conn_p, "Manual channel fixing disabled.");
 
 	service_send(chanfix_p, client_p, conn_p,
-			"At least %d percent of all network servers (%d) need to be linked, which is a minimum of %d.",
-				config_file.cf_minimum_servers, config_file.cf_network_servers,
-				(config_file.cf_minimum_servers * config_file.cf_network_servers) / 100 + 1);
+		"For normal operation, chanfix requires that at least %d out of %d (%d percent) network servers be linked.",
+				(config_file.cf_min_server_percent * config_file.cf_network_servers) / 100 + 1,
+				config_file.cf_network_servers, config_file.cf_min_server_percent);
 
 	if(cf_check_min_servers_linked())
-		service_send(chanfix_p, client_p, conn_p, "Chanfix splitmode not active.");
+		service_send(chanfix_p, client_p, conn_p, "Splitmode not active.");
 	else
-		service_send(chanfix_p, client_p, conn_p, "Chanfix splitmode enabled.");
+		service_send(chanfix_p, client_p, conn_p, "Chanfix splitmode active. Channel scoring/fixing disabled.");
 		
 	return 0;
 }
