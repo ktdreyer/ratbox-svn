@@ -1,3 +1,16 @@
+moggie      2010/02/10 21:57:31 UTC	(20100210_3-26801)
+  Log:
+  - Add a s_chanfix.h header file.
+  - Create chan_remove_modes() and chan_remove_bans() functions for removing
+    specific modes from channels.
+  - Re-factor some of the function names.
+  
+
+  Modified:
+	rserv/trunk/include/s_chanfix.h (File Added) 
+	rserv/trunk/src/s_chanfix.c (File Modified) 
+
+
 moggie      2010/02/10 11:44:03 UTC	(20100210_2-26799)
   Log:
   Silly SVN didn't include these files in the previous commit.
