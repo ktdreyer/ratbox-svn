@@ -1,3 +1,16 @@
+moggie      2010/02/10 11:21:38 UTC	(20100210_1-26797)
+  Log:
+  - Make a start on help file info.
+  - Tweak options for chanfix 'set' command.
+  - Re-generate help index.
+  
+
+  Modified:
+	rserv/trunk/help/bg/memoserv/index (File Modified) 
+	rserv/trunk/help/genindex.sh (File Modified) 
+	rserv/trunk/src/s_chanfix.c (File Modified) 
+
+
 moggie      2010/02/10 01:50:19 UTC	(20100210_0-26795)
   Log:
   - Tidy up chanfix code.
