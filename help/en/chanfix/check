@@ -1,0 +1,5 @@
+CHECK <#channel>
+Shows the number of ops and total clients of a channel.
+  <#channel>: Channel to request check of.
+
+NOTE: Command usage broadcast to logged in users.

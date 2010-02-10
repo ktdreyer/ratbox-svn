@@ -1,0 +1,3 @@
+HISTORY <#channel>
+Shows the history of auto and manual fixes for a channel.
+  <#channel>: Channel to request history of.

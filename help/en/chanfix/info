@@ -1,0 +1,3 @@
+INFO <#channel>
+Shows all notes for this channel, and whether it has been blocked.
+  <#channel>: Channel to request info of.

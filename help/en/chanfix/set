@@ -1,0 +1,6 @@
+SET <option> <parameter>
+[ADMIN] Sets various options for chanfix.
+  SERVERS <integer>: Total number of servers that should be linked
+                     on the network.
+  AUTOFIX <on|off> : Toggle whether chanfix should perform automatic fixing.
+  CHANFIX <on|off> : Toggle whether chanfix should permit manual chanfixing.

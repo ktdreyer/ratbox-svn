@@ -1,0 +1,3 @@
+ OPLIST        - Shows a channel's top most hostmasks and their associated score.
+ OPNICKS       - Shows the nicks of all ops in a channel.
+ SET           - Sets various options for chanfix.

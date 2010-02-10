@@ -1,0 +1,13 @@
+This service monitors the network and attempts to
+fix oppless channels. Available commands:
+ ADDNOTE     - Adds a note for a channel.
+ ALERT       - Sets an alert flag for a channel to ensure channel notes are read.
+ BLOCK       - Blocks a channel from auto and manual fixing, and stores a
+ CHANFIX     - Signals chanfix to perform a manual fix of a channel that contains no ops.
+ CHECK       - Shows the number of ops and total clients of a channel.
+ DELNOTE     - Removes a channel note identified by its ID number.
+ HISTORY     - Shows the history of auto and manual fixes for a channel.
+ INFO        - Shows all notes for this channel, and whether it has been blocked.
+ STATUS      - Shows the current status of the chanfix module.
+ UNALERT     - Removes an alert flag for a channel.
+ UNBLOCK     - Re-enables auto and manual fixing for a channel.

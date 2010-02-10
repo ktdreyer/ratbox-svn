@@ -1,0 +1,4 @@
+ADDNOTE <#channel> <note>
+Adds a note for a channel.
+  <#channel>: Channel to add note for.
+  <note>    : Note to add.

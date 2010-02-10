@@ -1,0 +1,5 @@
+OPNICKS <#channel>
+[ADMIN] Shows the nicks of all ops in a channel.
+  <#channel>: Channel to show nicks on.
+
+NOTE: Command usage broadcast to logged in users.

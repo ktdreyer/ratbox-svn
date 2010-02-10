@@ -1,0 +1,3 @@
+ALERT <#channel>
+Sets an alert flag for a channel to ensure channel notes are read.
+  <#channel>: Channel to add alert for.

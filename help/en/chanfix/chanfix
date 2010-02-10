@@ -1,0 +1,5 @@
+CHANFIX <#channel> [override]
+Signals chanfix to perform a manual fix of a channel that contains no ops.
+  <#channel>: Channel to perform manual fix on.
+  [override]: Forces chanfix to takeover the channel and restore based on
+              chanfix scores.

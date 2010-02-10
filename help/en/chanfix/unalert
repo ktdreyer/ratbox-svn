@@ -1,0 +1,3 @@
+UNALERT <#channel>
+Removes an alert flag for a channel.
+  <#channel>: Channel to remove alert for.
