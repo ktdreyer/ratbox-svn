@@ -69,7 +69,6 @@ static int o_chanfix_status(struct client *, struct lconn *, const char **, int)
 
 /* Internal chanfix functions */
 static int count_opped_users(struct channel *);
-static int num_of_linked_servers(void);
 static int is_network_split(void);
 static void send_chan_privmsg(struct channel *, const char *, ...);
 static void gather_channels(void);
@@ -163,26 +162,6 @@ count_opped_users(struct channel *chptr) {
 }
 
 
-/* num_of_linked_servers()
- *   Returns the number of servers that have fully burst.
- */
-static int
-num_of_linked_servers(void)
-{
-	int count = 0;
-	struct client *server_p;
-	dlink_node *ptr;
-
-	DLINK_FOREACH(ptr, server_list.head)
-	{
-		server_p = ptr->data;
-		if(IsEOB(server_p))
-			count++;
-	}
-	
-	return count;
-}
-
 /* is_network_split()
  *   Checks to see if the min number of servers are linked to know
  *   whether we're split or not.
@@ -192,9 +171,18 @@ num_of_linked_servers(void)
 static int
 is_network_split(void)
 {
-	int num_linked = num_of_linked_servers();
+	int s_count = 0;
+	struct client *server_p;
+	dlink_node *ptr;
+
+	DLINK_FOREACH(ptr, server_list.head)
+	{
+		server_p = ptr->data;
+		if(IsEOB(server_p))
+			s_count++;
+	}
 	
-	if(num_linked * 100 >= config_file.cf_min_server_percent * config_file.cf_network_servers)
+	if(s_count * 100 >= config_file.cf_min_server_percent * config_file.cf_network_servers)
 	{
 		return 0;
 	}

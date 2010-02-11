@@ -1,0 +1,208 @@
+###  ChanFix Module - General Information  ###
+
+
+##  Data Gathering  ##
+
+Every 5 minutes gather_channels() is called. This function looks at the list of
+all the channels on the network and groups them into "buckets". On each bucket
+of several hundred channels, it runs gather_channel_bucket(), which processes
+each channel individually by generating a tuple (user, host, username) for each
+channel op. Note that each bucket is processed a couple of seconds apart for
+resource distribution, and that any channel registered with ChanServ is ignored.
+
+Essentially, Chanfix now has a list of all the ops in the channel it's looking
+at; but before it can do anything else, it needs to check the list and drop any
+entries matching these criteria:
+
+  - Any tuple with the same UserServ username as another in the list.
+  - Any entry in the list with a non-unique user@host pair that does not have a
+    UserServ username.
+
+This is done to stop people from being able to trick chanfix into giving them
+multiple points; like if they login more than once, or run multiple clients on
+the same host. Note that if UserServ support is not compiled into rserv, we can
+skip the checks for UserServ usernames and only worry about duplicate user@host
+pairs.
+
+Once the list has been pruned, Chanfix will try to match each tuple with an
+entry stored in its database so it can give it 1 point (after checking if it has
+an ident/rDNS based on config file options). First it will look for a chanop
+record that has a matching username, then try based on the user@host pair. If in
+both cases it doesn't find a match, Chanfix will consider this to be a new
+channel op that it hasn't seen before, so it will create a new chanop entry in
+the DB for it. Note that at no point are chanop scores ever decremented.
+
+Every chanop's score is grouped into "daysamples". A daysample period lasts for
+24 hours and is delimited by counting the number of days since the EPOCH. For
+example, any scores collected on the 10th of February 2010 will be stored under
+day number 14650. Then samples for the next day will be scored under 14651, and
+so on. This method of daysampling allows Chanfix to keep a record of how much
+time a user has spent opped during one day. It also means that, for example, if
+Chanfix is set to keep scores for 14 days, it can efficiently drop daysamples
+for all chanops that are more than 14 days old using an SQL command similar to:
+
+DELETE FROM daysample WHERE daynum < DAYS_SINCE_EPOCH - DAYSAMPLES;
+
+This command is executed at midnight each day - when Chanfix calculates a new
+value for DAYS_SINCE_EPOCH and begins collating scores from 0 again
+(representing a new daysample).
+
+In theory, a user that stays opped for a full daysample period (24 hours) will
+receive the maximum score of 288. Then, if we assume Chanfix is set to keep its
+daysample history for up to 14 days. The maximum total score a user can
+accumulate if they are opped in a channel for the full 14 days is 4032 (288 *
+14).
+
+Just to re-iterate. Chanfix removes chanop scores by deleting old daysample
+scores from the DB each night - just like a FIFO queue. This gives the illusion
+that user's scores are being decremented for however long they spend not opped
+or off-line.
+
+
+
+##  Scoring with UserServ Support  ##
+
+A more detailed look at how scoring is done during Data Gathering when UserServ
+support is enabled:
+
+  - While generating the list of user@host pairs for opped users in a channel,
+    check to see if the user is logged in with UserServ and create a tuple of
+    user, host and username.
+  - If the user has a username, iterate of the channel's chanop records in the
+    DB to see if there's a match. If there's a match, increment the score and
+    at the same time, update their user@host field too.
+  - If the user is not registered with UserServ, iterate of the chanop records
+    and check for a matching user@host field. If a match is found, increment
+    the score.
+  - Otherwise, there isn't an existing entry for the channel op we're looking
+    at in the DB, so create a new chanop entry for them; saving their
+    user@host and UserServ association (if they have one).
+
+By scoring in this manner, we'll likely end up with duplicate user@host entries
+in the chanop array for people who have a UserServ username but aren't logged in
+with it all the time. These users will end up with their chanfix score split
+between the two entries; with one entry containing just the client's user@host,
+and the other containing a matching user@host entry and their UserServ
+association.
+
+
+
+##  Manual Channel Fixing  ##
+
+For services operators Chanfix provides a manual chanfix command. This command
+has two modes of operation:
+
+This first is effectively a normal channel fix, with the exception that the
+channel is added to a list of channels that manual fixes need to be performed
+on. This basically gives these channels a higher priority and causes Chanfix to
+check these channels more often (every 5 minutes or so) to see if it can restore
+ops to them more quickly.
+
+By supplying the 'override' keyword to the chanfix command, Chanfix will use the
+second mode of operation. This option is meant to be used only in emergencies
+when a channel's scores indicate that it has been taken over. A chanfix override
+follows the procedure described below:
+
+  - Chanfix will log that it's performing a manual fix, record a timestamp and
+    enter Stage 1.
+  - The services server will then reset all the channel's modes back to the
+    defaults. Meaning it will revert the channel modes back to +nt.
+  - At the same time the server will remove any user modes from the channel,
+    causing everyone to be deopped and/or devoiced.
+  - Then Chanfix will join the channel and gain ops.
+  - Chanfix will then remove any +beI modes that may be preventing access (much
+    like an operserv takeover).
+  - A message is sent to the channel saying something like: "Channel fix in
+    progress, please stand by".
+  - Now Stage 1 is complete so Chanfix will wait for at least 5 minutes before
+    it does anything else. This gives users time to rejoin the channel to be
+    considered for opping.
+  - Chanfix then enters Stage 2 of the manual chanfix and attempts to op users
+    based on their score just like it would a normal automatic fix.
+
+If Chanfix has been unable to manually fix a channel within an hour, it will log
+that it was unable to fix the channel and remove the channel from the manual
+chanfix list. At which point the channel can be considered for normal oppless
+channel fixing like normal.
+
+
+
+##  Automatic Channel Fixing  ##
+
+A timer causes Chanfix to check the list of channels that need autofixing every
+5 minutes. For each channel in the list is performs the following steps:
+
+  - Check to see if the channel still exists. If it doesn't, the fix is successful.
+  - Fetch all the chanops from the DB, add up their daysample scores, keep the
+    ones with a score greater than the absolute minimum, and then sort them into
+    ascending order.
+  - Check whether the highest chanop score is greater than the absolute minimum
+    required for opping. If it isn't, Chanfix wont ever be able to fix this
+    channel. A suspend time of 6 hours is set and the autofix aborted.
+  - Count how many ops are currently in the channel, if it's greater than the
+    minimum we need for a fix (about 5), the fix is done.
+  - Create user, host and username arrays for of all the non-opped clients in the
+    channel.
+  - Determine the minimum score required for this fix iteration (uses linear
+    equations on the maximum possible channel score and the highest score held
+    by one of the chanops, the minimum score needed is the higher of these two).
+  - Compare channel non-op list with top chanop scores from DB, if anyone (up to
+    a max of 8) has a score high enough, find out their nicknames and op them.
+  - If after 15 minutes the channel hasn't been fixed, remove channel modes that
+    might be preventing people from joining.
+  - If after 25 minutes the channel hasn't been fixed, remove channel bans that
+    might be preventing people from joining.
+  - If no users have a score high enough, wait until the next iteration.
+
+Like manual fixing, auto fixing has an iteration delay. Meaning that Chanfix
+will only check a channel's scores and try to give ops every 10 minutes (twice
+that of a manual fix). This delay mechanism helps to prevent Chanfix from
+expending too many resources.
+
+Chanfix will try to automatically fix a channel for an hour. As time progresses
+and the 60 minute window comes closer to an end, Chanfix will reduce its minimum
+score requirements and consider opping users with a lower score (down to an
+absolute minimum after which it will never op someone).
+
+
+
+##  Oppless Channel Detection  ##
+
+Every 10 minutes Chanfix will check for oppless channels. It iterates over all
+the channels on the network and, as required, fetches the channel's cf_channel
+and chanop score data from the DB. Allowing it to see which channels qualify for
+fixing based on the following criteria:
+
+  - The channel has no ops.
+  - The channel doesn't have a 'suspend' time.
+  - The channel is not registered with ChanServ.
+  - The channel has scores in the DB.
+  - A client is present in the channel that has a score higher than the minimum
+    absolute required for opping.
+  - The channel is not set as blocked.
+  - The channel is not already being fixed (automatically or manually).
+
+If the channel matches all these criteria, it will be added to the list of
+autofix channels.
+
+
+
+##  Splitmode  ##
+
+For data gathering and channel fixing to be done correctly, the network must be
+intact. To detect when servers (and therefore clients) may be split from the
+network, Chanfix regularly counts the number of servers present and ensures that
+this is greater than or equal to the minimum percentage required for processing.
+
+If the number of servers present is lower than the minimum percentage required,
+Chanfix will enter "splitmode" and suspend data gathering, scoring, and manual /
+automatic fixing until they return.
+
+
+
+##  DB  ##
+
+It's probably worth noting that for the majority of look-up operations Chanfix
+performs, it needs to generate a list of chanops and their scores. The frequent
+retrieval, summing and sorting of all the chanop & daysample data could require
+a lot of intense processing.
