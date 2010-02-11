@@ -164,11 +164,23 @@ count_opped_users(struct channel *chptr) {
 
 
 /* num_of_linked_servers()
- *   Returns the number of linked servers on the network.*/
+ *   Returns the number of servers that have fully burst.
+ */
 static int
 num_of_linked_servers(void)
 {
-	return dlink_list_length(&server_list);
+	int count = 0;
+	struct client *server_p;
+	dlink_node *ptr;
+
+	DLINK_FOREACH(ptr, server_list.head)
+	{
+		server_p = ptr->data;
+		if(IsEOB(server_p))
+			count++;
+	}
+	
+	return count;
 }
 
 /* is_network_split()
@@ -569,6 +581,7 @@ gather_channel_bucket(void)
 static int
 chan_remove_modes(struct channel *chptr)
 {
+	/* TODO: Try making this function more like chanserv::clearmodes */
 	char modelist[] = "ilkrS", flag = '0';
 	int i;
 	int masklist[] = {
