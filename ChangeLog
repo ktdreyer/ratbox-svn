@@ -1,3 +1,14 @@
+moggie      2010/02/11 01:23:42 UTC	(20100211_0-26803)
+  Log:
+  When checking for splitmode, need to make sure servers have finished busrting
+  (End Of Burst) to get channel and client info from them. Thanks to jilles for
+  pointing it out.
+  
+
+  Modified:
+	rserv/trunk/src/s_chanfix.c (File Modified) 
+
+
 moggie      2010/02/10 21:57:31 UTC	(20100210_3-26801)
   Log:
   - Add a s_chanfix.h header file.
