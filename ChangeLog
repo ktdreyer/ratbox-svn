@@ -1,3 +1,15 @@
+moggie      2010/02/11 18:36:56 UTC	(20100211_1-26805)
+  Log:
+  - Add a chanfix.txt doc to describe a bit how it works.
+  - At some point we stopped using num_of_linked_servers() in multiple places so
+    we should merge it into is_network_split().
+  
+
+  Modified:
+	rserv/trunk/doc/chanfix.txt (File Added) 
+	rserv/trunk/src/s_chanfix.c (File Modified) 
+
+
 moggie      2010/02/11 01:23:42 UTC	(20100211_0-26803)
   Log:
   When checking for splitmode, need to make sure servers have finished busrting
