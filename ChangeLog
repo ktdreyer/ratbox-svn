@@ -1,3 +1,26 @@
+moggie      2010/02/12 13:08:15 UTC	(20100212_0-26807)
+  Log:
+  - Remove the network_servers and min_server_percent options from the config
+    file and replace with min_servers and min_users as general server options.
+  - Move is_network_split() function from chanfix module to client.c.
+  - Add two new translation strings SVC_PARAMINVALID and SVC_OPTIONSETTO.
+  - Update example config file to reflect changes.
+  - Update help/Makefile.in to make sure chanfix help is installed.
+  
+
+  Modified:
+	rserv/trunk/doc/example.conf (File Modified) 
+	rserv/trunk/help/Makefile.in (File Modified) 
+	rserv/trunk/include/conf.h (File Modified) 
+	rserv/trunk/include/langs.h (File Modified) 
+	rserv/trunk/src/client.c (File Modified) 
+	rserv/trunk/src/conf.c (File Modified) 
+	rserv/trunk/src/langs.c (File Modified) 
+	rserv/trunk/src/messages.c (File Modified) 
+	rserv/trunk/src/newconf.c (File Modified) 
+	rserv/trunk/src/s_chanfix.c (File Modified) 
+
+
 moggie      2010/02/11 18:36:56 UTC	(20100211_1-26805)
   Log:
   - Add a chanfix.txt doc to describe a bit how it works.
