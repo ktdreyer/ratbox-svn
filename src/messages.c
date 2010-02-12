@@ -250,9 +250,10 @@ struct _lang_internal lang_internal[] =
 	{ SVC_MEMO_UNREAD_COUNT,	"You  have %u new memo(s)"				},
 
 	/* chanfix */
-	{ SVC_CF_NOTENOUGHUSERS,	"Channel %s doesn't have enough users for me to act on"			},
-	{ SVC_CF_HASOPPEDUSERS,	"Channel %s already has opped users"			},
-	{ SVC_CF_CHECK,		"Channel '%s' appears to contain %d opped out of %d users"			},
+	{ SVC_CF_NOTENOUGHUSERS,	"Channel %s doesn't have enough users for me to act on"		},
+	{ SVC_CF_HASOPPEDUSERS,		"Channel %s already has opped users"				},
+	{ SVC_CF_CHECK,			"Channel '%s' appears to contain %d opped out of %d users"		},
+	{ SVC_CF_CHANFIXINPROG,		"Channel fix in progress, please stand by."			},
 /* STOP_GENEXAMPLE_PARSING -- for genexample.pl in langs/ */
 
 	/* this must be last */

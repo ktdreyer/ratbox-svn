@@ -255,6 +255,7 @@ enum svc_notice_enum
 	SVC_CF_NOTENOUGHUSERS,
 	SVC_CF_HASOPPEDUSERS,
 	SVC_CF_CHECK,
+	SVC_CF_CHANFIXINPROG,
 
 	/* this must be last */
 	SVC_LAST

@@ -266,6 +266,7 @@ const char *svc_notice_string[] =
 	"SVC_CF_NOTENOUGHUSERS",
 	"SVC_CF_HASOPPEDUSERS",
 	"SVC_CF_CHECK",
+	"SVC_CF_CHANFIXINPROG",
 
 	/* must be last */
 	"\0"

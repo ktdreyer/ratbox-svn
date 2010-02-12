@@ -1120,6 +1120,23 @@ service_err(struct client *service_p, struct client *client_p, int msgid, ...)
 }
 
 void
+service_err_chan(struct client *service_p, struct channel *chptr, int msgid, ...)
+{
+	static char buf[BUFSIZE];
+	va_list args;
+
+	va_start(args, msgid);
+	vsnprintf(buf, sizeof(buf), lang_get_notice(msgid, NULL, NULL), args);
+	va_end(args);
+
+	if (dlink_find(service_p, &chptr->services))
+	{
+		sendto_server(":%s PRIVMSG %s :%s",
+				SVC_UID(service_p), chptr->name, buf);
+	}
+}
+
+void
 service_stats(struct client *service_p, struct lconn *conn_p)
 {
         struct service_command *cmd_table;

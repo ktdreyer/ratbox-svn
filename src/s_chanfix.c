@@ -69,7 +69,6 @@ static int o_chanfix_status(struct client *, struct lconn *, const char **, int)
 
 /* Internal chanfix functions */
 static int count_opped_users(struct channel *);
-static int is_network_split(void);
 static void send_chan_privmsg(struct channel *, const char *, ...);
 static void gather_channels(void);
 static void gather_channel_bucket(void);
@@ -346,8 +345,8 @@ o_chanfix_chanfix(struct client *client_p, struct lconn *conn_p, const char *par
 				}
 				/* override command has been given, so we should take-over the channel */
 				chan_takeover(chptr, 0);
-				send_chan_privmsg(chptr, "Channel fix in progress, please stand by.");
 				override = 1;
+				service_err_chan(chanfix_p, chptr, SVC_CF_CHANFIXINPROG);
 			}
 		}
 		else
