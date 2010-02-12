@@ -1,3 +1,14 @@
+moggie      2010/02/12 18:35:55 UTC	(20100212_2-26811)
+  Log:
+  - Any service using service_err_chan() should have already checked that it's
+    actually in the channel, meaning we should be able to simplify it a bit.
+  
+
+  Modified:
+	rserv/trunk/src/s_chanfix.c (File Modified) 
+	rserv/trunk/src/service.c (File Modified) 
+
+
 moggie      2010/02/12 14:07:05 UTC	(20100212_1-26809)
   Log:
   - Add manual chanfix translation string.
