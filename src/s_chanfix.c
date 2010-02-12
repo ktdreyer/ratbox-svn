@@ -346,7 +346,7 @@ o_chanfix_chanfix(struct client *client_p, struct lconn *conn_p, const char *par
 				/* override command has been given, so we should take-over the channel */
 				chan_takeover(chptr, 0);
 				override = 1;
-				service_err_chan(chanfix_p, chptr, SVC_CF_CHANFIXINPROG);
+				service_err_chan(chanfix_p, chptr->name, SVC_CF_CHANFIXINPROG);
 			}
 		}
 		else

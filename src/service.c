@@ -1119,8 +1119,9 @@ service_err(struct client *service_p, struct client *client_p, int msgid, ...)
 			UID(client_p), buf);
 }
 
+/* precondition: ensure service is in channel before using this function */
 void
-service_err_chan(struct client *service_p, struct channel *chptr, int msgid, ...)
+service_err_chan(struct client *service_p, char *channel, int msgid, ...)
 {
 	static char buf[BUFSIZE];
 	va_list args;
@@ -1129,11 +1130,8 @@ service_err_chan(struct client *service_p, struct channel *chptr, int msgid, ...
 	vsnprintf(buf, sizeof(buf), lang_get_notice(msgid, NULL, NULL), args);
 	va_end(args);
 
-	if (dlink_find(service_p, &chptr->services))
-	{
-		sendto_server(":%s PRIVMSG %s :%s",
-				SVC_UID(service_p), chptr->name, buf);
-	}
+	sendto_server(":%s PRIVMSG %s :%s",
+				SVC_UID(service_p), channel, buf);
 }
 
 void
