@@ -73,6 +73,9 @@ set_default_conf(void)
 	config_file.client_flood_ignore_time = 300;
 	config_file.client_flood_time = 60;
 
+	config_file.min_servers = 0;
+	config_file.min_users = 0;
+
 	config_file.disable_email = 1;
 	config_file.email_number = 15;
 	config_file.email_duration = 60;
@@ -151,8 +154,6 @@ set_default_conf(void)
 	/* chanfix */
 	config_file.cf_enable_autofix = 0;
 	config_file.cf_enable_chanfix = 0;
-	config_file.cf_network_servers = 1;
-	config_file.cf_min_server_percent = 75;
 	config_file.cf_num_top_scores = 10;
 	config_file.cf_min_clients = 4;
 	config_file.cf_client_needs_ident = 1;
@@ -202,12 +203,6 @@ validate_conf(void)
 	/* chanfix validators */
 	if(config_file.cf_num_top_scores < 1 || config_file.cf_num_top_scores > 10)
 		config_file.cf_num_top_scores = 10;
-
-	if(config_file.cf_network_servers < 1)
-		config_file.cf_network_servers = 1;
-
-	if(config_file.cf_min_server_percent < 0 || config_file.cf_min_server_percent > 100)
-		config_file.cf_min_server_percent = 75;
 
 	if(config_file.cf_min_clients < 2)
 		config_file.cf_min_clients = 2;

@@ -36,6 +36,9 @@ struct _config_file
 	unsigned int client_flood_max;
 	unsigned int client_flood_max_ignore;
 
+	int min_servers;
+	int min_users;
+
 	char *admin1;
 	char *admin2;
 	char *admin3;
@@ -133,8 +136,6 @@ struct _config_file
 	/* chanfix */
 	int cf_enable_autofix;
 	int cf_enable_chanfix;
-	int cf_network_servers;
-	int cf_min_server_percent;
 	int cf_num_top_scores;
 	int cf_min_clients;
 	int cf_client_needs_ident;

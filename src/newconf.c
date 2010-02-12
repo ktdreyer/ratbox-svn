@@ -1005,6 +1005,8 @@ conf_set_banserv_autosync(void *data)
 
 static struct ConfEntry conf_serverinfo_table[] =
 {
+	{ "min_servers",	CF_INT,   NULL, 0, &config_file.min_servers	},
+	{ "min_users", CF_INT,  NULL, 0, &config_file.min_users	},
 	{ "client_flood_max",		CF_INT,  NULL, 0, &config_file.client_flood_max	},
 	{ "client_flood_max_ignore",	CF_INT,	 NULL, 0, &config_file.client_flood_max_ignore },
 	{ "client_flood_ignore_time",	CF_TIME, NULL, 0, &config_file.client_flood_ignore_time },
@@ -1202,8 +1204,6 @@ static struct ConfEntry conf_chanfix_table[] =
 {
 	{ "enable_autofix",	CF_YESNO, NULL, 0, &config_file.cf_enable_autofix	},
 	{ "enable_chanfix",	CF_YESNO,  NULL, 0, &config_file.cf_enable_chanfix		},
-	{ "network_servers",	CF_INT,   NULL, 0, &config_file.cf_network_servers	},
-	{ "min_server_percent", CF_INT,  NULL, 0, &config_file.cf_min_server_percent		},
 	{ "num_top_scores",CF_INT,  NULL, 0, &config_file.cf_num_top_scores	},
 	{ "min_clients",	CF_INT,  NULL, 0, &config_file.cf_min_clients		},
 	{ "client_needs_ident",		CF_YESNO,	  NULL, 0, &config_file.cf_client_needs_ident	},

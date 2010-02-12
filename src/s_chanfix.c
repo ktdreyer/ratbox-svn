@@ -147,7 +147,8 @@ chanfix_db_callback(int argc, const char **argv)
  * outputs	- number of opped users
  */
 static int
-count_opped_users(struct channel *chptr) {
+count_opped_users(struct channel *chptr)
+{
 	int opcount = 0;
 	struct chmember *msptr;
 	dlink_node *ptr;
@@ -159,35 +160,6 @@ count_opped_users(struct channel *chptr) {
 			opcount++;
 	}
 	return opcount;
-}
-
-
-/* is_network_split()
- *   Checks to see if the min number of servers are linked to know
- *   whether we're split or not.
- * inputs	-
- * outputs	- 1 if enough servers are linked, 0 is not
- */
-static int
-is_network_split(void)
-{
-	int s_count = 0;
-	struct client *server_p;
-	dlink_node *ptr;
-
-	DLINK_FOREACH(ptr, server_list.head)
-	{
-		server_p = ptr->data;
-		if(IsEOB(server_p))
-			s_count++;
-	}
-	
-	if(s_count * 100 >= config_file.cf_min_server_percent * config_file.cf_network_servers)
-	{
-		return 0;
-	}
-
-	return 1;
 }
 
 
@@ -449,53 +421,107 @@ o_chanfix_check(struct client *client_p, struct lconn *conn_p, const char *parv[
 static int
 o_chanfix_set(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
-	/* TODO: Make these messages into translation strings. */
-	if(!irccmp(parv[0], "servers")) {
-		if(parc > 1) {
-			int num;
+	/* TODO: Make these messages into translation strings when we're sure about what
+	 * they're going to be. If rserv has a general /SET command like IRCD does, we
+	 * should move the min_servers and min_users into that because these may become
+	 * generic options not necessarily specific to chanfix alone.
+	 */
+	int num;
+
+	if(!irccmp(parv[0], "min_servers"))
+	{
+		if(parc > 1)
+		{
 			num = atoi(parv[1]);
-			if(num > 0) {
-				config_file.cf_network_servers = num;
-				service_send(chanfix_p, client_p, conn_p, "Number of network servers is now %d.", num);
-			} else {
-				service_send(chanfix_p, client_p, conn_p, "Invalid parameter. Use SET servers <integer>.");
+			if(num > 0)
+			{
+				config_file.min_servers = num;
+				service_err(chanfix_p, client_p, SVC_OPTIONSETTO, chanfix_p->name,
+						"SET", "min_servers", parv[1]);
 			}
-		} else {
-			/* Instead of returning an error here, we should show the current value */
-			service_err(chanfix_p, client_p, SVC_NEEDMOREPARAMS, chanfix_p->name, "SET::servers");
+			else
+			{
+				service_err(chanfix_p, client_p, SVC_PARAMINVALID,
+						chanfix_p->name, "SET::min_servers");
+			}
+		}
+		else
+		{
+			/* Instead of returning an error here, we could show the current value */
+			service_err(chanfix_p, client_p, SVC_NEEDMOREPARAMS, chanfix_p->name, "SET::min_servers");
 		}
 	}
-	else if(!irccmp(parv[0], "autofix")) {
-		if(parc > 1) {
-			if(!irccmp(parv[1], "on") || !irccmp(parv[0], "yes")) {
-				service_send(chanfix_p, client_p, conn_p, "Automatic channel fixing enabled.");
+	else if(!irccmp(parv[0], "min_users"))
+	{
+		if(parc > 1)
+		{
+			num = atoi(parv[1]);
+			if(num > 0)
+			{
+				config_file.min_users = num;
+				service_err(chanfix_p, client_p, SVC_OPTIONSETTO, chanfix_p->name,
+						"SET", "min_users", parv[1]);
+			}
+			else
+			{
+				service_err(chanfix_p, client_p, SVC_PARAMINVALID,
+						chanfix_p->name, "SET::min_users");
+			}
+		}
+		else
+		{
+			/* Instead of returning an error here, we could show the current value */
+			service_err(chanfix_p, client_p, SVC_NEEDMOREPARAMS, chanfix_p->name, "SET::min_users");
+		}
+	}
+	else if(!irccmp(parv[0], "autofix"))
+	{
+		if(parc > 1)
+		{
+			if(!irccmp(parv[1], "on") || !irccmp(parv[0], "yes"))
+			{
 				config_file.cf_enable_autofix = 1;
+				service_err(chanfix_p, client_p, SVC_OPTIONSETTO, chanfix_p->name,
+						"SET", "autofix", "enabled");
 			}
-			else if(!irccmp(parv[1], "off") || !irccmp(parv[0], "no")) {
-				service_send(chanfix_p, client_p, conn_p, "Automatic channel fixing disabled.");
+			else if(!irccmp(parv[1], "off") || !irccmp(parv[0], "no"))
+			{
+				service_err(chanfix_p, client_p, SVC_OPTIONSETTO, chanfix_p->name,
+						"SET", "autofix", "disabled");
 				config_file.cf_enable_autofix = 0;
-			} else {
-				service_send(chanfix_p, client_p, conn_p, "Invalid parameter. Use SET autofix <on|off>.");
 			}
-		} else {
+			else
+			{
+				service_err(chanfix_p, client_p, SVC_PARAMINVALID,
+						chanfix_p->name, "SET::autofix");
+			}
+		}
+		else
+		{
 			/* Instead of returning an error here, we should show the current value */
 			service_err(chanfix_p, client_p, SVC_NEEDMOREPARAMS, chanfix_p->name, "SET::autofix");
 		}
 	}
-	else if(!irccmp(parv[0], "chanfix")) {
+	else if(!irccmp(parv[0], "chanfix"))
+	{
 		if(parc > 1)
 		{
-			if(!irccmp(parv[1], "on") || !irccmp(parv[0], "yes")) {
-				service_send(chanfix_p, client_p, conn_p, "Manual channel fixing enabled.");
+			if(!irccmp(parv[1], "on") || !irccmp(parv[0], "yes"))
+			{
 				config_file.cf_enable_chanfix = 1;
+				service_err(chanfix_p, client_p, SVC_OPTIONSETTO, chanfix_p->name,
+						"SET", "chanfix", "enabled");
 			}
-			else if(!irccmp(parv[1], "off") || !irccmp(parv[0], "no")) {
-				service_send(chanfix_p, client_p, conn_p, "Manual channel fixing disabled.");
+			else if(!irccmp(parv[1], "off") || !irccmp(parv[0], "no"))
+			{
+				service_err(chanfix_p, client_p, SVC_OPTIONSETTO, chanfix_p->name,
+						"SET", "chanfix", "disabled");
 				config_file.cf_enable_chanfix = 0;
 			}
 			else
 			{
-				service_send(chanfix_p, client_p, conn_p, "Invalid parameter. Use SET chanfix <on|off>.");
+				service_err(chanfix_p, client_p, SVC_PARAMINVALID,
+						chanfix_p->name, "SET::chanfix");
 			}
 		}
 		else
@@ -503,7 +529,8 @@ o_chanfix_set(struct client *client_p, struct lconn *conn_p, const char *parv[],
 			service_err(chanfix_p, client_p, SVC_NEEDMOREPARAMS, chanfix_p->name, "SET::chanfix");
 		}
 	}
-	else {
+	else
+	{
 		service_err(chanfix_p, client_p, SVC_OPTIONINVALID, chanfix_p->name, "SET");
 	}
 		
@@ -525,10 +552,11 @@ o_chanfix_status(struct client *client_p, struct lconn *conn_p, const char *parv
 	else
 		service_send(chanfix_p, client_p, conn_p, "Manual channel fixing disabled.");
 
-	service_send(chanfix_p, client_p, conn_p,
+	/*service_send(chanfix_p, client_p, conn_p,
 		"For scoring/fixing, chanfix requires that at least %d out of %d network servers be linked (~%d percent).",
 			(config_file.cf_min_server_percent * config_file.cf_network_servers) / 100 + 1,
 			config_file.cf_network_servers, config_file.cf_min_server_percent);
+	*/
 
 	if(is_network_split())
 		service_send(chanfix_p, client_p, conn_p, "Splitmode active. Channel scoring/fixing disabled.");

@@ -1061,3 +1061,38 @@ c_squit(struct client *client_p, const char *parv[], int parc)
 
 	exit_client(target_p);
 }
+
+/* is_network_split()
+ *   Tires to check if the network is split based on min number of
+ *   users and servers. We check these separately because 
+ */
+int
+is_network_split()
+{
+	int s_count = 0, u_count = 0;
+	struct client *server_p;
+	dlink_node *ptr;
+
+	if(config_file.min_servers > 0)
+	{
+		DLINK_FOREACH(ptr, server_list.head)
+		{
+			server_p = ptr->data;
+			if(IsEOB(server_p))
+				s_count++;
+		}
+
+		if(s_count < config_file.min_servers)
+		{
+			return 1;
+		}
+	}
+
+	if((config_file.min_users > 0) &&
+			(dlink_list_length(&user_list) < config_file.min_users))
+	{
+		return 1;
+	}
+
+	return 0;
+}
