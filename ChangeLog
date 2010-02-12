@@ -1,3 +1,18 @@
+moggie      2010/02/12 14:07:05 UTC	(20100212_1-26809)
+  Log:
+  - Add manual chanfix translation string.
+  - Add service_err_chan() function so services can send messages to channels
+    if they need to.
+  
+
+  Modified:
+	rserv/trunk/include/langs.h (File Modified) 
+	rserv/trunk/src/langs.c (File Modified) 
+	rserv/trunk/src/messages.c (File Modified) 
+	rserv/trunk/src/s_chanfix.c (File Modified) 
+	rserv/trunk/src/service.c (File Modified) 
+
+
 moggie      2010/02/12 13:08:15 UTC	(20100212_0-26807)
   Log:
   - Remove the network_servers and min_server_percent options from the config
