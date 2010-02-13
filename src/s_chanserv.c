@@ -956,12 +956,14 @@ e_chanserv_enforcetopic(void *unused)
 	{
 		chreg_p = ptr->data;
 
-		/* we must be joined to set a topic.. */
-		if(EmptyString(chreg_p->topic) ||
-		   !(chreg_p->flags & CS_FLAGS_AUTOJOIN))
+		if(EmptyString(chreg_p->topic))
 			continue;
 
+		/* we must be joined to set a topic.. */
 		if((chptr = find_channel(chreg_p->name)) == NULL)
+			continue;
+
+		if(dlink_find(chanserv_p, &chptr->services) == NULL)
 			continue;
 
 		/* already has this topic set.. */
