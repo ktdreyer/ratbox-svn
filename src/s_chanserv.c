@@ -1352,7 +1352,7 @@ h_chanserv_join(void *v_chptr, void *v_members)
 			banreg_p = bptr->data;
 
 			/* ban has expired? */
-			if(banreg_p->hold <= CURRENT_TIME)
+			if(banreg_p->hold && banreg_p->hold <= CURRENT_TIME)
 				continue;
 
 			if(!match(banreg_p->mask, member_p->client_p->user->mask))
