@@ -202,3 +202,5 @@ extern void free_client(struct client *target_p);
 
 extern int string_to_umode(const char *p, int current_umode);
 extern const char *umode_to_string(int umode);
+
+extern int is_network_split(void);

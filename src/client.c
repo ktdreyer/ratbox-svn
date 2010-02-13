@@ -1067,18 +1067,18 @@ c_squit(struct client *client_p, const char *parv[], int parc)
  *   users and servers. We check these separately because 
  */
 int
-is_network_split()
+is_network_split(void)
 {
-	int s_count = 0, u_count = 0;
-	struct client *server_p;
+	int s_count = 0;
+	struct client *target_p;
 	dlink_node *ptr;
 
 	if(config_file.min_servers > 0)
 	{
 		DLINK_FOREACH(ptr, server_list.head)
 		{
-			server_p = ptr->data;
-			if(IsEOB(server_p))
+			target_p = ptr->data;
+			if(IsEOB(target_p))
 				s_count++;
 		}
 
