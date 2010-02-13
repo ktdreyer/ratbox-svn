@@ -1,3 +1,24 @@
+leeh        2010/02/13 12:43:22 UTC	(20100213_5-26827)
+  Log:
+  - add new functions, op_chmember() and deop_chmember() which op/deop a user
+    in a channel
+  - extend the chmember struct to also maintain separate lists of opped users
+    and unopped users -- in addition to the standard user list
+  - swap the direct op/deops to using the helper functions
+  - add in calls to the helper functions in a couple of places they were
+    missing
+  - make e_chanserv_partinhabit() directly test users_opped rather than
+    walking the list
+  
+
+  Modified:
+	rserv/trunk/include/channel.h (File Modified) 
+	rserv/trunk/src/c_mode.c (File Modified) 
+	rserv/trunk/src/channel.c (File Modified) 
+	rserv/trunk/src/s_chanserv.c (File Modified) 
+	rserv/trunk/src/s_operbot.c (File Modified) 
+
+
 leeh        2010/02/13 11:36:35 UTC	(20100213_4-26823)
   Log:
   - via Narf, ensure we exclude permanent bans from expiry checks when a user
