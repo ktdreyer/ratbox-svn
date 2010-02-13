@@ -3258,8 +3258,10 @@ s_chan_addban(struct client *client_p, struct lconn *conn_p, const char *parv[],
 	int level;
 	int loc = 1;
 
-	if((mreg_p = verify_member_reg_name(client_p, &chptr, parv[0], S_C_REGULAR)) == NULL)
+	if((mreg_p = verify_member_reg_name(client_p, NULL, parv[0], S_C_REGULAR)) == NULL)
 		return 1;
+
+	chptr = find_channel(parv[0]);
 
 	duration = get_temp_time(parv[1]);
 
@@ -3415,8 +3417,10 @@ s_chan_delban(struct client *client_p, struct lconn *conn_p, const char *parv[],
 	struct ban_reg *banreg_p;
 	dlink_node *ptr;
 
-	if((mreg_p = verify_member_reg_name(client_p, &chptr, parv[0], S_C_REGULAR)) == NULL)
+	if((mreg_p = verify_member_reg_name(client_p, NULL, parv[0], S_C_REGULAR)) == NULL)
 		return 1;
+
+	chptr = find_channel(parv[0]);
 
 	if((banreg_p = find_ban_reg(mreg_p->channel_reg, parv[1])) == NULL)
 	{
