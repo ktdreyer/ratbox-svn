@@ -58,6 +58,8 @@
 static void init_s_chanfix(void);
 
 static struct client *chanfix_p;
+static dlink_list autofix_chan_list;
+static dlink_list chanfix_chan_list;
 
 /* Services operator functions */
 static int o_chanfix_cfjoin(struct client *, struct lconn *, const char **, int);
@@ -67,14 +69,23 @@ static int o_chanfix_check(struct client *, struct lconn *, const char **, int);
 static int o_chanfix_set(struct client *, struct lconn *, const char **, int);
 static int o_chanfix_status(struct client *, struct lconn *, const char **, int);
 
+/* Event triggered functions */
+static void e_find_oppless_channels(void);
+static void e_rotate_chanfix_db(void);
+static void e_fix_chanfix_channels(void);
+static void e_fix_autofix_channels(void);
+static void e_gather_channels(void);
+
 /* Internal chanfix functions */
 static int count_opped_users(struct channel *);
 static void send_chan_privmsg(struct channel *, const char *, ...);
-static void gather_channels(void);
 static void gather_channel_bucket(void);
 static void chan_takeover(struct channel *, int);
 static int chan_remove_modes(struct channel *);
 static int chan_remove_bans(struct channel *);
+static int is_chan_being_fixed(const char *);
+static int is_being_chanfixed(const char *);
+static int is_being_autofixed(const char *);
 
 static struct service_command chanfix_command[] =
 {
@@ -123,8 +134,10 @@ init_s_chanfix(void)
 			"SELECT chname, tsinfo FROM operbot");
 	*/
 
-	/*eventAdd("chanfix_join", e_join_channels, NULL, 180);
-	eventAdd("chanfix_part", e_part_channels, NULL, 300);
+	/*eventAdd("cf_find_oppless_chans", e_find_oppless_channels, NULL, 600);
+	eventAdd("cf_fix_chanfix_channels", e_fix_chanfix_channels, NULL, 300);
+	eventAdd("cf_fix_autofix_channels", e_fix_autofix_channels, NULL, 300);
+	eventAddOnce("cf_rotate_cf_db", e_rotate_chanfix_db, NULL, seconds_to_midnight());
 	*/
 }
 
@@ -145,7 +158,7 @@ chanfix_db_callback(int argc, const char **argv)
  * inputs	- channel ptr
  * outputs	- number of opped users
  */
-static int
+static unsigned int
 count_opped_users(struct channel *chptr)
 {
 	int opcount = 0;
@@ -362,6 +375,9 @@ o_chanfix_chanfix(struct client *client_p, struct lconn *conn_p, const char *par
 	/* override command will have already joined chanfix for us */
 	if(!override)
 		join_service(chanfix_p, parv[0], chptr->tsinfo, NULL, 0);
+
+	chan_remove_modes(chptr);
+	chan_remove_bans(chptr);
  
 	service_snd(chanfix_p, client_p, conn_p, SVC_ISSUEDFORBY,
 				chanfix_p->name, "CHANFIX", parv[0], client_p->name);
@@ -569,7 +585,7 @@ o_chanfix_status(struct client *client_p, struct lconn *conn_p, const char *parv
  * gathering score data.
  */
 static void
-gather_channels(void)
+e_gather_channels(void)
 {
 	/*DAYS_SINCE_EPOCH config_file.cf_min_clients */
 
@@ -677,4 +693,114 @@ chan_remove_bans(struct channel *chptr)
 
 	return 1;
 }
+
+static void
+e_find_oppless_channels(void)
+{
+	struct channel *chptr;
+	dlink_node *ptr;
+	int min_clients;
+
+	if(is_network_split() || !config_file.cf_enable_autofix)
+	{
+		return;
+	}
+
+	min_clients = config_file.cf_min_clients;
+
+	DLINK_FOREACH(ptr, channel_list.head)
+	{
+		chptr = ptr->data;
+
+		if((dlink_list_length(&chptr->users) >= min_clients) &&
+					(count_opped_users(chptr) == 0))
+		{
+			/* Add this channel to the channel_autofix_list if:
+				- The channel doesn't have a 'suspend' time.
+				- The channel is not registered with ChanServ.
+				- The channel has scores in the DB.
+				- A client is present in the channel that has a score higher than the
+					minimum absolute required for opping.
+				- The channel is not set as blocked.
+				- The channel is not already being fixed (automatically or manually).
+
+			is_chan_being_fixed()
+
+			*/
+		}
+	}
+}
+
+static int
+is_chan_being_fixed(const char *channel)
+{
+	return (is_being_chanfixed(channel) || is_being_autofixed(channel));
+}
+
+static int
+is_being_chanfixed(const char *channel)
+{
+	dlink_node *ptr;
+	struct chanfix_channel *cfc_p;
+
+	DLINK_FOREACH(ptr, chanfix_chan_list.head)
+	{
+		cfc_p = ptr->data;
+		if(!irccmp(cfc_p->name, channel))
+		{
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
+static int
+is_being_autofixed(const char *channel)
+{
+	dlink_node *ptr;
+	struct autofix_channel *cfc_p;
+
+	DLINK_FOREACH(ptr, autofix_chan_list.head)
+	{
+		cfc_p = ptr->data;
+		if(!irccmp(cfc_p->name, channel))
+		{
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
+static void
+e_fix_chanfix_channels(void)
+{
+}
+
+static void
+e_fix_autofix_channels(void)
+{
+}
+
+static void
+e_rotate_chanfix_db(void)
+{
+	/* stuff we need to do at midnight. like clear out the old daysample scores
+	 * from the DB, or update some variables etc.
+	 */
+	/* Re-add this event once we're done
+	eventAddOnce("cf_rotate_cf_db", e_rotate_chanfix_db, NULL, seconds_to_midnight());
+	*/
+}
+
+static void
+seconds_to_midnight(void)
+{
+	struct tm *t_info;
+	time_t nowtime = CURRENT_TIME;
+	t_info = localtime(&nowtime);
+	return 86400 - (t_info->tm_hour * 3600 + t_info->tm_min * 60 + t_info->tm_sec);
+}
+
 #endif
