@@ -43,6 +43,10 @@ struct channel
 
 	dlink_node listptr;		/* node in channel_list */
 	dlink_node nameptr;		/* node in channel hash */
+
+#ifdef ENABLE_CHANFIX
+	void *cfptr;			/* chanfix pointer */
+#endif
 };
 
 struct chmember

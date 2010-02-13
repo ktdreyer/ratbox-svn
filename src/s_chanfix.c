@@ -750,6 +750,7 @@ add_autofix_channel(struct channel *chptr)
 	struct chanfix_channel *af_chan;
 
 	if(dlink_find(chptr, &chanfix_list))
+		return 0;
 
 	af_chan = my_calloc(1, sizeof(struct chanfix_channel));
 	af_chan->chptr = chptr;
@@ -769,6 +770,7 @@ add_autofix_channel(struct channel *chptr)
 	 * this channel.
 	 */
 	dlink_add(af_chan, &af_chan->node, &chanfix_list);
+	chptr->cfptr = af_chan;
 
 	return 1;
 }
@@ -785,6 +787,7 @@ del_autofix_channel(struct channel *chptr)
 	{
 		dlink_delete(ptr, &chanfix_list);
 		my_free(af_chan);
+		chptr->cfptr = NULL;
 		return 1;
 	}
 
