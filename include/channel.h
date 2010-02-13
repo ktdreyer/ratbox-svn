@@ -31,6 +31,8 @@ struct channel
 	time_t tsinfo;
 
 	dlink_list users;		/* users in this channel */
+	dlink_list users_opped;		/* subset of users who are opped */
+	dlink_list users_unopped;	/* subset of users who are unopped */
 	dlink_list services;
 
 	dlink_list bans;		/* +b */
@@ -46,6 +48,7 @@ struct channel
 struct chmember
 {
 	dlink_node chnode;		/* node in struct channel */
+	dlink_node choppednode;		/* node in struct channel for opped/unopped */
 	dlink_node usernode;		/* node in struct client */
 
 	struct channel *chptr;
@@ -92,6 +95,9 @@ extern struct chmember *add_chmember(struct channel *chptr, struct client *targe
 extern void del_chmember(struct chmember *mptr);
 extern struct chmember *find_chmember(struct channel *chptr, struct client *target_p);
 #define is_member(chptr, target_p) ((find_chmember(chptr, target_p)) ? 1 : 0)
+
+extern void op_chmember(struct chmember *member_p);
+extern void deop_chmember(struct chmember *member_p);
 
 int find_exempt(struct channel *chptr, struct client *target_p);
 

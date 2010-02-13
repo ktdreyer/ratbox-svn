@@ -220,7 +220,7 @@ s_operbot_op(struct client *client_p, struct lconn *conn_p, const char *parv[], 
 			if(is_opped(mptr))
 				continue;
 
-			mptr->flags |= MODE_OPPED;
+			op_chmember(mptr);
 			sendto_server(":%s MODE %s +o %s",
 					SVC_UID(operbot_p), chptr->name, UID(client_p));
 		}
@@ -246,7 +246,7 @@ s_operbot_op(struct client *client_p, struct lconn *conn_p, const char *parv[], 
 	if(is_opped(mptr))
 		return 1;
 
-	mptr->flags |= MODE_OPPED;
+	op_chmember(mptr);
 	sendto_server(":%s MODE %s +o %s",
 			SVC_UID(operbot_p), chptr->name, UID(client_p));
 	return 1;

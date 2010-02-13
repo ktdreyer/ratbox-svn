@@ -976,10 +976,8 @@ e_chanserv_partinhabit(void *unused)
 {
 	struct channel *chptr;
 	struct chan_reg *chreg_p;
-	struct chmember *member_p;
-	dlink_node *ptr, *vptr;
+	dlink_node *ptr;
 	int i;
-	int found_opped = 0;
 
 	HASH_WALK(i, MAX_CHANNEL_TABLE, ptr, chan_reg_table)
 	{
@@ -1009,14 +1007,6 @@ e_chanserv_partinhabit(void *unused)
 				continue;
 			}
 
-			DLINK_FOREACH(vptr, chptr->users.head)
-			{
-				member_p = vptr->data;
-
-				if(member_p->flags & MODE_OPPED)
-					found_opped++;
-			}
-
 			/* noone in there.. */
 			if(!dlink_list_length(&chptr->users))
 			{
@@ -1029,7 +1019,7 @@ e_chanserv_partinhabit(void *unused)
 				chreg_p->flags &= ~CS_FLAGS_INHABIT;
 			}
 			/* someone is opped, they can look after it */
-			else if(found_opped)
+			else if(dlink_list_length(&chptr->users_opped))
 			{
 				chreg_p->flags &= ~CS_FLAGS_INHABIT;
 				part_service(chanserv_p, chptr->name);
@@ -1135,7 +1125,7 @@ h_chanserv_mode_op(void *v_chptr, void *v_members)
 		DLINK_FOREACH_SAFE(ptr, next_ptr, members->head)
 		{
 			member_p = ptr->data;
-			member_p->flags &= ~MODE_OPPED;
+			deop_chmember(member_p);
 			modebuild_add(DIR_DEL, "o", UID(member_p->client_p));
 			dlink_destroy(ptr, members);
 		}
@@ -1153,7 +1143,7 @@ h_chanserv_mode_op(void *v_chptr, void *v_members)
 
 			if(!mreg_p || mreg_p->suspend || mreg_p->level < S_C_OP)
 			{
-				member_p->flags &= ~MODE_OPPED;
+				deop_chmember(member_p);
 				modebuild_add(DIR_DEL, "o",
 						UID(member_p->client_p));
 				dlink_destroy(ptr, members);
@@ -1369,7 +1359,10 @@ h_chanserv_join(void *v_chptr, void *v_members)
 				mreg_p->bants = chreg_p->bants;
 
 			if(is_opped(member_p))
+			{
 				modebuild_add(DIR_DEL, "o", UID(member_p->client_p));
+				deop_chmember(member_p);
+			}
 
 			if(banreg_p->marked != current_mark)
 			{
@@ -1419,7 +1412,7 @@ h_chanserv_join(void *v_chptr, void *v_members)
 
 				modebuild_add(DIR_DEL, "o", 
 						UID(member_p->client_p));
-				member_p->flags &= ~MODE_OPPED;
+				deop_chmember(member_p);
 			}
 
 			hit++;
@@ -1463,8 +1456,7 @@ h_chanserv_join(void *v_chptr, void *v_members)
 			{
 				modebuild_add(DIR_ADD, "o", 
 					UID(member_p->client_p));
-				member_p->flags &= ~MODE_DEOPPED;
-				member_p->flags |= MODE_OPPED;
+				op_chmember(member_p);
 			}
 			else if(mreg_p->flags & CS_MEMBER_AUTOVOICE &&
 				!is_voiced(member_p) &&
@@ -1535,8 +1527,7 @@ h_chanserv_user_login(void *v_client_p, void *unused)
 			sendto_server(":%s MODE %s +o %s",
 					SVC_UID(chanserv_p), chptr->name,
 					UID(member_p->client_p));
-			member_p->flags &= ~MODE_DEOPPED;
-			member_p->flags |= MODE_OPPED;
+			op_chmember(member_p);
 		}
 		else if(mreg_p->flags & CS_MEMBER_AUTOVOICE &&
 			!is_voiced(member_p) &&
@@ -2569,7 +2560,7 @@ s_chan_clearops_loc(struct channel *chptr, struct chan_reg *chreg_p,
 		}
 
 		modebuild_add(DIR_DEL, "o", UID(msptr->client_p));
-		msptr->flags &= ~MODE_OPPED;
+		deop_chmember(msptr);
 	}
 
 	modebuild_finish();
@@ -3075,8 +3066,7 @@ s_chan_op(struct client *client_p, struct lconn *conn_p, const char *parv[], int
 			if(reg_p->channel_reg->flags & CS_FLAGS_NOOPS)
 				continue;
 
-			msptr->flags &= ~MODE_DEOPPED;
-			msptr->flags |= MODE_OPPED;
+			op_chmember(msptr);
 			sendto_server(":%s MODE %s +o %s",
 					chanserv_p->name, chptr->name, UID(client_p));
 		}
@@ -3112,8 +3102,7 @@ s_chan_op(struct client *client_p, struct lconn *conn_p, const char *parv[], int
 
 	zlog(chanserv_p, 6, 0, 0, client_p, NULL, "OP %s", parv[0]);
 
-	msptr->flags &= ~MODE_DEOPPED;
-	msptr->flags |= MODE_OPPED;
+	op_chmember(msptr);
 	sendto_server(":%s MODE %s +o %s",
 			chanserv_p->name, parv[0], UID(client_p));
 	return 1;
@@ -3386,7 +3375,10 @@ s_chan_addban(struct client *client_p, struct lconn *conn_p, const char *parv[],
 		}
 
 		if(is_opped(msptr))
+		{
 			modebuild_add(DIR_DEL, "o", UID(msptr->client_p));
+			deop_chmember(msptr);
+		}
 
 		/* if we're kicking out the last user, enable
 		 * inhabit so that kicking them doesnt destroy the

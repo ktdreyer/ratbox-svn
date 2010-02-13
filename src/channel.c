@@ -200,6 +200,11 @@ add_chmember(struct channel *chptr, struct client *target_p, int flags)
 	dlink_add(mptr, &mptr->chnode, &chptr->users);
 	dlink_add(mptr, &mptr->usernode, &target_p->user->channels);
 
+	if(is_opped(mptr))
+		dlink_add(mptr, &mptr->choppednode, &chptr->users_opped);
+	else
+		dlink_add(mptr, &mptr->choppednode, &chptr->users_unopped);
+
 	return mptr;
 }
 
@@ -223,6 +228,11 @@ del_chmember(struct chmember *mptr)
 
 	dlink_delete(&mptr->chnode, &chptr->users);
 	dlink_delete(&mptr->usernode, &client_p->user->channels);
+
+	if(is_opped(mptr))
+		dlink_delete(&mptr->choppednode, &chptr->users_opped);
+	else
+		dlink_delete(&mptr->choppednode, &chptr->users_unopped);
 
 	if(dlink_list_length(&chptr->users) == 0 &&
 	   dlink_list_length(&chptr->services) == 0)
@@ -264,6 +274,42 @@ find_chmember(struct channel *chptr, struct client *target_p)
 
 	return NULL;
 }
+
+/* op_chmember()
+ *   ops a chmember, ensuring list integrity is saved
+ *
+ * inputs	- membership struct to op
+ * outputs	-
+ */
+void
+op_chmember(struct chmember *member_p)
+{
+	if(is_opped(member_p))
+		return;
+
+	member_p->flags &= ~MODE_DEOPPED;
+	member_p->flags |= MODE_OPPED;
+	dlink_move_node(&member_p->choppednode, &member_p->chptr->users_unopped,
+			&member_p->chptr->users_opped);
+}
+
+/* deop_chmember()
+ *   deops a chmember, ensuring list integrity is saved
+ *
+ * inputs	- membership struct to deop
+ * outputs	-
+ */
+void
+deop_chmember(struct chmember *member_p)
+{
+	if(!is_opped(member_p))
+		return;
+
+	member_p->flags &= ~MODE_OPPED;
+	dlink_move_node(&member_p->choppednode, &member_p->chptr->users_opped,
+			&member_p->chptr->users_unopped);
+}
+
 
 int
 find_exempt(struct channel *chptr, struct client *target_p)
@@ -554,7 +600,11 @@ remove_our_modes(struct channel *chptr)
 		msptr = ptr->data;
 
 		msptr->flags &= ~(MODE_OPPED|MODE_VOICED);
+
+		/* users_opped/users_unopped integrity done en mass below */
 	}
+
+	dlink_move_list(&chptr->users_opped, &chptr->users_unopped);
 }
 
 /* remove_bans()

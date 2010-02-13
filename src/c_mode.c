@@ -518,16 +518,16 @@ parse_full_mode(struct channel *chptr, struct client *source_p,
 					mptr->flags &= ~MODE_DEOPPED;
 
 					/* ignore redundant modes */
-					if(mptr->flags & MODE_OPPED)
+					if(is_opped(mptr))
 						continue;
 
-					mptr->flags |= MODE_OPPED;
+					op_chmember(mptr);
 					dlink_add_alloc(mptr, &opped_list);
 				}
-				else if(mptr->flags & MODE_OPPED)
+				else if(is_opped(mptr))
 				{
 					dlink_find_destroy(mptr, &opped_list);
-					mptr->flags &= ~MODE_OPPED;
+					deop_chmember(mptr);
 				}
 
 				if(source_p)
