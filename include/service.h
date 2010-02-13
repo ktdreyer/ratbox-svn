@@ -83,6 +83,7 @@ extern void handle_service(struct client *service_p, struct client *client_p,
 extern void PRINTFLIKE(3, 4) service_error(struct client *service_p,
                           struct client *client_p, const char *, ...);
 void service_err(struct client *service_p, struct client *client_p, int msgid, ...);
+void service_err_chan(struct client *service_p, struct channel *chptr, int msgid, ...);
 
 void PRINTFLIKE(4, 5) service_send(struct client *, struct client *,
                 struct lconn *, const char *, ...);

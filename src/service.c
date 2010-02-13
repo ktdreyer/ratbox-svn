@@ -1121,7 +1121,7 @@ service_err(struct client *service_p, struct client *client_p, int msgid, ...)
 
 /* precondition: ensure service is in channel before using this function */
 void
-service_err_chan(struct client *service_p, char *channel, int msgid, ...)
+service_err_chan(struct client *service_p, struct channel *chptr, int msgid, ...)
 {
 	static char buf[BUFSIZE];
 	va_list args;
@@ -1131,7 +1131,7 @@ service_err_chan(struct client *service_p, char *channel, int msgid, ...)
 	va_end(args);
 
 	sendto_server(":%s PRIVMSG %s :%s",
-				SVC_UID(service_p), channel, buf);
+				SVC_UID(service_p), chptr->name, buf);
 }
 
 void
