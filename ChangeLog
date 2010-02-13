@@ -1,3 +1,17 @@
+moggie      2010/02/13 18:30:26 UTC	(20100213_10-26841)
+  Log:
+  - Outline add_autofix_channel() and del_autofix_channel() functions.
+  - Make find_oppless_channels() back into a normal func and remove eventAdd()
+    (going to use a hook instead).
+  - Outline chanfix_channel and autofix_channel structs for keeping track of
+    which channels we're fixing.
+  
+
+  Modified:
+	rserv/trunk/include/s_chanfix.h (File Modified) 
+	rserv/trunk/src/s_chanfix.c (File Modified) 
+
+
 moggie      2010/02/13 14:55:05 UTC	(20100213_9-26839)
   Log:
   - Remove count_opped_users() function as it can be done more efficiently now.
