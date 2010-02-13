@@ -1,3 +1,13 @@
+moggie      2010/02/13 14:55:05 UTC	(20100213_9-26839)
+  Log:
+  - Remove count_opped_users() function as it can be done more efficiently now.
+  - Adjust "opped" checking code to use new opped and unopped sub-lists.
+  
+
+  Modified:
+	rserv/trunk/src/s_chanfix.c (File Modified) 
+
+
 leeh        2010/02/13 13:24:22 UTC	(20100213_8-26835)
   Log:
   - move chanservs enforcetopic over to a slightly less efficient but more
