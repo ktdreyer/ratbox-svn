@@ -712,6 +712,18 @@ enable_inhabit(struct chan_reg *chreg_p, struct channel *chptr, int autojoin)
 	join_service(chanserv_p, chreg_p->name, chreg_p->tsinfo,
 			chreg_p->emode.mode ? &chreg_p->emode :
 			&chreg_p->cmode, autojoin);
+
+	if(chptr == NULL)
+		chptr = find_channel(chreg_p->name);
+
+	/* we have a topic to enforce, and channel one is different.. */
+	if(chptr && !EmptyString(chreg_p->topic) && irccmp(chreg_p->topic, chptr->topic))
+	{
+		sendto_server(":%s TOPIC %s :%s",
+				SVC_UID(chanserv_p), chptr->name, chreg_p->topic);
+		strlcpy(chptr->topic, chreg_p->topic, sizeof(chptr->topic));
+		strlcpy(chptr->topicwho, MYNAME, sizeof(chptr->topicwho));
+	}
 }
 
 static void
@@ -1432,15 +1444,6 @@ h_chanserv_join(void *v_chptr, void *v_members)
 		if(chreg_p->flags & CS_FLAGS_AUTOJOIN && dlink_find(chanserv_p, &chptr->services) == NULL)
 		{
 			enable_inhabit(chreg_p, chptr, 1);
-
-			/* we have a topic to enforce, and channel one is different.. */
-			if(!EmptyString(chreg_p->topic) && irccmp(chreg_p->topic, chptr->topic))
-			{
-				sendto_server(":%s TOPIC %s :%s",
-						SVC_UID(chanserv_p), chptr->name, chreg_p->topic);
-				strlcpy(chptr->topic, chreg_p->topic, sizeof(chptr->topic));
-				strlcpy(chptr->topicwho, MYNAME, sizeof(chptr->topicwho));
-			}
 		}
 			
 		/* removed ops from them, or they joined opped.. cant be setting them */
