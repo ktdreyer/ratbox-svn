@@ -1,3 +1,12 @@
+leeh        2010/02/13 13:11:30 UTC	(20100213_6-26829)
+  Log:
+  - dont require the channel exists for chanserv::addban or chanserv::delban
+  
+
+  Modified:
+	rserv/trunk/src/s_chanserv.c (File Modified) 
+
+
 leeh        2010/02/13 12:43:22 UTC	(20100213_5-26827)
   Log:
   - add new functions, op_chmember() and deop_chmember() which op/deop a user
