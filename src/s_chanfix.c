@@ -77,7 +77,6 @@ static void e_fix_autofix_channels(void);
 static void e_gather_channels(void);
 
 /* Internal chanfix functions */
-static int count_opped_users(struct channel *);
 static void send_chan_privmsg(struct channel *, const char *, ...);
 static void gather_channel_bucket(void);
 static void chan_takeover(struct channel *, int);
@@ -152,27 +151,6 @@ chanfix_db_callback(int argc, const char **argv)
 
 
 
-/* count_opped_users()
- *   Count the number of opped users in the channel. Does not include
- *   any services that may be in the channel.
- * inputs	- channel ptr
- * outputs	- number of opped users
- */
-static unsigned int
-count_opped_users(struct channel *chptr)
-{
-	int opcount = 0;
-	struct chmember *msptr;
-	dlink_node *ptr;
-
-	DLINK_FOREACH(ptr, chptr->users.head)
-	{
-		msptr = ptr->data;
-		if(is_opped(msptr))
-			opcount++;
-	}
-	return opcount;
-}
 
 
 /* send_chan_privmsg()
@@ -343,7 +321,7 @@ o_chanfix_chanfix(struct client *client_p, struct lconn *conn_p, const char *par
 	}
 
 	/* Check if anyone is opped, if they are we don't do anything unless someone forced us. */
-	if(count_opped_users(chptr) > 0)
+	if(dlink_list_length(&chptr->users_opped) > 0)
 	{
 		/* Check whether the OVERRIDE flag has been given */
 		if (parc > 1)
@@ -385,11 +363,10 @@ o_chanfix_chanfix(struct client *client_p, struct lconn *conn_p, const char *par
 	/* for now we'll just op everyone */
 	modebuild_start(chanfix_p, chptr);
 	/* Do I need to use DLINK_FOREACH_SAFE here? */
-	DLINK_FOREACH(ptr, chptr->users.head)
+	DLINK_FOREACH(ptr, chptr->users_unopped.head)
 	{
 		msptr = ptr->data;
-		msptr->flags &= ~MODE_DEOPPED;
-		msptr->flags |= MODE_OPPED;
+		op_chmember(msptr);
 		modebuild_add(DIR_ADD, "o", msptr->client_p->name);
 	}
 	modebuild_finish();
@@ -425,7 +402,7 @@ o_chanfix_check(struct client *client_p, struct lconn *conn_p, const char *parv[
 	service_snd(chanfix_p, client_p, conn_p, SVC_ISSUEDFORBY,
 				chanfix_p->name, "CHECK", parv[0], client_p->name);
 
-	ops = count_opped_users(chptr);
+	ops = dlink_list_length(&chptr->users_opped);
 	users = dlink_list_length(&chptr->users);
 	service_snd(chanfix_p, client_p, conn_p, SVC_CF_CHECK, parv[0], ops, users);
 
@@ -713,7 +690,7 @@ e_find_oppless_channels(void)
 		chptr = ptr->data;
 
 		if((dlink_list_length(&chptr->users) >= min_clients) &&
-					(count_opped_users(chptr) == 0))
+					(chptr->users_opped.head == NULL))
 		{
 			/* Add this channel to the channel_autofix_list if:
 				- The channel doesn't have a 'suspend' time.
