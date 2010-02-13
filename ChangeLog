@@ -1,3 +1,16 @@
+leeh        2010/02/13 11:19:46 UTC	(20100213_0-26813)
+  Log:
+  - add in the definition for service_err_chan() to service.h
+  - move service_err_chan() back to passing in chptr, in case for some future
+    reason it ever needs to lookup any other information from chptr
+  
+
+  Modified:
+	rserv/trunk/include/service.h (File Modified) 
+	rserv/trunk/src/s_chanfix.c (File Modified) 
+	rserv/trunk/src/service.c (File Modified) 
+
+
 moggie      2010/02/12 18:35:55 UTC	(20100212_2-26811)
   Log:
   - Any service using service_err_chan() should have already checked that it's
