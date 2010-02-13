@@ -28,7 +28,7 @@
  * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- * $Id: s_chanfix.c 26718 2010-01-03 18:43:02Z leeh $
+ * $Id$
  */
 #include "stdinc.h"
 
@@ -70,7 +70,6 @@ static int o_chanfix_set(struct client *, struct lconn *, const char **, int);
 static int o_chanfix_status(struct client *, struct lconn *, const char **, int);
 
 /* Event triggered functions */
-static void e_find_oppless_channels(void);
 static void e_rotate_chanfix_db(void);
 static void e_fix_chanfix_channels(void);
 static void e_fix_autofix_channels(void);
@@ -85,6 +84,10 @@ static int chan_remove_bans(struct channel *);
 static int is_chan_being_fixed(const char *);
 static int is_being_chanfixed(const char *);
 static int is_being_autofixed(const char *);
+static time_t seconds_to_midnight();
+static void find_oppless_channels(void);
+static int add_autofix_channel(const char *);
+static int del_autofix_channel(const char *);
 
 static struct service_command chanfix_command[] =
 {
@@ -133,8 +136,7 @@ init_s_chanfix(void)
 			"SELECT chname, tsinfo FROM operbot");
 	*/
 
-	/*eventAdd("cf_find_oppless_chans", e_find_oppless_channels, NULL, 600);
-	eventAdd("cf_fix_chanfix_channels", e_fix_chanfix_channels, NULL, 300);
+	/*eventAdd("cf_fix_chanfix_channels", e_fix_chanfix_channels, NULL, 300);
 	eventAdd("cf_fix_autofix_channels", e_fix_autofix_channels, NULL, 300);
 	eventAddOnce("cf_rotate_cf_db", e_rotate_chanfix_db, NULL, seconds_to_midnight());
 	*/
@@ -672,7 +674,7 @@ chan_remove_bans(struct channel *chptr)
 }
 
 static void
-e_find_oppless_channels(void)
+find_oppless_channels(void)
 {
 	struct channel *chptr;
 	dlink_node *ptr;
@@ -697,7 +699,7 @@ e_find_oppless_channels(void)
 				- The channel is not registered with ChanServ.
 				- The channel has scores in the DB.
 				- A client is present in the channel that has a score higher than the
-					minimum absolute required for opping.
+				  minimum absolute required for opping.
 				- The channel is not set as blocked.
 				- The channel is not already being fixed (automatically or manually).
 
@@ -771,7 +773,7 @@ e_rotate_chanfix_db(void)
 	*/
 }
 
-static void
+static time_t
 seconds_to_midnight(void)
 {
 	struct tm *t_info;
@@ -779,5 +781,59 @@ seconds_to_midnight(void)
 	t_info = localtime(&nowtime);
 	return 86400 - (t_info->tm_hour * 3600 + t_info->tm_min * 60 + t_info->tm_sec);
 }
+
+static int
+add_autofix_channel(const char *channel)
+{
+	struct autofix_channel *af_chan;
+
+	/* Don't add a channel twice */
+	if (is_chan_being_fixed(channel))
+	{
+		return 0;
+	}
+
+	af_chan = my_calloc(1, sizeof(struct autofix_channel));
+
+	strlcpy(af_chan->name, channel, sizeof(af_chan->name));
+	af_chan->time_fix_started = CURRENT_TIME;
+	af_chan->time_prev_attempt = 0;
+
+	/* We should either:
+	 *	- Get the highest chanop score so we can set highest_score, or
+	 *  - Fetch all the chanops from the DB we can consider for opping and store
+	 *    them in the autofix_channel struct so we don't have to keep querying
+	 *    the DB.
+	 */
+	/*af_chan->hightest_score = */
+
+	/* Also record an entry in the fixhistory table to say we're autofixing
+	 * this channel.
+	 */
+	dlink_add(af_chan, make_dlink_node(), &autofix_chan_list);
+
+	return 1;
+}
+
+static int
+del_autofix_channel(const char* channel)
+{
+	struct autofix_channel *af_chan;
+	dlink_node *ptr, *next_ptr;
+
+	DLINK_FOREACH_SAFE(ptr, next_ptr, autofix_chan_list.head)
+	{
+		af_chan = ptr->data;
+		if (!irccmp(af_chan->name, channel))
+		{
+			dlink_delete(ptr, &autofix_channel_list);
+			my_free(af_chan);
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
 
 #endif
