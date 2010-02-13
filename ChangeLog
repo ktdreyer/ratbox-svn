@@ -1,3 +1,12 @@
+leeh        2010/02/13 23:46:56 UTC	(20100213_14-26849)
+  Log:
+  - err, that should be adding chptr to the list
+  
+
+  Modified:
+	rserv/trunk/src/s_chanfix.c (File Modified) 
+
+
 leeh        2010/02/13 23:45:35 UTC	(20100213_13-26847)
   Log:
   - store the pointer to the current chanfix entry against the channel
