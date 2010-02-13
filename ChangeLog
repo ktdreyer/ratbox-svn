@@ -1,3 +1,14 @@
+leeh        2010/02/13 11:31:52 UTC	(20100213_2-26817)
+  Log:
+  - add support for +S into alis
+  
+
+  Modified:
+	rserv/trunk/help/bg/alis/list (File Modified) 
+	rserv/trunk/help/en/alis/list (File Modified) 
+	rserv/trunk/src/s_alis.c (File Modified) 
+
+
 leeh        2010/02/13 11:28:03 UTC	(20100213_1-26815)
   Log:
   - add missing prototype for is_network_split()
