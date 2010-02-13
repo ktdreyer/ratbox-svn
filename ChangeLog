@@ -1,3 +1,17 @@
+moggie      2010/02/13 20:57:15 UTC	(20100213_11-26843)
+  Log:
+  - Make chan_remove_modes() and chan_remove_bans() more flexible for manual
+    chanfixing.
+  - Translate the language strings used in these functions.
+  
+
+  Modified:
+	rserv/trunk/include/langs.h (File Modified) 
+	rserv/trunk/src/langs.c (File Modified) 
+	rserv/trunk/src/messages.c (File Modified) 
+	rserv/trunk/src/s_chanfix.c (File Modified) 
+
+
 moggie      2010/02/13 18:30:26 UTC	(20100213_10-26841)
   Log:
   - Outline add_autofix_channel() and del_autofix_channel() functions.
