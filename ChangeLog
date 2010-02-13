@@ -1,3 +1,13 @@
+leeh        2010/02/13 13:19:29 UTC	(20100213_7-26833)
+  Log:
+  - move the topic resetting code up to enable_inhabit(), so chanserv will
+    enforce the topic whenever it joins a channel for any reason..
+  
+
+  Modified:
+	rserv/trunk/src/s_chanserv.c (File Modified) 
+
+
 leeh        2010/02/13 13:11:30 UTC	(20100213_6-26829)
   Log:
   - dont require the channel exists for chanserv::addban or chanserv::delban
