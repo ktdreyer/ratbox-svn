@@ -256,6 +256,8 @@ enum svc_notice_enum
 	SVC_CF_HASOPPEDUSERS,
 	SVC_CF_CHECK,
 	SVC_CF_CHANFIXINPROG,
+	SVC_CF_BANSREMOVED,
+	SVC_CF_MODESREMOVED,
 
 	/* this must be last */
 	SVC_LAST

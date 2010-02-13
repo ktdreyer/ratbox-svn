@@ -254,6 +254,8 @@ struct _lang_internal lang_internal[] =
 	{ SVC_CF_HASOPPEDUSERS,		"Channel %s already has opped users"				},
 	{ SVC_CF_CHECK,			"Channel '%s' appears to contain %d opped out of %d users"		},
 	{ SVC_CF_CHANFIXINPROG,		"Channel fix in progress, please stand by."			},
+	{ SVC_CF_BANSREMOVED,		"%s's ban modes have been removed so users can re-join."		},
+	{ SVC_CF_MODESREMOVED,		"Channel modes have been removed so users can re-join."			},
 /* STOP_GENEXAMPLE_PARSING -- for genexample.pl in langs/ */
 
 	/* this must be last */

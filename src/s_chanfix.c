@@ -79,8 +79,8 @@ static void e_gather_channels(void);
 static void send_chan_privmsg(struct channel *, const char *, ...);
 static void gather_channel_bucket(void);
 static void chan_takeover(struct channel *, int);
-static int chan_remove_modes(struct channel *);
-static int chan_remove_bans(struct channel *);
+static int chan_remove_modes(struct channel *, char);
+static int chan_remove_bans(struct channel *, char);
 static int is_chan_being_fixed(const char *);
 static int is_being_chanfixed(const char *);
 static int is_being_autofixed(const char *);
@@ -356,8 +356,8 @@ o_chanfix_chanfix(struct client *client_p, struct lconn *conn_p, const char *par
 	if(!override)
 		join_service(chanfix_p, parv[0], chptr->tsinfo, NULL, 0);
 
-	chan_remove_modes(chptr);
-	chan_remove_bans(chptr);
+	chan_remove_modes(chptr, '0');
+	chan_remove_bans(chptr, '0');
  
 	service_snd(chanfix_p, client_p, conn_p, SVC_ISSUEDFORBY,
 				chanfix_p->name, "CHANFIX", parv[0], client_p->name);
@@ -589,7 +589,7 @@ gather_channel_bucket(void)
  * from getting in.
  */
 static int
-chan_remove_modes(struct channel *chptr)
+chan_remove_modes(struct channel *chptr, char showmsg)
 {
 	/* TODO: Try making this function more like chanserv::clearmodes */
 	char modelist[] = "ilkrS", flag = '0';
@@ -627,8 +627,10 @@ chan_remove_modes(struct channel *chptr)
 	{
 		join_service(chanfix_p, chptr->name, chptr->tsinfo, NULL, 0);
 		modebuild_finish();
-		send_chan_privmsg(chptr,
-		"Channel modes have been removed so users can re-join.");
+		if(showmsg == '1')
+		{
+			service_err_chan(chanfix_p, chptr, SVC_CF_MODESREMOVED);
+		}
 		return 1;
 	}
 
@@ -639,7 +641,7 @@ chan_remove_modes(struct channel *chptr)
  * from getting in.
  */
 static int
-chan_remove_bans(struct channel *chptr)
+chan_remove_bans(struct channel *chptr, char showmsg)
 {
 	dlink_node *ptr, *next_ptr;
 
@@ -666,9 +668,10 @@ chan_remove_bans(struct channel *chptr)
 	/* apply the bans removal */
 	modebuild_finish();
 
-	send_chan_privmsg(chptr,
-		"%s's ban modes have been removed so users can re-join.",
-		chptr->name);
+	if(showmsg == '1')
+	{
+		service_err_chan(chanfix_p, chptr, SVC_CF_BANSREMOVED, chptr->name);
+	}
 
 	return 1;
 }
@@ -826,7 +829,7 @@ del_autofix_channel(const char* channel)
 		af_chan = ptr->data;
 		if (!irccmp(af_chan->name, channel))
 		{
-			dlink_delete(ptr, &autofix_channel_list);
+			dlink_delete(ptr, &autofix_chan_list);
 			my_free(af_chan);
 			return 1;
 		}
