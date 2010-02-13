@@ -6,5 +6,5 @@ Gives a channel list based on parameters.
     -max <n>: maximum users in channel
     -skip <n>: skip first n matches
     -show [m][t]: show modes/topicwho
-    -mode <+|-|=><iklmnt>: modes set/unset/equal on channel
+    -mode <+|-|=><iklmntS>: modes set/unset/equal on channel
     -topic <string>: require topic to contain string
