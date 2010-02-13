@@ -1,3 +1,19 @@
+leeh        2010/02/13 11:28:03 UTC	(20100213_1-26815)
+  Log:
+  - add missing prototype for is_network_split()
+  - is_network_split() takes no params, so ensure its declared as (void)
+  - add 'struct channel;' pseudo def to service.h for service_err_chan()
+  - remove unused u_count in is_network_split()
+  - rename server_p to target_p in is_network_split(), because server_p is a
+    global variable used elsewhere
+  
+
+  Modified:
+	rserv/trunk/include/client.h (File Modified) 
+	rserv/trunk/include/service.h (File Modified) 
+	rserv/trunk/src/client.c (File Modified) 
+
+
 leeh        2010/02/13 11:19:46 UTC	(20100213_0-26813)
   Log:
   - add in the definition for service_err_chan() to service.h
