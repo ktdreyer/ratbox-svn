@@ -769,7 +769,7 @@ add_autofix_channel(struct channel *chptr)
 	/* Also record an entry in the fixhistory table to say we're autofixing
 	 * this channel.
 	 */
-	dlink_add(af_chan, &af_chan->node, &chanfix_list);
+	dlink_add(chptr, &af_chan->node, &chanfix_list);
 	chptr->cfptr = af_chan;
 
 	return 1;
