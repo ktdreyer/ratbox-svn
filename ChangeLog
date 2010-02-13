@@ -1,3 +1,13 @@
+leeh        2010/02/13 11:36:35 UTC	(20100213_4-26823)
+  Log:
+  - via Narf, ensure we exclude permanent bans from expiry checks when a user
+    joins a channel
+  
+
+  Modified:
+	rserv/trunk/src/s_chanserv.c (File Modified) 
+
+
 moggie      2010/02/13 11:35:17 UTC	(20100213_3-26821)
   Log:
   - Outline some functions needed for finding oppless channels and scheduling
