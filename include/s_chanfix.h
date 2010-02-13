@@ -2,7 +2,14 @@
 #ifndef INCLUDED_s_chanfix_h
 #define INCLUDED_s_chanfix_h
 
+struct channel;
+
 #define DAYS_SINCE_EPOCH	CURRENT_TIME / 86400
+
+#define CF_STATUS_CLEAREDMODES		0x0000001
+#define CF_STATUS_CLEAREDBANS		0x0000002
+#define CF_STATUS_MANUALFIX		0x0000004
+#define CF_STATUS_AUTOFIX		0x0000008
 
 /* Structures used to store the current status of channels currently being
  * fixed.
@@ -12,22 +19,14 @@
  */
 struct chanfix_channel
 {
-	char name[CHANNELLEN + 1];
+	struct channel *chptr;
 	time_t time_fix_started;
 	time_t time_prev_attempt;
 	int stage;
 	int highest_score;	/* highest chanop score in channel */
-};
+	int flags;
 
-struct autofix_channel
-{
-	char name[CHANNELLEN + 1];
-	time_t time_fix_started;
-	time_t time_prev_attempt;
-	int highest_score;	/* highest chanop score in channel */
-	int modes_removed;
-	int bans_removed;
+	dlink_node node;
 };
-
 
 #endif

@@ -48,6 +48,7 @@
 #include "ucommand.h"
 #include "newconf.h"
 #include "watch.h"
+#include "modebuild.h"
 #include "s_chanfix.h"
 
 /* Please note that this CHANFIX module is very much a work in progress,
@@ -58,8 +59,8 @@
 static void init_s_chanfix(void);
 
 static struct client *chanfix_p;
-static dlink_list autofix_chan_list;
-static dlink_list chanfix_chan_list;
+
+static dlink_list chanfix_list;
 
 /* Services operator functions */
 static int o_chanfix_cfjoin(struct client *, struct lconn *, const char **, int);
@@ -86,8 +87,8 @@ static int is_being_chanfixed(const char *);
 static int is_being_autofixed(const char *);
 static time_t seconds_to_midnight();
 static void find_oppless_channels(void);
-static int add_autofix_channel(const char *);
-static int del_autofix_channel(const char *);
+static int add_autofix_channel(struct channel *chptr);
+static int del_autofix_channel(struct channel *chptr);
 
 static struct service_command chanfix_command[] =
 {
@@ -713,48 +714,6 @@ find_oppless_channels(void)
 	}
 }
 
-static int
-is_chan_being_fixed(const char *channel)
-{
-	return (is_being_chanfixed(channel) || is_being_autofixed(channel));
-}
-
-static int
-is_being_chanfixed(const char *channel)
-{
-	dlink_node *ptr;
-	struct chanfix_channel *cfc_p;
-
-	DLINK_FOREACH(ptr, chanfix_chan_list.head)
-	{
-		cfc_p = ptr->data;
-		if(!irccmp(cfc_p->name, channel))
-		{
-			return 1;
-		}
-	}
-
-	return 0;
-}
-
-static int
-is_being_autofixed(const char *channel)
-{
-	dlink_node *ptr;
-	struct autofix_channel *cfc_p;
-
-	DLINK_FOREACH(ptr, autofix_chan_list.head)
-	{
-		cfc_p = ptr->data;
-		if(!irccmp(cfc_p->name, channel))
-		{
-			return 1;
-		}
-	}
-
-	return 0;
-}
-
 static void
 e_fix_chanfix_channels(void)
 {
@@ -786,19 +745,15 @@ seconds_to_midnight(void)
 }
 
 static int
-add_autofix_channel(const char *channel)
+add_autofix_channel(struct channel *chptr)
 {
-	struct autofix_channel *af_chan;
+	struct chanfix_channel *af_chan;
 
-	/* Don't add a channel twice */
-	if (is_chan_being_fixed(channel))
-	{
-		return 0;
-	}
+	if(dlink_find(chptr, &chanfix_list))
 
-	af_chan = my_calloc(1, sizeof(struct autofix_channel));
-
-	strlcpy(af_chan->name, channel, sizeof(af_chan->name));
+	af_chan = my_calloc(1, sizeof(struct chanfix_channel));
+	af_chan->chptr = chptr;
+	af_chan->flags |= CF_STATUS_AUTOFIX;
 	af_chan->time_fix_started = CURRENT_TIME;
 	af_chan->time_prev_attempt = 0;
 
@@ -813,26 +768,24 @@ add_autofix_channel(const char *channel)
 	/* Also record an entry in the fixhistory table to say we're autofixing
 	 * this channel.
 	 */
-	dlink_add(af_chan, make_dlink_node(), &autofix_chan_list);
+	dlink_add(af_chan, &af_chan->node, &chanfix_list);
 
 	return 1;
 }
 
 static int
-del_autofix_channel(const char* channel)
+del_autofix_channel(struct channel *chptr)
 {
 	struct autofix_channel *af_chan;
 	dlink_node *ptr, *next_ptr;
 
-	DLINK_FOREACH_SAFE(ptr, next_ptr, autofix_chan_list.head)
+	ptr = dlink_find(chptr, &chanfix_list);
+
+	if(ptr)
 	{
-		af_chan = ptr->data;
-		if (!irccmp(af_chan->name, channel))
-		{
-			dlink_delete(ptr, &autofix_chan_list);
-			my_free(af_chan);
-			return 1;
-		}
+		dlink_delete(ptr, &chanfix_list);
+		my_free(af_chan);
+		return 1;
 	}
 
 	return 0;
