@@ -638,17 +638,17 @@ handle_chmode(struct channel *chptr, struct client *source_p, int parc, const ch
 	parse_full_mode(chptr, NULL, (const char **) parv, parc, 0, 1);
 
 	if(dlink_list_length(&opped_list))
-		hook_call(HOOK_MODE_OP, chptr, &opped_list);
+		hook_call(HOOK_CHANNEL_MODE_OP, chptr, &opped_list);
 
 	if(dlink_list_length(&voiced_list))
-		hook_call(HOOK_MODE_VOICE, chptr, &voiced_list);
+		hook_call(HOOK_CHANNEL_MODE_VOICE, chptr, &voiced_list);
 
 	if(oldmode.mode != chptr->mode.mode || oldmode.limit != chptr->mode.limit ||
 	   strcasecmp(oldmode.key, chptr->mode.key))
-		hook_call(HOOK_MODE_SIMPLE, chptr, NULL);
+		hook_call(HOOK_CHANNEL_MODE_SIMPLE, chptr, NULL);
 
 	if(IsUser(source_p) && dlink_list_length(&ban_list))
-		hook_call(HOOK_MODE_BAN, chptr, &ban_list);
+		hook_call(HOOK_CHANNEL_MODE_BAN, chptr, &ban_list);
 
 	DLINK_FOREACH_SAFE(ptr, next_ptr, opped_list.head)
 	{

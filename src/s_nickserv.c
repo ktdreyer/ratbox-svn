@@ -107,9 +107,9 @@ init_s_nickserv(void)
 	rsdb_exec(nick_db_callback, 
 			"SELECT nickname, username, reg_time, last_time, flags FROM nicks");
 
-	hook_add(h_nick_warn_client, HOOK_NEW_CLIENT);
-	hook_add(h_nick_warn_client, HOOK_NICKCHANGE);
-	hook_add(h_nick_server_eob, HOOK_SERVER_EOB);
+	hook_add(h_nick_warn_client, HOOK_CLIENT_CONNECT);
+	hook_add(h_nick_warn_client, HOOK_CLIENT_NICKCHANGE);
+	hook_add(h_nick_server_eob, HOOK_EOB_SERVER);
 }
 
 static void

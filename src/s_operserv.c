@@ -115,7 +115,7 @@ init_s_operserv(void)
 	rsdb_exec(operserv_db_callback, 
 			"SELECT chname, tsinfo FROM operserv");
 
-	hook_add(h_operserv_sjoin_lowerts, HOOK_SJOIN_LOWERTS);
+	hook_add(h_operserv_sjoin_lowerts, HOOK_CHANNEL_SJOIN_LOWERTS);
 }
 
 static int

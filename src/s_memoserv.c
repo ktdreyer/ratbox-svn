@@ -81,7 +81,7 @@ preinit_s_memoserv(void)
 static void
 init_s_memoserv(void)
 {
-	hook_add(h_memoserv_user_login, HOOK_USER_LOGIN);
+	hook_add(h_memoserv_user_login, HOOK_USERSERV_LOGIN);
 }
 
 static int

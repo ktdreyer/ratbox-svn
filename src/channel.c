@@ -839,7 +839,7 @@ c_sjoin(struct client *client_p, const char *parv[], int parc)
 
 	/* this must be done after we've updated the modes */
 	if(!keep_old_modes)
-		hook_call(HOOK_SJOIN_LOWERTS, chptr, NULL);
+		hook_call(HOOK_CHANNEL_SJOIN_LOWERTS, chptr, NULL);
 
 	if(EmptyString(parv[args]))
 		return;
@@ -908,7 +908,7 @@ c_sjoin(struct client *client_p, const char *parv[], int parc)
 	   dlink_list_length(&chptr->services) == 0)
 		free_channel(chptr);
 	else
-		hook_call(HOOK_JOIN_CHANNEL, chptr, &joined_members);
+		hook_call(HOOK_CHANNEL_JOIN, chptr, &joined_members);
 
 	DLINK_FOREACH_SAFE(ptr, next_ptr, joined_members.head)
 	{
@@ -1029,7 +1029,7 @@ c_join(struct client *client_p, const char *parv[], int parc)
 
 	/* this must be done after we've updated the modes */
 	if(!keep_old_modes)
-		hook_call(HOOK_SJOIN_LOWERTS, chptr, NULL);
+		hook_call(HOOK_CHANNEL_SJOIN_LOWERTS, chptr, NULL);
 
 	if(!is_member(chptr, client_p))
 	{
@@ -1037,7 +1037,7 @@ c_join(struct client *client_p, const char *parv[], int parc)
 		dlink_add_alloc(member_p, &joined_members);
 	}
 
-	hook_call(HOOK_JOIN_CHANNEL, chptr, &joined_members);
+	hook_call(HOOK_CHANNEL_JOIN, chptr, &joined_members);
 
 	DLINK_FOREACH_SAFE(ptr, next_ptr, joined_members.head)
 	{

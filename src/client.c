@@ -425,7 +425,7 @@ exit_user(struct client *target_p)
 
 	SetDead(target_p);
 
-	hook_call(HOOK_USER_EXIT, target_p, NULL);
+	hook_call(HOOK_CLIENT_EXIT, target_p, NULL);
 
 #ifdef ENABLE_USERSERV
 	if(target_p->user->user_reg)
@@ -705,9 +705,9 @@ c_nick(struct client *client_p, const char *parv[], int parc)
 		dlink_add(target_p, &target_p->upnode, &uplink_p->server->users);
 
 		if(IsEOB(uplink_p))
-			hook_call(HOOK_NEW_CLIENT, target_p, NULL);
+			hook_call(HOOK_CLIENT_CONNECT, target_p, NULL);
 		else
-			hook_call(HOOK_NEW_CLIENT_BURST, target_p, NULL);
+			hook_call(HOOK_CLIENT_CONNECT_BURST, target_p, NULL);
 	}
 
         /* client changing nicks */
@@ -735,7 +735,7 @@ c_nick(struct client *client_p, const char *parv[], int parc)
 
 		client_p->user->tsinfo = atol(parv[1]);
 
-		hook_call(HOOK_NICKCHANGE, client_p, NULL);
+		hook_call(HOOK_CLIENT_NICKCHANGE, client_p, NULL);
 	}
 }
 
@@ -827,9 +827,9 @@ c_uid(struct client *client_p, const char *parv[], int parc)
 	dlink_add(target_p, &target_p->upnode, &client_p->server->users);
 
 	if(IsEOB(client_p))
-		hook_call(HOOK_NEW_CLIENT, target_p, NULL);
+		hook_call(HOOK_CLIENT_CONNECT, target_p, NULL);
 	else
-		hook_call(HOOK_NEW_CLIENT_BURST, target_p, NULL);
+		hook_call(HOOK_CLIENT_CONNECT_BURST, target_p, NULL);
 }
 
 /* c_quit()
@@ -1053,7 +1053,7 @@ c_squit(struct client *client_p, const char *parv[], int parc)
 	if(target_p == NULL)
 	{
 		/* returns -1 if it handled it */
-		if(hook_call(HOOK_SQUIT_UNKNOWN, (void *) parv[0], NULL) == 0)
+		if(hook_call(HOOK_PROTO_SQUIT_UNKNOWN, (void *) parv[0], NULL) == 0)
 			mlog("PROTO: SQUIT for unknown server %s", parv[0]);
 
 		return;

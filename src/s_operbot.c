@@ -95,7 +95,7 @@ init_s_operbot(void)
 	rsdb_exec(operbot_db_callback,
 			"SELECT chname, tsinfo FROM operbot");
 
-	hook_add(h_operbot_sjoin_lowerts, HOOK_SJOIN_LOWERTS);
+	hook_add(h_operbot_sjoin_lowerts, HOOK_CHANNEL_SJOIN_LOWERTS);
 }
 
 static int

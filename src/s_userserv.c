@@ -154,7 +154,7 @@ init_s_userserv(void)
 	rsdb_hook_add("users_sync", "SETPASS", 900, dbh_user_setpass);
 	rsdb_hook_add("users_sync", "SETEMAIL", 900, dbh_user_setemail);
 
-	hook_add(h_user_burst_login, HOOK_BURST_LOGIN);
+	hook_add(h_user_burst_login, HOOK_USERSERV_LOGIN_BURST);
 	hook_add(h_user_dbsync, HOOK_DBSYNC);
 
 	eventAdd("userserv_expire", e_user_expire, NULL, 900);
@@ -1286,7 +1286,7 @@ s_user_register(struct client *client_p, struct lconn *conn_p, const char *parv[
 
 		service_err(userserv_p, client_p, SVC_USER_NOWREGLOGGEDIN, parv[0]);
 
-		hook_call(HOOK_USER_LOGIN, client_p, NULL);
+		hook_call(HOOK_USERSERV_LOGIN, client_p, NULL);
 	}
 	else
 		service_err(userserv_p, client_p, SVC_USER_NOWREGEMAILED, parv[0]);
@@ -1418,7 +1418,7 @@ s_user_login(struct client *client_p, struct lconn *conn_p, const char *parv[], 
 	service_err(userserv_p, client_p, SVC_SUCCESSFUL,
 			userserv_p->name, "LOGIN");
 
-	hook_call(HOOK_USER_LOGIN, client_p, NULL);
+	hook_call(HOOK_USERSERV_LOGIN, client_p, NULL);
 
 	return 1;
 }

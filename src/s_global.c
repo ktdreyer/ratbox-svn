@@ -124,7 +124,7 @@ init_s_global(void)
 	rsdb_exec_fetch_end(data);
 	my_free(data);
 
-	hook_add(h_global_send_welcome, HOOK_NEW_CLIENT);
+	hook_add(h_global_send_welcome, HOOK_CLIENT_CONNECT);
 }
 
 static int

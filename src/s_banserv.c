@@ -163,8 +163,8 @@ init_s_banserv(void)
 	eventAdd("banserv_autosync", e_banserv_autosync, NULL,
 			DEFAULT_AUTOSYNC_FREQUENCY);
 
-	hook_add(h_banserv_new_client, HOOK_NEW_CLIENT);
-	hook_add(h_banserv_new_client, HOOK_NEW_CLIENT_BURST);
+	hook_add(h_banserv_new_client, HOOK_CLIENT_CONNECT);
+	hook_add(h_banserv_new_client, HOOK_CLIENT_CONNECT_BURST);
 
 	rsdb_exec(regexp_callback, "SELECT id, regex, reason, hold, create_time, oper FROM operbans_regexp");
 	rsdb_exec(regexp_neg_callback, "SELECT id, parent_id, regex, oper FROM operbans_regexp_neg");

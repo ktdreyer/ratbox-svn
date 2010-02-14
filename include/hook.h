@@ -2,29 +2,36 @@
 #ifndef INCLUDED_hook_h
 #define INCLUDED_hook_h
 
-#define HOOK_JOIN_CHANNEL	0	/* someone joining a channel */
-#define HOOK_MODE_OP		1
-#define HOOK_MODE_SIMPLE	2	/* +ntsimplk */
-#define HOOK_SQUIT_UNKNOWN	3	/* squit an unknown server */
-#define HOOK_FINISHED_BURSTING	4
-#define HOOK_SJOIN_LOWERTS	5
-#define HOOK_BURST_LOGIN	6
-#define HOOK_USER_LOGIN		7
-#define HOOK_MODE_VOICE		8
-#define HOOK_NEW_CLIENT		9	/* client is introduced to the network,
-					 * outside of burst
-					 */
-#define HOOK_NICKCHANGE		10	/* client changing nick */
-#define HOOK_SERVER_EOB		11	/* specific server sent EOB */
-#define HOOK_DBSYNC		12
-#define HOOK_NEW_CLIENT_BURST	13	/* new client during burst */
-#define HOOK_DCC_AUTH		14	/* dcc client auths */
-#define HOOK_DCC_EXIT		15	/* dcc client exits */
-#define HOOK_USER_EXIT		16	/* user exits the network */
-#define HOOK_SERVER_EXIT	17	/* server exits the network */
-#define HOOK_MODE_BAN		18	/* mode +b done by a user only */
-#define HOOK_CHANNEL_DESTROY	19	/* about to destroy a struct chptr */
-#define HOOK_LAST_HOOK		20
+#define HOOK_DCC_AUTH			0	/* dcc client auths */
+#define HOOK_DCC_EXIT			2	/* dcc client exits */
+
+#define HOOK_CHANNEL_JOIN		4	/* someone joining a channel */
+#define HOOK_CHANNEL_SJOIN_LOWERTS	6	/* channel SJOIN at lower TS */
+#define HOOK_CHANNEL_MODE_OP		8	/* +o on a channel */
+#define HOOK_CHANNEL_MODE_VOICE		10	/* +v on a channel */
+#define HOOK_CHANNEL_MODE_BAN		12	/* +b on a channel */
+#define HOOK_CHANNEL_MODE_SIMPLE	14	/* +ntsimplkS */
+#define HOOK_CHANNEL_DESTROY		16	/* about to destroy a chptr */
+
+#define HOOK_EOB_UPLINK			18	/* uplink finished bursting */
+#define HOOK_EOB_SERVER			20	/* a server finished bursting
+						 * called for uplink too after HOOK_EOB_UPLINK
+						 */
+
+#define HOOK_CLIENT_CONNECT		22	/* client connects (not burst) */
+#define HOOK_CLIENT_CONNECT_BURST	24	/* client connects (burst) */
+#define HOOK_CLIENT_NICKCHANGE		26	/* client changes nick */
+#define HOOK_CLIENT_EXIT		28	/* client quits */
+
+#define HOOK_SERVER_EXIT		30	/* server squits */
+
+#define HOOK_USERSERV_LOGIN		32	/* user logs into userserv */
+#define HOOK_USERSERV_LOGIN_BURST	34	/* user logs into userserv (burst) */
+
+#define HOOK_PROTO_SQUIT_UNKNOWN	36	/* squit an unknown server */
+
+#define HOOK_DBSYNC			38	/* services about to terminate */
+#define HOOK_LAST_HOOK			40
 
 typedef int (*hook_func)(void *, void *);
 

@@ -198,13 +198,13 @@ init_s_chanserv(void)
 
 	load_channel_db();
 
-	hook_add(h_chanserv_join, HOOK_JOIN_CHANNEL);
-	hook_add(h_chanserv_mode_op, HOOK_MODE_OP);
-	hook_add(h_chanserv_mode_voice, HOOK_MODE_VOICE);
-	hook_add(h_chanserv_mode_simple, HOOK_MODE_SIMPLE);
-	hook_add(h_chanserv_mode_ban, HOOK_MODE_BAN);
-	hook_add(h_chanserv_sjoin_lowerts, HOOK_SJOIN_LOWERTS);
-	hook_add(h_chanserv_user_login, HOOK_USER_LOGIN);
+	hook_add(h_chanserv_join, HOOK_CHANNEL_JOIN);
+	hook_add(h_chanserv_mode_op, HOOK_CHANNEL_MODE_OP);
+	hook_add(h_chanserv_mode_voice, HOOK_CHANNEL_MODE_VOICE);
+	hook_add(h_chanserv_mode_simple, HOOK_CHANNEL_MODE_SIMPLE);
+	hook_add(h_chanserv_mode_ban, HOOK_CHANNEL_MODE_BAN);
+	hook_add(h_chanserv_sjoin_lowerts, HOOK_CHANNEL_SJOIN_LOWERTS);
+	hook_add(h_chanserv_user_login, HOOK_USERSERV_LOGIN);
 	hook_add(h_chanserv_dbsync, HOOK_DBSYNC);
 
 	eventAdd("chanserv_updatechan", e_chanserv_updatechan, NULL, 3600);

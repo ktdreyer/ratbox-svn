@@ -302,7 +302,7 @@ c_encap(struct client *client_p, const char *parv[], int parc)
 		if(EmptyString(parv[2]) || !IsUser(client_p))
 			return;
 
-		hook_call(HOOK_BURST_LOGIN, client_p, (void *) parv[2]);
+		hook_call(HOOK_USERSERV_LOGIN_BURST, client_p, (void *) parv[2]);
 	}
 	else if(!irccmp(parv[1], "GCAP"))
 	{
@@ -389,13 +389,13 @@ c_pong(struct client *client_p, const char *parv[], int parc)
                            server_p->name);
                 SetConnEOB(server_p);
 
-		hook_call(HOOK_FINISHED_BURSTING, NULL, NULL);
+		hook_call(HOOK_EOB_UPLINK, NULL, NULL);
         }
 
 	if(!IsEOB(client_p))
 	{
 		SetEOB(client_p);
-		hook_call(HOOK_SERVER_EOB, client_p, NULL);
+		hook_call(HOOK_EOB_SERVER, client_p, NULL);
 	}
 }
 

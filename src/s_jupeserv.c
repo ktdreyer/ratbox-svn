@@ -122,8 +122,8 @@ init_s_jupeserv(void)
 		}
 	}
 
-	hook_add(h_jupeserv_squit, HOOK_SQUIT_UNKNOWN);
-	hook_add(h_jupeserv_finburst, HOOK_FINISHED_BURSTING);
+	hook_add(h_jupeserv_squit, HOOK_PROTO_SQUIT_UNKNOWN);
+	hook_add(h_jupeserv_finburst, HOOK_EOB_UPLINK);
 	eventAdd("e_jupeserv_expire", e_jupeserv_expire, NULL, 60);
 
 	rsdb_exec(jupe_db_callback, "SELECT servername, reason FROM jupes");
