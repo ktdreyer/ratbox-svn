@@ -175,6 +175,8 @@ free_channel(struct channel *chptr)
 	if(chptr == NULL)
 		return;
 
+	hook_call(HOOK_CHANNEL_DESTROY, chptr, NULL);
+
 	del_channel(chptr);
 
 	BlockHeapFree(channel_heap, chptr);
@@ -236,10 +238,7 @@ del_chmember(struct chmember *mptr)
 
 	if(dlink_list_length(&chptr->users) == 0 &&
 	   dlink_list_length(&chptr->services) == 0)
-	{
-		hook_call(HOOK_CHANNEL_DESTROY, chptr, NULL);
 		free_channel(chptr);
-	}
 
 	BlockHeapFree(chmember_heap, mptr);
 }
