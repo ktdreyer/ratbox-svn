@@ -85,7 +85,7 @@ static int chan_remove_bans(struct channel *, char);
 static int is_chan_being_fixed(const char *);
 static int is_being_chanfixed(const char *);
 static int is_being_autofixed(const char *);
-static time_t seconds_to_midnight();
+static time_t seconds_to_midnight(void);
 static void find_oppless_channels(void);
 
 static int add_chanfix(struct channel *chptr);
@@ -710,7 +710,7 @@ seconds_to_midnight(void)
 {
 	struct tm *t_info;
 	time_t nowtime = CURRENT_TIME;
-	t_info = localtime(&nowtime);
+	t_info = gmtime(&nowtime);
 	return 86400 - (t_info->tm_hour * 3600 + t_info->tm_min * 60 + t_info->tm_sec);
 }
 
