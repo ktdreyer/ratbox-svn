@@ -1,3 +1,16 @@
+leeh        2010/02/14 21:57:22 UTC	(20100214_4-26859)
+  Log:
+  - shunt operflags over to a long long
+  - correct some bitmasks using integer when they should be using long
+  
+
+  Modified:
+	rserv/trunk/include/client.h (File Modified) 
+	rserv/trunk/include/conf.h (File Modified) 
+	rserv/trunk/include/service.h (File Modified) 
+	rserv/trunk/src/newconf.c (File Modified) 
+
+
 moggie      2010/02/14 12:58:06 UTC	(20100214_3-26857)
   Log:
   Add hook for finding oppless channels after a server burst.
