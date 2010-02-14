@@ -1,3 +1,16 @@
+leeh        2010/02/14 00:15:14 UTC	(20100214_0-26851)
+  Log:
+  - add a hook for when a channel is about to  be destroyed
+  - rename {add|del}_autofix_channel to {add|del}_chanfix
+  - ensure we del_chanfix when a channel is about to be destroyed
+  
+
+  Modified:
+	rserv/trunk/include/hook.h (File Modified) 
+	rserv/trunk/src/channel.c (File Modified) 
+	rserv/trunk/src/s_chanfix.c (File Modified) 
+
+
 leeh        2010/02/13 23:46:56 UTC	(20100213_14-26849)
   Log:
   - err, that should be adding chptr to the list
