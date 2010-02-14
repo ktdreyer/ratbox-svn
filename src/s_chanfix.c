@@ -86,7 +86,7 @@ static int is_chan_being_fixed(const char *);
 static int is_being_chanfixed(const char *);
 static int is_being_autofixed(const char *);
 static time_t seconds_to_midnight(void);
-static void find_oppless_channels(void);
+static void e_find_oppless_channels(void);
 
 static int add_chanfix(struct channel *chptr);
 static void del_chanfix(struct channel *chptr);
@@ -124,6 +124,7 @@ static struct service_handler chanfix_service = {
 };
 
 static int h_chanfix_channel_destroy(void *chptr_v, void *unused);
+static int h_find_oppless_after_burst(void *unused, void *unused);
 
 void
 preinit_s_chanfix(void)
@@ -135,6 +136,7 @@ static void
 init_s_chanfix(void)
 {
 	hook_add(h_chanfix_channel_destroy, HOOK_CHANNEL_DESTROY);
+	/*hook_add(h_find_oppless_after_burst, HOOK_FINISHED_BURSTING);*/
 
 	/*eventAdd("cf_fix_chanfix_channels", e_fix_chanfix_channels, NULL, 300);
 	eventAdd("cf_fix_autofix_channels", e_fix_autofix_channels, NULL, 300);
@@ -208,6 +210,14 @@ h_chanfix_channel_destroy(void *chptr_v, void *unused)
 
 	if(chptr->cfptr)
 		del_chanfix(chptr);
+}
+
+static int
+h_find_oppless_after_burst(void *unused, void *unused)
+{
+	struct channel *chptr = (struct channel *) chptr_v;
+
+	eventAddOnce("cf_find_oppless_chans", e_find_oppless_channels, NULL, 300);
 }
 
 static int
@@ -648,7 +658,7 @@ chan_remove_bans(struct channel *chptr, char showmsg)
 }
 
 static void
-find_oppless_channels(void)
+e_find_oppless_channels(void)
 {
 	struct channel *chptr;
 	dlink_node *ptr;
