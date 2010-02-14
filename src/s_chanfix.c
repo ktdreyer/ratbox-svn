@@ -77,14 +77,10 @@ static void e_fix_autofix_channels(void);
 static void e_gather_channels(void);
 
 /* Internal chanfix functions */
-static void send_chan_privmsg(struct channel *, const char *, ...);
 static void gather_channel_bucket(void);
 static void chan_takeover(struct channel *, int);
 static int chan_remove_modes(struct channel *, char);
 static int chan_remove_bans(struct channel *, char);
-static int is_chan_being_fixed(const char *);
-static int is_being_chanfixed(const char *);
-static int is_being_autofixed(const char *);
 static time_t seconds_to_midnight(void);
 static void e_find_oppless_channels(void);
 
@@ -210,6 +206,8 @@ h_chanfix_channel_destroy(void *chptr_v, void *unused)
 
 	if(chptr->cfptr)
 		del_chanfix(chptr);
+
+	return 0;
 }
 
 static int
@@ -686,8 +684,6 @@ e_find_oppless_channels(void)
 				  minimum absolute required for opping.
 				- The channel is not set as blocked.
 				- The channel is not already being fixed (automatically or manually).
-
-			is_chan_being_fixed()
 
 			*/
 		}
