@@ -1,3 +1,13 @@
+leeh        2010/02/14 22:24:34 UTC	(20100214_6-26863)
+  Log:
+  - remove some function prototypes for functions that no longer exist
+  - the channel destroy hook needs to return 0;
+  
+
+  Modified:
+	rserv/trunk/src/s_chanfix.c (File Modified) 
+
+
 leeh        2010/02/14 22:15:50 UTC	(20100214_5-26861)
   Log:
   - rationalise the naming of hooks
