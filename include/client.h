@@ -78,7 +78,7 @@ struct service
 	char host[HOSTLEN+1];
 	char id[NICKLEN+1];
 	int status;
-	unsigned int flags;
+	unsigned long flags;
 
 	dlink_list channels;		/* the channels this service is in */
 

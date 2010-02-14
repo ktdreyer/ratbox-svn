@@ -32,7 +32,7 @@ struct client *yy_service;
 struct mode_table
 {
 	const char *name;
-	int mode;
+	unsigned long long mode;
 };
 
 static struct mode_table privs_table[] = {
@@ -253,7 +253,7 @@ find_umode(struct mode_table *tab, char *name)
 }
 
 static void
-set_modes_from_table(unsigned int *modes, const char *whatis, struct mode_table *tab, conf_parm_t * args)
+set_modes_from_table(unsigned long long *modes, const char *whatis, struct mode_table *tab, conf_parm_t * args)
 {
 	for (; args; args = args->next)
 	{
@@ -763,7 +763,7 @@ conf_set_oper_encrypted(void *data)
 static void
 conf_set_oper_flags(void *data)
 {
-	set_modes_from_table(&yy_oper->flags, "flag", privs_table, data);
+	set_modes_from_table((unsigned long long *) &yy_oper->flags, "flag", privs_table, data);
 }
 
 static void
@@ -915,7 +915,7 @@ conf_set_service_flags(void *data)
 		return;
 
 	yy_service->service->flags = 0;
-	set_modes_from_table(&yy_service->service->flags, "flag",
+	set_modes_from_table((unsigned long long *) &yy_service->service->flags, "flag",
 				service_flags_table, data);
 }
 

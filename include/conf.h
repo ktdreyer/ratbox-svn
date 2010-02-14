@@ -162,8 +162,8 @@ struct conf_oper
         char *host;
         char *pass;
 	char *server;
-	unsigned int flags;		/* general flags */
-	unsigned int sflags;		/* individual service flags */
+	unsigned long flags;		/* general flags */
+	unsigned long long sflags;	/* individual service flags */
 	int refcount;
 };
 

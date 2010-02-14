@@ -22,7 +22,7 @@ struct service_command
         unsigned long cmd_use;
 	int userreg;
 	int operonly;
-	int operflags;
+	unsigned long long operflags;
 };
 
 struct service_handler
