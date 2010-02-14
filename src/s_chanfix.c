@@ -87,8 +87,9 @@ static int is_being_chanfixed(const char *);
 static int is_being_autofixed(const char *);
 static time_t seconds_to_midnight();
 static void find_oppless_channels(void);
-static int add_autofix_channel(struct channel *chptr);
-static int del_autofix_channel(struct channel *chptr);
+
+static int add_chanfix(struct channel *chptr);
+static void del_chanfix(struct channel *chptr);
 
 static struct service_command chanfix_command[] =
 {
@@ -122,7 +123,7 @@ static struct service_handler chanfix_service = {
 	chanfix_command, sizeof(chanfix_command), chanfix_ucommand, init_s_chanfix, NULL
 };
 
-/*static int operbot_db_callback(int, const char **);*/
+static int h_chanfix_channel_destroy(void *chptr_v, void *unused);
 
 void
 preinit_s_chanfix(void)
@@ -133,51 +134,13 @@ preinit_s_chanfix(void)
 static void
 init_s_chanfix(void)
 {
-	/*rsdb_exec(operbot_db_callback,
-			"SELECT chname, tsinfo FROM operbot");
-	*/
+	hook_add(h_chanfix_channel_destroy, HOOK_CHANNEL_DESTROY);
 
 	/*eventAdd("cf_fix_chanfix_channels", e_fix_chanfix_channels, NULL, 300);
 	eventAdd("cf_fix_autofix_channels", e_fix_autofix_channels, NULL, 300);
 	eventAddOnce("cf_rotate_cf_db", e_rotate_chanfix_db, NULL, seconds_to_midnight());
 	*/
 }
-
-
-/*static int
-chanfix_db_callback(int argc, const char **argv)
-{
-	join_service(chanfix_p, argv[0], atol(argv[1]), NULL, 0);
-	return 0;
-}
-*/
-
-
-
-
-
-/* send_chan_privmsg()
- *   Sends the given message and args to the channel.
- *
- * inputs	- channel ptr, formatted string, args
- * outputs	-
- */
-static void
-send_chan_privmsg(struct channel *chptr, const char *format, ...)
-{
-	static char buf[BUFSIZE];
-	va_list args;
-
-	va_start(args, format);
-	vsnprintf(buf, sizeof(buf), format, args);
-	va_end(args);
-	/* Make sure we're in the channel before we try to send */
-	if (dlink_find(chanfix_p, &chptr->services)) {
-		sendto_server(":%s PRIVMSG %s :%s", chanfix_p->name, chptr->name, buf);
-	}
-}
-
-
 
 /* preconditions: TS >= 2 and there is at least one user in the channel */
 static void
@@ -238,7 +201,14 @@ chan_takeover(struct channel *chptr, int invite)
 	}
 }
 
+static int
+h_chanfix_channel_destroy(void *chptr_v, void *unused)
+{
+	struct channel *chptr = (struct channel *) chptr_v;
 
+	if(chptr->cfptr)
+		del_chanfix(chptr);
+}
 
 static int
 o_chanfix_cfjoin(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
@@ -745,7 +715,7 @@ seconds_to_midnight(void)
 }
 
 static int
-add_autofix_channel(struct channel *chptr)
+add_chanfix(struct channel *chptr)
 {
 	struct chanfix_channel *af_chan;
 
@@ -775,23 +745,15 @@ add_autofix_channel(struct channel *chptr)
 	return 1;
 }
 
-static int
-del_autofix_channel(struct channel *chptr)
+static void 
+del_chanfix(struct channel *chptr)
 {
-	struct autofix_channel *af_chan;
-	dlink_node *ptr, *next_ptr;
+	struct chanfix_channel *cfptr;
 
-	ptr = dlink_find(chptr, &chanfix_list);
-
-	if(ptr)
-	{
-		dlink_delete(ptr, &chanfix_list);
-		my_free(af_chan);
-		chptr->cfptr = NULL;
-		return 1;
-	}
-
-	return 0;
+	cfptr = (struct chanfix_channel *) chptr->cfptr;
+	dlink_delete(&cfptr->node, &chanfix_list);
+	my_free(cfptr);
+	chptr->cfptr = NULL;
 }
 
 
