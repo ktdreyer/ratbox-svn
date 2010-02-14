@@ -1,3 +1,12 @@
+moggie      2010/02/14 11:57:37 UTC	(20100214_2-26855)
+  Log:
+  Use gmtime() instead of localtime() for calculating the seconds in a day.
+  
+
+  Modified:
+	rserv/trunk/src/s_chanfix.c (File Modified) 
+
+
 leeh        2010/02/14 00:18:35 UTC	(20100214_1-26853)
   Log:
   - the hook for destroying a channel is better called in free_channel()
