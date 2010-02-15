@@ -1,3 +1,12 @@
+leeh        2010/02/15 20:19:23 UTC	(20100215_0-26865)
+  Log:
+  - various tidyups, reordering, removing some unused functions, etc
+  
+
+  Modified:
+	rserv/trunk/src/s_chanfix.c (File Modified) 
+
+
 leeh        2010/02/14 22:24:34 UTC	(20100214_6-26863)
   Log:
   - remove some function prototypes for functions that no longer exist
