@@ -1,3 +1,16 @@
+leeh        2010/02/15 21:15:05 UTC	(20100215_1-26867)
+  Log:
+  - split remove_our_modes() into remove_our_simple_modes() and
+    remove_our_ov_modes()
+  
+
+  Modified:
+	rserv/trunk/include/channel.h (File Modified) 
+	rserv/trunk/src/channel.c (File Modified) 
+	rserv/trunk/src/s_chanfix.c (File Modified) 
+	rserv/trunk/src/s_operserv.c (File Modified) 
+
+
 leeh        2010/02/15 20:19:23 UTC	(20100215_0-26865)
   Log:
   - various tidyups, reordering, removing some unused functions, etc
