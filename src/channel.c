@@ -581,21 +581,31 @@ c_tb(struct client *client_p, const char *parv[], int parc)
 	}
 }
 
-/* remove_our_modes()
- *   clears our channel modes from a channel
+/* remove_our_simple_modes()
+ *   clears our simple channel modes from a channel
  *
- * inputs	- channel to remove modes from
+ * inputs	- channel to remove simple modes from
  * outputs	-
  */
 void
-remove_our_modes(struct channel *chptr)
+remove_our_simple_modes(struct channel *chptr)
 {
-	struct chmember *msptr;
-	dlink_node *ptr;
-
 	chptr->mode.mode = 0;
 	chptr->mode.key[0] = '\0';
 	chptr->mode.limit = 0;
+}
+
+/* remove_our_ov_modes()
+ *   clears our +ov channel modes from a channel
+ *
+ * inputs	- channel to remove +ov modes from
+ * outputs	-
+ */
+void
+remove_our_ov_modes(struct channel *chptr)
+{
+	struct chmember *msptr;
+	dlink_node *ptr;
 
 	DLINK_FOREACH(ptr, chptr->users.head)
 	{
@@ -608,6 +618,7 @@ remove_our_modes(struct channel *chptr)
 
 	dlink_move_list(&chptr->users_opped, &chptr->users_unopped);
 }
+
 
 /* remove_bans()
  *   clears +beI modes from a channel
@@ -809,7 +820,8 @@ c_sjoin(struct client *client_p, const char *parv[], int parc)
 	if(!keep_old_modes)
 	{
 		chptr->tsinfo = newts;
-		remove_our_modes(chptr);
+		remove_our_simple_modes(chptr);
+		remove_our_ov_modes(chptr);
 		/* If the source does TS6, also remove all +beI modes */
 		if (!EmptyString(client_p->uid))
 			remove_bans(chptr);
@@ -1001,7 +1013,8 @@ c_join(struct client *client_p, const char *parv[], int parc)
 	if(!keep_old_modes)
 	{
 		chptr->tsinfo = newts;
-		remove_our_modes(chptr);
+		remove_our_simple_modes(chptr);
+		remove_our_ov_modes(chptr);
 		/* Note that JOIN does not remove bans */
 
 		/* services is in there.. rejoin */

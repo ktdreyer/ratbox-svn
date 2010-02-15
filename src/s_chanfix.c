@@ -139,7 +139,8 @@ chan_takeover(struct channel *chptr, int invite)
 
 	part_service(chanfix_p, chptr->name);
 
-	remove_our_modes(chptr);
+	remove_our_simple_modes(chptr);
+	remove_our_ov_modes(chptr);
 
 	if (EmptyString(server_p->sid))
 	{
