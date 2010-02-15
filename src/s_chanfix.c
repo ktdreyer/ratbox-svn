@@ -50,6 +50,7 @@
 #include "watch.h"
 #include "modebuild.h"
 #include "s_chanfix.h"
+#include "event.h"
 
 /* Please note that this CHANFIX module is very much a work in progress,
  * and that it is likely to change frequently & dramatically whilst being
@@ -62,30 +63,12 @@ static struct client *chanfix_p;
 
 static dlink_list chanfix_list;
 
-/* Services operator functions */
 static int o_chanfix_cfjoin(struct client *, struct lconn *, const char **, int);
 static int o_chanfix_cfpart(struct client *, struct lconn *, const char **, int);
 static int o_chanfix_chanfix(struct client *, struct lconn *, const char **, int);
 static int o_chanfix_check(struct client *, struct lconn *, const char **, int);
 static int o_chanfix_set(struct client *, struct lconn *, const char **, int);
 static int o_chanfix_status(struct client *, struct lconn *, const char **, int);
-
-/* Event triggered functions */
-static void e_rotate_chanfix_db(void);
-static void e_fix_chanfix_channels(void);
-static void e_fix_autofix_channels(void);
-static void e_gather_channels(void);
-
-/* Internal chanfix functions */
-static void gather_channel_bucket(void);
-static void chan_takeover(struct channel *, int);
-static int chan_remove_modes(struct channel *, char);
-static int chan_remove_bans(struct channel *, char);
-static time_t seconds_to_midnight(void);
-static void e_find_oppless_channels(void);
-
-static int add_chanfix(struct channel *chptr);
-static void del_chanfix(struct channel *chptr);
 
 static struct service_command chanfix_command[] =
 {
@@ -120,7 +103,19 @@ static struct service_handler chanfix_service = {
 };
 
 static int h_chanfix_channel_destroy(void *chptr_v, void *unused);
-static int h_find_oppless_after_burst(void *unused, void *unused);
+
+static void e_chanfix_score_channels(void *unused);
+
+/* Internal chanfix functions */
+static void chan_takeover(struct channel *, int);
+static int chan_remove_modes(struct channel *, char);
+static int chan_remove_bans(struct channel *, char);
+#if 0
+static time_t seconds_to_midnight(void);
+#endif
+
+static int add_chanfix(struct channel *chptr);
+static void del_chanfix(struct channel *chptr);
 
 void
 preinit_s_chanfix(void)
@@ -132,12 +127,8 @@ static void
 init_s_chanfix(void)
 {
 	hook_add(h_chanfix_channel_destroy, HOOK_CHANNEL_DESTROY);
-	/*hook_add(h_find_oppless_after_burst, HOOK_FINISHED_BURSTING);*/
 
-	/*eventAdd("cf_fix_chanfix_channels", e_fix_chanfix_channels, NULL, 300);
-	eventAdd("cf_fix_autofix_channels", e_fix_autofix_channels, NULL, 300);
-	eventAddOnce("cf_rotate_cf_db", e_rotate_chanfix_db, NULL, seconds_to_midnight());
-	*/
+	eventAdd("e_chanfix_score_channels", e_chanfix_score_channels, NULL, 300);
 }
 
 /* preconditions: TS >= 2 and there is at least one user in the channel */
@@ -199,6 +190,22 @@ chan_takeover(struct channel *chptr, int invite)
 	}
 }
 
+/* General function to manage how we iterate over all the channels
+ * gathering score data.
+ */
+static void 
+e_chanfix_score_channels(void *unused)
+{
+	/*DAYS_SINCE_EPOCH config_file.cf_min_clients */
+
+	/* Rorate the scores if it's midnight. */
+
+
+
+
+}
+
+
 static int
 h_chanfix_channel_destroy(void *chptr_v, void *unused)
 {
@@ -208,14 +215,6 @@ h_chanfix_channel_destroy(void *chptr_v, void *unused)
 		del_chanfix(chptr);
 
 	return 0;
-}
-
-static int
-h_find_oppless_after_burst(void *unused, void *unused)
-{
-	struct channel *chptr = (struct channel *) chptr_v;
-
-	eventAddOnce("cf_find_oppless_chans", e_find_oppless_channels, NULL, 300);
 }
 
 static int
@@ -357,6 +356,8 @@ o_chanfix_chanfix(struct client *client_p, struct lconn *conn_p, const char *par
 	 */
 
 	part_service(chanfix_p, parv[0]);
+
+	add_chanfix(chptr);
 
 	return 0;
 }
@@ -539,31 +540,6 @@ o_chanfix_status(struct client *client_p, struct lconn *conn_p, const char *parv
 	return 0;
 }
 
-/* General function to manage how we iterate over all the channels
- * gathering score data.
- */
-static void
-e_gather_channels(void)
-{
-	/*DAYS_SINCE_EPOCH config_file.cf_min_clients */
-
-	/* Rorate the scores if it's midnight. */
-
-
-
-
-}
-
-/* Process the score data for a bucket of channels. A bucket is a subset
- * of the total network channels.
- */
-static void
-gather_channel_bucket(void)
-{
-
-
-}
-
 /* Removes modes from a channel that might be preventing regular users
  * from getting in.
  */
@@ -655,62 +631,7 @@ chan_remove_bans(struct channel *chptr, char showmsg)
 	return 1;
 }
 
-static void
-e_find_oppless_channels(void)
-{
-	struct channel *chptr;
-	dlink_node *ptr;
-	int min_clients;
-
-	if(is_network_split() || !config_file.cf_enable_autofix)
-	{
-		return;
-	}
-
-	min_clients = config_file.cf_min_clients;
-
-	DLINK_FOREACH(ptr, channel_list.head)
-	{
-		chptr = ptr->data;
-
-		if((dlink_list_length(&chptr->users) >= min_clients) &&
-					(chptr->users_opped.head == NULL))
-		{
-			/* Add this channel to the channel_autofix_list if:
-				- The channel doesn't have a 'suspend' time.
-				- The channel is not registered with ChanServ.
-				- The channel has scores in the DB.
-				- A client is present in the channel that has a score higher than the
-				  minimum absolute required for opping.
-				- The channel is not set as blocked.
-				- The channel is not already being fixed (automatically or manually).
-
-			*/
-		}
-	}
-}
-
-static void
-e_fix_chanfix_channels(void)
-{
-}
-
-static void
-e_fix_autofix_channels(void)
-{
-}
-
-static void
-e_rotate_chanfix_db(void)
-{
-	/* stuff we need to do at midnight. like clear out the old daysample scores
-	 * from the DB, or update some variables etc.
-	 */
-	/* Re-add this event once we're done
-	eventAddOnce("cf_rotate_cf_db", e_rotate_chanfix_db, NULL, seconds_to_midnight());
-	*/
-}
-
+#if 0
 static time_t
 seconds_to_midnight(void)
 {
@@ -719,6 +640,7 @@ seconds_to_midnight(void)
 	t_info = gmtime(&nowtime);
 	return 86400 - (t_info->tm_hour * 3600 + t_info->tm_min * 60 + t_info->tm_sec);
 }
+#endif
 
 static int
 add_chanfix(struct channel *chptr)
