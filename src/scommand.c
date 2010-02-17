@@ -363,7 +363,6 @@ c_pass(struct client *client_p, const char *parv[], int parc)
 	if(parc > 3 && atoi(parv[2]) >= 6 && !EmptyString(parv[3]) && valid_sid(parv[3]))
 	{
 		server_p->sid = my_strdup(parv[3]);
-		SetConnTS6(server_p);
 	}
 	/* TS6 is required, therefore server_p->sid MUST be valid */
 	else

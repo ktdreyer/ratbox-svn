@@ -591,17 +591,11 @@ unmerge_service(struct client *service_p)
 void
 introduce_service(struct client *target_p)
 {
-	if(ConnTS6(server_p))
-		sendto_server("UID %s 1 1 +iDS%s %s %s 0 %s :%s",
-				target_p->name, ServiceOpered(target_p) ? "o" : "",
-				target_p->service->username,
-				target_p->service->host, target_p->uid,
-				target_p->info);
-	else
-		sendto_server("NICK %s 1 1 +iDS%s %s %s %s :%s",
-				target_p->name, ServiceOpered(target_p) ? "o" : "",
-				target_p->service->username,
-				target_p->service->host, MYNAME, target_p->info);
+	sendto_server("UID %s 1 1 +iDS%s %s %s 0 %s :%s",
+			target_p->name, ServiceOpered(target_p) ? "o" : "",
+			target_p->service->username,
+			target_p->service->host, target_p->uid,
+			target_p->info);
 
 	SetServiceIntroduced(target_p);
 	add_client(target_p);
