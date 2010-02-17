@@ -365,6 +365,16 @@ c_pass(struct client *client_p, const char *parv[], int parc)
 		server_p->sid = my_strdup(parv[3]);
 		SetConnTS6(server_p);
 	}
+	/* TS6 is required, therefore server_p->sid MUST be valid */
+	else
+	{
+		mlog("Connection to server %s failed: "
+			"(TS6 required)",
+			server_p->name);
+		(server_p->io_close)(server_p);
+		return;
+	}
+
 }
 
 static void

@@ -928,6 +928,7 @@ c_server(struct client *client_p, const char *parv[], int parc)
         /* our uplink introducing themselves */
         if(client_p == NULL)
         {
+		/* This will also cover the TS6 check */
 		if(!ConnTS(server_p))
 		{
 			mlog("Connection to server %s failed: "
@@ -937,7 +938,7 @@ c_server(struct client *client_p, const char *parv[], int parc)
 			return;
 		}
 
-                if(irccmp(server_p->name, parv[0]))
+		if(irccmp(server_p->name, parv[0]))
                 {
                         mlog("Connection to server %s failed: "
                              "(Servername mismatch)",
@@ -958,7 +959,7 @@ c_server(struct client *client_p, const char *parv[], int parc)
 		sizeof(target_p->info));
 
 	/* local TS6 servers use SERVER and pass the SID on the PASS command */
-	if(!EmptyString(server_p->sid) && client_p == NULL)
+	if(client_p == NULL)
 		strlcpy(target_p->uid, server_p->sid, sizeof(target_p->uid));
 
 	target_p->server->hops = atoi(parv[1]);
