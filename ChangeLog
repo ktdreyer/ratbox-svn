@@ -1,3 +1,16 @@
+leeh        2010/02/17 19:50:52 UTC	(20100217_4-26877)
+  Log:
+  - add three params to remove_our_bans() controlling whether we remove +b, +e
+    and +I independently
+  
+
+  Modified:
+	rserv/trunk/include/channel.h (File Modified) 
+	rserv/trunk/src/channel.c (File Modified) 
+	rserv/trunk/src/s_chanfix.c (File Modified) 
+	rserv/trunk/src/s_operserv.c (File Modified) 
+
+
 leeh        2010/02/17 19:41:31 UTC	(20100217_3-26875)
   Log:
   - server_p->sid will no longer be empty, so allow TS6 to take care of
