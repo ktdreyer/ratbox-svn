@@ -620,14 +620,14 @@ remove_our_ov_modes(struct channel *chptr)
 }
 
 
-/* remove_bans()
+/* remove_our_bans()
  *   clears +beI modes from a channel
  *
  * inputs	- channel to remove modes from
  * outputs	-
  */
 void
-remove_bans(struct channel *chptr)
+remove_our_bans(struct channel *chptr)
 {
 	dlink_node *ptr, *next_ptr;
 
@@ -824,7 +824,7 @@ c_sjoin(struct client *client_p, const char *parv[], int parc)
 		remove_our_ov_modes(chptr);
 		/* If the source does TS6, also remove all +beI modes */
 		if (!EmptyString(client_p->uid))
-			remove_bans(chptr);
+			remove_our_bans(chptr);
 
 		/* services is in there.. rejoin */
 		if(sent_burst)

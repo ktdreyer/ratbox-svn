@@ -160,7 +160,7 @@ chan_takeover(struct channel *chptr, int invite)
 		}
 	}
 
-	remove_bans(chptr);
+	remove_our_bans(chptr);
 
 	if(invite)
 		chptr->mode.mode = MODE_TOPIC|MODE_NOEXTERNAL|MODE_INVITEONLY;
