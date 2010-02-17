@@ -623,19 +623,27 @@ remove_our_ov_modes(struct channel *chptr)
 /* remove_our_bans()
  *   clears +beI modes from a channel
  *
- * inputs	- channel to remove modes from, bitmask of mode types to remove
+ * inputs	- channel to remove modes from, service client to issue
+ * 		  modebuilds from (or NULL to not), whether to remove +b, 
+ *		  +e, +I
  * outputs	-
  */
 void
-remove_our_bans(struct channel *chptr, int remove_bans,
-		int remove_exceptions, int remove_invex)
+remove_our_bans(struct channel *chptr, struct client *service_p, 
+		int remove_bans, int remove_exceptions, int remove_invex)
 {
 	dlink_node *ptr, *next_ptr;
+
+	if(service_p)
+		modebuild_start(service_p, chptr);
 
 	if(remove_bans)
 	{
 		DLINK_FOREACH_SAFE(ptr, next_ptr, chptr->bans.head)
 		{
+			if(service_p)
+				modebuild_add(DIR_DEL, "b", ptr->data);
+
 			my_free(ptr->data);
 			dlink_destroy(ptr, &chptr->bans);
 		}
@@ -645,6 +653,9 @@ remove_our_bans(struct channel *chptr, int remove_bans,
 	{
 		DLINK_FOREACH_SAFE(ptr, next_ptr, chptr->excepts.head)
 		{
+			if(service_p)
+				modebuild_add(DIR_DEL, "e", ptr->data);
+
 			my_free(ptr->data);
 			dlink_destroy(ptr, &chptr->excepts);
 		}
@@ -654,10 +665,16 @@ remove_our_bans(struct channel *chptr, int remove_bans,
 	{
 		DLINK_FOREACH_SAFE(ptr, next_ptr, chptr->invites.head)
 		{
+			if(service_p)
+				modebuild_add(DIR_DEL, "I", ptr->data);
+
 			my_free(ptr->data);
 			dlink_destroy(ptr, &chptr->invites);
 		}
 	}
+
+	if(service_p)
+		modebuild_finish();
 }
 
 /* chmode_to_string()
@@ -834,7 +851,7 @@ c_sjoin(struct client *client_p, const char *parv[], int parc)
 		remove_our_ov_modes(chptr);
 		/* If the source does TS6, also remove all +beI modes */
 		if (!EmptyString(client_p->uid))
-			remove_our_bans(chptr, 1, 1, 1);
+			remove_our_bans(chptr, NULL, 1, 1, 1);
 
 		/* services is in there.. rejoin */
 		if(sent_burst)

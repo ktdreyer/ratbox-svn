@@ -150,7 +150,7 @@ otakeover(struct channel *chptr, int invite)
 	remove_our_simple_modes(chptr);
 	remove_our_ov_modes(chptr);
 
-	remove_our_bans(chptr, 1, 1, 1);
+	remove_our_bans(chptr, NULL, 1, 1, 1);
 
 	if(invite)
 		chptr->mode.mode = MODE_TOPIC|MODE_NOEXTERNAL|MODE_INVITEONLY;

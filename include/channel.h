@@ -91,8 +91,8 @@ extern struct channel *find_channel(const char *name);
 
 void remove_our_simple_modes(struct channel *chptr);
 void remove_our_ov_modes(struct channel *chptr);
-void remove_our_bans(struct channel *chptr, int remove_bans, 
-			int remove_exceptions, int remove_invex);
+void remove_our_bans(struct channel *chptr, struct client *service_p, 
+			int remove_bans, int remove_exceptions, int remove_invex);
 
 extern const char *chmode_to_string(struct chmode *mode);
 extern const char *chmode_to_string_simple(struct chmode *mode);
