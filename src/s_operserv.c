@@ -150,24 +150,6 @@ otakeover(struct channel *chptr, int invite)
 	remove_our_simple_modes(chptr);
 	remove_our_ov_modes(chptr);
 
-	if (EmptyString(server_p->sid))
-	{
-		modebuild_start(operserv_p, chptr);
-
-		DLINK_FOREACH(ptr, chptr->bans.head)
-		{
-			modebuild_add(DIR_DEL, "b", ptr->data);
-		}
-		DLINK_FOREACH(ptr, chptr->excepts.head)
-		{
-			modebuild_add(DIR_DEL, "e", ptr->data);
-		}
-		DLINK_FOREACH(ptr, chptr->invites.head)
-		{
-			modebuild_add(DIR_DEL, "I", ptr->data);
-		}
-	}
-
 	remove_our_bans(chptr);
 
 	if(invite)
@@ -178,10 +160,6 @@ otakeover(struct channel *chptr, int invite)
 	chptr->tsinfo--;
 
 	join_service(operserv_p, chptr->name, chptr->tsinfo, NULL, 0);
-
-	/* apply the -beI if needed, after the join */
-	if(EmptyString(server_p->sid))
-		modebuild_finish();
 
 	/* need to reop some services */
 	if(dlink_list_length(&chptr->services) > 1)
