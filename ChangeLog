@@ -1,3 +1,14 @@
+leeh        2010/02/17 19:41:31 UTC	(20100217_3-26875)
+  Log:
+  - server_p->sid will no longer be empty, so allow TS6 to take care of
+    removing bans on a SJOIN with TS-1 for us.
+  
+
+  Modified:
+	rserv/trunk/src/s_chanfix.c (File Modified) 
+	rserv/trunk/src/s_operserv.c (File Modified) 
+
+
 leeh        2010/02/17 19:39:18 UTC	(20100217_2-26873)
   Log:
   - remove ConnTS6() as its now a requirement
