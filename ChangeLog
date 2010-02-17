@@ -1,3 +1,13 @@
+leeh        2010/02/17 19:37:00 UTC	(20100217_1-26871)
+  Log:
+  - TS6 is now required, it'll simplify some code..
+  
+
+  Modified:
+	rserv/trunk/src/client.c (File Modified) 
+	rserv/trunk/src/scommand.c (File Modified) 
+
+
 leeh        2010/02/17 19:28:10 UTC	(20100217_0-26869)
   Log:
   - rename remove_bans() to remove_our_bans()
