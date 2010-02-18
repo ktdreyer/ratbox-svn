@@ -89,7 +89,8 @@ extern void del_channel(struct channel *chptr);
 extern void free_channel(struct channel *chptr);
 extern struct channel *find_channel(const char *name);
 
-void remove_our_simple_modes(struct channel *chptr, struct client *service_p);
+void remove_our_simple_modes(struct channel *chptr, struct client *service_p, 
+				int prevent_join);
 void remove_our_ov_modes(struct channel *chptr);
 void remove_our_bans(struct channel *chptr, struct client *service_p, 
 			int remove_bans, int remove_exceptions, int remove_invex);
