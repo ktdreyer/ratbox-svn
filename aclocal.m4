@@ -62,7 +62,7 @@ AC_DEFUN([AX_LIB_MYSQL],
     dnl Check MySQL libraries (libpq)
     dnl
 
-    if test "$ac_cv_mysql_val" = "yes"; then
+    if test "$ac_cv_mysql_val" != "no"; then
 
 	if test "X$ac_cv_mysql_val" != "X" &&
 	   test "$ac_cv_mysql_val" != "no" && 
@@ -208,7 +208,7 @@ AC_DEFUN([AX_LIB_POSTGRESQL],
     dnl Check PostgreSQL libraries (libpq)
     dnl
 
-    if test "$ac_cv_postgresql_val" = "yes"; then
+    if test "$ac_cv_postgresql_val" != "no"; then
 
 	if test "X$ac_cv_postgresql_val" != "X" &&
 	   test "$ac_cv_postgresql_val" != "no" && 

@@ -4761,7 +4761,7 @@ fi
     MYSQL_VERSION=""
 
 
-    if test "$ac_cv_mysql_val" = "yes"; then
+    if test "$ac_cv_mysql_val" != "no"; then
 
 	if test "X$ac_cv_mysql_val" != "X" &&
 	   test "$ac_cv_mysql_val" != "no" &&
@@ -4897,7 +4897,7 @@ fi
     POSTGRESQL_POSTGRESQL=""
 
 
-    if test "$ac_cv_postgresql_val" = "yes"; then
+    if test "$ac_cv_postgresql_val" != "no"; then
 
 	if test "X$ac_cv_postgresql_val" != "X" &&
 	   test "$ac_cv_postgresql_val" != "no" &&
