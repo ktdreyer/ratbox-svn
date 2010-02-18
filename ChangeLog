@@ -1,3 +1,15 @@
+leeh        2010/02/18 21:42:24 UTC	(20100218_2-26893)
+  Log:
+  - add support for removing only modes that prevent users joining to
+    remove_our_modes_simple()
+  
+
+  Modified:
+	rserv/trunk/src/channel.c (File Modified) 
+	rserv/trunk/src/s_chanfix.c (File Modified) 
+	rserv/trunk/src/s_operserv.c (File Modified) 
+
+
 leeh        2010/02/18 21:35:41 UTC	(20100218_1-26891)
   Log:
   - make remove_our_simple_modes() support a modebuilder
