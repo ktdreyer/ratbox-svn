@@ -1,3 +1,13 @@
+leeh        2010/02/18 22:16:20 UTC	(20100218_4-26897)
+  Log:
+  - forgot to commit prototype alteration for prevent_join in
+    remove_our_simple_modes()
+  
+
+  Modified:
+	rserv/trunk/include/channel.h (File Modified) 
+
+
 leeh        2010/02/18 22:12:06 UTC	(20100218_3-26895)
   Log:
   - fix the --enable-mysql and --enable-pgsql check
