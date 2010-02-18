@@ -1,3 +1,13 @@
+leeh        2010/02/18 22:12:06 UTC	(20100218_3-26895)
+  Log:
+  - fix the --enable-mysql and --enable-pgsql check
+  
+
+  Modified:
+	rserv/trunk/aclocal.m4 (File Modified) 
+	rserv/trunk/configure (File Modified) 
+
+
 leeh        2010/02/18 21:42:24 UTC	(20100218_2-26893)
   Log:
   - add support for removing only modes that prevent users joining to
