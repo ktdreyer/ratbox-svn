@@ -62,6 +62,23 @@ static struct scommand_handler sjoin_command = { "SJOIN", c_sjoin, 0, DLINK_EMPT
 static struct scommand_handler tb_command = { "TB", c_tb, 0, DLINK_EMPTY };
 static struct scommand_handler topic_command = { "TOPIC", c_topic, 0, DLINK_EMPTY };
 
+static struct _chmode_table
+{
+	unsigned long mode;
+	const char *modestr;
+} chmode_table[] = {
+	{ MODE_INVITEONLY,	"i" },
+	{ MODE_MODERATED,	"m" },
+	{ MODE_NOEXTERNAL,	"n" },
+	{ MODE_PRIVATE,		"p" },
+	{ MODE_SECRET,		"s" },
+	{ MODE_TOPIC,		"t" },
+	{ MODE_REGONLY,		"r" },
+	{ MODE_SSLONLY,		"S" },
+	{ 0, NULL }
+};
+	
+
 /* init_channel()
  *   initialises various things
  */
@@ -688,27 +705,17 @@ chmode_to_string(struct chmode *mode)
 {
 	static char buf[BUFSIZE];
 	char *p;
+	int i;
 
 	p = buf;
 
 	*p++ = '+';
 
-	if(mode->mode & MODE_INVITEONLY)
-		*p++ = 'i';
-	if(mode->mode & MODE_MODERATED)
-		*p++ = 'm';
-	if(mode->mode & MODE_NOEXTERNAL)
-		*p++ = 'n';
-	if(mode->mode & MODE_PRIVATE)
-		*p++ = 'p';
-	if(mode->mode & MODE_SECRET)
-		*p++ = 's';
-	if(mode->mode & MODE_TOPIC)
-		*p++ = 't';
-	if(mode->mode & MODE_REGONLY)
-		*p++ = 'r';
-	if(mode->mode & MODE_SSLONLY)
-		*p++ = 'S';
+	for(i = 0; chmode_table[i].mode; i++)
+	{
+		if(mode->mode & chmode_table[i].mode)
+			*p++ = chmode_table[i].modestr[0];
+	}
 
 	if(mode->limit && mode->key[0])
 	{
@@ -739,27 +746,18 @@ chmode_to_string_simple(struct chmode *mode)
 {
 	static char buf[BUFSIZE];
 	char *p;
+	int i;
 
 	p = buf;
 
 	*p++ = '+';
 
-	if(mode->mode & MODE_INVITEONLY)
-		*p++ = 'i';
-	if(mode->mode & MODE_MODERATED)
-		*p++ = 'm';
-	if(mode->mode & MODE_NOEXTERNAL)
-		*p++ = 'n';
-	if(mode->mode & MODE_PRIVATE)
-		*p++ = 'p';
-	if(mode->mode & MODE_SECRET)
-		*p++ = 's';
-	if(mode->mode & MODE_TOPIC)
-		*p++ = 't';
-	if(mode->mode & MODE_REGONLY)
-		*p++ = 'r';
-	if(mode->mode & MODE_SSLONLY)
-		*p++ = 'S';
+	for(i = 0; chmode_table[i].mode; i++)
+	{
+		if(mode->mode & chmode_table[i].mode)
+			*p++ = chmode_table[i].modestr[0];
+	}
+
 	if(mode->limit)
 		*p++ = 'l';
 	if(mode->key[0])
