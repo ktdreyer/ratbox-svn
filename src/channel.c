@@ -41,6 +41,7 @@
 #include "balloc.h"
 #include "io.h"
 #include "hook.h"
+#include "modebuild.h"
 
 static dlink_list channel_table[MAX_CHANNEL_TABLE];
 dlink_list channel_list;
@@ -601,12 +602,35 @@ c_tb(struct client *client_p, const char *parv[], int parc)
 /* remove_our_simple_modes()
  *   clears our simple channel modes from a channel
  *
- * inputs	- channel to remove simple modes from
+ * inputs	- channel to remove simple modes from, service client to issue
+ * 		  modebuilds from (or NULL to not)
  * outputs	-
  */
 void
-remove_our_simple_modes(struct channel *chptr)
+remove_our_simple_modes(struct channel *chptr, struct client *service_p)
 {
+	if(service_p)
+	{
+		int i;
+
+		modebuild_start(service_p, chptr);
+
+		for(i = 0; chmode_table[i].mode; i++)
+		{
+			if(chptr->mode.mode & chmode_table[i].mode)
+				modebuild_add(DIR_DEL, chmode_table[i].modestr, NULL);
+		}
+
+		if(chptr->mode.key[0])
+			modebuild_add(DIR_DEL, "k", "*");
+
+		if(chptr->mode.limit)
+			modebuild_add(DIR_DEL, "l", NULL);
+
+		modebuild_finish();
+	}
+
+	/* clear the modes */
 	chptr->mode.mode = 0;
 	chptr->mode.key[0] = '\0';
 	chptr->mode.limit = 0;
@@ -845,7 +869,7 @@ c_sjoin(struct client *client_p, const char *parv[], int parc)
 	if(!keep_old_modes)
 	{
 		chptr->tsinfo = newts;
-		remove_our_simple_modes(chptr);
+		remove_our_simple_modes(chptr, NULL);
 		remove_our_ov_modes(chptr);
 		/* If the source does TS6, also remove all +beI modes */
 		if (!EmptyString(client_p->uid))
@@ -1038,7 +1062,7 @@ c_join(struct client *client_p, const char *parv[], int parc)
 	if(!keep_old_modes)
 	{
 		chptr->tsinfo = newts;
-		remove_our_simple_modes(chptr);
+		remove_our_simple_modes(chptr, NULL);
 		remove_our_ov_modes(chptr);
 		/* Note that JOIN does not remove bans */
 

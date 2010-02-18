@@ -147,7 +147,7 @@ otakeover(struct channel *chptr, int invite)
 
 	part_service(operserv_p, chptr->name);
 
-	remove_our_simple_modes(chptr);
+	remove_our_simple_modes(chptr, NULL);
 	remove_our_ov_modes(chptr);
 
 	remove_our_bans(chptr, NULL, 1, 1, 1);
