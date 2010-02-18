@@ -65,17 +65,18 @@ static struct scommand_handler topic_command = { "TOPIC", c_topic, 0, DLINK_EMPT
 
 static struct _chmode_table
 {
-	unsigned long mode;
-	const char *modestr;
+	unsigned long mode;	/* bitmask of mode */
+	const char *modestr;	/* mode character */
+	int prevent_join;	/* this mode prevents users joining? */
 } chmode_table[] = {
-	{ MODE_INVITEONLY,	"i" },
-	{ MODE_MODERATED,	"m" },
-	{ MODE_NOEXTERNAL,	"n" },
-	{ MODE_PRIVATE,		"p" },
-	{ MODE_SECRET,		"s" },
-	{ MODE_TOPIC,		"t" },
-	{ MODE_REGONLY,		"r" },
-	{ MODE_SSLONLY,		"S" },
+	{ MODE_INVITEONLY,	"i", 1 },
+	{ MODE_MODERATED,	"m", 0 },
+	{ MODE_NOEXTERNAL,	"n", 0 },
+	{ MODE_PRIVATE,		"p", 0 },
+	{ MODE_SECRET,		"s", 0 },
+	{ MODE_TOPIC,		"t", 0 },
+	{ MODE_REGONLY,		"r", 1 },
+	{ MODE_SSLONLY,		"S", 1 },
 	{ 0, NULL }
 };
 	
@@ -603,11 +604,13 @@ c_tb(struct client *client_p, const char *parv[], int parc)
  *   clears our simple channel modes from a channel
  *
  * inputs	- channel to remove simple modes from, service client to issue
- * 		  modebuilds from (or NULL to not)
+ * 		  modebuilds from (or NULL to not), remove only modes
+ * 		  preventing users joining or not
  * outputs	-
  */
 void
-remove_our_simple_modes(struct channel *chptr, struct client *service_p)
+remove_our_simple_modes(struct channel *chptr, struct client *service_p,
+			int prevent_join)
 {
 	if(service_p)
 	{
@@ -617,6 +620,9 @@ remove_our_simple_modes(struct channel *chptr, struct client *service_p)
 
 		for(i = 0; chmode_table[i].mode; i++)
 		{
+			if(prevent_join & !chmode_table[i].prevent_join)
+				continue;
+
 			if(chptr->mode.mode & chmode_table[i].mode)
 				modebuild_add(DIR_DEL, chmode_table[i].modestr, NULL);
 		}
@@ -869,7 +875,7 @@ c_sjoin(struct client *client_p, const char *parv[], int parc)
 	if(!keep_old_modes)
 	{
 		chptr->tsinfo = newts;
-		remove_our_simple_modes(chptr, NULL);
+		remove_our_simple_modes(chptr, NULL, 0);
 		remove_our_ov_modes(chptr);
 		/* If the source does TS6, also remove all +beI modes */
 		if (!EmptyString(client_p->uid))
@@ -1062,7 +1068,7 @@ c_join(struct client *client_p, const char *parv[], int parc)
 	if(!keep_old_modes)
 	{
 		chptr->tsinfo = newts;
-		remove_our_simple_modes(chptr, NULL);
+		remove_our_simple_modes(chptr, NULL, 0);
 		remove_our_ov_modes(chptr);
 		/* Note that JOIN does not remove bans */
 
