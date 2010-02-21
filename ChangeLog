@@ -1,3 +1,16 @@
+leeh        2010/02/21 20:28:39 UTC	(20100221_0-26899)
+  Log:
+  - start storing topic_tsinfo for channels, as when the topic was last reset
+  - follow the rules on receiving a topicburst, ignoring it if the burst
+    topic is newer
+  
+
+  Modified:
+	rserv/trunk/include/channel.h (File Modified) 
+	rserv/trunk/src/channel.c (File Modified) 
+	rserv/trunk/src/s_chanserv.c (File Modified) 
+
+
 leeh        2010/02/18 22:16:20 UTC	(20100218_4-26897)
   Log:
   - forgot to commit prototype alteration for prevent_join in
