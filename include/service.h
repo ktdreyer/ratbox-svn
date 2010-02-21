@@ -67,7 +67,7 @@ void init_services(void);
 extern struct client *add_service();
 extern struct client *find_service_id(const char *name);
 extern void introduce_service(struct client *client_p);
-extern void introduce_service_channels(struct client *client_p);
+extern void introduce_service_channels(struct client *client_p, int send_tb);
 extern void introduce_services(void);
 extern void introduce_services_channels(void);
 extern void reintroduce_service(struct client *client_p);

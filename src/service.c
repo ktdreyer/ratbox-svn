@@ -602,7 +602,7 @@ introduce_service(struct client *target_p)
 }
 
 void
-introduce_service_channels(struct client *target_p)
+introduce_service_channels(struct client *target_p, int send_tb)
 {
 	struct channel *chptr;
 	dlink_node *ptr;
@@ -615,6 +615,13 @@ introduce_service_channels(struct client *target_p)
 				MYUID, (unsigned long) chptr->tsinfo, 
 				chptr->name, chmode_to_string(&chptr->mode), 
 				SVC_UID(target_p));
+
+		if(send_tb && ConnCapTB(server_p) && !EmptyString(chptr->topic))
+			sendto_server(":%s TB %s %lu %s :%s",
+					MYUID, chptr->name,
+					(unsigned long) chptr->topic_tsinfo,
+					chptr->topicwho, chptr->topic);
+
 	}
 }
 
@@ -646,7 +653,7 @@ introduce_services_channels()
 		service_p = ptr->data;
 
 		if(!ServiceDisabled(service_p))
-			introduce_service_channels(ptr->data);
+			introduce_service_channels(ptr->data, 1);
 	}
 }
 
@@ -656,7 +663,7 @@ reintroduce_service(struct client *target_p)
 	sendto_server(":%s QUIT :Updating information", SVC_UID(target_p));
 	del_client(target_p);
 	introduce_service(target_p);
-	introduce_service_channels(target_p);
+	introduce_service_channels(target_p, 0);
 
 	ClearServiceReintroduce(target_p);
 }

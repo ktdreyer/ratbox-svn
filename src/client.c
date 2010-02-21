@@ -898,7 +898,7 @@ c_kill(struct client *client_p, const char *parv[], int parc)
 		 */
 		del_client(target_p);
 		introduce_service(target_p);
-		introduce_service_channels(target_p);
+		introduce_service_channels(target_p, 0);
 
 		return;
 	}

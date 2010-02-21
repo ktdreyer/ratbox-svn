@@ -171,6 +171,7 @@ static int h_chanserv_mode_ban(void *chptr, void *list);
 static int h_chanserv_sjoin_lowerts(void *chptr, void *unused);
 static int h_chanserv_user_login(void *client, void *unused);
 static int h_chanserv_dbsync(void *unused, void *unusedd);
+static int h_chanserv_eob_uplink(void *unused, void *unusedd);
 static void e_chanserv_updatechan(void *unused);
 static void e_chanserv_expirechan(void *unused);
 static void e_chanserv_expireban(void *unused);
@@ -206,6 +207,7 @@ init_s_chanserv(void)
 	hook_add(h_chanserv_sjoin_lowerts, HOOK_CHANNEL_SJOIN_LOWERTS);
 	hook_add(h_chanserv_user_login, HOOK_USERSERV_LOGIN);
 	hook_add(h_chanserv_dbsync, HOOK_DBSYNC);
+	hook_add(h_chanserv_eob_uplink, HOOK_EOB_UPLINK);
 
 	eventAdd("chanserv_updatechan", e_chanserv_updatechan, NULL, 3600);
 	eventAdd("chanserv_expirechan", e_chanserv_expirechan, NULL, 43200);
@@ -1545,6 +1547,37 @@ h_chanserv_user_login(void *v_client_p, void *unused)
 					UID(member_p->client_p));
 			member_p->flags |= MODE_VOICED;
 		}
+	}
+
+	return 0;
+}
+
+/* h_chanserv_eob_uplink()
+ *   Called when we receive EOB from our uplink
+ */
+static int
+h_chanserv_eob_uplink(void *unused, void *unusedd)
+{
+	/* ugh, uplink doesn't support topic bursting */
+	if(!ConnCapTB(server_p))
+	{
+		/* ok, here is the general idea.  When an uplink supports TB
+		 * the generic code for introducing a service to a
+		 * channel will also burst the topic.
+		 *
+		 * If an uplink doesn't support TB -- chanserv will re-issue
+		 * topics for all channels its in, but the other services
+		 * (such as operserv/operbot) will not.  If chanserv joins
+		 * later, it may not enforce topics as it may not think it
+		 * needs to..
+		 *
+		 * There's various other reasons for enabling TB, so just
+		 * ask the users to enable it. --anfl
+		 */
+		mlog("Warning: Connection to uplink does not support topic bursting. "
+			"This will cause problems in some rare situations.");
+
+		/* code for resetting chanserv topics goes here */
 	}
 
 	return 0;
