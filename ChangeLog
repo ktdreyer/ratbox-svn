@@ -1,3 +1,17 @@
+moggie      2010/02/21 23:09:01 UTC	(20100221_3-26905)
+  Log:
+  - Add options for specifying a manual or autofix add_chanfix() channel.
+  - Use remove_our_simple_modes() and remove_our_bans() as replacements for
+    chan_remove_modes() and chan_remove_bans().
+  - The the now obsolete chan_remove_modes() and chan_remove_bans().
+  - Create REVERT command to give a better name for the CHANFIX override
+    option. Tidy unused code in functions for both commands.
+  
+
+  Modified:
+	rserv/trunk/src/s_chanfix.c (File Modified) 
+
+
 leeh        2010/02/21 21:30:27 UTC	(20100221_2-26903)
   Log:
   - new param to introduce_service_channels(), controlling whether it sends a
