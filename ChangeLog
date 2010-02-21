@@ -1,3 +1,20 @@
+leeh        2010/02/21 21:30:27 UTC	(20100221_2-26903)
+  Log:
+  - new param to introduce_service_channels(), controlling whether it sends a
+    TB or not, and support sending a TB when thats true and our uplink
+    supports it too
+  - introduce channels with TB on initial burst only
+  - make chanserv whinge when we get an EOB from our uplink and it doesn't
+    support TB
+  
+
+  Modified:
+	rserv/trunk/include/service.h (File Modified) 
+	rserv/trunk/src/client.c (File Modified) 
+	rserv/trunk/src/s_chanserv.c (File Modified) 
+	rserv/trunk/src/service.c (File Modified) 
+
+
 leeh        2010/02/21 20:34:08 UTC	(20100221_1-26901)
   Log:
   - add in tracking for whether our uplink supports TB
