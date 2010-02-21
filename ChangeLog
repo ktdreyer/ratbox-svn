@@ -1,3 +1,13 @@
+leeh        2010/02/21 20:34:08 UTC	(20100221_1-26901)
+  Log:
+  - add in tracking for whether our uplink supports TB
+  
+
+  Modified:
+	rserv/trunk/include/io.h (File Modified) 
+	rserv/trunk/src/scommand.c (File Modified) 
+
+
 leeh        2010/02/21 20:28:39 UTC	(20100221_0-26899)
   Log:
   - start storing topic_tsinfo for channels, as when the topic was last reset
