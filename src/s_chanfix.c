@@ -66,6 +66,7 @@ static dlink_list chanfix_list;
 static int o_chanfix_cfjoin(struct client *, struct lconn *, const char **, int);
 static int o_chanfix_cfpart(struct client *, struct lconn *, const char **, int);
 static int o_chanfix_chanfix(struct client *, struct lconn *, const char **, int);
+static int o_chanfix_revert(struct client *, struct lconn *, const char **, int);
 static int o_chanfix_check(struct client *, struct lconn *, const char **, int);
 static int o_chanfix_set(struct client *, struct lconn *, const char **, int);
 static int o_chanfix_status(struct client *, struct lconn *, const char **, int);
@@ -75,7 +76,8 @@ static struct service_command chanfix_command[] =
 	{ "CFJOIN",	&o_chanfix_cfjoin,	1, NULL, 1, 0L, 0, 1, 0 },
 	{ "CFPART",	&o_chanfix_cfpart,	1, NULL, 1, 0L, 0, 1, 0 },
 	/*{ "SCORE",&o_chanfix_score,	1, NULL, 1, 0L, 0, 1, 0 },*/
-	{ "CHANFIX",&o_chanfix_chanfix,	1, NULL, 1, 0L, 0, 1, 0 },
+	{ "CHANFIX",	&o_chanfix_chanfix,	1, NULL, 1, 0L, 0, 1, 0 },
+	{ "REVERT",	&o_chanfix_revert,	1, NULL, 1, 0L, 0, 1, 0 },
 	/*{ "HISTORY",&o_chanfix_history,	1, NULL, 1, 0L, 0, 1, 0 },
 	{ "INFO",	&o_chanfix_info,	1, NULL, 1, 0L, 0, 1, 0 },
 	{ "OPLIST",	&o_chanfix_oplist,	1, NULL, 1, 0L, 0, 1, 0 },
@@ -108,13 +110,11 @@ static void e_chanfix_score_channels(void *unused);
 
 /* Internal chanfix functions */
 static void chan_takeover(struct channel *, int);
-static int chan_remove_modes(struct channel *, char);
-static int chan_remove_bans(struct channel *, char);
 #if 0
 static time_t seconds_to_midnight(void);
 #endif
 
-static int add_chanfix(struct channel *chptr);
+static int add_chanfix(struct channel *chptr, int manualfix);
 static void del_chanfix(struct channel *chptr);
 
 void
@@ -257,7 +257,7 @@ o_chanfix_chanfix(struct client *client_p, struct lconn *conn_p, const char *par
 {
 	struct channel *chptr;
 	int override = 0;
-	dlink_node *ptr;
+	dlink_node *ptr, *next_ptr;
 	struct chmember *msptr;
 
 	if(!valid_chname(parv[0]))
@@ -279,50 +279,28 @@ o_chanfix_chanfix(struct client *client_p, struct lconn *conn_p, const char *par
 		return 0;
 	}
 
-	/* Check if anyone is opped, if they are we don't do anything unless someone forced us. */
+	/* Check if anyone is opped, if they are we don't do anything. */
 	if(dlink_list_length(&chptr->users_opped) > 0)
 	{
-		/* Check whether the OVERRIDE flag has been given */
-		if (parc > 1)
-		{
-			if (!irccmp(parv[1], "override") || parv[1][0] == '!')
-			{
-				if(chptr->tsinfo < 2)
-				{
-					service_send(chanfix_p, client_p, conn_p,
-									"Channel '%s' TS too low for takeover", parv[0]);
-					return 0;
-				}
-				/* override command has been given, so we should take-over the channel */
-				chan_takeover(chptr, 0);
-				override = 1;
-				service_err_chan(chanfix_p, chptr, SVC_CF_CHANFIXINPROG);
-			}
-		}
-		else
-		{
-			service_snd(chanfix_p, client_p, conn_p, SVC_CF_HASOPPEDUSERS, parv[0]);
-			return 0;
-		}
+		service_snd(chanfix_p, client_p, conn_p, SVC_CF_HASOPPEDUSERS, parv[0]);
+		return 0;
 	}
 
+	service_err_chan(chanfix_p, chptr, SVC_CF_CHANFIXINPROG);
 
 	/*if(!dlink_find(chanfix_p, &chptr->services))*/
 
-	/* override command will have already joined chanfix for us */
-	if(!override)
-		join_service(chanfix_p, parv[0], chptr->tsinfo, NULL, 0);
+	join_service(chanfix_p, parv[0], chptr->tsinfo, NULL, 0);
 
-	chan_remove_modes(chptr, '0');
-	chan_remove_bans(chptr, '0');
+	remove_our_simple_modes(chptr, chanfix_p, 1);
+	remove_our_bans(chptr, chanfix_p, 1, 0, 0);
  
 	service_snd(chanfix_p, client_p, conn_p, SVC_ISSUEDFORBY,
 				chanfix_p->name, "CHANFIX", parv[0], client_p->name);
 
-	/* for now we'll just op everyone */
+	/* for testing we'll just op everyone */
 	modebuild_start(chanfix_p, chptr);
-	/* Do I need to use DLINK_FOREACH_SAFE here? */
-	DLINK_FOREACH(ptr, chptr->users_unopped.head)
+	DLINK_FOREACH_SAFE(ptr, next_ptr, chptr->users_unopped.head)
 	{
 		msptr = ptr->data;
 		op_chmember(msptr);
@@ -330,17 +308,70 @@ o_chanfix_chanfix(struct client *client_p, struct lconn *conn_p, const char *par
 	}
 	modebuild_finish();
 
-	/* Once the channel has been taken over, we should add it to the list of channels that need
-	 * to be fixed based on their scores.
-	 */
-
 	part_service(chanfix_p, parv[0]);
 
-	add_chanfix(chptr);
+	/*add_chanfix(chptr, 1);*/
 
 	return 0;
 }
 
+static int
+o_chanfix_revert(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
+{
+	struct channel *chptr;
+	int override = 0;
+	dlink_node *ptr, *next_ptr;
+	struct chmember *msptr;
+
+	if(!valid_chname(parv[0]))
+	{
+		service_snd(chanfix_p, client_p, conn_p, SVC_IRC_CHANNELINVALID, parv[0]);
+		return 0;
+	}
+
+	if((chptr = find_channel(parv[0])) == NULL)
+	{
+		service_snd(chanfix_p, client_p, conn_p, SVC_IRC_NOSUCHCHANNEL, parv[0]);
+		return 0;
+	}
+
+	if(dlink_list_length(&chptr->users) < config_file.cf_min_clients)
+	{
+		/* Not enough users in this channel */
+		service_snd(chanfix_p, client_p, conn_p, SVC_CF_NOTENOUGHUSERS, parv[0]);
+		return 0;
+	}
+
+	if(chptr->tsinfo < 2)
+	{
+		service_send(chanfix_p, client_p, conn_p,
+						"Channel '%s' TS too low for takeover", parv[0]);
+		return 0;
+	}
+
+	/* Everything looks okay, execute the takeover. */
+	chan_takeover(chptr, 0);
+	service_err_chan(chanfix_p, chptr, SVC_CF_CHANFIXINPROG);
+
+	service_snd(chanfix_p, client_p, conn_p, SVC_ISSUEDFORBY,
+				chanfix_p->name, "REVERT", parv[0], client_p->name);
+
+	/* for testing we'll just op everyone */
+	modebuild_start(chanfix_p, chptr);
+	DLINK_FOREACH_SAFE(ptr, next_ptr, chptr->users_unopped.head)
+	{
+		msptr = ptr->data;
+		op_chmember(msptr);
+		modebuild_add(DIR_ADD, "o", msptr->client_p->name);
+	}
+	modebuild_finish();
+
+	part_service(chanfix_p, parv[0]);
+
+	/*add_chanfix(chptr, 1);*/
+
+	return 0;
+}
 
 
 static int
@@ -519,96 +550,6 @@ o_chanfix_status(struct client *client_p, struct lconn *conn_p, const char *parv
 	return 0;
 }
 
-/* Removes modes from a channel that might be preventing regular users
- * from getting in.
- */
-static int
-chan_remove_modes(struct channel *chptr, char showmsg)
-{
-	/* TODO: Try making this function more like chanserv::clearmodes */
-	char modelist[] = "ilkrS", flag = '0';
-	int i;
-	int masklist[] = {
-		MODE_INVITEONLY,
-		MODE_LIMIT,
-		MODE_KEY,
-		MODE_REGONLY,
-		MODE_SSLONLY
-	};
-
-	modebuild_start(chanfix_p, chptr);
-
-	for(i = 0; i < sizeof(modelist)-1; i++)
-	{
-		if(chptr->mode.mode & masklist[i])
-		{
-			modebuild_add(DIR_DEL, &modelist[i], NULL);
-			chptr->mode.mode &= ~masklist[i];
-			flag = '1';
-
-			if(masklist[i] == MODE_KEY)
-			{
-				chptr->mode.key[0] = '\0';
-			}
-			else if(masklist[i] == MODE_LIMIT)
-			{
-				chptr->mode.limit = 0;
-			}
-		}
-	}
-
-	if(flag == '1')
-	{
-		join_service(chanfix_p, chptr->name, chptr->tsinfo, NULL, 0);
-		modebuild_finish();
-		if(showmsg == '1')
-		{
-			service_err_chan(chanfix_p, chptr, SVC_CF_MODESREMOVED);
-		}
-		return 1;
-	}
-
-	return 0;
-}
-
-/* Remove only the bans from a channel in case they're preventing people
- * from getting in.
- */
-static int
-chan_remove_bans(struct channel *chptr, char showmsg)
-{
-	dlink_node *ptr, *next_ptr;
-
-	if(dlink_list_length(&chptr->bans) < 1)
-	{
-		return 0;
-	}
-
-	join_service(chanfix_p, chptr->name, chptr->tsinfo, NULL, 0);
-
-	modebuild_start(chanfix_p, chptr);
-
-	DLINK_FOREACH(ptr, chptr->bans.head)
-	{
-		modebuild_add(DIR_DEL, "b", ptr->data);
-	}
-
-	DLINK_FOREACH_SAFE(ptr, next_ptr, chptr->bans.head)
-	{
-		my_free(ptr->data);
-		dlink_destroy(ptr, &chptr->bans);
-	}
-
-	/* apply the bans removal */
-	modebuild_finish();
-
-	if(showmsg == '1')
-	{
-		service_err_chan(chanfix_p, chptr, SVC_CF_BANSREMOVED, chptr->name);
-	}
-
-	return 1;
-}
 
 #if 0
 static time_t
@@ -622,7 +563,7 @@ seconds_to_midnight(void)
 #endif
 
 static int
-add_chanfix(struct channel *chptr)
+add_chanfix(struct channel *chptr, int manualfix)
 {
 	struct chanfix_channel *af_chan;
 
@@ -631,7 +572,10 @@ add_chanfix(struct channel *chptr)
 
 	af_chan = my_calloc(1, sizeof(struct chanfix_channel));
 	af_chan->chptr = chptr;
-	af_chan->flags |= CF_STATUS_AUTOFIX;
+	if(manualfix)
+		af_chan->flags |= CF_STATUS_MANUALFIX;
+	else
+		af_chan->flags |= CF_STATUS_AUTOFIX;
 	af_chan->time_fix_started = CURRENT_TIME;
 	af_chan->time_prev_attempt = 0;
 
