@@ -29,6 +29,7 @@ struct channel
 	char topicwho[NICKUSERHOSTLEN+1];
 
 	time_t tsinfo;
+	time_t topic_tsinfo;
 
 	dlink_list users;		/* users in this channel */
 	dlink_list users_opped;		/* subset of users who are opped */

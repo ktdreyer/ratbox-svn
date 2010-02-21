@@ -723,6 +723,7 @@ enable_inhabit(struct chan_reg *chreg_p, struct channel *chptr, int autojoin)
 				SVC_UID(chanserv_p), chptr->name, chreg_p->topic);
 		strlcpy(chptr->topic, chreg_p->topic, sizeof(chptr->topic));
 		strlcpy(chptr->topicwho, MYNAME, sizeof(chptr->topicwho));
+		chptr->topic_tsinfo = CURRENT_TIME;
 	}
 }
 
@@ -974,6 +975,7 @@ e_chanserv_enforcetopic(void *unused)
 				SVC_UID(chanserv_p), chptr->name, chreg_p->topic);
 		strlcpy(chptr->topic, chreg_p->topic, sizeof(chptr->topic));
 		strlcpy(chptr->topicwho, MYNAME, sizeof(chptr->topicwho));
+		chptr->topic_tsinfo = CURRENT_TIME;
 	}
 	HASH_WALK_END
 }
@@ -2962,6 +2964,7 @@ s_chan_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 						SVC_UID(chanserv_p), chptr->name, chreg_p->topic);
 				strlcpy(chptr->topic, chreg_p->topic, sizeof(chptr->topic));
 				strlcpy(chptr->topicwho, MYNAME, sizeof(chptr->topicwho));
+				chptr->topic_tsinfo = CURRENT_TIME;
 			}
 		}
 
