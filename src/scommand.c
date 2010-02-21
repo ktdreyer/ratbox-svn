@@ -246,6 +246,7 @@ static struct capab_entry
 } capab_table[] = {
 	{ "SERVICES",	CONN_CAP_SERVICE	},
 	{ "RSFNC",	CONN_CAP_RSFNC		},
+	{ "TB",		CONN_CAP_TB		},
 	{ "\0", 0 }
 };
 
