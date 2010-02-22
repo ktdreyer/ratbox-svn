@@ -172,6 +172,7 @@ static int h_chanserv_sjoin_lowerts(void *chptr, void *unused);
 static int h_chanserv_user_login(void *client, void *unused);
 static int h_chanserv_dbsync(void *unused, void *unusedd);
 static int h_chanserv_eob_uplink(void *unused, void *unusedd);
+static int h_chanserv_topic(void *unused, void *unusedd);
 static void e_chanserv_updatechan(void *unused);
 static void e_chanserv_expirechan(void *unused);
 static void e_chanserv_expireban(void *unused);
@@ -205,6 +206,7 @@ init_s_chanserv(void)
 	hook_add(h_chanserv_mode_simple, HOOK_CHANNEL_MODE_SIMPLE);
 	hook_add(h_chanserv_mode_ban, HOOK_CHANNEL_MODE_BAN);
 	hook_add(h_chanserv_sjoin_lowerts, HOOK_CHANNEL_SJOIN_LOWERTS);
+	hook_add(h_chanserv_topic, HOOK_CHANNEL_TOPIC);
 	hook_add(h_chanserv_user_login, HOOK_USERSERV_LOGIN);
 	hook_add(h_chanserv_dbsync, HOOK_DBSYNC);
 	hook_add(h_chanserv_eob_uplink, HOOK_EOB_UPLINK);
@@ -955,6 +957,10 @@ e_chanserv_enforcetopic(void *unused)
 	dlink_node *ptr;
 	int i;
 
+	/* topics are enforced automatically */
+	if(config_file.cenforcetopic_frequency == 0)
+		return;
+
 	HASH_WALK(i, MAX_CHANNEL_TABLE, ptr, chan_reg_table)
 	{
 		chreg_p = ptr->data;
@@ -1578,6 +1584,37 @@ h_chanserv_eob_uplink(void *unused, void *unusedd)
 			"This will cause problems in some rare situations.");
 
 		/* code for resetting chanserv topics goes here */
+	}
+
+	return 0;
+}
+
+/* h_chanserv_topic()
+ *   Called when the topic on a channel changes
+ */
+static int
+h_chanserv_topic(void *v_chptr, void *unused)
+{
+	struct channel *chptr = (struct channel *) v_chptr;
+	struct chan_reg *chreg_p;
+
+	/* enforcetopic_time of 0 indicates immediate enforcement, all
+	 * others are handled by an event
+	 */
+	if(config_file.cenforcetopic_frequency > 0)
+		return 0;
+
+	if((chreg_p = find_channel_reg(NULL, chptr->name)) == NULL)
+		return 0;
+
+	/* we have a topic to enforce, and channel one is different.. */
+	if(!EmptyString(chreg_p->topic) && irccmp(chreg_p->topic, chptr->topic))
+	{
+		sendto_server(":%s TOPIC %s :%s",
+				SVC_UID(chanserv_p), chptr->name, chreg_p->topic);
+		strlcpy(chptr->topic, chreg_p->topic, sizeof(chptr->topic));
+		strlcpy(chptr->topicwho, MYNAME, sizeof(chptr->topicwho));
+		chptr->topic_tsinfo = CURRENT_TIME;
 	}
 
 	return 0;

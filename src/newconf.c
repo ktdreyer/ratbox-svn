@@ -970,13 +970,6 @@ conf_set_chanserv_enforcetopic(void *data)
 {
 	time_t val = *(time_t *) data;
 
-	if(val < 60)
-	{
-		conf_report_error("Ignoring chanserv::enforcetopic_frequency "
-			"-- invalid duration");
-		return;
-	}
-
 	if(config_file.cenforcetopic_frequency == val)
 		return;
 

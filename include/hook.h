@@ -12,6 +12,7 @@
 #define HOOK_CHANNEL_MODE_BAN		12	/* +b on a channel */
 #define HOOK_CHANNEL_MODE_SIMPLE	14	/* +ntsimplkS */
 #define HOOK_CHANNEL_DESTROY		16	/* about to destroy a chptr */
+#define HOOK_CHANNEL_TOPIC		17	/* TOPIC/TB on a channel */
 
 #define HOOK_EOB_UPLINK			18	/* uplink finished bursting */
 #define HOOK_EOB_SERVER			20	/* a server finished bursting
