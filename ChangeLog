@@ -1,3 +1,17 @@
+leeh        2010/02/22 20:15:32 UTC	(20100222_1-26913)
+  Log:
+  - add a hook for when the topic changes on a channel
+  - support enforcetopic_frequency of 0 to enforce automatically on a topic
+    change
+  
+
+  Modified:
+	rserv/trunk/include/hook.h (File Modified) 
+	rserv/trunk/src/channel.c (File Modified) 
+	rserv/trunk/src/newconf.c (File Modified) 
+	rserv/trunk/src/s_chanserv.c (File Modified) 
+
+
 leeh        2010/02/22 19:09:39 UTC	(20100222_0-26909)
   Log:
   - ensure we clear MODE_LIMIT and MODE_KEY from the bitmask in
