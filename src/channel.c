@@ -642,10 +642,16 @@ remove_our_simple_modes(struct channel *chptr, struct client *service_p,
 		}
 
 		if(chptr->mode.key[0])
+		{
 			modebuild_add(DIR_DEL, "k", "*");
+			chptr->mode.mode &= ~MODE_KEY;
+		}
 
 		if(chptr->mode.limit)
+		{
 			modebuild_add(DIR_DEL, "l", NULL);
+			chptr->mode.mode &= ~MODE_LIMIT;
+		}
 
 		modebuild_finish();
 	}
