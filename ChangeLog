@@ -1,3 +1,13 @@
+leeh        2010/02/23 21:45:02 UTC	(20100223_0-26915)
+  Log:
+  - make the hook for enforcing topics only work when chanserv is in the
+    channel
+  
+
+  Modified:
+	rserv/trunk/src/s_chanserv.c (File Modified) 
+
+
 leeh        2010/02/22 20:15:32 UTC	(20100222_1-26913)
   Log:
   - add a hook for when the topic changes on a channel
