@@ -1604,6 +1604,10 @@ h_chanserv_topic(void *v_chptr, void *unused)
 	if(config_file.cenforcetopic_frequency > 0)
 		return 0;
 
+	/* chanserv only enforces topics when in the channel */
+	if(dlink_find(chanserv_p, &chptr->services) == NULL)
+		return 0;
+
 	if((chreg_p = find_channel_reg(NULL, chptr->name)) == NULL)
 		return 0;
 
