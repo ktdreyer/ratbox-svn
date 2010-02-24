@@ -1,3 +1,21 @@
+moggie      2010/02/24 01:57:58 UTC	(20100224_0-26917)
+  Log:
+  - Make find_channel_reg() non-static and external for use by chanfix.
+  - Add SVC_CF_CHANSERVCHANNEL translation string.
+  - Remove "invite only" parameter to chan_takeover() as we'll never use it.
+  - Add update_channel_scores().
+  - Outline e_chanfix_score_channels().
+  
+
+  Modified:
+	rserv/trunk/include/langs.h (File Modified) 
+	rserv/trunk/include/s_chanserv.h (File Modified) 
+	rserv/trunk/src/langs.c (File Modified) 
+	rserv/trunk/src/messages.c (File Modified) 
+	rserv/trunk/src/s_chanfix.c (File Modified) 
+	rserv/trunk/src/s_chanserv.c (File Modified) 
+
+
 leeh        2010/02/23 21:45:02 UTC	(20100223_0-26915)
   Log:
   - make the hook for enforcing topics only work when chanserv is in the
