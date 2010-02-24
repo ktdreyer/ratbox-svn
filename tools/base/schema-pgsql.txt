@@ -185,7 +185,19 @@ CREATE TABLE memos (
 );
 
 CREATE TABLE cf_temp_score (
-    chname VARCHAR(CHANNELLEN),
-    userhost VARCHAR(CONVERT_USER_HOST),
-    day_ts INTEGER
+	chname VARCHAR(CHANNELLEN),
+	userhost VARCHAR(CONVERT_USER_HOST),
+	day_ts INTEGER
+);
+
+CREATE TABLE cf_userhost (
+	id SERRIAL,
+	userhost VARCHAR(CONVERT_USER_HOST),
+	PRIMARY KEY(id)
+);
+
+CREATE TABLE cf_channel (
+	id SERRIAL,
+	chname VARCHAR(CHANNELLEN),
+	PRIMARY KEY(id)
 );
