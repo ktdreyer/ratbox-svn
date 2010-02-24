@@ -1,3 +1,14 @@
+moggie      2010/02/24 17:46:43 UTC	(20100224_4-26925)
+  Log:
+  - Add cf_score table support in DB.
+  
+
+  Modified:
+	rserv/trunk/tools/base/schema-mysql.txt (File Modified) 
+	rserv/trunk/tools/base/schema-pgsql.txt (File Modified) 
+	rserv/trunk/tools/base/schema-sqlite.txt (File Modified) 
+
+
 moggie      2010/02/24 13:24:50 UTC	(20100224_3-26923)
   Log:
   - Add cf_userhost and cf_channel tables.
