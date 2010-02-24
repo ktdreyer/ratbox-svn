@@ -169,10 +169,10 @@ chan_takeover(struct channel *chptr)
 	}
 }
 
-/* Function for updating the scores of the given channel.
+/* Function for collecting chanop scores for a given channel.
  */
 static void
-update_channel_scores(struct channel *chptr, time_t timestamp)
+collect_channel_scores(struct channel *chptr, time_t timestamp)
 {
 	struct chmember *msptr;
 	dlink_node *ptr;
@@ -192,6 +192,58 @@ update_channel_scores(struct channel *chptr, time_t timestamp)
 	}
 }
 
+/* prerequisite: chname should already be in lower case from when it was
+ * entered into the DB.
+ */
+static unsigned long
+get_userhost_id(const char *userhost)
+{
+	unsigned long userhost_id;
+	struct rsdb_table data;
+
+	rsdb_exec_fetch(&data, "SELECT id FROM cf_userhost WHERE userhost='%Q'",
+						userhost);
+
+	if(data.row_count == 0)
+	{
+		rsdb_exec(NULL, "INSERT INTO cf_userhost (userhost) VALUES(LOWER('%Q'))",
+						userhost);
+		rsdb_exec_fetch(&data, "SELECT id FROM cf_userhost WHERE userhost='%Q'",
+						userhost);
+	}
+
+	userhost_id = atoi(data.row[0][0]);
+	rsdb_exec_fetch_end(&data);
+
+	return userhost_id;
+}
+
+/* prerequisite: chname should already be in lower case from when it was
+ * entered into the DB.
+ */
+static unsigned long
+get_channel_id(const char *channel)
+{
+	unsigned long channel_id;
+	struct rsdb_table data;
+
+	rsdb_exec_fetch(&data, "SELECT id FROM cf_channel WHERE chname='%Q'",
+						channel);
+
+	if(data.row_count == 0)
+	{
+		rsdb_exec(NULL, "INSERT INTO cf_channel (chname) VALUES(LOWER('%Q'))",
+						channel);
+		rsdb_exec_fetch(&data, "SELECT id FROM cf_channel WHERE chname='%Q'",
+						channel);
+	}
+
+	channel_id = atoi(data.row[0][0]);
+	rsdb_exec_fetch_end(&data);
+
+	return channel_id;
+}
+
 /* General function to manage how we iterate over all the channels
  * gathering score data.
  */
@@ -200,7 +252,9 @@ e_chanfix_score_channels(void *unused)
 {
 	struct channel *chptr;
 	dlink_node *ptr;
-	time_t timestamp = CURRENT_TIME;
+	time_t min_ts, timestamp = CURRENT_TIME;
+	struct rsdb_table chanop_data;
+	unsigned long i, channel_id, userhost_id;
 
 	DLINK_FOREACH(ptr, channel_list.head)
 	{
@@ -219,11 +273,52 @@ e_chanfix_score_channels(void *unused)
 		if((dlink_list_length(&chptr->users) >= config_file.cf_min_clients) &&
 				(&chptr->users_opped.head != NULL))
 		{
-			mlog("Scoring opped clients in: %s", chptr->name);
-			update_channel_scores(chptr, timestamp);
+			mlog("debug: Scoring opped clients in: %s", chptr->name);
+			collect_channel_scores(chptr, timestamp);
 		}
 	}
 
+	/* Done collecting chanops, execute the collation routines. */
+	rsdb_exec_fetch(&chanop_data, "SELECT MIN(timestamp) FROM cf_temp_score");
+
+	if(chanop_data.row_count == 0)
+	{
+		mlog("warning: Unable to retrieve min timestamp for ChanFix collation.");
+		rsdb_exec_fetch_end(&chanop_data);
+		return;
+	}
+
+	min_ts = atoi(chanop_data.row[0][0]);
+	rsdb_exec_fetch_end(&chanop_data);
+
+	/* Using the min_ts timestamp from above, select the distinct channels and
+	 * userhosts from the temporary table. */
+
+	rsdb_exec_fetch(&chanop_data, "SELECT DISTINCT chname, userhost FROM cf_temp_score "
+							"WHERE timestamp='%lu'", min_ts);
+
+	if(chanop_data.row_count == 0)
+	{
+		mlog("warning: Unable to retrieve distinct channels and userhosts for "
+				"ChanFix collation.");
+		rsdb_exec_fetch_end(&chanop_data);
+		return;
+	}
+
+	for(i = 0; i < chanop_data.row_count; i++)
+	{
+		channel_id = get_channel_id(chanop_data.row[i][0]);
+		userhost_id = get_userhost_id(chanop_data.row[i][1]);
+
+		rsdb_exec(NULL, "INSERT INTO cf_score (channel_id, userhost_id, timestamp) "
+						"VALUES('%lu', '%lu', '%lu')",
+						channel_id, userhost_id, timestamp);
+	}
+
+	rsdb_exec_fetch_end(&chanop_data);
+
+	/* Delete these timestamp entries when we're done. */
+	rsdb_exec(NULL, "DELETE FROM cf_temp_score WHERE timestamp='%lu'", min_ts);
 }
 
 
