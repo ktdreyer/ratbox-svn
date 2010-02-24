@@ -1,3 +1,15 @@
+moggie      2010/02/24 02:24:04 UTC	(20100224_1-26919)
+  Log:
+  - Create cf_temp_score table.
+  
+
+  Modified:
+	rserv/trunk/src/s_chanfix.c (File Modified) 
+	rserv/trunk/tools/base/schema-mysql.txt (File Modified) 
+	rserv/trunk/tools/base/schema-pgsql.txt (File Modified) 
+	rserv/trunk/tools/base/schema-sqlite.txt (File Modified) 
+
+
 moggie      2010/02/24 01:57:58 UTC	(20100224_0-26917)
   Log:
   - Make find_channel_reg() non-static and external for use by chanfix.
