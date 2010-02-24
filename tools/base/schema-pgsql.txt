@@ -201,3 +201,11 @@ CREATE TABLE cf_channel (
 	chname VARCHAR(CHANNELLEN),
 	PRIMARY KEY(id)
 );
+
+CREATE TABLE cf_score (
+	channel_id BIGINT NOT NULL,
+	userhost_id BIGINT NOT NULL,
+	day_ts INTEGER,
+	FOREIGN KEY (channel_id) REFERENCES cf_channel (id) ON DELETE CASCADE,
+	FOREIGN KEY (userhost_id) REFERENCES cf_userhost (id) ON DELETE CASCADE
+);
