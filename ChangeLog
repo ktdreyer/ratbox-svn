@@ -1,3 +1,19 @@
+moggie      2010/02/24 22:46:35 UTC	(20100224_6-26931)
+  Log:
+  - Rename update_channel_scores() to collect_channel_scores().
+  - Add prototype chanop scoring functionality and collate cf_temp_score data
+    into cf_score.
+  - Create get_channel_id() and get_userhost_id() functions for inserting
+    and retrieving channel / userhost IDs from the DB.
+  
+
+  Modified:
+	rserv/trunk/src/s_chanfix.c (File Modified) 
+	rserv/trunk/tools/base/schema-mysql.txt (File Modified) 
+	rserv/trunk/tools/base/schema-pgsql.txt (File Modified) 
+	rserv/trunk/tools/base/schema-sqlite.txt (File Modified) 
+
+
 moggie      2010/02/24 18:22:25 UTC	(20100224_5-26927)
   Log:
   - Add primary key to cf_score and cf_temp_score tables.
