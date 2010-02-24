@@ -1,3 +1,14 @@
+moggie      2010/02/24 13:24:50 UTC	(20100224_3-26923)
+  Log:
+  - Add cf_userhost and cf_channel tables.
+  
+
+  Modified:
+	rserv/trunk/tools/base/schema-mysql.txt (File Modified) 
+	rserv/trunk/tools/base/schema-pgsql.txt (File Modified) 
+	rserv/trunk/tools/base/schema-sqlite.txt (File Modified) 
+
+
 moggie      2010/02/24 13:01:34 UTC	(20100224_2-26921)
   Log:
   - Rename cf_temp_score.channel to chname for consistency.
