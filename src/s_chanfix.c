@@ -187,11 +187,12 @@ update_channel_scores(struct channel *chptr)
 				msptr->client_p->user->host);
 
 
-		mlog("channel: %s, nickname: %s, userhost: %s", chptr->name,
+		/*mlog("channel: %s, nickname: %s, userhost: %s", chptr->name,
 						msptr->client_p->name,
 						userhost);
+		*/
 
-		/*rsdb_exec(NULL, "INSERT INTO cf_temp_score (userhost, channel, datetime) "
+		/*rsdb_exec(NULL, "INSERT INTO cf_temp_score (channel, userhost, day_ts) "
 						"VALUES(LOWER('%Q'), LOWER('%Q'), '%lu')",
 						chptr->name, userhost, DAYS_SINCE_EPOCH);
 		*/

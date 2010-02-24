@@ -163,3 +163,8 @@ CREATE TABLE memos (
 	text TEXT
 );
 
+CREATE TABLE cf_temp_score (
+    channel TEXT,
+    userhost TEXT,
+    day_ts INTEGER
+);

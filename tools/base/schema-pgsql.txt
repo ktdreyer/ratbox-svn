@@ -184,3 +184,8 @@ CREATE TABLE memos (
 	FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 );
 
+CREATE TABLE cf_temp_score (
+    channel VARCHAR(CHANNELLEN),
+    userhost VARCHAR(CONVERT_NICK_USER_HOST),
+    day_ts INTEGER
+);

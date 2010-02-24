@@ -177,3 +177,8 @@ CREATE TABLE memos(
 	PRIMARY KEY(id)
 );
 
+CREATE TABLE cf_temp_score (
+	channel VARCHAR(CHANNELLEN),
+	userhost VARCHAR(CONVERT_NICK_USER_HOST),
+	day_ts INT UNSIGNED
+);
