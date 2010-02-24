@@ -1,3 +1,18 @@
+moggie      2010/02/24 13:01:34 UTC	(20100224_2-26921)
+  Log:
+  - Rename cf_temp_score.channel to chname for consistency.
+  - Create CONVERT_USER_HOST for storing user@hosts with the correct size.
+  - Update generate-schema.pl with CONVERT_USER_HOST value.
+  
+
+  Modified:
+	rserv/trunk/src/s_chanfix.c (File Modified) 
+	rserv/trunk/tools/base/schema-mysql.txt (File Modified) 
+	rserv/trunk/tools/base/schema-pgsql.txt (File Modified) 
+	rserv/trunk/tools/base/schema-sqlite.txt (File Modified) 
+	rserv/trunk/tools/generate-schema.pl (File Modified) 
+
+
 moggie      2010/02/24 02:24:04 UTC	(20100224_1-26919)
   Log:
   - Create cf_temp_score table.
