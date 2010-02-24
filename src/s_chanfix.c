@@ -172,7 +172,7 @@ chan_takeover(struct channel *chptr)
 /* Function for updating the scores of the given channel.
  */
 static void
-update_channel_scores(struct channel *chptr)
+update_channel_scores(struct channel *chptr, time_t timestamp)
 {
 	struct chmember *msptr;
 	dlink_node *ptr;
@@ -186,9 +186,9 @@ update_channel_scores(struct channel *chptr)
 				msptr->client_p->user->username,
 				msptr->client_p->user->host);
 
-		rsdb_exec(NULL, "INSERT INTO cf_temp_score (chname, userhost, day_ts) "
+		rsdb_exec(NULL, "INSERT INTO cf_temp_score (chname, userhost, timestamp) "
 						"VALUES(LOWER('%Q'), LOWER('%Q'), '%lu')",
-						chptr->name, userhost, DAYS_SINCE_EPOCH);
+						chptr->name, userhost, timestamp);
 	}
 }
 
@@ -200,6 +200,7 @@ e_chanfix_score_channels(void *unused)
 {
 	struct channel *chptr;
 	dlink_node *ptr;
+	time_t timestamp = CURRENT_TIME;
 
 	DLINK_FOREACH(ptr, channel_list.head)
 	{
@@ -219,7 +220,7 @@ e_chanfix_score_channels(void *unused)
 				(&chptr->users_opped.head != NULL))
 		{
 			mlog("Scoring opped clients in: %s", chptr->name);
-			update_channel_scores(chptr);
+			update_channel_scores(chptr, timestamp);
 		}
 	}
 
