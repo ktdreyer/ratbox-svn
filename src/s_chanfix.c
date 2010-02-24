@@ -186,17 +186,9 @@ update_channel_scores(struct channel *chptr)
 				msptr->client_p->user->username,
 				msptr->client_p->user->host);
 
-
-		/*mlog("channel: %s, nickname: %s, userhost: %s", chptr->name,
-						msptr->client_p->name,
-						userhost);
-		*/
-
-		/*rsdb_exec(NULL, "INSERT INTO cf_temp_score (channel, userhost, day_ts) "
+		rsdb_exec(NULL, "INSERT INTO cf_temp_score (chname, userhost, day_ts) "
 						"VALUES(LOWER('%Q'), LOWER('%Q'), '%lu')",
 						chptr->name, userhost, DAYS_SINCE_EPOCH);
-		*/
-
 	}
 }
 
@@ -226,6 +218,7 @@ e_chanfix_score_channels(void *unused)
 		if((dlink_list_length(&chptr->users) >= config_file.cf_min_clients) &&
 				(&chptr->users_opped.head != NULL))
 		{
+			mlog("Scoring opped clients in: %s", chptr->name);
 			update_channel_scores(chptr);
 		}
 	}

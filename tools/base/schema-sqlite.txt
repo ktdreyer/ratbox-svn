@@ -164,7 +164,7 @@ CREATE TABLE memos (
 );
 
 CREATE TABLE cf_temp_score (
-    channel TEXT,
+    chname TEXT,
     userhost TEXT,
     day_ts INTEGER
 );

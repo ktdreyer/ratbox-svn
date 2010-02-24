@@ -63,6 +63,9 @@ foreach my $i (@schemas)
 	$special = $vals{"NICKLEN"} + $vals{"USERLEN"} + $vals{"HOSTLEN"} + 2;
 	$input =~ s/CONVERT_NICK_USER_HOST/$special/g;
 
+	$special = $vals{"USERLEN"} + $vals{"HOSTLEN"} + 1;
+	$input =~ s/CONVERT_USER_HOST/$special/g;
+
 	print OUTPUT "$input";
 }
 
