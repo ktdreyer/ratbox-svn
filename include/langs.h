@@ -258,6 +258,7 @@ enum svc_notice_enum
 	SVC_CF_CHANFIXINPROG,
 	SVC_CF_BANSREMOVED,
 	SVC_CF_MODESREMOVED,
+	SVC_CF_CHANSERVCHANNEL,
 
 	/* this must be last */
 	SVC_LAST

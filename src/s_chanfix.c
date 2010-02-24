@@ -51,6 +51,9 @@
 #include "modebuild.h"
 #include "s_chanfix.h"
 #include "event.h"
+#ifdef ENABLE_CHANSERV
+#include "s_chanserv.h"
+#endif
 
 /* Please note that this CHANFIX module is very much a work in progress,
  * and that it is likely to change frequently & dramatically whilst being
@@ -109,7 +112,7 @@ static int h_chanfix_channel_destroy(void *chptr_v, void *unused);
 static void e_chanfix_score_channels(void *unused);
 
 /* Internal chanfix functions */
-static void chan_takeover(struct channel *, int);
+static void chan_takeover(struct channel *);
 #if 0
 static time_t seconds_to_midnight(void);
 #endif
@@ -133,7 +136,7 @@ init_s_chanfix(void)
 
 /* preconditions: TS >= 2 and there is at least one user in the channel */
 static void
-chan_takeover(struct channel *chptr, int invite)
+chan_takeover(struct channel *chptr)
 {
 	dlink_node *ptr;
 
@@ -144,10 +147,7 @@ chan_takeover(struct channel *chptr, int invite)
 
 	remove_our_bans(chptr, NULL, 1, 1, 1);
 
-	if(invite)
-		chptr->mode.mode = MODE_TOPIC|MODE_NOEXTERNAL|MODE_INVITEONLY;
-	else
-		chptr->mode.mode = MODE_TOPIC|MODE_NOEXTERNAL;
+	chptr->mode.mode = MODE_TOPIC|MODE_NOEXTERNAL;
 
 	chptr->tsinfo--;
 
@@ -169,18 +169,65 @@ chan_takeover(struct channel *chptr, int invite)
 	}
 }
 
+/* Function for updating the scores of the given channel.
+ */
+static void
+update_channel_scores(struct channel *chptr)
+{
+	struct chmember *msptr;
+	dlink_node *ptr;
+	char userhost[USERLEN+HOSTLEN+2];
+
+	DLINK_FOREACH(ptr, chptr->users_opped.head)
+	{
+		msptr = ptr->data;
+
+		snprintf(userhost, sizeof(userhost), "%s@%s",
+				msptr->client_p->user->username,
+				msptr->client_p->user->host);
+
+
+		mlog("channel: %s, nickname: %s, userhost: %s", chptr->name,
+						msptr->client_p->name,
+						userhost);
+
+		/*rsdb_exec(NULL, "INSERT INTO cf_temp_score (userhost, channel, datetime) "
+						"VALUES(LOWER('%Q'), LOWER('%Q'), '%lu')",
+						chptr->name, userhost, DAYS_SINCE_EPOCH);
+		*/
+
+	}
+}
+
 /* General function to manage how we iterate over all the channels
  * gathering score data.
  */
 static void 
 e_chanfix_score_channels(void *unused)
 {
-	/*DAYS_SINCE_EPOCH config_file.cf_min_clients */
+	struct channel *chptr;
+	dlink_node *ptr;
 
-	/* Rorate the scores if it's midnight. */
+	DLINK_FOREACH(ptr, channel_list.head)
+	{
+		chptr = ptr->data;
 
+#ifdef ENABLE_CHANSERV
+		/* Need to skip the channel if it's registered with ChanServ.
+		 * If scoring channels isn't very resource intensive, it might be worth
+		 * scoring ChanServ channels anyway (or making it a config file option)
+		 * to avoid the string comparisons.
+		 */
+		if(find_channel_reg(NULL, chptr->name))
+			continue;
+#endif
 
-
+		if((dlink_list_length(&chptr->users) >= config_file.cf_min_clients) &&
+				(&chptr->users_opped.head != NULL))
+		{
+			update_channel_scores(chptr);
+		}
+	}
 
 }
 
@@ -272,6 +319,14 @@ o_chanfix_chanfix(struct client *client_p, struct lconn *conn_p, const char *par
 		return 0;
 	}
 
+#ifdef ENABLE_CHANSERV
+	if(find_channel_reg(NULL, chptr->name))
+	{
+		service_snd(chanfix_p, client_p, conn_p, SVC_CF_CHANSERVCHANNEL, parv[0]);
+		return 0;
+	}
+#endif
+
 	if(dlink_list_length(&chptr->users) < config_file.cf_min_clients)
 	{
 		/* Not enough users in this channel */
@@ -335,6 +390,14 @@ o_chanfix_revert(struct client *client_p, struct lconn *conn_p, const char *parv
 		return 0;
 	}
 
+#ifdef ENABLE_CHANSERV
+	if(find_channel_reg(NULL, chptr->name))
+	{
+		service_snd(chanfix_p, client_p, conn_p, SVC_CF_CHANSERVCHANNEL, parv[0]);
+		return 0;
+	}
+#endif
+
 	if(dlink_list_length(&chptr->users) < config_file.cf_min_clients)
 	{
 		/* Not enough users in this channel */
@@ -350,7 +413,7 @@ o_chanfix_revert(struct client *client_p, struct lconn *conn_p, const char *parv
 	}
 
 	/* Everything looks okay, execute the takeover. */
-	chan_takeover(chptr, 0);
+	chan_takeover(chptr);
 	service_err_chan(chanfix_p, chptr, SVC_CF_CHANFIXINPROG);
 
 	service_snd(chanfix_p, client_p, conn_p, SVC_ISSUEDFORBY,
@@ -566,6 +629,12 @@ static int
 add_chanfix(struct channel *chptr, int manualfix)
 {
 	struct chanfix_channel *af_chan;
+
+#ifdef ENABLE_CHANSERV
+	/* Need to skip the channel if it's registered with ChanServ. */
+	if(find_channel_reg(NULL, chptr->name))
+		return 0;
+#endif
 
 	if(dlink_find(chptr, &chanfix_list))
 		return 0;

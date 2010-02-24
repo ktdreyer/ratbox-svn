@@ -269,6 +269,7 @@ const char *svc_notice_string[] =
 	"SVC_CF_CHANFIXINPROG",
 	"SVC_CF_BANSREMOVED",
 	"SVC_CF_MODESREMOVED",
+	"SVC_CF_CHANSERVCHANNEL",
 
 	/* must be last */
 	"\0"

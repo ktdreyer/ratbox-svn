@@ -256,6 +256,7 @@ struct _lang_internal lang_internal[] =
 	{ SVC_CF_CHANFIXINPROG,		"Channel fix in progress, please stand by."			},
 	{ SVC_CF_BANSREMOVED,		"%s's ban modes have been removed so users can re-join."		},
 	{ SVC_CF_MODESREMOVED,		"Channel modes have been removed so users can re-join."			},
+	{ SVC_CF_CHANSERVCHANNEL,	"Channel '%s' is registered with ChanServ"			},
 /* STOP_GENEXAMPLE_PARSING -- for genexample.pl in langs/ */
 
 	/* this must be last */

@@ -303,7 +303,7 @@ init_channel_reg(struct chan_reg *chreg_p, const char *name)
 		chreg_p->last_time, "+nt");
 }
 
-static struct chan_reg *
+struct chan_reg *
 find_channel_reg(struct client *client_p, const char *name)
 {
 	struct chan_reg *reg_p;
