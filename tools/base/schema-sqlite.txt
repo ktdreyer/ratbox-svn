@@ -167,7 +167,8 @@ CREATE TABLE cf_temp_score (
 	id INTEGER PRIMARY KEY,
 	chname TEXT,
 	userhost TEXT,
-	timestamp INTEGER
+	timestamp INTEGER,
+	dayts INTEGER
 );
 
 CREATE TABLE cf_userhost (
@@ -185,6 +186,7 @@ CREATE TABLE cf_score (
 	channel_id INTEGER NOT NULL,
 	userhost_id INTEGER NOT NULL,
 	timestamp INTEGER,
+	dayts INTEGER,
 	FOREIGN KEY (channel_id) REFERENCES cf_channel (id),
 	FOREIGN KEY (userhost_id) REFERENCES cf_userhost (id)
 );

@@ -189,6 +189,7 @@ CREATE TABLE cf_temp_score (
 	chname VARCHAR(CHANNELLEN),
 	userhost VARCHAR(CONVERT_USER_HOST),
 	timestamp INTEGER,
+	dayts INTEGER,
 	PRIMARY KEY(id)
 );
 
@@ -209,6 +210,7 @@ CREATE TABLE cf_score (
 	channel_id BIGINT NOT NULL,
 	userhost_id BIGINT NOT NULL,
 	timestamp INTEGER,
+	dayts INTEGER,
 	PRIMARY KEY(id),
 	FOREIGN KEY (channel_id) REFERENCES cf_channel (id) ON DELETE CASCADE,
 	FOREIGN KEY (userhost_id) REFERENCES cf_userhost (id) ON DELETE CASCADE

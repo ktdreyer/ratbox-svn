@@ -172,7 +172,7 @@ chan_takeover(struct channel *chptr)
 /* Function for collecting chanop scores for a given channel.
  */
 static void
-collect_channel_scores(struct channel *chptr, time_t timestamp)
+collect_channel_scores(struct channel *chptr, time_t timestamp, unsigned int dayts)
 {
 	struct chmember *msptr;
 	dlink_node *ptr;
@@ -186,8 +186,8 @@ collect_channel_scores(struct channel *chptr, time_t timestamp)
 				msptr->client_p->user->username,
 				msptr->client_p->user->host);
 
-		rsdb_exec(NULL, "INSERT INTO cf_temp_score (chname, userhost, timestamp) "
-						"VALUES(LOWER('%Q'), LOWER('%Q'), '%lu')",
+		rsdb_exec(NULL, "INSERT INTO cf_temp_score (chname, userhost, timestamp, dayts) "
+						"VALUES(LOWER('%Q'), LOWER('%Q'), '%lu', '%lu')",
 						chptr->name, userhost, timestamp);
 	}
 }
@@ -201,6 +201,7 @@ e_chanfix_score_channels(void *unused)
 	struct channel *chptr;
 	dlink_node *ptr;
 	time_t min_ts, timestamp = CURRENT_TIME;
+	unsigned int dayts = DAYS_SINCE_EPOCH;
 	struct rsdb_table ts_data;
 
 	DLINK_FOREACH(ptr, channel_list.head)
@@ -221,7 +222,7 @@ e_chanfix_score_channels(void *unused)
 				(&chptr->users_opped.head != NULL))
 		{
 			mlog("debug: Scoring opped clients in: %s", chptr->name);
-			collect_channel_scores(chptr, timestamp);
+			collect_channel_scores(chptr, timestamp, dayts);
 		}
 	}
 
@@ -243,7 +244,7 @@ e_chanfix_score_channels(void *unused)
 	 */
 
 	rsdb_exec(NULL, "INSERT INTO cf_channel (chname) "
-				"SELECT DISTINCT chname FROM cf_temp_score "
+				"SELECT DISTINCT cf_temp_score.chname FROM cf_temp_score "
 				"LEFT JOIN cf_channel ON cf_temp_score.chname=cf_channel.chname "
 				"WHERE cf_channel.id IS NULL");
 
@@ -252,8 +253,8 @@ e_chanfix_score_channels(void *unused)
 				"LEFT JOIN cf_userhost ON cf_temp_score.userhost=cf_userhost.userhost "
 				"WHERE cf_userhost.id IS NULL");
 
-	rsdb_exec(NULL, "INSERT INTO cf_score (channel_id, userhost_id, timestamp) "
-			"SELECT DISTINCT cf_channel.id, cf_userhost.id, timestamp "
+	rsdb_exec(NULL, "INSERT INTO cf_score (channel_id, userhost_id, timestamp, dayts) "
+			"SELECT DISTINCT cf_channel.id, cf_userhost.id, timestamp, dayts "
 			"FROM cf_temp_score LEFT JOIN cf_channel ON cf_temp_score.chname=cf_channel.chname "
 			"LEFT JOIN cf_userhost ON cf_temp_score.userhost=cf_userhost.userhost "
 			"WHERE timestamp='%lu'", min_ts);
