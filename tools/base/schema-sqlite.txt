@@ -172,12 +172,12 @@ CREATE TABLE cf_temp_score (
 
 CREATE TABLE cf_userhost (
 	id INTEGER PRIMARY KEY,
-	userhost TEXT,
+	userhost TEXT
 );
 
 CREATE TABLE cf_channel (
 	id INTEGER PRIMARY KEY,
-	channel TEXT,
+	channel TEXT
 );
 
 CREATE TABLE cf_score (

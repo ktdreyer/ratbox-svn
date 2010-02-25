@@ -193,19 +193,19 @@ CREATE TABLE cf_temp_score (
 );
 
 CREATE TABLE cf_userhost (
-	id SERRIAL,
+	id SERIAL,
 	userhost VARCHAR(CONVERT_USER_HOST),
 	PRIMARY KEY(id)
 );
 
 CREATE TABLE cf_channel (
-	id SERRIAL,
+	id SERIAL,
 	chname VARCHAR(CHANNELLEN),
 	PRIMARY KEY(id)
 );
 
 CREATE TABLE cf_score (
-	id SERRIAL,
+	id SERIAL,
 	channel_id BIGINT NOT NULL,
 	userhost_id BIGINT NOT NULL,
 	timestamp INTEGER,
