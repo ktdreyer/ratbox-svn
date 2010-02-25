@@ -1,3 +1,12 @@
+moggie      2010/02/25 19:31:39 UTC	(20100225_2-26937)
+  Log:
+  - Ooops, cf_channel.channel should be cf_channel.chname like the others.
+  
+
+  Modified:
+	rserv/trunk/tools/base/schema-sqlite.txt (File Modified) 
+
+
 leeh        2010/02/25 19:11:53 UTC	(20100225_1-26935)
   Log:
   - id columns for postgres need to be 'SERIAL' not 'SERRIAL'
