@@ -1,3 +1,12 @@
+moggie      2010/02/25 19:46:20 UTC	(20100225_4-26941)
+  Log:
+  - Remove redundant functions get_channel_id() and get_userhost_id().
+  
+
+  Modified:
+	rserv/trunk/src/s_chanfix.c (File Modified) 
+
+
 moggie      2010/02/25 19:45:05 UTC	(20100225_3-26939)
   Log:
   - Modify cf_temp_score collation to use pure SQL.
