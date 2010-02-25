@@ -1,3 +1,13 @@
+moggie      2010/02/25 11:51:44 UTC	(20100225_0-26933)
+  Log:
+  - Modify score collection routine to handle multiple timestamp entries in case
+    the last collection was interrupted.
+  
+
+  Modified:
+	rserv/trunk/src/s_chanfix.c (File Modified) 
+
+
 moggie      2010/02/24 22:46:35 UTC	(20100224_6-26931)
   Log:
   - Rename update_channel_scores() to collect_channel_scores().
