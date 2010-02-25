@@ -1,3 +1,12 @@
+moggie      2010/02/25 19:45:05 UTC	(20100225_3-26939)
+  Log:
+  - Modify cf_temp_score collation to use pure SQL.
+  
+
+  Modified:
+	rserv/trunk/src/s_chanfix.c (File Modified) 
+
+
 moggie      2010/02/25 19:31:39 UTC	(20100225_2-26937)
   Log:
   - Ooops, cf_channel.channel should be cf_channel.chname like the others.
