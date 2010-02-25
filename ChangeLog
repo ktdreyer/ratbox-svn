@@ -1,3 +1,15 @@
+moggie      2010/02/25 22:10:11 UTC	(20100225_6-26945)
+  Log:
+  - Create cf_score_history table and try adding some indexes.
+  
+
+  Modified:
+	rserv/trunk/src/s_chanfix.c (File Modified) 
+	rserv/trunk/tools/base/schema-mysql.txt (File Modified) 
+	rserv/trunk/tools/base/schema-pgsql.txt (File Modified) 
+	rserv/trunk/tools/base/schema-sqlite.txt (File Modified) 
+
+
 moggie      2010/02/25 20:33:00 UTC	(20100225_5-26943)
   Log:
   - Store days from epoch as well as timestamps in chanfix DB tables.
