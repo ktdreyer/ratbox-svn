@@ -1,3 +1,14 @@
+leeh        2010/02/25 19:11:53 UTC	(20100225_1-26935)
+  Log:
+  - id columns for postgres need to be 'SERIAL' not 'SERRIAL'
+  - remove some extra ',' in the sqlite schema
+  
+
+  Modified:
+	rserv/trunk/tools/base/schema-pgsql.txt (File Modified) 
+	rserv/trunk/tools/base/schema-sqlite.txt (File Modified) 
+
+
 moggie      2010/02/25 11:51:44 UTC	(20100225_0-26933)
   Log:
   - Modify score collection routine to handle multiple timestamp entries in case
