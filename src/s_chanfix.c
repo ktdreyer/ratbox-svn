@@ -253,8 +253,9 @@ e_chanfix_score_channels(void *unused)
 	struct channel *chptr;
 	dlink_node *ptr;
 	time_t min_ts, timestamp = CURRENT_TIME;
-	struct rsdb_table chanop_data;
+	struct rsdb_table ts_data, chanop_data;
 	unsigned long i, channel_id, userhost_id;
+	unsigned int tsi;
 
 	DLINK_FOREACH(ptr, channel_list.head)
 	{
@@ -278,47 +279,51 @@ e_chanfix_score_channels(void *unused)
 		}
 	}
 
-	/* Done collecting chanops, execute the collation routines. */
-	rsdb_exec_fetch(&chanop_data, "SELECT MIN(timestamp) FROM cf_temp_score");
+	/* Done collecting chanops, execute the collation routine. */
+	rsdb_exec_fetch(&ts_data, "SELECT DISTINCT timestamp FROM cf_temp_score");
 
-	if(chanop_data.row_count == 0)
+	if(ts_data.row_count == 0)
 	{
-		mlog("warning: Unable to retrieve min timestamp for ChanFix collation.");
-		rsdb_exec_fetch_end(&chanop_data);
+		mlog("warning: Unable to retrieve timestamp(s) for ChanFix collation.");
+		rsdb_exec_fetch_end(&ts_data);
 		return;
 	}
 
-	min_ts = atoi(chanop_data.row[0][0]);
-	rsdb_exec_fetch_end(&chanop_data);
-
-	/* Using the min_ts timestamp from above, select the distinct channels and
-	 * userhosts from the temporary table. */
-
-	rsdb_exec_fetch(&chanop_data, "SELECT DISTINCT chname, userhost FROM cf_temp_score "
-							"WHERE timestamp='%lu'", min_ts);
-
-	if(chanop_data.row_count == 0)
+	for(tsi = 0; tsi < ts_data.row_count; tsi++)
 	{
-		mlog("warning: Unable to retrieve distinct channels and userhosts for "
-				"ChanFix collation.");
-		rsdb_exec_fetch_end(&chanop_data);
-		return;
+		min_ts = atoi(ts_data.row[tsi][0]);
+
+		/* Using the min_ts timestamp, select the distinct channels and
+		 * userhosts from the temporary table.
+		 */
+
+		rsdb_exec_fetch(&chanop_data, "SELECT DISTINCT chname, userhost FROM cf_temp_score "
+								"WHERE timestamp='%lu'", min_ts);
+
+		if(chanop_data.row_count == 0)
+		{
+			/* In theory this should never happen if everything is working right. */
+			mlog("warning: Failed to retrieve distinct channels and userhosts for "
+					"ChanFix collation TS: %d", min_ts);
+			continue;
+		}
+
+		for(i = 0; i < chanop_data.row_count; i++)
+		{
+			channel_id = get_channel_id(chanop_data.row[i][0]);
+			userhost_id = get_userhost_id(chanop_data.row[i][1]);
+
+			rsdb_exec(NULL, "INSERT INTO cf_score (channel_id, userhost_id, timestamp) "
+							"VALUES('%lu', '%lu', '%lu')",
+							channel_id, userhost_id, timestamp);
+		}
+
+		/* Delete these timestamp entries when we're done. */
+		rsdb_exec(NULL, "DELETE FROM cf_temp_score WHERE timestamp='%lu'", min_ts);
 	}
 
-	for(i = 0; i < chanop_data.row_count; i++)
-	{
-		channel_id = get_channel_id(chanop_data.row[i][0]);
-		userhost_id = get_userhost_id(chanop_data.row[i][1]);
-
-		rsdb_exec(NULL, "INSERT INTO cf_score (channel_id, userhost_id, timestamp) "
-						"VALUES('%lu', '%lu', '%lu')",
-						channel_id, userhost_id, timestamp);
-	}
-
+	rsdb_exec_fetch_end(&ts_data);
 	rsdb_exec_fetch_end(&chanop_data);
-
-	/* Delete these timestamp entries when we're done. */
-	rsdb_exec(NULL, "DELETE FROM cf_temp_score WHERE timestamp='%lu'", min_ts);
 }
 
 
