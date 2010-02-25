@@ -177,7 +177,7 @@ CREATE TABLE cf_userhost (
 
 CREATE TABLE cf_channel (
 	id INTEGER PRIMARY KEY,
-	channel TEXT
+	chname TEXT
 );
 
 CREATE TABLE cf_score (
