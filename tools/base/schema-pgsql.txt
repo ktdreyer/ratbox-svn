@@ -192,18 +192,22 @@ CREATE TABLE cf_temp_score (
 	dayts INTEGER,
 	PRIMARY KEY(id)
 );
+CREATE INDEX cf_temp_score_chname_idx ON cf_channel (chname);
+CREATE INDEX cf_temp_score_userhost_idx ON cf_userhost (userhost);
 
 CREATE TABLE cf_userhost (
 	id SERIAL,
 	userhost VARCHAR(CONVERT_USER_HOST),
 	PRIMARY KEY(id)
 );
+CREATE INDEX cf_userhost_userhost_idx ON cf_userhost (userhost);
 
 CREATE TABLE cf_channel (
 	id SERIAL,
 	chname VARCHAR(CHANNELLEN),
 	PRIMARY KEY(id)
 );
+CREATE INDEX cf_channel_chname_idx ON cf_channel (chname);
 
 CREATE TABLE cf_score (
 	id SERIAL,
@@ -211,6 +215,18 @@ CREATE TABLE cf_score (
 	userhost_id BIGINT NOT NULL,
 	timestamp INTEGER,
 	dayts INTEGER,
+	PRIMARY KEY(id),
+	FOREIGN KEY (channel_id) REFERENCES cf_channel (id) ON DELETE CASCADE,
+	FOREIGN KEY (userhost_id) REFERENCES cf_userhost (id) ON DELETE CASCADE
+);
+
+CREATE TABLE cf_score_history (
+	id SERIAL,
+	channel_id BIGINT NOT NULL,
+	userhost_id BIGINT NOT NULL,
+	timestamp INTEGER,
+	dayts INTEGER,
+	score INTEGER,
 	PRIMARY KEY(id),
 	FOREIGN KEY (channel_id) REFERENCES cf_channel (id) ON DELETE CASCADE,
 	FOREIGN KEY (userhost_id) REFERENCES cf_userhost (id) ON DELETE CASCADE

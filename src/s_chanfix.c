@@ -188,7 +188,7 @@ collect_channel_scores(struct channel *chptr, time_t timestamp, unsigned int day
 
 		rsdb_exec(NULL, "INSERT INTO cf_temp_score (chname, userhost, timestamp, dayts) "
 						"VALUES(LOWER('%Q'), LOWER('%Q'), '%lu', '%lu')",
-						chptr->name, userhost, timestamp);
+						chptr->name, userhost, timestamp, dayts);
 	}
 }
 
