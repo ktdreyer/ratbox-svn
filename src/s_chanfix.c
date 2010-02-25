@@ -206,14 +206,15 @@ get_userhost_id(const char *userhost)
 
 	if(data.row_count == 0)
 	{
-		rsdb_exec(NULL, "INSERT INTO cf_userhost (userhost) VALUES(LOWER('%Q'))",
-						userhost);
-		rsdb_exec_fetch(&data, "SELECT id FROM cf_userhost WHERE userhost='%Q'",
-						userhost);
+		rsdb_exec_fetch_end(&data);
+		rsdb_exec_insert(&userhost_id, "cf_userhost", "id",
+			"INSERT INTO cf_userhost (userhost) VALUES(LOWER('%Q'))", userhost);
 	}
-
-	userhost_id = atoi(data.row[0][0]);
-	rsdb_exec_fetch_end(&data);
+	else
+	{
+		userhost_id = atoi(data.row[0][0]);
+		rsdb_exec_fetch_end(&data);
+	}
 
 	return userhost_id;
 }
@@ -232,14 +233,15 @@ get_channel_id(const char *channel)
 
 	if(data.row_count == 0)
 	{
-		rsdb_exec(NULL, "INSERT INTO cf_channel (chname) VALUES(LOWER('%Q'))",
-						channel);
-		rsdb_exec_fetch(&data, "SELECT id FROM cf_channel WHERE chname='%Q'",
-						channel);
+		rsdb_exec_fetch_end(&data);
+		rsdb_exec_insert(&channel_id, "cf_channel", "id",
+				"INSERT INTO cf_channel (chname) VALUES(LOWER('%Q'))", channel);
 	}
-
-	channel_id = atoi(data.row[0][0]);
-	rsdb_exec_fetch_end(&data);
+	else
+	{
+		channel_id = atoi(data.row[0][0]);
+		rsdb_exec_fetch_end(&data);
+	}
 
 	return channel_id;
 }
@@ -253,9 +255,7 @@ e_chanfix_score_channels(void *unused)
 	struct channel *chptr;
 	dlink_node *ptr;
 	time_t min_ts, timestamp = CURRENT_TIME;
-	struct rsdb_table ts_data, chanop_data;
-	unsigned long i, channel_id, userhost_id;
-	unsigned int tsi;
+	struct rsdb_table ts_data;
 
 	DLINK_FOREACH(ptr, channel_list.head)
 	{
@@ -280,50 +280,40 @@ e_chanfix_score_channels(void *unused)
 	}
 
 	/* Done collecting chanops, execute the collation routine. */
-	rsdb_exec_fetch(&ts_data, "SELECT DISTINCT timestamp FROM cf_temp_score");
+	rsdb_exec_fetch(&ts_data, "SELECT MIN(timestamp) FROM cf_temp_score");
 
 	if(ts_data.row_count == 0)
 	{
-		mlog("warning: Unable to retrieve timestamp(s) for ChanFix collation.");
+		mlog("warning: Unable to retrieve min timestamp for ChanFix collation.");
 		rsdb_exec_fetch_end(&ts_data);
 		return;
 	}
 
-	for(tsi = 0; tsi < ts_data.row_count; tsi++)
-	{
-		min_ts = atoi(ts_data.row[tsi][0]);
-
-		/* Using the min_ts timestamp, select the distinct channels and
-		 * userhosts from the temporary table.
-		 */
-
-		rsdb_exec_fetch(&chanop_data, "SELECT DISTINCT chname, userhost FROM cf_temp_score "
-								"WHERE timestamp='%lu'", min_ts);
-
-		if(chanop_data.row_count == 0)
-		{
-			/* In theory this should never happen if everything is working right. */
-			mlog("warning: Failed to retrieve distinct channels and userhosts for "
-					"ChanFix collation TS: %d", min_ts);
-			continue;
-		}
-
-		for(i = 0; i < chanop_data.row_count; i++)
-		{
-			channel_id = get_channel_id(chanop_data.row[i][0]);
-			userhost_id = get_userhost_id(chanop_data.row[i][1]);
-
-			rsdb_exec(NULL, "INSERT INTO cf_score (channel_id, userhost_id, timestamp) "
-							"VALUES('%lu', '%lu', '%lu')",
-							channel_id, userhost_id, timestamp);
-		}
-
-		/* Delete these timestamp entries when we're done. */
-		rsdb_exec(NULL, "DELETE FROM cf_temp_score WHERE timestamp='%lu'", min_ts);
-	}
-
+	min_ts = atoi(ts_data.row[0][0]);
 	rsdb_exec_fetch_end(&ts_data);
-	rsdb_exec_fetch_end(&chanop_data);
+
+	/* Using the min_ts timestamp, select the distinct channels and
+	 * userhosts from the temporary table.
+	 */
+
+	rsdb_exec(NULL, "INSERT INTO cf_channel (chname) "
+				"SELECT DISTINCT chname FROM cf_temp_score "
+				"LEFT JOIN cf_channel ON cf_temp_score.chname=cf_channel.chname "
+				"WHERE cf_channel.id IS NULL");
+
+	rsdb_exec(NULL, "INSERT INTO cf_userhost (userhost) "
+				"SELECT DISTINCT cf_temp_score.userhost FROM cf_temp_score "
+				"LEFT JOIN cf_userhost ON cf_temp_score.userhost=cf_userhost.userhost "
+				"WHERE cf_userhost.id IS NULL");
+
+	rsdb_exec(NULL, "INSERT INTO cf_score (channel_id, userhost_id, timestamp) "
+			"SELECT DISTINCT cf_channel.id, cf_userhost.id, timestamp "
+			"FROM cf_temp_score LEFT JOIN cf_channel ON cf_temp_score.chname=cf_channel.chname "
+			"LEFT JOIN cf_userhost ON cf_temp_score.userhost=cf_userhost.userhost "
+			"WHERE timestamp='%lu'", min_ts);
+
+	/* Delete these timestamp entries when we're done. */
+	rsdb_exec(NULL, "DELETE FROM cf_temp_score WHERE timestamp='%lu'", min_ts);
 }
 
 
