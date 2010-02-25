@@ -192,60 +192,6 @@ collect_channel_scores(struct channel *chptr, time_t timestamp)
 	}
 }
 
-/* prerequisite: chname should already be in lower case from when it was
- * entered into the DB.
- */
-static unsigned long
-get_userhost_id(const char *userhost)
-{
-	unsigned long userhost_id;
-	struct rsdb_table data;
-
-	rsdb_exec_fetch(&data, "SELECT id FROM cf_userhost WHERE userhost='%Q'",
-						userhost);
-
-	if(data.row_count == 0)
-	{
-		rsdb_exec_fetch_end(&data);
-		rsdb_exec_insert(&userhost_id, "cf_userhost", "id",
-			"INSERT INTO cf_userhost (userhost) VALUES(LOWER('%Q'))", userhost);
-	}
-	else
-	{
-		userhost_id = atoi(data.row[0][0]);
-		rsdb_exec_fetch_end(&data);
-	}
-
-	return userhost_id;
-}
-
-/* prerequisite: chname should already be in lower case from when it was
- * entered into the DB.
- */
-static unsigned long
-get_channel_id(const char *channel)
-{
-	unsigned long channel_id;
-	struct rsdb_table data;
-
-	rsdb_exec_fetch(&data, "SELECT id FROM cf_channel WHERE chname='%Q'",
-						channel);
-
-	if(data.row_count == 0)
-	{
-		rsdb_exec_fetch_end(&data);
-		rsdb_exec_insert(&channel_id, "cf_channel", "id",
-				"INSERT INTO cf_channel (chname) VALUES(LOWER('%Q'))", channel);
-	}
-	else
-	{
-		channel_id = atoi(data.row[0][0]);
-		rsdb_exec_fetch_end(&data);
-	}
-
-	return channel_id;
-}
-
 /* General function to manage how we iterate over all the channels
  * gathering score data.
  */
