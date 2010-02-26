@@ -193,14 +193,14 @@ CREATE TABLE cf_userhost (
 	userhost VARCHAR(CONVERT_USER_HOST),
 	PRIMARY KEY(id)
 );
-ALTER TABLE cf_userhost ADD INDEX UNIQUE cf_userhost_userhost_idx_unique (userhost);
+ALTER TABLE cf_userhost ADD UNIQUE INDEX cf_userhost_userhost_idx_unique (userhost);
 
 CREATE TABLE cf_channel (
 	id INTEGER AUTO_INCREMENT,
 	chname VARCHAR(CHANNELLEN),
 	PRIMARY KEY(id)
 );
-ALTER TABLE cf_channel ADD INDEX UNIQUE cf_channel_chname_idx_unique (chname);
+ALTER TABLE cf_channel ADD UNIQUE INDEX cf_channel_chname_idx_unique (chname);
 
 CREATE TABLE cf_score (
 	id INTEGER AUTO_INCREMENT,

@@ -110,12 +110,11 @@ static struct service_handler chanfix_service = {
 static int h_chanfix_channel_destroy(void *chptr_v, void *unused);
 
 static void e_chanfix_score_channels(void *unused);
+static void e_chanfix_collate_history(void *unused);
 
 /* Internal chanfix functions */
 static void chan_takeover(struct channel *);
-#if 0
 static time_t seconds_to_midnight(void);
-#endif
 
 static int add_chanfix(struct channel *chptr, int manualfix);
 static void del_chanfix(struct channel *chptr);
@@ -132,6 +131,8 @@ init_s_chanfix(void)
 	hook_add(h_chanfix_channel_destroy, HOOK_CHANNEL_DESTROY);
 
 	eventAdd("e_chanfix_score_channels", e_chanfix_score_channels, NULL, 300);
+	eventAddOnce("e_chanfix_collate_history", e_chanfix_collate_history, NULL,
+				seconds_to_midnight());
 }
 
 /* preconditions: TS >= 2 and there is at least one user in the channel */
@@ -200,8 +201,9 @@ e_chanfix_score_channels(void *unused)
 {
 	struct channel *chptr;
 	dlink_node *ptr;
-	time_t min_ts, timestamp = CURRENT_TIME;
+	time_t min_ts, max_ts, timestamp = CURRENT_TIME;
 	unsigned int dayts = DAYS_SINCE_EPOCH;
+	short i = 0;
 	struct rsdb_table ts_data;
 
 	DLINK_FOREACH(ptr, channel_list.head)
@@ -226,43 +228,97 @@ e_chanfix_score_channels(void *unused)
 		}
 	}
 
-	/* Done collecting chanops, execute the collation routine. */
-	rsdb_exec_fetch(&ts_data, "SELECT MIN(timestamp) FROM cf_temp_score");
-
-	if(ts_data.row_count == 0)
-	{
-		mlog("warning: Unable to retrieve min timestamp for ChanFix collation.");
-		rsdb_exec_fetch_end(&ts_data);
-		return;
-	}
-
-	min_ts = atoi(ts_data.row[0][0]);
-	rsdb_exec_fetch_end(&ts_data);
-
-	/* Using the min_ts timestamp, select the distinct channels and
-	 * userhosts from the temporary table.
+	/* Done collecting chanops, execute the collation routine.
+	 * As a basic sanity check, don't do more than 5 of these at a time.
 	 */
+	while (i < 5)
+	{
+		rsdb_exec_fetch(&ts_data, "SELECT MIN(timestamp), MAX(timestamp) FROM cf_temp_score");
 
-	rsdb_exec(NULL, "INSERT INTO cf_channel (chname) "
-				"SELECT DISTINCT cf_temp_score.chname FROM cf_temp_score "
-				"LEFT JOIN cf_channel ON cf_temp_score.chname=cf_channel.chname "
-				"WHERE cf_channel.id IS NULL");
+		if(ts_data.row_count == 0)
+		{
+			mlog("warning: Unable to retrieve min timestamp for ChanFix collation.");
+			rsdb_exec_fetch_end(&ts_data);
+			return;
+		}
 
-	rsdb_exec(NULL, "INSERT INTO cf_userhost (userhost) "
-				"SELECT DISTINCT cf_temp_score.userhost FROM cf_temp_score "
+		min_ts = atoi(ts_data.row[0][0]);
+		max_ts = atoi(ts_data.row[0][1]);
+		rsdb_exec_fetch_end(&ts_data);
+
+		if(min_ts == max_ts)
+			break;
+
+		/* Using the min_ts timestamp, select the distinct channels and
+		 * userhosts from the temporary table.
+		 */
+
+		rsdb_exec(NULL, "INSERT INTO cf_channel (chname) "
+					"SELECT DISTINCT cf_temp_score.chname FROM cf_temp_score "
+					"LEFT JOIN cf_channel ON cf_temp_score.chname=cf_channel.chname "
+					"WHERE cf_channel.id IS NULL");
+
+		rsdb_exec(NULL, "INSERT INTO cf_userhost (userhost) "
+					"SELECT DISTINCT cf_temp_score.userhost FROM cf_temp_score "
+					"LEFT JOIN cf_userhost ON cf_temp_score.userhost=cf_userhost.userhost "
+					"WHERE cf_userhost.id IS NULL");
+
+		rsdb_exec(NULL, "INSERT INTO cf_score (channel_id, userhost_id, timestamp, dayts) "
+				"SELECT DISTINCT cf_channel.id, cf_userhost.id, timestamp, dayts "
+				"FROM cf_temp_score LEFT JOIN cf_channel ON cf_temp_score.chname=cf_channel.chname "
 				"LEFT JOIN cf_userhost ON cf_temp_score.userhost=cf_userhost.userhost "
-				"WHERE cf_userhost.id IS NULL");
+				"WHERE timestamp='%lu'", min_ts);
 
-	rsdb_exec(NULL, "INSERT INTO cf_score (channel_id, userhost_id, timestamp, dayts) "
-			"SELECT DISTINCT cf_channel.id, cf_userhost.id, timestamp, dayts "
-			"FROM cf_temp_score LEFT JOIN cf_channel ON cf_temp_score.chname=cf_channel.chname "
-			"LEFT JOIN cf_userhost ON cf_temp_score.userhost=cf_userhost.userhost "
-			"WHERE timestamp='%lu'", min_ts);
+		/* Delete these timestamp entries when we're done. */
+		rsdb_exec(NULL, "DELETE FROM cf_temp_score WHERE timestamp='%lu'", min_ts);
 
-	/* Delete these timestamp entries when we're done. */
-	rsdb_exec(NULL, "DELETE FROM cf_temp_score WHERE timestamp='%lu'", min_ts);
+		i++;
+	}
 }
 
+/* Collate the cf_score data into cf_score_history. */
+static void 
+e_chanfix_collate_history(void *unused)
+{
+	unsigned int min_dayts;
+	struct rsdb_table ts_data;
+	short i = 0;
+
+	/* As a basic sanity check, don't do more than 10 of these at a time. */
+	while (i < 10)
+	{
+		rsdb_exec_fetch(&ts_data, "SELECT MIN(dayts) FROM cf_score");
+
+		if(ts_data.row_count == 0)
+		{
+			mlog("warning: Unable to retrieve min timestamp for ChanFix collation.");
+			rsdb_exec_fetch_end(&ts_data);
+			return;
+		}
+
+		min_dayts = atoi(ts_data.row[0][0]);
+		rsdb_exec_fetch_end(&ts_data);
+
+		if(min_dayts == DAYS_SINCE_EPOCH)
+			break;
+
+		mlog("debug: Collating score history for dayts: %d", min_dayts);
+
+		rsdb_exec(NULL, "INSERT INTO cf_score_history (channel_id, userhost_id, dayts, score) "
+				"SELECT channel_id, userhost_id, dayts, count(*) "
+				"FROM cf_score where dayts = '%u' "
+				"GROUP BY channel_id, userhost_id",
+				min_dayts);
+
+		/* Delete these timestamp entries when we're done. */
+		rsdb_exec(NULL, "DELETE FROM cf_score WHERE dayts='%lu'", min_dayts);
+
+		i++;
+	}
+
+	eventAddOnce("e_chanfix_collate_history", e_chanfix_collate_history, NULL,
+				seconds_to_midnight());
+}
 
 static int
 h_chanfix_channel_destroy(void *chptr_v, void *unused)
@@ -646,7 +702,6 @@ o_chanfix_status(struct client *client_p, struct lconn *conn_p, const char *parv
 }
 
 
-#if 0
 static time_t
 seconds_to_midnight(void)
 {
@@ -655,7 +710,6 @@ seconds_to_midnight(void)
 	t_info = gmtime(&nowtime);
 	return 86400 - (t_info->tm_hour * 3600 + t_info->tm_min * 60 + t_info->tm_sec);
 }
-#endif
 
 static int
 add_chanfix(struct channel *chptr, int manualfix)

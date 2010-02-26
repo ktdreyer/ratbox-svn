@@ -29,4 +29,7 @@ struct chanfix_channel
 	dlink_node node;
 };
 
+/* The maximum number of users chanfix will op when fixing a channel. */
+#define CF_MAX_USERS_TO_OP	5
+
 #endif
