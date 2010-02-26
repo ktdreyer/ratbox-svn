@@ -1,3 +1,18 @@
+moggie      2010/02/26 02:56:22 UTC	(20100226_0-26947)
+  Log:
+  - Compensate for MySQL docs index syntax confusionness.
+  - Enable seconds_to_midnight() function.
+  - Add e_chanfix_collate_history() function to collate history scores into
+    cf_score_history each night.
+  - Add while loop into e_chanfix_score_channels() to process past score samples.
+  
+
+  Modified:
+	rserv/trunk/include/s_chanfix.h (File Modified) 
+	rserv/trunk/src/s_chanfix.c (File Modified) 
+	rserv/trunk/tools/base/schema-mysql.txt (File Modified) 
+
+
 moggie      2010/02/25 22:10:11 UTC	(20100225_6-26945)
   Log:
   - Create cf_score_history table and try adding some indexes.
