@@ -1,3 +1,15 @@
+moggie      2010/02/27 23:53:59 UTC	(20100227_0-26953)
+  Log:
+  - Outline o_chanfix_score() function for showing scores.
+  - Add get_userhost_chan_scores() for fetching userhosts and scores from the DB.
+  - Add some #defines we'll need later.
+  
+
+  Modified:
+	rserv/trunk/include/s_chanfix.h (File Modified) 
+	rserv/trunk/src/s_chanfix.c (File Modified) 
+
+
 moggie      2010/02/26 02:56:22 UTC	(20100226_0-26947)
   Log:
   - Compensate for MySQL docs index syntax confusionness.
