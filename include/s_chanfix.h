@@ -32,4 +32,10 @@ struct chanfix_channel
 /* The maximum number of users chanfix will op when fixing a channel. */
 #define CF_MAX_USERS_TO_OP	5
 
+/* The number of daysamples to keep scores for in the database. */
+#define CF_DAYSAMPLES	14
+
+/* The maximum possible score achievable by a user (288 * CF_DAYSAMPLES). */
+#define CF_MAX_CHANFIX_SCORE	4032
+
 #endif

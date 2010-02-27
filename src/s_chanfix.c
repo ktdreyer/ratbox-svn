@@ -68,6 +68,7 @@ static dlink_list chanfix_list;
 
 static int o_chanfix_cfjoin(struct client *, struct lconn *, const char **, int);
 static int o_chanfix_cfpart(struct client *, struct lconn *, const char **, int);
+static int o_chanfix_score(struct client *, struct lconn *, const char **, int);
 static int o_chanfix_chanfix(struct client *, struct lconn *, const char **, int);
 static int o_chanfix_revert(struct client *, struct lconn *, const char **, int);
 static int o_chanfix_check(struct client *, struct lconn *, const char **, int);
@@ -78,7 +79,7 @@ static struct service_command chanfix_command[] =
 {
 	{ "CFJOIN",	&o_chanfix_cfjoin,	1, NULL, 1, 0L, 0, 1, 0 },
 	{ "CFPART",	&o_chanfix_cfpart,	1, NULL, 1, 0L, 0, 1, 0 },
-	/*{ "SCORE",&o_chanfix_score,	1, NULL, 1, 0L, 0, 1, 0 },*/
+	{ "SCORE",	&o_chanfix_score,	1, NULL, 1, 0L, 0, 1, 0 },
 	{ "CHANFIX",	&o_chanfix_chanfix,	1, NULL, 1, 0L, 0, 1, 0 },
 	{ "REVERT",	&o_chanfix_revert,	1, NULL, 1, 0L, 0, 1, 0 },
 	/*{ "HISTORY",&o_chanfix_history,	1, NULL, 1, 0L, 0, 1, 0 },
@@ -132,7 +133,7 @@ init_s_chanfix(void)
 
 	eventAdd("e_chanfix_score_channels", e_chanfix_score_channels, NULL, 300);
 	eventAddOnce("e_chanfix_collate_history", e_chanfix_collate_history, NULL,
-				seconds_to_midnight());
+				seconds_to_midnight()+5);
 }
 
 /* preconditions: TS >= 2 and there is at least one user in the channel */
@@ -297,12 +298,16 @@ e_chanfix_collate_history(void *unused)
 		}
 
 		min_dayts = atoi(ts_data.row[0][0]);
+		/*mlog("debug: converted min_dayts to: %d, epoch is: %d", min_dayts, DAYS_SINCE_EPOCH);*/
 		rsdb_exec_fetch_end(&ts_data);
 
 		if(min_dayts == DAYS_SINCE_EPOCH)
+		{
+			mlog("info: History successfully collated.");
 			break;
+		}
 
-		mlog("debug: Collating score history for dayts: %d", min_dayts);
+		mlog("info: Collating score history for dayts: %d", min_dayts);
 
 		rsdb_exec(NULL, "INSERT INTO cf_score_history (channel_id, userhost_id, dayts, score) "
 				"SELECT channel_id, userhost_id, dayts, count(*) "
@@ -310,14 +315,14 @@ e_chanfix_collate_history(void *unused)
 				"GROUP BY channel_id, userhost_id",
 				min_dayts);
 
-		/* Delete these timestamp entries when we're done. */
+		/* Delete these day's entries when we're done. */
 		rsdb_exec(NULL, "DELETE FROM cf_score WHERE dayts='%lu'", min_dayts);
 
 		i++;
 	}
 
 	eventAddOnce("e_chanfix_collate_history", e_chanfix_collate_history, NULL,
-				seconds_to_midnight());
+				seconds_to_midnight()+5);
 }
 
 static int
@@ -383,6 +388,143 @@ o_chanfix_cfpart(struct client *client_p, struct lconn *conn_p, const char *parv
 	else
 		service_snd(chanfix_p, client_p, conn_p, SVC_IRC_NOTINCHANNEL,
 				chanfix_p->name, parv[0]);
+
+	return 0;
+}
+
+static int
+get_userhost_chan_scores(struct channel *chptr, short opped, struct rsdb_table *data)
+{
+	struct chmember *msptr;
+	dlink_node *ptr, *listhead;
+	char userhost[USERLEN+HOSTLEN+4+1];
+	char *uhostbuf;
+	unsigned int count;
+
+	if(opped == 1)
+	{
+		count = dlink_list_length(&chptr->users_opped);
+		listhead = chptr->users_opped.head;
+	}
+	else
+	{
+		count = dlink_list_length(&chptr->users_unopped);
+		listhead = chptr->users_unopped.head;
+	}
+
+	if(count < 1)
+		return 0;
+
+	uhostbuf = my_malloc(sizeof(userhost) * count);
+	uhostbuf[0] = '\0';
+
+	DLINK_FOREACH(ptr, listhead)
+	{
+		msptr = ptr->data;
+
+		snprintf(userhost, sizeof(userhost), "'%s@%s',",
+				msptr->client_p->user->username,
+				msptr->client_p->user->host);
+
+		strcat(uhostbuf, userhost);
+	}
+
+	uhostbuf[strlen(uhostbuf) - 1] = '\0';
+	mlog("debug: uhostbuf: %s", uhostbuf);
+
+	rsdb_exec_fetch(data, "SELECT userhost, userhost_id, SUM(total) "
+		"FROM "
+		"  (SELECT cf_score.userhost_id, count(*) AS total "
+		"  FROM cf_score "
+		"  LEFT JOIN cf_channel ON cf_score.channel_id=cf_channel.id "
+		"  WHERE cf_channel.chname = LOWER('%Q') "
+		"  GROUP BY cf_score.userhost_id "
+		"  UNION ALL "
+		"  SELECT cf_score_history.userhost_id, SUM(cf_score_history.score) AS total "
+		"  FROM cf_score_history "
+		"  LEFT JOIN cf_channel ON cf_score_history.channel_id=cf_channel.id "
+		"  WHERE cf_channel.chname = LOWER('%Q') "
+		"  GROUP BY cf_score_history.userhost_id) AS total_table "
+		"LEFT JOIN cf_userhost ON total_table.userhost_id=cf_userhost.id "
+		"WHERE userhost IN (%s) "
+		"GROUP BY total_table.userhost_id", 
+		chptr->name, chptr->name, uhostbuf);
+
+	my_free(uhostbuf);
+	uhostbuf = NULL;
+
+	if(data->row_count == 0)
+	{
+		mlog("warning: Failed to retrieve userhost scores.");
+		rsdb_exec_fetch_end(data);
+		return 0;
+	}
+
+	return 1;
+}
+
+static int
+o_chanfix_score(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
+{
+	struct channel *chptr;
+	struct rsdb_table data;
+	char buf[BUFSIZE], t_buf[8];
+	int i;
+
+	if(!valid_chname(parv[0]))
+	{
+		service_snd(chanfix_p, client_p, conn_p, SVC_IRC_CHANNELINVALID, parv[0]);
+		return 0;
+	}
+
+	if((chptr = find_channel(parv[0])) == NULL)
+	{
+		service_snd(chanfix_p, client_p, conn_p, SVC_IRC_NOSUCHCHANNEL, parv[0]);
+		return 0;
+	}
+
+#ifdef ENABLE_CHANSERV
+	if(find_channel_reg(NULL, chptr->name))
+	{
+		service_snd(chanfix_p, client_p, conn_p, SVC_CF_CHANSERVCHANNEL, parv[0]);
+		return 0;
+	}
+#endif
+
+	mlog("debug: querying for opped users.");
+
+	/* get the opped userhost / score data. */
+	if(get_userhost_chan_scores(chptr, 1, &data))
+	{
+		mlog("debug: generate string buf for opped users.");
+		buf[0] = '\0';
+		for(i = 0; i < data.row_count; i++)
+		{
+			snprintf(t_buf, sizeof(t_buf), "%s ", data.row[i][2]);
+			strcat(buf, t_buf);
+		}
+		service_send(chanfix_p, client_p, conn_p,
+					"Top scores for ops in channel '%s':", parv[0]);
+		service_send(chanfix_p, client_p, conn_p, "%s", buf);
+		rsdb_exec_fetch_end(&data);
+	}
+	mlog("debug: querying for unopped users.");
+
+	/* get the unopped userhost / score data. */
+	if(get_userhost_chan_scores(chptr, 0, &data))
+	{
+		mlog("debug: generate string buf for unopped users.");
+		buf[0] = '\0';
+		for(i = 0; i < data.row_count; i++)
+		{
+			snprintf(t_buf, sizeof(t_buf), "%s ", data.row[i][2]);
+			strcat(buf, t_buf);
+		}
+		service_send(chanfix_p, client_p, conn_p,
+					"Top scores for non-ops in channel '%s':", parv[0]);
+		service_send(chanfix_p, client_p, conn_p, "%s", buf);
+		rsdb_exec_fetch_end(&data);
+	}
 
 	return 0;
 }
