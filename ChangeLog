@@ -1,3 +1,13 @@
+leeh        2010/02/28 18:19:09 UTC	(20100228_6-26969)
+  Log:
+  - ensure find_conf_oper() cannot allow users to use blocks that have been
+    removed but are still active (i.e. someone is logged in)
+  
+
+  Modified:
+	rserv/trunk/src/conf.c (File Modified) 
+
+
 leeh        2010/02/28 18:10:15 UTC	(20100228_5-26967)
   Log:
   - add in HOOK_CLIENT_EXIT_SPLIT for when a client exits due to a split
