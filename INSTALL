@@ -33,8 +33,14 @@ doc/database_mod.txt for more information.
    To choose PostgreSQL you should pass '--enable-pgsql' to configure.
 
    If configure cannot find your database engine, you can tell it to look
-   in a specific place.  Eg, for sqlite, '--enable-sqlite=PATH'.  Configure
-   will then look in PATH/include/ and PATH/lib/ for the files it needs.
+   in a specific place.  This varies for each database:
+
+     For SQLite:     '--enable-sqlite=PATH'.
+       Configure will then look in PATH/include/ and PATH/lib/
+     For MySQL:      '--enable-mysql=/path/to/mysql_config'
+       Configure will use the given mysql_config binary to determine paths.
+     For PostgreSQL: '--enable-pgsql=/path/to/pg_config'
+       Configure will use the given pg_config binary to determine paths.
 
    The sqlite included here is NOT suitable for installation system wide, 
    only for building ratbox-services.
