@@ -1,3 +1,18 @@
+leeh        2010/02/28 22:14:46 UTC	(20100228_7-26971)
+  Log:
+  - change the parsing of operator {}; blocks so that they are not free()d on
+    rehash.  When loading the conf again, try to find a dead one to resurrect
+    instead of just creating new ones..
+  
+    This has the nice side effect that changing the flags on an operator {};
+    block will now update the flags for any opers actually logged in
+  
+
+  Modified:
+	rserv/trunk/src/conf.c (File Modified) 
+	rserv/trunk/src/newconf.c (File Modified) 
+
+
 leeh        2010/02/28 18:19:09 UTC	(20100228_6-26969)
   Log:
   - ensure find_conf_oper() cannot allow users to use blocks that have been
