@@ -4817,7 +4817,7 @@ fi
             { $as_echo "$as_me:${as_lineno-$LINENO}: checking for MySQL libraries" >&5
 $as_echo_n "checking for MySQL libraries... " >&6; }
 
-            MYSQL_CFLAGS="`$MYSQL_CONFIG --cflags`"
+            MYSQL_CFLAGS="`$MYSQL_CONFIG --include`"
             MYSQL_LDFLAGS="`$MYSQL_CONFIG --libs`"
 
             MYSQL_VERSION=`$MYSQL_CONFIG --version`

@@ -31,8 +31,9 @@
  * $Id$
  */
 #include "stdinc.h"
-#include <mysql/mysql.h>
-#include <mysql/errmsg.h>
+#include <mysql.h>
+/* this is the mysql errmsg.h */
+#include <errmsg.h>
 #include "rsdb.h"
 #include "rserv.h"
 #include "conf.h"
