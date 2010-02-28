@@ -1,3 +1,12 @@
+moggie      2010/02/28 03:53:40 UTC	(20100228_0-26955)
+  Log:
+  - Make sure the history update code can detect if the cf_score table is empty.
+  
+
+  Modified:
+	rserv/trunk/src/s_chanfix.c (File Modified) 
+
+
 moggie      2010/02/27 23:53:59 UTC	(20100227_0-26953)
   Log:
   - Outline o_chanfix_score() function for showing scores.
