@@ -297,8 +297,11 @@ e_chanfix_collate_history(void *unused)
 			return;
 		}
 
-		min_dayts = atoi(ts_data.row[0][0]);
-		/*mlog("debug: converted min_dayts to: %d, epoch is: %d", min_dayts, DAYS_SINCE_EPOCH);*/
+		if(ts_data.row[0][0] != NULL)
+			min_dayts = atoi(ts_data.row[0][0]);
+		else
+			min_dayts = DAYS_SINCE_EPOCH;
+
 		rsdb_exec_fetch_end(&ts_data);
 
 		if(min_dayts == DAYS_SINCE_EPOCH)
