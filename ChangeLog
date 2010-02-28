@@ -1,3 +1,15 @@
+moggie      2010/02/28 12:49:31 UTC	(20100228_2-26959)
+  Log:
+  - Add get_all_cf_scores() function for fetching all DB channel scores.
+  - Rename get_userhost_chan_scores() to get_chmember_cf_scores() and move code
+    to right place.
+  - Re-factor o_chanfix_score() prototype to give better user output.
+  
+
+  Modified:
+	rserv/trunk/src/s_chanfix.c (File Modified) 
+
+
 leeh        2010/02/28 11:58:42 UTC	(20100228_1-26957)
   Log:
   - via Narf, userserv is passing in the wrong parameter ordering to
