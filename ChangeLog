@@ -1,3 +1,19 @@
+leeh        2010/02/28 13:00:52 UTC	(20100228_3-26961)
+  Log:
+  - take --include from mysql_config, not --cflags
+  - ensure we include <mysql.h> and <errmsg.h> for mysql, rather than
+    <mysql/...>
+  
+    Looks like along with everyone else, we just have to hope there are no OS
+    conflicts with errmsg.h
+  
+
+  Modified:
+	rserv/trunk/aclocal.m4 (File Modified) 
+	rserv/trunk/configure (File Modified) 
+	rserv/trunk/src/rsdb_mysql.c (File Modified) 
+
+
 moggie      2010/02/28 12:49:31 UTC	(20100228_2-26959)
   Log:
   - Add get_all_cf_scores() function for fetching all DB channel scores.
