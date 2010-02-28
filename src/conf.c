@@ -370,6 +370,9 @@ find_conf_oper(const char *username, const char *host, const char *server,
         {
                 oper_p = ptr->data;
 
+		if(ConfDead(oper_p))
+			continue;
+
                 if(match(oper_p->username, username) &&
                    match(oper_p->host, host) &&
 		   (EmptyString(oper_p->server) || match(oper_p->server, server)) &&
