@@ -226,13 +226,8 @@ clear_old_conf(void)
 	{
 		oper_p = ptr->data;
 
-		/* still in use */
-		if(oper_p->refcount)
-			SetConfDead(oper_p);
-		else
-			free_conf_oper(oper_p);
-
-		dlink_destroy(ptr, &conf_oper_list);
+		/* cleaned up properly in clear_old_conf_final() */
+		SetConfDead(oper_p);
 	}
 
 	DLINK_FOREACH_SAFE(ptr, next_ptr, conf_server_list.head)
@@ -240,6 +235,29 @@ clear_old_conf(void)
 		free_conf_server(ptr->data);
 		dlink_destroy(ptr, &conf_server_list);
 	}	
+}
+
+/* clear_old_conf_final()
+ *   Clears out old configuration stuff that rserv doesn't need after a
+ *   rehash.
+ */
+static void
+clear_old_conf_final(void)
+{
+	struct conf_oper *oper_p;
+	dlink_node *ptr;
+	dlink_node *next_ptr;
+
+	DLINK_FOREACH_SAFE(ptr, next_ptr, conf_oper_list.head)
+	{
+		oper_p = ptr->data;
+
+		if(ConfDead(oper_p) && oper_p->refcount == 0)
+		{
+			free_conf_oper(oper_p);
+			dlink_destroy(ptr, &conf_oper_list);
+		}
+	}
 }
 
 void
@@ -296,6 +314,9 @@ conf_parse(int cold)
 	}
 
         fclose(conf_fbfile_in);
+
+	if(!cold)
+		clear_old_conf_final();
 }
 
 void

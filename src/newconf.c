@@ -661,8 +661,10 @@ conf_begin_operator(struct TopConf *tc)
 static int
 conf_end_operator(struct TopConf *tc)
 {
-	dlink_node *ptr;
-	dlink_node *next_ptr;
+	struct conf_oper *yy_cloper;
+	dlink_node *ptr, *next_ptr;
+	dlink_node *cptr, *next_cptr;
+	int found;
 
         if(conf_cur_block_name != NULL)
                 yy_oper->name = my_strdup(conf_cur_block_name);
@@ -682,12 +684,81 @@ conf_end_operator(struct TopConf *tc)
 	DLINK_FOREACH_SAFE(ptr, next_ptr, yy_oper_list.head)
 	{
 		yy_tmpoper = ptr->data;
-		yy_tmpoper->name = my_strdup(yy_oper->name);
-		yy_tmpoper->pass = my_strdup(yy_oper->pass);
-		yy_tmpoper->flags = yy_oper->flags;
-		yy_tmpoper->sflags = yy_oper->sflags;
 
-		dlink_add_tail_alloc(yy_tmpoper, &conf_oper_list);
+		found = 0;
+
+		/* see if we have a conf block marked DEAD that we can update.. */
+		DLINK_FOREACH_SAFE(cptr, next_cptr, conf_oper_list.head)
+		{
+			yy_cloper = cptr->data;
+
+			if(!ConfDead(yy_cloper))
+				continue;
+
+			/* username and host should match */
+			if(irccmp(yy_cloper->username, yy_tmpoper->username))
+				continue;
+
+			if(irccmp(yy_cloper->host, yy_tmpoper->host))
+				continue;
+
+			/* as should the name on the block -- which is in yy_oper */
+			if(irccmp(yy_cloper->name, yy_oper->name))
+				continue;
+
+			/* yy_cloper has a servername.. */
+			if(!EmptyString(yy_cloper->server))
+			{
+				/* so yy_tmpoper should have one too */
+				if(EmptyString(yy_tmpoper->server))
+					continue;
+
+				/* and it should match */
+				if(irccmp(yy_cloper->server, yy_tmpoper->server))
+					continue;
+			}
+			/* yy_cloper is empty, yy_tmpoper should be too */
+			else if(!EmptyString(yy_tmpoper->server))
+				continue;
+
+			/* found our match! lets leave it in yy_cloper */
+			found++;
+			break;
+
+		}
+
+		/* got one to update.. */
+		if(found)
+		{
+			/* user, host, server are already identical.. */
+
+			/* reset password */
+			my_free(yy_cloper->pass);
+			yy_cloper->pass = my_strdup(yy_oper->pass);
+
+			/* update flags */
+			yy_cloper->flags = yy_oper->flags;
+			yy_cloper->sflags = yy_oper->sflags;
+
+			/* clear fact its dead */
+			ClearConfDead(yy_cloper);
+
+			/* we've updated an existing entry -- so yy_tmpoper isn't needed */
+			free_conf_oper(yy_tmpoper);
+		}
+		/* creating a new block -- so update this user@host, server with the
+		 * generic bits from yy_oper --anfl
+		 */
+		else
+		{
+			yy_tmpoper->name = my_strdup(yy_oper->name);
+			yy_tmpoper->pass = my_strdup(yy_oper->pass);
+			yy_tmpoper->flags = yy_oper->flags;
+			yy_tmpoper->sflags = yy_oper->sflags;
+
+			dlink_add_tail_alloc(yy_tmpoper, &conf_oper_list);
+		}
+
 		dlink_destroy(ptr, &yy_oper_list);
 	}
 
