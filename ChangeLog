@@ -1,3 +1,13 @@
+leeh        2010/02/28 11:58:42 UTC	(20100228_1-26957)
+  Log:
+  - via Narf, userserv is passing in the wrong parameter ordering to
+    SVC_INFO_SUSPENDEDADMIN when reasons are to be shown
+  
+
+  Modified:
+	rserv/trunk/src/s_userserv.c (File Modified) 
+
+
 moggie      2010/02/28 03:53:40 UTC	(20100228_0-26955)
   Log:
   - Make sure the history update code can detect if the cf_score table is empty.
