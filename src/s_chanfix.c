@@ -116,6 +116,8 @@ static void e_chanfix_collate_history(void *unused);
 /* Internal chanfix functions */
 static void chan_takeover(struct channel *);
 static time_t seconds_to_midnight(void);
+static int get_all_cf_scores(struct channel *, struct rsdb_table *);
+static int get_chmember_cf_scores(struct channel *, struct rsdb_table *, short);
 
 static int add_chanfix(struct channel *chptr, int manualfix);
 static void del_chanfix(struct channel *chptr);
@@ -169,6 +171,119 @@ chan_takeover(struct channel *chptr)
 		}
 		modebuild_finish();
 	}
+}
+
+/* Return a DB table of all known user@hosts and scores who have scores in
+ * the specified channel.
+ */
+static int
+get_all_cf_scores(struct channel *chptr, struct rsdb_table *data)
+{
+	struct chmember *msptr;
+	dlink_node *ptr, *listhead;
+	char userhost[USERLEN+HOSTLEN+4+1];
+	char *uhostbuf;
+	unsigned int count;
+
+	rsdb_exec_fetch(data, "SELECT userhost, userhost_id, SUM(total) "
+		"FROM "
+		"  (SELECT cf_score.userhost_id, count(*) AS total "
+		"  FROM cf_score "
+		"  LEFT JOIN cf_channel ON cf_score.channel_id=cf_channel.id "
+		"  WHERE cf_channel.chname = LOWER('%Q') "
+		"  GROUP BY cf_score.userhost_id "
+		"  UNION ALL "
+		"  SELECT cf_score_history.userhost_id, SUM(cf_score_history.score) AS total "
+		"  FROM cf_score_history "
+		"  LEFT JOIN cf_channel ON cf_score_history.channel_id=cf_channel.id "
+		"  WHERE cf_channel.chname = LOWER('%Q') "
+		"  GROUP BY cf_score_history.userhost_id) AS total_table "
+		"LEFT JOIN cf_userhost ON total_table.userhost_id=cf_userhost.id "
+		"GROUP BY total_table.userhost_id", 
+		chptr->name, chptr->name);
+
+	if(data->row_count == 0)
+	{
+		mlog("warning: Failed to retrieve userhost scores.");
+		rsdb_exec_fetch_end(data);
+		return 0;
+	}
+
+	return 1;
+}
+
+/* Return a DB table of user@hosts and scores who are either currently opped or
+ * unopped in the specified channel.
+ */
+static int
+get_chmember_cf_scores(struct channel *chptr, struct rsdb_table *data, short opped)
+{
+	struct chmember *msptr;
+	dlink_node *ptr, *listhead;
+	char userhost[USERLEN+HOSTLEN+4+1];
+	char *uhostbuf;
+	unsigned int count;
+
+	if(opped == 1)
+	{
+		count = dlink_list_length(&chptr->users_opped);
+		listhead = chptr->users_opped.head;
+	}
+	else
+	{
+		count = dlink_list_length(&chptr->users_unopped);
+		listhead = chptr->users_unopped.head;
+	}
+
+	if(count < 1)
+		return 0;
+
+	uhostbuf = my_malloc(sizeof(userhost) * count);
+	uhostbuf[0] = '\0';
+
+	DLINK_FOREACH(ptr, listhead)
+	{
+		msptr = ptr->data;
+
+		snprintf(userhost, sizeof(userhost), "'%s@%s',",
+				msptr->client_p->user->username,
+				msptr->client_p->user->host);
+
+		strcat(uhostbuf, userhost);
+	}
+
+	uhostbuf[strlen(uhostbuf) - 1] = '\0';
+	mlog("debug: uhostbuf: %s", uhostbuf);
+
+	rsdb_exec_fetch(data, "SELECT userhost, userhost_id, SUM(total) "
+		"FROM "
+		"  (SELECT cf_score.userhost_id, count(*) AS total "
+		"  FROM cf_score "
+		"  LEFT JOIN cf_channel ON cf_score.channel_id=cf_channel.id "
+		"  WHERE cf_channel.chname = LOWER('%Q') "
+		"  GROUP BY cf_score.userhost_id "
+		"  UNION ALL "
+		"  SELECT cf_score_history.userhost_id, SUM(cf_score_history.score) AS total "
+		"  FROM cf_score_history "
+		"  LEFT JOIN cf_channel ON cf_score_history.channel_id=cf_channel.id "
+		"  WHERE cf_channel.chname = LOWER('%Q') "
+		"  GROUP BY cf_score_history.userhost_id) AS total_table "
+		"LEFT JOIN cf_userhost ON total_table.userhost_id=cf_userhost.id "
+		"WHERE userhost IN (%s) "
+		"GROUP BY total_table.userhost_id", 
+		chptr->name, chptr->name, uhostbuf);
+
+	my_free(uhostbuf);
+	uhostbuf = NULL;
+
+	if(data->row_count == 0)
+	{
+		mlog("warning: Failed to retrieve userhost scores.");
+		rsdb_exec_fetch_end(data);
+		return 0;
+	}
+
+	return 1;
 }
 
 /* Function for collecting chanop scores for a given channel.
@@ -395,76 +510,6 @@ o_chanfix_cfpart(struct client *client_p, struct lconn *conn_p, const char *parv
 	return 0;
 }
 
-static int
-get_userhost_chan_scores(struct channel *chptr, short opped, struct rsdb_table *data)
-{
-	struct chmember *msptr;
-	dlink_node *ptr, *listhead;
-	char userhost[USERLEN+HOSTLEN+4+1];
-	char *uhostbuf;
-	unsigned int count;
-
-	if(opped == 1)
-	{
-		count = dlink_list_length(&chptr->users_opped);
-		listhead = chptr->users_opped.head;
-	}
-	else
-	{
-		count = dlink_list_length(&chptr->users_unopped);
-		listhead = chptr->users_unopped.head;
-	}
-
-	if(count < 1)
-		return 0;
-
-	uhostbuf = my_malloc(sizeof(userhost) * count);
-	uhostbuf[0] = '\0';
-
-	DLINK_FOREACH(ptr, listhead)
-	{
-		msptr = ptr->data;
-
-		snprintf(userhost, sizeof(userhost), "'%s@%s',",
-				msptr->client_p->user->username,
-				msptr->client_p->user->host);
-
-		strcat(uhostbuf, userhost);
-	}
-
-	uhostbuf[strlen(uhostbuf) - 1] = '\0';
-	mlog("debug: uhostbuf: %s", uhostbuf);
-
-	rsdb_exec_fetch(data, "SELECT userhost, userhost_id, SUM(total) "
-		"FROM "
-		"  (SELECT cf_score.userhost_id, count(*) AS total "
-		"  FROM cf_score "
-		"  LEFT JOIN cf_channel ON cf_score.channel_id=cf_channel.id "
-		"  WHERE cf_channel.chname = LOWER('%Q') "
-		"  GROUP BY cf_score.userhost_id "
-		"  UNION ALL "
-		"  SELECT cf_score_history.userhost_id, SUM(cf_score_history.score) AS total "
-		"  FROM cf_score_history "
-		"  LEFT JOIN cf_channel ON cf_score_history.channel_id=cf_channel.id "
-		"  WHERE cf_channel.chname = LOWER('%Q') "
-		"  GROUP BY cf_score_history.userhost_id) AS total_table "
-		"LEFT JOIN cf_userhost ON total_table.userhost_id=cf_userhost.id "
-		"WHERE userhost IN (%s) "
-		"GROUP BY total_table.userhost_id", 
-		chptr->name, chptr->name, uhostbuf);
-
-	my_free(uhostbuf);
-	uhostbuf = NULL;
-
-	if(data->row_count == 0)
-	{
-		mlog("warning: Failed to retrieve userhost scores.");
-		rsdb_exec_fetch_end(data);
-		return 0;
-	}
-
-	return 1;
-}
 
 static int
 o_chanfix_score(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
@@ -494,10 +539,33 @@ o_chanfix_score(struct client *client_p, struct lconn *conn_p, const char *parv[
 	}
 #endif
 
-	mlog("debug: querying for opped users.");
+	/* get all scores. */
+	if(get_all_cf_scores(chptr, &data) && data.row[0][0])
+	{
+		mlog("debug: generate string buf for all users.");
+		buf[0] = '\0';
+		for(i = 0; i < data.row_count; i++)
+		{
+			snprintf(t_buf, sizeof(t_buf), "%s ", data.row[i][2]);
+			strcat(buf, t_buf);
+		}
+		service_send(chanfix_p, client_p, conn_p,
+				"Top scores for channel '%s':", parv[0]);
+		service_send(chanfix_p, client_p, conn_p, "%s", buf);
+		rsdb_exec_fetch_end(&data);
+	}
+	else
+	{
+		service_send(chanfix_p, client_p, conn_p,
+					"Channel '%s' has no score data.", parv[0]);
+		rsdb_exec_fetch_end(&data);
+		return 0;
+	}
 
-	/* get the opped userhost / score data. */
-	if(get_userhost_chan_scores(chptr, 1, &data))
+	/* show the opped userhost / score data. */
+	service_send(chanfix_p, client_p, conn_p,
+					"Top scores for ops in channel '%s':", parv[0]);
+	if(get_chmember_cf_scores(chptr, &data, 1) && data.row[0][0])
 	{
 		mlog("debug: generate string buf for opped users.");
 		buf[0] = '\0';
@@ -506,15 +574,20 @@ o_chanfix_score(struct client *client_p, struct lconn *conn_p, const char *parv[
 			snprintf(t_buf, sizeof(t_buf), "%s ", data.row[i][2]);
 			strcat(buf, t_buf);
 		}
-		service_send(chanfix_p, client_p, conn_p,
-					"Top scores for ops in channel '%s':", parv[0]);
 		service_send(chanfix_p, client_p, conn_p, "%s", buf);
 		rsdb_exec_fetch_end(&data);
 	}
-	mlog("debug: querying for unopped users.");
+	else
+	{
+		service_send(chanfix_p, client_p, conn_p, "No opped scores.");
+		rsdb_exec_fetch_end(&data);
+	}
 
+	mlog("debug: querying for unopped users.");
 	/* get the unopped userhost / score data. */
-	if(get_userhost_chan_scores(chptr, 0, &data))
+	service_send(chanfix_p, client_p, conn_p,
+				"Top scores for non-ops in channel '%s':", parv[0]);
+	if(get_chmember_cf_scores(chptr, &data, 0) && data.row[0][0])
 	{
 		mlog("debug: generate string buf for unopped users.");
 		buf[0] = '\0';
@@ -523,9 +596,12 @@ o_chanfix_score(struct client *client_p, struct lconn *conn_p, const char *parv[
 			snprintf(t_buf, sizeof(t_buf), "%s ", data.row[i][2]);
 			strcat(buf, t_buf);
 		}
-		service_send(chanfix_p, client_p, conn_p,
-					"Top scores for non-ops in channel '%s':", parv[0]);
 		service_send(chanfix_p, client_p, conn_p, "%s", buf);
+		rsdb_exec_fetch_end(&data);
+	}
+	else
+	{
+		service_send(chanfix_p, client_p, conn_p, "No non-op scores.");
 		rsdb_exec_fetch_end(&data);
 	}
 
