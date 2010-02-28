@@ -467,6 +467,7 @@ exit_server(struct client *target_p)
         /* first exit each of this servers users */
 	DLINK_FOREACH_SAFE(ptr, next_ptr, target_p->server->users.head)
 	{
+		hook_call(HOOK_CLIENT_EXIT_SPLIT, ptr->data, NULL);
 		exit_client(ptr->data);
 	}
 

@@ -23,6 +23,10 @@
 #define HOOK_CLIENT_CONNECT_BURST	24	/* client connects (burst) */
 #define HOOK_CLIENT_NICKCHANGE		26	/* client changes nick */
 #define HOOK_CLIENT_EXIT		28	/* client quits */
+/* HOOK_CLIENT_EXIT_SPLIT is called prior to HOOK_CLIENT_EXIT, but both are
+ * called for a client that splits
+ */
+#define HOOK_CLIENT_EXIT_SPLIT		29	/* client quits due to a split */
 
 #define HOOK_SERVER_EXIT		30	/* server squits */
 
