@@ -1,3 +1,13 @@
+leeh        2010/02/28 17:34:49 UTC	(20100228_4-26965)
+  Log:
+  - clarify the INSTALL instructions as to how the database engines lookup
+    paths
+  
+
+  Modified:
+	rserv/trunk/INSTALL (File Modified) 
+
+
 leeh        2010/02/28 13:00:52 UTC	(20100228_3-26961)
   Log:
   - take --include from mysql_config, not --cflags
