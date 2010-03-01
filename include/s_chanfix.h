@@ -45,8 +45,11 @@ struct chanfix_score_item
 	int score;
 };
 
-/* The maximum number of users chanfix will op when fixing a channel. */
-#define CF_MAX_USERS_TO_OP	5
+/* The maximum number of users chanfix will op per fix cycle. */
+#define CF_MAX_USERS_TO_OP	8
+
+/* The minimum number of ops required for a successful chanfix. */
+#define CF_MIN_FIX_OPS	5
 
 /* The number of daysamples to keep scores for in the database. */
 #define CF_DAYSAMPLES	14
@@ -54,7 +57,5 @@ struct chanfix_score_item
 /* The maximum possible score achievable by a user (288 * CF_DAYSAMPLES). */
 #define CF_MAX_CHANFIX_SCORE	4032
 
-/* Sanity limit for max number of opped users to score per channel. */
-#define MAXCHANOPCOUNT	256
 
 #endif

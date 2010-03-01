@@ -82,17 +82,17 @@ static struct service_command chanfix_command[] =
 	{ "SCORE",	&o_chanfix_score,	1, NULL, 1, 0L, 0, 1, 0 },
 	{ "CHANFIX",	&o_chanfix_chanfix,	1, NULL, 1, 0L, 0, 1, 0 },
 	{ "REVERT",	&o_chanfix_revert,	1, NULL, 1, 0L, 0, 1, 0 },
-	/*{ "HISTORY",&o_chanfix_history,	1, NULL, 1, 0L, 0, 1, 0 },
+	/*{ "HISTORY",	&o_chanfix_history,	1, NULL, 1, 0L, 0, 1, 0 },
 	{ "INFO",	&o_chanfix_info,	1, NULL, 1, 0L, 0, 1, 0 },
 	{ "OPLIST",	&o_chanfix_oplist,	1, NULL, 1, 0L, 0, 1, 0 },
-	{ "ADDNOTE",&o_chanfix_addnote,	1, NULL, 1, 0L, 0, 1, 0 },
-	{ "DELNOTE",&o_chanfix_delnote,	1, NULL, 1, 0L, 0, 1, 0 },*/
+	{ "ADDNOTE",	&o_chanfix_addnote,	1, NULL, 1, 0L, 0, 1, 0 },
+	{ "DELNOTE",	&o_chanfix_delnote,	1, NULL, 1, 0L, 0, 1, 0 },*/
 	{ "SET",	&o_chanfix_set,	1, NULL, 1, 0L, 0, 1, 0 },
 	/*{ "BLOCK",	&o_chanfix_block,	1, NULL, 1, 0L, 0, 1, 0 },
-	{ "UNBLOCK",&o_chanfix_unblock,	1, NULL, 1, 0L, 0, 1, 0 },*/
+	{ "UNBLOCK",	&o_chanfix_unblock,	1, NULL, 1, 0L, 0, 1, 0 },*/
 	{ "CHECK",	&o_chanfix_check,	1, NULL, 1, 0L, 0, 1, 0 },
 	/*{ "OPNICKS",&o_chanfix_opnicks,	1, NULL, 1, 0L, 0, 1, 0 },*/
-	{ "STATUS",&o_chanfix_status,	0, NULL, 1, 0L, 0, 1, 0 }
+	{ "STATUS",	&o_chanfix_status,	0, NULL, 1, 0L, 0, 1, 0 }
 };
 
 static struct ucommand_handler chanfix_ucommand[] =
@@ -291,19 +291,20 @@ get_chmember_cf_scores(struct channel *chptr, short opped, int max_num)
 	struct chanfix_score *scores;
 	unsigned long userhost_id;
 	struct chmember *msptr;
-	dlink_node *ptr, *listhead;
+	dlink_node *ptr;
+	dlink_list *listptr;
 	char userhost[USERLEN+HOSTLEN+4+1];
 	unsigned int count, i, user_count;
 
 	if(opped == 1)
 	{
 		count = dlink_list_length(&chptr->users_opped);
-		listhead = chptr->users_opped.head;
+		listptr = chptr->users_opped;
 	}
 	else
 	{
 		count = dlink_list_length(&chptr->users_unopped);
-		listhead = chptr->users_unopped.head;
+		listptr = chptr->users_unopped;
 	}
 
 	if(count < 1)
@@ -313,7 +314,7 @@ get_chmember_cf_scores(struct channel *chptr, short opped, int max_num)
 		return NULL;
 
 	user_count = 0;
-	DLINK_FOREACH(ptr, listhead)
+	DLINK_FOREACH(ptr, listptr.head)
 	{
 		msptr = ptr->data;
 
@@ -356,7 +357,6 @@ collect_channel_scores(struct channel *chptr, time_t timestamp, unsigned int day
 	struct chmember *msptr;
 	dlink_node *ptr;
 	char userhost[USERLEN+HOSTLEN+2];
-	unsigned int count = 0;
 
 	DLINK_FOREACH(ptr, chptr->users_opped.head)
 	{
@@ -369,10 +369,6 @@ collect_channel_scores(struct channel *chptr, time_t timestamp, unsigned int day
 		rsdb_exec(NULL, "INSERT INTO cf_temp_score (chname, userhost, timestamp, dayts) "
 						"VALUES(LOWER('%Q'), LOWER('%Q'), '%lu', '%lu')",
 						chptr->name, userhost, timestamp, dayts);
-
-		count++;
-		if(count > MAXCHANOPCOUNT)
-			break;
 	}
 }
 
