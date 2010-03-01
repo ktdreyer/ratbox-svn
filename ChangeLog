@@ -1,3 +1,16 @@
+moggie      2010/03/01 22:06:46 UTC	(20100301_2-26977)
+  Log:
+  - Remove MAXCHANOPCOUNT restriction to avoid possible inaccurate scoring for
+    huge channels (the benefit of this is probably not worth it).
+  - Store dlink_list ptr instead of dlink_node ptr when running DLINK_FOREACH
+    loops.
+  
+
+  Modified:
+	rserv/trunk/include/s_chanfix.h (File Modified) 
+	rserv/trunk/src/s_chanfix.c (File Modified) 
+
+
 moggie      2010/03/01 12:15:49 UTC	(20100301_1-26975)
   Log:
   - Tidy some things and add a few reminder comments.
