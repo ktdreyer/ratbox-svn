@@ -1,3 +1,20 @@
+moggie      2010/03/01 02:41:59 UTC	(20100301_0-26973)
+  Log:
+  - Bring back simplified version of get_userhost_id() and get_channel_id().
+  - Modify get_all_cf_scores() to return a chanfix_score structure.
+  - Modify get_chmember_cf_scores() to use a get_all_cf_scores() structure
+    and fill in msptr values relating to channel members.
+  - Modify o_chanfix_score() to make use of the above functions for displaying
+    top channel score info.
+  - Add chanfix_score and chanfix_score_item structs to make chanfixing with
+    organised score data easier.
+  
+
+  Modified:
+	rserv/trunk/include/s_chanfix.h (File Modified) 
+	rserv/trunk/src/s_chanfix.c (File Modified) 
+
+
 leeh        2010/02/28 22:14:46 UTC	(20100228_7-26971)
   Log:
   - change the parsing of operator {}; blocks so that they are not free()d on
