@@ -29,6 +29,19 @@ struct chanfix_channel
 	dlink_node node;
 };
 
+struct chanfix_score
+{
+	struct chanfix_score_item *score_items;
+	int length;
+};
+
+struct chanfix_score_item
+{
+	struct chmember *msptr;
+	unsigned long userhost_id;
+	int score;
+};
+
 /* The maximum number of users chanfix will op when fixing a channel. */
 #define CF_MAX_USERS_TO_OP	5
 
