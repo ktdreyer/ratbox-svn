@@ -1,3 +1,15 @@
+moggie      2010/03/01 12:15:49 UTC	(20100301_1-26975)
+  Log:
+  - Tidy some things and add a few reminder comments.
+  - Add sanity check so we don't score a silly number of chanops in the DB.
+  - Run query during history collation to drop old scores from the DB.
+  
+
+  Modified:
+	rserv/trunk/include/s_chanfix.h (File Modified) 
+	rserv/trunk/src/s_chanfix.c (File Modified) 
+
+
 moggie      2010/03/01 02:41:59 UTC	(20100301_0-26973)
   Log:
   - Bring back simplified version of get_userhost_id() and get_channel_id().
