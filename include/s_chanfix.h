@@ -29,6 +29,9 @@ struct chanfix_channel
 	dlink_node node;
 };
 
+/* Structures for storing one or more chanfix_score_items containing
+ * chanop info such as: msptr, userhost_id and score.
+ */
 struct chanfix_score
 {
 	struct chanfix_score_item *score_items;
@@ -50,5 +53,8 @@ struct chanfix_score_item
 
 /* The maximum possible score achievable by a user (288 * CF_DAYSAMPLES). */
 #define CF_MAX_CHANFIX_SCORE	4032
+
+/* Sanity limit for max number of opped users to score per channel. */
+#define MAXCHANOPCOUNT	256
 
 #endif

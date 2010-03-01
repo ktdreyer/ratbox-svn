@@ -121,7 +121,7 @@ static time_t seconds_to_midnight(void);
 static struct chanfix_score * get_all_cf_scores(struct channel *, int);
 static struct chanfix_score * get_chmember_cf_scores(struct channel *, short, int);
 
-static int add_chanfix(struct channel *chptr, int manualfix);
+static int add_chanfix(struct channel *chptr, short man_fix);
 static void del_chanfix(struct channel *chptr);
 
 void
@@ -293,9 +293,7 @@ get_chmember_cf_scores(struct channel *chptr, short opped, int max_num)
 	struct chmember *msptr;
 	dlink_node *ptr, *listhead;
 	char userhost[USERLEN+HOSTLEN+4+1];
-	unsigned int count;
-	int i, user_count;
-
+	unsigned int count, i, user_count;
 
 	if(opped == 1)
 	{
@@ -329,8 +327,8 @@ get_chmember_cf_scores(struct channel *chptr, short opped, int max_num)
 		{
 			if(scores->score_items[i].userhost_id == userhost_id)
 			{
-				/* Check to see if msptr is NULL so we don't count users with
-				 * duplicate user@hosts.
+				/* Check to see if msptr is NULL so this function call doesn't
+				 * count duplicate user@hosts.
 				 */
 				if(scores->score_items[i].msptr == NULL)
 				{
@@ -358,6 +356,7 @@ collect_channel_scores(struct channel *chptr, time_t timestamp, unsigned int day
 	struct chmember *msptr;
 	dlink_node *ptr;
 	char userhost[USERLEN+HOSTLEN+2];
+	unsigned int count = 0;
 
 	DLINK_FOREACH(ptr, chptr->users_opped.head)
 	{
@@ -370,6 +369,10 @@ collect_channel_scores(struct channel *chptr, time_t timestamp, unsigned int day
 		rsdb_exec(NULL, "INSERT INTO cf_temp_score (chname, userhost, timestamp, dayts) "
 						"VALUES(LOWER('%Q'), LOWER('%Q'), '%lu', '%lu')",
 						chptr->name, userhost, timestamp, dayts);
+
+		count++;
+		if(count > MAXCHANOPCOUNT)
+			break;
 	}
 }
 
@@ -505,6 +508,12 @@ e_chanfix_collate_history(void *unused)
 
 	eventAddOnce("e_chanfix_collate_history", e_chanfix_collate_history, NULL,
 				seconds_to_midnight()+5);
+
+	/* Drop old history data from the cf_score_history table. */
+	mlog("info: Dropping old daysample history.");
+
+	rsdb_exec(NULL, "DELETE FROM cf_score_history WHERE dayts < '%lu'",
+				(DAYS_SINCE_EPOCH - DAYSAMPLES));
 }
 
 static int
@@ -725,6 +734,8 @@ o_chanfix_chanfix(struct client *client_p, struct lconn *conn_p, const char *par
 		service_snd(chanfix_p, client_p, conn_p, SVC_CF_HASOPPEDUSERS, parv[0]);
 		return 0;
 	}
+
+	/* Need to check to see if this channel has an ALERT set for it. */
 
 	service_err_chan(chanfix_p, chptr, SVC_CF_CHANFIXINPROG);
 
@@ -1009,9 +1020,9 @@ seconds_to_midnight(void)
 }
 
 static int
-add_chanfix(struct channel *chptr, int manualfix)
+add_chanfix(struct channel *chptr, short man_fix)
 {
-	struct chanfix_channel *af_chan;
+	struct chanfix_channel *cf_chan;
 
 #ifdef ENABLE_CHANSERV
 	/* Need to skip the channel if it's registered with ChanServ. */
@@ -1019,17 +1030,24 @@ add_chanfix(struct channel *chptr, int manualfix)
 		return 0;
 #endif
 
+	/* Must check if the channel has any sores in the DB. If not, print a
+	 * messages to logged in chanfix operators saying we know the channel
+	 * is oppless but cannot fix it, then return 0.
+	 */
+
+	/* Need to check to see if the channel is BLOCKed and should be ignored. */
+
 	if(dlink_find(chptr, &chanfix_list))
 		return 0;
 
-	af_chan = my_calloc(1, sizeof(struct chanfix_channel));
-	af_chan->chptr = chptr;
-	if(manualfix)
-		af_chan->flags |= CF_STATUS_MANUALFIX;
+	cf_chan = my_calloc(1, sizeof(struct chanfix_channel));
+	cf_chan->chptr = chptr;
+	if(man_fix)
+		cf_chan->flags |= CF_STATUS_MANUALFIX;
 	else
-		af_chan->flags |= CF_STATUS_AUTOFIX;
-	af_chan->time_fix_started = CURRENT_TIME;
-	af_chan->time_prev_attempt = 0;
+		cf_chan->flags |= CF_STATUS_AUTOFIX;
+	cf_chan->time_fix_started = CURRENT_TIME;
+	cf_chan->time_prev_attempt = 0;
 
 	/* We should either:
 	 *	- Get the highest chanop score so we can set highest_score, or
@@ -1037,13 +1055,13 @@ add_chanfix(struct channel *chptr, int manualfix)
 	 *    them in the autofix_channel struct so we don't have to keep querying
 	 *    the DB.
 	 */
-	/*af_chan->hightest_score = */
+	/*cf_chan->hightest_score = */
 
 	/* Also record an entry in the fixhistory table to say we're autofixing
 	 * this channel.
 	 */
-	dlink_add(chptr, &af_chan->node, &chanfix_list);
-	chptr->cfptr = af_chan;
+	dlink_add(chptr, &cf_chan->node, &chanfix_list);
+	chptr->cfptr = cf_chan;
 
 	return 1;
 }
