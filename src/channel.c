@@ -329,6 +329,9 @@ deop_chmember(struct chmember *member_p)
 	member_p->flags &= ~MODE_OPPED;
 	dlink_move_node(&member_p->choppednode, &member_p->chptr->users_opped,
 			&member_p->chptr->users_unopped);
+
+	if(dlink_list_length(&member_p->chptr->users_opped) == 0)
+		hook_call(HOOK_CHANNEL_OPLESS, member_p->chptr, NULL);
 }
 
 

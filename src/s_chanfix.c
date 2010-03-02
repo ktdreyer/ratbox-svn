@@ -109,7 +109,7 @@ static struct service_handler chanfix_service = {
 };
 
 static int h_chanfix_channel_destroy(void *chptr_v, void *unused);
-static int h_chanfix_channel_oppless(void *chptr_v, void *unused);
+static int h_chanfix_channel_opless(void *chptr_v, void *unused);
 
 static void e_chanfix_score_channels(void *unused);
 static void e_chanfix_collate_history(void *unused);
@@ -138,7 +138,7 @@ static void
 init_s_chanfix(void)
 {
 	hook_add(h_chanfix_channel_destroy, HOOK_CHANNEL_DESTROY);
-	/*hook_add(h_chanfix_channel_oppless, HOOK_CHANNEL_OPPLESS);*/
+	/*hook_add(h_chanfix_channel_opless, HOOK_CHANNEL_OPLESS);*/
 
 	eventAdd("e_chanfix_score_channels", e_chanfix_score_channels, NULL, 300);
 	/*eventAdd("e_chanfix_autofix_channels", e_chanfix_autofix_channels, NULL, 300);*/
@@ -606,7 +606,7 @@ h_chanfix_channel_destroy(void *chptr_v, void *unused)
 }
 
 static int
-h_chanfix_channel_oppless(void *chptr_v, void *unused)
+h_chanfix_channel_opless(void *chptr_v, void *unused)
 {
 	struct channel *chptr = (struct channel *) chptr_v;
 
