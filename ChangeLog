@@ -1,3 +1,15 @@
+moggie      2010/03/02 14:08:24 UTC	(20100302_1-26985)
+  Log:
+  - Add some #defines for calculating score checks.
+  - Create process_chanfix_list() function for processing either the list of
+    oppless auto or manual fix channels.
+  
+
+  Modified:
+	rserv/trunk/include/s_chanfix.h (File Modified) 
+	rserv/trunk/src/s_chanfix.c (File Modified) 
+
+
 moggie      2010/03/02 01:30:51 UTC	(20100302_0-26983)
   Log:
   - Create USERLIST command functionality.
