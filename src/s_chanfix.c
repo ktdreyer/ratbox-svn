@@ -121,7 +121,8 @@ static unsigned long get_userhost_id(const char *);
 static unsigned long get_channel_id(const char *);
 static time_t seconds_to_midnight(void);
 static struct chanfix_score * get_all_cf_scores(struct channel *, int, int);
-static struct chanfix_score * get_chmember_cf_scores(struct channel *, short, int);
+static struct chanfix_score * get_chmember_cf_scores(struct chanfix_score *,
+			struct channel *, dlink_list *, int);
 static void process_chanfix_list(int);
 
 static int add_chanfix(struct channel *chptr, short man_fix);
@@ -310,37 +311,21 @@ get_all_cf_scores(struct channel *chptr, int max_num, int min_score)
  * the DB for the specified channel.
  */
 static struct chanfix_score *
-get_chmember_cf_scores(struct channel *chptr, short status, int max_num)
+get_chmember_cf_scores(struct chanfix_score *scores, struct channel *chptr,
+		dlink_list *listptr, int max_num)
 {
-	struct chanfix_score *scores;
 	unsigned long userhost_id;
 	struct chmember *msptr;
 	dlink_node *ptr;
-	dlink_list *listptr;
 	char userhost[USERLEN+HOSTLEN+4+1];
-	unsigned int count, i, user_count;
+	unsigned int i, user_count;
 
-	if(status == 2)
-	{
-		count = dlink_list_length(&chptr->users);
-		listptr = &chptr->users;
-	}
-	else if(status == 1)
-	{
-		count = dlink_list_length(&chptr->users_opped);
-		listptr = &chptr->users_opped;
-	}
-	else
-	{
-		count = dlink_list_length(&chptr->users_unopped);
-		listptr = &chptr->users_unopped;
-	}
-
-	if(count < 1)
+	if(dlink_list_length(listptr) < 1)
 		return NULL;
 
-	if((scores = get_all_cf_scores(chptr, max_num, 0)) == NULL)
-		return NULL;
+	if(scores == NULL)
+		if((scores = get_all_cf_scores(chptr, max_num, 0)) == NULL)
+			return NULL;
 
 	user_count = 0;
 	DLINK_FOREACH(ptr, listptr->head)
@@ -358,7 +343,9 @@ get_chmember_cf_scores(struct channel *chptr, short status, int max_num)
 			if(scores->score_items[i].userhost_id == userhost_id)
 			{
 				/* Check to see if msptr is NULL so this function call doesn't
-				 * count duplicate user@hosts.
+				 * count duplicate user@hosts. This means if a channel contains
+				 * multiple users with the same user@host, only the first one
+				 * will be assigned a score.
 				 */
 				if(scores->score_items[i].msptr == NULL)
 				{
@@ -691,7 +678,7 @@ o_chanfix_score(struct client *client_p, struct lconn *conn_p, const char *parv[
 	struct channel *chptr;
 	char buf[BUFSIZE], t_buf[8];
 	int i;
-	struct chanfix_score *scores;
+	struct chanfix_score *all_scores, *scores;
 
 	if(!valid_chname(parv[0]))
 	{
@@ -714,22 +701,18 @@ o_chanfix_score(struct client *client_p, struct lconn *conn_p, const char *parv[
 #endif
 
 	/* get all scores. */
-	if(scores = get_all_cf_scores(chptr, config_file.cf_num_top_scores, 0))
+	if(all_scores = get_all_cf_scores(chptr, config_file.cf_num_top_scores, 0))
 	{
-		mlog("debug: generate string buf for all users.");
 		buf[0] = '\0';
-		for(i = 0; i < scores->length; i++)
+		for(i = 0; i < all_scores->length; i++)
 		{
-			snprintf(t_buf, sizeof(t_buf), "%d ", scores->score_items[i].score);
+			snprintf(t_buf, sizeof(t_buf), "%d ", all_scores->score_items[i].score);
 			strcat(buf, t_buf);
 		}
 		service_send(chanfix_p, client_p, conn_p,
 			"Top %d scores for channel '%s':", config_file.cf_num_top_scores, parv[0]);
 		service_send(chanfix_p, client_p, conn_p, "%s", buf);
 
-		my_free(scores->score_items);
-		my_free(scores);
-		scores = NULL;
 	}
 	else
 	{
@@ -738,12 +721,12 @@ o_chanfix_score(struct client *client_p, struct lconn *conn_p, const char *parv[
 		return 0;
 	}
 
-	/* show the opped userhost / score data. */
+	/* show the opped scores. */
 	service_send(chanfix_p, client_p, conn_p,
 		"Top %d scores for ops in channel '%s':", config_file.cf_num_top_scores, parv[0]);
-	if(scores = get_chmember_cf_scores(chptr, 1, config_file.cf_num_top_scores))
+	if(scores = get_chmember_cf_scores(all_scores, chptr, &chptr->users_opped,
+					config_file.cf_num_top_scores))
 	{
-		mlog("debug: generate string buf for opped users.");
 		buf[0] = '\0';
 		for(i = 0; i < scores->length; i++)
 		{
@@ -765,12 +748,12 @@ o_chanfix_score(struct client *client_p, struct lconn *conn_p, const char *parv[
 	}
 
 	mlog("debug: querying for unopped users.");
-	/* get the unopped userhost / score data. */
+	/* show unopped scores. */
 	service_send(chanfix_p, client_p, conn_p,
 		"Top %d scores for non-ops in channel '%s':", config_file.cf_num_top_scores, parv[0]);
-	if(scores = get_chmember_cf_scores(chptr, 0, config_file.cf_num_top_scores))
+	if(scores = get_chmember_cf_scores(all_scores, chptr, &chptr->users_unopped,
+				config_file.cf_num_top_scores))
 	{
-		mlog("debug: generate string buf for unopped users.");
 		buf[0] = '\0';
 		for(i = 0; i < scores->length; i++)
 		{
@@ -790,6 +773,9 @@ o_chanfix_score(struct client *client_p, struct lconn *conn_p, const char *parv[
 	{
 		service_send(chanfix_p, client_p, conn_p, "No non-op scores.");
 	}
+
+	my_free(all_scores->score_items);
+	my_free(all_scores);
 
 	return 0;
 }
@@ -824,7 +810,8 @@ o_chanfix_userlist(struct client *client_p, struct lconn *conn_p, const char *pa
 #endif
 
 
-	if(scores = get_chmember_cf_scores(chptr, 2, config_file.cf_num_top_scores))
+	if(scores = get_chmember_cf_scores(NULL, chptr, &chptr->users,
+				config_file.cf_num_top_scores))
 	{
 		service_send(chanfix_p, client_p, conn_p,
 			"Top %d users for channel '%s':", config_file.cf_num_top_scores, parv[0]);
@@ -842,7 +829,6 @@ o_chanfix_userlist(struct client *client_p, struct lconn *conn_p, const char *pa
 
 		my_free(scores->score_items);
 		my_free(scores);
-		scores = NULL;
 	}
 	else
 	{
@@ -1207,7 +1193,7 @@ add_chanfix(struct channel *chptr, short man_fix)
 		cf_chan->flags |= CF_STATUS_MANUALFIX;
 	else
 		cf_chan->flags |= CF_STATUS_AUTOFIX;
-	cf_chan->time_fix_started = CURRENT_TIME;
+	cf_chan->time_fix_started = 0;
 	cf_chan->time_prev_attempt = 0;
 
 	/* We should either:
