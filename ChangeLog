@@ -1,3 +1,17 @@
+moggie      2010/03/02 21:16:05 UTC	(20100302_2-26987)
+  Log:
+  - Modify the get_chmember_cf_scores() function to take a chanfix_score struct
+    as a parameter. In the case of the SCORE command, this avoids the need to
+    perform 2 separate queries and memory allocations to fetch the necessary
+    score info from the DB.
+  - Pass the users/users_opped/users_unopped list directly into
+    get_chmember_cf_scores() (instead of an int flag) for safety/niceness.
+  
+
+  Modified:
+	rserv/trunk/src/s_chanfix.c (File Modified) 
+
+
 moggie      2010/03/02 14:08:24 UTC	(20100302_1-26985)
   Log:
   - Add some #defines for calculating score checks.
