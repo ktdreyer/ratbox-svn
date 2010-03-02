@@ -113,6 +113,7 @@ static int h_chanfix_channel_oppless(void *chptr_v, void *unused);
 
 static void e_chanfix_score_channels(void *unused);
 static void e_chanfix_collate_history(void *unused);
+static void e_chanfix_autofix_channels(void *unused);
 
 /* Internal chanfix functions */
 static void chan_takeover(struct channel *);
@@ -121,6 +122,7 @@ static unsigned long get_channel_id(const char *);
 static time_t seconds_to_midnight(void);
 static struct chanfix_score * get_all_cf_scores(struct channel *, int, int);
 static struct chanfix_score * get_chmember_cf_scores(struct channel *, short, int);
+static void process_chanfix_list(int);
 
 static int add_chanfix(struct channel *chptr, short man_fix);
 static void del_chanfix(struct channel *chptr);
@@ -138,6 +140,7 @@ init_s_chanfix(void)
 	/*hook_add(h_chanfix_channel_oppless, HOOK_CHANNEL_OPPLESS);*/
 
 	eventAdd("e_chanfix_score_channels", e_chanfix_score_channels, NULL, 300);
+	/*eventAdd("e_chanfix_autofix_channels", e_chanfix_autofix_channels, NULL, 300);*/
 	eventAddOnce("e_chanfix_collate_history", e_chanfix_collate_history, NULL,
 				seconds_to_midnight()+5);
 }
@@ -398,6 +401,64 @@ collect_channel_scores(struct channel *chptr, time_t timestamp, unsigned int day
 	}
 }
 
+/* Iterate over the chanfix_list and perform chanfixing for the specified
+ * fix_type. This will be either CF_STATUS_AUTOFIX or CF_STATUS_MANUALFIX.
+ */
+static void 
+process_chanfix_list(int fix_type)
+{
+	struct chanfix_channel *cf_ch;
+	dlink_node *ptr, *next_ptr;
+
+	DLINK_FOREACH_SAFE(ptr, next_ptr, chanfix_list.head)
+	{
+		cf_ch = ptr->data;
+
+		if(cf_ch->flags & fix_type)
+		{
+			if(dlink_list_length(&cf_ch->chptr->users) < config_file.cf_min_clients)
+			{
+				del_chanfix(cf_ch->chptr);
+				mlog("debug: Channel '%s' has insufficient users for a fix",
+					cf_ch->chptr->name);
+			}
+
+			if(dlink_list_length(&cf_ch->chptr->users_opped) >= CF_MIN_FIX_OPS)
+			{
+				del_chanfix(cf_ch->chptr);
+				mlog("debug: Channel '%s' has enough ops (fix complete).",
+					cf_ch->chptr->name);
+			}
+
+			if(cf_ch->highest_score <=
+					(CF_MIN_ABS_CHAN_SCORE_END * CF_MAX_CHANFIX_SCORE))
+			{
+				del_chanfix(cf_ch->chptr);
+				mlog("debug: Cannot fix channel '%s' (highest user score is too low).");
+			}
+
+		}
+	}
+
+
+	/*op_chmember(msptr);
+	modebuild_add(DIR_ADD, "o", msptr->client_p->name);
+
+	cf_chan = my_calloc(1, sizeof(struct chanfix_channel));
+	cf_chan->chptr = chptr;
+	cf_chan->time_fix_started = CURRENT_TIME;
+	cf_chan->time_prev_attempt = 0;
+	*/
+
+
+	/* Also record an entry in the fixhistory table to say we're autofixing
+	 * this channel.
+	 */
+	/*dlink_add(chptr, &cf_chan->node, &chanfix_list);
+	chptr->cfptr = cf_chan;
+	*/
+}
+
 /* General function to manage how we iterate over all the channels
  * gathering score data.
  */
@@ -537,6 +598,14 @@ e_chanfix_collate_history(void *unused)
 	rsdb_exec(NULL, "DELETE FROM cf_score_history WHERE dayts < '%lu'",
 				(DAYS_SINCE_EPOCH - CF_DAYSAMPLES));
 }
+
+static void
+e_chanfix_autofix_channels(void *unused)
+{
+	if(!is_network_split())
+		process_chanfix_list(CF_STATUS_AUTOFIX);
+}
+
 
 static int
 h_chanfix_channel_destroy(void *chptr_v, void *unused)

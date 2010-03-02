@@ -57,5 +57,25 @@ struct chanfix_score_item
 /* The maximum possible score achievable by a user (288 * CF_DAYSAMPLES). */
 #define CF_MAX_CHANFIX_SCORE	4032
 
+/* Minimum absolute score required for chanfix to op a user, based on the
+ * maximum possible chanfix score achievable (default: 0.20 * 4032). 
+ * Make sure this value is between 0 and 1. */
+#define CF_MIN_ABS_CHAN_SCORE_BEGIN	0.20f
+
+/* Minimum absolute score required for chanfix to op a user towards the end
+ * of a fix, based on the maximum possible chanfix score achievable. 
+ * Make sure this value is between 0 and CF_MIN_ABS_CHAN_SCORE_BEGIN. */
+#define CF_MIN_ABS_CHAN_SCORE_END	0.04f
+
+/* Minimum score required for chanfix to op, relative to the highest
+ * user score found for this channel in the DB (at the beginning of the fix).
+ * Make sure this value is between 0 and 1. */
+#define CF_MIN_USER_SCORE_BEGIN	0.90f
+
+/* Minimum score required for chanfix to op, relative to the highest
+ * user score found for this channel in the DB. Thus if you have less than
+ * 30% of the highest score, chanfix will never op you.
+ * Make sure this value is between 0 and CF_MIN_USER_SCORE_BEGIN. */
+#define CF_MIN_USER_SCORE_END	0.30f
 
 #endif
