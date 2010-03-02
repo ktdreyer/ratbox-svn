@@ -1,3 +1,14 @@
+moggie      2010/03/02 23:00:33 UTC	(20100302_3-26989)
+  Log:
+  - Add a HOOK_CHANNEL_OPLESS hook to signal when a channel has become opless.
+  
+
+  Modified:
+	rserv/trunk/include/hook.h (File Modified) 
+	rserv/trunk/src/channel.c (File Modified) 
+	rserv/trunk/src/s_chanfix.c (File Modified) 
+
+
 moggie      2010/03/02 21:16:05 UTC	(20100302_2-26987)
   Log:
   - Modify the get_chmember_cf_scores() function to take a chanfix_score struct
