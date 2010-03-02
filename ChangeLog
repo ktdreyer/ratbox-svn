@@ -1,3 +1,16 @@
+moggie      2010/03/02 01:30:51 UTC	(20100302_0-26983)
+  Log:
+  - Create USERLIST command functionality.
+  - Use CF_DAYSAMPLES not DAYSAMPLES.
+  - Modify get_all_cf_scores() to take an extra param for when we want to filter
+    scores by a minimum value.
+  - Fix some channel user dlink_list pointeryness in get_chmember_cf_scores().
+  
+
+  Modified:
+	rserv/trunk/src/s_chanfix.c (File Modified) 
+
+
 moggie      2010/03/01 22:13:09 UTC	(20100301_3-26979)
   Log:
   - Add basic support for a HOOK_CHANNEL_OPPLESS hook.
