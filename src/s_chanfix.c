@@ -69,6 +69,7 @@ static dlink_list chanfix_list;
 static int o_chanfix_cfjoin(struct client *, struct lconn *, const char **, int);
 static int o_chanfix_cfpart(struct client *, struct lconn *, const char **, int);
 static int o_chanfix_score(struct client *, struct lconn *, const char **, int);
+static int o_chanfix_userlist(struct client *, struct lconn *, const char **, int);
 static int o_chanfix_chanfix(struct client *, struct lconn *, const char **, int);
 static int o_chanfix_revert(struct client *, struct lconn *, const char **, int);
 static int o_chanfix_check(struct client *, struct lconn *, const char **, int);
@@ -84,14 +85,13 @@ static struct service_command chanfix_command[] =
 	{ "REVERT",	&o_chanfix_revert,	1, NULL, 1, 0L, 0, 1, 0 },
 	/*{ "HISTORY",	&o_chanfix_history,	1, NULL, 1, 0L, 0, 1, 0 },
 	{ "INFO",	&o_chanfix_info,	1, NULL, 1, 0L, 0, 1, 0 },
-	{ "OPLIST",	&o_chanfix_oplist,	1, NULL, 1, 0L, 0, 1, 0 },
 	{ "ADDNOTE",	&o_chanfix_addnote,	1, NULL, 1, 0L, 0, 1, 0 },
 	{ "DELNOTE",	&o_chanfix_delnote,	1, NULL, 1, 0L, 0, 1, 0 },*/
 	{ "SET",	&o_chanfix_set,	1, NULL, 1, 0L, 0, 1, 0 },
 	/*{ "BLOCK",	&o_chanfix_block,	1, NULL, 1, 0L, 0, 1, 0 },
 	{ "UNBLOCK",	&o_chanfix_unblock,	1, NULL, 1, 0L, 0, 1, 0 },*/
 	{ "CHECK",	&o_chanfix_check,	1, NULL, 1, 0L, 0, 1, 0 },
-	/*{ "OPNICKS",&o_chanfix_opnicks,	1, NULL, 1, 0L, 0, 1, 0 },*/
+	{ "USERLIST",	&o_chanfix_userlist,	1, NULL, 1, 0L, 0, 1, 0 },
 	{ "STATUS",	&o_chanfix_status,	0, NULL, 1, 0L, 0, 1, 0 }
 };
 
@@ -119,7 +119,7 @@ static void chan_takeover(struct channel *);
 static unsigned long get_userhost_id(const char *);
 static unsigned long get_channel_id(const char *);
 static time_t seconds_to_midnight(void);
-static struct chanfix_score * get_all_cf_scores(struct channel *, int);
+static struct chanfix_score * get_all_cf_scores(struct channel *, int, int);
 static struct chanfix_score * get_chmember_cf_scores(struct channel *, short, int);
 
 static int add_chanfix(struct channel *chptr, short man_fix);
@@ -230,7 +230,7 @@ get_channel_id(const char *channel)
  * the DB for the specified channel.
  */
 static struct chanfix_score *
-get_all_cf_scores(struct channel *chptr, int max_num)
+get_all_cf_scores(struct channel *chptr, int max_num, int min_score)
 {
 	struct chanfix_score *scores;
 	unsigned long channel_id;
@@ -243,18 +243,37 @@ get_all_cf_scores(struct channel *chptr, int max_num)
 		return NULL;
 	}
 
-	rsdb_exec_fetch(&data, "SELECT userhost_id, SUM(total) "
-		"FROM "
-		"  (SELECT cf_score.userhost_id, count(*) AS total "
-		"  FROM cf_score WHERE channel_id = '%lu' "
-		"  GROUP BY cf_score.userhost_id "
-		"  UNION ALL "
-		"  SELECT cf_score_history.userhost_id, SUM(cf_score_history.score) AS total "
-		"  FROM cf_score_history WHERE channel_id = '%lu' "
-		"  GROUP BY cf_score_history.userhost_id) AS total_table "
-		"GROUP BY total_table.userhost_id " 
-		"ORDER BY total DESC", 
-		channel_id, channel_id);
+	if(min_score > 0)
+	{
+		rsdb_exec_fetch(&data, "SELECT userhost_id, SUM(total) "
+			"FROM "
+			"  (SELECT cf_score.userhost_id, count(*) AS total "
+			"  FROM cf_score WHERE channel_id = '%lu' "
+			"  GROUP BY cf_score.userhost_id "
+			"  UNION ALL "
+			"  SELECT cf_score_history.userhost_id, SUM(score) AS total "
+			"  FROM cf_score_history WHERE channel_id = '%lu' "
+			"  GROUP BY cf_score_history.userhost_id) AS total_table "
+			"WHERE total > %d "
+			"GROUP BY total_table.userhost_id " 
+			"ORDER BY total DESC", 
+			channel_id, channel_id, min_score);
+	}
+	else
+	{
+		rsdb_exec_fetch(&data, "SELECT userhost_id, SUM(total) "
+			"FROM "
+			"  (SELECT cf_score.userhost_id, count(*) AS total "
+			"  FROM cf_score WHERE channel_id = '%lu' "
+			"  GROUP BY cf_score.userhost_id "
+			"  UNION ALL "
+			"  SELECT cf_score_history.userhost_id, SUM(score) AS total "
+			"  FROM cf_score_history WHERE channel_id = '%lu' "
+			"  GROUP BY cf_score_history.userhost_id) AS total_table "
+			"GROUP BY total_table.userhost_id " 
+			"ORDER BY total DESC", 
+			channel_id, channel_id);
+	}
 
 	if(data.row_count == 0 || data.row[0][0] == NULL)
 	{
@@ -288,7 +307,7 @@ get_all_cf_scores(struct channel *chptr, int max_num)
  * the DB for the specified channel.
  */
 static struct chanfix_score *
-get_chmember_cf_scores(struct channel *chptr, short opped, int max_num)
+get_chmember_cf_scores(struct channel *chptr, short status, int max_num)
 {
 	struct chanfix_score *scores;
 	unsigned long userhost_id;
@@ -298,25 +317,30 @@ get_chmember_cf_scores(struct channel *chptr, short opped, int max_num)
 	char userhost[USERLEN+HOSTLEN+4+1];
 	unsigned int count, i, user_count;
 
-	if(opped == 1)
+	if(status == 2)
+	{
+		count = dlink_list_length(&chptr->users);
+		listptr = &chptr->users;
+	}
+	else if(status == 1)
 	{
 		count = dlink_list_length(&chptr->users_opped);
-		listptr = chptr->users_opped;
+		listptr = &chptr->users_opped;
 	}
 	else
 	{
 		count = dlink_list_length(&chptr->users_unopped);
-		listptr = chptr->users_unopped;
+		listptr = &chptr->users_unopped;
 	}
 
 	if(count < 1)
 		return NULL;
 
-	if((scores = get_all_cf_scores(chptr, max_num)) == NULL)
+	if((scores = get_all_cf_scores(chptr, max_num, 0)) == NULL)
 		return NULL;
 
 	user_count = 0;
-	DLINK_FOREACH(ptr, listptr.head)
+	DLINK_FOREACH(ptr, listptr->head)
 	{
 		msptr = ptr->data;
 
@@ -511,7 +535,7 @@ e_chanfix_collate_history(void *unused)
 	mlog("info: Dropping old daysample history.");
 
 	rsdb_exec(NULL, "DELETE FROM cf_score_history WHERE dayts < '%lu'",
-				(DAYS_SINCE_EPOCH - DAYSAMPLES));
+				(DAYS_SINCE_EPOCH - CF_DAYSAMPLES));
 }
 
 static int
@@ -592,7 +616,6 @@ o_chanfix_cfpart(struct client *client_p, struct lconn *conn_p, const char *parv
 	return 0;
 }
 
-
 static int
 o_chanfix_score(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
@@ -622,7 +645,7 @@ o_chanfix_score(struct client *client_p, struct lconn *conn_p, const char *parv[
 #endif
 
 	/* get all scores. */
-	if(scores = get_all_cf_scores(chptr, config_file.cf_num_top_scores))
+	if(scores = get_all_cf_scores(chptr, config_file.cf_num_top_scores, 0))
 	{
 		mlog("debug: generate string buf for all users.");
 		buf[0] = '\0';
@@ -697,6 +720,66 @@ o_chanfix_score(struct client *client_p, struct lconn *conn_p, const char *parv[
 	else
 	{
 		service_send(chanfix_p, client_p, conn_p, "No non-op scores.");
+	}
+
+	return 0;
+}
+
+
+static int
+o_chanfix_userlist(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
+{
+	struct channel *chptr;
+	char buf[BUFSIZE];
+	int i;
+	struct chanfix_score *scores;
+
+	if(!valid_chname(parv[0]))
+	{
+		service_snd(chanfix_p, client_p, conn_p, SVC_IRC_CHANNELINVALID, parv[0]);
+		return 0;
+	}
+
+	if((chptr = find_channel(parv[0])) == NULL)
+	{
+		service_snd(chanfix_p, client_p, conn_p, SVC_IRC_NOSUCHCHANNEL, parv[0]);
+		return 0;
+	}
+
+#ifdef ENABLE_CHANSERV
+	if(find_channel_reg(NULL, chptr->name))
+	{
+		service_snd(chanfix_p, client_p, conn_p, SVC_CF_CHANSERVCHANNEL, parv[0]);
+		return 0;
+	}
+#endif
+
+
+	if(scores = get_chmember_cf_scores(chptr, 2, config_file.cf_num_top_scores))
+	{
+		service_send(chanfix_p, client_p, conn_p,
+			"Top %d users for channel '%s':", config_file.cf_num_top_scores, parv[0]);
+		for(i = 0; i < scores->length; i++)
+		{
+			if(scores->score_items[i].msptr)
+			{
+				snprintf(buf, sizeof(buf), "%4d  %s!%s@%s", scores->score_items[i].score,
+					scores->score_items[i].msptr->client_p->name,
+					scores->score_items[i].msptr->client_p->user->username,
+					scores->score_items[i].msptr->client_p->user->host);
+				service_send(chanfix_p, client_p, conn_p, "%s", buf);
+			}
+		}
+
+		my_free(scores->score_items);
+		my_free(scores);
+		scores = NULL;
+	}
+	else
+	{
+		service_send(chanfix_p, client_p, conn_p,
+				"Channel '%s' has no score data.", parv[0]);
+		return 0;
 	}
 
 	return 0;
