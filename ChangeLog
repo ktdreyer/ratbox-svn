@@ -1,3 +1,27 @@
+moggie      2010/03/03 20:33:50 UTC	(20100303_0-26991)
+  Log:
+  - Add translation strings for SCORE and USERLIST functions.
+  - Make chanfix part when a chanfix_channel is deleted.
+  - Improve logic in get_chmember_cf_scores() function.
+  - Check autofixing is enabled before processing autofix channels.
+  - Use numbers instead of strings for better DB performance.
+  - Use HAVING instead of WHERE clauses to limit results by min score.
+  - Create basic chanfix_opless_channel() function for chanfixing opless
+    channels.
+  - Add check to see if fix time has expired and if there are any more non-ops
+    left (signalling a completed fix).
+  - TODO: Write score builder function to generate scores based on channels
+    instead of DB info, test for indications of which performs better.
+  
+
+  Modified:
+	rserv/trunk/include/langs.h (File Modified) 
+	rserv/trunk/include/s_chanfix.h (File Modified) 
+	rserv/trunk/src/langs.c (File Modified) 
+	rserv/trunk/src/messages.c (File Modified) 
+	rserv/trunk/src/s_chanfix.c (File Modified) 
+
+
 moggie      2010/03/02 23:00:33 UTC	(20100302_3-26989)
   Log:
   - Add a HOOK_CHANNEL_OPLESS hook to signal when a channel has become opless.
