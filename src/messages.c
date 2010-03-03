@@ -257,6 +257,12 @@ struct _lang_internal lang_internal[] =
 	{ SVC_CF_BANSREMOVED,		"%s's ban modes have been removed so users can re-join."		},
 	{ SVC_CF_MODESREMOVED,		"Channel modes have been removed so users can re-join."			},
 	{ SVC_CF_CHANSERVCHANNEL,	"Channel '%s' is registered with ChanServ"			},
+	{ SVC_CF_TOPSCORESFOR,		"Top %d scores for channel '%s':"		},
+	{ SVC_CF_TOPOPSCORES,		"Top %d scores for ops in channel '%s':"	},
+	{ SVC_CF_TOPUNOPSCORES,		"Top %d scores for non-ops in channel '%s':"	},
+	{ SVC_CF_NOTYPESCORES,		"No %s scores."		},
+	{ SVC_CF_TOPUSERSFOR,	"Top %d users for channel '%s':"	},
+	{ SVC_CF_NOSCOREDATA,	"Channel '%s' has no score data."	},
 /* STOP_GENEXAMPLE_PARSING -- for genexample.pl in langs/ */
 
 	/* this must be last */

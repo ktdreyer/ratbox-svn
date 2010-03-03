@@ -78,4 +78,7 @@ struct chanfix_score_item
  * Make sure this value is between 0 and CF_MIN_USER_SCORE_BEGIN. */
 #define CF_MIN_USER_SCORE_END	0.30f
 
+/* The maximum time to try fixing a channel. */
+#define CF_MAX_FIX_TIME	3600
+
 #endif
