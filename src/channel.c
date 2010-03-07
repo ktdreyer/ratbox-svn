@@ -252,6 +252,8 @@ del_chmember(struct chmember *mptr)
 
 	if(is_opped(mptr))
 		dlink_delete(&mptr->choppednode, &chptr->users_opped);
+		if(dlink_list_length(&chptr->users_opped) == 0)
+			hook_call(HOOK_CHANNEL_OPLESS, chptr, NULL);
 	else
 		dlink_delete(&mptr->choppednode, &chptr->users_unopped);
 

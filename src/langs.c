@@ -276,6 +276,9 @@ const char *svc_notice_string[] =
 	"SVC_CF_NOTYPESCORES",
 	"SVC_CF_TOPUSERSFOR",
 	"SVC_CF_NOSCOREDATA",
+	"SVC_CF_BEINGFIXED",
+	"SVC_CF_1BEENOPPED",
+	"SVC_CF_HAVEBEENOPPED",
 
 	/* must be last */
 	"\0"

@@ -23,10 +23,11 @@ struct chanfix_channel
 	time_t time_fix_started;
 	time_t time_prev_attempt;
 	int stage;
+	struct chanfix_score *scores;
 	int highest_score;	/* highest chanop score in channel */
 	int flags;
 
-	dlink_node node;
+	dlink_node node;	/* ptr to this mode in chanfix_list */
 };
 
 /* Structures for storing one or more chanfix_score_items containing
@@ -36,6 +37,7 @@ struct chanfix_score
 {
 	struct chanfix_score_item *score_items;
 	int length;
+	int matched;
 };
 
 struct chanfix_score_item
@@ -43,6 +45,7 @@ struct chanfix_score_item
 	struct chmember *msptr;
 	unsigned long userhost_id;
 	int score;
+	short opped;
 };
 
 /* The maximum number of users chanfix will op per fix cycle. */
@@ -80,5 +83,11 @@ struct chanfix_score_item
 
 /* The maximum time to try fixing a channel. */
 #define CF_MAX_FIX_TIME	3600
+
+/* The time to wait between consecutive autofixes. */
+#define CF_AUTOFIX_INTERVAL	600
+
+/* the time to wait between consecutive chanfixes. */
+#define CF_MANUALFIX_INTERVAL	300
 
 #endif
