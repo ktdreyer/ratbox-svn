@@ -370,7 +370,7 @@ s_nick_release(struct client *client_p, struct lconn *conn_p, const char *parv[]
 	sendto_server("KILL %s :%s (%s: RELEASE by %s)",
 			UID(target_p), MYNAME, 
 			nickserv_p->name, client_p->name);
-	exit_client(target_p);
+	exit_client(target_p, 0);
 
 	zlog(nickserv_p, 4, 0, 0, client_p, NULL, "RELEASE %s", parv[0]);
 
@@ -426,7 +426,7 @@ s_nick_regain(struct client *client_p, struct lconn *conn_p, const char *parv[],
 			nreg_p->name, (unsigned long)(CURRENT_TIME - 60),
 			(unsigned long)client_p->user->tsinfo);
 
-	exit_client(target_p);
+	exit_client(target_p, 0);
 
 	zlog(nickserv_p, 4, 0, 0, client_p, NULL, "REGAIN %s", parv[0]);
 

@@ -279,7 +279,7 @@ read_io(void)
 			/* connection is dead, uplinks still here. byebye */
 			if(server_p->client_p != NULL && 
 			   !IsDead(server_p->client_p))
-				exit_client(server_p->client_p);
+				exit_client(server_p->client_p, 0);
 
 			my_free(server_p->name);
 			my_free(server_p->sid);
@@ -755,7 +755,7 @@ signoff_server(struct lconn *conn_p)
 				config_file.reconnect_time);
 
 		if(server_p->client_p != NULL)
-			exit_client(server_p->client_p);
+			exit_client(server_p->client_p, 0);
 	}
 
 	sock_close(conn_p);

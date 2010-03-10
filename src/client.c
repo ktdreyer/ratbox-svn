@@ -411,11 +411,11 @@ generate_uid(void)
 /* exit_user()
  *   exits a user, removing them from channels and lists
  *
- * inputs       - client to exit
+ * inputs       - client to exit, caused by split or not
  * outputs      -
  */
 static void
-exit_user(struct client *target_p)
+exit_user(struct client *target_p, int split)
 {
 	dlink_node *ptr;
 	dlink_node *next_ptr;
@@ -450,11 +450,11 @@ exit_user(struct client *target_p)
 /* exit_server()
  *   exits a server, removing their dependencies
  *
- * inputs       - client to exit
+ * inputs       - client to exit, caused by split or not
  * outputs      -
  */
 static void
-exit_server(struct client *target_p)
+exit_server(struct client *target_p, int split)
 {
 	dlink_node *ptr;
 	dlink_node *next_ptr;
@@ -468,13 +468,13 @@ exit_server(struct client *target_p)
 	DLINK_FOREACH_SAFE(ptr, next_ptr, target_p->server->users.head)
 	{
 		hook_call(HOOK_CLIENT_EXIT_SPLIT, ptr->data, NULL);
-		exit_client(ptr->data);
+		exit_client(ptr->data, split);
 	}
 
         /* then exit each of their servers.. */
 	DLINK_FOREACH_SAFE(ptr, next_ptr, target_p->server->servers.head)
 	{
-		exit_client(ptr->data);
+		exit_client(ptr->data, split);
 	}
 
 	/* do this after all its leaf servers have been removed */
@@ -490,11 +490,11 @@ exit_server(struct client *target_p)
 /* exit_client()
  *   exits a generic client, calling functions specific for that client
  *
- * inputs       - client to exit
+ * inputs       - client to exit, caused by split or not
  * outputs      -
  */
 void
-exit_client(struct client *target_p)
+exit_client(struct client *target_p, int split)
 {
         s_assert(!IsService(target_p));
 
@@ -502,9 +502,9 @@ exit_client(struct client *target_p)
                 return;
 
 	if(IsServer(target_p))
-		exit_server(target_p);
+		exit_server(target_p, split);
 	else if(IsUser(target_p))
-		exit_user(target_p);
+		exit_user(target_p, split);
 
 	del_client(target_p);
 }
@@ -665,7 +665,7 @@ c_nick(struct client *client_p, const char *parv[], int parc)
 				}
 
 				/* normal nick collision.. exit old */
-				exit_client(target_p);
+				exit_client(target_p, 0);
 			}
 			else if(IsService(target_p))
 			{
@@ -782,7 +782,7 @@ c_uid(struct client *client_p, const char *parv[], int parc)
 			}
 
 			/* normal nick collision.. exit old */
-			exit_client(target_p);
+			exit_client(target_p, 0);
 		}
 		else if(IsService(target_p))
 		{
@@ -845,7 +845,7 @@ c_quit(struct client *client_p, const char *parv[], int parc)
 		return;
 	}
 
-	exit_client(client_p);
+	exit_client(client_p, 0);
 }
 
 /* c_kill()
@@ -905,7 +905,7 @@ c_kill(struct client *client_p, const char *parv[], int parc)
 	}
 
         /* its a user, just exit them */
-	exit_client(target_p);
+	exit_client(target_p, 0);
 }
 
 /* c_server()
@@ -1046,7 +1046,7 @@ c_squit(struct client *client_p, const char *parv[], int parc)
 	/* malformed squit, byebye. */
 	if(parc < 1 || EmptyString(parv[0]))
 	{
-		exit_client(server_p->client_p);
+		exit_client(server_p->client_p, 1);
 		return;
 	}
 
@@ -1061,7 +1061,7 @@ c_squit(struct client *client_p, const char *parv[], int parc)
 		return;
 	}
 
-	exit_client(target_p);
+	exit_client(target_p, 1);
 }
 
 /* is_network_split()

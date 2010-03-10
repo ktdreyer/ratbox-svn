@@ -408,7 +408,7 @@ add_service(struct service_handler *service)
 				die(1, "services conflict");
 
 			/* we're about to collide it. */
-			exit_client(client_p);
+			exit_client(client_p, 0);
 		}
 	}
 

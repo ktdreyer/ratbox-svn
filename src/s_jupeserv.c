@@ -146,7 +146,11 @@ add_jupe(struct server_jupe *jupe_p)
 	if((target_p = find_server(jupe_p->name)))
 	{
 		sendto_server("SQUIT %s :%s", jupe_p->name, jupe_p->reason);
-		exit_client(target_p);
+
+		/* ensure a jupe doesn't trigger any special split
+		 * protection --anfl
+		 */
+		exit_client(target_p, 0);
 	}
 
 	if(finished_bursting)
@@ -247,7 +251,7 @@ h_jupeserv_finburst(void *unused, void *unused2)
 		if((target_p = find_server(jupe_p->name)))
 		{
 			sendto_server("SQUIT %s :%s", jupe_p->name, jupe_p->reason);
-			exit_client(target_p);
+			exit_client(target_p, 0);
 		}
 
 		sendto_server(":%s SERVER %s 2 :JUPED: %s",

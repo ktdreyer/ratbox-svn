@@ -197,7 +197,7 @@ extern struct client *find_server(const char *name);
 extern struct client *find_service(const char *name);
 struct host_entry *find_host(const char *name);
 
-extern void exit_client(struct client *target_p);
+extern void exit_client(struct client *target_p, int split);
 extern void free_client(struct client *target_p);
 
 extern int string_to_umode(const char *p, int current_umode);
