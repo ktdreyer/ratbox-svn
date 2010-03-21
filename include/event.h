@@ -5,6 +5,7 @@
 #define	MAX_EVENTS	50
 
 struct lconn;
+struct client;
 
 typedef void EVH(void *);
 
@@ -28,6 +29,6 @@ extern void eventDelete(EVH * func, void *);
 extern int eventFind(EVH * func, void *);
 void eventUpdate(const char *name, time_t when);
 
-extern void event_show(struct lconn *conn_p);
+extern void event_show(struct client *client_p, struct lconn *conn_p);
 
 #endif /* INCLUDED_event_h */

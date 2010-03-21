@@ -364,7 +364,7 @@ u_connect(struct client *unused, struct lconn *conn_p, const char *parv[], int p
 static int
 u_events(struct client *unused, struct lconn *conn_p, const char *parv[], int parc)
 {
-        event_show(conn_p);
+        event_show(NULL, conn_p);
 	return 0;
 }
 

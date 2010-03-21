@@ -42,6 +42,7 @@
 #include "service.h"
 #include "log.h"
 #include "hook.h"
+#include "event.h"
 #include "s_userserv.h"
 
 static dlink_list scommand_table[MAX_SCOMMAND_HASH];
@@ -616,6 +617,15 @@ c_stats(struct client *client_p, const char *parv[], int parc)
 
 			count_memory(client_p);
 			break;
+
+		case 'E':
+			/* restrict to admins */
+			if(!client_p->user->oper || !(client_p->user->oper->flags & CONF_OPER_ADMIN))
+				break;
+
+			event_show(client_p, NULL);
+			break;
+
 
 		default:
 			break;

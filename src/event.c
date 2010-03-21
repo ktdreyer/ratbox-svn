@@ -48,6 +48,8 @@
 #include "rserv.h"
 #include "event.h"
 #include "io.h"
+#include "client.h"
+#include "conf.h"
 
 struct ev_entry event_table[MAX_EVENTS];
 static time_t event_time_min = -1;
@@ -280,19 +282,31 @@ eventFind(EVH * func, void *arg)
 }
 
 void
-event_show(struct lconn *conn_p)
+event_show(struct client *client_p, struct lconn *conn_p)
 {
         int i;
 
-        sendto_one(conn_p, "Events: Function                    Next");
+	if(!conn_p && !client_p)
+		return;
+
+	if(conn_p)
+	        sendto_one(conn_p, "Events: Function                    Next");
+	else
+		sendto_server(":%s 249 %s E :%-28s Next", 
+				MYUID, UID(client_p), "Function");
         
         for(i = 0; i < MAX_EVENTS; i++)
         {
                 if(!event_table[i].active)
                         continue;
 
-                sendto_one(conn_p, "        %-27s %-4ld seconds",
-                           event_table[i].name,
-                           (event_table[i].when - CURRENT_TIME));
+		if(conn_p)
+	                sendto_one(conn_p, "        %-27s %-4ld seconds",
+        	                   event_table[i].name,
+                	           (event_table[i].when - CURRENT_TIME));
+		else
+			sendto_server(":%s 249 %s E :%-28s %-4ld seconds",
+					MYUID, UID(client_p), event_table[i].name,
+					(event_table[i].when - CURRENT_TIME));
         }
 }
