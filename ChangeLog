@@ -1,3 +1,15 @@
+leeh        2010/03/21 12:25:48 UTC	(20100321_0-26999)
+  Log:
+  - make /stats E available over irc to services admins
+  
+
+  Modified:
+	rserv/trunk/include/event.h (File Modified) 
+	rserv/trunk/src/event.c (File Modified) 
+	rserv/trunk/src/scommand.c (File Modified) 
+	rserv/trunk/src/ucommand.c (File Modified) 
+
+
 leeh        2010/03/10 21:57:30 UTC	(20100310_0-26997)
   Log:
   - alter exit_client(), exit_user() and exit_server() to take a parameter
