@@ -15,6 +15,9 @@ struct ev_entry
 	EVH *func;
 	void *arg;
 	const char *name;
+
+	/* frequency == -1 means disabled event */
+	/* frequency == 0 means 'oneshot' event */
 	time_t frequency;
 	time_t when;
 	int active;
