@@ -3032,7 +3032,7 @@ s_chan_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 		/* send a topic update if services is in the channel.. */
 		if((chptr = find_channel(chreg_p->name)))
 		{
-			if(dlink_find(chanserv_p, &chptr->services) && irccmp(chptr->topic, chreg_p->topic))
+			if(dlink_find(chanserv_p, &chptr->services) && strcmp(chptr->topic, chreg_p->topic))
 			{
 				sendto_server(":%s TOPIC %s :%s",
 						SVC_UID(chanserv_p), chptr->name, chreg_p->topic);
