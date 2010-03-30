@@ -113,7 +113,7 @@ static int
 get_line(struct lconn *conn_p)
 {
 	char *p;
-	size_t n;
+	ssize_t n;
 	int term;
 	size_t buflen;
 
