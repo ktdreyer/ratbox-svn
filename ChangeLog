@@ -1,3 +1,12 @@
+leeh        2010/03/30 21:15:21 UTC	(20100330_2-27013)
+  Log:
+  - recv returns an ssize_t, not a size_t
+  
+
+  Modified:
+	rserv/trunk/src/io.c (File Modified) 
+
+
 leeh        2010/03/30 19:26:53 UTC	(20100330_1-27009)
   Log:
   - TS6 spec says a channels modes aren't actually sent in a TS6 JOIN, so we
