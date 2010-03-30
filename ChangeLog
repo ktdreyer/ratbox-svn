@@ -1,3 +1,15 @@
+leeh        2010/03/30 19:26:53 UTC	(20100330_1-27009)
+  Log:
+  - TS6 spec says a channels modes aren't actually sent in a TS6 JOIN, so we
+    shouldn't be applying them..
+  
+    This was screwing over limit/keys in some situations
+  
+
+  Modified:
+	rserv/trunk/src/channel.c (File Modified) 
+
+
 leeh        2010/03/30 19:09:16 UTC	(20100330_0-27007)
   Log:
   - make the check for updating topics case insensitive
