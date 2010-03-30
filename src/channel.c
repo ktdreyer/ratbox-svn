@@ -1026,7 +1026,6 @@ c_join(struct client *client_p, const char *parv[], int parc)
 	dlink_node *next_ptr;
 	time_t newts;
 	int keep_old_modes = 1;
-	int keep_new_modes = 1;
 	int args = 0;
 
 	if(parc < 0 || EmptyString(parv[0]))
@@ -1075,8 +1074,6 @@ c_join(struct client *client_p, const char *parv[], int parc)
 			chptr->tsinfo = 0;
 		else if(newts < chptr->tsinfo)
 			keep_old_modes = 0;
-		else if(chptr->tsinfo < newts)
-			keep_new_modes = 0;
 	}
 
 	newmode.mode = 0;
@@ -1109,19 +1106,6 @@ c_join(struct client *client_p, const char *parv[], int parc)
 				rejoin_service(ptr->data, chptr, 1);
 			}
 		}
-	}
-
-	if(keep_new_modes)
-	{
-		chptr->mode.mode |= newmode.mode;
-
-		if(!chptr->mode.limit || chptr->mode.limit < newmode.limit)
-			chptr->mode.limit = newmode.limit;
-
-		if(!chptr->mode.key[0] || strcmp(chptr->mode.key, newmode.key) > 0)
-			strlcpy(chptr->mode.key, newmode.key,
-				sizeof(chptr->mode.key));
-
 	}
 
 	/* this must be done after we've updated the modes */
