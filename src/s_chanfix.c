@@ -66,8 +66,6 @@ static struct client *chanfix_p;
 
 static dlink_list chanfix_list;
 
-static int o_chanfix_cfjoin(struct client *, struct lconn *, const char **, int);
-static int o_chanfix_cfpart(struct client *, struct lconn *, const char **, int);
 static int o_chanfix_score(struct client *, struct lconn *, const char **, int);
 static int o_chanfix_userlist(struct client *, struct lconn *, const char **, int);
 static int o_chanfix_chanfix(struct client *, struct lconn *, const char **, int);
@@ -78,8 +76,6 @@ static int o_chanfix_status(struct client *, struct lconn *, const char **, int)
 
 static struct service_command chanfix_command[] =
 {
-	{ "CFJOIN",	&o_chanfix_cfjoin,	1, NULL, 1, 0L, 0, 1, 0 },
-	{ "CFPART",	&o_chanfix_cfpart,	1, NULL, 1, 0L, 0, 1, 0 },
 	{ "SCORE",	&o_chanfix_score,	1, NULL, 1, 0L, 0, 1, 0 },
 	{ "CHANFIX",	&o_chanfix_chanfix,	1, NULL, 1, 0L, 0, 1, 0 },
 	{ "REVERT",	&o_chanfix_revert,	1, NULL, 1, 0L, 0, 1, 0 },
@@ -87,7 +83,7 @@ static struct service_command chanfix_command[] =
 	{ "INFO",	&o_chanfix_info,	1, NULL, 1, 0L, 0, 1, 0 },
 	{ "ADDNOTE",	&o_chanfix_addnote,	1, NULL, 1, 0L, 0, 1, 0 },
 	{ "DELNOTE",	&o_chanfix_delnote,	1, NULL, 1, 0L, 0, 1, 0 },*/
-	{ "SET",	&o_chanfix_set,	1, NULL, 1, 0L, 0, 1, 0 },
+	{ "SET",	&o_chanfix_set,		1, NULL, 1, 0L, 0, 1, 0 },
 	/*{ "BLOCK",	&o_chanfix_block,	1, NULL, 1, 0L, 0, 1, 0 },
 	{ "UNBLOCK",	&o_chanfix_unblock,	1, NULL, 1, 0L, 0, 1, 0 },*/
 	{ "CHECK",	&o_chanfix_check,	1, NULL, 1, 0L, 0, 1, 0 },
@@ -605,12 +601,12 @@ typedef int (*scorecmp)(const void *, const void *);
 static int
 score_cmp(struct chanfix_score_item *one, struct chanfix_score_item *two)
 {
-	return (two->score - one->score);
+	return (one->score - two->score);
 }
 
 
 static struct chanfix_score *
-build_opless_channel_scores(struct channel *chptr)
+build_opless_channel_scores(struct channel *chptr, int max_num)
 {
 	struct chanfix_score *scores;
 	unsigned long channel_id;
@@ -668,6 +664,7 @@ build_opless_channel_scores(struct channel *chptr)
 
 		scores->score_items[user_count].userhost_id = atoi(data.row[0][0]);
 		scores->score_items[user_count].score = atoi(data.row[0][1]);
+		scores->score_items[user_count].msptr = msptr;
 		user_count++;
 
 		rsdb_exec_fetch_end(&data);
@@ -681,6 +678,17 @@ build_opless_channel_scores(struct channel *chptr)
 
 	qsort(scores->score_items, scores->length,
 			sizeof(struct chanfix_score_item), (scorecmp) score_cmp);
+
+	if(max_num > 0)
+	{
+		scores->score_items = realloc(scores->score_items,
+				sizeof(struct chanfix_score_item) * max_num);
+		if(user_count > max_num)
+		{
+			scores->length = max_num;
+			scores->matched = max_num;
+		}
+	}
 
 	return scores;
 }
@@ -873,61 +881,6 @@ h_chanfix_channel_opless(void *chptr_v, void *unused)
 	return 0;
 }
 
-static int
-o_chanfix_cfjoin(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
-{
-	struct channel *chptr;
-	time_t tsinfo;
-
-	if(!valid_chname(parv[0]))
-	{
-		service_snd(chanfix_p, client_p, conn_p, SVC_IRC_CHANNELINVALID, parv[0]);
-		return 0;
-	}
-
-	if((chptr = find_channel(parv[0])) && dlink_find(chanfix_p, &chptr->services))
-	{
-		service_snd(chanfix_p, client_p, conn_p, SVC_IRC_ALREADYONCHANNEL,
-				chanfix_p->name, chptr->name);
-		return 0;
-	}
-
-	zlog(chanfix_p, 1, WATCH_OPERBOT, 1, client_p, conn_p,
-		"CFJOIN %s", parv[0]);
-
-	tsinfo = chptr != NULL ? chptr->tsinfo : CURRENT_TIME;
-
-	/*rsdb_exec(NULL, "INSERT INTO operbot (chname, tsinfo, oper) VALUES(LOWER('%Q'), '%lu', '%Q')",
-			parv[0], tsinfo, OPER_NAME(client_p, conn_p));
-	*/
-
-	join_service(chanfix_p, parv[0], tsinfo, NULL, 0);
-
-	service_snd(chanfix_p, client_p, conn_p, SVC_SUCCESSFULON,
-			chanfix_p->name, "CFJOIN", parv[0]);
-	return 0;
-}
-
-static int
-o_chanfix_cfpart(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
-{
-	if(part_service(chanfix_p, parv[0]))
-	{
-		zlog(chanfix_p, 1, WATCH_OPERBOT, 1, client_p, conn_p,
-			"CFPART %s", parv[0]);
-
-		/*rsdb_exec(NULL, "DELETE FROM operbot WHERE chname = LOWER('%Q')",
-				parv[0]);
-		*/
-		service_snd(chanfix_p, client_p, conn_p, SVC_SUCCESSFULON,
-				chanfix_p->name, "CFPART", parv[0]);
-	}
-	else
-		service_snd(chanfix_p, client_p, conn_p, SVC_IRC_NOTINCHANNEL,
-				chanfix_p->name, parv[0]);
-
-	return 0;
-}
 
 static int
 o_chanfix_score(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
@@ -1487,11 +1440,12 @@ del_chanfix(struct channel *chptr)
 	part_service(chanfix_p, chptr->name);
 
 	cfptr = (struct chanfix_channel *) chptr->cfptr;
+
 	dlink_delete(&cfptr->node, &chanfix_list);
+
 	if(!cfptr->scores)
 	{
 		my_free(cfptr->scores->score_items);
-		cfptr->scores->score_items = NULL;
 		my_free(cfptr->scores);
 		cfptr->scores = NULL;
 	}

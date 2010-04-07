@@ -81,13 +81,13 @@ struct chanfix_score_item
  * Make sure this value is between 0 and CF_MIN_USER_SCORE_BEGIN. */
 #define CF_MIN_USER_SCORE_END	0.30f
 
-/* The maximum time to try fixing a channel. */
+/* The maximum time to try fixing a channel (seconds). */
 #define CF_MAX_FIX_TIME	3600
 
-/* The time to wait between consecutive autofixes. */
+/* The time to wait between consecutive autofixes (seconds). */
 #define CF_AUTOFIX_INTERVAL	600
 
-/* the time to wait between consecutive chanfixes. */
+/* the time to wait between consecutive chanfixes (seconds). */
 #define CF_MANUALFIX_INTERVAL	300
 
 #endif
