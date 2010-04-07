@@ -1,3 +1,17 @@
+moggie      2010/04/07 01:28:02 UTC	(20100407_0-27017)
+  Log:
+  - Add a max_num parameter to build_opless_channel_scores().
+  - Check if score_items is less than max_num and shrink memory if possible.
+  - Remove o_chanfix_cfjoin() and o_chanfix_cfpart() as no longer useful.
+  - Swap score_cmp() comparison used by qsort.
+  - Set msptr when building opless channel scores.
+  
+
+  Modified:
+	rserv/trunk/include/s_chanfix.h (File Modified) 
+	rserv/trunk/src/s_chanfix.c (File Modified) 
+
+
 leeh        2010/03/30 21:15:21 UTC	(20100330_2-27013)
   Log:
   - recv returns an ssize_t, not a size_t
