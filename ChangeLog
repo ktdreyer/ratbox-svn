@@ -1,3 +1,13 @@
+leeh        2010/04/22 18:18:29 UTC	(20100422_0-27019)
+  Log:
+  - add modified version of esoterics patch to add startup options controlling
+    the path to chroot to and the uid/gid to drop privs to
+  
+
+  Modified:
+	rserv/trunk/src/rserv.c (File Modified) 
+
+
 moggie      2010/04/07 01:28:02 UTC	(20100407_0-27017)
   Log:
   - Add a max_num parameter to build_opless_channel_scores().
