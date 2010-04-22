@@ -182,6 +182,9 @@ print_help(void)
 	printf(" -v show version\n");
 	printf(" -f foreground mode\n");
 	printf(" -t test config\n");
+	printf(" -r change root directory\n");
+	printf(" -g change the real and effective group ID\n");
+	printf(" -u change the real and effective user ID\n");
 }
 
 static void
@@ -209,25 +212,30 @@ main(int argc, char *argv[])
 	char c;
 	int nofork = 0;
 	int childpid;
+	int chroot_uid = 0;
+	int chroot_gid = 0;
+	int retval;
+	char *chroot_path = NULL;
 
-	if(geteuid() == 0)
+	/* The seteuid() system call (setegid()) sets the effective user ID (group
+	 * ID) of the current process.  The effective user ID may be set to the
+	 * value of the real user ID or the saved set-user-ID (see intro(2) and
+	 * execve(2)); in this way, the effective user ID of a set-user-ID exe-
+	 * cutable may be toggled by switching to the real user ID, then re-enabled
+	 * by reverting to the set-user-ID value.  Similarly, the effective group ID
+	 * may be set to the value of the real group ID or the saved set-group-ID.
+	 */
+	if(getuid() == 0 && geteuid() != 0)
 	{
-		printf("ratbox-services will not run as root\n");
-		return -1;
+		if(seteuid(0) != 0)
+		{
+			printf("ratbox-services terminated: unable to geteuid(0) whilst getuid() == 0\n");
+			perror("seteuid(0)");
+			exit(EXIT_FAILURE);
+		}
 	}
 
-	if(chdir(PREFIX))
-	{
-		printf("ratbox-services terminated: unable to chdir() to %s: %s\n",
-			PREFIX, strerror(errno));
-		return -1;
-	}
-
-	check_md5_crypt();
-
-	setup_corefile();
-
-	while((c = getopt(argc, argv, "hvft")) != -1)
+	while((c = getopt(argc, argv, "hvftr:g:u:")) != -1)
 	{
 		switch(c)
 		{
@@ -246,8 +254,116 @@ main(int argc, char *argv[])
 			case 't':
 				testing_conf = 1;
 				break;
+			case 'r':
+				chroot_path = my_strdup(optarg);
+				break;
+
+			case 'g':
+				chroot_gid = atoi(optarg);
+				break;
+			case 'u':
+				chroot_uid = atoi(optarg);
+				break;
 		}
 	}
+
+	if(chroot_path)
+	{
+		/* The chdir() system call causes the named directory to become the
+		 * current working directory, that is, the starting point for path
+		 * searches of pathnames not beginning with a slash, `/'.
+		 *
+		 * In order for a directory to become the current directory, a
+		 * process must have execute (search) access to the directory.
+		 */
+		retval = chdir(chroot_path);
+
+		if(retval)
+		{
+			printf("ratbox-services terminated: unable to chdir() to %s: %s\n",
+				chroot_path, strerror(errno));
+
+			perror("chdir()");
+			exit(EXIT_FAILURE);
+		}
+
+		retval = chroot(chroot_path);
+
+		if(retval)
+		{
+			printf("ratbox-services terminated: unable to chroot() to %s: %s\n",
+				chroot_path, strerror(errno));
+
+			perror("chroot()");
+			exit(EXIT_FAILURE);
+		}
+
+		printf("ratbox-services: root directory now %s\n", chroot_path);
+
+		my_free(chroot_path);
+	}
+
+	if(chroot_gid)
+	{
+		/* The setgid() system call sets the real and effective group IDs
+		 * and the saved set-group-ID of the current process to the
+		 * specified value.  The setgid() system call is permitted if the
+		 * specified ID is equal to the real group ID or the effective
+		 * group ID of the process, or if the effective user ID is that of
+		 * the super user.
+		 */
+		retval = setgid(chroot_gid);
+		if(retval)
+		{
+			printf("ratbox-services terminated: unable to setgid(%d): %s\n",
+				chroot_gid, strerror(errno));
+				
+			perror("setgid()");
+			exit(EXIT_FAILURE);
+		}
+
+		printf("ratbox-services: real and effective group ID now %d\n",
+			chroot_gid);
+	}
+
+	if(chroot_uid)
+	{
+		/* The setuid() system call sets the real and effective user IDs
+		 * and the saved set-user-ID of the current process to the
+		 * specified value.  The setuid() system call is permitted if the
+		 * specified ID is equal to the real user ID or the effective user
+		 * ID of the process, or if the effective user ID is that of the
+		 * super user.
+		 */
+		retval = setuid(chroot_uid);
+		if(retval)
+		{
+			printf("ratbox-services terminated: unable to setuid(%d): %s\n",
+				chroot_uid, strerror(errno));
+			perror("setuid()");
+			exit(EXIT_FAILURE);
+		}
+
+		printf("ratbox-services: real and effective user ID now %u\n",
+			chroot_uid);
+	}
+
+	if(geteuid() == 0)
+	{
+		printf("ratbox-services will not run as root\n");
+		return -1;
+	}
+
+	if(chdir(PREFIX))
+	{
+		printf("ratbox-services terminated: unable to chdir() to %s: %s\n",
+			PREFIX, strerror(errno));
+		return -1;
+	}
+
+	check_md5_crypt();
+
+	setup_corefile();
 
 	set_time();
 
