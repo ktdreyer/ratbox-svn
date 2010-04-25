@@ -1,3 +1,17 @@
+leeh        2010/04/25 18:23:20 UTC	(20100425_0-27025)
+  Log:
+  - first pass at storing entries for opers who split
+  
+
+  Modified:
+	rserv/trunk/include/client.h (File Modified) 
+	rserv/trunk/include/conf.h (File Modified) 
+	rserv/trunk/src/client.c (File Modified) 
+	rserv/trunk/src/conf.c (File Modified) 
+	rserv/trunk/src/newconf.c (File Modified) 
+	rserv/trunk/src/scommand.c (File Modified) 
+
+
 leeh        2010/04/22 18:18:29 UTC	(20100422_0-27019)
   Log:
   - add modified version of esoterics patch to add startup options controlling
