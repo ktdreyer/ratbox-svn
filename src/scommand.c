@@ -407,6 +407,8 @@ c_pong(struct client *client_p, const char *parv[], int parc)
 	{
 		SetEOB(client_p);
 		hook_call(HOOK_EOB_SERVER, client_p, NULL);
+
+		clear_client_oper_sid(client_p);
 	}
 }
 

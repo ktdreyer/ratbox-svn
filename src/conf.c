@@ -44,6 +44,8 @@ struct _config_file config_file;
 dlink_list conf_server_list;
 dlink_list conf_oper_list;
 
+dlink_list client_oper_list;
+
 time_t first_time;
 
 extern int yyparse();           /* defined in y.tab.c */
@@ -75,6 +77,8 @@ set_default_conf(void)
 
 	config_file.min_servers = 0;
 	config_file.min_users = 0;
+
+	config_file.split_oper_time = 600;
 
 	config_file.disable_email = 1;
 	config_file.email_number = 15;
@@ -402,6 +406,92 @@ find_conf_oper(const char *username, const char *host, const char *server,
         }
 
         return NULL;
+}
+
+/* store_client_oper()
+ *   Stores an opers current logged in information
+ *
+ * inputs	- client to store information for
+ * outputs	-
+ * side effects - adds an entry to client_oper_list
+ */
+void
+store_client_oper(struct client *client_p)
+{
+	struct client_oper *coper_p;
+
+	coper_p = my_malloc(sizeof(struct client_oper));
+	strlcpy(coper_p->uid, client_p->uid, sizeof(coper_p->uid));
+	strlcpy(coper_p->username, client_p->user->username,
+		sizeof(coper_p->username));
+	strlcpy(coper_p->host, client_p->user->host, sizeof(coper_p->host));
+	strlcpy(coper_p->sid, client_p->uplink->uid, sizeof(coper_p->sid));
+
+	coper_p->oper = client_p->user->oper;
+	coper_p->oper->refcount++;
+
+	coper_p->timestamp = CURRENT_TIME;
+
+	dlink_add(coper_p, &coper_p->ptr, &client_oper_list);
+}
+
+/* free_client_oper()
+ *   frees a client_oper and removes from list
+ *
+ * inputs	- struct client_oper to free
+ * outputs	-
+ * side effects	- frees the client_oper and removes from client_oper_list
+ */
+void
+free_client_oper(struct client_oper *coper_p)
+{
+	deallocate_conf_oper(coper_p->oper);
+	dlink_delete(&coper_p->ptr, &client_oper_list);
+	my_free(coper_p);
+}
+
+/* clear_client_oper_sid()
+ *   clears all client oper entries for a given SID
+ *
+ * inputs	- server to clear from client_oper_list
+ * outputs	-
+ * side effects - clears all entries for server from client_oper_list
+ */
+void
+clear_client_oper_sid(struct client *client_p)
+{
+	struct client_oper *coper_p;
+	dlink_node *ptr, *next_ptr;
+
+	DLINK_FOREACH_SAFE(ptr, next_ptr, client_oper_list.head)
+	{
+		coper_p = ptr->data;
+
+		if(!irccmp(coper_p->sid, client_p->uid))
+			free_client_oper(coper_p);
+	}
+}
+
+/* expire_client_oper()
+ *   expires entries from client_oper_list
+ *
+ * inputs	- NULL
+ * outputs	-
+ * side effects - expires stale entries from client_oper_list
+ */
+void
+expire_client_oper(void *unused)
+{
+	struct client_oper *coper_p;
+	dlink_node *ptr, *next_ptr;
+
+	DLINK_FOREACH_SAFE(ptr, next_ptr, client_oper_list.head)
+	{
+		coper_p = ptr->data;
+
+		if((coper_p->timestamp + config_file.split_oper_time) < CURRENT_TIME)
+			free_client_oper(coper_p);
+	}
 }
 
 static struct flag_table

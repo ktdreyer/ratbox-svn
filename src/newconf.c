@@ -1088,6 +1088,7 @@ static struct ConfEntry conf_serverinfo_table[] =
 	{ "name",		CF_QSTRING, conf_set_serverinfo_name, 0, NULL	},
 	{ "sid",		CF_QSTRING, conf_set_serverinfo_sid, 0, NULL	},
 	{ "default_language",	CF_QSTRING, conf_set_serverinfo_lang, 0, NULL	},
+	{ "split_oper_time",	CF_TIME,    NULL, 0, &config_file.split_oper_time },
 	{ "\0", 0, NULL, 0, NULL }
 };
 

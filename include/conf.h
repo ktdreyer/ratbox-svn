@@ -4,6 +4,7 @@
 
 struct lconn;
 struct FileBuf;
+struct client_oper;
 
 #define MYNAME config_file.name
 
@@ -30,6 +31,7 @@ struct _config_file
 	int allow_stats_o;
 	int allow_sslonly;
 	int default_language;
+	int split_oper_time;
 
 	unsigned int client_flood_time;
 	unsigned int client_flood_ignore_time;
@@ -259,5 +261,10 @@ extern struct conf_server *find_conf_server(const char *name);
 
 extern struct conf_oper *find_conf_oper(const char *username, const char *host,
 					const char *server, const char *oper_username);
+
+void store_client_oper(struct client *);
+void free_client_oper(struct client_oper *);
+void clear_client_oper_sid(struct client *);
+void expire_client_oper(void *);
 
 #endif

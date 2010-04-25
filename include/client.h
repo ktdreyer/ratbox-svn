@@ -126,6 +126,20 @@ struct host_entry
 	dlink_node node;
 };
 
+struct client_oper
+{
+	char uid[UIDLEN+1];
+	char username[USERLEN+1];
+	char host[HOSTLEN+1];
+	char sid[UIDLEN+1];
+
+	struct conf_oper *oper;
+
+	dlink_node ptr;
+
+	time_t timestamp;
+};
+
 #define UID(x) (EmptyString((x)->uid) ? (x)->name : (x)->uid)
 #define MYUID ((server_p && !EmptyString(server_p->sid)) ? config_file.sid : config_file.name)
 #define SVC_UID(x) ((server_p && !EmptyString(server_p->sid)) ? (x)->uid : (x)->name)

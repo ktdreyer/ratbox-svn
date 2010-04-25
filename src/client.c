@@ -427,6 +427,9 @@ exit_user(struct client *target_p, int split)
 
 	hook_call(HOOK_CLIENT_EXIT, target_p, NULL);
 
+	if(split && config_file.split_oper_time > 0 && target_p->user->oper)
+		store_client_oper(target_p);
+
 #ifdef ENABLE_USERSERV
 	if(target_p->user->user_reg)
 		dlink_find_destroy(target_p, &target_p->user->user_reg->users);
