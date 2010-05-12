@@ -14,15 +14,15 @@ struct cachefile;
 
 struct service_command
 {
-        const char *cmd;
-        int (*func)(struct client *, struct lconn *, const char **, int);
+	const char *cmd;
+	int (*func)(struct client *, struct lconn *, const char **, int);
 	int minparc;
 	struct cachefile **helpfile;
-        int help_penalty;
-        unsigned long cmd_use;
+	int help_penalty;
+	unsigned long cmd_use;
 	int userreg;
 	int operonly;
-	unsigned long long operflags;
+	uint64_t operflags;
 };
 
 struct service_handler

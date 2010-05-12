@@ -247,7 +247,7 @@ find_conf_item(const struct TopConf *top, const char *name)
 	return NULL;
 }
 
-static int
+static uint64_t
 find_umode(struct mode_table *tab, char *name)
 {
 	int i;
@@ -1160,6 +1160,7 @@ static struct ConfEntry conf_oper_table[] =
 	{ "global",	CF_STRING|CF_FLIST,  conf_set_oper_global,	0, NULL },
 	{ "jupeserv",	CF_STRING|CF_FLIST,  conf_set_oper_jupeserv,	0, NULL },
 	{ "banserv",	CF_STRING|CF_FLIST,  conf_set_oper_banserv,	0, NULL },
+	{ "chanfix",	CF_STRING|CF_FLIST,  conf_set_oper_chanfix,	0, NULL },
 	{ "\0", 0, NULL, 0, NULL }
 };
 
