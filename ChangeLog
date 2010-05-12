@@ -1,3 +1,15 @@
+moggie      2010/05/12 16:23:39 UTC	(20100512_1-27029)
+  Log:
+  - Fix service_flags compile warning.
+  - Add support for chanfix service flags in operator blocks.
+  
+
+  Modified:
+	rserv/trunk/include/conf.h (File Modified) 
+	rserv/trunk/include/service.h (File Modified) 
+	rserv/trunk/src/newconf.c (File Modified) 
+
+
 moggie      2010/05/12 10:49:32 UTC	(20100512_0-27027)
   Log:
   - Rename service_flags type to 'unsigned long long' to 'uint64_t' for better
