@@ -77,17 +77,17 @@ static int o_chanfix_status(struct client *, struct lconn *, const char **, int)
 static struct service_command chanfix_command[] =
 {
 	{ "SCORE",	&o_chanfix_score,	1, NULL, 1, 0L, 0, 1, 0 },
-	{ "CHANFIX",	&o_chanfix_chanfix,	1, NULL, 1, 0L, 0, 1, 0 },
-	{ "REVERT",	&o_chanfix_revert,	1, NULL, 1, 0L, 0, 1, 0 },
+	{ "CHANFIX",	&o_chanfix_chanfix,	1, NULL, 1, 0L, 0, 0, CONF_OPER_CF_CHANFIX },
+	{ "REVERT",	&o_chanfix_revert,	1, NULL, 1, 0L, 0, 0, CONF_OPER_CF_CHANFIX },
 	/*{ "HISTORY",	&o_chanfix_history,	1, NULL, 1, 0L, 0, 1, 0 },
-	{ "INFO",	&o_chanfix_info,	1, NULL, 1, 0L, 0, 1, 0 },
+	{ "INFO",	&o_chanfix_info,	1, NULL, 1, 0L, 0, 1, CONF_OPER_CF_INFO },
 	{ "ADDNOTE",	&o_chanfix_addnote,	1, NULL, 1, 0L, 0, 1, 0 },
 	{ "DELNOTE",	&o_chanfix_delnote,	1, NULL, 1, 0L, 0, 1, 0 },*/
-	{ "SET",	&o_chanfix_set,		1, NULL, 1, 0L, 0, 1, 0 },
+	{ "SET",	&o_chanfix_set,		1, NULL, 1, 0L, 0, 0, CONF_OPER_CF_ADMIN },
 	/*{ "BLOCK",	&o_chanfix_block,	1, NULL, 1, 0L, 0, 1, 0 },
 	{ "UNBLOCK",	&o_chanfix_unblock,	1, NULL, 1, 0L, 0, 1, 0 },*/
-	{ "CHECK",	&o_chanfix_check,	1, NULL, 1, 0L, 0, 1, 0 },
-	{ "USERLIST",	&o_chanfix_userlist,	1, NULL, 1, 0L, 0, 1, 0 },
+	{ "CHECK",	&o_chanfix_check,	1, NULL, 1, 0L, 0, 0, CONF_OPER_CF_INFO },
+	{ "USERLIST",	&o_chanfix_userlist,	1, NULL, 1, 0L, 0, 0, CONF_OPER_CF_CHANFIX },
 	{ "STATUS",	&o_chanfix_status,	0, NULL, 1, 0L, 0, 1, 0 }
 };
 
@@ -720,11 +720,21 @@ e_chanfix_score_channels(void *unused)
 			continue;
 #endif
 
-		if((dlink_list_length(&chptr->users) >= config_file.cf_min_clients) &&
-				(&chptr->users_opped.head != NULL))
+		if(dlink_list_length(&chptr->users) >= config_file.cf_min_clients)
 		{
-			mlog("debug: Scoring opped clients in: %s", chptr->name);
-			collect_channel_scores(chptr, timestamp, dayts);
+			if(dlink_list_length(&chptr->users_opped) != 0)
+			{
+				mlog("debug: Scoring opped clients in: %s", chptr->name);
+				collect_channel_scores(chptr, timestamp, dayts);
+			}
+			else
+			{
+				if((!chptr->cfptr) && (add_chanfix(chptr, 0, NULL)))
+				{
+					mlog("debug: Added opless channel '%s' for autofixing.",
+					chptr->name);
+				}
+			}
 		}
 	}
 
@@ -1359,6 +1369,10 @@ seconds_to_midnight(void)
 	return 86400 - (t_info->tm_hour * 3600 + t_info->tm_min * 60 + t_info->tm_sec);
 }
 
+/* Add a channel to be manual or auto fixed.
+ * Input: channel pointer, man/auto fix bool, client struct if an error
+ *        message needs to be sent to a client.
+ */
 static int
 add_chanfix(struct channel *chptr, short man_fix, struct client *client_p)
 {

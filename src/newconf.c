@@ -32,7 +32,7 @@ struct client *yy_service;
 struct mode_table
 {
 	const char *name;
-	unsigned long long mode;
+	uint64_t mode;
 };
 
 static struct mode_table privs_table[] = {
@@ -107,6 +107,15 @@ static struct mode_table banserv_table[] = {
 	{ "sync",	CONF_OPER_BAN_SYNC	},
 	{ "nomax",	CONF_OPER_BAN_NOMAX	},
 	{ "\0", 0 }
+};
+
+static struct mode_table chanfix_table[] = {
+	{ "info",	CONF_OPER_CF_INFO	},
+	{ "notes",	CONF_OPER_CF_NOTES	},
+	{ "block",	CONF_OPER_CF_BLOCK	},
+	{ "chanfix",	CONF_OPER_CF_CHANFIX	},
+	{ "admin",	CONF_OPER_CF_ADMIN	},
+	{ "\0",		0			}
 };
 
 static struct mode_table service_flags_table[] = {
@@ -253,11 +262,11 @@ find_umode(struct mode_table *tab, char *name)
 }
 
 static void
-set_modes_from_table(unsigned long long *modes, const char *whatis, struct mode_table *tab, conf_parm_t * args)
+set_modes_from_table(uint64_t *modes, const char *whatis, struct mode_table *tab, conf_parm_t * args)
 {
 	for (; args; args = args->next)
 	{
-		int mode;
+		uint64_t mode;
 
 		if((args->type & CF_MTYPE) != CF_STRING)
 		{
@@ -834,7 +843,7 @@ conf_set_oper_encrypted(void *data)
 static void
 conf_set_oper_flags(void *data)
 {
-	set_modes_from_table((unsigned long long *) &yy_oper->flags, "flag", privs_table, data);
+	set_modes_from_table((uint64_t *) &yy_oper->flags, "flag", privs_table, data);
 }
 
 static void
@@ -891,6 +900,13 @@ conf_set_oper_banserv(void *data)
 {
 	set_modes_from_table(&yy_oper->sflags, "flag",
 				banserv_table, data);
+}
+
+static void
+conf_set_oper_chanfix(void *data)
+{
+	set_modes_from_table(&yy_oper->sflags, "flag",
+				chanfix_table, data);
 }
 
 static int
@@ -986,7 +1002,7 @@ conf_set_service_flags(void *data)
 		return;
 
 	yy_service->service->flags = 0;
-	set_modes_from_table((unsigned long long *) &yy_service->service->flags, "flag",
+	set_modes_from_table((uint64_t *) &yy_service->service->flags, "flag",
 				service_flags_table, data);
 }
 
@@ -1267,13 +1283,13 @@ static struct ConfEntry conf_memoserv_table[] =
 
 static struct ConfEntry conf_chanfix_table[] =
 {
-	{ "enable_autofix",	CF_YESNO, NULL, 0, &config_file.cf_enable_autofix	},
-	{ "enable_chanfix",	CF_YESNO,  NULL, 0, &config_file.cf_enable_chanfix		},
-	{ "num_top_scores",CF_INT,  NULL, 0, &config_file.cf_num_top_scores	},
-	{ "min_clients",	CF_INT,  NULL, 0, &config_file.cf_min_clients		},
-	{ "client_needs_ident",		CF_YESNO,	  NULL, 0, &config_file.cf_client_needs_ident	},
-	{ "client_needs_rdns",	CF_YESNO,NULL, 0, &config_file.cf_client_needs_rdns	},
-	{ "cf_score_chanserv_chans",	CF_YESNO,NULL, 0, &config_file.cf_score_chanserv_chans	},
+	{ "enable_autofix",	CF_YESNO,	NULL,	0,	&config_file.cf_enable_autofix	},
+	{ "enable_chanfix",	CF_YESNO,	NULL,	0,	&config_file.cf_enable_chanfix		},
+	{ "num_top_scores",	CF_INT,	NULL,	0,	&config_file.cf_num_top_scores	},
+	{ "min_clients",	CF_INT,	NULL,	0,	&config_file.cf_min_clients		},
+	{ "client_needs_ident",	CF_YESNO,	NULL,	0,	&config_file.cf_client_needs_ident	},
+	{ "client_needs_rdns",	CF_YESNO,	NULL,	0,	&config_file.cf_client_needs_rdns	},
+	{ "cf_score_chanserv_chans",	CF_YESNO,	NULL,	0,	&config_file.cf_score_chanserv_chans	},
 	{ "\0", 0, NULL, 0, NULL }
 };
 

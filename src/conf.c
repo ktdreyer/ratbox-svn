@@ -532,7 +532,7 @@ static struct sflag_table
 {
 	int serviceid;
 	const char *sname;
-	int flag;
+	uint64_t flag;
 	const char *name;
 } service_flags[] = {
 #ifdef SERVICE_FLAGS_FULL
@@ -565,6 +565,10 @@ static struct sflag_table
 	{ 8, "banserv",  CONF_OPER_BAN_REMOVE,	"remove"	},
 	{ 8, "banserv",  CONF_OPER_BAN_SYNC,	"sync"		},
 	{ 8, "banserv",	 CONF_OPER_BAN_NOMAX,	"nomax"		},
+	{ 9, "chanfix",  CONF_OPER_CF_INFO,	"info"		},
+	{ 9, "chanfix",  CONF_OPER_CF_NOTES,	"notes"		},
+	{ 9, "chanfix",  CONF_OPER_CF_BLOCK,	"block"	},
+	{ 9, "chanfix",  CONF_OPER_CF_CHANFIX,	"chanfix"	},
 #else
 	{ 1, "OS", CONF_OPER_OS_MAINTAIN,	"M" },
 	{ 1, "OS", CONF_OPER_OS_IGNORE,		"I" },
@@ -595,12 +599,16 @@ static struct sflag_table
 	{ 8, "BS", CONF_OPER_BAN_REMOVE,	"V" },
 	{ 8, "BS", CONF_OPER_BAN_SYNC,		"S" },
 	{ 8, "BS", CONF_OPER_BAN_NOMAX,		"M" },
+	{ 9, "CF", CONF_OPER_CF_INFO,		"I" },
+	{ 9, "CF", CONF_OPER_CF_NOTES,		"N" },
+	{ 9, "CF", CONF_OPER_CF_BLOCK,		"B" },
+	{ 9, "CF", CONF_OPER_CF_CHANFIX,	"C" },
 #endif
 	{ 0, NULL, 0, NULL }
 };
 
 const char *
-conf_service_flags(unsigned int flags)
+conf_service_flags(uint64_t flags)
 {
 	static char buf[BUFSIZE];
 	static const char *empty_flags = "-";

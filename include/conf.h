@@ -165,7 +165,7 @@ struct conf_oper
         char *pass;
 	char *server;
 	unsigned long flags;		/* general flags */
-	unsigned long long sflags;	/* individual service flags */
+	uint64_t sflags;	/* individual service flags */
 	int refcount;
 };
 
@@ -233,6 +233,12 @@ struct conf_oper
 #define CONF_OPER_BAN_REGEXP	0x40000000
 #define CONF_OPER_BAN_NOMAX	0x00080000
 
+#define CONF_OPER_CF_INFO	0x0000000100000000
+#define CONF_OPER_CF_NOTES	0x0000000200000000
+#define CONF_OPER_CF_BLOCK	0x0000000400000000
+#define CONF_OPER_CF_CHANFIX	0x0000000800000000
+#define CONF_OPER_CF_ADMIN	(CONF_OPER_CF_NOTES|CONF_OPER_CF_BLOCK|CONF_OPER_CF_CHANFIX)
+
 #define CONF_SERVER_AUTOCONN	0x0001
 
 #define ConfServerAutoconn(x)	((x)->flags & CONF_SERVER_AUTOCONN)
@@ -253,7 +259,7 @@ extern void rehash(int sig);
 extern void free_conf_oper(struct conf_oper *conf_p);
 extern void deallocate_conf_oper(struct conf_oper *conf_p);
 extern const char *conf_oper_flags(unsigned int flags);
-extern const char *conf_service_flags(unsigned int flags);
+extern const char *conf_service_flags(uint64_t flags);
 
 extern void free_conf_server(struct conf_server *conf_p);
 
