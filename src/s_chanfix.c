@@ -155,7 +155,7 @@ chan_takeover(struct channel *chptr)
 	remove_our_simple_modes(chptr, NULL, 0);
 	remove_our_ov_modes(chptr);
 
-	remove_our_bans(chptr, NULL, 1, 1, 1);
+	remove_our_bans(chptr, NULL, 1, 1, 0);
 
 	chptr->mode.mode = MODE_TOPIC|MODE_NOEXTERNAL;
 
@@ -314,9 +314,10 @@ get_chmember_cf_scores(struct chanfix_score *scores, struct channel *chptr,
 {
 	unsigned long userhost_id;
 	struct chmember *msptr;
-	dlink_node *ptr;
+	dlink_node *ptr, *next_ptr;
 	char userhost[USERLEN+HOSTLEN+4+1];
 	unsigned int i, user_count;
+
 
 	if(dlink_list_length(listptr) < 1)
 		return NULL;
@@ -333,7 +334,7 @@ get_chmember_cf_scores(struct chanfix_score *scores, struct channel *chptr,
 	}
 
 	user_count = 0;
-	DLINK_FOREACH(ptr, listptr->head)
+	DLINK_FOREACH_SAFE(ptr, next_ptr, listptr->head)
 	{
 		msptr = ptr->data;
 
@@ -360,6 +361,9 @@ get_chmember_cf_scores(struct chanfix_score *scores, struct channel *chptr,
 				}
 				else
 				{
+					/* Found matching user@host but msptr != NULL, meaning this
+					 * must be a duplicate.
+					 */
 					break;
 				}
 			}
@@ -440,7 +444,9 @@ chanfix_opless_channel(struct chanfix_channel *cf_ch)
 			(cf_ch->highest_score * CF_MIN_USER_SCORE_BEGIN -
 			CF_MIN_USER_SCORE_END * cf_ch->highest_score);
 	
-	/* The min score needed for ops is the HIGHER of these two values. */
+	/* The min score needed for ops is the HIGHER of min_chan_score
+	 * or min_user_score.
+	 */
 	min_score = min_chan_score;
 	if (min_user_score > min_score)
 		min_score = min_user_score;
@@ -471,7 +477,7 @@ chanfix_opless_channel(struct chanfix_channel *cf_ch)
 	if(count < 1)
 	{
 		/* Unfortunately no one has a high enough score right now. */
-		mlog("debug: Can't fix '%s' right now because no one has a high enough score at the moment.",
+		mlog("debug: Can't fix '%s' as no one has a high enough score at the moment.",
 				cf_ch->chptr->name);
 		/*my_free(all_scores->score_items);
 		my_free(all_scores);*/
@@ -488,8 +494,10 @@ chanfix_opless_channel(struct chanfix_channel *cf_ch)
 	for(i = 0; i < scores->length; i++)
 	{
 		if(scores->score_items[i].opped == 0)
+		{
 			all_opped = 0;
 			break;
+		}
 		/*my_free(all_scores->score_items);
 		my_free(all_scores);*/
 	}
@@ -710,16 +718,6 @@ e_chanfix_score_channels(void *unused)
 	{
 		chptr = ptr->data;
 
-#ifdef ENABLE_CHANSERV
-		/* Need to skip the channel if it's registered with ChanServ.
-		 * If scoring channels isn't very resource intensive, it might be worth
-		 * scoring ChanServ channels anyway (or making it a config file option)
-		 * to avoid the string comparisons.
-		 */
-		if(find_channel_reg(NULL, chptr->name))
-			continue;
-#endif
-
 		if(dlink_list_length(&chptr->users) >= config_file.cf_min_clients)
 		{
 			if(dlink_list_length(&chptr->users_opped) != 0)
@@ -727,13 +725,10 @@ e_chanfix_score_channels(void *unused)
 				mlog("debug: Scoring opped clients in: %s", chptr->name);
 				collect_channel_scores(chptr, timestamp, dayts);
 			}
-			else
+			else if((!chptr->cfptr) && (add_chanfix(chptr, 0, NULL)))
 			{
-				if((!chptr->cfptr) && (add_chanfix(chptr, 0, NULL)))
-				{
-					mlog("debug: Added opless channel '%s' for autofixing.",
+				mlog("debug: Added opless channel '%s' for autofixing.",
 					chptr->name);
-				}
 			}
 		}
 	}
@@ -1155,9 +1150,8 @@ o_chanfix_revert(struct client *client_p, struct lconn *conn_p, const char *parv
 		return 0;
 	}
 
-	/*if(!add_chanfix(chptr, 1, client_p))
+	if(!add_chanfix(chptr, 1, client_p))
 		return 0;
-	*/
 
 	/* Everything looks okay, execute the takeover. */
 	chan_takeover(chptr);
@@ -1165,18 +1159,6 @@ o_chanfix_revert(struct client *client_p, struct lconn *conn_p, const char *parv
 
 	service_snd(chanfix_p, client_p, conn_p, SVC_ISSUEDFORBY,
 				chanfix_p->name, "REVERT", parv[0], client_p->name);
-
-	/* for testing we'll just op everyone */
-	modebuild_start(chanfix_p, chptr);
-	DLINK_FOREACH_SAFE(ptr, next_ptr, chptr->users_unopped.head)
-	{
-		msptr = ptr->data;
-		op_chmember(msptr);
-		modebuild_add(DIR_ADD, "o", msptr->client_p->name);
-	}
-	modebuild_finish();
-
-	part_service(chanfix_p, parv[0]);
 
 
 	return 0;

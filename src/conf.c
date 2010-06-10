@@ -161,8 +161,6 @@ set_default_conf(void)
 	config_file.cf_num_top_scores = 10;
 	config_file.cf_min_clients = 4;
 	config_file.cf_client_needs_ident = 1;
-	config_file.cf_client_needs_rdns = 0;
-	config_file.cf_score_chanserv_chans = 0;
 }
 
 static void

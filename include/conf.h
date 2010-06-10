@@ -141,8 +141,6 @@ struct _config_file
 	int cf_num_top_scores;
 	int cf_min_clients;
 	int cf_client_needs_ident;
-	int cf_client_needs_rdns;
-	int cf_score_chanserv_chans;
 };
 
 struct conf_server
