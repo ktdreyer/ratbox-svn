@@ -1,3 +1,23 @@
+moggie      2010/06/10 23:17:32 UTC	(20100610_0-27031)
+  Log:
+  - Set chanfix to be stealthed by default in example config.
+  - Remove cf_client_needs_rdns and cf_score_chanserv_chans config file options
+    as they don't seem very useful.
+  - Update REVERT command function to use chanfix opping logic.
+  - Don't remove +I's during a REVERT.
+  - No longer check if a channel is registered with ChanServ before scoring it.
+    Avoiding this check should save resources and may provide useful information
+    to services admins.
+  
+
+  Modified:
+	rserv/trunk/doc/example.conf (File Modified) 
+	rserv/trunk/include/conf.h (File Modified) 
+	rserv/trunk/src/conf.c (File Modified) 
+	rserv/trunk/src/newconf.c (File Modified) 
+	rserv/trunk/src/s_chanfix.c (File Modified) 
+
+
 moggie      2010/05/12 16:23:39 UTC	(20100512_1-27029)
   Log:
   - Fix service_flags compile warning.
