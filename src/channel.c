@@ -251,14 +251,16 @@ del_chmember(struct chmember *mptr)
 	dlink_delete(&mptr->usernode, &client_p->user->channels);
 
 	if(is_opped(mptr))
+	{
 		dlink_delete(&mptr->choppednode, &chptr->users_opped);
 		if(dlink_list_length(&chptr->users_opped) == 0)
 			hook_call(HOOK_CHANNEL_OPLESS, chptr, NULL);
+	}
 	else
 		dlink_delete(&mptr->choppednode, &chptr->users_unopped);
 
 	if(dlink_list_length(&chptr->users) == 0 &&
-	   dlink_list_length(&chptr->services) == 0)
+			dlink_list_length(&chptr->services) == 0)
 		free_channel(chptr);
 
 	BlockHeapFree(chmember_heap, mptr);

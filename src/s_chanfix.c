@@ -333,6 +333,7 @@ get_chmember_cf_scores(struct chanfix_score *scores, struct channel *chptr,
 			scores->score_items[i].msptr = NULL;
 	}
 
+
 	user_count = 0;
 	DLINK_FOREACH_SAFE(ptr, next_ptr, listptr->head)
 	{
@@ -369,7 +370,7 @@ get_chmember_cf_scores(struct chanfix_score *scores, struct channel *chptr,
 			}
 		}
 
-		if(user_count >= scores->length)
+		if(user_count >= scores->length) 
 			break;
 	}
 
@@ -892,7 +893,7 @@ o_chanfix_score(struct client *client_p, struct lconn *conn_p, const char *parv[
 {
 	struct channel *chptr;
 	char buf[BUFSIZE], t_buf[8];
-	int i;
+	int i, count;
 	struct chanfix_score *scores, *all_scores;
 
 	if(!valid_chname(parv[0]))
@@ -934,50 +935,62 @@ o_chanfix_score(struct client *client_p, struct lconn *conn_p, const char *parv[
 		return 0;
 	}
 
+	my_free(all_scores->score_items);
+	my_free(all_scores);
+	all_scores = NULL;
+
+	/* Get new list containing all DB scores */
+	if((all_scores = get_all_cf_scores(chptr, 0, 0)) == NULL)
+		return 0;
+
 	/* Show the top opped scores for the channel. */
 	service_snd(chanfix_p, client_p, conn_p, SVC_CF_TOPOPSCORES,
 		config_file.cf_num_top_scores, parv[0]);
 
-	if(scores = get_chmember_cf_scores(all_scores, chptr, &chptr->users_opped,
-					config_file.cf_num_top_scores))
+	scores = get_chmember_cf_scores(all_scores, chptr, &chptr->users_opped, 0);
+	if(scores && scores->matched > 0)
 	{
 		buf[0] = '\0';
-		for(i = 0; i < scores->length; i++)
+		count = 0;
+		for(i = 0; i < scores->length && count < config_file.cf_num_top_scores; i++)
 		{
 			if(scores->score_items[i].msptr)
 			{
 				snprintf(t_buf, sizeof(t_buf), "%d ", scores->score_items[i].score);
 				strcat(buf, t_buf);
+				count++;
 			}
 		}
 		service_send(chanfix_p, client_p, conn_p, "%s", buf);
 	}
 	else
 	{
-		service_snd(chanfix_p, client_p, conn_p, SVC_CF_NOTYPESCORES, "op");
+		service_snd(chanfix_p, client_p, conn_p, SVC_CF_NOMATCHES);
 	}
 
 	/* Show the top unopped scores for the channel. */
 	service_snd(chanfix_p, client_p, conn_p, SVC_CF_TOPUNOPSCORES,
 		config_file.cf_num_top_scores, parv[0]);
 
-	if(scores = get_chmember_cf_scores(all_scores, chptr, &chptr->users_unopped,
-				config_file.cf_num_top_scores))
+	scores = get_chmember_cf_scores(all_scores, chptr, &chptr->users_unopped, 0);
+	if(scores && scores->matched > 0)
 	{
 		buf[0] = '\0';
-		for(i = 0; i < scores->length; i++)
+		count = 0;
+		for(i = 0; i < scores->length && count < config_file.cf_num_top_scores; i++)
 		{
 			if(scores->score_items[i].msptr)
 			{
 				snprintf(t_buf, sizeof(t_buf), "%d ", scores->score_items[i].score);
 				strcat(buf, t_buf);
+				count++;
 			}
 		}
 		service_send(chanfix_p, client_p, conn_p, "%s", buf);
 	}
 	else
 	{
-		service_snd(chanfix_p, client_p, conn_p, SVC_CF_NOTYPESCORES, "non-op");
+		service_snd(chanfix_p, client_p, conn_p, SVC_CF_NOMATCHES);
 	}
 
 	my_free(all_scores->score_items);
@@ -992,7 +1005,7 @@ o_chanfix_userlist(struct client *client_p, struct lconn *conn_p, const char *pa
 {
 	struct channel *chptr;
 	char buf[BUFSIZE];
-	int i;
+	int i, count;
 	struct chanfix_score *scores;
 
 	if(!valid_chname(parv[0]))
@@ -1011,17 +1024,22 @@ o_chanfix_userlist(struct client *client_p, struct lconn *conn_p, const char *pa
 	if(find_channel_reg(NULL, chptr->name))
 	{
 		service_snd(chanfix_p, client_p, conn_p, SVC_CF_CHANSERVCHANNEL, parv[0]);
-		return 0;
 	}
 #endif
 
-	if(scores = get_chmember_cf_scores(NULL, chptr, &chptr->users,
-				config_file.cf_num_top_scores))
+	if((scores = get_chmember_cf_scores(NULL, chptr, &chptr->users, 0)) == NULL)
+	{
+		service_snd(chanfix_p, client_p, conn_p, SVC_CF_NOSCOREDATA, parv[0]);
+		return 0;
+	}
+
+	if(scores->matched > 0)
 	{
 		service_snd(chanfix_p, client_p, conn_p, SVC_CF_TOPUSERSFOR,
 			 config_file.cf_num_top_scores, parv[0]);
 
-		for(i = 0; i < scores->length; i++)
+		count = 0;
+		for(i = 0; i < scores->length && count < config_file.cf_num_top_scores; i++)
 		{
 			if(scores->score_items[i].msptr)
 			{
@@ -1030,17 +1048,17 @@ o_chanfix_userlist(struct client *client_p, struct lconn *conn_p, const char *pa
 					scores->score_items[i].msptr->client_p->user->username,
 					scores->score_items[i].msptr->client_p->user->host);
 				service_send(chanfix_p, client_p, conn_p, "%s", buf);
+				count++;
 			}
 		}
-
-		my_free(scores->score_items);
-		my_free(scores);
 	}
 	else
 	{
-		service_snd(chanfix_p, client_p, conn_p, SVC_CF_NOTYPESCORES, "matching user");
-		return 0;
+		service_snd(chanfix_p, client_p, conn_p, SVC_CF_NOMATCHES);
 	}
+
+	my_free(scores->score_items);
+	my_free(scores);
 
 	return 0;
 }
@@ -1159,7 +1177,6 @@ o_chanfix_revert(struct client *client_p, struct lconn *conn_p, const char *parv
 
 	service_snd(chanfix_p, client_p, conn_p, SVC_ISSUEDFORBY,
 				chanfix_p->name, "REVERT", parv[0], client_p->name);
-
 
 	return 0;
 }

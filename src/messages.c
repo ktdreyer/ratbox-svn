@@ -260,12 +260,12 @@ struct _lang_internal lang_internal[] =
 	{ SVC_CF_TOPSCORESFOR,		"Top %d scores for channel '%s':"		},
 	{ SVC_CF_TOPOPSCORES,		"Top %d scores for ops in channel '%s':"	},
 	{ SVC_CF_TOPUNOPSCORES,		"Top %d scores for non-ops in channel '%s':"	},
-	{ SVC_CF_NOTYPESCORES,		"No %s scores."		},
 	{ SVC_CF_TOPUSERSFOR,		"Top %d users for channel '%s':"	},
 	{ SVC_CF_NOSCOREDATA,		"Channel '%s' has no score data."	},
 	{ SVC_CF_BEINGFIXED,		"Channel '%s' is already being fixed."	},
 	{ SVC_CF_1BEENOPPED,		"1 client should have been opped."	},
 	{ SVC_CF_HAVEBEENOPPED,		"%d clients should have been opped."	},
+	{ SVC_CF_NOMATCHES,		"No matches were found."	},
 /* STOP_GENEXAMPLE_PARSING -- for genexample.pl in langs/ */
 
 	/* this must be last */
