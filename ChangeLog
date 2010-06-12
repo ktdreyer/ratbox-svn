@@ -1,3 +1,20 @@
+moggie      2010/06/12 12:13:38 UTC	(20100612_0-27033)
+  Log:
+  - Remove SVC_CF_NOTYPESCORES and replace with SVC_CF_NOMATCHES.
+  - Improve SCORE and USERLIST commands to correctly show score data of clients
+    present in the channel.
+  - Don't abort the SCORE and USERLIST commands if a channel is ran by ChanServ.
+  - Add missing braces in src/channel.c
+  
+
+  Modified:
+	rserv/trunk/include/langs.h (File Modified) 
+	rserv/trunk/src/channel.c (File Modified) 
+	rserv/trunk/src/langs.c (File Modified) 
+	rserv/trunk/src/messages.c (File Modified) 
+	rserv/trunk/src/s_chanfix.c (File Modified) 
+
+
 moggie      2010/06/10 23:17:32 UTC	(20100610_0-27031)
   Log:
   - Set chanfix to be stealthed by default in example config.
