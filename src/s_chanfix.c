@@ -68,6 +68,7 @@ static dlink_list chanfix_list;
 
 static int o_chanfix_score(struct client *, struct lconn *, const char **, int);
 static int o_chanfix_userlist(struct client *, struct lconn *, const char **, int);
+static int o_chanfix_userlist2(struct client *, struct lconn *, const char **, int);
 static int o_chanfix_chanfix(struct client *, struct lconn *, const char **, int);
 static int o_chanfix_revert(struct client *, struct lconn *, const char **, int);
 static int o_chanfix_check(struct client *, struct lconn *, const char **, int);
@@ -88,6 +89,7 @@ static struct service_command chanfix_command[] =
 	{ "UNBLOCK",	&o_chanfix_unblock,	1, NULL, 1, 0L, 0, 1, 0 },*/
 	{ "CHECK",	&o_chanfix_check,	1, NULL, 1, 0L, 0, 0, CONF_OPER_CF_INFO },
 	{ "USERLIST",	&o_chanfix_userlist,	1, NULL, 1, 0L, 0, 0, CONF_OPER_CF_CHANFIX },
+	{ "USERLIST2",	&o_chanfix_userlist2,	1, NULL, 1, 0L, 0, 0, CONF_OPER_CF_CHANFIX },
 	{ "STATUS",	&o_chanfix_status,	0, NULL, 1, 0L, 0, 1, 0 }
 };
 
@@ -610,19 +612,20 @@ typedef int (*scorecmp)(const void *, const void *);
 static int
 score_cmp(struct chanfix_score_item *one, struct chanfix_score_item *two)
 {
-	return (one->score - two->score);
+	return (two->score - one->score);
 }
 
 
 static struct chanfix_score *
-build_opless_channel_scores(struct channel *chptr, int max_num)
+build_channel_scores(struct channel *chptr, int max_num)
 {
 	struct chanfix_score *scores;
-	unsigned long channel_id;
+	unsigned long channel_id, userhost_id;
 	struct chmember *msptr;
 	dlink_node *ptr;
 	struct rsdb_table data;
 	char userhost[USERLEN+HOSTLEN+4+1];
+	int day_score, hist_score;
 	unsigned int user_count;
 
 	if((channel_id = get_channel_id(chptr->name)) == 0)
@@ -631,16 +634,16 @@ build_opless_channel_scores(struct channel *chptr, int max_num)
 		return NULL;
 	}
 
-	if(dlink_list_length(&chptr->users_unopped) < 1)
+	if(dlink_list_length(&chptr->users) < 1)
 		return NULL;
 
 	scores = my_malloc(sizeof(struct chanfix_score));
 	scores->score_items = my_malloc(sizeof(struct chanfix_score_item) *
-					dlink_list_length(&chptr->users_unopped));
+					dlink_list_length(&chptr->users));
 
 	user_count = 0;
 
-	DLINK_FOREACH(ptr, chptr->users_unopped.head)
+	DLINK_FOREACH(ptr, chptr->users.head)
 	{
 		msptr = ptr->data;
 
@@ -648,39 +651,50 @@ build_opless_channel_scores(struct channel *chptr, int max_num)
 				msptr->client_p->user->username,
 				msptr->client_p->user->host);
 
-		rsdb_exec_fetch(&data, "SELECT userhost_id, SUM(t) AS total "
-			"FROM "
-			"  (SELECT userhost_id, COUNT(*) AS t "
-			"  FROM cf_score "
-			"  WHERE channel_id = %lu AND userhost_id= "
-			"    (SELECT id FROM cf_userhost "
-			"    WHERE userhost=LOWER('%Q')) "
-			"  UNION ALL "
-			"  SELECT userhost_id, SUM(score) AS t "
-			"  FROM cf_score_history "
-			"  WHERE channel_id = %lu AND userhost_id= "
-			"    (SELECT id FROM cf_userhost "
-			"    WHERE userhost=LOWER('%Q'))) "
-			"  AS total_table;",
-			channel_id, userhost, channel_id, userhost);
+		userhost_id = get_userhost_id(userhost);
 
+		mlog("debug: user id %d matches with userhost '%s'.", userhost_id, userhost);
 
-		if(data.row_count == 0 || data.row[0][0] == NULL)
+		if(!userhost_id)
 		{
-			rsdb_exec_fetch_end(&data);
+			mlog("debug: userhost '%s' not in DB, skipping.", userhost);
 			continue;
 		}
 
-		scores->score_items[user_count].userhost_id = atoi(data.row[0][0]);
-		scores->score_items[user_count].score = atoi(data.row[0][1]);
+		rsdb_exec_fetch(&data, "SELECT userhost_id, COUNT(*) AS t "
+			"FROM cf_score "
+			"WHERE channel_id = %lu AND userhost_id= %lu ",
+			channel_id, userhost_id);
+		if(data.row_count == 0 || data.row[0][0] == NULL)
+			day_score = 0;
+		else
+			day_score = atoi(data.row[0][1]);
+		rsdb_exec_fetch_end(&data);
+
+
+		rsdb_exec_fetch(&data, "SELECT userhost_id, SUM(score) AS t "
+			"  FROM cf_score_history "
+			"  WHERE channel_id = %lu AND userhost_id= %lu",
+			channel_id, userhost_id);
+		if(data.row_count == 0 || data.row[0][0] == NULL)
+			hist_score = 0;
+		else
+			hist_score = atoi(data.row[0][1]);
+		rsdb_exec_fetch_end(&data);
+
+		if(day_score == 0 && hist_score == 0)
+		{
+			continue;
+		}
+
+		scores->score_items[user_count].userhost_id = userhost_id;
+		scores->score_items[user_count].score = day_score + hist_score;
 		scores->score_items[user_count].msptr = msptr;
 		user_count++;
-
-		rsdb_exec_fetch_end(&data);
 	}
 
 	scores->score_items = realloc(scores->score_items,
-				sizeof(struct chanfix_score_item) * user_count);
+			sizeof(struct chanfix_score_item) * user_count);
 
 	scores->length = user_count;
 	scores->matched = user_count;
@@ -1037,6 +1051,70 @@ o_chanfix_userlist(struct client *client_p, struct lconn *conn_p, const char *pa
 	{
 		service_snd(chanfix_p, client_p, conn_p, SVC_CF_TOPUSERSFOR,
 			 config_file.cf_num_top_scores, parv[0]);
+
+		count = 0;
+		for(i = 0; i < scores->length && count < config_file.cf_num_top_scores; i++)
+		{
+			if(scores->score_items[i].msptr)
+			{
+				snprintf(buf, sizeof(buf), "%4d  %s!%s@%s", scores->score_items[i].score,
+					scores->score_items[i].msptr->client_p->name,
+					scores->score_items[i].msptr->client_p->user->username,
+					scores->score_items[i].msptr->client_p->user->host);
+				service_send(chanfix_p, client_p, conn_p, "%s", buf);
+				count++;
+			}
+		}
+	}
+	else
+	{
+		service_snd(chanfix_p, client_p, conn_p, SVC_CF_NOMATCHES);
+	}
+
+	my_free(scores->score_items);
+	my_free(scores);
+
+	return 0;
+}
+
+/* Duplicate userlist command using build_channel_scores() */
+static int
+o_chanfix_userlist2(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
+{
+	struct channel *chptr;
+	char buf[BUFSIZE];
+	int i, count;
+	struct chanfix_score *scores;
+
+	if(!valid_chname(parv[0]))
+	{
+		service_snd(chanfix_p, client_p, conn_p, SVC_IRC_CHANNELINVALID, parv[0]);
+		return 0;
+	}
+
+	if((chptr = find_channel(parv[0])) == NULL)
+	{
+		service_snd(chanfix_p, client_p, conn_p, SVC_IRC_NOSUCHCHANNEL, parv[0]);
+		return 0;
+	}
+
+#ifdef ENABLE_CHANSERV
+	if(find_channel_reg(NULL, chptr->name))
+	{
+		service_snd(chanfix_p, client_p, conn_p, SVC_CF_CHANSERVCHANNEL, parv[0]);
+	}
+#endif
+
+	if((scores = build_channel_scores(chptr, 0)) == NULL)
+	{
+		service_snd(chanfix_p, client_p, conn_p, SVC_CF_NOSCOREDATA, parv[0]);
+		return 0;
+	}
+
+	if(scores->matched > 0)
+	{
+		service_snd(chanfix_p, client_p, conn_p, SVC_CF_TOPUSERSFOR,
+				config_file.cf_num_top_scores, parv[0]);
 
 		count = 0;
 		for(i = 0; i < scores->length && count < config_file.cf_num_top_scores; i++)
