@@ -1,3 +1,14 @@
+moggie      2010/06/13 00:30:10 UTC	(20100613_0-27039)
+  Log:
+  - Rename build_opless_channel_scores() to build_channel_scores() and fix up to
+    work properly.
+  - Create o_chanfix_userlist2() for testing build_channel_scores() function.
+  
+
+  Modified:
+	rserv/trunk/src/s_chanfix.c (File Modified) 
+
+
 moggie      2010/06/12 12:13:38 UTC	(20100612_0-27033)
   Log:
   - Remove SVC_CF_NOTYPESCORES and replace with SVC_CF_NOMATCHES.
