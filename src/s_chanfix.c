@@ -427,13 +427,34 @@ chanfix_opless_channel(struct chanfix_channel *cf_ch)
 		return 0;
 	}
 
+	/* Need to do this before checking for any unopped users in the channel in
+	 * case those users are being preveted from joining.
+	 */
+	if(cf_ch->flags & CF_STATUS_AUTOFIX)
+	{
+		if(!(cf_ch->flags & CF_STATUS_CLEAREDMODES) &&
+				time_since_start > (CF_MAX_FIX_TIME * CF_REMOVE_MODES_TIME))
+		{
+			remove_our_simple_modes(cf_ch->chptr, chanfix_p, 1);
+			cf_ch->flags |= CF_STATUS_CLEAREDMODES;
+		}
+
+		if(!(cf_ch->flags & CF_STATUS_CLEAREDBANS) &&
+				time_since_start > (CF_MAX_FIX_TIME * CF_REMOVE_BANS_TIME))
+		{
+			remove_our_bans(cf_ch->chptr, chanfix_p, 1, 0, 0);
+			cf_ch->flags |= CF_STATUS_CLEAREDBANS;
+		}
+	}
+
 	/* Give get_chmember_cf_scores() the all_scores scores so it can match them up
 	 * against users in the channel for us.
 	 */
 	scores = get_chmember_cf_scores(cf_ch->scores, cf_ch->chptr,
 				&cf_ch->chptr->users_unopped, 0);
-	/* Might be NULL if there aren't any unopped users in the channel. */
-	if(scores == NULL)
+
+	/* Check there are scores and some users have been matched. */
+	if(scores == NULL || scores->matched == 0)
 		return 0;
 
 
@@ -451,7 +472,7 @@ chanfix_opless_channel(struct chanfix_channel *cf_ch)
 	 * or min_user_score.
 	 */
 	min_score = min_chan_score;
-	if (min_user_score > min_score)
+	if(min_user_score > min_score)
 		min_score = min_user_score;
 
 	mlog("debug: Calculated min score for '%s' is %d.",
@@ -535,12 +556,12 @@ process_chanfix_list(int fix_type)
 			if((fix_type == CF_STATUS_AUTOFIX) &&
 				((CURRENT_TIME - cf_ch->time_prev_attempt) < CF_AUTOFIX_INTERVAL))
 			{
-					continue;
+				continue;
 			}
 			else if((fix_type == CF_STATUS_MANUALFIX) &&
 				((CURRENT_TIME - cf_ch->time_prev_attempt) < CF_MANUALFIX_INTERVAL))
 			{
-					continue;
+				continue;
 			}
 			else
 			{
@@ -551,7 +572,7 @@ process_chanfix_list(int fix_type)
 			{
 				del_chanfix(cf_ch->chptr);
 				mlog("debug: Channel '%s' has insufficient users for a fix.",
-					cf_ch->chptr->name);
+						cf_ch->chptr->name);
 				continue;
 			}
 
@@ -559,7 +580,7 @@ process_chanfix_list(int fix_type)
 			{
 				del_chanfix(cf_ch->chptr);
 				mlog("debug: Channel '%s' has enough ops (fix complete).",
-					cf_ch->chptr->name);
+						cf_ch->chptr->name);
 				continue;
 			}
 
@@ -568,7 +589,7 @@ process_chanfix_list(int fix_type)
 			{
 				del_chanfix(cf_ch->chptr);
 				mlog("debug: Cannot fix channel '%s' (highest user score is too low).",
-					cf_ch->chptr->name);
+						cf_ch->chptr->name);
 				continue;
 			}
 
@@ -576,7 +597,7 @@ process_chanfix_list(int fix_type)
 			{
 				del_chanfix(cf_ch->chptr);
 				mlog("debug: Cannot fix channel '%s' (fix time expired).",
-					cf_ch->chptr->name);
+						cf_ch->chptr->name);
 				continue;
 			}
 				
@@ -628,11 +649,9 @@ build_channel_scores(struct channel *chptr, int max_num)
 	int day_score, hist_score;
 	unsigned int user_count;
 
+	/* Channel has no ID in the DB and therefore can't have any scores. */
 	if((channel_id = get_channel_id(chptr->name)) == 0)
-	{
-		/* Channel has no ID in the DB and therefore can't have any scores. */
 		return NULL;
-	}
 
 	if(dlink_list_length(&chptr->users) < 1)
 		return NULL;
@@ -656,10 +675,7 @@ build_channel_scores(struct channel *chptr, int max_num)
 		mlog("debug: user id %d matches with userhost '%s'.", userhost_id, userhost);
 
 		if(!userhost_id)
-		{
-			mlog("debug: userhost '%s' not in DB, skipping.", userhost);
 			continue;
-		}
 
 		rsdb_exec_fetch(&data, "SELECT userhost_id, COUNT(*) AS t "
 			"FROM cf_score "
@@ -743,7 +759,7 @@ e_chanfix_score_channels(void *unused)
 			else if((!chptr->cfptr) && (add_chanfix(chptr, 0, NULL)))
 			{
 				mlog("debug: Added opless channel '%s' for autofixing.",
-					chptr->name);
+						chptr->name);
 			}
 		}
 	}
@@ -1199,7 +1215,7 @@ o_chanfix_chanfix(struct client *client_p, struct lconn *conn_p, const char *par
 	remove_our_bans(chptr, chanfix_p, 1, 0, 0);
  
 	service_snd(chanfix_p, client_p, conn_p, SVC_ISSUEDFORBY,
-				chanfix_p->name, "CHANFIX", parv[0], client_p->name);
+			chanfix_p->name, "CHANFIX", parv[0], client_p->name);
 
 	return 0;
 }
@@ -1242,7 +1258,7 @@ o_chanfix_revert(struct client *client_p, struct lconn *conn_p, const char *parv
 	if(chptr->tsinfo < 2)
 	{
 		service_send(chanfix_p, client_p, conn_p,
-						"Channel '%s' TS too low for takeover", parv[0]);
+				"Channel '%s' TS too low for takeover", parv[0]);
 		return 0;
 	}
 
@@ -1254,7 +1270,7 @@ o_chanfix_revert(struct client *client_p, struct lconn *conn_p, const char *parv
 	service_err_chan(chanfix_p, chptr, SVC_CF_CHANFIXINPROG);
 
 	service_snd(chanfix_p, client_p, conn_p, SVC_ISSUEDFORBY,
-				chanfix_p->name, "REVERT", parv[0], client_p->name);
+			chanfix_p->name, "REVERT", parv[0], client_p->name);
 
 	return 0;
 }
@@ -1278,7 +1294,7 @@ o_chanfix_check(struct client *client_p, struct lconn *conn_p, const char *parv[
 	}
 
 	service_snd(chanfix_p, client_p, conn_p, SVC_ISSUEDFORBY,
-				chanfix_p->name, "CHECK", parv[0], client_p->name);
+			chanfix_p->name, "CHECK", parv[0], client_p->name);
 
 	ops = dlink_list_length(&chptr->users_opped);
 	users = dlink_list_length(&chptr->users);
@@ -1501,6 +1517,7 @@ add_chanfix(struct channel *chptr, short man_fix, struct client *client_p)
 	}
 
 	cf_chan->highest_score = cf_chan->scores->score_items[0].score;
+	cf_chan->endfix_uscore = CF_MIN_USER_SCORE_END * cf_chan->highest_score;
 
 	/*my_free(scores->score_items);
 	my_free(scores);

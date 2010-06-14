@@ -11,23 +11,20 @@ struct channel;
 #define CF_STATUS_MANUALFIX		0x0000004
 #define CF_STATUS_AUTOFIX		0x0000008
 
-/* Structures used to store the current status of channels currently being
- * fixed.
- * A chanfix channel has 2 stages:
- * Stage 1 - join with TS-1 and get rid of all the modes;
- * Stage 2 - give ops to the right people.
+/* Structures used to store the current status of channels currently
+ * being fixed.
  */
 struct chanfix_channel
 {
 	struct channel *chptr;
 	time_t time_fix_started;
 	time_t time_prev_attempt;
-	int stage;
 	struct chanfix_score *scores;
 	int highest_score;	/* highest chanop score in channel */
+	int endfix_uscore;	/* min possible user score at end of a chanfix */
 	int flags;
 
-	dlink_node node;	/* ptr to this mode in chanfix_list */
+	dlink_node node;	/* ptr to this node in chanfix_list */
 };
 
 /* Structures for storing one or more chanfix_score_items containing
@@ -89,5 +86,13 @@ struct chanfix_score_item
 
 /* the time to wait between consecutive chanfixes (seconds). */
 #define CF_MANUALFIX_INTERVAL	300
+
+/* Time to wait before removing channel modes during an autofix. Expressed as
+ * a percentage of the CF_MAX_FIX_TIME. */
+#define CF_REMOVE_MODES_TIME	0.50f
+
+/* Time to wait before removing channel bans during an autofix. Expressed as
+ * a percentage of the CF_MAX_FIX_TIME. */
+#define CF_REMOVE_BANS_TIME	0.60f
 
 #endif
