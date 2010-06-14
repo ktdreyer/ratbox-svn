@@ -1,3 +1,14 @@
+moggie      2010/06/14 00:52:45 UTC	(20100614_0-27041)
+  Log:
+  - Tidy up some of the chanfix code.
+  - Add support for removing channel modes and bans during an autofix.
+  
+
+  Modified:
+	rserv/trunk/include/s_chanfix.h (File Modified) 
+	rserv/trunk/src/s_chanfix.c (File Modified) 
+
+
 moggie      2010/06/13 00:30:10 UTC	(20100613_0-27039)
   Log:
   - Rename build_opless_channel_scores() to build_channel_scores() and fix up to
