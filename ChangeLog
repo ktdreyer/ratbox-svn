@@ -1,3 +1,14 @@
+moggie      2010/06/15 00:07:42 UTC	(20100615_0-27043)
+  Log:
+  - Add basic support for handling duplicate user@hosts on channels.
+  - Create clones dlink_list for storing clone chanfix info.
+  
+
+  Modified:
+	rserv/trunk/include/s_chanfix.h (File Modified) 
+	rserv/trunk/src/s_chanfix.c (File Modified) 
+
+
 moggie      2010/06/14 00:52:45 UTC	(20100614_0-27041)
   Log:
   - Tidy up some of the chanfix code.
