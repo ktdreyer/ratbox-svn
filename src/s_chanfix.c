@@ -317,9 +317,9 @@ get_chmember_cf_scores(struct chanfix_score *scores, struct channel *chptr,
 	unsigned long userhost_id;
 	struct chmember *msptr;
 	struct chanfix_score_item *clone;
-	dlink_node *ptr, *next_ptr;
+	dlink_node *ptr, *next_ptr, *ptr2;
 	char userhost[USERLEN+HOSTLEN+4+1];
-	unsigned int i, user_count;
+	unsigned int i, u_count, c_count;
 
 
 	if(dlink_list_length(listptr) < 1)
@@ -336,19 +336,20 @@ get_chmember_cf_scores(struct chanfix_score *scores, struct channel *chptr,
 			scores->score_items[i].msptr = NULL;
 		if(dlink_list_length(&scores->clones) > 0)
 		{
-			DLINK_FOREACH_SAFE(ptr, next_ptr, scores->clones.head)
+			DLINK_FOREACH(ptr, scores->clones.head)
 			{
 				clone = ptr->data;
-				mlog("debug: freeing clone memory with userhost_id: %d",
+				mlog("debug: re-setting clone with userhost_id: %d",
 						clone->userhost_id);
-				dlink_destroy(ptr, &scores->clones);
-				my_free(clone);
+				clone->msptr = NULL;
 			}
 		}
 	}
 
 
-	user_count = 0;
+	u_count = 0;	/* counter for users */
+	c_count = 0;	/* counter for clones */
+
 	DLINK_FOREACH_SAFE(ptr, next_ptr, listptr->head)
 	{
 		msptr = ptr->data;
@@ -371,7 +372,7 @@ get_chmember_cf_scores(struct chanfix_score *scores, struct channel *chptr,
 				if(scores->score_items[i].msptr == NULL)
 				{
 					scores->score_items[i].msptr = msptr;
-					user_count++;
+					u_count++;
 					break;
 				}
 				else
@@ -379,22 +380,42 @@ get_chmember_cf_scores(struct chanfix_score *scores, struct channel *chptr,
 					/* Found matching user@host but msptr != NULL, meaning
 					 * this must be a duplicate.
 					 */
-					clone = my_malloc(sizeof(struct chanfix_score_item));
-					clone->msptr = msptr;
-					clone->score = scores->score_items[i].score;
-					clone->userhost_id = userhost_id;
-					dlink_add_alloc(clone, &scores->clones);
 					mlog("debug: found clone as '%s'.", userhost);
+					c_count++;
+					if(c_count > dlink_list_length(&scores->clones))
+					{
+						mlog("debug: creating new clone struct.");
+						clone = my_malloc(sizeof(struct chanfix_score_item));
+						clone->msptr = msptr;
+						clone->score = scores->score_items[i].score;
+						clone->userhost_id = userhost_id;
+						dlink_add_alloc(clone, &scores->clones);
+					}
+					else
+					{
+						DLINK_FOREACH(ptr2, scores->clones.head)
+						{
+							clone = ptr2->data;
+							if(clone->msptr == NULL)
+							{
+								mlog("debug: re-using clone struct.");
+								clone->msptr = msptr;
+								clone->score = scores->score_items[i].score;
+								clone->userhost_id = userhost_id;
+								break;
+							}
+						}
+					}
 					break;
 				}
 			}
 		}
 
-		if(user_count >= scores->length) 
+		if(u_count >= scores->length) 
 			break;
 	}
 
-	scores->matched = user_count;
+	scores->matched = u_count;
 
 	return scores;
 }
@@ -411,6 +432,10 @@ collect_channel_scores(struct channel *chptr, time_t timestamp, unsigned int day
 	DLINK_FOREACH(ptr, chptr->users_opped.head)
 	{
 		msptr = ptr->data;
+
+		if(config_file.cf_client_needs_ident &&
+				msptr->client_p->user->username[0] == '~')
+			continue;
 
 		snprintf(userhost, sizeof(userhost), "%s@%s",
 				msptr->client_p->user->username,
@@ -521,7 +546,7 @@ chanfix_opless_channel(struct chanfix_channel *cf_ch)
 		DLINK_FOREACH(ptr, scores->clones.head)
 		{
 			clone = ptr->data;
-			if(clone->score >= min_score)
+			if(clone->msptr && clone->score >= min_score)
 			{
 				modebuild_add(DIR_ADD, "o", clone->msptr->client_p->name);
 				op_chmember(clone->msptr);
@@ -763,6 +788,8 @@ e_chanfix_score_channels(void *unused)
 	short i = 0;
 	struct rsdb_table ts_data;
 
+	mlog("debug: Examining channels for opped users.");
+
 	DLINK_FOREACH(ptr, channel_list.head)
 	{
 		chptr = ptr->data;
@@ -771,7 +798,6 @@ e_chanfix_score_channels(void *unused)
 		{
 			if(dlink_list_length(&chptr->users_opped) != 0)
 			{
-				mlog("debug: Scoring opped clients in: %s", chptr->name);
 				collect_channel_scores(chptr, timestamp, dayts);
 			}
 			else if((!chptr->cfptr) && (add_chanfix(chptr, 0, NULL)))
