@@ -316,6 +316,7 @@ get_chmember_cf_scores(struct chanfix_score *scores, struct channel *chptr,
 {
 	unsigned long userhost_id;
 	struct chmember *msptr;
+	struct chanfix_score_item *clone;
 	dlink_node *ptr, *next_ptr;
 	char userhost[USERLEN+HOSTLEN+4+1];
 	unsigned int i, user_count;
@@ -333,6 +334,17 @@ get_chmember_cf_scores(struct chanfix_score *scores, struct channel *chptr,
 	{
 		for(i = 0; i < scores->length; i++)
 			scores->score_items[i].msptr = NULL;
+		if(dlink_list_length(&scores->clones) > 0)
+		{
+			DLINK_FOREACH_SAFE(ptr, next_ptr, scores->clones.head)
+			{
+				clone = ptr->data;
+				mlog("debug: freeing clone memory with userhost_id: %d",
+						clone->userhost_id);
+				dlink_destroy(ptr, &scores->clones);
+				my_free(clone);
+			}
+		}
 	}
 
 
@@ -364,9 +376,15 @@ get_chmember_cf_scores(struct chanfix_score *scores, struct channel *chptr,
 				}
 				else
 				{
-					/* Found matching user@host but msptr != NULL, meaning this
-					 * must be a duplicate.
+					/* Found matching user@host but msptr != NULL, meaning
+					 * this must be a duplicate.
 					 */
+					clone = my_malloc(sizeof(struct chanfix_score_item));
+					clone->msptr = msptr;
+					clone->score = scores->score_items[i].score;
+					clone->userhost_id = userhost_id;
+					dlink_add_alloc(clone, &scores->clones);
+					mlog("debug: found clone as '%s'.", userhost);
 					break;
 				}
 			}
@@ -408,9 +426,11 @@ static int
 chanfix_opless_channel(struct chanfix_channel *cf_ch)
 {
 	struct chanfix_score *scores, *all_scores;
+	struct chanfix_score_item *clone;
 	unsigned int time_since_start, i, count;
 	int min_score, min_chan_score, min_user_score;
 	short all_opped = 1;
+	dlink_node *ptr;
 
 	time_since_start = CURRENT_TIME - (cf_ch->time_fix_started);
 
@@ -493,6 +513,19 @@ chanfix_opless_channel(struct chanfix_channel *cf_ch)
 			op_chmember(scores->score_items[i].msptr);
 			scores->score_items[i].opped = 1;
 			count++;
+		}
+	}
+
+	if(dlink_list_length(&scores->clones) > 0)
+	{
+		DLINK_FOREACH(ptr, scores->clones.head)
+		{
+			clone = ptr->data;
+			if(clone->score >= min_score)
+			{
+				modebuild_add(DIR_ADD, "o", clone->msptr->client_p->name);
+				op_chmember(clone->msptr);
+			}
 		}
 	}
 
@@ -611,21 +644,6 @@ process_chanfix_list(int fix_type)
 		}
 	}
 
-
-	/*op_chmember(msptr);
-	modebuild_add(DIR_ADD, "o", msptr->client_p->name);
-
-	cf_chan = my_calloc(1, sizeof(struct chanfix_channel));
-	cf_chan->chptr = chptr;
-	*/
-
-
-	/* Also record an entry in the fixhistory table to say we're autofixing
-	 * this channel.
-	 */
-	/*dlink_add(chptr, &cf_chan->node, &chanfix_list);
-	chptr->cfptr = cf_chan;
-	*/
 }
 
 
@@ -1544,6 +1562,8 @@ static void
 del_chanfix(struct channel *chptr)
 {
 	struct chanfix_channel *cfptr;
+	struct chanfix_score_item *clone;
+	dlink_node *ptr, *next_ptr;
 
 	part_service(chanfix_p, chptr->name);
 
@@ -1551,12 +1571,26 @@ del_chanfix(struct channel *chptr)
 
 	dlink_delete(&cfptr->node, &chanfix_list);
 
+	/* If chanfix detected any clones, get rid of those too. */
+	if(dlink_list_length(&cfptr->scores->clones) > 0)
+	{
+		DLINK_FOREACH_SAFE(ptr, next_ptr, cfptr->scores->clones.head)
+		{
+			clone = ptr->data;
+			mlog("debug: freeing clone memory with userhost_id: %d",
+					clone->userhost_id);
+			dlink_destroy(ptr, &cfptr->scores->clones);
+			my_free(clone);
+		}
+	}
+
 	if(!cfptr->scores)
 	{
 		my_free(cfptr->scores->score_items);
 		my_free(cfptr->scores);
 		cfptr->scores = NULL;
 	}
+
 	my_free(cfptr);
 	chptr->cfptr = NULL;
 }

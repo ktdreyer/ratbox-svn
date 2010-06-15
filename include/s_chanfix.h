@@ -35,6 +35,8 @@ struct chanfix_score
 	struct chanfix_score_item *score_items;
 	int length;
 	int matched;
+
+	dlink_list clones;	/* List of duplicate user@hosts found. */
 };
 
 struct chanfix_score_item
