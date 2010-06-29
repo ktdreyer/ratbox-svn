@@ -1,3 +1,11 @@
+androsyn    2010/06/29 16:42:31 UTC	(20100629_0-27049)
+  Log:
+  add stdint.h to list of includes
+
+  Modified:
+	rserv/trunk/include/stdinc.h (File Modified) 
+
+
 moggie      2010/06/15 23:40:36 UTC	(20100615_1-27045)
   Log:
   - Honor the client_needs_ident config file option when scoring.
