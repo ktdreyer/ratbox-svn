@@ -1,3 +1,15 @@
+jilles      2010/06/29 17:47:39 UTC	(20100629_1-27051)
+  Log:
+  Make parallel make more reliable by adding a missing dependency.
+  
+  The error message of this problem starts with something like
+  lexer.l:39:19: error: y.tab.h: No such file or directory
+  
+
+  Modified:
+	rserv/trunk/src/Makefile.in (File Modified) 
+
+
 androsyn    2010/06/29 16:42:31 UTC	(20100629_0-27049)
   Log:
   add stdint.h to list of includes
