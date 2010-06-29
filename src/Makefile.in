@@ -79,8 +79,9 @@ y.tab.o:	y.tab.c parser.y
 
 y.tab.c:	parser.y
 	$(YACC) -d parser.y
+y.tab.h:	y.tab.c
 
-lex.yy.o:	lex.yy.c lexer.l
+lex.yy.o:	lex.yy.c lexer.l y.tab.h
 	$(CC) $(INCLUDES) -I. $(CFLAGS) -c lex.yy.c
 
 lex.yy.c:	lexer.l
