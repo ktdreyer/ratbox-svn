@@ -26,6 +26,10 @@
 #include <unistd.h>
 #endif
 
+#ifdef HAVE_STDINT_H
+#include <stdint.h>
+#endif
+
 #include <fcntl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
