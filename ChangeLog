@@ -1,3 +1,17 @@
+moggie      2010/07/12 23:35:47 UTC	(20100712_0-27053)
+  Log:
+  - Rename get_chmember_cf_scores() to get_chmember_scores().
+  - Adjust get_chmember_scores() to accept an option to ignore duplicate
+    user@hosts (clones).
+  - Remove CF_MAX_USERS_TO_OP as not used.
+  - Adjust CF_DAYSAMPLES removal logic uses the right number of days.
+  
+
+  Modified:
+	rserv/trunk/include/s_chanfix.h (File Modified) 
+	rserv/trunk/src/s_chanfix.c (File Modified) 
+
+
 jilles      2010/06/29 17:47:39 UTC	(20100629_1-27051)
   Log:
   Make parallel make more reliable by adding a missing dependency.
