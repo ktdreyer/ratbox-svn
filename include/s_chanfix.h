@@ -47,9 +47,6 @@ struct chanfix_score_item
 	short opped;
 };
 
-/* The maximum number of users chanfix will op per fix cycle. */
-#define CF_MAX_USERS_TO_OP	8
-
 /* The minimum number of ops required for a successful chanfix. */
 #define CF_MIN_FIX_OPS	5
 

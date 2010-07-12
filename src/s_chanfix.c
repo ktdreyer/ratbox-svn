@@ -120,8 +120,8 @@ static unsigned long get_userhost_id(const char *);
 static unsigned long get_channel_id(const char *);
 static time_t seconds_to_midnight(void);
 static struct chanfix_score * get_all_cf_scores(struct channel *, int, int);
-static struct chanfix_score * get_chmember_cf_scores(struct chanfix_score *,
-			struct channel *, dlink_list *, int);
+static struct chanfix_score * get_chmember_scores(struct chanfix_score *,
+			struct channel *, dlink_list *, short);
 static void process_chanfix_list(int);
 
 static int add_chanfix(struct channel *chptr, short man_fix, struct client *);
@@ -311,8 +311,8 @@ get_all_cf_scores(struct channel *chptr, int max_num, int min_score)
  * the DB for the specified channel.
  */
 static struct chanfix_score *
-get_chmember_cf_scores(struct chanfix_score *scores, struct channel *chptr,
-		dlink_list *listptr, int max_num)
+get_chmember_scores(struct chanfix_score *scores, struct channel *chptr,
+		dlink_list *listptr, short ignore_clones)
 {
 	unsigned long userhost_id;
 	struct chmember *msptr;
@@ -327,13 +327,14 @@ get_chmember_cf_scores(struct chanfix_score *scores, struct channel *chptr,
 
 	if(scores == NULL)
 	{
-		if((scores = get_all_cf_scores(chptr, max_num, 0)) == NULL)
+		if((scores = get_all_cf_scores(chptr, 0, 0)) == NULL)
 			return NULL;
 	}
 	else
 	{
 		for(i = 0; i < scores->length; i++)
 			scores->score_items[i].msptr = NULL;
+
 		if(dlink_list_length(&scores->clones) > 0)
 		{
 			DLINK_FOREACH(ptr, scores->clones.head)
@@ -375,7 +376,7 @@ get_chmember_cf_scores(struct chanfix_score *scores, struct channel *chptr,
 					u_count++;
 					break;
 				}
-				else
+				else if(ignore_clones == 0)
 				{
 					/* Found matching user@host but msptr != NULL, meaning
 					 * this must be a duplicate.
@@ -492,10 +493,10 @@ chanfix_opless_channel(struct chanfix_channel *cf_ch)
 		}
 	}
 
-	/* Give get_chmember_cf_scores() the all_scores scores so it can match them up
+	/* Give get_chmember_scores() the all_scores scores so it can match them up
 	 * against users in the channel for us.
 	 */
-	scores = get_chmember_cf_scores(cf_ch->scores, cf_ch->chptr,
+	scores = get_chmember_scores(cf_ch->scores, cf_ch->chptr,
 				&cf_ch->chptr->users_unopped, 0);
 
 	/* Check there are scores and some users have been matched. */
@@ -910,7 +911,7 @@ e_chanfix_collate_history(void *unused)
 	mlog("info: Dropping old daysample history.");
 
 	rsdb_exec(NULL, "DELETE FROM cf_score_history WHERE dayts < %lu",
-				(DAYS_SINCE_EPOCH - CF_DAYSAMPLES));
+				(DAYS_SINCE_EPOCH - CF_DAYSAMPLES + 1));
 }
 
 static void
@@ -1000,7 +1001,7 @@ o_chanfix_score(struct client *client_p, struct lconn *conn_p, const char *parv[
 			strcat(buf, t_buf);
 		}
 		service_snd(chanfix_p, client_p, conn_p, SVC_CF_TOPSCORESFOR,
-			config_file.cf_num_top_scores, parv[0]);
+				config_file.cf_num_top_scores, parv[0]);
 		service_send(chanfix_p, client_p, conn_p, "%s", buf);
 	}
 	else
@@ -1019,9 +1020,9 @@ o_chanfix_score(struct client *client_p, struct lconn *conn_p, const char *parv[
 
 	/* Show the top opped scores for the channel. */
 	service_snd(chanfix_p, client_p, conn_p, SVC_CF_TOPOPSCORES,
-		config_file.cf_num_top_scores, parv[0]);
+			config_file.cf_num_top_scores, parv[0]);
 
-	scores = get_chmember_cf_scores(all_scores, chptr, &chptr->users_opped, 0);
+	scores = get_chmember_scores(all_scores, chptr, &chptr->users_opped, 1);
 	if(scores && scores->matched > 0)
 	{
 		buf[0] = '\0';
@@ -1044,9 +1045,9 @@ o_chanfix_score(struct client *client_p, struct lconn *conn_p, const char *parv[
 
 	/* Show the top unopped scores for the channel. */
 	service_snd(chanfix_p, client_p, conn_p, SVC_CF_TOPUNOPSCORES,
-		config_file.cf_num_top_scores, parv[0]);
+			config_file.cf_num_top_scores, parv[0]);
 
-	scores = get_chmember_cf_scores(all_scores, chptr, &chptr->users_unopped, 0);
+	scores = get_chmember_scores(all_scores, chptr, &chptr->users_unopped, 1);
 	if(scores && scores->matched > 0)
 	{
 		buf[0] = '\0';
@@ -1101,7 +1102,7 @@ o_chanfix_userlist(struct client *client_p, struct lconn *conn_p, const char *pa
 	}
 #endif
 
-	if((scores = get_chmember_cf_scores(NULL, chptr, &chptr->users, 0)) == NULL)
+	if((scores = get_chmember_scores(NULL, chptr, &chptr->users, 0)) == NULL)
 	{
 		service_snd(chanfix_p, client_p, conn_p, SVC_CF_NOSCOREDATA, parv[0]);
 		return 0;
