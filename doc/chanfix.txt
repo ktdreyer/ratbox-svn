@@ -86,6 +86,15 @@ and the other containing a matching user@host entry and their UserServ
 association.
 
 
+##  Channel Fixing with ChanServ Support  ##
+
+If a channel is registered with ChanServ part way through a fix, does ChanFix
+need to be instantly aware of this? Or does it not really matter?
+
+If RESTRICTOPS is enabled for a channel and users have the necessary scores
+requiredfor opping, ChanFix keeps trying to re-op users, but ChanServ seems to
+silently reverse this as part of its HOOK_CHANNEL_MODE_OP hook.
+
 
 ##  Manual Channel Fixing  ##
 

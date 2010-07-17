@@ -266,6 +266,10 @@ struct _lang_internal lang_internal[] =
 	{ SVC_CF_1BEENOPPED,		"1 client should have been opped."	},
 	{ SVC_CF_HAVEBEENOPPED,		"%d clients should have been opped."	},
 	{ SVC_CF_NOMATCHES,		"No matches were found."	},
+	{ SVC_CF_BLOCKED,		"Channel %s has been blocked."	},
+	{ SVC_CF_NOTBLOCKED,		"Channel %s is not blocked."	},
+	{ SVC_CF_UNBLOCKED,		"Channel %s has been unblocked."	},
+	{ SVC_CF_ISBLOCKED,		"Channel %s is blocked."	},
 /* STOP_GENEXAMPLE_PARSING -- for genexample.pl in langs/ */
 
 	/* this must be last */

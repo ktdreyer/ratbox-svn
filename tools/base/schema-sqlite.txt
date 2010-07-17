@@ -181,7 +181,8 @@ CREATE UNIQUE INDEX cf_userhost_userhost_idx_unique ON cf_userhost (userhost);
 
 CREATE TABLE cf_channel (
 	id INTEGER PRIMARY KEY,
-	chname TEXT
+	chname TEXT,
+	flags INTEGER DEFAULT '0'
 );
 CREATE UNIQUE INDEX cf_channel_chname_idx_unique ON cf_channel (chname);
 

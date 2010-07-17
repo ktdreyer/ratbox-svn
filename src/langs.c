@@ -279,6 +279,10 @@ const char *svc_notice_string[] =
 	"SVC_CF_1BEENOPPED",
 	"SVC_CF_HAVEBEENOPPED",
 	"SVC_CF_NOMATCHES",
+	"SVC_CF_BLOCKED",
+	"SVC_CF_NOTBLOCKED",
+	"SVC_CF_UNBLOCKED",
+	"SVC_CF_ISBLOCKED",
 
 	/* must be last */
 	"\0"

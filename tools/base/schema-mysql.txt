@@ -198,6 +198,7 @@ ALTER TABLE cf_userhost ADD UNIQUE INDEX cf_userhost_userhost_idx_unique (userho
 CREATE TABLE cf_channel (
 	id INTEGER AUTO_INCREMENT,
 	chname VARCHAR(CHANNELLEN),
+	flags INTEGER UNSIGNED DEFAULT '0',
 	PRIMARY KEY(id)
 );
 ALTER TABLE cf_channel ADD UNIQUE INDEX cf_channel_chname_idx_unique (chname);

@@ -11,6 +11,11 @@ struct channel;
 #define CF_STATUS_MANUALFIX		0x0000004
 #define CF_STATUS_AUTOFIX		0x0000008
 
+/* Channel flags used by the DB in cf_channel table */
+#define CF_CHAN_BLOCK	0x0000001
+#define CF_CHAN_ALERT	0x0000002
+#define CF_CHAN_SUSPEND	0x0000004
+
 /* Structures used to store the current status of channels currently
  * being fixed.
  */

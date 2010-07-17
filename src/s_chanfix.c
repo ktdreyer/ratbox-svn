@@ -72,6 +72,8 @@ static int o_chanfix_userlist2(struct client *, struct lconn *, const char **, i
 static int o_chanfix_chanfix(struct client *, struct lconn *, const char **, int);
 static int o_chanfix_revert(struct client *, struct lconn *, const char **, int);
 static int o_chanfix_check(struct client *, struct lconn *, const char **, int);
+static int o_chanfix_block(struct client *, struct lconn *, const char **, int);
+static int o_chanfix_unblock(struct client *, struct lconn *, const char **, int);
 static int o_chanfix_set(struct client *, struct lconn *, const char **, int);
 static int o_chanfix_status(struct client *, struct lconn *, const char **, int);
 
@@ -85,8 +87,8 @@ static struct service_command chanfix_command[] =
 	{ "ADDNOTE",	&o_chanfix_addnote,	1, NULL, 1, 0L, 0, 1, 0 },
 	{ "DELNOTE",	&o_chanfix_delnote,	1, NULL, 1, 0L, 0, 1, 0 },*/
 	{ "SET",	&o_chanfix_set,		1, NULL, 1, 0L, 0, 0, CONF_OPER_CF_ADMIN },
-	/*{ "BLOCK",	&o_chanfix_block,	1, NULL, 1, 0L, 0, 1, 0 },
-	{ "UNBLOCK",	&o_chanfix_unblock,	1, NULL, 1, 0L, 0, 1, 0 },*/
+	{ "BLOCK",	&o_chanfix_block,	1, NULL, 1, 0L, 0, 0, CONF_OPER_CF_BLOCK },
+	{ "UNBLOCK",	&o_chanfix_unblock,	1, NULL, 1, 0L, 0, 0, CONF_OPER_CF_BLOCK },
 	{ "CHECK",	&o_chanfix_check,	1, NULL, 1, 0L, 0, 0, CONF_OPER_CF_INFO },
 	{ "USERLIST",	&o_chanfix_userlist,	1, NULL, 1, 0L, 0, 0, CONF_OPER_CF_CHANFIX },
 	{ "USERLIST2",	&o_chanfix_userlist2,	1, NULL, 1, 0L, 0, 0, CONF_OPER_CF_CHANFIX },
@@ -835,14 +837,14 @@ e_chanfix_score_channels(void *unused)
 		 */
 
 		rsdb_exec(NULL, "INSERT INTO cf_channel (chname) "
-					"SELECT DISTINCT cf_temp_score.chname FROM cf_temp_score "
-					"LEFT JOIN cf_channel ON cf_temp_score.chname=cf_channel.chname "
-					"WHERE cf_channel.id IS NULL");
+				"SELECT DISTINCT cf_temp_score.chname FROM cf_temp_score "
+				"LEFT JOIN cf_channel ON cf_temp_score.chname=cf_channel.chname "
+				"WHERE cf_channel.id IS NULL");
 
 		rsdb_exec(NULL, "INSERT INTO cf_userhost (userhost) "
-					"SELECT DISTINCT cf_temp_score.userhost FROM cf_temp_score "
-					"LEFT JOIN cf_userhost ON cf_temp_score.userhost=cf_userhost.userhost "
-					"WHERE cf_userhost.id IS NULL");
+				"SELECT DISTINCT cf_temp_score.userhost FROM cf_temp_score "
+				"LEFT JOIN cf_userhost ON cf_temp_score.userhost=cf_userhost.userhost "
+				"WHERE cf_userhost.id IS NULL");
 
 		rsdb_exec(NULL, "INSERT INTO cf_score (channel_id, userhost_id, timestamp, dayts) "
 				"SELECT DISTINCT cf_channel.id, cf_userhost.id, timestamp, dayts "
@@ -987,7 +989,6 @@ o_chanfix_score(struct client *client_p, struct lconn *conn_p, const char *parv[
 	if(find_channel_reg(NULL, chptr->name))
 	{
 		service_snd(chanfix_p, client_p, conn_p, SVC_CF_CHANSERVCHANNEL, parv[0]);
-		return 0;
 	}
 #endif
 
@@ -1322,6 +1323,93 @@ o_chanfix_revert(struct client *client_p, struct lconn *conn_p, const char *parv
 
 
 static int
+o_chanfix_block(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
+{
+	struct rsdb_table data;
+	uint32_t flags = 0;
+
+	/*const char *msg;
+	msg = rebuild_params(parv, parc, 1);*/
+
+	if(!valid_chname(parv[0]))
+	{
+		service_snd(chanfix_p, client_p, conn_p, SVC_IRC_CHANNELINVALID, parv[0]);
+		return 0;
+	}
+
+	rsdb_exec_fetch(&data,
+			"SELECT flags FROM cf_channel WHERE chname=LOWER('%Q')", parv[0]);
+
+	if((data.row_count > 0) && (data.row[0][0] != NULL))
+	{
+		flags = atoi(data.row[0][0]);
+
+		if(flags & CF_CHAN_BLOCK)
+		{
+			service_snd(chanfix_p, client_p, conn_p, SVC_CF_ISBLOCKED, parv[0]);
+		}
+		else
+		{
+			flags |= CF_CHAN_BLOCK;
+			service_snd(chanfix_p, client_p, conn_p, SVC_CF_BLOCKED, parv[0]);
+			rsdb_exec(NULL, "UPDATE cf_channel SET flags = '%d' WHERE chname = '%Q'",
+					flags, parv[0]);
+		}
+	}
+	else
+	{
+		service_snd(chanfix_p, client_p, conn_p, SVC_CF_NOSCOREDATA, parv[0]);
+	}
+
+	rsdb_exec_fetch_end(&data);
+
+	return 0;
+}
+
+
+static int
+o_chanfix_unblock(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
+{
+	struct rsdb_table data;
+	uint32_t flags = 0;
+
+	if(!valid_chname(parv[0]))
+	{
+		service_snd(chanfix_p, client_p, conn_p, SVC_IRC_CHANNELINVALID, parv[0]);
+		return 0;
+	}
+
+	rsdb_exec_fetch(&data,
+			"SELECT flags FROM cf_channel WHERE chname=LOWER('%Q')", parv[0]);
+
+	if((data.row_count > 0) && (data.row[0][0] != NULL))
+	{
+		flags = atoi(data.row[0][0]);
+
+		if(!(flags & CF_CHAN_BLOCK))
+		{
+			service_snd(chanfix_p, client_p, conn_p, SVC_CF_NOTBLOCKED, parv[0]);
+		}
+		else
+		{
+			flags &= ~CF_CHAN_BLOCK;
+			service_snd(chanfix_p, client_p, conn_p, SVC_CF_UNBLOCKED, parv[0]);
+			rsdb_exec(NULL, "UPDATE cf_channel SET flags = '%d' WHERE chname = '%Q'",
+					flags, parv[0]);
+		}
+	}
+	else
+	{
+		service_snd(chanfix_p, client_p, conn_p, SVC_CF_NOSCOREDATA, parv[0]);
+	}
+
+	rsdb_exec_fetch_end(&data);
+
+	return 0;
+}
+
+
+static int
 o_chanfix_check(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct channel *chptr;
@@ -1516,6 +1604,8 @@ add_chanfix(struct channel *chptr, short man_fix, struct client *client_p)
 {
 	struct chanfix_channel *cf_chan;
 	struct chanfix_score *scores;
+	struct rsdb_table data;
+	uint32_t flags = 0;
 
 #ifdef ENABLE_CHANSERV
 	/* Need to skip the channel if it's registered with ChanServ. */
@@ -1528,6 +1618,22 @@ add_chanfix(struct channel *chptr, short man_fix, struct client *client_p)
 	 * is oppless but cannot fix it, then return 0.
 	 */
 	/* Need to check to see if the channel is BLOCKed and should be ignored. */
+	rsdb_exec_fetch(&data,
+			"SELECT flags FROM cf_channel WHERE chname=LOWER('%Q')", chptr->name);
+
+	if((data.row_count > 0) && (data.row[0][0] != NULL))
+	{
+		flags = atoi(data.row[0][0]);
+		if(flags & CF_CHAN_BLOCK)
+		{
+			rsdb_exec_fetch_end(&data);
+			if(client_p)
+				service_err(chanfix_p, client_p, SVC_CF_ISBLOCKED, chptr->name);
+			return 0;
+		}
+	}
+
+	rsdb_exec_fetch_end(&data);
 
 	/* Make sure this channel isn't already being fixed. */
 	if(chptr->cfptr)
