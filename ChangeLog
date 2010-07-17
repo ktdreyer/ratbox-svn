@@ -1,3 +1,24 @@
+moggie      2010/07/17 21:41:24 UTC	(20100717_0-27055)
+  Log:
+  - Add note in chanfix doc about chanfixing with ChanServ support.
+  - Add flags field to cf_channel table.
+  - Add translation strings for channel blocking / unblocking.
+  - First pass at supporting blocking / unblocking of channels.
+  - Create some flags for storing channel status in DB.
+  
+
+  Modified:
+	rserv/trunk/doc/chanfix.txt (File Modified) 
+	rserv/trunk/include/langs.h (File Modified) 
+	rserv/trunk/include/s_chanfix.h (File Modified) 
+	rserv/trunk/src/langs.c (File Modified) 
+	rserv/trunk/src/messages.c (File Modified) 
+	rserv/trunk/src/s_chanfix.c (File Modified) 
+	rserv/trunk/tools/base/schema-mysql.txt (File Modified) 
+	rserv/trunk/tools/base/schema-pgsql.txt (File Modified) 
+	rserv/trunk/tools/base/schema-sqlite.txt (File Modified) 
+
+
 moggie      2010/07/12 23:35:47 UTC	(20100712_0-27053)
   Log:
   - Rename get_chmember_cf_scores() to get_chmember_scores().
