@@ -270,6 +270,10 @@ struct _lang_internal lang_internal[] =
 	{ SVC_CF_NOTBLOCKED,		"Channel %s is not blocked."	},
 	{ SVC_CF_UNBLOCKED,		"Channel %s has been unblocked."	},
 	{ SVC_CF_ISBLOCKED,		"Channel %s is blocked."	},
+	{ SVC_CF_HASALERT,		"%s has an alert flag. Please check INFO for notes."	},
+	{ SVC_CF_NOALERT,		"No alert flag for %s"	},
+	{ SVC_CF_ALERTSET,		"Alert flag set for channel %s"	},
+	{ SVC_CF_ALERTUNSET,		"Alert flag for channel %s removed."	},
 /* STOP_GENEXAMPLE_PARSING -- for genexample.pl in langs/ */
 
 	/* this must be last */

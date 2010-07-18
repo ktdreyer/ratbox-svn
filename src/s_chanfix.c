@@ -74,6 +74,8 @@ static int o_chanfix_revert(struct client *, struct lconn *, const char **, int)
 static int o_chanfix_check(struct client *, struct lconn *, const char **, int);
 static int o_chanfix_block(struct client *, struct lconn *, const char **, int);
 static int o_chanfix_unblock(struct client *, struct lconn *, const char **, int);
+static int o_chanfix_alert(struct client *, struct lconn *, const char **, int);
+static int o_chanfix_unalert(struct client *, struct lconn *, const char **, int);
 static int o_chanfix_set(struct client *, struct lconn *, const char **, int);
 static int o_chanfix_status(struct client *, struct lconn *, const char **, int);
 
@@ -89,6 +91,8 @@ static struct service_command chanfix_command[] =
 	{ "SET",	&o_chanfix_set,		1, NULL, 1, 0L, 0, 0, CONF_OPER_CF_ADMIN },
 	{ "BLOCK",	&o_chanfix_block,	1, NULL, 1, 0L, 0, 0, CONF_OPER_CF_BLOCK },
 	{ "UNBLOCK",	&o_chanfix_unblock,	1, NULL, 1, 0L, 0, 0, CONF_OPER_CF_BLOCK },
+	{ "ALERT",	&o_chanfix_alert,	1, NULL, 1, 0L, 0, 0, CONF_OPER_CF_NOTES },
+	{ "UNALERT",	&o_chanfix_unalert,	1, NULL, 1, 0L, 0, 0, CONF_OPER_CF_NOTES },
 	{ "CHECK",	&o_chanfix_check,	1, NULL, 1, 0L, 0, 0, CONF_OPER_CF_INFO },
 	{ "USERLIST",	&o_chanfix_userlist,	1, NULL, 1, 0L, 0, 0, CONF_OPER_CF_CHANFIX },
 	{ "USERLIST2",	&o_chanfix_userlist2,	1, NULL, 1, 0L, 0, 0, CONF_OPER_CF_CHANFIX },
@@ -1410,6 +1414,92 @@ o_chanfix_unblock(struct client *client_p, struct lconn *conn_p, const char *par
 
 
 static int
+o_chanfix_alert(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
+{
+	struct rsdb_table data;
+	uint32_t flags = 0;
+
+	/*const char *msg;
+	msg = rebuild_params(parv, parc, 1);*/
+
+	if(!valid_chname(parv[0]))
+	{
+		service_snd(chanfix_p, client_p, conn_p, SVC_IRC_CHANNELINVALID, parv[0]);
+		return 0;
+	}
+
+	rsdb_exec_fetch(&data,
+			"SELECT flags FROM cf_channel WHERE chname=LOWER('%Q')", parv[0]);
+
+	if((data.row_count > 0) && (data.row[0][0] != NULL))
+	{
+		flags = atoi(data.row[0][0]);
+
+		if(flags & CF_CHAN_ALERT)
+		{
+			service_snd(chanfix_p, client_p, conn_p, SVC_CF_HASALERT, parv[0]);
+		}
+		else
+		{
+			flags |= CF_CHAN_ALERT;
+			service_snd(chanfix_p, client_p, conn_p, SVC_CF_ALERTSET, parv[0]);
+			rsdb_exec(NULL, "UPDATE cf_channel SET flags = '%d' WHERE chname = '%Q'",
+					flags, parv[0]);
+		}
+	}
+	else
+	{
+		service_snd(chanfix_p, client_p, conn_p, SVC_CF_NOSCOREDATA, parv[0]);
+	}
+
+	rsdb_exec_fetch_end(&data);
+
+	return 0;
+}
+
+
+static int
+o_chanfix_unalert(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
+{
+	struct rsdb_table data;
+	uint32_t flags = 0;
+
+	if(!valid_chname(parv[0]))
+	{
+		service_snd(chanfix_p, client_p, conn_p, SVC_IRC_CHANNELINVALID, parv[0]);
+		return 0;
+	}
+
+	rsdb_exec_fetch(&data,
+			"SELECT flags FROM cf_channel WHERE chname=LOWER('%Q')", parv[0]);
+
+	if((data.row_count > 0) && (data.row[0][0] != NULL))
+	{
+		flags = atoi(data.row[0][0]);
+
+		if(!(flags & CF_CHAN_ALERT))
+		{
+			service_snd(chanfix_p, client_p, conn_p, SVC_CF_NOALERT, parv[0]);
+		}
+		else
+		{
+			flags &= ~CF_CHAN_ALERT;
+			service_snd(chanfix_p, client_p, conn_p, SVC_CF_ALERTUNSET, parv[0]);
+			rsdb_exec(NULL, "UPDATE cf_channel SET flags = '%d' WHERE chname = '%Q'",
+					flags, parv[0]);
+		}
+	}
+	else
+	{
+		service_snd(chanfix_p, client_p, conn_p, SVC_CF_NOSCOREDATA, parv[0]);
+	}
+
+	rsdb_exec_fetch_end(&data);
+
+	return 0;
+}
+
+static int
 o_chanfix_check(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct channel *chptr;
@@ -1605,7 +1695,7 @@ add_chanfix(struct channel *chptr, short man_fix, struct client *client_p)
 	struct chanfix_channel *cf_chan;
 	struct chanfix_score *scores;
 	struct rsdb_table data;
-	uint32_t flags = 0;
+	uint32_t flags = NULL;
 
 #ifdef ENABLE_CHANSERV
 	/* Need to skip the channel if it's registered with ChanServ. */
@@ -1624,16 +1714,26 @@ add_chanfix(struct channel *chptr, short man_fix, struct client *client_p)
 	if((data.row_count > 0) && (data.row[0][0] != NULL))
 	{
 		flags = atoi(data.row[0][0]);
+	}
+
+	rsdb_exec_fetch_end(&data);
+
+	if(flags != NULL)
+	{
 		if(flags & CF_CHAN_BLOCK)
 		{
-			rsdb_exec_fetch_end(&data);
 			if(client_p)
 				service_err(chanfix_p, client_p, SVC_CF_ISBLOCKED, chptr->name);
 			return 0;
 		}
-	}
 
-	rsdb_exec_fetch_end(&data);
+		if(man_fix && (flags & CF_CHAN_ALERT))
+		{
+			if(client_p)
+				service_err(chanfix_p, client_p, SVC_CF_HASALERT, chptr->name);
+			return 0;
+		}
+	}
 
 	/* Make sure this channel isn't already being fixed. */
 	if(chptr->cfptr)
