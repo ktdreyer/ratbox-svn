@@ -1,3 +1,16 @@
+moggie      2010/07/18 12:02:13 UTC	(20100718_0-27057)
+  Log:
+  - Start adding support for setting alert flags for channels.
+  - Modify add_chanfix() code to include checks for alert flags.
+  
+
+  Modified:
+	rserv/trunk/include/langs.h (File Modified) 
+	rserv/trunk/src/langs.c (File Modified) 
+	rserv/trunk/src/messages.c (File Modified) 
+	rserv/trunk/src/s_chanfix.c (File Modified) 
+
+
 moggie      2010/07/17 21:41:24 UTC	(20100717_0-27055)
   Log:
   - Add note in chanfix doc about chanfixing with ChanServ support.
