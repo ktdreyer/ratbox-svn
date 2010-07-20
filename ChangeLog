@@ -1,3 +1,15 @@
+moggie      2010/07/20 12:00:28 UTC	(20100720_0-27059)
+  Log:
+  - Add a USCORE command for looking up scores of individual user@hosts.
+  
+
+  Modified:
+	rserv/trunk/include/langs.h (File Modified) 
+	rserv/trunk/src/langs.c (File Modified) 
+	rserv/trunk/src/messages.c (File Modified) 
+	rserv/trunk/src/s_chanfix.c (File Modified) 
+
+
 moggie      2010/07/18 12:02:13 UTC	(20100718_0-27057)
   Log:
   - Start adding support for setting alert flags for channels.
