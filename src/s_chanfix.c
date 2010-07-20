@@ -67,6 +67,7 @@ static struct client *chanfix_p;
 static dlink_list chanfix_list;
 
 static int o_chanfix_score(struct client *, struct lconn *, const char **, int);
+static int o_chanfix_uscore(struct client *, struct lconn *, const char **, int);
 static int o_chanfix_userlist(struct client *, struct lconn *, const char **, int);
 static int o_chanfix_userlist2(struct client *, struct lconn *, const char **, int);
 static int o_chanfix_chanfix(struct client *, struct lconn *, const char **, int);
@@ -82,6 +83,7 @@ static int o_chanfix_status(struct client *, struct lconn *, const char **, int)
 static struct service_command chanfix_command[] =
 {
 	{ "SCORE",	&o_chanfix_score,	1, NULL, 1, 0L, 0, 1, 0 },
+	{ "USCORE",	&o_chanfix_uscore,	2, NULL, 1, 0L, 0, 0, CONF_OPER_CF_CHANFIX },
 	{ "CHANFIX",	&o_chanfix_chanfix,	1, NULL, 1, 0L, 0, 0, CONF_OPER_CF_CHANFIX },
 	{ "REVERT",	&o_chanfix_revert,	1, NULL, 1, 0L, 0, 0, CONF_OPER_CF_CHANFIX },
 	/*{ "HISTORY",	&o_chanfix_history,	1, NULL, 1, 0L, 0, 1, 0 },
@@ -1079,6 +1081,75 @@ o_chanfix_score(struct client *client_p, struct lconn *conn_p, const char *parv[
 	return 0;
 }
 
+
+static int
+o_chanfix_uscore(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
+{
+	unsigned long channel_id, userhost_id;
+	struct rsdb_table data;
+	int day_score, hist_score;
+
+	if(!valid_chname(parv[0]))
+	{
+		service_snd(chanfix_p, client_p, conn_p, SVC_IRC_CHANNELINVALID, parv[0]);
+		return 0;
+	}
+
+	if((channel_id = get_channel_id(parv[0])) == 0)
+	{
+		service_snd(chanfix_p, client_p, conn_p, SVC_CF_NOSCOREDATA, parv[0]);
+		return 0;
+	}
+
+#ifdef ENABLE_CHANSERV
+	if(find_channel_reg(NULL, parv[0]))
+	{
+		service_snd(chanfix_p, client_p, conn_p, SVC_CF_CHANSERVCHANNEL, parv[0]);
+	}
+#endif
+
+	userhost_id = get_userhost_id(parv[1]);
+
+	if(!userhost_id)
+	{
+		service_snd(chanfix_p, client_p, conn_p, SVC_CF_NOUSERMATCH);
+		return 0;
+	}
+
+	rsdb_exec_fetch(&data, "SELECT userhost_id, COUNT(*) AS t "
+		"FROM cf_score "
+		"WHERE channel_id = %lu AND userhost_id= %lu ",
+		channel_id, userhost_id);
+	if(data.row_count == 0 || data.row[0][0] == NULL)
+		day_score = 0;
+	else
+		day_score = atoi(data.row[0][1]);
+	rsdb_exec_fetch_end(&data);
+
+
+	rsdb_exec_fetch(&data, "SELECT userhost_id, SUM(score) AS t "
+		"  FROM cf_score_history "
+		"  WHERE channel_id = %lu AND userhost_id= %lu",
+		channel_id, userhost_id);
+	if(data.row_count == 0 || data.row[0][0] == NULL)
+		hist_score = 0;
+	else
+		hist_score = atoi(data.row[0][1]);
+	rsdb_exec_fetch_end(&data);
+
+
+	if(day_score == 0 && hist_score == 0)
+	{
+		service_snd(chanfix_p, client_p, conn_p, SVC_CF_NOUSERMATCH);
+	}
+	else
+	{
+		service_snd(chanfix_p, client_p, conn_p, SVC_CF_UHOSTSCORE,
+				day_score + hist_score, parv[1]);
+	}
+
+	return 0;
+}
 
 static int
 o_chanfix_userlist(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)

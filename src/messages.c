@@ -274,6 +274,8 @@ struct _lang_internal lang_internal[] =
 	{ SVC_CF_NOALERT,		"No alert flag for %s"	},
 	{ SVC_CF_ALERTSET,		"Alert flag set for channel %s"	},
 	{ SVC_CF_ALERTUNSET,		"Alert flag for channel %s removed."	},
+	{ SVC_CF_NOUSERMATCH,		"No matching user found."	},
+	{ SVC_CF_UHOSTSCORE,		"%4d  %s"	},
 /* STOP_GENEXAMPLE_PARSING -- for genexample.pl in langs/ */
 
 	/* this must be last */

@@ -276,6 +276,8 @@ enum svc_notice_enum
 	SVC_CF_NOALERT,
 	SVC_CF_ALERTSET,
 	SVC_CF_ALERTUNSET,
+	SVC_CF_NOUSERMATCH,
+	SVC_CF_UHOSTSCORE,
 
 	/* this must be last */
 	SVC_LAST

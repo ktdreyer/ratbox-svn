@@ -287,6 +287,8 @@ const char *svc_notice_string[] =
 	"SVC_CF_NOALERT",
 	"SVC_CF_ALERTSET",
 	"SVC_CF_ALERTUNSET",
+	"SVC_CF_NOUSERMATCH",
+	"SVC_CF_UHOSTSCORE",
 
 	/* must be last */
 	"\0"
