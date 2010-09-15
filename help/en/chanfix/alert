@@ -1,3 +1,4 @@
 ALERT <#channel>
-Sets an alert flag for a channel to ensure channel notes are read.
+[ADMIN] Sets an alert flag for a channel.
+Ensures people check for notes before performing fixes.
   <#channel>: Channel to add alert for.

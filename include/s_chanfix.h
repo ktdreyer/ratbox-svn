@@ -37,7 +37,7 @@ struct chanfix_channel
  */
 struct chanfix_score
 {
-	struct chanfix_score_item *score_items;
+	struct chanfix_score_item *s_items;
 	int length;
 	int matched;
 

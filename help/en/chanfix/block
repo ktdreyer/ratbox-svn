@@ -1,5 +1,5 @@
 BLOCK <#channel> <note>
-Blocks a channel from auto and manual fixing, and stores a
-note to explain why.
+[ADMIN] Excludes a channel from auto and manual fixing.
+Stores a note to explain why.
   <#channel>: Channel to block.
   <note>    : Note for why channel was blocked.

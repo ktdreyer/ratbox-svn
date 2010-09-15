@@ -1,0 +1,4 @@
+USCORE <#channel> <user@host>
+[ADMIN] Shows the current score belonging to a specific user@host.
+  <#channel> : Channel to check.
+  <user@host>: user@host to match.

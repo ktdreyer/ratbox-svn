@@ -87,7 +87,7 @@ static struct service_command chanfix_command[] =
 	{ "CHANFIX",	&o_chanfix_chanfix,	1, NULL, 1, 0L, 0, 0, CONF_OPER_CF_CHANFIX },
 	{ "REVERT",	&o_chanfix_revert,	1, NULL, 1, 0L, 0, 0, CONF_OPER_CF_CHANFIX },
 	/*{ "HISTORY",	&o_chanfix_history,	1, NULL, 1, 0L, 0, 1, 0 },
-	{ "INFO",	&o_chanfix_info,	1, NULL, 1, 0L, 0, 1, CONF_OPER_CF_INFO },
+	{ "INFO",	&o_chanfix_info,	1, NULL, 1, 0L, 0, 1, 0 },
 	{ "ADDNOTE",	&o_chanfix_addnote,	1, NULL, 1, 0L, 0, 1, 0 },
 	{ "DELNOTE",	&o_chanfix_delnote,	1, NULL, 1, 0L, 0, 1, 0 },*/
 	{ "SET",	&o_chanfix_set,		1, NULL, 1, 0L, 0, 0, CONF_OPER_CF_ADMIN },
@@ -302,12 +302,12 @@ get_all_cf_scores(struct channel *chptr, int max_num, int min_score)
 		max_num = data.row_count;
 
 	scores->length = max_num;
-	scores->score_items = my_malloc(sizeof(struct chanfix_score_item) * max_num);
+	scores->s_items = my_malloc(sizeof(struct chanfix_score_item) * max_num);
 
 	for(i = 0; i < max_num; i++)
 	{
-		scores->score_items[i].userhost_id = atoi(data.row[i][0]);
-		scores->score_items[i].score = atoi(data.row[i][1]);
+		scores->s_items[i].userhost_id = atoi(data.row[i][0]);
+		scores->s_items[i].score = atoi(data.row[i][1]);
 	}
 
 	rsdb_exec_fetch_end(&data);
@@ -341,7 +341,7 @@ get_chmember_scores(struct chanfix_score *scores, struct channel *chptr,
 	else
 	{
 		for(i = 0; i < scores->length; i++)
-			scores->score_items[i].msptr = NULL;
+			scores->s_items[i].msptr = NULL;
 
 		if(dlink_list_length(&scores->clones) > 0)
 		{
@@ -371,16 +371,16 @@ get_chmember_scores(struct chanfix_score *scores, struct channel *chptr,
 
 		for(i = 0; i < scores->length; i++)
 		{
-			if(scores->score_items[i].userhost_id == userhost_id)
+			if(scores->s_items[i].userhost_id == userhost_id)
 			{
 				/* Check to see if msptr is NULL so this function call doesn't
 				 * count duplicate user@hosts. This means if a channel contains
 				 * multiple users with the same user@host, only the first one
 				 * will be assigned a score.
 				 */
-				if(scores->score_items[i].msptr == NULL)
+				if(scores->s_items[i].msptr == NULL)
 				{
-					scores->score_items[i].msptr = msptr;
+					scores->s_items[i].msptr = msptr;
 					u_count++;
 					break;
 				}
@@ -396,7 +396,7 @@ get_chmember_scores(struct chanfix_score *scores, struct channel *chptr,
 						mlog("debug: creating new clone struct.");
 						clone = my_malloc(sizeof(struct chanfix_score_item));
 						clone->msptr = msptr;
-						clone->score = scores->score_items[i].score;
+						clone->score = scores->s_items[i].score;
 						clone->userhost_id = userhost_id;
 						dlink_add_alloc(clone, &scores->clones);
 					}
@@ -409,7 +409,7 @@ get_chmember_scores(struct chanfix_score *scores, struct channel *chptr,
 							{
 								mlog("debug: re-using clone struct.");
 								clone->msptr = msptr;
-								clone->score = scores->score_items[i].score;
+								clone->score = scores->s_items[i].score;
 								clone->userhost_id = userhost_id;
 								break;
 							}
@@ -459,10 +459,10 @@ collect_channel_scores(struct channel *chptr, time_t timestamp, unsigned int day
 static int
 chanfix_opless_channel(struct chanfix_channel *cf_ch)
 {
-	struct chanfix_score *scores, *all_scores;
+	struct chanfix_score *scores;
 	struct chanfix_score_item *clone;
 	unsigned int time_since_start, i, count;
-	int min_score, min_chan_score, min_user_score;
+	int min_score, min_chan_s, min_user_s;
 	short all_opped = 1;
 	dlink_node *ptr;
 
@@ -473,16 +473,14 @@ chanfix_opless_channel(struct chanfix_channel *cf_ch)
 	 */
 	/*all_scores = get_all_cf_scores(cf_ch->chptr, 0,
 				(CF_MIN_ABS_CHAN_SCORE_END * CF_MAX_CHANFIX_SCORE));*/
+	/* We already checked this when adding the chanfix channel, so this
+	 * shouldn't happen, but just to be safe.
+	 */
 	if(cf_ch->scores == NULL)
-	{
-		/* We already checked this when adding the chanfix channel, so this
-		 * shouldn't happen, but just to be safe.
-		 */
-		return 0;
-	}
+		return -1;
 
-	/* Need to do this before checking for any unopped users in the channel in
-	 * case those users are being preveted from joining.
+	/* If we're unable to fix the channel after the designated times, remove
+	 * any possible bans or modes that might be preventing people from joining.
 	 */
 	if(cf_ch->flags & CF_STATUS_AUTOFIX)
 	{
@@ -512,12 +510,12 @@ chanfix_opless_channel(struct chanfix_channel *cf_ch)
 		return 0;
 
 
-	min_chan_score = (CF_MAX_CHANFIX_SCORE * CF_MIN_ABS_CHAN_SCORE_BEGIN) -
+	min_chan_s = (CF_MAX_CHANFIX_SCORE * CF_MIN_ABS_CHAN_SCORE_BEGIN) -
 		(float)time_since_start / CF_MAX_FIX_TIME * 
 			(CF_MAX_CHANFIX_SCORE * CF_MIN_ABS_CHAN_SCORE_BEGIN -
 			CF_MIN_ABS_CHAN_SCORE_END * CF_MAX_CHANFIX_SCORE);
 
-	min_user_score = (cf_ch->highest_score * CF_MIN_USER_SCORE_BEGIN) -
+	min_user_s = (cf_ch->highest_score * CF_MIN_USER_SCORE_BEGIN) -
 		(float)time_since_start / CF_MAX_FIX_TIME * 
 			(cf_ch->highest_score * CF_MIN_USER_SCORE_BEGIN -
 			CF_MIN_USER_SCORE_END * cf_ch->highest_score);
@@ -525,12 +523,12 @@ chanfix_opless_channel(struct chanfix_channel *cf_ch)
 	/* The min score needed for ops is the HIGHER of min_chan_score
 	 * or min_user_score.
 	 */
-	min_score = min_chan_score;
-	if(min_user_score > min_score)
-		min_score = min_user_score;
+	min_score = (min_chan_s > min_user_s)
+				? min_chan_s
+				: min_user_s;
 
 	mlog("debug: Calculated min score for '%s' is %d.",
-		cf_ch->chptr->name, min_score);
+			cf_ch->chptr->name, min_score);
 
 	/* Knowing the min score we need for ops, see how many users in the channel
 	 * have a high enough score.
@@ -540,12 +538,13 @@ chanfix_opless_channel(struct chanfix_channel *cf_ch)
 
 	for(i = 0; i < scores->length; i++)
 	{
-		if(scores->score_items[i].msptr &&
-			(scores->score_items[i].score >= min_score))
+		if(scores->s_items[i].msptr &&
+			(scores->s_items[i].score >= min_score))
 		{
-			modebuild_add(DIR_ADD, "o", scores->score_items[i].msptr->client_p->name);
-			op_chmember(scores->score_items[i].msptr);
-			scores->score_items[i].opped = 1;
+			modebuild_add(DIR_ADD, "o",
+					scores->s_items[i].msptr->client_p->name);
+			op_chmember(scores->s_items[i].msptr);
+			scores->s_items[i].opped = 1;
 			count++;
 		}
 	}
@@ -568,9 +567,9 @@ chanfix_opless_channel(struct chanfix_channel *cf_ch)
 	if(count < 1)
 	{
 		/* Unfortunately no one has a high enough score right now. */
-		mlog("debug: Can't fix '%s' as no one has a high enough score at the moment.",
+		mlog("debug: '%s' currently doesn't have users with high enough scores.",
 				cf_ch->chptr->name);
-		/*my_free(all_scores->score_items);
+		/*my_free(all_scores->s_items);
 		my_free(all_scores);*/
 		return 0;
 	}
@@ -579,17 +578,18 @@ chanfix_opless_channel(struct chanfix_channel *cf_ch)
 		service_err_chan(chanfix_p, cf_ch->chptr, SVC_CF_1BEENOPPED);
 	else
 		service_err_chan(chanfix_p, cf_ch->chptr, SVC_CF_HAVEBEENOPPED, count);
+
 	mlog("debug: Gave some ops out in '%s'.", cf_ch->chptr->name);
 
 	/* Crude check to guess whether we've opped everyone we have scores for. */
 	for(i = 0; i < scores->length; i++)
 	{
-		if(scores->score_items[i].opped == 0)
+		if(scores->s_items[i].opped == 0)
 		{
 			all_opped = 0;
 			break;
 		}
-		/*my_free(all_scores->score_items);
+		/*my_free(all_scores->s_items);
 		my_free(all_scores);*/
 	}
 
@@ -598,7 +598,7 @@ chanfix_opless_channel(struct chanfix_channel *cf_ch)
 	{
 		return 1;
 	}
-	/*my_free(all_scores->score_items);
+	/*my_free(all_scores->s_items);
 	my_free(all_scores);*/
 
 	return 0;
@@ -613,6 +613,7 @@ process_chanfix_list(int fix_type)
 {
 	struct chanfix_channel *cf_ch;
 	dlink_node *ptr, *next_ptr;
+	int fix_status;
 
 	DLINK_FOREACH_SAFE(ptr, next_ptr, chanfix_list.head)
 	{
@@ -670,10 +671,18 @@ process_chanfix_list(int fix_type)
 				
 			join_service(chanfix_p, cf_ch->chptr->name, cf_ch->chptr->tsinfo, NULL, 0);
 
-			if(chanfix_opless_channel(cf_ch))
+			fix_status = chanfix_opless_channel(cf_ch);
+
+			if(fix_status != 0)
 			{
+				if(fix_status)
+					mlog("debug: Opping logic thinks '%s' is fixed.",
+							cf_ch->chptr->name);
+				else
+					mlog("debug: Fatal error occured trying to fix '%s'.",
+							cf_ch->chptr->name);
+
 				del_chanfix(cf_ch->chptr);
-				mlog("debug: Opping logic thinks '%s' is fixed.", cf_ch->chptr->name);
 			}
 		}
 	}
@@ -709,7 +718,7 @@ build_channel_scores(struct channel *chptr, int max_num)
 		return NULL;
 
 	scores = my_malloc(sizeof(struct chanfix_score));
-	scores->score_items = my_malloc(sizeof(struct chanfix_score_item) *
+	scores->s_items = my_malloc(sizeof(struct chanfix_score_item) *
 					dlink_list_length(&chptr->users));
 
 	user_count = 0;
@@ -755,24 +764,24 @@ build_channel_scores(struct channel *chptr, int max_num)
 			continue;
 		}
 
-		scores->score_items[user_count].userhost_id = userhost_id;
-		scores->score_items[user_count].score = day_score + hist_score;
-		scores->score_items[user_count].msptr = msptr;
+		scores->s_items[user_count].userhost_id = userhost_id;
+		scores->s_items[user_count].score = day_score + hist_score;
+		scores->s_items[user_count].msptr = msptr;
 		user_count++;
 	}
 
-	scores->score_items = realloc(scores->score_items,
+	scores->s_items = realloc(scores->s_items,
 			sizeof(struct chanfix_score_item) * user_count);
 
 	scores->length = user_count;
 	scores->matched = user_count;
 
-	qsort(scores->score_items, scores->length,
+	qsort(scores->s_items, scores->length,
 			sizeof(struct chanfix_score_item), (scorecmp) score_cmp);
 
 	if(max_num > 0)
 	{
-		scores->score_items = realloc(scores->score_items,
+		scores->s_items = realloc(scores->s_items,
 				sizeof(struct chanfix_score_item) * max_num);
 		if(user_count > max_num)
 		{
@@ -1004,7 +1013,7 @@ o_chanfix_score(struct client *client_p, struct lconn *conn_p, const char *parv[
 		buf[0] = '\0';
 		for(i = 0; i < all_scores->length; i++)
 		{
-			snprintf(t_buf, sizeof(t_buf), "%d ", all_scores->score_items[i].score);
+			snprintf(t_buf, sizeof(t_buf), "%d ", all_scores->s_items[i].score);
 			strcat(buf, t_buf);
 		}
 		service_snd(chanfix_p, client_p, conn_p, SVC_CF_TOPSCORESFOR,
@@ -1017,7 +1026,7 @@ o_chanfix_score(struct client *client_p, struct lconn *conn_p, const char *parv[
 		return 0;
 	}
 
-	my_free(all_scores->score_items);
+	my_free(all_scores->s_items);
 	my_free(all_scores);
 	all_scores = NULL;
 
@@ -1036,9 +1045,9 @@ o_chanfix_score(struct client *client_p, struct lconn *conn_p, const char *parv[
 		count = 0;
 		for(i = 0; i < scores->length && count < config_file.cf_num_top_scores; i++)
 		{
-			if(scores->score_items[i].msptr)
+			if(scores->s_items[i].msptr)
 			{
-				snprintf(t_buf, sizeof(t_buf), "%d ", scores->score_items[i].score);
+				snprintf(t_buf, sizeof(t_buf), "%d ", scores->s_items[i].score);
 				strcat(buf, t_buf);
 				count++;
 			}
@@ -1061,9 +1070,9 @@ o_chanfix_score(struct client *client_p, struct lconn *conn_p, const char *parv[
 		count = 0;
 		for(i = 0; i < scores->length && count < config_file.cf_num_top_scores; i++)
 		{
-			if(scores->score_items[i].msptr)
+			if(scores->s_items[i].msptr)
 			{
-				snprintf(t_buf, sizeof(t_buf), "%d ", scores->score_items[i].score);
+				snprintf(t_buf, sizeof(t_buf), "%d ", scores->s_items[i].score);
 				strcat(buf, t_buf);
 				count++;
 			}
@@ -1075,7 +1084,7 @@ o_chanfix_score(struct client *client_p, struct lconn *conn_p, const char *parv[
 		service_snd(chanfix_p, client_p, conn_p, SVC_CF_NOMATCHES);
 	}
 
-	my_free(all_scores->score_items);
+	my_free(all_scores->s_items);
 	my_free(all_scores);
 
 	return 0;
@@ -1192,12 +1201,12 @@ o_chanfix_userlist(struct client *client_p, struct lconn *conn_p, const char *pa
 		count = 0;
 		for(i = 0; i < scores->length && count < config_file.cf_num_top_scores; i++)
 		{
-			if(scores->score_items[i].msptr)
+			if(scores->s_items[i].msptr)
 			{
-				snprintf(buf, sizeof(buf), "%4d  %s!%s@%s", scores->score_items[i].score,
-					scores->score_items[i].msptr->client_p->name,
-					scores->score_items[i].msptr->client_p->user->username,
-					scores->score_items[i].msptr->client_p->user->host);
+				snprintf(buf, sizeof(buf), "%4d  %s!%s@%s", scores->s_items[i].score,
+					scores->s_items[i].msptr->client_p->name,
+					scores->s_items[i].msptr->client_p->user->username,
+					scores->s_items[i].msptr->client_p->user->host);
 				service_send(chanfix_p, client_p, conn_p, "%s", buf);
 				count++;
 			}
@@ -1208,7 +1217,7 @@ o_chanfix_userlist(struct client *client_p, struct lconn *conn_p, const char *pa
 		service_snd(chanfix_p, client_p, conn_p, SVC_CF_NOMATCHES);
 	}
 
-	my_free(scores->score_items);
+	my_free(scores->s_items);
 	my_free(scores);
 
 	return 0;
@@ -1256,12 +1265,12 @@ o_chanfix_userlist2(struct client *client_p, struct lconn *conn_p, const char *p
 		count = 0;
 		for(i = 0; i < scores->length && count < config_file.cf_num_top_scores; i++)
 		{
-			if(scores->score_items[i].msptr)
+			if(scores->s_items[i].msptr)
 			{
-				snprintf(buf, sizeof(buf), "%4d  %s!%s@%s", scores->score_items[i].score,
-					scores->score_items[i].msptr->client_p->name,
-					scores->score_items[i].msptr->client_p->user->username,
-					scores->score_items[i].msptr->client_p->user->host);
+				snprintf(buf, sizeof(buf), "%4d  %s!%s@%s", scores->s_items[i].score,
+					scores->s_items[i].msptr->client_p->name,
+					scores->s_items[i].msptr->client_p->user->username,
+					scores->s_items[i].msptr->client_p->user->host);
 				service_send(chanfix_p, client_p, conn_p, "%s", buf);
 				count++;
 			}
@@ -1272,7 +1281,7 @@ o_chanfix_userlist2(struct client *client_p, struct lconn *conn_p, const char *p
 		service_snd(chanfix_p, client_p, conn_p, SVC_CF_NOMATCHES);
 	}
 
-	my_free(scores->score_items);
+	my_free(scores->s_items);
 	my_free(scores);
 
 	return 0;
@@ -1434,6 +1443,10 @@ o_chanfix_block(struct client *client_p, struct lconn *conn_p, const char *parv[
 	else
 	{
 		service_snd(chanfix_p, client_p, conn_p, SVC_CF_NOSCOREDATA, parv[0]);
+		flags |= CF_CHAN_BLOCK;
+		rsdb_exec(NULL, "INSERT INTO cf_channel (chname, flags) "
+				"VALUES (LOWER('%Q'), '%d')", parv[0], flags);
+		service_snd(chanfix_p, client_p, conn_p, SVC_CF_BLOCKED, parv[0]);
 	}
 
 	rsdb_exec_fetch_end(&data);
@@ -1586,9 +1599,6 @@ o_chanfix_check(struct client *client_p, struct lconn *conn_p, const char *parv[
 		service_err(chanfix_p, client_p, SVC_IRC_NOSUCHCHANNEL, chanfix_p->name, parv[0]);
 		return 0;
 	}
-
-	service_snd(chanfix_p, client_p, conn_p, SVC_ISSUEDFORBY,
-			chanfix_p->name, "CHECK", parv[0], client_p->name);
 
 	ops = dlink_list_length(&chptr->users_opped);
 	users = dlink_list_length(&chptr->users);
@@ -1766,7 +1776,7 @@ add_chanfix(struct channel *chptr, short man_fix, struct client *client_p)
 	struct chanfix_channel *cf_chan;
 	struct chanfix_score *scores;
 	struct rsdb_table data;
-	uint32_t flags = NULL;
+	uint32_t flags = 0;
 
 #ifdef ENABLE_CHANSERV
 	/* Need to skip the channel if it's registered with ChanServ. */
@@ -1789,7 +1799,7 @@ add_chanfix(struct channel *chptr, short man_fix, struct client *client_p)
 
 	rsdb_exec_fetch_end(&data);
 
-	if(flags != NULL)
+	if(flags != 0)
 	{
 		if(flags & CF_CHAN_BLOCK)
 		{
@@ -1838,10 +1848,10 @@ add_chanfix(struct channel *chptr, short man_fix, struct client *client_p)
 		return 0;
 	}
 
-	cf_chan->highest_score = cf_chan->scores->score_items[0].score;
+	cf_chan->highest_score = cf_chan->scores->s_items[0].score;
 	cf_chan->endfix_uscore = CF_MIN_USER_SCORE_END * cf_chan->highest_score;
 
-	/*my_free(scores->score_items);
+	/*my_free(scores->s_items);
 	my_free(scores);
 	scores = NULL;*/
 
@@ -1888,9 +1898,10 @@ del_chanfix(struct channel *chptr)
 		}
 	}
 
-	if(!cfptr->scores)
+	if(cfptr->scores)
 	{
-		my_free(cfptr->scores->score_items);
+		mlog("debug: deleting scores struct for: %s", chptr->name);
+		my_free(cfptr->scores->s_items);
 		my_free(cfptr->scores);
 		cfptr->scores = NULL;
 	}

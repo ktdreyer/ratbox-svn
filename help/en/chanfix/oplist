@@ -1,5 +1,0 @@
-OPLIST <#channel>
-[ADMIN] Shows a channel's top most hostmasks and their associated score.
-  <#channel>: Channel to request oplist of.
-
-NOTE: Command usage broadcast to logged in users.

@@ -1,0 +1,4 @@
+USERLIST <#channel>
+[ADMIN] Shows a channel's top most hostmasks and their score.
+  <#channel>: Channel to request userlist for.
+

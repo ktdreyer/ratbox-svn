@@ -1,3 +1,12 @@
- OPLIST        - Shows a channel's top most hostmasks and their associated score.
- OPNICKS       - Shows the nicks of all ops in a channel.
+ ADDNOTE       - Adds a note for a channel.
+ ALERT         - Sets an alert flag for a channel.
+ BLOCK         - Excludes a channel from auto and manual fixing.
+ CHANFIX       - Performs a manual fix of a channel that contains no ops.
+ CHECK         - Shows the number of ops and total clients of a channel.
+ DELNOTE       - Removes a channel note identified by its ID number.
+ SCORE         - Shows the highest scores belonging to users in the channel.
  SET           - Sets various options for chanfix.
+ UNALERT       - Removes an alert flag for a channel.
+ UNBLOCK       - Re-enables auto and manual fixing for a channel.
+ USCORE        - Shows the current score belonging to a specific user@host.
+ USERLIST      - Shows a channel's top most hostmasks and their score.
