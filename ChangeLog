@@ -1,3 +1,38 @@
+moggie      2010/09/15 14:08:51 UTC	(20100915_0-27063)
+  Log:
+  - Update the help files to reflect recent changes.
+  - Rename score_items to s_items for a bit of clarity.
+  - Set chanfix as opered in the example config.
+  - Add a chanfix flags section and fix bad formatting in example config.
+  - Revert bad ru translation strings to English to stop them causing log
+    file errors.
+  - Fix a typo likely preventing chanfix scores from being free'd.
+  - Adjust BLOCK command to block channels that don't already exist in the DB.
+  
+
+  Modified:
+	rserv/trunk/doc/example.conf (File Modified) 
+	rserv/trunk/help/en/chanfix/addnote (File Modified) 
+	rserv/trunk/help/en/chanfix/alert (File Modified) 
+	rserv/trunk/help/en/chanfix/block (File Modified) 
+	rserv/trunk/help/en/chanfix/chanfix (File Modified) 
+	rserv/trunk/help/en/chanfix/check (File Modified) 
+	rserv/trunk/help/en/chanfix/delnote (File Modified) 
+	rserv/trunk/help/en/chanfix/index (File Modified) 
+	rserv/trunk/help/en/chanfix/index-admin (File Modified) 
+	rserv/trunk/help/en/chanfix/info (File Modified) 
+	rserv/trunk/help/en/chanfix/oplist (File Deleted) 
+	rserv/trunk/help/en/chanfix/opnicks (File Deleted) 
+	rserv/trunk/help/en/chanfix/score (File Added) 
+	rserv/trunk/help/en/chanfix/unalert (File Modified) 
+	rserv/trunk/help/en/chanfix/unblock (File Modified) 
+	rserv/trunk/help/en/chanfix/uscore (File Added) 
+	rserv/trunk/help/en/chanfix/userlist (File Added) 
+	rserv/trunk/include/s_chanfix.h (File Modified) 
+	rserv/trunk/langs/ru.lang (File Modified) 
+	rserv/trunk/src/s_chanfix.c (File Modified) 
+
+
 moggie      2010/07/20 12:00:28 UTC	(20100720_0-27059)
   Log:
   - Add a USCORE command for looking up scores of individual user@hosts.
