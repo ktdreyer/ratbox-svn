@@ -79,6 +79,9 @@ static int o_chanfix_alert(struct client *, struct lconn *, const char **, int);
 static int o_chanfix_unalert(struct client *, struct lconn *, const char **, int);
 static int o_chanfix_set(struct client *, struct lconn *, const char **, int);
 static int o_chanfix_status(struct client *, struct lconn *, const char **, int);
+static int o_chanfix_info(struct client *, struct lconn *, const char **, int);
+static int o_chanfix_addnote(struct client *, struct lconn *, const char **, int);
+static int o_chanfix_delnote(struct client *, struct lconn *, const char **, int);
 
 static struct service_command chanfix_command[] =
 {
@@ -86,10 +89,9 @@ static struct service_command chanfix_command[] =
 	{ "USCORE",	&o_chanfix_uscore,	2, NULL, 1, 0L, 0, 0, CONF_OPER_CF_CHANFIX },
 	{ "CHANFIX",	&o_chanfix_chanfix,	1, NULL, 1, 0L, 0, 0, CONF_OPER_CF_CHANFIX },
 	{ "REVERT",	&o_chanfix_revert,	1, NULL, 1, 0L, 0, 0, CONF_OPER_CF_CHANFIX },
-	/*{ "HISTORY",	&o_chanfix_history,	1, NULL, 1, 0L, 0, 1, 0 },
 	{ "INFO",	&o_chanfix_info,	1, NULL, 1, 0L, 0, 1, 0 },
-	{ "ADDNOTE",	&o_chanfix_addnote,	1, NULL, 1, 0L, 0, 1, 0 },
-	{ "DELNOTE",	&o_chanfix_delnote,	1, NULL, 1, 0L, 0, 1, 0 },*/
+	{ "ADDNOTE",	&o_chanfix_addnote,	2, NULL, 1, 0L, 0, 0, CONF_OPER_CF_NOTES },
+	{ "DELNOTE",	&o_chanfix_delnote,	1, NULL, 1, 0L, 0, 0, CONF_OPER_CF_NOTES },
 	{ "SET",	&o_chanfix_set,		1, NULL, 1, 0L, 0, 0, CONF_OPER_CF_ADMIN },
 	{ "BLOCK",	&o_chanfix_block,	1, NULL, 1, 0L, 0, 0, CONF_OPER_CF_BLOCK },
 	{ "UNBLOCK",	&o_chanfix_unblock,	1, NULL, 1, 0L, 0, 0, CONF_OPER_CF_BLOCK },
@@ -126,6 +128,7 @@ static void e_chanfix_manualfix_channels(void *unused);
 static void chan_takeover(struct channel *);
 static unsigned long get_userhost_id(const char *);
 static unsigned long get_channel_id(const char *);
+static int get_cf_chan_flags(const char *, uint32_t *);
 static time_t seconds_to_midnight(void);
 static struct chanfix_score * get_all_cf_scores(struct channel *, int, int);
 static struct chanfix_score * get_chmember_scores(struct chanfix_score *,
@@ -237,6 +240,28 @@ get_channel_id(const char *channel)
 	return channel_id;
 }
 
+/* Fetch a channel's chanfix flags from the DB (if present). */
+static int
+get_cf_chan_flags(const char *chan, uint32_t *flags)
+{
+	struct rsdb_table data;
+
+	rsdb_exec_fetch(&data,
+		"SELECT flags FROM cf_channel WHERE chname=LOWER('%Q')", chan);
+
+	if(data.row_count > 0)
+	{
+		*flags = atoi(data.row[0][0]);
+	}
+	else
+	{
+		rsdb_exec_fetch_end(&data);
+		return 0;
+	}
+
+	rsdb_exec_fetch_end(&data);
+	return 1;
+}
 
 /* Return an array of chanfix_score_item structures for each chanop stored in
  * the DB for the specified channel.
@@ -669,7 +694,8 @@ process_chanfix_list(int fix_type)
 				continue;
 			}
 				
-			join_service(chanfix_p, cf_ch->chptr->name, cf_ch->chptr->tsinfo, NULL, 0);
+			join_service(chanfix_p, cf_ch->chptr->name,
+					cf_ch->chptr->tsinfo, NULL, 0);
 
 			fix_status = chanfix_opless_channel(cf_ch);
 
@@ -1022,7 +1048,7 @@ o_chanfix_score(struct client *client_p, struct lconn *conn_p, const char *parv[
 	}
 	else
 	{
-		service_snd(chanfix_p, client_p, conn_p, SVC_CF_NOSCOREDATA, parv[0]);
+		service_snd(chanfix_p, client_p, conn_p, SVC_CF_NODATAFOR, parv[0]);
 		return 0;
 	}
 
@@ -1106,7 +1132,7 @@ o_chanfix_uscore(struct client *client_p, struct lconn *conn_p, const char *parv
 
 	if((channel_id = get_channel_id(parv[0])) == 0)
 	{
-		service_snd(chanfix_p, client_p, conn_p, SVC_CF_NOSCOREDATA, parv[0]);
+		service_snd(chanfix_p, client_p, conn_p, SVC_CF_NODATAFOR, parv[0]);
 		return 0;
 	}
 
@@ -1189,7 +1215,7 @@ o_chanfix_userlist(struct client *client_p, struct lconn *conn_p, const char *pa
 
 	if((scores = get_chmember_scores(NULL, chptr, &chptr->users, 0)) == NULL)
 	{
-		service_snd(chanfix_p, client_p, conn_p, SVC_CF_NOSCOREDATA, parv[0]);
+		service_snd(chanfix_p, client_p, conn_p, SVC_CF_NODATAFOR, parv[0]);
 		return 0;
 	}
 
@@ -1253,7 +1279,7 @@ o_chanfix_userlist2(struct client *client_p, struct lconn *conn_p, const char *p
 
 	if((scores = build_channel_scores(chptr, 0)) == NULL)
 	{
-		service_snd(chanfix_p, client_p, conn_p, SVC_CF_NOSCOREDATA, parv[0]);
+		service_snd(chanfix_p, client_p, conn_p, SVC_CF_NODATAFOR, parv[0]);
 		return 0;
 	}
 
@@ -1303,14 +1329,30 @@ o_chanfix_chanfix(struct client *client_p, struct lconn *conn_p, const char *par
 
 	if((chptr = find_channel(parv[0])) == NULL)
 	{
-		service_snd(chanfix_p, client_p, conn_p, SVC_IRC_NOSUCHCHANNEL, parv[0]);
+		service_snd(chanfix_p, client_p, conn_p,
+				SVC_IRC_NOSUCHCHANNEL, parv[0]);
+		return 0;
+	}
+
+	if(!config_file.cf_enable_chanfix)
+	{
+		service_send(chanfix_p, client_p, conn_p,
+				"Manual channel fixing disabled.");
+		return 0;
+	}
+
+	if(is_network_split())
+	{
+		service_send(chanfix_p, client_p, conn_p,
+				"Unable to comply. Splitmode active.");
 		return 0;
 	}
 
 #ifdef ENABLE_CHANSERV
 	if(find_channel_reg(NULL, chptr->name))
 	{
-		service_snd(chanfix_p, client_p, conn_p, SVC_CF_CHANSERVCHANNEL, parv[0]);
+		service_snd(chanfix_p, client_p, conn_p,
+				SVC_CF_CHANSERVCHANNEL, parv[0]);
 		return 0;
 	}
 #endif
@@ -1318,14 +1360,16 @@ o_chanfix_chanfix(struct client *client_p, struct lconn *conn_p, const char *par
 	if(dlink_list_length(&chptr->users) < config_file.cf_min_clients)
 	{
 		/* Not enough users in this channel */
-		service_snd(chanfix_p, client_p, conn_p, SVC_CF_NOTENOUGHUSERS, parv[0]);
+		service_snd(chanfix_p, client_p, conn_p,
+				SVC_CF_NOTENOUGHUSERS, parv[0]);
 		return 0;
 	}
 
 	/* Check if anyone is opped, if they are we don't do anything. */
 	if(dlink_list_length(&chptr->users_opped) > 0)
 	{
-		service_snd(chanfix_p, client_p, conn_p, SVC_CF_HASOPPEDUSERS, parv[0]);
+		service_snd(chanfix_p, client_p, conn_p,
+				SVC_CF_HASOPPEDUSERS, parv[0]);
 		return 0;
 	}
 
@@ -1435,18 +1479,20 @@ o_chanfix_block(struct client *client_p, struct lconn *conn_p, const char *parv[
 		else
 		{
 			flags |= CF_CHAN_BLOCK;
-			service_snd(chanfix_p, client_p, conn_p, SVC_CF_BLOCKED, parv[0]);
+			service_snd(chanfix_p, client_p, conn_p, SVC_SUCCESSFULON,
+					chanfix_p->name, "BLOCKED", parv[0]);
 			rsdb_exec(NULL, "UPDATE cf_channel SET flags = '%d' WHERE chname = '%Q'",
 					flags, parv[0]);
 		}
 	}
 	else
 	{
-		service_snd(chanfix_p, client_p, conn_p, SVC_CF_NOSCOREDATA, parv[0]);
+		service_snd(chanfix_p, client_p, conn_p, SVC_CF_NODATAFOR, parv[0]);
 		flags |= CF_CHAN_BLOCK;
 		rsdb_exec(NULL, "INSERT INTO cf_channel (chname, flags) "
 				"VALUES (LOWER('%Q'), '%d')", parv[0], flags);
-		service_snd(chanfix_p, client_p, conn_p, SVC_CF_BLOCKED, parv[0]);
+		service_snd(chanfix_p, client_p, conn_p, SVC_SUCCESSFULON,
+				chanfix_p->name, "BLOCKED", parv[0]);
 	}
 
 	rsdb_exec_fetch_end(&data);
@@ -1481,14 +1527,15 @@ o_chanfix_unblock(struct client *client_p, struct lconn *conn_p, const char *par
 		else
 		{
 			flags &= ~CF_CHAN_BLOCK;
-			service_snd(chanfix_p, client_p, conn_p, SVC_CF_UNBLOCKED, parv[0]);
+			service_snd(chanfix_p, client_p, conn_p, SVC_SUCCESSFULON,
+					chanfix_p->name, "UNBLOCKED", parv[0]);
 			rsdb_exec(NULL, "UPDATE cf_channel SET flags = '%d' WHERE chname = '%Q'",
 					flags, parv[0]);
 		}
 	}
 	else
 	{
-		service_snd(chanfix_p, client_p, conn_p, SVC_CF_NOSCOREDATA, parv[0]);
+		service_snd(chanfix_p, client_p, conn_p, SVC_CF_NODATAFOR, parv[0]);
 	}
 
 	rsdb_exec_fetch_end(&data);
@@ -1526,14 +1573,15 @@ o_chanfix_alert(struct client *client_p, struct lconn *conn_p, const char *parv[
 		else
 		{
 			flags |= CF_CHAN_ALERT;
-			service_snd(chanfix_p, client_p, conn_p, SVC_CF_ALERTSET, parv[0]);
-			rsdb_exec(NULL, "UPDATE cf_channel SET flags = '%d' WHERE chname = '%Q'",
-					flags, parv[0]);
+			service_snd(chanfix_p, client_p, conn_p, SVC_SUCCESSFULON,
+					chanfix_p->name, "ALERT", parv[0]);
+			rsdb_exec(NULL, "UPDATE cf_channel SET flags = '%d' "
+					"WHERE chname = '%Q'", flags, parv[0]);
 		}
 	}
 	else
 	{
-		service_snd(chanfix_p, client_p, conn_p, SVC_CF_NOSCOREDATA, parv[0]);
+		service_snd(chanfix_p, client_p, conn_p, SVC_CF_NODATAFOR, parv[0]);
 	}
 
 	rsdb_exec_fetch_end(&data);
@@ -1568,17 +1616,98 @@ o_chanfix_unalert(struct client *client_p, struct lconn *conn_p, const char *par
 		else
 		{
 			flags &= ~CF_CHAN_ALERT;
-			service_snd(chanfix_p, client_p, conn_p, SVC_CF_ALERTUNSET, parv[0]);
+			service_snd(chanfix_p, client_p, conn_p, SVC_SUCCESSFULON,
+					chanfix_p->name, "UNALERT", parv[0]);
 			rsdb_exec(NULL, "UPDATE cf_channel SET flags = '%d' WHERE chname = '%Q'",
 					flags, parv[0]);
 		}
 	}
 	else
 	{
-		service_snd(chanfix_p, client_p, conn_p, SVC_CF_NOSCOREDATA, parv[0]);
+		service_snd(chanfix_p, client_p, conn_p, SVC_CF_NODATAFOR, parv[0]);
 	}
 
 	rsdb_exec_fetch_end(&data);
+
+	return 0;
+}
+
+static int
+o_chanfix_info(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
+{
+	uint32_t flags;
+	unsigned long channel_id;
+	struct channel *chptr;
+	struct chanfix_channel *cfptr;
+	struct rsdb_table data;
+
+	if(!valid_chname(parv[0]))
+	{
+		service_snd(chanfix_p, client_p, conn_p, SVC_IRC_CHANNELINVALID, parv[0]);
+		return 0;
+	}
+
+#ifdef ENABLE_CHANSERV
+	if(find_channel_reg(NULL, parv[0]))
+	{
+		service_snd(chanfix_p, client_p, conn_p, SVC_CF_CHANSERVCHANNEL, parv[0]);
+		return 0;
+	}
+#endif
+
+	service_snd(chanfix_p, client_p, conn_p, SVC_CF_INFOON, parv[0]);
+
+	if(!get_cf_chan_flags(parv[0], &flags))
+	{
+		service_snd(chanfix_p, client_p, conn_p, SVC_CF_NODATAFOR, parv[0]);
+		return 0;
+	}
+
+	if(flags & CF_CHAN_ALERT)
+		service_snd(chanfix_p, client_p, conn_p, SVC_CF_HASALERT, parv[0]);
+
+	if(flags & CF_CHAN_BLOCK)
+		service_snd(chanfix_p, client_p, conn_p, SVC_CF_ISBLOCKED, parv[0]);
+
+	if(((chptr = find_channel(parv[0])) != NULL) && (chptr->cfptr))
+	{
+		mlog("debug: inside fix status check");
+		cfptr = (struct chanfix_channel *) chptr->cfptr;
+		if(cfptr->flags & CF_STATUS_AUTOFIX)
+			service_snd(chanfix_p, client_p,
+					conn_p, SVC_CF_AUTOFIXED, parv[0]);
+		else
+			service_snd(chanfix_p, client_p,
+					conn_p, SVC_CF_CHANFIXED, parv[0]);
+	}
+
+	if((channel_id = get_channel_id(parv[0])) == 0)
+	{
+		service_snd(chanfix_p, client_p, conn_p, SVC_CF_NODATAFOR, parv[0]);
+		return 0;
+	}
+
+	rsdb_exec_fetch(&data, "SELECT id, author, timestamp, text FROM cf_note "
+			"WHERE channel_id = %lu "
+			"ORDER BY timestamp DESC LIMIT 5", channel_id);
+
+	if(data.row_count > 0)
+	{
+		int i;
+
+		for(i = data.row_count-1; i >= 0; i--)
+		{
+			service_err(chanfix_p, client_p, SVC_CF_SHOWNOTE,
+					atoi(data.row[i][0]), data.row[i][1],
+					get_time(atoi(data.row[i][2]), 0), data.row[i][3]);
+		}
+	}
+	else
+		service_snd(chanfix_p, client_p, conn_p, SVC_CF_NONOTES);
+
+	rsdb_exec_fetch_end(&data);
+
+	service_snd(chanfix_p, client_p, conn_p, SVC_CF_ENDOFINFO);
 
 	return 0;
 }
@@ -1607,6 +1736,86 @@ o_chanfix_check(struct client *client_p, struct lconn *conn_p, const char *parv[
 	return 0;
 }
 
+static int
+o_chanfix_addnote(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
+{
+	unsigned long channel_id, note_id;
+	struct rsdb_table data;
+	const char *msg;
+
+	if(!valid_chname(parv[0]))
+	{
+		service_snd(chanfix_p, client_p, conn_p, SVC_IRC_CHANNELINVALID, parv[0]);
+		return 0;
+	}
+
+	if((channel_id = get_channel_id(parv[0])) == 0)
+	{
+		service_snd(chanfix_p, client_p, conn_p, SVC_CF_NODATAFOR, parv[0]);
+		return 0;
+	}
+
+#ifdef ENABLE_CHANSERV
+	if(find_channel_reg(NULL, parv[0]))
+	{
+		service_snd(chanfix_p, client_p, conn_p, SVC_CF_CHANSERVCHANNEL, parv[0]);
+	}
+#endif
+
+
+	/*rsdb_exec_fetch(&data, "SELECT userhost_id, COUNT(*) AS t "
+		"FROM cf_score "
+		"WHERE channel_id = %lu AND userhost_id= %lu ",
+		channel_id, userhost_id);
+	if(data.row_count == 0 || data.row[0][0] == NULL)
+		day_score = 0;
+	else
+		day_score = atoi(data.row[0][1]);
+	rsdb_exec_fetch_end(&data);
+
+
+	rsdb_exec_fetch(&data, "SELECT userhost_id, SUM(score) AS t "
+		"  FROM cf_score_history "
+		"  WHERE channel_id = %lu AND userhost_id= %lu",
+		channel_id, userhost_id);
+	if(data.row_count == 0 || data.row[0][0] == NULL)
+		hist_score = 0;
+	else
+		hist_score = atoi(data.row[0][1]);
+	rsdb_exec_fetch_end(&data);*/
+
+	msg = rebuild_params(parv, parc, 1);
+
+	rsdb_exec(NULL,
+			"INSERT INTO cf_note (channel_id, timestamp, author, text) "
+			"VALUES('%lu', '%lu', '%Q', '%Q')",
+			channel_id, CURRENT_TIME, client_p->user->oper->name, msg);
+
+	service_err(chanfix_p, client_p, SVC_CF_NOTEADDED, parv[0]);
+
+
+
+	return 0;
+}
+
+static int
+o_chanfix_delnote(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
+{
+	unsigned long note_id;
+	char *endptr;
+
+	note_id = strtol(parv[0], &endptr, 10);
+
+	if(EmptyString(endptr) && note_id > 0)
+	{
+		rsdb_exec(NULL, "DELETE FROM cf_note WHERE id = %lu", note_id);
+		service_err(chanfix_p, client_p, SVC_CF_DELNOTE, note_id);
+	}
+	else
+		service_err(chanfix_p, client_p, SVC_CF_NOTEINVALID, parv[0]);
+
+	return 0;
+}
 
 static int
 o_chanfix_set(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
@@ -1844,7 +2053,7 @@ add_chanfix(struct channel *chptr, short man_fix, struct client *client_p)
 		mlog("debug: Insufficient DB scores for '%s', cannot add for chanfixing.",
 					chptr->name);
 		if(client_p)
-			service_err(chanfix_p, client_p, SVC_CF_NOSCOREDATA, chanfix_p->name);
+			service_err(chanfix_p, client_p, SVC_CF_NODATAFOR, chanfix_p->name);
 		return 0;
 	}
 

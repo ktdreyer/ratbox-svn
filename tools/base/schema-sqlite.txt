@@ -170,8 +170,8 @@ CREATE TABLE cf_temp_score (
 	timestamp INTEGER,
 	dayts INTEGER
 );
-ALTER TABLE cf_temp_score ADD INDEX cf_temp_score_chname_idx (chname);
-ALTER TABLE cf_temp_score ADD INDEX cf_temp_score_userhost_idx (userhost);
+CREATE UNIQUE INDEX cf_temp_score_chname_idx ON cf_temp_score (chname);
+CREATE UNIQUE INDEX cf_temp_score_userhost_idx ON cf_temp_score (userhost);
 
 CREATE TABLE cf_userhost (
 	id INTEGER PRIMARY KEY,
@@ -205,4 +205,13 @@ CREATE TABLE cf_score_history (
 	score INTEGER,
 	FOREIGN KEY (channel_id) REFERENCES cf_channel (id),
 	FOREIGN KEY (userhost_id) REFERENCES cf_userhost (id)
+);
+
+CREATE TABLE cf_note (
+	id INTEGER PRIMARY KEY,
+	channel_id INTEGER NOT NULL,
+	timestamp INTEGER DEFAULT '0',
+	author TEXT,
+	text TEXT,
+	FOREIGN KEY (channel_id) REFERENCES cf_channel (id)
 );
