@@ -1,3 +1,24 @@
+moggie      2010/09/17 11:32:39 UTC	(20100917_0-27065)
+  Log:
+  - Fix sqlite schema error.
+  - Add cf_note table for storing channel notes.
+  - Add new and remove several old chanfix translation strings.
+  - Add functions for INFO, ADDNOTE and DELNOTE.
+  - When executing a manual chanfix, check the network isn't split and manual
+    chanfixing isn't disabled.
+  - Add a get_cf_chan_flags() function to see if it improves code clarity.
+  
+
+  Modified:
+	rserv/trunk/include/langs.h (File Modified) 
+	rserv/trunk/src/langs.c (File Modified) 
+	rserv/trunk/src/messages.c (File Modified) 
+	rserv/trunk/src/s_chanfix.c (File Modified) 
+	rserv/trunk/tools/base/schema-mysql.txt (File Modified) 
+	rserv/trunk/tools/base/schema-pgsql.txt (File Modified) 
+	rserv/trunk/tools/base/schema-sqlite.txt (File Modified) 
+
+
 moggie      2010/09/15 14:08:51 UTC	(20100915_0-27063)
   Log:
   - Update the help files to reflect recent changes.
