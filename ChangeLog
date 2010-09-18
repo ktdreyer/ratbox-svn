@@ -1,3 +1,19 @@
+moggie      2010/09/18 01:06:59 UTC	(20100918_0-27067)
+  Log:
+  - Add add_system_note() function to create internal notes.
+  - Add main log entries for when the network is split.
+  - Change add_chanfix() to use get_cf_chan_flags().
+  - Remove checks for chanserv channels in CHANFIX and REVERT functions
+    since add_chanfix() does this anyway.
+  
+
+  Modified:
+	rserv/trunk/help/en/chanfix/delnote (File Modified) 
+	rserv/trunk/src/client.c (File Modified) 
+	rserv/trunk/src/messages.c (File Modified) 
+	rserv/trunk/src/s_chanfix.c (File Modified) 
+
+
 moggie      2010/09/17 11:32:39 UTC	(20100917_0-27065)
   Log:
   - Fix sqlite schema error.
