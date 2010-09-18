@@ -129,14 +129,15 @@ static void chan_takeover(struct channel *);
 static unsigned long get_userhost_id(const char *);
 static unsigned long get_channel_id(const char *);
 static int get_cf_chan_flags(const char *, uint32_t *);
+static void add_system_note(const char *, unsigned long, const char *, ...);
 static time_t seconds_to_midnight(void);
 static struct chanfix_score * get_all_cf_scores(struct channel *, int, int);
 static struct chanfix_score * get_chmember_scores(struct chanfix_score *,
 			struct channel *, dlink_list *, short);
 static void process_chanfix_list(int);
 
-static int add_chanfix(struct channel *chptr, short man_fix, struct client *);
-static void del_chanfix(struct channel *chptr);
+static int add_chanfix(struct channel *, short, struct client *);
+static void del_chanfix(struct channel *);
 
 void
 preinit_s_chanfix(void)
@@ -262,6 +263,31 @@ get_cf_chan_flags(const char *chan, uint32_t *flags)
 	rsdb_exec_fetch_end(&data);
 	return 1;
 }
+
+static void
+add_system_note(const char *chan, unsigned long chan_id, const char *format, ...)
+{
+	static char buf[BUFSIZE];
+	va_list args;
+
+	va_start(args, format);
+	vsnprintf(buf, sizeof(buf), format, args);
+	va_end(args);
+
+	if(chan_id == 0)
+		chan_id = get_channel_id(chan);
+
+	if(chan_id > 0)
+	{
+
+		rsdb_exec(NULL,
+			"INSERT INTO cf_note (channel_id, timestamp, author, text) "
+			"VALUES('%lu', '%lu', '%Q', '%Q')",
+			chan_id, CURRENT_TIME, chanfix_p->name, buf);
+	}
+}
+
+
 
 /* Return an array of chanfix_score_item structures for each chanop stored in
  * the DB for the specified channel.
@@ -1317,7 +1343,6 @@ static int
 o_chanfix_chanfix(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct channel *chptr;
-	int override = 0;
 	dlink_node *ptr, *next_ptr;
 	struct chmember *msptr;
 
@@ -1348,14 +1373,6 @@ o_chanfix_chanfix(struct client *client_p, struct lconn *conn_p, const char *par
 		return 0;
 	}
 
-#ifdef ENABLE_CHANSERV
-	if(find_channel_reg(NULL, chptr->name))
-	{
-		service_snd(chanfix_p, client_p, conn_p,
-				SVC_CF_CHANSERVCHANNEL, parv[0]);
-		return 0;
-	}
-#endif
 
 	if(dlink_list_length(&chptr->users) < config_file.cf_min_clients)
 	{
@@ -1375,8 +1392,8 @@ o_chanfix_chanfix(struct client *client_p, struct lconn *conn_p, const char *par
 
 	/* Need to check to see if this channel has an ALERT set for it. */
 
-	/* Try to add the manual fix. If an error occured add_chanfix() should send
-	 * the error to the client.
+	/* Try to add the manual fix. If an error occurs, add_chanfix() should
+	 * inform the client since we've passed a client ptr.
 	 */
 	if(!add_chanfix(chptr, 1, client_p))
 		return 0;
@@ -1391,6 +1408,9 @@ o_chanfix_chanfix(struct client *client_p, struct lconn *conn_p, const char *par
 	service_snd(chanfix_p, client_p, conn_p, SVC_ISSUEDFORBY,
 			chanfix_p->name, "CHANFIX", parv[0], client_p->name);
 
+	add_system_note(parv[0], 0, "CHANFIX by %s",
+			client_p->user->oper->name);
+
 	return 0;
 }
 
@@ -1398,7 +1418,6 @@ static int
 o_chanfix_revert(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct channel *chptr;
-	int override = 0;
 	dlink_node *ptr, *next_ptr;
 	struct chmember *msptr;
 
@@ -1413,14 +1432,6 @@ o_chanfix_revert(struct client *client_p, struct lconn *conn_p, const char *parv
 		service_snd(chanfix_p, client_p, conn_p, SVC_IRC_NOSUCHCHANNEL, parv[0]);
 		return 0;
 	}
-
-#ifdef ENABLE_CHANSERV
-	if(find_channel_reg(NULL, chptr->name))
-	{
-		service_snd(chanfix_p, client_p, conn_p, SVC_CF_CHANSERVCHANNEL, parv[0]);
-		return 0;
-	}
-#endif
 
 	if(dlink_list_length(&chptr->users) < config_file.cf_min_clients)
 	{
@@ -1445,6 +1456,9 @@ o_chanfix_revert(struct client *client_p, struct lconn *conn_p, const char *parv
 
 	service_snd(chanfix_p, client_p, conn_p, SVC_ISSUEDFORBY,
 			chanfix_p->name, "REVERT", parv[0], client_p->name);
+
+	add_system_note(parv[0], 0, "REVERT issued by %s",
+			client_p->user->oper->name);
 
 	return 0;
 }
@@ -1980,35 +1994,28 @@ seconds_to_midnight(void)
  *        message needs to be sent to a client.
  */
 static int
-add_chanfix(struct channel *chptr, short man_fix, struct client *client_p)
+add_chanfix(struct channel *chptr, short chanfix, struct client *client_p)
 {
 	struct chanfix_channel *cf_chan;
-	struct chanfix_score *scores;
-	struct rsdb_table data;
-	uint32_t flags = 0;
+	uint32_t flags;
 
 #ifdef ENABLE_CHANSERV
 	/* Need to skip the channel if it's registered with ChanServ. */
 	if(find_channel_reg(NULL, chptr->name))
+	{
+		if(client_p)
+			service_err(chanfix_p, client_p,
+					SVC_CF_CHANSERVCHANNEL, chptr->name);
 		return 0;
+	}
 #endif
 
 	/* Must check if the channel has any sores in the DB. If not, print a
 	 * messages to logged in chanfix operators saying we know the channel
 	 * is oppless but cannot fix it, then return 0.
 	 */
-	/* Need to check to see if the channel is BLOCKed and should be ignored. */
-	rsdb_exec_fetch(&data,
-			"SELECT flags FROM cf_channel WHERE chname=LOWER('%Q')", chptr->name);
 
-	if((data.row_count > 0) && (data.row[0][0] != NULL))
-	{
-		flags = atoi(data.row[0][0]);
-	}
-
-	rsdb_exec_fetch_end(&data);
-
-	if(flags != 0)
+	if(get_cf_chan_flags(chptr->name, &flags) > 0)
 	{
 		if(flags & CF_CHAN_BLOCK)
 		{
@@ -2017,7 +2024,7 @@ add_chanfix(struct channel *chptr, short man_fix, struct client *client_p)
 			return 0;
 		}
 
-		if(man_fix && (flags & CF_CHAN_ALERT))
+		if(chanfix && (flags & CF_CHAN_ALERT))
 		{
 			if(client_p)
 				service_err(chanfix_p, client_p, SVC_CF_HASALERT, chptr->name);
@@ -2035,19 +2042,18 @@ add_chanfix(struct channel *chptr, short man_fix, struct client *client_p)
 
 	cf_chan = my_calloc(1, sizeof(struct chanfix_channel));
 	cf_chan->chptr = chptr;
-	if(man_fix)
-	{
+
+	if(chanfix)
 		cf_chan->flags |= CF_STATUS_MANUALFIX;
-	}
 	else
-	{
 		cf_chan->flags |= CF_STATUS_AUTOFIX;
-	}
+
 	cf_chan->time_fix_started = CURRENT_TIME;
 	cf_chan->time_prev_attempt = 0;
 
 	cf_chan->scores = get_all_cf_scores(chptr, 0,
 			(CF_MIN_ABS_CHAN_SCORE_END * CF_MAX_CHANFIX_SCORE));
+
 	if(cf_chan->scores == NULL)
 	{
 		mlog("debug: Insufficient DB scores for '%s', cannot add for chanfixing.",
@@ -2072,11 +2078,11 @@ add_chanfix(struct channel *chptr, short man_fix, struct client *client_p)
 	 *    the DB.
 	 */
 
-	/* Also record an entry in the fixhistory table to say we're autofixing
-	 * this channel.
-	 */
 	dlink_add(cf_chan, &cf_chan->node, &chanfix_list);
 	chptr->cfptr = cf_chan;
+
+	if(!chanfix)
+		add_system_note(chptr->name, 0, "Added for AUTOFIX");
 
 	return 1;
 }

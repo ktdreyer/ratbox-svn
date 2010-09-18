@@ -1089,6 +1089,7 @@ is_network_split(void)
 
 		if(s_count < config_file.min_servers)
 		{
+			mlog("Network split detected (servers)");
 			return 1;
 		}
 	}
@@ -1096,6 +1097,7 @@ is_network_split(void)
 	if((config_file.min_users > 0) &&
 			(dlink_list_length(&user_list) < config_file.min_users))
 	{
+		mlog("Network split detected (users)");
 		return 1;
 	}
 

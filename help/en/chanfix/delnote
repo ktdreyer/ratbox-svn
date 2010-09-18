@@ -1,4 +1,3 @@
-DELNOTE <#channel> <note_id>
+DELNOTE <note_id>
 [ADMIN] Removes a channel note identified by its ID number.
-  <#channel>: Channel to remove note from.
   <note_id> : ID number of note to remove.
