@@ -161,6 +161,7 @@ set_default_conf(void)
 	config_file.cf_num_top_scores = 10;
 	config_file.cf_min_clients = 4;
 	config_file.cf_client_needs_ident = 1;
+	config_file.cf_max_notes = 10;
 }
 
 static void
@@ -203,11 +204,16 @@ validate_conf(void)
 		config_file.uregister_email = 1;
 
 	/* chanfix validators */
-	if(config_file.cf_num_top_scores < 1 || config_file.cf_num_top_scores > 10)
+	if((config_file.cf_num_top_scores < 1)
+			|| (config_file.cf_num_top_scores > 10))
 		config_file.cf_num_top_scores = 10;
 
 	if(config_file.cf_min_clients < 2)
 		config_file.cf_min_clients = 2;
+
+	if((config_file.cf_max_notes < 3)
+			|| (config_file.cf_max_notes > 25))
+		config_file.cf_max_notes = 10;
 }
 
 static void

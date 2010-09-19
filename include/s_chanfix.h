@@ -88,7 +88,7 @@ struct chanfix_score_item
 /* The time to wait between consecutive autofixes (seconds). */
 #define CF_AUTOFIX_INTERVAL	600
 
-/* the time to wait between consecutive chanfixes (seconds). */
+/* The time to wait between consecutive chanfixes (seconds). */
 #define CF_MANUALFIX_INTERVAL	300
 
 /* Time to wait before removing channel modes during an autofix. Expressed as
@@ -98,5 +98,9 @@ struct chanfix_score_item
 /* Time to wait before removing channel bans during an autofix. Expressed as
  * a percentage of the CF_MAX_FIX_TIME. */
 #define CF_REMOVE_BANS_TIME	0.60f
+
+/* Time to temporarily ignore opless channels for after a server
+ * squits, meaning a netsplit might be in progress (seconds). */
+#define CF_TEMP_OPLESS_IGNORE_TIME	CURRENT_TIME + 180
 
 #endif

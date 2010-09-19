@@ -1289,6 +1289,7 @@ static struct ConfEntry conf_chanfix_table[] =
 	{ "num_top_scores",	CF_INT,	NULL,	0,	&config_file.cf_num_top_scores	},
 	{ "min_clients",	CF_INT,	NULL,	0,	&config_file.cf_min_clients		},
 	{ "client_needs_ident",	CF_YESNO,	NULL,	0,	&config_file.cf_client_needs_ident	},
+	{ "max_notes",	CF_INT,	NULL,	0,	&config_file.cf_max_notes	},
 	{ "\0", 0, NULL, 0, NULL }
 };
 

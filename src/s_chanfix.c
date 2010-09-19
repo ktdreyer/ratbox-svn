@@ -66,6 +66,11 @@ static struct client *chanfix_p;
 
 static dlink_list chanfix_list;
 
+/* netsplit warning timestamp. Used to let chanfix know when a server has
+ * squit, so it can temporarily ignore opless channels.
+ */
+static time_t netsplit_warn_ts = 0;
+
 static int o_chanfix_score(struct client *, struct lconn *, const char **, int);
 static int o_chanfix_uscore(struct client *, struct lconn *, const char **, int);
 static int o_chanfix_userlist(struct client *, struct lconn *, const char **, int);
@@ -118,6 +123,7 @@ static struct service_handler chanfix_service = {
 
 static int h_chanfix_channel_destroy(void *chptr_v, void *unused);
 static int h_chanfix_channel_opless(void *chptr_v, void *unused);
+static int h_chanfix_server_squit_warn(void *target_p, void *unused);
 
 static void e_chanfix_score_channels(void *unused);
 static void e_chanfix_collate_history(void *unused);
@@ -150,6 +156,7 @@ init_s_chanfix(void)
 {
 	hook_add(h_chanfix_channel_destroy, HOOK_CHANNEL_DESTROY);
 	hook_add(h_chanfix_channel_opless, HOOK_CHANNEL_OPLESS);
+	hook_add(h_chanfix_server_squit_warn, HOOK_SERVER_EXIT_WARNING);
 
 	eventAdd("e_chanfix_score_channels", e_chanfix_score_channels, NULL, 300);
 	eventAdd("e_chanfix_autofix_channels", e_chanfix_autofix_channels, NULL, 300);
@@ -858,6 +865,12 @@ e_chanfix_score_channels(void *unused)
 	short i = 0;
 	struct rsdb_table ts_data;
 
+	if(is_network_split())
+	{
+		mlog("debug: Channel scoring skipped (network split).");
+		return;
+	}
+
 	mlog("debug: Examining channels for opped users.");
 
 	DLINK_FOREACH(ptr, channel_list.head)
@@ -1021,16 +1034,31 @@ h_chanfix_channel_opless(void *chptr_v, void *unused)
 
 	if(!chptr->cfptr)
 	{
-		if(add_chanfix(chptr, 0, NULL))
+		if(netsplit_warn_ts > CURRENT_TIME)
 		{
-			mlog("debug: Added opless channel '%s' for autofixing.",
-				chptr->name);
+			mlog("debug: Temporarily ignoring opless channel %s "
+					"(recent squit detected).", chptr->name);
+		}
+		else if(add_chanfix(chptr, 0, NULL))
+		{
+			mlog("debug: Added opless channel %s for autofixing.",
+					chptr->name);
 		}
 	}
 
 	return 0;
 }
 
+static int
+h_chanfix_server_squit_warn(void *target_p, void *unused)
+{
+	/* Temporarily disable opless channel detection because it looks
+	 * like a netsplit is in progress.
+	 */
+	netsplit_warn_ts = CF_TEMP_OPLESS_IGNORE_TIME;
+
+	return 0;
+}
 
 static int
 o_chanfix_score(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
@@ -1703,7 +1731,8 @@ o_chanfix_info(struct client *client_p, struct lconn *conn_p, const char *parv[]
 
 	rsdb_exec_fetch(&data, "SELECT id, author, timestamp, text FROM cf_note "
 			"WHERE channel_id = %lu "
-			"ORDER BY timestamp DESC LIMIT 5", channel_id);
+			"ORDER BY timestamp DESC LIMIT %d",
+			channel_id, config_file.cf_max_notes);
 
 	if(data.row_count > 0)
 	{

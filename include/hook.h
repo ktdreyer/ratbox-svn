@@ -30,6 +30,7 @@
 #define HOOK_CLIENT_EXIT_SPLIT		29	/* client quits due to a split */
 
 #define HOOK_SERVER_EXIT		30	/* server squits */
+#define HOOK_SERVER_EXIT_WARNING	31	/* server squit early warning */
 
 #define HOOK_USERSERV_LOGIN		32	/* user logs into userserv */
 #define HOOK_USERSERV_LOGIN_BURST	34	/* user logs into userserv (burst) */

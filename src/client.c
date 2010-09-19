@@ -467,7 +467,10 @@ exit_server(struct client *target_p, int split)
 
 	SetDead(target_p);
 
-        /* first exit each of this servers users */
+	/* Early warning that a server is squit'ing. */
+	hook_call(HOOK_SERVER_EXIT_WARNING, target_p, NULL);
+
+	/* first exit each of this servers users */
 	DLINK_FOREACH_SAFE(ptr, next_ptr, target_p->server->users.head)
 	{
 		hook_call(HOOK_CLIENT_EXIT_SPLIT, ptr->data, NULL);
