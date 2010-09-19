@@ -1,3 +1,22 @@
+moggie      2010/09/19 15:26:39 UTC	(20100919_0-27069)
+  Log:
+  - Add config file option for max chanfix notes.
+  - Add HOOK_SERVER_EXIT_WARNING to tell when a netsplit may be in progress.
+  - Add netsplit_warn_ts for chanfix to temporarily ignore opless channels
+    during a netsplit.
+  
+
+  Modified:
+	rserv/trunk/doc/example.conf (File Modified) 
+	rserv/trunk/include/conf.h (File Modified) 
+	rserv/trunk/include/hook.h (File Modified) 
+	rserv/trunk/include/s_chanfix.h (File Modified) 
+	rserv/trunk/src/client.c (File Modified) 
+	rserv/trunk/src/conf.c (File Modified) 
+	rserv/trunk/src/newconf.c (File Modified) 
+	rserv/trunk/src/s_chanfix.c (File Modified) 
+
+
 moggie      2010/09/18 01:06:59 UTC	(20100918_0-27067)
   Log:
   - Add add_system_note() function to create internal notes.
