@@ -633,9 +633,9 @@ chanfix_opless_channel(struct chanfix_channel *cf_ch)
 	}
 
 	if(count == 1)
-		service_err_chan(chanfix_p, cf_ch->chptr, SVC_CF_1BEENOPPED);
+		service_err_chanmsg(chanfix_p, cf_ch->chptr, SVC_CF_1BEENOPPED);
 	else
-		service_err_chan(chanfix_p, cf_ch->chptr, SVC_CF_HAVEBEENOPPED, count);
+		service_err_chanmsg(chanfix_p, cf_ch->chptr, SVC_CF_HAVEBEENOPPED, count);
 
 	mlog("debug: Gave some ops out in '%s'.", cf_ch->chptr->name);
 
@@ -724,6 +724,8 @@ process_chanfix_list(int fix_type)
 				del_chanfix(cf_ch->chptr);
 				mlog("debug: Cannot fix channel '%s' (fix time expired).",
 						cf_ch->chptr->name);
+				add_system_note(chptr->name, 0,
+						"AUTOFIX ended (fix time expired)");
 				continue;
 			}
 				
@@ -1428,7 +1430,7 @@ o_chanfix_chanfix(struct client *client_p, struct lconn *conn_p, const char *par
 
 	join_service(chanfix_p, parv[0], chptr->tsinfo, NULL, 0);
 
-	service_err_chan(chanfix_p, chptr, SVC_CF_CHANFIXINPROG);
+	service_err_chanmsg(chanfix_p, chptr, SVC_CF_CHANFIXINPROG);
 
 	remove_our_simple_modes(chptr, chanfix_p, 1);
 	remove_our_bans(chptr, chanfix_p, 1, 0, 0);
@@ -1480,7 +1482,7 @@ o_chanfix_revert(struct client *client_p, struct lconn *conn_p, const char *parv
 
 	/* Everything looks okay, execute the takeover. */
 	chan_takeover(chptr);
-	service_err_chan(chanfix_p, chptr, SVC_CF_CHANFIXINPROG);
+	service_err_chanmsg(chanfix_p, chptr, SVC_CF_CHANFIXINPROG);
 
 	service_snd(chanfix_p, client_p, conn_p, SVC_ISSUEDFORBY,
 			chanfix_p->name, "REVERT", parv[0], client_p->name);
@@ -1763,12 +1765,13 @@ o_chanfix_check(struct client *client_p, struct lconn *conn_p, const char *parv[
 
 	if(!valid_chname(parv[0]))
 	{
-		service_err(chanfix_p, client_p, SVC_IRC_CHANNELINVALID, chanfix_p->name, parv[0]);
+		service_err(chanfix_p, client_p, SVC_IRC_CHANNELINVALID, parv[0]);
 		return 0;
 	}
+
 	if((chptr = find_channel(parv[0])) == NULL)
 	{
-		service_err(chanfix_p, client_p, SVC_IRC_NOSUCHCHANNEL, chanfix_p->name, parv[0]);
+		service_err(chanfix_p, client_p, SVC_IRC_NOSUCHCHANNEL, parv[0]);
 		return 0;
 	}
 
@@ -2089,6 +2092,8 @@ add_chanfix(struct channel *chptr, short chanfix, struct client *client_p)
 					chptr->name);
 		if(client_p)
 			service_err(chanfix_p, client_p, SVC_CF_NODATAFOR, chanfix_p->name);
+		my_free(cf_chan);
+		cf_chan = NULL;
 		return 0;
 	}
 

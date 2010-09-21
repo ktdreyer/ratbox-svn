@@ -2058,6 +2058,10 @@ s_chan_register(struct client *client_p, struct lconn *conn_p, const char *parv[
 
 	service_err(chanserv_p, client_p, SVC_CHAN_NOWREG, chptr->name);
 
+	/* channel NOTICE sent from server since ChanServ isn't there. */
+	service_err_channot(NULL, chptr, SVC_CHAN_NOWREGWITH, chptr->name,
+			chanserv_p->name, client_p->user->user_reg->name);
+
 	return 5;
 }
 

@@ -173,6 +173,7 @@ const char *svc_notice_string[] =
 
 	/* chanserv */
 	"SVC_CHAN_NOWREG",
+	"SVC_CHAN_NOWREGWITH",
 	"SVC_CHAN_NOTREG",
 	"SVC_CHAN_ALREADYREG",
 	"SVC_CHAN_CHANGEDOPTION",

@@ -160,6 +160,7 @@ struct _lang_internal lang_internal[] =
 
 	/* chanserv */
 	{ SVC_CHAN_NOWREG,		"Channel %s registered"					},
+	{ SVC_CHAN_NOWREGWITH,		"*** Notice - Channel %s now registered with %s"	},
 	{ SVC_CHAN_NOTREG,		"Channel %s is not registered"				},
 	{ SVC_CHAN_ALREADYREG,		"Channel %s is already registered"			},
 	{ SVC_CHAN_CHANGEDOPTION,	"Channel %s %s set to %s"				},
@@ -252,9 +253,9 @@ struct _lang_internal lang_internal[] =
 	/* chanfix */
 	{ SVC_CF_NOTENOUGHUSERS,	"Channel %s doesn't have enough users for me to act on"		},
 	{ SVC_CF_HASOPPEDUSERS,		"Channel %s already has opped users"				},
-	{ SVC_CF_CHECK,			"Channel '%s' appears to contain %d opped out of %d users"		},
+	{ SVC_CF_CHECK,			"Channel %s appears to contain %d opped out of %d users"	},
 	{ SVC_CF_CHANFIXINPROG,		"Channel fix in progress, please stand by."			},
-	{ SVC_CF_CHANSERVCHANNEL,	"Channel '%s' is registered with ChanServ"			},
+	{ SVC_CF_CHANSERVCHANNEL,	"Channel %s is registered with ChanServ"			},
 	{ SVC_CF_TOPSCORESFOR,		"Top %d scores for channel '%s':"		},
 	{ SVC_CF_TOPOPSCORES,		"Top %d scores for ops in channel '%s':"	},
 	{ SVC_CF_TOPUNOPSCORES,		"Top %d scores for non-ops in channel '%s':"	},
