@@ -1,3 +1,22 @@
+moggie      2010/09/21 00:23:25 UTC	(20100921_0-27071)
+  Log:
+  - Add function for sending NOTICEs to a channel.
+  - Get services to send a NOTICE to a channel when it becomes registered
+    with ChanServ.
+  - Use correct params for errors in CHECK command.
+  - Add system note for a fix time expiring.
+  
+
+  Modified:
+	rserv/trunk/include/langs.h (File Modified) 
+	rserv/trunk/include/service.h (File Modified) 
+	rserv/trunk/src/langs.c (File Modified) 
+	rserv/trunk/src/messages.c (File Modified) 
+	rserv/trunk/src/s_chanfix.c (File Modified) 
+	rserv/trunk/src/s_chanserv.c (File Modified) 
+	rserv/trunk/src/service.c (File Modified) 
+
+
 moggie      2010/09/19 15:26:39 UTC	(20100919_0-27069)
   Log:
   - Add config file option for max chanfix notes.
