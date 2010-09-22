@@ -724,7 +724,7 @@ process_chanfix_list(int fix_type)
 				del_chanfix(cf_ch->chptr);
 				mlog("debug: Cannot fix channel '%s' (fix time expired).",
 						cf_ch->chptr->name);
-				add_system_note(chptr->name, 0,
+				add_system_note(cf_ch->chptr->name, 0,
 						"AUTOFIX ended (fix time expired)");
 				continue;
 			}

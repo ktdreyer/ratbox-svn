@@ -143,6 +143,7 @@ set_default_conf(void)
 				"be disconnected if a user regains this nickname.");
 
 	config_file.oper_score = 3;
+	config_file.admin_score = 3;
 	config_file.jupe_score = 15;
 	config_file.unjupe_score = 15;
 	config_file.pending_time = 1800;

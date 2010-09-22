@@ -384,7 +384,8 @@ s_jupeserv_calljupe(struct client *client_p, struct lconn *conn_p, const char *p
 		return 0;
 	}
 
-	if(!config_file.jupe_score || !config_file.oper_score)
+	if(!config_file.jupe_score || !config_file.oper_score ||
+			!config_file.admin_score)
 	{
 		service_err(jupeserv_p, client_p, SVC_ISDISABLED,
 				jupeserv_p->name, "CALLJUPE");
@@ -429,7 +430,10 @@ s_jupeserv_calljupe(struct client *client_p, struct lconn *conn_p, const char *p
 		"CALLJUPE %s %s", parv[0], jupe_p->reason);
 
 	jupe_p->expire = CURRENT_TIME + config_file.pending_time;
-	jupe_p->points += config_file.oper_score;
+	if(ClientAdmin(client_p))
+		jupe_p->points += config_file.admin_score;
+	else
+		jupe_p->points += config_file.oper_score;
 	dlink_add_alloc(my_strdup(client_p->user->servername), &jupe_p->servers);
 
 	if(jupe_p->points >= config_file.jupe_score)
@@ -462,7 +466,8 @@ s_jupeserv_callunjupe(struct client *client_p, struct lconn *conn_p, const char 
 	struct server_jupe *ajupe_p, *jupe_p;
 	dlink_node *ptr;
 
-	if(!config_file.unjupe_score || !config_file.oper_score)
+	if(!config_file.unjupe_score || !config_file.oper_score ||
+			!config_file.admin_score)
 	{
 		service_err(jupeserv_p, client_p, SVC_ISDISABLED,
 				jupeserv_p->name, "CALLUNJUPE");
@@ -495,7 +500,10 @@ s_jupeserv_callunjupe(struct client *client_p, struct lconn *conn_p, const char 
 		"CALLUNJUPE %s", parv[0]);
 
 	jupe_p->expire = CURRENT_TIME + config_file.pending_time;
-	jupe_p->points -= config_file.oper_score;
+	if(ClientAdmin(client_p))
+		jupe_p->points -= config_file.admin_score;
+	else
+		jupe_p->points -= config_file.oper_score;
 	dlink_add_alloc(my_strdup(client_p->user->servername), &jupe_p->servers);
 
 	if(jupe_p->points <= 0)
@@ -532,7 +540,7 @@ s_jupeserv_pending(struct client *client_p, struct lconn *conn_p, const char *pa
 	struct server_jupe *jupe_p;
 	dlink_node *ptr;
 
-	if(!config_file.oper_score)
+	if(!config_file.oper_score || !config_file.admin_score)
 	{
 		service_err(jupeserv_p, client_p, SVC_ISDISABLED,
 				jupeserv_p->name, "PENDING");

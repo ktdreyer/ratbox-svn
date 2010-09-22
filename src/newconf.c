@@ -1236,6 +1236,7 @@ static struct ConfEntry conf_nickserv_table[] =
 static struct ConfEntry conf_jupeserv_table[] =
 {
 	{ "oper_score",		CF_INT, NULL, 0, &config_file.oper_score	},
+	{ "admin_score",	CF_INT, NULL, 0, &config_file.admin_score	},
 	{ "jupe_score",		CF_INT, NULL, 0, &config_file.jupe_score	},
 	{ "unjupe_score",	CF_INT, NULL, 0, &config_file.unjupe_score	},
 	{ "pending_time",	CF_TIME,NULL, 0, &config_file.pending_time	},
