@@ -1,3 +1,18 @@
+moggie      2010/09/22 10:21:29 UTC	(20100922_0-27073)
+  Log:
+  - Add configurable admin_score for jupeserv.
+  - Fix copy/paste error in chanfix system note.
+  
+
+  Modified:
+	rserv/trunk/doc/example.conf (File Modified) 
+	rserv/trunk/include/conf.h (File Modified) 
+	rserv/trunk/src/conf.c (File Modified) 
+	rserv/trunk/src/newconf.c (File Modified) 
+	rserv/trunk/src/s_chanfix.c (File Modified) 
+	rserv/trunk/src/s_jupeserv.c (File Modified) 
+
+
 moggie      2010/09/21 00:23:25 UTC	(20100921_0-27071)
   Log:
   - Add function for sending NOTICEs to a channel.
