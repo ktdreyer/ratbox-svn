@@ -1,3 +1,27 @@
+moggie      2010/09/29 12:16:54 UTC	(20100929_0-27098)
+  Log:
+  - Add a time lock option which prevents a channel being registered if it has
+    existed for longer than the specified duration.
+  - Modify USCORE command to accept either an IRC nickname or a user@host.
+  - Rename cf_chan to cf_ptr.
+  - Add duration timers to see how long chanfixing / scoring takes.
+  
+
+  Modified:
+	rserv/trunk/doc/example.conf (File Modified) 
+	rserv/trunk/help/en/chanfix/index-admin (File Modified) 
+	rserv/trunk/help/en/chanfix/uscore (File Modified) 
+	rserv/trunk/include/conf.h (File Modified) 
+	rserv/trunk/include/langs.h (File Modified) 
+	rserv/trunk/include/s_chanfix.h (File Modified) 
+	rserv/trunk/src/conf.c (File Modified) 
+	rserv/trunk/src/langs.c (File Modified) 
+	rserv/trunk/src/messages.c (File Modified) 
+	rserv/trunk/src/newconf.c (File Modified) 
+	rserv/trunk/src/s_chanfix.c (File Modified) 
+	rserv/trunk/src/s_chanserv.c (File Modified) 
+
+
 moggie      2010/09/22 10:21:29 UTC	(20100922_0-27073)
   Log:
   - Add configurable admin_score for jupeserv.
