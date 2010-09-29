@@ -98,6 +98,7 @@ struct _config_file
 	int cemail_delowner;
 	int cautojoin_empty;
 	int cshow_suspend_reasons;
+	int ctime_lock;
 
 	/* nickserv */
 	int nmax_nicks;

@@ -1,4 +1,5 @@
-USCORE <#channel> <user@host>
-[ADMIN] Shows the current score belonging to a specific user@host.
-  <#channel> : Channel to check.
-  <user@host>: user@host to match.
+USCORE <#channel> <nickname|user@host>
+[ADMIN] Shows the score belonging to a specific nick or user@host.
+  <#channel> : Channel to check
+  <nickname> : IRC nickname to match
+  <user@host>: user@host to match

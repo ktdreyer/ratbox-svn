@@ -163,6 +163,7 @@ struct _lang_internal lang_internal[] =
 	{ SVC_CHAN_NOWREGWITH,		"*** Notice - Channel %s now registered with %s"	},
 	{ SVC_CHAN_NOTREG,		"Channel %s is not registered"				},
 	{ SVC_CHAN_ALREADYREG,		"Channel %s is already registered"			},
+	{ SVC_CHAN_TIMELOCKED,		"Channel %s is time locked"				},
 	{ SVC_CHAN_CHANGEDOPTION,	"Channel %s %s set to %s"				},
 	{ SVC_CHAN_UNSETOPTION,		"Channel %s %s unset"					},
 	{ SVC_CHAN_QUERYOPTION,		"Channel %s %s is set to %s"				},

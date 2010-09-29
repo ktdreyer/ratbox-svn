@@ -27,7 +27,7 @@ struct chanfix_channel
 	struct chanfix_score *scores;
 	int highest_score;	/* highest chanop score in channel */
 	int endfix_uscore;	/* min possible user score at end of a chanfix */
-	int flags;
+	uint32_t flags;
 
 	dlink_node node;	/* ptr to this node in chanfix_list */
 };
@@ -38,8 +38,8 @@ struct chanfix_channel
 struct chanfix_score
 {
 	struct chanfix_score_item *s_items;
-	int length;
-	int matched;
+	unsigned int length;
+	unsigned int matched;
 
 	dlink_list clones;	/* List of duplicate user@hosts found. */
 };
@@ -49,7 +49,7 @@ struct chanfix_score_item
 	struct chmember *msptr;
 	unsigned long userhost_id;
 	int score;
-	short opped;
+	uint8_t opped;
 };
 
 /* The minimum number of ops required for a successful chanfix. */
@@ -101,6 +101,6 @@ struct chanfix_score_item
 
 /* Time to temporarily ignore opless channels for after a server
  * squits, meaning a netsplit might be in progress (seconds). */
-#define CF_TEMP_OPLESS_IGNORE_TIME	CURRENT_TIME + 180
+#define CF_OPLESS_IGNORE_TIME	180
 
 #endif

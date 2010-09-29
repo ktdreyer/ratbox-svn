@@ -122,6 +122,7 @@ set_default_conf(void)
 	config_file.cemail_delowner = 0;
 	config_file.cautojoin_empty = 0;
 	config_file.cshow_suspend_reasons = 0;
+	config_file.ctime_lock = 0;
 
 	config_file.nmax_nicks = 2;
 	config_file.nallow_set_warn = 1;

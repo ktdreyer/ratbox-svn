@@ -8,5 +8,5 @@
  SET           - Sets various options for chanfix.
  UNALERT       - Removes an alert flag for a channel.
  UNBLOCK       - Re-enables auto and manual fixing for a channel.
- USCORE        - Shows the current score belonging to a specific user@host.
+ USCORE        - Shows the score belonging to a specific nick or user@host.
  USERLIST      - Shows a channel's top most hostmasks and their score.

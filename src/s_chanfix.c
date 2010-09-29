@@ -286,7 +286,6 @@ add_system_note(const char *chan, unsigned long chan_id, const char *format, ...
 
 	if(chan_id > 0)
 	{
-
 		rsdb_exec(NULL,
 			"INSERT INTO cf_note (channel_id, timestamp, author, text) "
 			"VALUES('%lu', '%lu', '%Q', '%Q')",
@@ -521,7 +520,7 @@ chanfix_opless_channel(struct chanfix_channel *cf_ch)
 	struct chanfix_score_item *clone;
 	unsigned int time_since_start, i, count;
 	int min_score, min_chan_s, min_user_s;
-	short all_opped = 1;
+	uint8_t all_opped = 1;
 	dlink_node *ptr;
 
 	time_since_start = CURRENT_TIME - (cf_ch->time_fix_started);
@@ -671,7 +670,7 @@ process_chanfix_list(int fix_type)
 {
 	struct chanfix_channel *cf_ch;
 	dlink_node *ptr, *next_ptr;
-	int fix_status;
+	short fix_status;
 
 	DLINK_FOREACH_SAFE(ptr, next_ptr, chanfix_list.head)
 	{
@@ -697,8 +696,8 @@ process_chanfix_list(int fix_type)
 			if(dlink_list_length(&cf_ch->chptr->users) < config_file.cf_min_clients)
 			{
 				del_chanfix(cf_ch->chptr);
-				mlog("debug: Channel '%s' has insufficient users for a fix.",
-						cf_ch->chptr->name);
+				mlog("debug: Channel '%s' has insufficient users for a fix (%d required).",
+						cf_ch->chptr->name, config_file.cf_min_clients);
 				continue;
 			}
 
@@ -737,8 +736,12 @@ process_chanfix_list(int fix_type)
 			if(fix_status != 0)
 			{
 				if(fix_status)
+				{
 					mlog("debug: Opping logic thinks '%s' is fixed.",
 							cf_ch->chptr->name);
+					add_system_note(cf_ch->chptr->name, 0,
+							"Channel fix complete");
+				}
 				else
 					mlog("debug: Fatal error occured trying to fix '%s'.",
 							cf_ch->chptr->name);
@@ -939,6 +942,9 @@ e_chanfix_score_channels(void *unused)
 
 		i++;
 	}
+
+	mlog("debug: channel op scoring time: %s",
+			get_duration(CURRENT_TIME - timestamp));
 }
 
 /* Collate the cf_score data into cf_score_history. */
@@ -1001,20 +1007,31 @@ e_chanfix_collate_history(void *unused)
 static void
 e_chanfix_autofix_channels(void *unused)
 {
+	time_t start_time;
+
 	if(!is_network_split() && config_file.cf_enable_autofix)
 	{
 		mlog("debug: Processing autofix channels.");
+		start_time = CURRENT_TIME;
+
 		process_chanfix_list(CF_STATUS_AUTOFIX);
+		mlog("debug: autofix processing time: %s",
+				get_duration(CURRENT_TIME - start_time));
 	}
 }
 
 static void
 e_chanfix_manualfix_channels(void *unused)
 {
+	time_t start_time;
 	if(!is_network_split() && config_file.cf_enable_chanfix)
 	{
 		mlog("debug: Processing chanfix channels.");
+		start_time = CURRENT_TIME;
+
 		process_chanfix_list(CF_STATUS_MANUALFIX);
+		mlog("debug: chanfix processing time: %s",
+				get_duration(CURRENT_TIME - start_time));
 	}
 }
 
@@ -1057,7 +1074,7 @@ h_chanfix_server_squit_warn(void *target_p, void *unused)
 	/* Temporarily disable opless channel detection because it looks
 	 * like a netsplit is in progress.
 	 */
-	netsplit_warn_ts = CF_TEMP_OPLESS_IGNORE_TIME;
+	netsplit_warn_ts = CF_OPLESS_IGNORE_TIME + CURRENT_TIME;
 
 	return 0;
 }
@@ -1179,6 +1196,8 @@ o_chanfix_uscore(struct client *client_p, struct lconn *conn_p, const char *parv
 	unsigned long channel_id, userhost_id;
 	struct rsdb_table data;
 	int day_score, hist_score;
+	char userhost[USERLEN+HOSTLEN+4+1];
+	struct client *target_p;
 
 	if(!valid_chname(parv[0]))
 	{
@@ -1199,7 +1218,27 @@ o_chanfix_uscore(struct client *client_p, struct lconn *conn_p, const char *parv
 	}
 #endif
 
-	userhost_id = get_userhost_id(parv[1]);
+	/* Check if we've been given a nickname or user@host */
+	if(strchr(parv[1], '@') == NULL)
+	{
+		target_p = find_user(parv[1], 0);
+
+		if(target_p)
+		{
+			snprintf(userhost, sizeof(userhost), "%s@%s",
+					target_p->user->username,
+					target_p->user->host);
+		}
+		else
+		{
+			service_snd(chanfix_p, client_p, conn_p, SVC_CF_NOUSERMATCH);
+			return 0;
+		}
+	}
+	else
+		strncpy(userhost, parv[1], sizeof(userhost)-1);
+	
+	userhost_id = get_userhost_id(userhost);
 
 	if(!userhost_id)
 	{
@@ -1236,7 +1275,7 @@ o_chanfix_uscore(struct client *client_p, struct lconn *conn_p, const char *parv
 	else
 	{
 		service_snd(chanfix_p, client_p, conn_p, SVC_CF_UHOSTSCORE,
-				day_score + hist_score, parv[1]);
+				day_score + hist_score, userhost);
 	}
 
 	return 0;
@@ -2028,7 +2067,7 @@ seconds_to_midnight(void)
 static int
 add_chanfix(struct channel *chptr, short chanfix, struct client *client_p)
 {
-	struct chanfix_channel *cf_chan;
+	struct chanfix_channel *cf_ptr;
 	uint32_t flags;
 
 #ifdef ENABLE_CHANSERV
@@ -2072,33 +2111,33 @@ add_chanfix(struct channel *chptr, short chanfix, struct client *client_p)
 		return 0;
 	}
 
-	cf_chan = my_calloc(1, sizeof(struct chanfix_channel));
-	cf_chan->chptr = chptr;
+	cf_ptr = my_calloc(1, sizeof(struct chanfix_channel));
+	cf_ptr->chptr = chptr;
 
 	if(chanfix)
-		cf_chan->flags |= CF_STATUS_MANUALFIX;
+		cf_ptr->flags |= CF_STATUS_MANUALFIX;
 	else
-		cf_chan->flags |= CF_STATUS_AUTOFIX;
+		cf_ptr->flags |= CF_STATUS_AUTOFIX;
 
-	cf_chan->time_fix_started = CURRENT_TIME;
-	cf_chan->time_prev_attempt = 0;
+	cf_ptr->time_fix_started = CURRENT_TIME;
+	cf_ptr->time_prev_attempt = 0;
 
-	cf_chan->scores = get_all_cf_scores(chptr, 0,
+	cf_ptr->scores = get_all_cf_scores(chptr, 0,
 			(CF_MIN_ABS_CHAN_SCORE_END * CF_MAX_CHANFIX_SCORE));
 
-	if(cf_chan->scores == NULL)
+	if(cf_ptr->scores == NULL)
 	{
 		mlog("debug: Insufficient DB scores for '%s', cannot add for chanfixing.",
 					chptr->name);
 		if(client_p)
 			service_err(chanfix_p, client_p, SVC_CF_NODATAFOR, chanfix_p->name);
-		my_free(cf_chan);
-		cf_chan = NULL;
+		my_free(cf_ptr);
+		cf_ptr = NULL;
 		return 0;
 	}
 
-	cf_chan->highest_score = cf_chan->scores->s_items[0].score;
-	cf_chan->endfix_uscore = CF_MIN_USER_SCORE_END * cf_chan->highest_score;
+	cf_ptr->highest_score = cf_ptr->scores->s_items[0].score;
+	cf_ptr->endfix_uscore = CF_MIN_USER_SCORE_END * cf_ptr->highest_score;
 
 	/*my_free(scores->s_items);
 	my_free(scores);
@@ -2112,8 +2151,8 @@ add_chanfix(struct channel *chptr, short chanfix, struct client *client_p)
 	 *    the DB.
 	 */
 
-	dlink_add(cf_chan, &cf_chan->node, &chanfix_list);
-	chptr->cfptr = cf_chan;
+	dlink_add(cf_ptr, &cf_ptr->node, &chanfix_list);
+	chptr->cfptr = cf_ptr;
 
 	if(!chanfix)
 		add_system_note(chptr->name, 0, "Added for AUTOFIX");

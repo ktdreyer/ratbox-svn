@@ -1222,6 +1222,7 @@ static struct ConfEntry conf_chanserv_table[] =
 	{ "email_delowner",	CF_YESNO, NULL, 0, &config_file.cemail_delowner	},
 	{ "autojoin_empty",	CF_YESNO, NULL, 0, &config_file.cautojoin_empty		},
 	{ "show_suspend_reasons",CF_YESNO,NULL, 0, &config_file.cshow_suspend_reasons	},
+	{ "time_lock",	CF_TIME,  NULL, 0, &config_file.ctime_lock	},
 	{ "\0", 0, NULL, 0, NULL }
 };
 

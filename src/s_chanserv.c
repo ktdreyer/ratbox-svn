@@ -2001,6 +2001,13 @@ s_chan_register(struct client *client_p, struct lconn *conn_p, const char *parv[
 		return 1;
 	}
 
+	if(config_file.ctime_lock > 0 &&
+		(CURRENT_TIME - config_file.ctime_lock) > chptr->tsinfo)
+	{
+		service_err(chanserv_p, client_p, SVC_CHAN_TIMELOCKED, parv[0]);
+		return 1;
+	}
+
 	/* apply timed registration limits */
 	if(config_file.cregister_time && config_file.cregister_amount)
 	{
