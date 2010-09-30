@@ -383,7 +383,7 @@ get_chmember_scores(struct chanfix_score *scores, struct channel *chptr,
 	struct chmember *msptr;
 	struct chanfix_score_item *clone;
 	dlink_node *ptr, *next_ptr, *ptr2;
-	char userhost[USERLEN+HOSTLEN+4+1];
+	char userhost[USERHOSTLEN+1];
 	unsigned int i, u_count, c_count;
 
 
@@ -430,10 +430,9 @@ get_chmember_scores(struct chanfix_score *scores, struct channel *chptr,
 		{
 			if(scores->s_items[i].userhost_id == userhost_id)
 			{
-				/* Check to see if msptr is NULL so this function call doesn't
-				 * count duplicate user@hosts. This means if a channel contains
-				 * multiple users with the same user@host, only the first one
-				 * will be assigned a score.
+				/* Check to see if msptr is NULL. If it is, then we've already
+				 * matched this score with a chmember, meaning it must be a
+				 * clone. Clones are stored in a linked list as needed.
 				 */
 				if(scores->s_items[i].msptr == NULL)
 				{
@@ -441,7 +440,7 @@ get_chmember_scores(struct chanfix_score *scores, struct channel *chptr,
 					u_count++;
 					break;
 				}
-				else if(ignore_clones == 0)
+				else if(!ignore_clones)
 				{
 					/* Found matching user@host but msptr != NULL, meaning
 					 * this must be a duplicate.
@@ -493,7 +492,7 @@ collect_channel_scores(struct channel *chptr, time_t timestamp, unsigned int day
 {
 	struct chmember *msptr;
 	dlink_node *ptr;
-	char userhost[USERLEN+HOSTLEN+2];
+	char userhost[USERHOSTLEN+1];
 
 	DLINK_FOREACH(ptr, chptr->users_opped.head)
 	{
@@ -770,7 +769,7 @@ build_channel_scores(struct channel *chptr, int max_num)
 	struct chmember *msptr;
 	dlink_node *ptr;
 	struct rsdb_table data;
-	char userhost[USERLEN+HOSTLEN+4+1];
+	char userhost[USERHOSTLEN+1];
 	int day_score, hist_score;
 	unsigned int user_count;
 
@@ -1196,7 +1195,7 @@ o_chanfix_uscore(struct client *client_p, struct lconn *conn_p, const char *parv
 	unsigned long channel_id, userhost_id;
 	struct rsdb_table data;
 	int day_score, hist_score;
-	char userhost[USERLEN+HOSTLEN+4+1];
+	char userhost[USERHOSTLEN+1];
 	struct client *target_p;
 
 	if(!valid_chname(parv[0]))
@@ -1236,7 +1235,7 @@ o_chanfix_uscore(struct client *client_p, struct lconn *conn_p, const char *parv
 		}
 	}
 	else
-		strncpy(userhost, parv[1], sizeof(userhost)-1);
+		strlcpy(userhost, parv[1], sizeof(userhost));
 	
 	userhost_id = get_userhost_id(userhost);
 
