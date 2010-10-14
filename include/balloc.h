@@ -36,14 +36,14 @@ struct Block
 	size_t alloc_size;
 	struct Block *next;	/* Next in our chain of blocks */
 	void *elems;		/* Points to allocated memory */
-	dlink_list free_list;
-	dlink_list used_list;
+	rb_dlink_list free_list;
+	rb_dlink_list used_list;
 };
 typedef struct Block Block;
 
 struct MemBlock
 {
-	dlink_node self;
+	rb_dlink_node self;
 	Block *block;		/* Which block we belong to */
 };
 typedef struct MemBlock MemBlock;
@@ -55,7 +55,7 @@ typedef struct MemBlock MemBlock;
 struct BlockHeap
 {
 	char *name;
-	dlink_node hlist;
+	rb_dlink_node hlist;
 	size_t elemSize;	/* Size of each element to be stored */
 	unsigned long elemsPerBlock;	/* Number of elements per block */
 	unsigned long blocksAllocated;	/* Number of blocks allocated */
@@ -64,7 +64,7 @@ struct BlockHeap
 };
 typedef struct BlockHeap BlockHeap;
 
-struct _dlink_list heap_lists;
+struct _rb_dlink_list heap_lists;
 
 extern void init_balloc(void);
 

@@ -34,15 +34,12 @@
 #include <signal.h>
 #include <sys/resource.h>
 
-#ifdef HAVE_CRYPT_H
-#include <crypt.h>
-#endif
-
 #ifdef HAVE_GETOPT_H
 #include <getopt.h>
 #endif
 
 #include "rserv.h"
+#include "tools.h"
 #include "langs.h"
 #include "rsdb.h"
 #include "conf.h"
@@ -105,19 +102,6 @@ die(int graceful, const char *format, ...)
 	exit(1);
 }
 
-void
-set_time(void)
-{
-	struct timeval newtime;
-
-	newtime.tv_sec = newtime.tv_usec = 0;
-
-	if(gettimeofday(&newtime, NULL) == -1)
-		die(1, "Clock failure.");
-
-	system_time.tv_sec = newtime.tv_sec;
-	system_time.tv_usec = newtime.tv_usec;
-}
 
 static void
 setup_corefile(void)
@@ -190,7 +174,7 @@ print_help(void)
 static void
 check_md5_crypt(void)
 {
-	if(strcmp((crypt("validate", "$1$tEsTiNg1")), "$1$tEsTiNg1$Orp/Maa6pOxfOpGWjmtVE/") == 0)
+	if(strcmp((rb_crypt("validate", "$1$tEsTiNg1")), "$1$tEsTiNg1$Orp/Maa6pOxfOpGWjmtVE/") == 0)
 		have_md5_crypt = 1;
 	else
 		have_md5_crypt = 0;
@@ -255,7 +239,7 @@ main(int argc, char *argv[])
 				testing_conf = 1;
 				break;
 			case 'r':
-				chroot_path = my_strdup(optarg);
+				chroot_path = rb_strdup(optarg);
 				break;
 
 			case 'g':
@@ -300,7 +284,7 @@ main(int argc, char *argv[])
 
 		printf("ratbox-services: root directory now %s\n", chroot_path);
 
-		my_free(chroot_path);
+		rb_free(chroot_path);
 	}
 
 	if(chroot_gid)
@@ -365,7 +349,7 @@ main(int argc, char *argv[])
 
 	setup_corefile();
 
-	set_time();
+	rb_set_time();
 
 #ifdef __CYGWIN__
         nofork = 1;
@@ -423,16 +407,15 @@ main(int argc, char *argv[])
 
 	current_mark = 0;
 
-	init_events();
+	/* XXX fix me */
+	rb_lib_init(NULL, NULL, NULL, 0, 1024, 1024, 1024);
+	rb_linebuf_init(1024);
+	//rb_lib_init(ilogcb, restartcb, diecb, 1, maxconnections, DNODE_HEAP_SIZE, FD_HEAP_SIZE);
+	// rb_linebuf_init(LINEBUF_HEAP_SIZE);
+	                
 
 	/* adding events uses the PRNG */
 	init_crypt_seed();
-
-	/* balloc requires events */
-        init_balloc();
-
-	/* tools requires balloc */
-	init_tools();
 
 	/* conf/commands/help all need base language stuff */
 	init_langs();
@@ -493,7 +476,7 @@ main(int argc, char *argv[])
 	add_scommand_handler(&bmask_command);
 	add_scommand_handler(&privmsg_command);
 
-	first_time = CURRENT_TIME;
+	first_time = rb_current_time();
 
 	if(testing_conf)
 		fprintf(stderr, "Conf check started\n");
@@ -515,20 +498,21 @@ main(int argc, char *argv[])
 	/* db must be done before this */
 	init_services();
 
-	eventAdd("update_service_floodcount", update_service_floodcount, 
+	rb_event_add("update_service_floodcount", update_service_floodcount, 
 		NULL, 1);
-	eventAdd("check_rehash", check_rehash, NULL, 2);
-
+	rb_event_add("check_rehash", check_rehash, NULL, 2);
+	add_server_events(); /* events from io.c */
        	write_pidfile();
 
 	/* we need the correct time here so the timeout to connect() will
 	 * work.
 	 */
-	set_time();
-	connect_to_server(NULL);
+	rb_set_time();
 
+	rb_event_addonce("connect_to_server_startup", connect_to_server, NULL, 1);
 	/* enter main IO loop */
-	read_io();
+
+	rb_lib_loop(0);
 
 	return 0;
 }
@@ -593,14 +577,14 @@ rebuild_params(const char **parv, int parc, int start)
 
 	if (start < parc)
 	{
-		strlcat(buf, parv[start], sizeof(buf));
+		rb_strlcat(buf, parv[start], sizeof(buf));
 		start++;
 
 		for(; start < parc; start++)
 		{
-			strlcat(buf, " ", sizeof(buf));
+			rb_strlcat(buf, " ", sizeof(buf));
 
-			if(strlcat(buf, parv[start], sizeof(buf)) >= sizeof(buf))
+			if(rb_strlcat(buf, parv[start], sizeof(buf)) >= sizeof(buf))
 				break;
 		}
 	}
@@ -661,10 +645,10 @@ count_memory_string(const char *str)
 void
 count_memory(struct client *client_p)
 {
-	BlockHeap *bh;
+//	rb_bh *bh;
 	struct conf_server *sconf;
 	struct conf_oper *oconf;
-	dlink_node *ptr;
+	rb_dlink_node *ptr;
 
 #ifdef ENABLE_USERSERV
 	size_t sz_user_reg_password = 0;
@@ -731,8 +715,8 @@ count_memory(struct client *client_p)
 #endif
 
 	sendto_server(":%s 988 %s :BLOCKHEAP", MYNAME, client_p->name);
-
-	DLINK_FOREACH(ptr, heap_lists.head)
+#if 0
+	RB_DLINK_FOREACH(ptr, heap_lists.head)
 	{
 		size_t sz_bh_used;
 		size_t sz_bh_free;
@@ -741,21 +725,21 @@ count_memory(struct client *client_p)
 
 		bh = ptr->data;
 
-		BlockHeapUsage(bh, &sz_bh_used, &sz_bh_free, &sz_bh_usedmem, &sz_bh_freemem);
+		rb_bh_usage(bh, &sz_bh_used, &sz_bh_free, &sz_bh_usedmem, &sz_bh_freemem);
 
 		sendto_server(":%s 988 %s :   %s: %u(%u) %u(%u)",
 				MYNAME, client_p->name, bh->name, 
 				sz_bh_used, sz_bh_usedmem,
 				sz_bh_free, sz_bh_freemem);
 	}
-
-	sz_hash_overhead += sizeof(dlink_list) * MAX_NAME_HASH;		/* name_table */
-	sz_hash_overhead += sizeof(dlink_list) * MAX_NAME_HASH;		/* uid_table */
-	sz_hash_overhead += sizeof(dlink_list) * MAX_HOST_HASH;		/* host_table */
-	sz_hash_overhead += sizeof(dlink_list) * MAX_CHANNEL_TABLE;	/* channel_table */
-	sz_hash_overhead += sizeof(dlink_list) * MAX_NAME_HASH;		/* user_reg_table */
-	sz_hash_overhead += sizeof(dlink_list) * MAX_CHANNEL_TABLE;	/* chan_reg_table */
-	sz_hash_overhead += sizeof(dlink_list) * MAX_NAME_HASH;		/* nick_reg_table */
+#endif
+	sz_hash_overhead += sizeof(rb_dlink_list) * MAX_NAME_HASH;		/* name_table */
+	sz_hash_overhead += sizeof(rb_dlink_list) * MAX_NAME_HASH;		/* uid_table */
+	sz_hash_overhead += sizeof(rb_dlink_list) * MAX_HOST_HASH;		/* host_table */
+	sz_hash_overhead += sizeof(rb_dlink_list) * MAX_CHANNEL_TABLE;	/* channel_table */
+	sz_hash_overhead += sizeof(rb_dlink_list) * MAX_NAME_HASH;		/* user_reg_table */
+	sz_hash_overhead += sizeof(rb_dlink_list) * MAX_CHANNEL_TABLE;	/* chan_reg_table */
+	sz_hash_overhead += sizeof(rb_dlink_list) * MAX_NAME_HASH;		/* nick_reg_table */
 
 	sendto_server(":%s 988 %s :Hash Overhead: %u",
 			MYNAME, client_p->name, (unsigned int) sz_hash_overhead);
@@ -777,7 +761,7 @@ count_memory(struct client *client_p)
 	sz_conf += count_memory_string(config_file.uregister_url);
 	sz_conf += count_memory_string(config_file.nwarn_string);
 
-	DLINK_FOREACH(ptr, conf_server_list.head)
+	RB_DLINK_FOREACH(ptr, conf_server_list.head)
 	{
 		sconf = ptr->data;
 
@@ -787,9 +771,9 @@ count_memory(struct client *client_p)
 		sz_conf += count_memory_string(sconf->vhost);
 	}
 
-	sz_conf += dlink_list_length(&conf_server_list) * sizeof(struct conf_server);
+	sz_conf += rb_dlink_list_length(&conf_server_list) * sizeof(struct conf_server);
 
-	DLINK_FOREACH(ptr, conf_oper_list.head)
+	RB_DLINK_FOREACH(ptr, conf_oper_list.head)
 	{
 		oconf = ptr->data;
 
@@ -800,9 +784,9 @@ count_memory(struct client *client_p)
 		sz_conf += count_memory_string(oconf->server);
 	}
 
-	sz_conf += dlink_list_length(&conf_oper_list) * sizeof(struct conf_oper);
+	sz_conf += rb_dlink_list_length(&conf_oper_list) * sizeof(struct conf_oper);
 
-	sendto_server(":%s 988 %s :Config File: %u", 
-			MYNAME, client_p->name, sz_conf);
+	sendto_server(":%s 988 %s :Config File: %lu", 
+			MYNAME, client_p->name, (unsigned long)sz_conf);
 }
 

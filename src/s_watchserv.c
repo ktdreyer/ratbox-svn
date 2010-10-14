@@ -44,6 +44,8 @@
 #include "watch.h"
 #include "hook.h"
 #include "s_userserv.h"
+#include "tools.h"
+
 
 #define WatchCapable(client_p, conn_p, flag) \
 	((conn_p) ? ((conn_p)->watchflags & flag) : ((client_p)->user->watchflags & flag))
@@ -128,7 +130,7 @@ init_s_watchserv(void)
 
 		if((service_p = merge_service(&watchserv_service, "OPERSERV", 1)) != NULL)
 		{
-			dlink_delete(&watchserv_p->listnode, &service_list);
+			rb_dlinkDelete(&watchserv_p->listnode, &service_list);
 			watchserv_p = service_p;
 		}
 	}
@@ -176,13 +178,13 @@ watch_show(struct client *client_p, struct lconn *conn_p)
 	{
 		if(WatchCapable(client_p, conn_p, watch_flags[i].flag))
 		{
-			strlcat(buf_on, watch_flags[i].name, sizeof(buf_on));
-			strlcat(buf_on, " ", sizeof(buf_on));
+			rb_strlcat(buf_on, watch_flags[i].name, sizeof(buf_on));
+			rb_strlcat(buf_on, " ", sizeof(buf_on));
 		}
 		else
 		{
-			strlcat(buf_off, watch_flags[i].name, sizeof(buf_off));
-			strlcat(buf_off, " ", sizeof(buf_off));
+			rb_strlcat(buf_off, watch_flags[i].name, sizeof(buf_off));
+			rb_strlcat(buf_off, " ", sizeof(buf_off));
 		}
 		
 	}
@@ -259,7 +261,7 @@ watch_send(unsigned int flag, struct client *source_client_p, struct lconn *sour
 	const char *flagname;
 	const char *name;
 	va_list args;
-	dlink_node *ptr;
+	rb_dlink_node *ptr;
 
 	va_start(args, format);
 	vsnprintf(buf, sizeof(buf), format, args);
@@ -272,7 +274,7 @@ watch_send(unsigned int flag, struct client *source_client_p, struct lconn *sour
 	else
 		name = source_client_p->user->user_reg ? source_client_p->user->user_reg->name : "-";
 
-	DLINK_FOREACH(ptr, oper_list.head)
+	RB_DLINK_FOREACH(ptr, oper_list.head)
 	{
 		client_p = ptr->data;
 
@@ -287,7 +289,7 @@ watch_send(unsigned int flag, struct client *source_client_p, struct lconn *sour
 					OPER_MASK(source_client_p, source_conn_p), buf);
 	}
 
-	DLINK_FOREACH(ptr, connection_list.head)
+	RB_DLINK_FOREACH(ptr, connection_list.head)
 	{
 		conn_p = ptr->data;
 

@@ -45,6 +45,7 @@
 #include "conf.h"
 #include "hook.h"
 #include "s_userserv.h"
+#include "tools.h"
 
 #define MS_FLAGS_READ			0x0001
 
@@ -227,11 +228,11 @@ s_memo_send(struct client *client_p, struct lconn *conn_p, const char *parv[], i
 	struct user_reg *ureg_p;
 	struct rsdb_table data;
 	unsigned int memo_id;
-	dlink_node *ptr;
+	rb_dlink_node *ptr;
 
 	/* check their username has been registered long enough */
 	if(config_file.ms_memo_regtime_duration &&
-	   (CURRENT_TIME - client_p->user->user_reg->reg_time) < config_file.ms_memo_regtime_duration)
+	   (rb_current_time() - client_p->user->user_reg->reg_time) < config_file.ms_memo_regtime_duration)
 	{
 		service_err(memoserv_p, client_p, SVC_USER_DURATIONTOOSHORT,
 				client_p->user->user_reg->name, memoserv_p->name, "SEND");
@@ -274,11 +275,11 @@ s_memo_send(struct client *client_p, struct lconn *conn_p, const char *parv[], i
 			"INSERT INTO memos (user_id, source, source_id, timestamp, flags, text)"
 			"VALUES('%u', '%Q', '%u', '%ld', '0', '%Q')",
 			ureg_p->id, client_p->user->user_reg->name,
-			client_p->user->user_reg->id, CURRENT_TIME, msg);
+			client_p->user->user_reg->id, rb_current_time(), msg);
 
 	service_err(memoserv_p, client_p, SVC_MEMO_SENT, ureg_p->name);
 
-	DLINK_FOREACH(ptr, ureg_p->users.head)
+	RB_DLINK_FOREACH(ptr, ureg_p->users.head)
 	{
 		service_err(memoserv_p, ptr->data, SVC_MEMO_RECEIVED,
 				memo_id, client_p->name);

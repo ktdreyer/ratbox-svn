@@ -51,7 +51,7 @@
 #include "event.h"
 #include "watch.h"
 #include "email.h"
-
+#include "tools.h"
 #define S_C_OWNER	200
 #define S_C_MANAGER	190
 #define S_C_USERLIST	150
@@ -71,11 +71,11 @@
 static void init_s_chanserv(void);
 
 static struct client *chanserv_p;
-static BlockHeap *channel_reg_heap;
-static BlockHeap *member_reg_heap;
-static BlockHeap *ban_reg_heap;
+static rb_bh *channel_reg_heap;
+static rb_bh *member_reg_heap;
+static rb_bh *ban_reg_heap;
 
-static dlink_list chan_reg_table[MAX_CHANNEL_TABLE];
+static rb_dlink_list chan_reg_table[MAX_CHANNEL_TABLE];
 
 static int o_chan_chanregister(struct client *, struct lconn *, const char **, int);
 static int o_chan_chandrop(struct client *, struct lconn *, const char **, int);
@@ -185,6 +185,10 @@ static void dump_info_accesslist(struct client *, struct lconn *, struct chan_re
 
 static void expire_chan_suspend(struct chan_reg *chreg_p);
 
+struct ev_entry *chanserv_enforcetopic_ev;
+struct ev_entry *chanserv_expireban_ev;
+
+
 void
 preinit_s_chanserv(void)
 {
@@ -194,9 +198,9 @@ preinit_s_chanserv(void)
 static void
 init_s_chanserv(void)
 {
-	channel_reg_heap = BlockHeapCreate("Channel Reg", sizeof(struct chan_reg), HEAP_CHANNEL_REG);
-	member_reg_heap = BlockHeapCreate("Member Reg", sizeof(struct member_reg), HEAP_MEMBER_REG);
-	ban_reg_heap = BlockHeapCreate("Ban Reg", sizeof(struct ban_reg), HEAP_BAN_REG);
+	channel_reg_heap = rb_bh_create(sizeof(struct chan_reg), HEAP_CHANNEL_REG, "Channel Reg");
+	member_reg_heap = rb_bh_create(sizeof(struct member_reg), HEAP_MEMBER_REG, "Member Reg");
+	ban_reg_heap = rb_bh_create(sizeof(struct ban_reg), HEAP_BAN_REG, "Ban Reg");
 
 	load_channel_db();
 
@@ -211,24 +215,24 @@ init_s_chanserv(void)
 	hook_add(h_chanserv_dbsync, HOOK_DBSYNC);
 	hook_add(h_chanserv_eob_uplink, HOOK_EOB_UPLINK);
 
-	eventAdd("chanserv_updatechan", e_chanserv_updatechan, NULL, 3600);
-	eventAdd("chanserv_expirechan", e_chanserv_expirechan, NULL, 43200);
-	eventAdd("chanserv_partinhabit", e_chanserv_partinhabit, NULL, 21600);
+	rb_event_add("chanserv_updatechan", e_chanserv_updatechan, NULL, 3600);
+	rb_event_add("chanserv_expirechan", e_chanserv_expirechan, NULL, 43200);
+	rb_event_add("chanserv_partinhabit", e_chanserv_partinhabit, NULL, 21600);
 
 	/* we add these with defaults, then update the timers when we parse
 	 * the conf..
 	 */
-	eventAdd("chanserv_expireban", e_chanserv_expireban, NULL,
+	chanserv_expireban_ev = rb_event_add("chanserv_expireban", e_chanserv_expireban, NULL,
 		config_file.cexpireban_frequency);
-	eventAdd("chanserv_enforcetopic", e_chanserv_enforcetopic, NULL,
+	chanserv_enforcetopic_ev = rb_event_add("chanserv_enforcetopic", e_chanserv_enforcetopic, NULL,
 		config_file.cenforcetopic_frequency);
-	eventAdd("chanserv_expire_delowner", e_chanserv_expire_delowner, NULL, 3600);
+	rb_event_add("chanserv_expire_delowner", e_chanserv_expire_delowner, NULL, 3600);
 }
 
 void
 free_channel_reg(struct chan_reg *reg_p)
 {
-	dlink_node *ptr, *next_ptr;
+	rb_dlink_node *ptr, *next_ptr;
 
 	unsigned int hashv = hash_channel(reg_p->name);
 
@@ -239,35 +243,35 @@ free_channel_reg(struct chan_reg *reg_p)
 	rsdb_exec(NULL, "DELETE FROM bans WHERE chname = '%Q'",
 			reg_p->name);
 
-	DLINK_FOREACH_SAFE(ptr, next_ptr, reg_p->bans.head)
+	RB_DLINK_FOREACH_SAFE(ptr, next_ptr, reg_p->bans.head)
 	{
 		free_ban_reg(reg_p, ptr->data);
 	}
 
-	dlink_delete(&reg_p->node, &chan_reg_table[hashv]);
+	rb_dlinkDelete(&reg_p->node, &chan_reg_table[hashv]);
 
 	rsdb_exec(NULL, "DELETE FROM channels WHERE chname = '%Q'",
 			reg_p->name);
 
-	my_free(reg_p->name);
-	my_free(reg_p->topic);
-	my_free(reg_p->url);
-	my_free(reg_p->suspender);
-	my_free(reg_p->suspend_reason);
+	rb_free(reg_p->name);
+	rb_free(reg_p->topic);
+	rb_free(reg_p->url);
+	rb_free(reg_p->suspender);
+	rb_free(reg_p->suspend_reason);
 
-	BlockHeapFree(channel_reg_heap, reg_p);
+	rb_bh_free(channel_reg_heap, reg_p);
 }
 
 static void
 destroy_channel_reg(struct chan_reg *reg_p)
 {
-	dlink_node *ptr, *next_ptr;
+	rb_dlink_node *ptr, *next_ptr;
 
 	rsdb_exec(NULL, "DELETE FROM members WHERE chname = '%Q'",
 			reg_p->name);
 
 	/* free_member_reg() will call free_channel_reg() when its done */
-	DLINK_FOREACH_SAFE(ptr, next_ptr, reg_p->users.head)
+	RB_DLINK_FOREACH_SAFE(ptr, next_ptr, reg_p->users.head)
 	{
 		free_member_reg(ptr->data, 0);
 	}
@@ -278,7 +282,7 @@ add_channel_reg(struct chan_reg *reg_p)
 {
 	unsigned int hashv = hash_channel(reg_p->name);
 	reg_p->bants = 1L; /* initially allow UNBAN */
-	dlink_add(reg_p, &reg_p->node, &chan_reg_table[hashv]);
+	rb_dlinkAdd(reg_p, &reg_p->node, &chan_reg_table[hashv]);
 }
 
 static void
@@ -288,9 +292,9 @@ init_channel_reg(struct chan_reg *chreg_p, const char *name)
 
 	chptr = find_channel(name);
 
-	chreg_p->name = my_strdup(name);
-	chreg_p->tsinfo = chptr != NULL ? chptr->tsinfo : CURRENT_TIME;
-	chreg_p->reg_time = chreg_p->last_time = CURRENT_TIME;
+	chreg_p->name = rb_strdup(name);
+	chreg_p->tsinfo = chptr != NULL ? chptr->tsinfo : rb_current_time();
+	chreg_p->reg_time = chreg_p->last_time = rb_current_time();
 	chreg_p->cmode.mode = MODE_TOPIC|MODE_NOEXTERNAL;
 
 	add_channel_reg(chreg_p);
@@ -308,9 +312,9 @@ find_channel_reg(struct client *client_p, const char *name)
 {
 	struct chan_reg *reg_p;
 	unsigned int hashv = hash_channel(name);
-	dlink_node *ptr;
+	rb_dlink_node *ptr;
 
-	DLINK_FOREACH(ptr, chan_reg_table[hashv].head)
+	RB_DLINK_FOREACH(ptr, chan_reg_table[hashv].head)
 	{
 		reg_p = ptr->data;
 
@@ -328,16 +332,16 @@ static struct member_reg *
 make_member_reg(struct user_reg *ureg_p, struct chan_reg *chreg_p,
 		const char *lastmod, int level, int flags)
 {
-	struct member_reg *mreg_p = BlockHeapAlloc(member_reg_heap);
+	struct member_reg *mreg_p = rb_bh_alloc(member_reg_heap);
 
 	mreg_p->user_reg = ureg_p;
 	mreg_p->channel_reg = chreg_p;
 	mreg_p->level = level;
 	mreg_p->flags = flags;
-	mreg_p->lastmod = my_strdup(lastmod);
+	mreg_p->lastmod = rb_strdup(lastmod);
 
-	dlink_add(mreg_p, &mreg_p->usernode, &ureg_p->channels);
-	dlink_add(mreg_p, &mreg_p->channode, &chreg_p->users);
+	rb_dlinkAdd(mreg_p, &mreg_p->usernode, &ureg_p->channels);
+	rb_dlinkAdd(mreg_p, &mreg_p->channode, &chreg_p->users);
 
 	return mreg_p;
 }
@@ -349,13 +353,13 @@ free_member_reg(struct member_reg *mreg_p, int upgrade)
 	int level = mreg_p->level;
 
 	/* remove the user before we find highest */
-	dlink_delete(&mreg_p->usernode, &mreg_p->user_reg->channels);
-	dlink_delete(&mreg_p->channode, &mreg_p->channel_reg->users);
+	rb_dlinkDelete(&mreg_p->usernode, &mreg_p->user_reg->channels);
+	rb_dlinkDelete(&mreg_p->channode, &mreg_p->channel_reg->users);
 
-	my_free(mreg_p->lastmod);
-	BlockHeapFree(member_reg_heap, mreg_p);
+	rb_free(mreg_p->lastmod);
+	rb_bh_free(member_reg_heap, mreg_p);
 
-	if(!dlink_list_length(&chreg_p->users))
+	if(!rb_dlink_list_length(&chreg_p->users))
 	{
 		free_channel_reg(chreg_p);
 	}
@@ -365,11 +369,11 @@ free_member_reg(struct member_reg *mreg_p, int upgrade)
 		struct member_reg *mreg_tp;
 		struct member_reg *mreg_top = NULL;
 		struct member_reg *mreg_topsus = NULL;
-		dlink_node *ptr;
+		rb_dlink_node *ptr;
 
 		level = 0;
 
-		DLINK_FOREACH(ptr, chreg_p->users.head)
+		RB_DLINK_FOREACH(ptr, chreg_p->users.head)
 		{
 			mreg_tp = ptr->data;
 
@@ -390,7 +394,7 @@ free_member_reg(struct member_reg *mreg_p, int upgrade)
 
 		/* now promote the highest user */
 		mreg_top->level = S_C_OWNER;
-		mreg_top->lastmod = my_strdup(MYNAME);
+		mreg_top->lastmod = rb_strdup(MYNAME);
 
 		rsdb_exec(NULL, 
 				"UPDATE members SET level = '%d', suspend = '0', lastmod = '%Q' "
@@ -404,12 +408,12 @@ static struct member_reg *
 find_member_reg(struct user_reg *ureg_p, struct chan_reg *chreg_p)
 {
 	struct member_reg *mreg_p;
-	dlink_node *ptr;
+	rb_dlink_node *ptr;
 
 	if(ureg_p == NULL)
 		return NULL;
 
-	DLINK_FOREACH(ptr, ureg_p->channels.head)
+	RB_DLINK_FOREACH(ptr, ureg_p->channels.head)
 	{
 		mreg_p = ptr->data;
 
@@ -468,7 +472,7 @@ verify_member_reg(struct client *client_p, struct channel **chptr,
 	}
 
 	/* this is called when someone issues a command.. */
-	mreg_p->channel_reg->last_time = CURRENT_TIME;
+	mreg_p->channel_reg->last_time = rb_current_time();
 	mreg_p->channel_reg->flags |= CS_FLAGS_NEEDUPDATE;
 
 	return mreg_p;
@@ -510,20 +514,20 @@ channel_db_callback(int argc, const char **argv)
 	if(EmptyString(argv[0]))
 		return 0;
 
-	reg_p = BlockHeapAlloc(channel_reg_heap);
-	reg_p->name = my_strdup(argv[0]);
+	reg_p = rb_bh_alloc(channel_reg_heap);
+	reg_p->name = rb_strdup(argv[0]);
 
 	if(!EmptyString(argv[1]))
-		reg_p->topic = my_strdup(argv[1]);
+		reg_p->topic = rb_strdup(argv[1]);
 
 	if(!EmptyString(argv[2]))
-		reg_p->url = my_strdup(argv[2]);
+		reg_p->url = rb_strdup(argv[2]);
 
 	if(!EmptyString(argv[3]))
 	{
 		memset(&mode, 0, sizeof(struct chmode));
 		tmpmode = LOCAL_COPY(argv[3]);
-		modec = string_to_array(tmpmode, modev);
+		modec = rb_string_to_array(tmpmode, modev, MAXPARA);
 
 		if(parse_simple_mode(&mode, (const char **) modev, modec, 0, 1))
 		{
@@ -531,7 +535,7 @@ channel_db_callback(int argc, const char **argv)
 			reg_p->cmode.limit = mode.limit;
 
 			if(mode.key[0])
-				strlcpy(reg_p->cmode.key, mode.key,
+				rb_strlcpy(reg_p->cmode.key, mode.key,
 					sizeof(reg_p->cmode.key));
 
 			/* it's possible someone set a +S when allow_sslonly was enabled, 
@@ -546,7 +550,7 @@ channel_db_callback(int argc, const char **argv)
 	{
 		memset(&mode, 0, sizeof(struct chmode));
 		tmpmode = LOCAL_COPY(argv[4]);
-		modec = string_to_array(tmpmode, modev);
+		modec = rb_string_to_array(tmpmode, modev, MAXPARA);
 
 		if(parse_simple_mode(&mode, (const char **) modev, modec, 0, 1))
 		{
@@ -554,7 +558,7 @@ channel_db_callback(int argc, const char **argv)
 			reg_p->emode.limit = mode.limit;
 
 			if(mode.key[0])
-				strlcpy(reg_p->emode.key, mode.key,
+				rb_strlcpy(reg_p->emode.key, mode.key,
 					sizeof(reg_p->emode.key));
 
 			/* it's possible someone set a +S when allow_sslonly was enabled, 
@@ -572,13 +576,13 @@ channel_db_callback(int argc, const char **argv)
 	reg_p->flags = atoi(argv[8]);
 
 	if(!EmptyString(argv[9]))
-		reg_p->suspender = my_strdup(argv[9]);
+		reg_p->suspender = rb_strdup(argv[9]);
 
 	/* note: suspend_reason may be blank even when a channel is
 	 * suspended, as they were introduced in rserv-1.1
 	 */
 	if(!EmptyString(argv[10]))
-		reg_p->suspend_reason = my_strdup(argv[10]);
+		reg_p->suspend_reason = rb_strdup(argv[10]);
 
 	if(!EmptyString(argv[11]) && atol(argv[11]))
 		reg_p->suspend_time = atol(argv[11]);
@@ -614,39 +618,39 @@ static struct ban_reg *
 make_ban_reg(struct chan_reg *chreg_p, const char *mask, const char *reason,
               const char *username, int level, int hold)
 {
-	struct ban_reg *banreg_p = BlockHeapAlloc(ban_reg_heap);
+	struct ban_reg *banreg_p = rb_bh_alloc(ban_reg_heap);
 
-	banreg_p->mask = my_strdup(mask);
-	banreg_p->reason = my_strdup(EmptyString(reason) ? "No Reason" : reason);
-	banreg_p->username = my_strdup(EmptyString(username) ? "unknown" : username);
+	banreg_p->mask = rb_strdup(mask);
+	banreg_p->reason = rb_strdup(EmptyString(reason) ? "No Reason" : reason);
+	banreg_p->username = rb_strdup(EmptyString(username) ? "unknown" : username);
 	banreg_p->level = level;
 	banreg_p->hold = hold;
 
 	collapse(banreg_p->mask);
 
-	dlink_add(banreg_p, &banreg_p->channode, &chreg_p->bans);
+	rb_dlinkAdd(banreg_p, &banreg_p->channode, &chreg_p->bans);
 	return banreg_p;
 }
 
 static void
 free_ban_reg(struct chan_reg *chreg_p, struct ban_reg *banreg_p)
 {
-	dlink_delete(&banreg_p->channode, &chreg_p->bans);
+	rb_dlinkDelete(&banreg_p->channode, &chreg_p->bans);
 
-	my_free(banreg_p->mask);
-	my_free(banreg_p->reason);
-	my_free(banreg_p->username);
+	rb_free(banreg_p->mask);
+	rb_free(banreg_p->reason);
+	rb_free(banreg_p->username);
 
-	BlockHeapFree(ban_reg_heap, banreg_p);
+	rb_bh_free(ban_reg_heap, banreg_p);
 }
 
 static struct ban_reg *
 find_ban_reg(struct chan_reg *chreg_p, const char *mask)
 {
 	struct ban_reg *banreg_p;
-	dlink_node *ptr;
+	rb_dlink_node *ptr;
 
-	DLINK_FOREACH(ptr, chreg_p->bans.head)
+	RB_DLINK_FOREACH(ptr, chreg_p->bans.head)
 	{
 		banreg_p = ptr->data;
 
@@ -725,9 +729,9 @@ enable_inhabit(struct chan_reg *chreg_p, struct channel *chptr, int autojoin)
 	{
 		sendto_server(":%s TOPIC %s :%s",
 				SVC_UID(chanserv_p), chptr->name, chreg_p->topic);
-		strlcpy(chptr->topic, chreg_p->topic, sizeof(chptr->topic));
-		strlcpy(chptr->topicwho, MYNAME, sizeof(chptr->topicwho));
-		chptr->topic_tsinfo = CURRENT_TIME;
+		rb_strlcpy(chptr->topic, chreg_p->topic, sizeof(chptr->topic));
+		rb_strlcpy(chptr->topicwho, MYNAME, sizeof(chptr->topicwho));
+		chptr->topic_tsinfo = rb_current_time();
 	}
 }
 
@@ -761,9 +765,9 @@ static const char *
 find_owner(struct chan_reg *chreg_p)
 {
 	struct member_reg *mreg_p;
-	dlink_node *ptr;
+	rb_dlink_node *ptr;
 
-	DLINK_FOREACH(ptr, chreg_p->users.head)
+	RB_DLINK_FOREACH(ptr, chreg_p->users.head)
 	{
 		mreg_p = ptr->data;
 
@@ -782,13 +786,13 @@ access_users_on_channel(struct chan_reg *chreg_p)
 	struct member_reg *mreg_tp;
 	struct user_reg *ureg_p;
 	struct chmember *msptr;
-	dlink_node *ptr;
+	rb_dlink_node *ptr;
 
 	chptr = find_channel(chreg_p->name);
 	if (chptr == NULL)
 		return 0;
 
-	DLINK_FOREACH(ptr, chptr->users.head)
+	RB_DLINK_FOREACH(ptr, chptr->users.head)
 	{
 		msptr = ptr->data;
 		ureg_p = msptr->client_p->user->user_reg;
@@ -812,7 +816,7 @@ static void
 e_chanserv_updatechan(void *unused)
 {
 	struct chan_reg *chreg_p;
-	dlink_node *ptr, *next_ptr;
+	rb_dlink_node *ptr, *next_ptr;
 	int i;
 
 	/* Start a transaction, we're going to make a lot of changes */
@@ -846,7 +850,7 @@ static void
 e_chanserv_expirechan(void *unused)
 {
 	struct chan_reg *chreg_p;
-	dlink_node *ptr, *next_ptr;
+	rb_dlink_node *ptr, *next_ptr;
 	int i;
 
 	/* Start a transaction, we're going to make a lot of changes */
@@ -861,12 +865,12 @@ e_chanserv_expirechan(void *unused)
 
 		if(chreg_p->flags & CS_FLAGS_SUSPENDED)
 		{
-			if((chreg_p->last_time + config_file.cexpire_suspended_time) > CURRENT_TIME)
+			if((chreg_p->last_time + config_file.cexpire_suspended_time) > rb_current_time())
 				continue;
 		}
 		else
 		{
-			if((chreg_p->last_time + config_file.cexpire_time) > CURRENT_TIME)
+			if((chreg_p->last_time + config_file.cexpire_time) > rb_current_time())
 				continue;
 
 			/* final check: make sure nobody with access is on the
@@ -874,7 +878,7 @@ e_chanserv_expirechan(void *unused)
 			 * otherwise expire. */
 			if(access_users_on_channel(chreg_p))
 			{
-				chreg_p->last_time = CURRENT_TIME;
+				chreg_p->last_time = rb_current_time();
 				rsdb_exec(NULL, "UPDATE channels "
 						"SET last_time = '%lu' WHERE chname = '%Q'",
 						chreg_p->last_time, chreg_p->name);
@@ -894,9 +898,9 @@ e_chanserv_expireban(void *unused)
 {
 	struct chan_reg *chreg_p;
 	struct ban_reg *banreg_p;
-	dlink_node *hptr;
-	dlink_node *ptr, *next_ptr;
-	dlink_node *bptr;
+	rb_dlink_node *hptr;
+	rb_dlink_node *ptr, *next_ptr;
+	rb_dlink_node *bptr;
 	int i, any;
 	struct channel *chptr;
 
@@ -909,11 +913,11 @@ e_chanserv_expireban(void *unused)
 		any = 0;
 		chptr = NULL;
 
-		DLINK_FOREACH_SAFE(ptr, next_ptr, chreg_p->bans.head)
+		RB_DLINK_FOREACH_SAFE(ptr, next_ptr, chreg_p->bans.head)
 		{
 			banreg_p = ptr->data;
 
-			if(!banreg_p->hold || banreg_p->hold > CURRENT_TIME)
+			if(!banreg_p->hold || banreg_p->hold > rb_current_time())
 				continue;
 
 			if (!any)
@@ -925,13 +929,13 @@ e_chanserv_expireban(void *unused)
 			}
 			if (chptr != NULL)
 			{
-				DLINK_FOREACH(bptr, chptr->bans.head)
+				RB_DLINK_FOREACH(bptr, chptr->bans.head)
 				{
 					if (!irccmp(bptr->data, banreg_p->mask))
 					{
 						modebuild_add(DIR_DEL, "b", banreg_p->mask);
-						my_free(bptr->data);
-						dlink_destroy(bptr, &chptr->bans);
+						rb_free(bptr->data);
+						rb_dlinkDestroy(bptr, &chptr->bans);
 						break;
 					}
 				}
@@ -954,7 +958,7 @@ e_chanserv_enforcetopic(void *unused)
 {
 	struct channel *chptr;
 	struct chan_reg *chreg_p;
-	dlink_node *ptr;
+	rb_dlink_node *ptr;
 	int i;
 
 	/* topics are enforced automatically */
@@ -972,7 +976,7 @@ e_chanserv_enforcetopic(void *unused)
 		if((chptr = find_channel(chreg_p->name)) == NULL)
 			continue;
 
-		if(dlink_find(chanserv_p, &chptr->services) == NULL)
+		if(rb_dlinkFind(chanserv_p, &chptr->services) == NULL)
 			continue;
 
 		/* already has this topic set.. */
@@ -981,9 +985,9 @@ e_chanserv_enforcetopic(void *unused)
 
 		sendto_server(":%s TOPIC %s :%s",
 				SVC_UID(chanserv_p), chptr->name, chreg_p->topic);
-		strlcpy(chptr->topic, chreg_p->topic, sizeof(chptr->topic));
-		strlcpy(chptr->topicwho, MYNAME, sizeof(chptr->topicwho));
-		chptr->topic_tsinfo = CURRENT_TIME;
+		rb_strlcpy(chptr->topic, chreg_p->topic, sizeof(chptr->topic));
+		rb_strlcpy(chptr->topicwho, MYNAME, sizeof(chptr->topicwho));
+		chptr->topic_tsinfo = rb_current_time();
 	}
 	HASH_WALK_END
 }
@@ -992,7 +996,7 @@ static void
 e_chanserv_expire_delowner(void *unused)
 {
 	rsdb_exec(NULL, "DELETE FROM channels_dropowner WHERE time <= '%lu'",
-			CURRENT_TIME - config_file.cdelowner_duration);
+			rb_current_time() - config_file.cdelowner_duration);
 }
 
 static void
@@ -1000,7 +1004,7 @@ e_chanserv_partinhabit(void *unused)
 {
 	struct channel *chptr;
 	struct chan_reg *chreg_p;
-	dlink_node *ptr;
+	rb_dlink_node *ptr;
 	int i;
 
 	HASH_WALK(i, MAX_CHANNEL_TABLE, ptr, chan_reg_table)
@@ -1032,7 +1036,7 @@ e_chanserv_partinhabit(void *unused)
 			}
 
 			/* noone in there.. */
-			if(!dlink_list_length(&chptr->users))
+			if(!rb_dlink_list_length(&chptr->users))
 			{
 				chreg_p->flags &= ~CS_FLAGS_INHABIT;
 				part_service(chanserv_p, chptr->name);
@@ -1043,7 +1047,7 @@ e_chanserv_partinhabit(void *unused)
 				chreg_p->flags &= ~CS_FLAGS_INHABIT;
 			}
 			/* someone is opped, they can look after it */
-			else if(dlink_list_length(&chptr->users_opped))
+			else if(rb_dlink_list_length(&chptr->users_opped))
 			{
 				chreg_p->flags &= ~CS_FLAGS_INHABIT;
 				part_service(chanserv_p, chptr->name);
@@ -1054,7 +1058,7 @@ e_chanserv_partinhabit(void *unused)
 		/* when dealing with autojoin, we only want to part channels that are empty */
 		else if(chreg_p->flags & CS_FLAGS_AUTOJOIN && !config_file.cautojoin_empty)
 		{
-			if(dlink_list_length(&chptr->users) == 0)
+			if(rb_dlink_list_length(&chptr->users) == 0)
 				part_service(chanserv_p, chptr->name);
 
 			continue;
@@ -1092,7 +1096,7 @@ h_chanserv_sjoin_lowerts(void *v_chptr, void *unused)
 	 * we will eventually send an sjoin, which will contain the updated
 	 * modes..
 	 */
-	if(!sent_burst && dlink_list_length(&chptr->services))
+	if(!sent_burst && rb_dlink_list_length(&chptr->services))
 	{
 		int i;
 
@@ -1107,7 +1111,7 @@ h_chanserv_sjoin_lowerts(void *v_chptr, void *unused)
 			chptr->mode.limit = chreg_p->emode.limit;
 
 		if(i & MODE_KEY)
-			strlcpy(chptr->mode.key, chreg_p->emode.key,
+			rb_strlcpy(chptr->mode.key, chreg_p->emode.key,
 				sizeof(chptr->mode.key));
 	}
 	else
@@ -1122,10 +1126,10 @@ h_chanserv_mode_op(void *v_chptr, void *v_members)
 	struct channel *chptr = v_chptr;
 	struct chmember *member_p;
 	struct chan_reg *chreg_p;
-	dlink_list *members = v_members;
-	dlink_node *ptr, *next_ptr;
+	rb_dlink_list *members = v_members;
+	rb_dlink_node *ptr, *next_ptr;
 
-	if(!dlink_list_length(members))
+	if(!rb_dlink_list_length(members))
 		return 0;
 
 	if((chreg_p = find_channel_reg(NULL, chptr->name)) == NULL)
@@ -1146,12 +1150,12 @@ h_chanserv_mode_op(void *v_chptr, void *v_members)
 
 	if(chreg_p->flags & CS_FLAGS_NOOPS)
 	{
-		DLINK_FOREACH_SAFE(ptr, next_ptr, members->head)
+		RB_DLINK_FOREACH_SAFE(ptr, next_ptr, members->head)
 		{
 			member_p = ptr->data;
 			deop_chmember(member_p);
 			modebuild_add(DIR_DEL, "o", UID(member_p->client_p));
-			dlink_destroy(ptr, members);
+			rb_dlinkDestroy(ptr, members);
 		}
 	}
 	else
@@ -1159,7 +1163,7 @@ h_chanserv_mode_op(void *v_chptr, void *v_members)
 		struct member_reg *mreg_p;
 
 
-		DLINK_FOREACH_SAFE(ptr, next_ptr, members->head)
+		RB_DLINK_FOREACH_SAFE(ptr, next_ptr, members->head)
 		{
 			member_p = ptr->data;
 			mreg_p = find_member_reg(member_p->client_p->user->user_reg, 
@@ -1170,7 +1174,7 @@ h_chanserv_mode_op(void *v_chptr, void *v_members)
 				deop_chmember(member_p);
 				modebuild_add(DIR_DEL, "o",
 						UID(member_p->client_p));
-				dlink_destroy(ptr, members);
+				rb_dlinkDestroy(ptr, members);
 			}
 		}
 	}
@@ -1186,10 +1190,10 @@ h_chanserv_mode_voice(void *v_chptr, void *v_members)
 	struct channel *chptr = v_chptr;
 	struct chmember *member_p;
 	struct chan_reg *chreg_p;
-	dlink_list *members = v_members;
-	dlink_node *ptr, *next_ptr;
+	rb_dlink_list *members = v_members;
+	rb_dlink_node *ptr, *next_ptr;
 
-	if(!dlink_list_length(members))
+	if(!rb_dlink_list_length(members))
 		return 0;
 
 	if((chreg_p = find_channel_reg(NULL, chptr->name)) == NULL)
@@ -1207,12 +1211,12 @@ h_chanserv_mode_voice(void *v_chptr, void *v_members)
 
 	modebuild_start(chanserv_p, chptr);
 
-	DLINK_FOREACH_SAFE(ptr, next_ptr, members->head)
+	RB_DLINK_FOREACH_SAFE(ptr, next_ptr, members->head)
 	{
 		member_p = ptr->data;
 		member_p->flags &= ~MODE_VOICED;
 		modebuild_add(DIR_DEL, "v", UID(member_p->client_p));
-		dlink_destroy(ptr, members);
+		rb_dlinkDestroy(ptr, members);
 	}
 
 	modebuild_finish();
@@ -1263,9 +1267,9 @@ h_chanserv_mode_simple(void *v_chptr, void *v_chreg)
 	if(chreg_p->emode.key[0] && strcasecmp(chptr->mode.key, chreg_p->emode.key))
 	{
 		mode.mode |= MODE_KEY;
-		strlcpy(chptr->mode.key, chreg_p->emode.key,
+		rb_strlcpy(chptr->mode.key, chreg_p->emode.key,
 			sizeof(chptr->mode.key));
-		strlcpy(mode.key, chreg_p->emode.key, sizeof(mode.key));
+		rb_strlcpy(mode.key, chreg_p->emode.key, sizeof(mode.key));
 	}
 
 	/* we simply issue a mode of what it doesnt have in common */
@@ -1281,10 +1285,10 @@ h_chanserv_mode_ban(void *v_chptr, void *v_list)
 {
 	struct channel *chptr = v_chptr;
 	struct chan_reg *chreg_p;
-	dlink_list *banlist = v_list;
-	dlink_node *ptr, *next_ptr;
+	rb_dlink_list *banlist = v_list;
+	rb_dlink_node *ptr, *next_ptr;
 
-	if(!dlink_list_length(banlist))
+	if(!rb_dlink_list_length(banlist))
 		return 0;
 
 	if((chreg_p = find_channel_reg(NULL, chptr->name)) == NULL)
@@ -1302,19 +1306,32 @@ h_chanserv_mode_ban(void *v_chptr, void *v_list)
 
 	modebuild_start(chanserv_p, chptr);
 
-	DLINK_FOREACH_SAFE(ptr, next_ptr, banlist->head)
+	RB_DLINK_FOREACH_SAFE(ptr, next_ptr, banlist->head)
 	{
 		modebuild_add(DIR_DEL, "b", ptr->data);
 
 		/* this will destroy what is referenced by ptr->data */
 		del_ban(ptr->data, &chptr->bans);
-		dlink_destroy(ptr, banlist);
+		rb_dlinkDestroy(ptr, banlist);
 	}
 
 	modebuild_finish();
 
 	return 0;
 }
+
+static rb_dlink_node *
+dlink_find_string(const char *data, rb_dlink_list *list)
+{
+        rb_dlink_node *ptr;
+        RB_DLINK_FOREACH(ptr, list->head)
+        {
+                if(!irccmp((const char *) ptr->data, data))
+                        return ptr;
+        }
+        return NULL;
+} 
+
 
 
 static int
@@ -1325,13 +1342,13 @@ h_chanserv_join(void *v_chptr, void *v_members)
 	struct ban_reg *banreg_p;
 	struct channel *chptr = v_chptr;
 	struct chmember *member_p;
-	dlink_list *members = v_members;
-	dlink_node *ptr, *next_ptr;
-	dlink_node *bptr;
+	rb_dlink_list *members = v_members;
+	rb_dlink_node *ptr, *next_ptr;
+	rb_dlink_node *bptr;
 	int hit;
 
 	/* another hook couldve altered this.. */
-	if(!dlink_list_length(members))
+	if(!rb_dlink_list_length(members))
 		return 0;
 
 	/* not registered, cant ban anyone.. */
@@ -1349,7 +1366,7 @@ h_chanserv_join(void *v_chptr, void *v_members)
 
 	current_mark++;
 
-	DLINK_FOREACH_SAFE(ptr, next_ptr, members->head)
+	RB_DLINK_FOREACH_SAFE(ptr, next_ptr, members->head)
 	{
 		member_p = ptr->data;
 		hit = 0;
@@ -1361,12 +1378,12 @@ h_chanserv_join(void *v_chptr, void *v_members)
 		if(mreg_p != NULL && mreg_p->suspend)
 			mreg_p = NULL;
 
-		DLINK_FOREACH(bptr, chreg_p->bans.head)
+		RB_DLINK_FOREACH(bptr, chreg_p->bans.head)
 		{
 			banreg_p = bptr->data;
 
 			/* ban has expired? */
-			if(banreg_p->hold && banreg_p->hold <= CURRENT_TIME)
+			if(banreg_p->hold && banreg_p->hold <= rb_current_time())
 				continue;
 
 			if(!match(banreg_p->mask, member_p->client_p->user->mask))
@@ -1391,7 +1408,7 @@ h_chanserv_join(void *v_chptr, void *v_members)
 			if(banreg_p->marked != current_mark)
 			{
 				if(!dlink_find_string(banreg_p->mask, &chptr->bans))
-					dlink_add_alloc(my_strdup(banreg_p->mask), &chptr->bans);
+					rb_dlinkAddAlloc(rb_strdup(banreg_p->mask), &chptr->bans);
 
 				modebuild_add(DIR_ADD, "b", banreg_p->mask);
 				banreg_p->marked = current_mark;
@@ -1401,12 +1418,12 @@ h_chanserv_join(void *v_chptr, void *v_members)
 			 * autojoin so that kicking them doesnt destroy the
 			 * channel --fl
 			 */
-			if(dlink_list_length(&chptr->users) == 1)
+			if(rb_dlink_list_length(&chptr->users) == 1)
 				enable_inhabit(chreg_p, chptr, 0);
 
 			kickbuild_add(UID(member_p->client_p), banreg_p->reason);
 
-			dlink_destroy(ptr, members);
+			rb_dlinkDestroy(ptr, members);
 			del_chmember(member_p);
 			hit++;
 			break;
@@ -1420,7 +1437,7 @@ h_chanserv_join(void *v_chptr, void *v_members)
 		if(mreg_p != NULL)
 		{
 			/* update last_time whenever a user with access joins */
-			mreg_p->channel_reg->last_time = CURRENT_TIME;
+			mreg_p->channel_reg->last_time = rb_current_time();
 			mreg_p->channel_reg->flags |= CS_FLAGS_NEEDUPDATE;
 		}
 
@@ -1431,7 +1448,7 @@ h_chanserv_join(void *v_chptr, void *v_members)
 			    (!mreg_p || mreg_p->level < S_C_OP)))
 			{
 				/* stop them cycling for ops */
-				if(dlink_list_length(&chptr->users) == 1)
+				if(rb_dlink_list_length(&chptr->users) == 1)
 					enable_inhabit(chreg_p, chptr, 0);
 
 				modebuild_add(DIR_DEL, "o", 
@@ -1444,7 +1461,7 @@ h_chanserv_join(void *v_chptr, void *v_members)
 
 		if(is_voiced(member_p) && (chreg_p->flags & CS_FLAGS_NOVOICES))
 		{
-			if(dlink_list_length(&chptr->users) == 1)
+			if(rb_dlink_list_length(&chptr->users) == 1)
 				enable_inhabit(chreg_p, chptr, 0);
 
 			modebuild_add(DIR_DEL, "v", UID(member_p->client_p));
@@ -1453,7 +1470,7 @@ h_chanserv_join(void *v_chptr, void *v_members)
 		}
 
 		/* channel is marked autojoin and we're not in there.. */
-		if(chreg_p->flags & CS_FLAGS_AUTOJOIN && dlink_find(chanserv_p, &chptr->services) == NULL)
+		if(chreg_p->flags & CS_FLAGS_AUTOJOIN && rb_dlinkFind(chanserv_p, &chptr->services) == NULL)
 		{
 			enable_inhabit(chreg_p, chptr, 1);
 		}
@@ -1497,7 +1514,7 @@ h_chanserv_join(void *v_chptr, void *v_members)
 static int
 h_chanserv_user_login(void *v_client_p, void *unused)
 {
-	dlink_node *ptr;
+	rb_dlink_node *ptr;
 	struct user *user;
 	struct user_reg *ureg_p;
 	struct channel *chptr;
@@ -1508,7 +1525,7 @@ h_chanserv_user_login(void *v_client_p, void *unused)
 	user = ((struct client *)v_client_p)->user;
 	ureg_p = user->user_reg;
 
-	DLINK_FOREACH(ptr, user->channels.head)
+	RB_DLINK_FOREACH(ptr, user->channels.head)
 	{
 		member_p = ptr->data;
 		chptr = member_p->chptr;
@@ -1529,7 +1546,7 @@ h_chanserv_user_login(void *v_client_p, void *unused)
 			continue;
 
 		/* channel is being used */
-		mreg_p->channel_reg->last_time = CURRENT_TIME;
+		mreg_p->channel_reg->last_time = rb_current_time();
 		mreg_p->channel_reg->flags |= CS_FLAGS_NEEDUPDATE;
 
 		/* autoop/voice dont work on +o users */
@@ -1605,7 +1622,7 @@ h_chanserv_topic(void *v_chptr, void *unused)
 		return 0;
 
 	/* chanserv only enforces topics when in the channel */
-	if(dlink_find(chanserv_p, &chptr->services) == NULL)
+	if(rb_dlinkFind(chanserv_p, &chptr->services) == NULL)
 		return 0;
 
 	if((chreg_p = find_channel_reg(NULL, chptr->name)) == NULL)
@@ -1616,9 +1633,9 @@ h_chanserv_topic(void *v_chptr, void *unused)
 	{
 		sendto_server(":%s TOPIC %s :%s",
 				SVC_UID(chanserv_p), chptr->name, chreg_p->topic);
-		strlcpy(chptr->topic, chreg_p->topic, sizeof(chptr->topic));
-		strlcpy(chptr->topicwho, MYNAME, sizeof(chptr->topicwho));
-		chptr->topic_tsinfo = CURRENT_TIME;
+		rb_strlcpy(chptr->topic, chreg_p->topic, sizeof(chptr->topic));
+		rb_strlcpy(chptr->topicwho, MYNAME, sizeof(chptr->topicwho));
+		chptr->topic_tsinfo = rb_current_time();
 	}
 
 	return 0;
@@ -1628,12 +1645,12 @@ static void
 expire_chan_suspend(struct chan_reg *chreg_p)
 {
 	chreg_p->flags &= ~CS_FLAGS_SUSPENDED;
-	my_free(chreg_p->suspender);
+	rb_free(chreg_p->suspender);
 	chreg_p->suspender = NULL;
-	my_free(chreg_p->suspend_reason);
+	rb_free(chreg_p->suspend_reason);
 	chreg_p->suspend_reason = NULL;
 	chreg_p->suspend_time = 0;
-	chreg_p->last_time = CURRENT_TIME;
+	chreg_p->last_time = rb_current_time();
 
 	rsdb_exec(NULL, "UPDATE channels SET flags='%d', suspender=NULL, suspend_reason=NULL,"
 			"suspend_time='0', last_time='%lu' WHERE chname='%Q'",
@@ -1666,7 +1683,7 @@ o_chan_chanregister(struct client *client_p, struct lconn *conn_p, const char *p
 	zlog(chanserv_p, 1, WATCH_CSADMIN, 1, client_p, conn_p,
 		"CHANREGISTER %s %s", parv[0], ureg_p->name);
 
-	chreg_p = BlockHeapAlloc(channel_reg_heap);
+	chreg_p = rb_bh_alloc(channel_reg_heap);
 	init_channel_reg(chreg_p, parv[0]);
 
 	mreg_p = make_member_reg(ureg_p, chreg_p, OPER_NAME(client_p, conn_p), 200, 0);
@@ -1742,12 +1759,12 @@ o_chan_chansuspend(struct client *client_p, struct lconn *conn_p, const char *pa
 		"CHANSUSPEND %s %s", reg_p->name, reason);
 
 	reg_p->flags |= CS_FLAGS_SUSPENDED;
-	reg_p->suspender = my_strdup(OPER_NAME(client_p, conn_p));
-	reg_p->suspend_reason = my_strndup(reason, SUSPENDREASONLEN);
-	reg_p->last_time = CURRENT_TIME;
+	reg_p->suspender = rb_strdup(OPER_NAME(client_p, conn_p));
+	reg_p->suspend_reason = rb_strndup(reason, SUSPENDREASONLEN);
+	reg_p->last_time = rb_current_time();
 
 	if(suspend_time)
-		reg_p->suspend_time = CURRENT_TIME + suspend_time;
+		reg_p->suspend_time = rb_current_time() + suspend_time;
 	else
 		reg_p->suspend_time = 0;
 
@@ -1783,11 +1800,11 @@ o_chan_chanunsuspend(struct client *client_p, struct lconn *conn_p, const char *
 		"CHANUNSUSPEND %s", reg_p->name);
 
 	reg_p->flags &= ~CS_FLAGS_SUSPENDED;
-	my_free(reg_p->suspender);
+	rb_free(reg_p->suspender);
 	reg_p->suspender = NULL;
-	my_free(reg_p->suspend_reason);
+	rb_free(reg_p->suspend_reason);
 	reg_p->suspend_reason = NULL;
-	reg_p->last_time = CURRENT_TIME;
+	reg_p->last_time = rb_current_time();
 
 	rsdb_exec(NULL, "UPDATE channels SET flags='%d',suspender=NULL,suspend_reason=NULL,last_time='%lu' WHERE chname = '%Q'",
 			reg_p->flags, reg_p->last_time, reg_p->name);
@@ -1806,7 +1823,7 @@ o_chan_chanlist(struct client *client_p, struct lconn *conn_p, const char *parv[
 	static char buf[BUFSIZE];
 	struct chan_reg *chreg_p;
 	const char *mask = def_mask;
-	dlink_node *ptr;
+	rb_dlink_node *ptr;
 	unsigned int limit = 100;
 	int para = 0;
 	int longlist = 0, suspended = 0;
@@ -1888,14 +1905,14 @@ o_chan_chanlist(struct client *client_p, struct lconn *conn_p, const char *parv[
 			else if(!access_users_on_channel(chreg_p))
 			{
 				snprintf(timebuf, sizeof(timebuf), "Last %s",
-					get_short_duration(CURRENT_TIME - chreg_p->last_time));
+					get_short_duration(rb_current_time() - chreg_p->last_time));
 				p = timebuf;
 			}
 
 			service_send(chanserv_p, client_p, conn_p,
 				"  %s - To %s For %s %s",
 				chreg_p->name, find_owner(chreg_p),
-				get_short_duration(CURRENT_TIME - chreg_p->reg_time),
+				get_short_duration(rb_current_time() - chreg_p->reg_time),
 				p);
 		}
 
@@ -1943,14 +1960,14 @@ o_chan_chaninfo(struct client *client_p, struct lconn *conn_p, const char *parv[
 
 	service_snd(chanserv_p, client_p, conn_p, SVC_INFO_REGDURATIONCHAN,
 			chreg_p->name, owner ?  owner : "?unknown?",
-			get_duration((time_t) (CURRENT_TIME - chreg_p->reg_time)));
+			get_duration((time_t) (rb_current_time() - chreg_p->reg_time)));
 
 	if(chreg_p->flags & CS_FLAGS_SUSPENDED)
 	{
 		time_t suspend_time = chreg_p->suspend_time;
 
 		if(suspend_time)
-			suspend_time -= CURRENT_TIME;
+			suspend_time -= rb_current_time();
 
 		service_snd(chanserv_p, client_p, conn_p, SVC_INFO_SUSPENDED,
 				chreg_p->name, chreg_p->suspender, 
@@ -2002,7 +2019,7 @@ s_chan_register(struct client *client_p, struct lconn *conn_p, const char *parv[
 	}
 
 	if(config_file.ctime_lock > 0 &&
-		(CURRENT_TIME - config_file.ctime_lock) > chptr->tsinfo)
+		(rb_current_time() - config_file.ctime_lock) > chptr->tsinfo)
 	{
 		service_err(chanserv_p, client_p, SVC_CHAN_TIMELOCKED, parv[0]);
 		return 1;
@@ -2014,9 +2031,9 @@ s_chan_register(struct client *client_p, struct lconn *conn_p, const char *parv[
 		static time_t last_time = 0;
 		static int last_count = 0;
 
-		if((last_time + config_file.cregister_time) < CURRENT_TIME)
+		if((last_time + config_file.cregister_time) < rb_current_time())
 		{
-			last_time = CURRENT_TIME;
+			last_time = rb_current_time();
 			last_count = 1;
 		}
 		else if(last_count >= config_file.cregister_amount)
@@ -2036,7 +2053,7 @@ s_chan_register(struct client *client_p, struct lconn *conn_p, const char *parv[
 
 		/* this host has gone over the limits.. */
 		if(hent->cregister >= config_file.chregister_amount &&
-		   hent->cregister_expire > CURRENT_TIME)
+		   hent->cregister_expire > rb_current_time())
 		{
 			service_err(chanserv_p, client_p, SVC_RATELIMITEDHOST,
 					chanserv_p->name, "REGISTER");
@@ -2044,9 +2061,9 @@ s_chan_register(struct client *client_p, struct lconn *conn_p, const char *parv[
 		}
 
 		/* its expired.. reset limits */
-		if(hent->cregister_expire <= CURRENT_TIME)
+		if(hent->cregister_expire <= rb_current_time())
 		{
-			hent->cregister_expire = CURRENT_TIME + config_file.chregister_time;
+			hent->cregister_expire = rb_current_time() + config_file.chregister_time;
 			hent->cregister = 0;
 		}
 
@@ -2056,7 +2073,7 @@ s_chan_register(struct client *client_p, struct lconn *conn_p, const char *parv[
 	zlog(chanserv_p, 2, WATCH_CSREGISTER, 0, client_p, NULL,
 		"REGISTER %s", parv[0]);
 
-	reg_p = BlockHeapAlloc(channel_reg_heap);
+	reg_p = rb_bh_alloc(channel_reg_heap);
 	init_channel_reg(reg_p, parv[0]);
 
 	mreg_p = make_member_reg(client_p->user->user_reg, reg_p,
@@ -2230,7 +2247,7 @@ s_chan_delowner(struct client *client_p, struct lconn *conn_p, const char *parv[
 		}
 
 		rsdb_exec_fetch(&data, "SELECT COUNT(chname) FROM channels_dropowner WHERE chname='%Q' AND time > '%lu'",
-				chreg_p->name, CURRENT_TIME - config_file.cdelowner_duration);
+				chreg_p->name, rb_current_time() - config_file.cdelowner_duration);
 
 		if(data.row_count == 0)
 		{
@@ -2266,7 +2283,7 @@ s_chan_delowner(struct client *client_p, struct lconn *conn_p, const char *parv[
 
 		token = get_password();
 		rsdb_exec(NULL, "INSERT INTO channels_dropowner (chname, token, time) VALUES('%Q', '%Q', '%lu')",
-				             chreg_p->name, token, CURRENT_TIME);
+				             chreg_p->name, token, rb_current_time());
 
 		if(!send_email(ureg_p->email, "Channel Owner Delete",
 				"%s!%s@%s has requested an owner delete for channel %s which "
@@ -2297,7 +2314,7 @@ s_chan_delowner(struct client *client_p, struct lconn *conn_p, const char *parv[
 
 	/* authenticating a password reset */
 	rsdb_exec_fetch(&data, "SELECT token FROM channels_dropowner WHERE chname='%Q' AND time > '%lu'",
-			chreg_p->name, CURRENT_TIME - config_file.cdelowner_duration);
+			chreg_p->name, rb_current_time() - config_file.cdelowner_duration);
 
 	/* ok, found the entry.. */
 	if(data.row_count)
@@ -2370,8 +2387,8 @@ s_chan_moduser(struct client *client_p, struct lconn *conn_p, const char *parv[]
 		parv[0], mreg_tp->user_reg->name, level);
 
 	mreg_tp->level = level;
-	my_free(mreg_tp->lastmod);
-	mreg_tp->lastmod = my_strdup(mreg_p->user_reg->name);
+	rb_free(mreg_tp->lastmod);
+	mreg_tp->lastmod = rb_strdup(mreg_p->user_reg->name);
 
 	service_err(chanserv_p, client_p, SVC_CHAN_USERSETACCESS,
 			mreg_tp->user_reg->name, level, mreg_tp->channel_reg->name);
@@ -2436,8 +2453,8 @@ s_chan_modauto(struct client *client_p, struct lconn *conn_p, const char *parv[]
 		"MODAUTO %s %s %s",
 		parv[0], mreg_tp->user_reg->name, parv[2]);
 
-	my_free(mreg_tp->lastmod);
-	mreg_tp->lastmod = my_strdup(mreg_p->user_reg->name);
+	rb_free(mreg_tp->lastmod);
+	mreg_tp->lastmod = rb_strdup(mreg_p->user_reg->name);
 
 	service_err(chanserv_p, client_p, SVC_CHAN_USERSETAUTOLEVEL,
 			mreg_tp->user_reg->name, parv[2], mreg_tp->channel_reg->name);
@@ -2518,8 +2535,8 @@ s_chan_suspend(struct client *client_p, struct lconn *conn_p, const char *parv[]
 		parv[0], mreg_tp->user_reg->name, level);
 
 	mreg_tp->suspend = level;
-	my_free(mreg_tp->lastmod);
-	mreg_tp->lastmod = my_strdup(mreg_p->user_reg->name);
+	rb_free(mreg_tp->lastmod);
+	mreg_tp->lastmod = rb_strdup(mreg_p->user_reg->name);
 
 	service_err(chanserv_p, client_p, SVC_CHAN_USERSETSUSPEND,
 			mreg_tp->user_reg->name, level, mreg_tp->channel_reg->name);
@@ -2567,8 +2584,8 @@ s_chan_unsuspend(struct client *client_p, struct lconn *conn_p, const char *parv
 		parv[0], mreg_tp->user_reg->name);
 
 	mreg_tp->suspend = 0;
-	my_free(mreg_tp->lastmod);
-	mreg_tp->lastmod = my_strdup(mreg_p->user_reg->name);
+	rb_free(mreg_tp->lastmod);
+	mreg_tp->lastmod = rb_strdup(mreg_p->user_reg->name);
 
 	service_err(chanserv_p, client_p, SVC_CHAN_USERSUSPENDREMOVED,
 			 mreg_tp->user_reg->name, mreg_tp->channel_reg->name);
@@ -2632,11 +2649,11 @@ s_chan_clearops_loc(struct channel *chptr, struct chan_reg *chreg_p,
 	struct member_reg *mreg_tp;
 	struct user_reg *ureg_p;
 	struct chmember *msptr;
-	dlink_node *ptr;
+	rb_dlink_node *ptr;
 
 	modebuild_start(chanserv_p, chptr);
 
-	DLINK_FOREACH(ptr, chptr->users.head)
+	RB_DLINK_FOREACH(ptr, chptr->users.head)
 	{
 		msptr = ptr->data;
 
@@ -2662,11 +2679,11 @@ static void
 s_chan_clearvoices_loc(struct channel *chptr, struct chan_reg *chreg_p)
 {
 	struct chmember *msptr;
-	dlink_node *ptr;
+	rb_dlink_node *ptr;
 
 	modebuild_start(chanserv_p, chptr);
 
-	DLINK_FOREACH(ptr, chptr->users.head)
+	RB_DLINK_FOREACH(ptr, chptr->users.head)
 	{
 		msptr = ptr->data;
 
@@ -2724,8 +2741,8 @@ s_chan_clearbans(struct client *client_p, struct lconn *conn_p, const char *parv
 	struct channel *chptr;
 	struct member_reg *mreg_p;
 	struct ban_reg *banreg_p;
-	dlink_node *ptr, *next_ptr;
-	dlink_node *bptr;
+	rb_dlink_node *ptr, *next_ptr;
+	rb_dlink_node *bptr;
 	int found;
 
 	if((mreg_p = verify_member_reg_name(client_p, &chptr, parv[0], S_C_CLEAR)) == NULL)
@@ -2736,11 +2753,11 @@ s_chan_clearbans(struct client *client_p, struct lconn *conn_p, const char *parv
 
 	modebuild_start(chanserv_p, chptr);
 
-	DLINK_FOREACH_SAFE(ptr, next_ptr, chptr->bans.head)
+	RB_DLINK_FOREACH_SAFE(ptr, next_ptr, chptr->bans.head)
 	{
 		found = 0;
 
-		DLINK_FOREACH(bptr, mreg_p->channel_reg->bans.head)
+		RB_DLINK_FOREACH(bptr, mreg_p->channel_reg->bans.head)
 		{
 			banreg_p = bptr->data;
 
@@ -2754,8 +2771,8 @@ s_chan_clearbans(struct client *client_p, struct lconn *conn_p, const char *parv
 		if(!found)
 		{
 			modebuild_add(DIR_DEL, "b", ptr->data);
-			my_free(ptr->data);
-			dlink_destroy(ptr, &chptr->bans);
+			rb_free(ptr->data);
+			rb_dlinkDestroy(ptr, &chptr->bans);
 		}
 	}
 
@@ -2940,7 +2957,7 @@ s_chan_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 		chreg_p->cmode.limit = mode.limit;
 
 		if(mode.key[0])
-			strlcpy(chreg_p->cmode.key, mode.key,
+			rb_strlcpy(chreg_p->cmode.key, mode.key,
 				sizeof(chreg_p->cmode.key));
 		else
 			chreg_p->cmode.key[0] = '\0';
@@ -2983,7 +3000,7 @@ s_chan_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 		chreg_p->emode.limit = mode.limit;
 
 		if(mode.key[0])
-			strlcpy(chreg_p->emode.key, mode.key,
+			rb_strlcpy(chreg_p->emode.key, mode.key,
 				sizeof(chreg_p->emode.key));
 		else
 			chreg_p->emode.key[0] = '\0';
@@ -3018,7 +3035,7 @@ s_chan_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 
 		if(!irccmp(data, "-none"))
 		{
-			my_free(chreg_p->topic);
+			rb_free(chreg_p->topic);
 			chreg_p->topic = NULL;
 
 			rsdb_exec(NULL, "UPDATE channels SET "
@@ -3033,8 +3050,8 @@ s_chan_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 		if(strlen(data) >= TOPICLEN)
 			data[TOPICLEN-1] = '\0';
 
-		my_free(chreg_p->topic);
-		chreg_p->topic = my_strdup(data);
+		rb_free(chreg_p->topic);
+		chreg_p->topic = rb_strdup(data);
 
 		rsdb_exec(NULL, "UPDATE channels SET topic='%Q' "
 				"WHERE chname='%Q'",
@@ -3043,13 +3060,13 @@ s_chan_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 		/* send a topic update if services is in the channel.. */
 		if((chptr = find_channel(chreg_p->name)))
 		{
-			if(dlink_find(chanserv_p, &chptr->services) && strcmp(chptr->topic, chreg_p->topic))
+			if(rb_dlinkFind(chanserv_p, &chptr->services) && strcmp(chptr->topic, chreg_p->topic))
 			{
 				sendto_server(":%s TOPIC %s :%s",
 						SVC_UID(chanserv_p), chptr->name, chreg_p->topic);
-				strlcpy(chptr->topic, chreg_p->topic, sizeof(chptr->topic));
-				strlcpy(chptr->topicwho, MYNAME, sizeof(chptr->topicwho));
-				chptr->topic_tsinfo = CURRENT_TIME;
+				rb_strlcpy(chptr->topic, chreg_p->topic, sizeof(chptr->topic));
+				rb_strlcpy(chptr->topicwho, MYNAME, sizeof(chptr->topicwho));
+				chptr->topic_tsinfo = rb_current_time();
 			}
 		}
 
@@ -3069,7 +3086,7 @@ s_chan_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 
 		if(!irccmp(arg, "-none"))
 		{
-			my_free(chreg_p->url);
+			rb_free(chreg_p->url);
 			chreg_p->url = NULL;
 
 			rsdb_exec(NULL, "UPDATE channels SET "
@@ -3081,8 +3098,8 @@ s_chan_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 			return 1;
 		}
 
-		my_free(chreg_p->url);
-		chreg_p->url = my_strndup(arg, URLLEN);
+		rb_free(chreg_p->url);
+		chreg_p->url = rb_strndup(arg, URLLEN);
 
 		rsdb_exec(NULL, "UPDATE channels SET url='%Q' "
 				"WHERE chname='%Q'",
@@ -3123,7 +3140,7 @@ s_chan_topic(struct client *client_p, struct lconn *conn_p, const char *parv[], 
 	buf[0] = '\0';
 
 	while(++i < parc)
-		strlcat(buf, parv[i], sizeof(buf));
+		rb_strlcat(buf, parv[i], sizeof(buf));
 		
 	sendto_server(":%s TOPIC %s :[%s] %s",
 			MYUID, parv[0], reg_p->user_reg->name, buf);
@@ -3142,9 +3159,9 @@ s_chan_op(struct client *client_p, struct lconn *conn_p, const char *parv[], int
 
 	if(parc < 1 || EmptyString(parv[0]))
 	{
-		dlink_node *ptr;
+		rb_dlink_node *ptr;
 
-		DLINK_FOREACH(ptr, client_p->user->channels.head)
+		RB_DLINK_FOREACH(ptr, client_p->user->channels.head)
 		{
 			msptr = ptr->data;
 			chptr = msptr->chptr;
@@ -3344,7 +3361,7 @@ s_chan_addban(struct client *client_p, struct lconn *conn_p, const char *parv[],
 	struct member_reg *mreg_p;
 	struct member_reg *mreg_tp;
 	struct ban_reg *banreg_p;
-	dlink_node *ptr, *next_ptr;
+	rb_dlink_node *ptr, *next_ptr;
 	const char *mask;
 	char *endptr;
 	time_t duration;
@@ -3363,7 +3380,7 @@ s_chan_addban(struct client *client_p, struct lconn *conn_p, const char *parv[],
 
 	mask = parv[loc++];
 
-	if(dlink_list_length(&mreg_p->channel_reg->bans) > config_file.cmax_bans)
+	if(rb_dlink_list_length(&mreg_p->channel_reg->bans) > config_file.cmax_bans)
 	{
 		service_err(chanserv_p, client_p, SVC_CHAN_BANLISTFULL, chptr->name);
 		return 1;
@@ -3406,7 +3423,7 @@ s_chan_addban(struct client *client_p, struct lconn *conn_p, const char *parv[],
 
 	while(loc < parc)
 	{
-		if(strlcat(reason, parv[loc], sizeof(reason)) >= REASON_MAGIC)
+		if(rb_strlcat(reason, parv[loc], sizeof(reason)) >= REASON_MAGIC)
 		{
 			reason[REASON_MAGIC] = '\0';
 			break;
@@ -3416,7 +3433,7 @@ s_chan_addban(struct client *client_p, struct lconn *conn_p, const char *parv[],
 
 		/* more params to come */
 		if(loc != parc)
-			strlcat(reason, " ", sizeof(reason));
+			rb_strlcat(reason, " ", sizeof(reason));
 	}
 
 	zlog(chanserv_p, 6, 0, 0, client_p, NULL,
@@ -3424,7 +3441,7 @@ s_chan_addban(struct client *client_p, struct lconn *conn_p, const char *parv[],
 
 	banreg_p = make_ban_reg(mreg_p->channel_reg, mask, reason, 
 			mreg_p->user_reg->name, level, 
-			duration ? CURRENT_TIME + duration : 0);
+			duration ? rb_current_time() + duration : 0);
 	write_ban_db_entry(banreg_p, mreg_p->channel_reg->name);
 
 	service_err(chanserv_p, client_p, SVC_CHAN_BANSET,
@@ -3434,7 +3451,7 @@ s_chan_addban(struct client *client_p, struct lconn *conn_p, const char *parv[],
 		return 1;
 
 	/* already +b'd */
-	DLINK_FOREACH(ptr, chptr->bans.head)
+	RB_DLINK_FOREACH(ptr, chptr->bans.head)
 	{
 		if(!irccmp((const char *) ptr->data, mask))
 			return 1;
@@ -3446,7 +3463,7 @@ s_chan_addban(struct client *client_p, struct lconn *conn_p, const char *parv[],
 	kickbuild_start();
 
 	/* now enforce the ban.. */
-	DLINK_FOREACH_SAFE(ptr, next_ptr, chptr->users.head)
+	RB_DLINK_FOREACH_SAFE(ptr, next_ptr, chptr->users.head)
 	{
 		msptr = ptr->data;
 
@@ -3479,7 +3496,7 @@ s_chan_addban(struct client *client_p, struct lconn *conn_p, const char *parv[],
 		 * inhabit so that kicking them doesnt destroy the
 		 * channel --fl
 		 */
-		if(dlink_list_length(&chptr->users) == 1)
+		if(rb_dlink_list_length(&chptr->users) == 1)
 			enable_inhabit(mreg_p->channel_reg, chptr, 0);
 		kickbuild_add(UID(msptr->client_p), reason);
 		del_chmember(msptr);
@@ -3492,7 +3509,7 @@ s_chan_addban(struct client *client_p, struct lconn *conn_p, const char *parv[],
 	if(loc)
 	{
 		if(!dlink_find_string(mask, &chptr->bans))
-			dlink_add_alloc(my_strdup(mask), &chptr->bans);
+			rb_dlinkAddAlloc(rb_strdup(mask), &chptr->bans);
 
 		modebuild_add(DIR_ADD, "b", mask);
 		modebuild_finish();
@@ -3508,7 +3525,7 @@ s_chan_delban(struct client *client_p, struct lconn *conn_p, const char *parv[],
 	struct channel *chptr;
 	struct member_reg *mreg_p;
 	struct ban_reg *banreg_p;
-	dlink_node *ptr;
+	rb_dlink_node *ptr;
 
 	if((mreg_p = verify_member_reg_name(client_p, NULL, parv[0], S_C_REGULAR)) == NULL)
 		return 1;
@@ -3554,14 +3571,14 @@ s_chan_delban(struct client *client_p, struct lconn *conn_p, const char *parv[],
 	if(chptr == NULL)
 		return 1;
 
-	DLINK_FOREACH(ptr, chptr->bans.head)
+	RB_DLINK_FOREACH(ptr, chptr->bans.head)
 	{
 		if(!irccmp((const char *) ptr->data, parv[1]))
 		{
 			sendto_server(":%s MODE %s -b %s",
 					chanserv_p->name, chptr->name, parv[1]);
-			my_free(ptr->data);
-			dlink_destroy(ptr, &chptr->bans);
+			rb_free(ptr->data);
+			rb_dlinkDestroy(ptr, &chptr->bans);
 			return 1;
 		}
 	}
@@ -3603,8 +3620,8 @@ s_chan_modban(struct client *client_p, struct lconn *conn_p, const char *parv[],
 	}
 
 	banreg_p->level = level;
-	my_free(banreg_p->username);
-	banreg_p->username = my_strdup(mreg_p->user_reg->name);
+	rb_free(banreg_p->username);
+	banreg_p->username = rb_strdup(mreg_p->user_reg->name);
 
 	service_err(chanserv_p, client_p, SVC_CHAN_BANSET,
 			parv[1], level, mreg_p->channel_reg->name);
@@ -3624,7 +3641,7 @@ s_chan_listbans(struct client *client_p, struct lconn *conn_p, const char *parv[
 {
 	struct member_reg *mreg_p;
 	struct ban_reg *banreg_p;
-	dlink_node *ptr;
+	rb_dlink_node *ptr;
 
 	if((mreg_p = verify_member_reg_name(client_p, NULL, parv[0], S_C_REGULAR)) == NULL)
 		return 1;
@@ -3633,14 +3650,14 @@ s_chan_listbans(struct client *client_p, struct lconn *conn_p, const char *parv[
 
 	service_err(chanserv_p, client_p, SVC_CHAN_BANLISTSTART, mreg_p->channel_reg->name);
 
-	DLINK_FOREACH(ptr, mreg_p->channel_reg->bans.head)
+	RB_DLINK_FOREACH(ptr, mreg_p->channel_reg->bans.head)
 	{
 		banreg_p = ptr->data;
 
 		service_error(chanserv_p, client_p, 
 				"  %s %d (%s) [mod: %s] :%s",
 				banreg_p->mask, banreg_p->level,
-				(banreg_p->hold ? get_short_duration(banreg_p->hold - CURRENT_TIME): "perm"),
+				(banreg_p->hold ? get_short_duration(banreg_p->hold - rb_current_time()): "perm"),
 				banreg_p->username, banreg_p->reason);
 	}
 
@@ -3655,7 +3672,7 @@ s_chan_unban(struct client *client_p, struct lconn *conn_p, const char *parv[], 
 	char ipmask[NICKUSERHOSTLEN+1];
 	struct channel *chptr;
 	struct member_reg *mreg_p;
-	dlink_node *ptr, *next_ptr;
+	rb_dlink_node *ptr, *next_ptr;
 	int found = 0;
 
 	if((mreg_p = verify_member_reg_name(client_p, &chptr, parv[0], S_C_REGULAR)) == NULL)
@@ -3685,7 +3702,7 @@ s_chan_unban(struct client *client_p, struct lconn *conn_p, const char *parv[], 
 
 	modebuild_start(chanserv_p, chptr);
 
-	DLINK_FOREACH_SAFE(ptr, next_ptr, chptr->bans.head)
+	RB_DLINK_FOREACH_SAFE(ptr, next_ptr, chptr->bans.head)
 	{
 		const char *data = (const char *) ptr->data;
 		int match_found = 0;
@@ -3701,8 +3718,8 @@ s_chan_unban(struct client *client_p, struct lconn *conn_p, const char *parv[], 
 		if(match_found)
 		{
 			modebuild_add(DIR_DEL, "b", (const char *) ptr->data);
-			my_free(ptr->data);
-			dlink_destroy(ptr, &chptr->bans);
+			rb_free(ptr->data);
+			rb_dlinkDestroy(ptr, &chptr->bans);
 			found++;
 		}
 	}
@@ -3757,13 +3774,13 @@ dump_info_accesslist(struct client *client_p, struct lconn *conn_p,
 			struct chan_reg *chreg_p)
 {
 	struct member_reg *mreg_p;
-	dlink_node *ptr;
+	rb_dlink_node *ptr;
 	char buf[30];
 
 	service_snd(chanserv_p, client_p, conn_p, SVC_INFO_ACCESSLIST,
 			chreg_p->name, "");
 
-	DLINK_FOREACH(ptr, chreg_p->users.head)
+	RB_DLINK_FOREACH(ptr, chreg_p->users.head)
 	{
 		mreg_p = ptr->data;
 		snprintf(buf, sizeof(buf), "(susp %d) ", mreg_p->suspend);
@@ -3791,7 +3808,7 @@ s_chan_info(struct client *client_p, struct lconn *conn_p, const char *parv[], i
 
 	service_err(chanserv_p, client_p, SVC_INFO_REGDURATIONCHAN,
 			reg_p->name, owner ?  owner : "?unknown?",
-			get_duration((time_t) (CURRENT_TIME - reg_p->reg_time)));
+			get_duration((time_t) (rb_current_time() - reg_p->reg_time)));
 
 	if(CHAN_SUSPEND_EXPIRED(reg_p))
 		expire_chan_suspend(reg_p);
@@ -3801,7 +3818,7 @@ s_chan_info(struct client *client_p, struct lconn *conn_p, const char *parv[], i
 		time_t suspend_time = reg_p->suspend_time;
 
 		if(suspend_time)
-			suspend_time -= CURRENT_TIME;
+			suspend_time -= rb_current_time();
 
 		if(config_file.cshow_suspend_reasons)
 			service_err(chanserv_p, client_p, SVC_INFO_SUSPENDEDADMIN,
@@ -3832,7 +3849,7 @@ s_chanserv_countmem(size_t *sz_chan_reg_name, size_t *sz_chan_reg_topic,
 {
 	struct chan_reg *chreg_p;
 	struct ban_reg *banreg_p;
-	dlink_node *ptr, *vptr;
+	rb_dlink_node *ptr, *vptr;
 	int i;
 
 	HASH_WALK(i, MAX_CHANNEL_TABLE, ptr, chan_reg_table)
@@ -3854,7 +3871,7 @@ s_chanserv_countmem(size_t *sz_chan_reg_name, size_t *sz_chan_reg_topic,
 		if(!EmptyString(chreg_p->suspend_reason))
 			*sz_chan_reg_suspend += strlen(chreg_p->suspend_reason) + 1;
 
-		DLINK_FOREACH(vptr, chreg_p->bans.head)
+		RB_DLINK_FOREACH(vptr, chreg_p->bans.head)
 		{
 			banreg_p = vptr->data;
 

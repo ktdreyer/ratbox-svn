@@ -24,10 +24,6 @@
 #include "stdinc.h"
 #include "rserv.h"
 
-#ifdef HAVE_CRYPT_H
-#include <crypt.h>
-#endif
-
 static char saltChars[] =
        "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
        /* 0 .. 63, ascii - 64 */
@@ -35,7 +31,14 @@ static char saltChars[] =
 void
 init_crypt_seed(void)
 {
-	srand((unsigned int) (system_time.tv_sec ^ (system_time.tv_usec | (getpid() << 20))));
+	unsigned int seed;
+	if(rb_get_random(&seed, sizeof(seed)) == -1)
+	{
+		const struct timeval *tv = rb_current_time_tv();
+		srand(tv->tv_sec ^ (tv->tv_usec | (getpid() << 20)));
+		return;
+	}
+	srand(seed);
 }
 
 static char *
@@ -92,7 +95,7 @@ get_crypt(const char *password, const char *csalt)
 	else if(salt == NULL)
 		salt = make_des_salt();
 
-	result = crypt(password, salt);
+	result = rb_crypt(password, salt);
 	return result;
 }
 

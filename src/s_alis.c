@@ -42,6 +42,7 @@
 #include "c_init.h"
 #include "log.h"
 #include "conf.h"
+#include "tools.h"
 
 #define ALIS_MAX_PARC	10
 
@@ -261,20 +262,20 @@ print_channel(struct client *client_p, struct channel *chptr,
 	if(query->show_mode && show_topicwho)
 		service_error(alis_p, client_p, "%-50s %-8s %3ld :%s (%s)",
 			chptr->name, chmode_to_string_simple(&chptr->mode),
-			dlink_list_length(&chptr->users),
+			rb_dlink_list_length(&chptr->users),
 			chptr->topic, chptr->topicwho);
 	else if(query->show_mode)
 		service_error(alis_p, client_p, "%-50s %-8s %3ld :%s",
 			chptr->name, chmode_to_string_simple(&chptr->mode),
-			dlink_list_length(&chptr->users),
+			rb_dlink_list_length(&chptr->users),
 			chptr->topic);
 	else if(show_topicwho)
 		service_error(alis_p, client_p, "%-50s %3ld :%s (%s)",
-			chptr->name, dlink_list_length(&chptr->users),
+			chptr->name, rb_dlink_list_length(&chptr->users),
 			chptr->topic, chptr->topicwho);
 	else
 		service_error(alis_p, client_p, "%-50s %3ld :%s",
-			chptr->name, dlink_list_length(&chptr->users),
+			chptr->name, rb_dlink_list_length(&chptr->users),
 			chptr->topic);
 }
 
@@ -285,8 +286,8 @@ show_channel(struct channel *chptr, struct alis_query *query)
         if(chptr->mode.mode & MODE_SECRET)
                 return 0;
 
-        if(dlink_list_length(&chptr->users) < query->min ||
-           (query->max && dlink_list_length(&chptr->users) > query->max))
+        if(rb_dlink_list_length(&chptr->users) < query->min ||
+           (query->max && rb_dlink_list_length(&chptr->users) > query->max))
                 return 0;
 
         if(query->mode)
@@ -340,7 +341,7 @@ s_alis_list(struct client *client_p, struct lconn *conn_p, const char *parv[], i
 {
 	struct channel *chptr;
 	struct alis_query query;
-	dlink_node *ptr;
+	rb_dlink_node *ptr;
 	int maxmatch = config_file.max_matches;
 
 	memset(&query, 0, sizeof(struct alis_query));
@@ -371,7 +372,7 @@ s_alis_list(struct client *client_p, struct lconn *conn_p, const char *parv[], i
                 return 1;
         }
 
-        DLINK_FOREACH(ptr, channel_list.head)
+        RB_DLINK_FOREACH(ptr, channel_list.head)
         {
                 chptr = ptr->data;
 

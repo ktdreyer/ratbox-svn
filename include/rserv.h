@@ -17,11 +17,6 @@
 int current_mark;
 int testing_conf;
 
-extern struct timeval system_time;
-#define CURRENT_TIME system_time.tv_sec
-
-extern void set_time(void);
-
 extern void PRINTFLIKE(2, 3) die(int graceful, const char *format, ...);
 
 extern int have_md5_crypt;

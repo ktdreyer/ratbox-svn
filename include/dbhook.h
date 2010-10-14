@@ -12,7 +12,8 @@ struct rsdb_hook
 	char *table;
 	char *hook_value;
 	dbh_callback callback;
-	dlink_node ptr;
+	rb_dlink_node ptr;
+	struct ev_entry *ev;
 };
 
 struct dbh_schedule
@@ -20,7 +21,7 @@ struct dbh_schedule
 	dbh_schedule_callback callback;
 	void *arg;
 	char *sql;
-	dlink_node ptr;
+	rb_dlink_node ptr;
 };
 
 void init_rsdb_hook(void);

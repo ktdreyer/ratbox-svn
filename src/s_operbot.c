@@ -47,6 +47,7 @@
 #include "ucommand.h"
 #include "newconf.h"
 #include "watch.h"
+#include "tools.h"
 
 static void init_s_operbot(void);
 
@@ -110,7 +111,7 @@ h_operbot_sjoin_lowerts(void *v_chptr, void *unused)
 {
 	struct channel *chptr = v_chptr;
 
-	if (dlink_find(operbot_p, &chptr->services) == NULL)
+	if (rb_dlinkFind(operbot_p, &chptr->services) == NULL)
 		return 0;
 
 	/* Save the new TS for later -- jilles */
@@ -132,7 +133,7 @@ o_operbot_objoin(struct client *client_p, struct lconn *conn_p, const char *parv
 	}
 
 	if((chptr = find_channel(parv[0])) && 
-	   dlink_find(operbot_p, &chptr->services))
+	   rb_dlinkFind(operbot_p, &chptr->services))
 	{
 		service_snd(operbot_p, client_p, conn_p, SVC_IRC_ALREADYONCHANNEL,
 				operbot_p->name, chptr->name);
@@ -142,7 +143,7 @@ o_operbot_objoin(struct client *client_p, struct lconn *conn_p, const char *parv
 	zlog(operbot_p, 1, WATCH_OPERBOT, 1, client_p, conn_p,
 		"OBJOIN %s", parv[0]);
 
-	tsinfo = chptr != NULL ? chptr->tsinfo : CURRENT_TIME;
+	tsinfo = chptr != NULL ? chptr->tsinfo : rb_current_time();
 
 	rsdb_exec(NULL, "INSERT INTO operbot (chname, tsinfo, oper) VALUES(LOWER('%Q'), '%lu', '%Q')",
 			parv[0], tsinfo, OPER_NAME(client_p, conn_p));
@@ -185,7 +186,7 @@ s_operbot_invite(struct client *client_p, struct lconn *conn_p, const char *parv
 		return 1;
 	}
 
-	if(dlink_find(chptr, &operbot_p->service->channels) == NULL)
+	if(rb_dlinkFind(chptr, &operbot_p->service->channels) == NULL)
 	{
 		service_err(operbot_p, client_p, SVC_IRC_CHANNELINVALID, parv[0]);
 		return 1;
@@ -208,9 +209,9 @@ s_operbot_op(struct client *client_p, struct lconn *conn_p, const char *parv[], 
 	/* op in all common channels */
 	if(!parc)
 	{
-		dlink_node *ptr;
+		rb_dlink_node *ptr;
 
-		DLINK_FOREACH(ptr, operbot_p->service->channels.head)
+		RB_DLINK_FOREACH(ptr, operbot_p->service->channels.head)
 		{
 			chptr = ptr->data;
 
@@ -234,7 +235,7 @@ s_operbot_op(struct client *client_p, struct lconn *conn_p, const char *parv[], 
 		return 1;
 	}
 
-	if(dlink_find(chptr, &operbot_p->service->channels) == NULL)
+	if(rb_dlinkFind(chptr, &operbot_p->service->channels) == NULL)
 	{
 		service_err(operbot_p, client_p, SVC_IRC_CHANNELINVALID, parv[0]);
 		return 1;

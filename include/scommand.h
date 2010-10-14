@@ -13,7 +13,7 @@ struct scommand_handler
 	const char *cmd;
 	scommand_func func;
 	int flags;
-	dlink_list hooks;
+	rb_dlink_list hooks;
 };
 
 #define FLAGS_UNKNOWN	0x0001

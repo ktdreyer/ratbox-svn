@@ -24,10 +24,10 @@ struct user_reg
 
 	unsigned int language;
 
-	dlink_node node;
-	dlink_list channels;
-	dlink_list users;
-	dlink_list nicks;
+	rb_dlink_node node;
+	rb_dlink_list channels;
+	rb_dlink_list users;
+	rb_dlink_list nicks;
 };
 
 /* Flags stored in the DB: 0xFFFF */
@@ -40,7 +40,7 @@ struct user_reg
 /* Flags not stored in the DB: 0xFFFF0000 */
 #define US_FLAGS_NEEDUPDATE	0x00010000
 
-#define USER_SUSPEND_EXPIRED(x)	((x)->flags & US_FLAGS_SUSPENDED && (x)->suspend_time && (x)->suspend_time <= CURRENT_TIME)
+#define USER_SUSPEND_EXPIRED(x)	((x)->flags & US_FLAGS_SUSPENDED && (x)->suspend_time && (x)->suspend_time <= rb_current_time())
 
 extern struct user_reg *find_user_reg(struct client *, const char *name);
 extern struct user_reg *find_user_reg_nick(struct client *, const char *name);

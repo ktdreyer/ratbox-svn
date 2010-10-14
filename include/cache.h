@@ -7,18 +7,18 @@
 
 struct lconn;
 
-struct BlockHeap *cacheline_heap;
+struct rb_bh *cacheline_heap;
 
 struct cachefile
 {
 	char name[CACHEFILELEN];
-	dlink_list contents;
+	rb_dlink_list contents;
 };
 
 struct cacheline
 {
 	char data[CACHELINELEN];
-	dlink_node linenode;
+	rb_dlink_node linenode;
 };
 
 extern struct cacheline *emptyline;

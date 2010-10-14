@@ -34,7 +34,7 @@
 #include "rserv.h"
 #include "hook.h"
 
-static dlink_list hooks[HOOK_LAST_HOOK];
+static rb_dlink_list hooks[HOOK_LAST_HOOK];
 
 void
 hook_add(hook_func func, int hook)
@@ -42,19 +42,19 @@ hook_add(hook_func func, int hook)
 	if(hook >= HOOK_LAST_HOOK)
 		return;
 
-	dlink_add_tail_alloc(func, &hooks[hook]);
+	rb_dlinkAddTailAlloc(func, &hooks[hook]);
 }
 
 int
 hook_call(int hook, void *arg, void *arg2)
 {
 	hook_func func;
-	dlink_node *ptr;
+	rb_dlink_node *ptr;
 
 	if(hook >= HOOK_LAST_HOOK)
 		return 0;
 
-	DLINK_FOREACH(ptr, hooks[hook].head)
+	RB_DLINK_FOREACH(ptr, hooks[hook].head)
 	{
 		func = ptr->data;
 		if((*func)(arg, arg2) < 0)

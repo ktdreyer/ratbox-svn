@@ -31,6 +31,7 @@
  * $Id$
  */
 #include "stdinc.h"
+#include "rserv.h"
 #include "c_init.h"
 #include "client.h"
 #include "channel.h"
@@ -38,6 +39,7 @@
 #include "log.h"
 #include "hook.h"
 #include "modebuild.h"
+#include "tools.h"
 
 static void c_mode(struct client *, const char *parv[], int parc);
 static void c_tmode(struct client *, const char *parv[], int parc);
@@ -47,10 +49,10 @@ struct scommand_handler tmode_command = { "TMODE", c_tmode, 0, DLINK_EMPTY };
 struct scommand_handler bmask_command = { "BMASK", c_bmask, 0, DLINK_EMPTY };
 
 /* linked list of services that were deopped */
-static dlink_list deopped_list;
-static dlink_list opped_list;
-static dlink_list voiced_list;
-static dlink_list ban_list;
+static rb_dlink_list deopped_list;
+static rb_dlink_list opped_list;
+static rb_dlink_list voiced_list;
+static rb_dlink_list ban_list;
 
 /* valid_key()
  *   validates key, and transforms to lower ascii
@@ -65,7 +67,7 @@ valid_key(const char *data)
 	unsigned char *s, c;
 	unsigned char *fix = (unsigned char *) buf;
 
-	strlcpy(buf, data, sizeof(buf));
+	rb_strlcpy(buf, data, sizeof(buf));
 
 	for(s = (unsigned char *) buf; (c = *s); s++)
 	{
@@ -117,19 +119,19 @@ valid_ban(const char *banstr)
 }
 
 static void *
-add_ban(const char *banstr, dlink_list *list)
+add_ban(const char *banstr, rb_dlink_list *list)
 {
 	char *ban;
-	dlink_node *ptr;
+	rb_dlink_node *ptr;
 
-	DLINK_FOREACH(ptr, list->head)
+	RB_DLINK_FOREACH(ptr, list->head)
 	{
 		if(!irccmp((const char *) ptr->data, banstr))
 			return NULL;
 	}
 
-	ban = my_strdup(banstr);
-	dlink_add_alloc(ban, list);
+	ban = rb_strdup(banstr);
+	rb_dlinkAddAlloc(ban, list);
 	return ban;
 }
 
@@ -139,12 +141,12 @@ add_ban(const char *banstr, dlink_list *list)
  * Do *NOT* dereference the return value from this function.
  */
 void *
-del_ban(const char *banstr, dlink_list *list)
+del_ban(const char *banstr, rb_dlink_list *list)
 {
 	void *banptr;
-	dlink_node *ptr;
+	rb_dlink_node *ptr;
 
-	DLINK_FOREACH(ptr, list->head)
+	RB_DLINK_FOREACH(ptr, list->head)
 	{
 		if(!irccmp(banstr, (const char *) ptr->data))
 		{
@@ -154,8 +156,8 @@ del_ban(const char *banstr, dlink_list *list)
 			 */
 			banptr = ptr->data;
 
-			my_free(ptr->data);
-			dlink_destroy(ptr, list);
+			rb_free(ptr->data);
+			rb_dlinkDestroy(ptr, list);
 			return banptr;
 		}
 	}
@@ -254,7 +256,7 @@ parse_simple_mode(struct chmode *mode, const char *parv[], int parc,
 						return 0;
 
 					mode->mode |= MODE_KEY;
-					strlcpy(mode->key, fixed,
+					rb_strlcpy(mode->key, fixed,
 						sizeof(mode->key));
 				}
 				else
@@ -411,7 +413,7 @@ parse_full_mode(struct channel *chptr, struct client *source_p,
 			if(dir)
 			{
 				chptr->mode.mode |= MODE_KEY;
-				strlcpy(chptr->mode.key, parv[start],
+				rb_strlcpy(chptr->mode.key, parv[start],
 					sizeof(chptr->mode.key));
 
 				if(source_p)
@@ -497,10 +499,10 @@ parse_full_mode(struct channel *chptr, struct client *source_p,
 
 				/* handle -o+o */
 				if(dir)
-					dlink_find_destroy(target_p, &deopped_list);
+					rb_dlinkFindDestroy(target_p, &deopped_list);
 				/* this is a -o */
-				else if(dlink_find(target_p, &deopped_list) == NULL)
-					dlink_add_alloc(target_p, &deopped_list);
+				else if(rb_dlinkFind(target_p, &deopped_list) == NULL)
+					rb_dlinkAddAlloc(target_p, &deopped_list);
 
 				break;
 			}
@@ -522,11 +524,11 @@ parse_full_mode(struct channel *chptr, struct client *source_p,
 						continue;
 
 					op_chmember(mptr);
-					dlink_add_alloc(mptr, &opped_list);
+					rb_dlinkAddAlloc(mptr, &opped_list);
 				}
 				else if(is_opped(mptr))
 				{
-					dlink_find_destroy(mptr, &opped_list);
+					rb_dlinkFindDestroy(mptr, &opped_list);
 					deop_chmember(mptr);
 				}
 
@@ -542,11 +544,11 @@ parse_full_mode(struct channel *chptr, struct client *source_p,
 						continue;
 
 					mptr->flags |= MODE_VOICED;
-					dlink_add_alloc(mptr, &voiced_list);
+					rb_dlinkAddAlloc(mptr, &voiced_list);
 				}
 				else if(mptr->flags & MODE_VOICED)
 				{
-					dlink_find_destroy(mptr, &voiced_list);
+					rb_dlinkFindDestroy(mptr, &voiced_list);
 					mptr->flags &= ~MODE_VOICED;
 				}
 
@@ -567,7 +569,7 @@ parse_full_mode(struct channel *chptr, struct client *source_p,
 				void *banstr = add_ban(parv[start], &chptr->bans);
 
 				if(banstr)
-					dlink_add_alloc(banstr, &ban_list);
+					rb_dlinkAddAlloc(banstr, &ban_list);
 			}
 			else
 			{
@@ -575,7 +577,7 @@ parse_full_mode(struct channel *chptr, struct client *source_p,
 				void *banptr = del_ban(parv[start], &chptr->bans);
 
 				if(banptr)
-					dlink_find_destroy(banptr, &ban_list);
+					rb_dlinkFindDestroy(banptr, &ban_list);
 			}
 
 			if(source_p)
@@ -624,8 +626,8 @@ static void
 handle_chmode(struct channel *chptr, struct client *source_p, int parc, const char **parv)
 {
 	struct client *target_p;
-	dlink_node *ptr;
-	dlink_node *next_ptr;
+	rb_dlink_node *ptr;
+	rb_dlink_node *next_ptr;
 	struct chmode oldmode;
 
 	oldmode.mode = chptr->mode.mode;
@@ -633,36 +635,36 @@ handle_chmode(struct channel *chptr, struct client *source_p, int parc, const ch
 	if(EmptyString(chptr->mode.key))
 		oldmode.key[0] = '\0';
 	else
-		strlcpy(oldmode.key, chptr->mode.key, sizeof(chptr->mode.key));
+		rb_strlcpy(oldmode.key, chptr->mode.key, sizeof(chptr->mode.key));
 
 	parse_full_mode(chptr, NULL, (const char **) parv, parc, 0, 1);
 
-	if(dlink_list_length(&opped_list))
+	if(rb_dlink_list_length(&opped_list))
 		hook_call(HOOK_CHANNEL_MODE_OP, chptr, &opped_list);
 
-	if(dlink_list_length(&voiced_list))
+	if(rb_dlink_list_length(&voiced_list))
 		hook_call(HOOK_CHANNEL_MODE_VOICE, chptr, &voiced_list);
 
 	if(oldmode.mode != chptr->mode.mode || oldmode.limit != chptr->mode.limit ||
 	   strcasecmp(oldmode.key, chptr->mode.key))
 		hook_call(HOOK_CHANNEL_MODE_SIMPLE, chptr, NULL);
 
-	if(IsUser(source_p) && dlink_list_length(&ban_list))
+	if(IsUser(source_p) && rb_dlink_list_length(&ban_list))
 		hook_call(HOOK_CHANNEL_MODE_BAN, chptr, &ban_list);
 
-	DLINK_FOREACH_SAFE(ptr, next_ptr, opped_list.head)
+	RB_DLINK_FOREACH_SAFE(ptr, next_ptr, opped_list.head)
 	{
-		free_dlink_node(ptr);
+		rb_free_rb_dlink_node(ptr);
 	}
 
-	DLINK_FOREACH_SAFE(ptr, next_ptr, voiced_list.head)
+	RB_DLINK_FOREACH_SAFE(ptr, next_ptr, voiced_list.head)
 	{
-		free_dlink_node(ptr);
+		rb_free_rb_dlink_node(ptr);
 	}
 
-	DLINK_FOREACH_SAFE(ptr, next_ptr, ban_list.head)
+	RB_DLINK_FOREACH_SAFE(ptr, next_ptr, ban_list.head)
 	{
-		free_dlink_node(ptr);
+		rb_free_rb_dlink_node(ptr);
 	}
 
 	opped_list.head = opped_list.tail = NULL;
@@ -672,11 +674,11 @@ handle_chmode(struct channel *chptr, struct client *source_p, int parc, const ch
 	ban_list.length = 0;
 
 	/* some services were deopped.. */
-	DLINK_FOREACH_SAFE(ptr, next_ptr, deopped_list.head)
+	RB_DLINK_FOREACH_SAFE(ptr, next_ptr, deopped_list.head)
 	{
 		target_p = ptr->data;
 		rejoin_service(target_p, chptr, 1);
-		dlink_destroy(ptr, &deopped_list);
+		rb_dlinkDestroy(ptr, &deopped_list);
 	}
 }
 
@@ -753,7 +755,7 @@ static void
 c_bmask(struct client *client_p, const char *parv[], int parc)
 {
 	struct channel *chptr;
-	dlink_list *banlist;
+	rb_dlink_list *banlist;
 	const char *s;
 	char *t;
 

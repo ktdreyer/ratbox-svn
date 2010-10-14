@@ -125,7 +125,7 @@ tryexec:
 
 				if(errcount <= 10)
 				{
-					my_sleep(0, 500000);
+					rb_sleep(0, 500000);
 					goto tryexec;
 				}
 
@@ -197,7 +197,7 @@ tryexec:
 
 				if(errcount <= 10)
 				{
-					my_sleep(0, 500000);
+					rb_sleep(0, 500000);
 					goto tryexec;
 				}
 					
@@ -222,10 +222,10 @@ tryexec:
 
 	/* sqlite puts the column names as the first row */
 	pos = table->col_count;
-	table->row = my_malloc(sizeof(char **) * table->row_count);
+	table->row = rb_malloc(sizeof(char **) * table->row_count);
 	for(i = 0; i < table->row_count; i++)
 	{
-		table->row[i] = my_malloc(sizeof(char *) * table->col_count);
+		table->row[i] = rb_malloc(sizeof(char *) * table->col_count);
 
 		for(j = 0; j < table->col_count; j++)
 		{
@@ -241,9 +241,9 @@ rsdb_exec_fetch_end(struct rsdb_table *table)
 
 	for(i = 0; i < table->row_count; i++)
 	{
-		my_free(table->row[i]);
+		rb_free(table->row[i]);
 	}
-	my_free(table->row);
+	rb_free(table->row);
 
 	sqlite3_free_table((char **) table->arg);
 }

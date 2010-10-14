@@ -108,17 +108,17 @@ rsdb_shutdown(void)
 static void
 rsdb_try_reconnect(void)
 {
-	time_t expire_time = CURRENT_TIME + RSDB_MAX_RECONNECT_TIME;
+	time_t expire_time = rb_current_time() + RSDB_MAX_RECONNECT_TIME;
 
 	mlog("Warning: unable to connect to database, stopping all functions until we recover");
 
-	while(CURRENT_TIME < expire_time)
+	while(rb_current_time() < expire_time)
 	{
 		if(!rsdb_connect(0))
 			return;
 
-		my_sleep(1, 0);
-		set_time();
+		rb_sleep(1, 0);
+		rb_set_time();
 	}
 
 	die(0, "Unable to connect to mysql database: %s", mysql_error(rsdb_database));
@@ -305,11 +305,11 @@ rsdb_exec_fetch(struct rsdb_table *table, const char *format, ...)
 		return;
 	}
 
-	table->row = my_malloc(sizeof(char **) * table->row_count);
+	table->row = rb_malloc(sizeof(char **) * table->row_count);
 
 	for(i = 0, row=mysql_fetch_row(rsdb_result); row; i++, row = mysql_fetch_row(rsdb_result))
 	{
-		table->row[i] = my_malloc(sizeof(char *) * table->col_count);
+		table->row[i] = rb_malloc(sizeof(char *) * table->col_count);
 
 		for(j = 0; j < table->col_count; j++)
 		{
@@ -325,10 +325,10 @@ rsdb_exec_fetch_end(struct rsdb_table *table)
 
 	for(i = 0; i < table->row_count; i++)
 	{
-		my_free(table->row[i]);
+		rb_free(table->row[i]);
 	}
 
-	my_free(table->row);
+	rb_free(table->row);
 
 	mysql_free_result((MYSQL_RES *) table->arg);
 }

@@ -11,7 +11,7 @@ struct send_queue
 	int len;
 	int pos;
 };
-
+ 
 struct lconn
 {
 	struct client *client_p;
@@ -19,7 +19,7 @@ struct lconn
 	char *sid;
         char *pass;
 
-	int fd;
+	rb_fde_t *F;
 	int flags;
 	unsigned int privs;		/* privs as an oper */
 	unsigned int sprivs;		/* privs on services */
@@ -29,18 +29,12 @@ struct lconn
 
         struct conf_oper *oper;
 
-	void (*io_read)(struct lconn *);
-	int (*io_write)(struct lconn *);
-	void (*io_close)(struct lconn *);
-
-	char recvbuf[BUFSIZE+1];
-	size_t recvbuf_offset;
-
-	dlink_list sendq;
+	buf_head_t lb_recvq;
+	buf_head_t lb_sendq;
 };
 
 extern struct lconn *server_p;
-extern dlink_list connection_list;
+extern rb_dlink_list connection_list;
 
 #define CONN_CONNECTING		0x0001
 #define CONN_DCCIN		0x0002
@@ -78,7 +72,6 @@ extern dlink_list connection_list;
 #define ClearConnSentPing(x)	((x)->flags &= ~CONN_SENTPING)
 
 /* server flags */
-#define CONN_FLAGS_UNTERMINATED	0x01000
 #define CONN_FLAGS_EOB		0x02000
 #define CONN_FLAGS_SENTBURST	0x04000
 /* CONTINUES ... */
@@ -99,8 +92,9 @@ extern dlink_list connection_list;
 #define SetUserChat(x)		((x)->flags |= CONN_FLAGS_CHAT)
 #define ClearUserChat(x)	((x)->flags &= ~CONN_FLAGS_CHAT)
 
-extern void read_io(void);
-
+extern void add_server_events(void);
+extern void signoff_server(struct lconn *);
+extern void signoff_client(struct lconn *);
 extern void connect_to_server(void *unused);
 extern void connect_to_client(struct client *client_p, struct conf_oper *oper_p,
 				const char *host, int port);
@@ -112,10 +106,10 @@ extern void PRINTFLIKE(2, 3) sendto_one(struct lconn *, const char *format, ...)
 extern void PRINTFLIKE(1, 2) sendto_all(const char *format, ...);
 extern void PRINTFLIKE(2, 3) sendto_all_chat(struct lconn *, const char *format, ...);
 
-extern int sock_create(int);
-extern int sock_open(const char *host, int port, const char *vhost, int type);
-extern void sock_close(struct lconn *conn_p);
-extern int sock_write(struct lconn *conn_p, const char *buf, size_t len);
+extern rb_fde_t *sock_create(int);
+extern rb_fde_t *sock_open(const char *host, int port, const char *vhost, int type);
+extern rb_fde_t *sock_close(struct lconn *conn_p);
+extern rb_fde_t *sock_write(struct lconn *conn_p, const char *buf, size_t len);
 
 extern unsigned long get_sendq(struct lconn *conn_p);
 

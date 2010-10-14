@@ -4,7 +4,8 @@
 
 struct user_reg;
 struct chmode;
-
+extern struct ev_entry *chanserv_enforcetopic_ev;
+extern struct ev_entry *chanserv_expireban_ev;
 /* Flags stored in the DB: 0xFFFF */
 #define CS_FLAGS_SUSPENDED	0x0001
 #define CS_FLAGS_NOOPS		0x0002
@@ -49,10 +50,10 @@ struct chan_reg
 	time_t last_time;
 	unsigned long bants;
 
-	dlink_node node;
+	rb_dlink_node node;
 
-	dlink_list users;
-	dlink_list bans;
+	rb_dlink_list users;
+	rb_dlink_list bans;
 };
 
 struct member_reg
@@ -67,8 +68,8 @@ struct member_reg
 
 	char *lastmod;			/* last user to modify this membership */
 
-	dlink_node usernode;
-	dlink_node channode;
+	rb_dlink_node usernode;
+	rb_dlink_node channode;
 };
 
 struct ban_reg
@@ -80,11 +81,11 @@ struct ban_reg
 	time_t hold;
 	int marked;
 
-	dlink_node channode;
+	rb_dlink_node channode;
 };
 
 #define CHAN_SUSPEND_EXPIRED(x) ((x)->flags & CS_FLAGS_SUSPENDED && (x)->suspend_time && \
-				(x)->suspend_time <= CURRENT_TIME)
+				(x)->suspend_time <= rb_current_time())
 
 extern struct chan_reg *find_channel_reg(struct client *, const char *);
 

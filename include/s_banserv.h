@@ -2,7 +2,14 @@
 #ifndef INCLUDED_banserv_h
 #define INCLUDED_banserv_h
 
-extern dlink_list regexp_list;
+#ifdef PCRE_BUILD
+#include "pcre.h"
+#else
+#include <pcre.h>
+#endif
+
+extern rb_dlink_list regexp_list;
+extern struct ev_entry *banserv_autosync_ev;
 
 struct regexp_ban
 {
@@ -15,8 +22,8 @@ struct regexp_ban
 
 	unsigned int id;
 
-	dlink_node ptr;
-	dlink_list negations;
+	rb_dlink_node ptr;
+	rb_dlink_list negations;
 
 	struct regexp_ban *parent;
 

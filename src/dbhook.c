@@ -38,8 +38,8 @@
 #include "log.h"
 #include "event.h"
 
-static dlink_list rsdb_hook_list;
-static dlink_list dbh_schedule_list;
+static rb_dlink_list rsdb_hook_list;
+static rb_dlink_list dbh_schedule_list;
 
 static void rsdb_hook_call(void *dbh);
 static void rsdb_hook_schedule_execute(void);
@@ -53,15 +53,15 @@ rsdb_hook_add(const char *table, const char *hook_value,
 	if(EmptyString(table) || EmptyString(hook_value))
 		return NULL;
 
-	dbh = my_malloc(sizeof(struct rsdb_hook));
+	dbh = rb_malloc(sizeof(struct rsdb_hook));
 
-	dbh->table = my_strdup(table);
-	dbh->hook_value = my_strdup(hook_value);
+	dbh->table = rb_strdup(table);
+	dbh->hook_value = rb_strdup(hook_value);
 	dbh->callback = callback;
 
-	dlink_add(dbh, &dbh->ptr, &rsdb_hook_list);
+	rb_dlinkAdd(dbh, &dbh->ptr, &rsdb_hook_list);
 
-	eventAdd(hook_value, rsdb_hook_call, dbh, frequency);
+	dbh->ev = rb_event_add(hook_value, rsdb_hook_call, dbh, frequency);
 
 	return dbh;
 }
@@ -70,9 +70,9 @@ void
 rsdb_hook_delete(dbh_callback callback)
 {
 	struct rsdb_hook *dbh;
-	dlink_node *ptr;
+	rb_dlink_node *ptr;
 
-	DLINK_FOREACH(ptr, rsdb_hook_list.head)
+	RB_DLINK_FOREACH(ptr, rsdb_hook_list.head)
 	{
 		dbh = ptr->data;
 
@@ -85,14 +85,14 @@ rsdb_hook_delete(dbh_callback callback)
 	if(dbh == NULL)
 		return;
 
-	dlink_delete(&dbh->ptr, &rsdb_hook_list);
+	rb_dlinkDelete(&dbh->ptr, &rsdb_hook_list);
 
-	eventDelete(rsdb_hook_call, dbh);
+	rb_event_delete(dbh->ev);
 
-	my_free(dbh->table);
-	my_free(dbh->hook_value);
+	rb_free(dbh->table);
+	rb_free(dbh->hook_value);
 
-	my_free(dbh);
+	rb_free(dbh);
 }
 
 static void
@@ -122,7 +122,7 @@ rsdb_hook_call(void *v_dbh)
 	if(!count)
 		return;
 
-	delid = my_malloc(sizeof(unsigned int) * count);
+	delid = rb_malloc(sizeof(unsigned int) * count);
 
 	/* limit our result set to count entries, as we've only allocated
 	 * memory for that many..
@@ -157,7 +157,7 @@ rsdb_hook_call(void *v_dbh)
 
 	rsdb_transaction(RSDB_TRANS_END);
 
-	my_free(delid);
+	rb_free(delid);
 }
 
 void
@@ -178,21 +178,21 @@ rsdb_hook_schedule(dbh_schedule_callback callback, void *arg, const char *format
 		die(0, "problem with compiling sql statement");
 	}
 
-	sched_p = my_malloc(sizeof(struct dbh_schedule));
+	sched_p = rb_malloc(sizeof(struct dbh_schedule));
 	sched_p->callback = callback;
 	sched_p->arg = arg;
-	sched_p->sql = my_strdup(buf);
+	sched_p->sql = rb_strdup(buf);
 
-	dlink_add(sched_p, &sched_p->ptr, &dbh_schedule_list);
+	rb_dlinkAdd(sched_p, &sched_p->ptr, &dbh_schedule_list);
 }
 
 static void
 rsdb_hook_schedule_execute(void)
 {
 	struct dbh_schedule *sched_p;
-	dlink_node *ptr, *next_ptr;
+	rb_dlink_node *ptr, *next_ptr;
 
-	DLINK_FOREACH_SAFE(ptr, next_ptr, dbh_schedule_list.head)
+	RB_DLINK_FOREACH_SAFE(ptr, next_ptr, dbh_schedule_list.head)
 	{
 		sched_p = ptr->data;
 
@@ -201,9 +201,9 @@ rsdb_hook_schedule_execute(void)
 		if(sched_p->callback)
 			(sched_p->callback)(sched_p->arg);
 
-		dlink_delete(&sched_p->ptr, &dbh_schedule_list);
-		my_free(sched_p->sql);
-		my_free(sched_p);
+		rb_dlinkDelete(&sched_p->ptr, &dbh_schedule_list);
+		rb_free(sched_p->sql);
+		rb_free(sched_p);
 	}
 }
 

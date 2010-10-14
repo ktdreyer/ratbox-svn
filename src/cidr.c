@@ -32,6 +32,7 @@
 #include "stdinc.h"
 #include "rserv.h"
 #include "client.h"
+#include "tools.h"
 
 #ifndef INADDRSZ
 #define INADDRSZ 4
@@ -266,8 +267,8 @@ int match_ips(const char *s1, const char *s2)
 	char *len;
 	int cidrlen;
 
-	strlcpy(ipmask, s1, sizeof ipmask);
-	strlcpy(ip, s2, sizeof ip);
+	rb_strlcpy(ipmask, s1, sizeof ipmask);
+	rb_strlcpy(ip, s2, sizeof ip);
 
 	len = strrchr(ipmask, '/');
 	if (len == NULL)
@@ -320,8 +321,8 @@ match_cidr(const char *s1, const char *s2)
 	char *len;
 	int cidrlen;
 
-	strlcpy(mask, s1, sizeof mask);
-	strlcpy(address, s2, sizeof address);
+	rb_strlcpy(mask, s1, sizeof mask);
+	rb_strlcpy(address, s2, sizeof address);
 
 	ipmask = strrchr(mask, '@');
 	if (ipmask == NULL)

@@ -32,13 +32,13 @@
  */
 #include "stdinc.h"
 #include "rserv.h"
-#include "tools.h"
 #include "balloc.h"
 #include "cache.h"
 #include "io.h"
+#include "tools.h"
 
-static BlockHeap *cachefile_heap = NULL;
-BlockHeap *cacheline_heap = NULL;
+static rb_bh *cachefile_heap = NULL;
+rb_bh *cacheline_heap = NULL;
 
 struct cacheline *emptyline = NULL;
 
@@ -51,11 +51,11 @@ struct cacheline *emptyline = NULL;
 void
 init_cache(void)
 {
-	cachefile_heap = BlockHeapCreate("Helpfile Cache", sizeof(struct cachefile), HEAP_CACHEFILE);
-	cacheline_heap = BlockHeapCreate("Helplines Cache", sizeof(struct cacheline), HEAP_CACHELINE);
+	cachefile_heap = rb_bh_create(sizeof(struct cachefile), HEAP_CACHEFILE, "Helpfile Cache");
+	cacheline_heap = rb_bh_create(sizeof(struct cacheline), HEAP_CACHELINE, "Helplines Cache");
 
 	/* allocate the emptyline */
-	emptyline = BlockHeapAlloc(cacheline_heap);
+	emptyline = rb_bh_alloc(cacheline_heap);
 	emptyline->data[0] = ' ';
 }
 
@@ -78,8 +78,8 @@ cache_file(const char *filename, const char *shortname, int add_blank)
 	if((in = fopen(filename, "r")) == NULL)
 		return NULL;
 
-	cacheptr = BlockHeapAlloc(cachefile_heap);
-	strlcpy(cacheptr->name, shortname, sizeof(cacheptr->name));
+	cacheptr = rb_bh_alloc(cachefile_heap);
+	rb_strlcpy(cacheptr->name, shortname, sizeof(cacheptr->name));
 
 	/* cache the file... */
 	while(fgets(line, sizeof(line), in) != NULL)
@@ -89,17 +89,17 @@ cache_file(const char *filename, const char *shortname, int add_blank)
 
 		if(!EmptyString(line))
 		{
-			lineptr = BlockHeapAlloc(cacheline_heap);
+			lineptr = rb_bh_alloc(cacheline_heap);
 
-			strlcpy(lineptr->data, line, sizeof(lineptr->data));
-			dlink_add_tail(lineptr, &lineptr->linenode, &cacheptr->contents);
+			rb_strlcpy(lineptr->data, line, sizeof(lineptr->data));
+			rb_dlinkAddTail(lineptr, &lineptr->linenode, &cacheptr->contents);
 		}
 		else
-			dlink_add_tail_alloc(emptyline, &cacheptr->contents);
+			rb_dlinkAddTailAlloc(emptyline, &cacheptr->contents);
 	}
 
 	if(add_blank)
-		dlink_add_tail_alloc(emptyline, &cacheptr->contents);
+		rb_dlinkAddTailAlloc(emptyline, &cacheptr->contents);
 
 	fclose(in);
 	return cacheptr;
@@ -114,33 +114,33 @@ cache_file(const char *filename, const char *shortname, int add_blank)
 void
 free_cachefile(struct cachefile *cacheptr)
 {
-	dlink_node *ptr;
-	dlink_node *next_ptr;
+	rb_dlink_node *ptr;
+	rb_dlink_node *next_ptr;
 
 	if(cacheptr == NULL)
 		return;
 
-	DLINK_FOREACH_SAFE(ptr, next_ptr, cacheptr->contents.head)
+	RB_DLINK_FOREACH_SAFE(ptr, next_ptr, cacheptr->contents.head)
 	{
 		if(ptr->data != emptyline)
-			BlockHeapFree(cacheline_heap, ptr->data);
+			rb_bh_free(cacheline_heap, ptr->data);
 		else
-			free_dlink_node(ptr);
+			rb_free_rb_dlink_node(ptr);
 	}
 
-	BlockHeapFree(cachefile_heap, cacheptr);
+	rb_bh_free(cachefile_heap, cacheptr);
 }
 
 void
 send_cachefile(struct cachefile *cacheptr, struct lconn *conn_p)
 {
         struct cacheline *lineptr;
-        dlink_node *ptr;
+        rb_dlink_node *ptr;
 
         if(cacheptr == NULL || conn_p == NULL)
                 return;
 
-        DLINK_FOREACH(ptr, cacheptr->contents.head)
+        RB_DLINK_FOREACH(ptr, cacheptr->contents.head)
         {
                 lineptr = ptr->data;
                 sendto_one(conn_p, "%s", lineptr->data);

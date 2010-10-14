@@ -36,6 +36,7 @@
 #include "conf.h"
 #include "ucommand.h"
 #include "io.h"
+#include "tools.h"
 
 static int u_stats(struct client *, struct lconn *, const char **, int);
 struct ucommand_handler stats_ucommand = { "stats", u_stats, 0, 0, 0, NULL };
@@ -50,9 +51,9 @@ static void
 stats_opers(struct lconn *conn_p)
 {
         struct conf_oper *conf_p;
-        dlink_node *ptr;
+        rb_dlink_node *ptr;
 
-        DLINK_FOREACH(ptr, conf_oper_list.head)
+        RB_DLINK_FOREACH(ptr, conf_oper_list.head)
         {
                 conf_p = ptr->data;
 
@@ -68,9 +69,9 @@ static void
 stats_servers(struct lconn *conn_p)
 {
         struct conf_server *conf_p;
-        dlink_node *ptr;
+        rb_dlink_node *ptr;
 
-        DLINK_FOREACH(ptr, conf_server_list.head)
+        RB_DLINK_FOREACH(ptr, conf_server_list.head)
         {
                 conf_p = ptr->data;
 
@@ -87,9 +88,9 @@ stats_uplink(struct lconn *conn_p)
                 sendto_one(conn_p, "Currently connected to %s Idle: %ld "
                            "SendQ: %ld Connected: %s",
                            server_p->name,
-                           (CURRENT_TIME - server_p->last_time), 
+                           (rb_current_time() - server_p->last_time), 
                            get_sendq(server_p),
-                           get_duration(CURRENT_TIME - server_p->first_time));
+                           get_duration(rb_current_time() - server_p->first_time));
         else
                 sendto_one(conn_p, "Currently disconnected");
 }
@@ -99,7 +100,7 @@ stats_uptime(struct lconn *conn_p)
 {
         sendto_one(conn_p, "%s up %s",
                    MYNAME,
-                   get_duration(CURRENT_TIME - first_time));
+                   get_duration(rb_current_time() - first_time));
 }
 
 static struct _stats_table stats_table[] =
@@ -124,8 +125,8 @@ u_stats(struct client *unused, struct lconn *conn_p, const char *parv[], int par
 
 		for(i = 0; stats_table[i].type[0] != '\0'; i++)
 		{
-			strlcat(buf, stats_table[i].type, sizeof(buf));
-			strlcat(buf, " ", sizeof(buf));
+			rb_strlcat(buf, stats_table[i].type, sizeof(buf));
+			rb_strlcat(buf, " ", sizeof(buf));
 		}
 
 		sendto_one(conn_p, "Stats types: %s", buf);

@@ -45,6 +45,7 @@
 #include "log.h"
 #include "hook.h"
 #include "watch.h"
+#include "tools.h"
 
 /* maximum length of a welcome message */
 #define WELCOME_MAGIC	400
@@ -107,7 +108,7 @@ init_s_global(void)
 	int i;
 
 	/* we will only ever use this once, so malloc() it */
-	data = my_malloc(sizeof(struct rsdb_table));
+	data = rb_malloc(sizeof(struct rsdb_table));
 
 	rsdb_exec_fetch(data, "SELECT id, text FROM global_welcome");
 
@@ -118,11 +119,11 @@ init_s_global(void)
 		if(pos >= WELCOME_MAX)
 			continue;
 
-		global_welcome_list[pos] = my_strdup(data->row[i][1]);
+		global_welcome_list[pos] = rb_strdup(data->row[i][1]);
 	}
 
 	rsdb_exec_fetch_end(data);
-	my_free(data);
+	rb_free(data);
 
 	hook_add(h_global_send_welcome, HOOK_CLIENT_CONNECT);
 }
@@ -131,12 +132,12 @@ static int
 o_global_netmsg(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct client *target_p;
-	dlink_node *ptr;
+	rb_dlink_node *ptr;
 	const char *data;
 
 	data = rebuild_params(parv, parc, 0);
 
-	DLINK_FOREACH(ptr, server_list.head)
+	RB_DLINK_FOREACH(ptr, server_list.head)
 	{
 		target_p = ptr->data;
 
@@ -189,12 +190,12 @@ o_global_addwelcome(struct client *client_p, struct lconn *conn_p, const char *p
 
 	if(global_welcome_list[id])
 	{
-		my_free(global_welcome_list[id]);
+		rb_free(global_welcome_list[id]);
 
 		rsdb_exec(NULL, "DELETE FROM global_welcome WHERE id='%u'", id);
 	}
 
-	global_welcome_list[id] = my_strdup(data);
+	global_welcome_list[id] = rb_strdup(data);
 
 	rsdb_exec(NULL, "INSERT INTO global_welcome (id, text) VALUES('%u', '%Q')",
 			id, data);
@@ -222,7 +223,7 @@ o_global_delwelcome(struct client *client_p, struct lconn *conn_p, const char *p
 
 	rsdb_exec(NULL, "DELETE FROM global_welcome WHERE id='%u'", id);
 
-	my_free(global_welcome_list[id]);
+	rb_free(global_welcome_list[id]);
 	global_welcome_list[id] = NULL;
 
 	service_snd(global_p, client_p, conn_p, SVC_GLOBAL_WELCOMEDELETED, id);

@@ -26,9 +26,9 @@ struct TopConf
 	char *tc_name;
 	int (*tc_sfunc) (struct TopConf *);
 	int (*tc_efunc) (struct TopConf *);
-	dlink_list tc_items;
+	rb_dlink_list tc_items;
 	struct ConfEntry *tc_entries;
-	dlink_list extensions;
+	rb_dlink_list extensions;
 };
 
 #define CF_QSTRING	0x01

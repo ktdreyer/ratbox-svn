@@ -39,6 +39,7 @@
 #include "scommand.h"
 #include "c_init.h"
 #include "log.h"
+#include "tools.h"
 
 static void c_message(struct client *, const char *parv[], int parc);
 
@@ -61,12 +62,12 @@ c_message(struct client *client_p, const char *parv[], int parc)
 	/* username@server messaged? */
 	if((p = strchr(target, '@')) != NULL)
 	{
-		dlink_node *ptr;
+		rb_dlink_node *ptr;
 
 		*p = '\0';
 
 		/* walk list manually hunting for this username.. */
-		DLINK_FOREACH(ptr, service_list.head)
+		RB_DLINK_FOREACH(ptr, service_list.head)
 		{
 			tmp_p = ptr->data;
 

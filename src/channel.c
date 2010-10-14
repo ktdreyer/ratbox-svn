@@ -34,7 +34,7 @@
 #include "rserv.h"
 #include "client.h"
 #include "conf.h"
-#include "tools.h"
+
 #include "channel.h"
 #include "scommand.h"
 #include "log.h"
@@ -42,12 +42,13 @@
 #include "io.h"
 #include "hook.h"
 #include "modebuild.h"
+#include "tools.h"
 
-static dlink_list channel_table[MAX_CHANNEL_TABLE];
-dlink_list channel_list;
+static rb_dlink_list channel_table[MAX_CHANNEL_TABLE];
+rb_dlink_list channel_list;
 
-static BlockHeap *channel_heap;
-static BlockHeap *chmember_heap;
+static rb_bh *channel_heap;
+static rb_bh *chmember_heap;
 
 static void c_join(struct client *, const char *parv[], int parc);
 static void c_kick(struct client *, const char *parv[], int parc);
@@ -87,8 +88,8 @@ static struct _chmode_table
 void
 init_channel(void)
 {
-        channel_heap = BlockHeapCreate("Channel", sizeof(struct channel), HEAP_CHANNEL);
-        chmember_heap = BlockHeapCreate("Channel Member", sizeof(struct chmember), HEAP_CHMEMBER);
+        channel_heap = rb_bh_create(sizeof(struct channel), HEAP_CHANNEL, "Channel");
+        chmember_heap = rb_bh_create(sizeof(struct chmember), HEAP_CHMEMBER, "Channel Member");
 
 	add_scommand_handler(&join_command);
 	add_scommand_handler(&kick_command);
@@ -140,8 +141,8 @@ void
 add_channel(struct channel *chptr)
 {
 	unsigned int hashv = hash_channel(chptr->name);
-	dlink_add(chptr, &chptr->nameptr, &channel_table[hashv]);
-	dlink_add(chptr, &chptr->listptr, &channel_list);
+	rb_dlinkAdd(chptr, &chptr->nameptr, &channel_table[hashv]);
+	rb_dlinkAdd(chptr, &chptr->listptr, &channel_list);
 }
 
 /* del_channel()
@@ -154,8 +155,8 @@ void
 del_channel(struct channel *chptr)
 {
 	unsigned int hashv = hash_channel(chptr->name);
-	dlink_delete(&chptr->nameptr, &channel_table[hashv]);
-	dlink_delete(&chptr->listptr, &channel_list);
+	rb_dlinkDelete(&chptr->nameptr, &channel_table[hashv]);
+	rb_dlinkDelete(&chptr->listptr, &channel_list);
 }
 
 /* find_channel()
@@ -168,10 +169,10 @@ struct channel *
 find_channel(const char *name)
 {
 	struct channel *chptr;
-	dlink_node *ptr;
+	rb_dlink_node *ptr;
 	unsigned int hashv = hash_channel(name);
 
-	DLINK_FOREACH(ptr, channel_table[hashv].head)
+	RB_DLINK_FOREACH(ptr, channel_table[hashv].head)
 	{
 		chptr = ptr->data;
 
@@ -198,7 +199,7 @@ free_channel(struct channel *chptr)
 
 	del_channel(chptr);
 
-	BlockHeapFree(channel_heap, chptr);
+	rb_bh_free(channel_heap, chptr);
 }
 
 /* add_chmember()
@@ -212,19 +213,19 @@ add_chmember(struct channel *chptr, struct client *target_p, int flags)
 {
 	struct chmember *mptr;
 
-	mptr = BlockHeapAlloc(chmember_heap);
+	mptr = rb_bh_alloc(chmember_heap);
 
 	mptr->client_p = target_p;
 	mptr->chptr = chptr;
 	mptr->flags = flags;
 
-	dlink_add(mptr, &mptr->chnode, &chptr->users);
-	dlink_add(mptr, &mptr->usernode, &target_p->user->channels);
+	rb_dlinkAdd(mptr, &mptr->chnode, &chptr->users);
+	rb_dlinkAdd(mptr, &mptr->usernode, &target_p->user->channels);
 
 	if(is_opped(mptr))
-		dlink_add(mptr, &mptr->choppednode, &chptr->users_opped);
+		rb_dlinkAdd(mptr, &mptr->choppednode, &chptr->users_opped);
 	else
-		dlink_add(mptr, &mptr->choppednode, &chptr->users_unopped);
+		rb_dlinkAdd(mptr, &mptr->choppednode, &chptr->users_unopped);
 
 	return mptr;
 }
@@ -247,23 +248,23 @@ del_chmember(struct chmember *mptr)
 	chptr = mptr->chptr;
 	client_p = mptr->client_p;
 
-	dlink_delete(&mptr->chnode, &chptr->users);
-	dlink_delete(&mptr->usernode, &client_p->user->channels);
+	rb_dlinkDelete(&mptr->chnode, &chptr->users);
+	rb_dlinkDelete(&mptr->usernode, &client_p->user->channels);
 
 	if(is_opped(mptr))
 	{
-		dlink_delete(&mptr->choppednode, &chptr->users_opped);
-		if(dlink_list_length(&chptr->users_opped) == 0)
+		rb_dlinkDelete(&mptr->choppednode, &chptr->users_opped);
+		if(rb_dlink_list_length(&chptr->users_opped) == 0)
 			hook_call(HOOK_CHANNEL_OPLESS, chptr, NULL);
 	}
 	else
-		dlink_delete(&mptr->choppednode, &chptr->users_unopped);
+		rb_dlinkDelete(&mptr->choppednode, &chptr->users_unopped);
 
-	if(dlink_list_length(&chptr->users) == 0 &&
-			dlink_list_length(&chptr->services) == 0)
+	if(rb_dlink_list_length(&chptr->users) == 0 &&
+			rb_dlink_list_length(&chptr->services) == 0)
 		free_channel(chptr);
 
-	BlockHeapFree(chmember_heap, mptr);
+	rb_bh_free(chmember_heap, mptr);
 }
 
 /* find_chmember()
@@ -276,11 +277,11 @@ struct chmember *
 find_chmember(struct channel *chptr, struct client *target_p)
 {
 	struct chmember *mptr;
-	dlink_node *ptr;
+	rb_dlink_node *ptr;
 
-	if (dlink_list_length(&chptr->users) < dlink_list_length(&target_p->user->channels))
+	if (rb_dlink_list_length(&chptr->users) < rb_dlink_list_length(&target_p->user->channels))
 	{
-		DLINK_FOREACH(ptr, chptr->users.head)
+		RB_DLINK_FOREACH(ptr, chptr->users.head)
 		{
 			mptr = ptr->data;
 			if(mptr->client_p == target_p)
@@ -289,7 +290,7 @@ find_chmember(struct channel *chptr, struct client *target_p)
 	}
 	else
 	{
-		DLINK_FOREACH(ptr, target_p->user->channels.head)
+		RB_DLINK_FOREACH(ptr, target_p->user->channels.head)
 		{
 			mptr = ptr->data;
 			if(mptr->chptr == chptr)
@@ -314,7 +315,7 @@ op_chmember(struct chmember *member_p)
 
 	member_p->flags &= ~MODE_DEOPPED;
 	member_p->flags |= MODE_OPPED;
-	dlink_move_node(&member_p->choppednode, &member_p->chptr->users_unopped,
+	rb_dlinkMoveNode(&member_p->choppednode, &member_p->chptr->users_unopped,
 			&member_p->chptr->users_opped);
 }
 
@@ -331,10 +332,10 @@ deop_chmember(struct chmember *member_p)
 		return;
 
 	member_p->flags &= ~MODE_OPPED;
-	dlink_move_node(&member_p->choppednode, &member_p->chptr->users_opped,
+	rb_dlinkMoveNode(&member_p->choppednode, &member_p->chptr->users_opped,
 			&member_p->chptr->users_unopped);
 
-	if(dlink_list_length(&member_p->chptr->users_opped) == 0)
+	if(rb_dlink_list_length(&member_p->chptr->users_opped) == 0)
 		hook_call(HOOK_CHANNEL_OPLESS, member_p->chptr, NULL);
 }
 
@@ -342,9 +343,9 @@ deop_chmember(struct chmember *member_p)
 int
 find_exempt(struct channel *chptr, struct client *target_p)
 {
-	dlink_node *ptr;
+	rb_dlink_node *ptr;
 
-	DLINK_FOREACH(ptr, chptr->excepts.head)
+	RB_DLINK_FOREACH(ptr, chptr->excepts.head)
 	{
 		if(match((const char *) ptr->data, target_p->user->mask))
 			return 1;
@@ -363,10 +364,10 @@ unsigned long
 count_topics(void)
 {
         struct channel *chptr;
-        dlink_node *ptr;
+        rb_dlink_node *ptr;
         unsigned long topic_count = 0;
 
-        DLINK_FOREACH(ptr, channel_list.head)
+        RB_DLINK_FOREACH(ptr, channel_list.head)
         {
                 chptr = ptr->data;
 
@@ -389,10 +390,10 @@ join_service(struct client *service_p, const char *chname, time_t tsinfo,
 	/* channel doesnt exist, have to join it */
 	if((chptr = find_channel(chname)) == NULL)
 	{
-		chptr = BlockHeapAlloc(channel_heap);
+		chptr = rb_bh_alloc(channel_heap);
 
-		strlcpy(chptr->name, chname, sizeof(chptr->name));
-		chptr->tsinfo = tsinfo ? tsinfo : CURRENT_TIME;
+		rb_strlcpy(chptr->name, chname, sizeof(chptr->name));
+		chptr->tsinfo = tsinfo ? tsinfo : rb_current_time();
 
 		if(mode != NULL)
 		{
@@ -400,7 +401,7 @@ join_service(struct client *service_p, const char *chname, time_t tsinfo,
 			chptr->mode.limit = mode->limit;
 
 			if(mode->key[0])
-				strlcpy(chptr->mode.key, mode->key,
+				rb_strlcpy(chptr->mode.key, mode->key,
 					sizeof(chptr->mode.key));
 		}
 		else
@@ -409,7 +410,7 @@ join_service(struct client *service_p, const char *chname, time_t tsinfo,
 		add_channel(chptr);
 	}
 	/* may already be joined.. */
-	else if(dlink_find(service_p, &chptr->services) != NULL)
+	else if(rb_dlinkFind(service_p, &chptr->services) != NULL)
 	{
 		return;
 	}
@@ -423,15 +424,15 @@ join_service(struct client *service_p, const char *chname, time_t tsinfo,
 			chptr->mode.limit = mode->limit;
 
 			if(mode->key[0])
-				strlcpy(chptr->mode.key, mode->key,
+				rb_strlcpy(chptr->mode.key, mode->key,
 					sizeof(chptr->mode.key));
 		}
 		else
 			chptr->mode.mode = MODE_NOEXTERNAL|MODE_TOPIC;
 	}
 
-	dlink_add_alloc(service_p, &chptr->services);
-	dlink_add_alloc(chptr, &service_p->service->channels);
+	rb_dlinkAddAlloc(service_p, &chptr->services);
+	rb_dlinkAddAlloc(chptr, &service_p->service->channels);
 
 	if(sent_burst)
 		sendto_server(":%s SJOIN %lu %s %s :@%s",
@@ -448,17 +449,17 @@ part_service(struct client *service_p, const char *chname)
 	if((chptr = find_channel(chname)) == NULL)
 		return 0;
 
-	if(dlink_find(service_p, &chptr->services) == NULL)
+	if(rb_dlinkFind(service_p, &chptr->services) == NULL)
 		return 0;
 
-	dlink_find_destroy(service_p, &chptr->services);
-	dlink_find_destroy(chptr, &service_p->service->channels);
+	rb_dlinkFindDestroy(service_p, &chptr->services);
+	rb_dlinkFindDestroy(chptr, &service_p->service->channels);
 
 	if(sent_burst)
 		sendto_server(":%s PART %s", SVC_UID(service_p), chptr->name);
 
-	if(dlink_list_length(&chptr->users) == 0 &&
-	   dlink_list_length(&chptr->services) == 0)
+	if(rb_dlink_list_length(&chptr->users) == 0 &&
+	   rb_dlink_list_length(&chptr->services) == 0)
 		free_channel(chptr);
 
 	return 1;
@@ -563,16 +564,16 @@ c_topic(struct client *client_p, const char *parv[], int parc)
 	}
 	else
 	{
-		strlcpy(chptr->topic, parv[1], sizeof(chptr->topic));
+		rb_strlcpy(chptr->topic, parv[1], sizeof(chptr->topic));
 
 		if(IsUser(client_p))
 			snprintf(chptr->topicwho, sizeof(chptr->topicwho), "%s!%s@%s", 
 				 client_p->name, client_p->user->username, 
 				 client_p->user->host);
 		else
-			strlcpy(chptr->topicwho, client_p->name, sizeof(chptr->topicwho));
+			rb_strlcpy(chptr->topicwho, client_p->name, sizeof(chptr->topicwho));
 
-		chptr->topic_tsinfo = CURRENT_TIME;
+		chptr->topic_tsinfo = rb_current_time();
 	}
 
 	hook_call(HOOK_CHANNEL_TOPIC, chptr, NULL);
@@ -607,9 +608,9 @@ c_tb(struct client *client_p, const char *parv[], int parc)
 		if(EmptyString(parv[3]))
 			return;
 
-		strlcpy(chptr->topic, parv[3], sizeof(chptr->topic));
-		strlcpy(chptr->topicwho, parv[2], sizeof(chptr->topicwho));
-		chptr->topic_tsinfo = CURRENT_TIME;
+		rb_strlcpy(chptr->topic, parv[3], sizeof(chptr->topic));
+		rb_strlcpy(chptr->topicwho, parv[2], sizeof(chptr->topicwho));
+		chptr->topic_tsinfo = rb_current_time();
 	}
 	/* :<server> TB <#channel> <topicts> :<topic> */
 	else
@@ -617,9 +618,9 @@ c_tb(struct client *client_p, const char *parv[], int parc)
 		if(EmptyString(parv[2]))
 			return;
 
-		strlcpy(chptr->topic, parv[2], sizeof(chptr->topic));
-		strlcpy(chptr->topicwho, client_p->name, sizeof(chptr->topicwho));
-		chptr->topic_tsinfo = CURRENT_TIME;
+		rb_strlcpy(chptr->topic, parv[2], sizeof(chptr->topic));
+		rb_strlcpy(chptr->topicwho, client_p->name, sizeof(chptr->topicwho));
+		chptr->topic_tsinfo = rb_current_time();
 	}
 
 	hook_call(HOOK_CHANNEL_TOPIC, chptr, NULL);
@@ -683,9 +684,9 @@ void
 remove_our_ov_modes(struct channel *chptr)
 {
 	struct chmember *msptr;
-	dlink_node *ptr;
+	rb_dlink_node *ptr;
 
-	DLINK_FOREACH(ptr, chptr->users.head)
+	RB_DLINK_FOREACH(ptr, chptr->users.head)
 	{
 		msptr = ptr->data;
 
@@ -694,7 +695,7 @@ remove_our_ov_modes(struct channel *chptr)
 		/* users_opped/users_unopped integrity done en mass below */
 	}
 
-	dlink_move_list(&chptr->users_opped, &chptr->users_unopped);
+	rb_dlinkMoveList(&chptr->users_opped, &chptr->users_unopped);
 }
 
 
@@ -710,44 +711,44 @@ void
 remove_our_bans(struct channel *chptr, struct client *service_p, 
 		int remove_bans, int remove_exceptions, int remove_invex)
 {
-	dlink_node *ptr, *next_ptr;
+	rb_dlink_node *ptr, *next_ptr;
 
 	if(service_p)
 		modebuild_start(service_p, chptr);
 
 	if(remove_bans)
 	{
-		DLINK_FOREACH_SAFE(ptr, next_ptr, chptr->bans.head)
+		RB_DLINK_FOREACH_SAFE(ptr, next_ptr, chptr->bans.head)
 		{
 			if(service_p)
 				modebuild_add(DIR_DEL, "b", ptr->data);
 
-			my_free(ptr->data);
-			dlink_destroy(ptr, &chptr->bans);
+			rb_free(ptr->data);
+			rb_dlinkDestroy(ptr, &chptr->bans);
 		}
 	}
 
 	if(remove_exceptions)
 	{
-		DLINK_FOREACH_SAFE(ptr, next_ptr, chptr->excepts.head)
+		RB_DLINK_FOREACH_SAFE(ptr, next_ptr, chptr->excepts.head)
 		{
 			if(service_p)
 				modebuild_add(DIR_DEL, "e", ptr->data);
 
-			my_free(ptr->data);
-			dlink_destroy(ptr, &chptr->excepts);
+			rb_free(ptr->data);
+			rb_dlinkDestroy(ptr, &chptr->excepts);
 		}
 	}
 
 	if(remove_invex)
 	{
-		DLINK_FOREACH_SAFE(ptr, next_ptr, chptr->invites.head)
+		RB_DLINK_FOREACH_SAFE(ptr, next_ptr, chptr->invites.head)
 		{
 			if(service_p)
 				modebuild_add(DIR_DEL, "I", ptr->data);
 
-			my_free(ptr->data);
-			dlink_destroy(ptr, &chptr->invites);
+			rb_free(ptr->data);
+			rb_dlinkDestroy(ptr, &chptr->invites);
 		}
 	}
 
@@ -839,9 +840,9 @@ c_sjoin(struct client *client_p, const char *parv[], int parc)
 	struct client *target_p;
 	struct chmode newmode;
 	struct chmember *member_p;
-	dlink_list joined_members;
-	dlink_node *ptr;
-	dlink_node *next_ptr;
+	rb_dlink_list joined_members;
+	rb_dlink_node *ptr;
+	rb_dlink_node *next_ptr;
 	char *p;
 	const char *s;
 	char *nicks;
@@ -851,7 +852,7 @@ c_sjoin(struct client *client_p, const char *parv[], int parc)
 	int keep_new_modes = 1;
 	int args = 0;
 
-	memset(&joined_members, 0, sizeof(dlink_list));
+	memset(&joined_members, 0, sizeof(rb_dlink_list));
 
 	/* :<server> SJOIN <TS> <#channel> +[modes [key][limit]] :<nicks> */
 	if(parc < 4 || EmptyString(parv[3]))
@@ -862,9 +863,9 @@ c_sjoin(struct client *client_p, const char *parv[], int parc)
 
 	if((chptr = find_channel(parv[1])) == NULL)
 	{
-		chptr = BlockHeapAlloc(channel_heap);
+		chptr = rb_bh_alloc(channel_heap);
 
-		strlcpy(chptr->name, parv[1], sizeof(chptr->name));
+		rb_strlcpy(chptr->name, parv[1], sizeof(chptr->name));
 		newts = chptr->tsinfo = atol(parv[0]);
 		add_channel(chptr);
 
@@ -915,7 +916,7 @@ c_sjoin(struct client *client_p, const char *parv[], int parc)
 		/* services is in there.. rejoin */
 		if(sent_burst)
 		{
-			DLINK_FOREACH(ptr, chptr->services.head)
+			RB_DLINK_FOREACH(ptr, chptr->services.head)
 			{
 				rejoin_service(ptr->data, chptr, 1);
 			}
@@ -930,7 +931,7 @@ c_sjoin(struct client *client_p, const char *parv[], int parc)
 			chptr->mode.limit = newmode.limit;
 
 		if(!chptr->mode.key[0] || strcmp(chptr->mode.key, newmode.key) > 0)
-			strlcpy(chptr->mode.key, newmode.key,
+			rb_strlcpy(chptr->mode.key, newmode.key,
 				sizeof(chptr->mode.key));
 
 	}
@@ -994,7 +995,7 @@ c_sjoin(struct client *client_p, const char *parv[], int parc)
 		if(!is_member(chptr, target_p))
 		{
 			member_p = add_chmember(chptr, target_p, flags);
-			dlink_add_alloc(member_p, &joined_members);
+			rb_dlinkAddAlloc(member_p, &joined_members);
 		}
 	}
 
@@ -1002,15 +1003,15 @@ c_sjoin(struct client *client_p, const char *parv[], int parc)
 	 * channel we just created.  This has to be tested before we call the
 	 * hook, as the hook may empty the channel and free it itself.
 	 */
-	if(dlink_list_length(&chptr->users) == 0 &&
-	   dlink_list_length(&chptr->services) == 0)
+	if(rb_dlink_list_length(&chptr->users) == 0 &&
+	   rb_dlink_list_length(&chptr->services) == 0)
 		free_channel(chptr);
 	else
 		hook_call(HOOK_CHANNEL_JOIN, chptr, &joined_members);
 
-	DLINK_FOREACH_SAFE(ptr, next_ptr, joined_members.head)
+	RB_DLINK_FOREACH_SAFE(ptr, next_ptr, joined_members.head)
 	{
-		free_dlink_node(ptr);
+		rb_free_rb_dlink_node(ptr);
 	}
 }
 
@@ -1023,9 +1024,9 @@ c_join(struct client *client_p, const char *parv[], int parc)
 	struct channel *chptr;
 	struct chmember *member_p;
 	struct chmode newmode;
-	dlink_list joined_members;
-	dlink_node *ptr;
-	dlink_node *next_ptr;
+	rb_dlink_list joined_members;
+	rb_dlink_node *ptr;
+	rb_dlink_node *next_ptr;
 	time_t newts;
 	int keep_old_modes = 1;
 	int args = 0;
@@ -1036,12 +1037,12 @@ c_join(struct client *client_p, const char *parv[], int parc)
 	if(!IsUser(client_p))
 		return;
 
-	memset(&joined_members, 0, sizeof(dlink_list));
+	memset(&joined_members, 0, sizeof(rb_dlink_list));
 
 	/* check for join 0 first */
 	if(parc == 1 && parv[0][0] == '0')
 	{
-		DLINK_FOREACH_SAFE(ptr, next_ptr, client_p->user->channels.head)
+		RB_DLINK_FOREACH_SAFE(ptr, next_ptr, client_p->user->channels.head)
 		{
 			del_chmember(ptr->data);
 		}
@@ -1060,9 +1061,9 @@ c_join(struct client *client_p, const char *parv[], int parc)
 
 	if((chptr = find_channel(parv[1])) == NULL)
 	{
-		chptr = BlockHeapAlloc(channel_heap);
+		chptr = rb_bh_alloc(channel_heap);
 
-		strlcpy(chptr->name, parv[1], sizeof(chptr->name));
+		rb_strlcpy(chptr->name, parv[1], sizeof(chptr->name));
 		newts = chptr->tsinfo = atol(parv[0]);
 		add_channel(chptr);
 
@@ -1103,7 +1104,7 @@ c_join(struct client *client_p, const char *parv[], int parc)
 		/* services is in there.. rejoin */
 		if(sent_burst)
 		{
-			DLINK_FOREACH(ptr, chptr->services.head)
+			RB_DLINK_FOREACH(ptr, chptr->services.head)
 			{
 				rejoin_service(ptr->data, chptr, 1);
 			}
@@ -1117,14 +1118,14 @@ c_join(struct client *client_p, const char *parv[], int parc)
 	if(!is_member(chptr, client_p))
 	{
 		member_p = add_chmember(chptr, client_p, 0);
-		dlink_add_alloc(member_p, &joined_members);
+		rb_dlinkAddAlloc(member_p, &joined_members);
 	}
 
 	hook_call(HOOK_CHANNEL_JOIN, chptr, &joined_members);
 
-	DLINK_FOREACH_SAFE(ptr, next_ptr, joined_members.head)
+	RB_DLINK_FOREACH_SAFE(ptr, next_ptr, joined_members.head)
 	{
-		free_dlink_node(ptr);
+		rb_free_rb_dlink_node(ptr);
 	}
 
 }

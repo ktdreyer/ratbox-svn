@@ -48,13 +48,14 @@
 #include "balloc.h"
 #include "hook.h"
 #include "watch.h"
+#include "tools.h"
 
 static void init_s_nickserv(void);
 
 static struct client *nickserv_p;
-static BlockHeap *nick_reg_heap;
+static rb_bh *nick_reg_heap;
 
-static dlink_list nick_reg_table[MAX_NAME_HASH];
+static rb_dlink_list nick_reg_table[MAX_NAME_HASH];
 
 static int o_nick_nickdrop(struct client *, struct lconn *, const char **, int);
 
@@ -102,7 +103,7 @@ preinit_s_nickserv(void)
 static void
 init_s_nickserv(void)
 {
-	nick_reg_heap = BlockHeapCreate("Nick Reg", sizeof(struct nick_reg), HEAP_NICK_REG);
+	nick_reg_heap = rb_bh_create(sizeof(struct nick_reg), HEAP_NICK_REG, "Nick Reg");
 
 	rsdb_exec(nick_db_callback, 
 			"SELECT nickname, username, reg_time, last_time, flags FROM nicks");
@@ -116,7 +117,7 @@ static void
 add_nick_reg(struct nick_reg *nreg_p)
 {
 	unsigned int hashv = hash_name(nreg_p->name);
-	dlink_add(nreg_p, &nreg_p->node, &nick_reg_table[hashv]);
+	rb_dlinkAdd(nreg_p, &nreg_p->node, &nick_reg_table[hashv]);
 }
 
 void
@@ -127,19 +128,19 @@ free_nick_reg(struct nick_reg *nreg_p)
 	rsdb_exec(NULL, "DELETE FROM nicks WHERE nickname = '%Q'",
 			nreg_p->name);
 
-	dlink_delete(&nreg_p->node, &nick_reg_table[hashv]);
-	dlink_delete(&nreg_p->usernode, &nreg_p->user_reg->nicks);
-	BlockHeapFree(nick_reg_heap, nreg_p);
+	rb_dlinkDelete(&nreg_p->node, &nick_reg_table[hashv]);
+	rb_dlinkDelete(&nreg_p->usernode, &nreg_p->user_reg->nicks);
+	rb_bh_free(nick_reg_heap, nreg_p);
 }
 
 static struct nick_reg *
 find_nick_reg(struct client *client_p, const char *name)
 {
 	struct nick_reg *nreg_p;
-	dlink_node *ptr;
+	rb_dlink_node *ptr;
 	unsigned int hashv = hash_name(name);
 
-	DLINK_FOREACH(ptr, nick_reg_table[hashv].head)
+	RB_DLINK_FOREACH(ptr, nick_reg_table[hashv].head)
 	{
 		nreg_p = ptr->data;
 		if(!irccmp(nreg_p->name, name))
@@ -164,14 +165,14 @@ nick_db_callback(int argc, const char **argv)
 	if((ureg_p = find_user_reg(NULL, argv[1])) == NULL)
 		return 0;
 
-	nreg_p = BlockHeapAlloc(nick_reg_heap);
-	strlcpy(nreg_p->name, argv[0], sizeof(nreg_p->name));
+	nreg_p = rb_bh_alloc(nick_reg_heap);
+	rb_strlcpy(nreg_p->name, argv[0], sizeof(nreg_p->name));
 	nreg_p->reg_time = atol(argv[2]);
 	nreg_p->last_time = atol(argv[3]);
 	nreg_p->flags = atol(argv[4]);
 
 	add_nick_reg(nreg_p);
-	dlink_add(nreg_p, &nreg_p->usernode, &ureg_p->nicks);
+	rb_dlinkAdd(nreg_p, &nreg_p->usernode, &ureg_p->nicks);
 	nreg_p->user_reg = ureg_p;
 
 	return 0;
@@ -206,12 +207,12 @@ h_nick_server_eob(void *vclient_p, void *unused)
 	struct nick_reg *nreg_p;
 	struct client *client_p = vclient_p;
 	struct client *target_p;
-	dlink_node *ptr;
+	rb_dlink_node *ptr;
 
 	if(!config_file.nallow_set_warn || EmptyString(config_file.nwarn_string))
 		return 0;
 
-	DLINK_FOREACH(ptr, client_p->server->users.head)
+	RB_DLINK_FOREACH(ptr, client_p->server->users.head)
 	{
 		target_p = ptr->data;
 
@@ -267,9 +268,9 @@ s_nick_register(struct client *client_p, struct lconn *conn_p, const char *parv[
 		return 1;
 	}
 	else
-		ureg_p->last_time = CURRENT_TIME;
+		ureg_p->last_time = rb_current_time();
 
-	if(dlink_list_length(&ureg_p->nicks) >= config_file.nmax_nicks)
+	if(rb_dlink_list_length(&ureg_p->nicks) >= config_file.nmax_nicks)
 	{
 		service_err(nickserv_p, client_p, SVC_NICK_TOOMANYREG,
 				config_file.nmax_nicks);
@@ -292,16 +293,16 @@ s_nick_register(struct client *client_p, struct lconn *conn_p, const char *parv[
 	zlog(nickserv_p, 2, WATCH_NSREGISTER, 0, client_p, NULL,
 		"REGISTER %s", client_p->name);
 
-	nreg_p = BlockHeapAlloc(nick_reg_heap);
+	nreg_p = rb_bh_alloc(nick_reg_heap);
 
-	strlcpy(nreg_p->name, client_p->name, sizeof(nreg_p->name));
-	nreg_p->reg_time = nreg_p->last_time = CURRENT_TIME;
+	rb_strlcpy(nreg_p->name, client_p->name, sizeof(nreg_p->name));
+	nreg_p->reg_time = nreg_p->last_time = rb_current_time();
 
 	if(config_file.nallow_set_warn)
 		nreg_p->flags |= NS_FLAGS_WARN;
 
 	add_nick_reg(nreg_p);
-	dlink_add(nreg_p, &nreg_p->usernode, &ureg_p->nicks);
+	rb_dlinkAdd(nreg_p, &nreg_p->usernode, &ureg_p->nicks);
 	nreg_p->user_reg = ureg_p;
 
 	rsdb_exec(NULL, 
@@ -423,7 +424,7 @@ s_nick_regain(struct client *client_p, struct lconn *conn_p, const char *parv[],
 	 */
 	sendto_server("ENCAP %s RSFNC %s %s %lu %lu",
 			client_p->user->servername, UID(client_p),
-			nreg_p->name, (unsigned long)(CURRENT_TIME - 60),
+			nreg_p->name, (unsigned long)(rb_current_time() - 60),
 			(unsigned long)client_p->user->tsinfo);
 
 	exit_client(target_p, 0);
@@ -521,7 +522,7 @@ s_nick_info(struct client *client_p, struct lconn *conn_p, const char *parv[], i
 
 	service_err(nickserv_p, client_p, SVC_INFO_REGDURATIONNICK,
 			nreg_p->name, nreg_p->user_reg->name,
-			get_duration((time_t) (CURRENT_TIME - nreg_p->reg_time)));
+			get_duration((time_t) (rb_current_time() - nreg_p->reg_time)));
 
 	zlog(nickserv_p, 5, 0, 0, client_p, NULL, "INFO %s", parv[0]);
 

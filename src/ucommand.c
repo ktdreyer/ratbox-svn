@@ -48,14 +48,10 @@
 #include "watch.h"
 #include "c_init.h"
 
-#ifdef HAVE_CRYPT_H
-#include <crypt.h>
-#endif
-
 #define MAX_HELP_ROW 8
 
-static dlink_list ucommand_table[MAX_UCOMMAND_HASH];
-dlink_list ucommand_list;
+static rb_dlink_list ucommand_table[MAX_UCOMMAND_HASH];
+rb_dlink_list ucommand_list;
 
 static int u_login(struct client *, struct lconn *, const char **, int);
 
@@ -109,10 +105,10 @@ struct ucommand_handler *
 find_ucommand(const char *command)
 {
         struct ucommand_handler *handler;
-        dlink_node *ptr;
+        rb_dlink_node *ptr;
 	unsigned int hashv = hash_command(command);
 
-	DLINK_FOREACH(ptr, ucommand_table[hashv].head)
+	RB_DLINK_FOREACH(ptr, ucommand_table[hashv].head)
 	{
 		handler = ptr->data;
 
@@ -173,11 +169,11 @@ add_ucommand_handler(struct client *service_p,
 		return;
 
 	hashv = hash_command(chandler->cmd);
-	dlink_add_alloc(chandler, &ucommand_table[hashv]);
+	rb_dlinkAddAlloc(chandler, &ucommand_table[hashv]);
 
 	/* command not associated with any service */
         if(service_p == NULL)
-		dlink_add_tail_alloc(chandler, &ucommand_list);
+		rb_dlinkAddTailAlloc(chandler, &ucommand_list);
 }
 
 void
@@ -196,13 +192,13 @@ load_ucommand_help(void)
 {
 	struct ucommand_handler *ucommand;
 	char filename[PATH_MAX];
-	dlink_node *ptr;
+	rb_dlink_node *ptr;
 	int i;
 
-	DLINK_FOREACH(ptr, ucommand_list.head)
+	RB_DLINK_FOREACH(ptr, ucommand_list.head)
 	{
 		ucommand = ptr->data;
-		ucommand->helpfile = my_malloc(sizeof(struct cachefile *) * LANG_MAX);
+		ucommand->helpfile = rb_malloc(sizeof(struct cachefile *) * LANG_MAX);
 
 		for(i = 0; langs_available[i]; i++)
 		{
@@ -217,10 +213,10 @@ void
 clear_ucommand_help(void)
 {
 	struct ucommand_handler *ucommand;
-	dlink_node *ptr;
+	rb_dlink_node *ptr;
 	int i;
 
-	DLINK_FOREACH(ptr, ucommand_list.head)
+	RB_DLINK_FOREACH(ptr, ucommand_list.head)
 	{
 		ucommand = ptr->data;
 
@@ -229,7 +225,7 @@ clear_ucommand_help(void)
 			free_cachefile(ucommand->helpfile[i]);
 		}
 		
-		my_free(ucommand->helpfile);
+		rb_free(ucommand->helpfile);
 		ucommand->helpfile = NULL;
 	}
 }
@@ -247,7 +243,7 @@ u_login(struct client *unused, struct lconn *conn_p, const char *parv[], int par
         }
 
         if(ConfOperEncrypted(oper_p))
-                crpass = crypt(parv[1], oper_p->pass);
+                crpass = rb_crypt(parv[1], oper_p->pass);
         else
                 crpass = parv[1];
 
@@ -281,10 +277,10 @@ u_boot(struct client *unused, struct lconn *conn_p, const char *parv[], int parc
 {
 	struct client *target_p;
 	struct lconn *dcc_p;
-	dlink_node *ptr, *next_ptr;
+	rb_dlink_node *ptr, *next_ptr;
 	unsigned int count = 0;
 
-	DLINK_FOREACH_SAFE(ptr, next_ptr, oper_list.head)
+	RB_DLINK_FOREACH_SAFE(ptr, next_ptr, oper_list.head)
 	{
 		target_p = ptr->data;
 
@@ -294,14 +290,14 @@ u_boot(struct client *unused, struct lconn *conn_p, const char *parv[], int parc
 
 			deallocate_conf_oper(target_p->user->oper);
 			target_p->user->oper = NULL;
-			dlink_destroy(ptr, &oper_list);
+			rb_dlinkDestroy(ptr, &oper_list);
 
 			sendto_server(":%s NOTICE %s :Logged out by %s",
 					MYUID, UID(target_p), conn_p->name);
 		}
 	}
 
-	DLINK_FOREACH_SAFE(ptr, next_ptr, connection_list.head)
+	RB_DLINK_FOREACH_SAFE(ptr, next_ptr, connection_list.head)
 	{
 		dcc_p = ptr->data;
 
@@ -310,7 +306,7 @@ u_boot(struct client *unused, struct lconn *conn_p, const char *parv[], int parc
 			count++;
 
 			sendto_one(dcc_p, "Logged out by %s", conn_p->name);
-			(dcc_p->io_close)(dcc_p);
+			signoff_client(dcc_p);
 		}
 	}
 
@@ -345,7 +341,7 @@ u_connect(struct client *unused, struct lconn *conn_p, const char *parv[], int p
 
         if(server_p != NULL && (server_p->flags & CONN_DEAD) == 0)
         {
-                (server_p->io_close)(server_p);
+                signoff_server(server_p);
 
                 sendto_all("Connection to server %s disconnected by %s: (reroute to %s)",
 				server_p->name, conn_p->name, conf_p->name);
@@ -355,16 +351,16 @@ u_connect(struct client *unused, struct lconn *conn_p, const char *parv[], int p
         }
 
         /* remove any pending events for connecting.. */
-        eventDelete(connect_to_server, NULL);
+//XXX        rb_event_delete(connect_to_server, NULL);
 
-        eventAddOnce("connect_to_server", connect_to_server, conf_p, 2);
+//XXX        rb_event_addonce("connect_to_server", connect_to_server, conf_p, 2);
 	return 0;
 }
 
 static int
 u_events(struct client *unused, struct lconn *conn_p, const char *parv[], int parc)
 {
-        event_show(NULL, conn_p);
+//XXX        event_show(NULL, conn_p);
 	return 0;
 }
 
@@ -372,7 +368,7 @@ static int
 u_quit(struct client *unused, struct lconn *conn_p, const char *parv[], int parc)
 {
 	sendto_one(conn_p, "Goodbye.");
-	(conn_p->io_close)(conn_p);
+	signoff_client(conn_p);
 	return 0;
 }
 
@@ -401,7 +397,7 @@ static int
 u_service(struct client *unused, struct lconn *conn_p, const char *parv[], int parc)
 {
         struct client *service_p;
-        dlink_node *ptr;
+        rb_dlink_node *ptr;
 
         if(parc > 0)
         {
@@ -420,7 +416,7 @@ u_service(struct client *unused, struct lconn *conn_p, const char *parv[], int p
 
         sendto_one(conn_p, "Services:");
 
-        DLINK_FOREACH(ptr, service_list.head)
+        RB_DLINK_FOREACH(ptr, service_list.head)
         {
                 service_p = ptr->data;
 
@@ -442,7 +438,7 @@ u_status(struct client *unused, struct lconn *conn_p, const char *parv[], int pa
 {
         sendto_one(conn_p, "%s, version ratbox-services-%s(%s), up %s",
 			MYNAME, RSERV_VERSION, SERIALNUM,
-			get_duration(CURRENT_TIME - first_time));
+			get_duration(rb_current_time() - first_time));
 
         if(server_p != NULL)
                 sendto_one(conn_p, "Currently connected to %s", server_p->name);
@@ -450,15 +446,15 @@ u_status(struct client *unused, struct lconn *conn_p, const char *parv[], int pa
                 sendto_one(conn_p, "Currently disconnected");
 
 	sendto_one(conn_p, "Services: %lu",
-			dlink_list_length(&service_list));
+			rb_dlink_list_length(&service_list));
 	sendto_one(conn_p, "Clients: DCC: %lu IRC: %lu",
-			dlink_list_length(&connection_list),
-			dlink_list_length(&oper_list));
+			rb_dlink_list_length(&connection_list),
+			rb_dlink_list_length(&oper_list));
         sendto_one(conn_p, "Network: Users: %lu Servers: %lu",
-			dlink_list_length(&user_list),
-			dlink_list_length(&server_list));
+			rb_dlink_list_length(&user_list),
+			rb_dlink_list_length(&server_list));
         sendto_one(conn_p, "         Channels: %lu Topics: %lu",
-			dlink_list_length(&channel_list), count_topics());
+			rb_dlink_list_length(&channel_list), count_topics());
 	return 0;
 }
 
@@ -489,15 +485,15 @@ u_chat(struct client *unused, struct lconn *conn_p, const char *parv[], int parc
 }
 
 static void
-dump_commands_list(struct lconn *conn_p, struct client *service_p, dlink_list *list)
+dump_commands_list(struct lconn *conn_p, struct client *service_p, rb_dlink_list *list)
 {
 	struct ucommand_handler *handler;
 	const char *hparv[MAX_HELP_ROW];
-	dlink_node *ptr;
+	rb_dlink_node *ptr;
 	int j = 0;
 	int header = 0;
 
-	DLINK_FOREACH(ptr, list->head)
+	RB_DLINK_FOREACH(ptr, list->head)
 	{
 		handler = ptr->data;
 
@@ -590,7 +586,7 @@ static int
 u_help(struct client *unused, struct lconn *conn_p, const char *parv[], int parc)
 {
         struct ucommand_handler *handler;
-	dlink_node *ptr;
+	rb_dlink_node *ptr;
 
         if(parc < 1 || EmptyString(parv[0]))
         {
@@ -598,7 +594,7 @@ u_help(struct client *unused, struct lconn *conn_p, const char *parv[], int parc
 
 		dump_commands_list(conn_p, NULL, &ucommand_list);
 
-		DLINK_FOREACH(ptr, service_list.head)
+		RB_DLINK_FOREACH(ptr, service_list.head)
 		{
 			service_p = ptr->data;
 

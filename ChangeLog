@@ -1,35 +1,231 @@
-moggie      2010/09/30 18:06:33 UTC	(20100930_0-27100)
+androsyn    2010/10/04 14:18:35 UTC	(20101004_1-27104)
   Log:
-  - Use strlcpy() instead of strncpy().
-  - Update some buffer lengths.
+  make rserv link against libratbox properly
+
+  Modified:
+	rserv/branches/rserv-libratbox/Makefile.in (File Modified) 
+	rserv/branches/rserv-libratbox/src/Makefile.in (File Modified) 
+
+
+androsyn    2010/10/04 14:09:55 UTC	(20101004_0-27102)
+  Log:
+  merge in rserv changes from trunk
+
+  Modified:
+	rserv/branches/rserv-libratbox/doc/example.conf (File Modified) 
+	rserv/branches/rserv-libratbox/help/en/chanfix/index-admin (File Modified) 
+	rserv/branches/rserv-libratbox/help/en/chanfix/uscore (File Modified) 
+	rserv/branches/rserv-libratbox/include/conf.h (File Modified) 
+	rserv/branches/rserv-libratbox/include/langs.h (File Modified) 
+	rserv/branches/rserv-libratbox/include/s_chanfix.h (File Modified) 
+	rserv/branches/rserv-libratbox/src/conf.c (File Modified) 
+	rserv/branches/rserv-libratbox/src/langs.c (File Modified) 
+	rserv/branches/rserv-libratbox/src/messages.c (File Modified) 
+	rserv/branches/rserv-libratbox/src/newconf.c (File Modified) 
+	rserv/branches/rserv-libratbox/src/s_chanfix.c (File Modified) 
+	rserv/branches/rserv-libratbox/src/s_chanserv.c (File Modified) 
+
+
+androsyn    2010/09/26 05:12:40 UTC	(20100926_6-27096)
+  Log:
+  update events timers now with the event api that needs pointers, not names to the events
+
+  Modified:
+	rserv/branches/rserv-libratbox/autoconf/configure.in (File Modified) 
+	rserv/branches/rserv-libratbox/configure (File Modified) 
+	rserv/branches/rserv-libratbox/include/s_banserv.h (File Modified) 
+	rserv/branches/rserv-libratbox/include/s_chanserv.h (File Modified) 
+	rserv/branches/rserv-libratbox/include/setup.h.in (File Modified) 
+	rserv/branches/rserv-libratbox/src/newconf.c (File Modified) 
+	rserv/branches/rserv-libratbox/src/s_banserv.c (File Modified) 
+	rserv/branches/rserv-libratbox/src/s_chanserv.c (File Modified) 
+
+
+androsyn    2010/09/26 05:00:55 UTC	(20100926_5-27094)
+  Log:
+  more crypt() related cleanups
+
+  Modified:
+	rserv/branches/rserv-libratbox/src/service.c (File Modified) 
+	rserv/branches/rserv-libratbox/src/ucommand.c (File Modified) 
+
+
+androsyn    2010/09/26 04:53:51 UTC	(20100926_4-27092)
+  Log:
+  don't need crypt.h with libratbox and its rb_crypt
+
+  Modified:
+	rserv/branches/rserv-libratbox/src/crypt.c (File Modified) 
+	rserv/branches/rserv-libratbox/src/rserv.c (File Modified) 
+
+
+androsyn    2010/09/26 04:22:59 UTC	(20100926_3-27090)
+  Log:
+  change a bunch of string_to_array calls with approriate rb_string_to_array calls
+
+  Modified:
+	rserv/branches/rserv-libratbox/include/tools.h (File Modified) 
+	rserv/branches/rserv-libratbox/src/rserv.c (File Modified) 
+	rserv/branches/rserv-libratbox/src/s_chanserv.c (File Modified) 
+	rserv/branches/rserv-libratbox/src/s_userserv.c (File Modified) 
+	rserv/branches/rserv-libratbox/src/service.c (File Modified) 
+	rserv/branches/rserv-libratbox/src/tools.c (File Modified) 
+
+
+androsyn    2010/09/26 04:15:24 UTC	(20100926_2-27088)
+  Log:
+  some more fixes/cleanups
+
+  Modified:
+	rserv/branches/rserv-libratbox/include/io.h (File Modified) 
+	rserv/branches/rserv-libratbox/src/c_error.c (File Modified) 
+	rserv/branches/rserv-libratbox/src/client.c (File Modified) 
+	rserv/branches/rserv-libratbox/src/io.c (File Modified) 
+	rserv/branches/rserv-libratbox/src/scommand.c (File Modified) 
+	rserv/branches/rserv-libratbox/src/ucommand.c (File Modified) 
+
+
+androsyn    2010/09/26 02:54:49 UTC	(20100926_1-27086)
+  Log:
+  deal with connection timeouts and crap
+
+  Modified:
+	rserv/branches/rserv-libratbox/src/io.c (File Modified) 
+	rserv/branches/rserv-libratbox/src/rserv.c (File Modified) 
+
+
+androsyn    2010/09/26 02:19:59 UTC	(20100926_0-27084)
+  Log:
+  Yet another megacommit.  More libratbox integration.  Some of the i/o code handling still needs
+  to be done for dead clients etc...fun fun
+  
   
 
   Modified:
-	rserv/trunk/src/s_chanfix.c (File Modified) 
+	rserv/branches/rserv-libratbox/autoconf/configure.in (File Modified) 
+	rserv/branches/rserv-libratbox/configure (File Modified) 
+	rserv/branches/rserv-libratbox/include/io.h (File Modified) 
+	rserv/branches/rserv-libratbox/include/rserv.h (File Modified) 
+	rserv/branches/rserv-libratbox/include/s_chanfix.h (File Modified) 
+	rserv/branches/rserv-libratbox/include/s_chanserv.h (File Modified) 
+	rserv/branches/rserv-libratbox/include/s_userserv.h (File Modified) 
+	rserv/branches/rserv-libratbox/include/setup.h.in (File Modified) 
+	rserv/branches/rserv-libratbox/src/.depend (File Modified) 
+	rserv/branches/rserv-libratbox/src/channel.c (File Modified) 
+	rserv/branches/rserv-libratbox/src/client.c (File Modified) 
+	rserv/branches/rserv-libratbox/src/conf.c (File Modified) 
+	rserv/branches/rserv-libratbox/src/crypt.c (File Modified) 
+	rserv/branches/rserv-libratbox/src/email.c (File Modified) 
+	rserv/branches/rserv-libratbox/src/io.c (File Modified) 
+	rserv/branches/rserv-libratbox/src/log.c (File Modified) 
+	rserv/branches/rserv-libratbox/src/rsdb_mysql.c (File Modified) 
+	rserv/branches/rserv-libratbox/src/rsdb_pgsql.c (File Modified) 
+	rserv/branches/rserv-libratbox/src/rserv.c (File Modified) 
+	rserv/branches/rserv-libratbox/src/s_banserv.c (File Modified) 
+	rserv/branches/rserv-libratbox/src/s_chanfix.c (File Modified) 
+	rserv/branches/rserv-libratbox/src/s_chanserv.c (File Modified) 
+	rserv/branches/rserv-libratbox/src/s_jupeserv.c (File Modified) 
+	rserv/branches/rserv-libratbox/src/s_memoserv.c (File Modified) 
+	rserv/branches/rserv-libratbox/src/s_nickserv.c (File Modified) 
+	rserv/branches/rserv-libratbox/src/s_operbot.c (File Modified) 
+	rserv/branches/rserv-libratbox/src/s_operserv.c (File Modified) 
+	rserv/branches/rserv-libratbox/src/s_userserv.c (File Modified) 
+	rserv/branches/rserv-libratbox/src/scommand.c (File Modified) 
+	rserv/branches/rserv-libratbox/src/service.c (File Modified) 
+	rserv/branches/rserv-libratbox/src/tools.c (File Modified) 
+	rserv/branches/rserv-libratbox/src/u_stats.c (File Modified) 
+	rserv/branches/rserv-libratbox/src/ucommand.c (File Modified) 
 
 
-moggie      2010/09/29 12:16:54 UTC	(20100929_0-27098)
+androsyn    2010/09/25 20:59:06 UTC	(20100925_2-27082)
   Log:
-  - Add a time lock option which prevents a channel being registered if it has
-    existed for longer than the specified duration.
-  - Modify USCORE command to accept either an IRC nickname or a user@host.
-  - Rename cf_chan to cf_ptr.
-  - Add duration timers to see how long chanfixing / scoring takes.
+  First go around at libratbox integration.  It compiles, likely doesn't work. 
+  This was just the long hanging fruit that could be search/replaced etc.
   
 
   Modified:
-	rserv/trunk/doc/example.conf (File Modified) 
-	rserv/trunk/help/en/chanfix/index-admin (File Modified) 
-	rserv/trunk/help/en/chanfix/uscore (File Modified) 
-	rserv/trunk/include/conf.h (File Modified) 
-	rserv/trunk/include/langs.h (File Modified) 
-	rserv/trunk/include/s_chanfix.h (File Modified) 
-	rserv/trunk/src/conf.c (File Modified) 
-	rserv/trunk/src/langs.c (File Modified) 
-	rserv/trunk/src/messages.c (File Modified) 
-	rserv/trunk/src/newconf.c (File Modified) 
-	rserv/trunk/src/s_chanfix.c (File Modified) 
-	rserv/trunk/src/s_chanserv.c (File Modified) 
+	rserv/branches/rserv-libratbox/autoconf/configure.in (File Modified) 
+	rserv/branches/rserv-libratbox/configure (File Modified) 
+	rserv/branches/rserv-libratbox/include/balloc.h (File Modified) 
+	rserv/branches/rserv-libratbox/include/cache.h (File Modified) 
+	rserv/branches/rserv-libratbox/include/channel.h (File Modified) 
+	rserv/branches/rserv-libratbox/include/client.h (File Modified) 
+	rserv/branches/rserv-libratbox/include/conf.h (File Modified) 
+	rserv/branches/rserv-libratbox/include/dbhook.h (File Modified) 
+	rserv/branches/rserv-libratbox/include/io.h (File Modified) 
+	rserv/branches/rserv-libratbox/include/newconf.h (File Modified) 
+	rserv/branches/rserv-libratbox/include/s_banserv.h (File Modified) 
+	rserv/branches/rserv-libratbox/include/s_chanfix.h (File Modified) 
+	rserv/branches/rserv-libratbox/include/s_chanserv.h (File Modified) 
+	rserv/branches/rserv-libratbox/include/s_nickserv.h (File Modified) 
+	rserv/branches/rserv-libratbox/include/s_userserv.h (File Modified) 
+	rserv/branches/rserv-libratbox/include/scommand.h (File Modified) 
+	rserv/branches/rserv-libratbox/include/service.h (File Modified) 
+	rserv/branches/rserv-libratbox/include/stdinc.h (File Modified) 
+	rserv/branches/rserv-libratbox/include/tools.h (File Modified) 
+	rserv/branches/rserv-libratbox/include/ucommand.h (File Modified) 
+	rserv/branches/rserv-libratbox/pcre/config.h.in (File Modified) 
+	rserv/branches/rserv-libratbox/pcre/configure (File Modified) 
+	rserv/branches/rserv-libratbox/src/.depend (File Modified) 
+	rserv/branches/rserv-libratbox/src/Makefile.in (File Modified) 
+	rserv/branches/rserv-libratbox/src/balloc.c (File Deleted) 
+	rserv/branches/rserv-libratbox/src/c_error.c (File Modified) 
+	rserv/branches/rserv-libratbox/src/c_message.c (File Modified) 
+	rserv/branches/rserv-libratbox/src/c_mode.c (File Modified) 
+	rserv/branches/rserv-libratbox/src/cache.c (File Modified) 
+	rserv/branches/rserv-libratbox/src/channel.c (File Modified) 
+	rserv/branches/rserv-libratbox/src/cidr.c (File Modified) 
+	rserv/branches/rserv-libratbox/src/client.c (File Modified) 
+	rserv/branches/rserv-libratbox/src/conf.c (File Modified) 
+	rserv/branches/rserv-libratbox/src/dbhook.c (File Modified) 
+	rserv/branches/rserv-libratbox/src/email.c (File Modified) 
+	rserv/branches/rserv-libratbox/src/event.c (File Deleted) 
+	rserv/branches/rserv-libratbox/src/hook.c (File Modified) 
+	rserv/branches/rserv-libratbox/src/io.c (File Modified) 
+	rserv/branches/rserv-libratbox/src/langs.c (File Modified) 
+	rserv/branches/rserv-libratbox/src/log.c (File Modified) 
+	rserv/branches/rserv-libratbox/src/modebuild.c (File Modified) 
+	rserv/branches/rserv-libratbox/src/newconf.c (File Modified) 
+	rserv/branches/rserv-libratbox/src/parser.y (File Modified) 
+	rserv/branches/rserv-libratbox/src/rsdb_mysql.c (File Modified) 
+	rserv/branches/rserv-libratbox/src/rsdb_pgsql.c (File Modified) 
+	rserv/branches/rserv-libratbox/src/rsdb_sqlite3.c (File Modified) 
+	rserv/branches/rserv-libratbox/src/rserv.c (File Modified) 
+	rserv/branches/rserv-libratbox/src/s_alis.c (File Modified) 
+	rserv/branches/rserv-libratbox/src/s_banserv.c (File Modified) 
+	rserv/branches/rserv-libratbox/src/s_chanfix.c (File Modified) 
+	rserv/branches/rserv-libratbox/src/s_chanserv.c (File Modified) 
+	rserv/branches/rserv-libratbox/src/s_global.c (File Modified) 
+	rserv/branches/rserv-libratbox/src/s_jupeserv.c (File Modified) 
+	rserv/branches/rserv-libratbox/src/s_memoserv.c (File Modified) 
+	rserv/branches/rserv-libratbox/src/s_nickserv.c (File Modified) 
+	rserv/branches/rserv-libratbox/src/s_operbot.c (File Modified) 
+	rserv/branches/rserv-libratbox/src/s_operserv.c (File Modified) 
+	rserv/branches/rserv-libratbox/src/s_userserv.c (File Modified) 
+	rserv/branches/rserv-libratbox/src/s_watchserv.c (File Modified) 
+	rserv/branches/rserv-libratbox/src/scommand.c (File Modified) 
+	rserv/branches/rserv-libratbox/src/service.c (File Modified) 
+	rserv/branches/rserv-libratbox/src/tools.c (File Modified) 
+	rserv/branches/rserv-libratbox/src/u_stats.c (File Modified) 
+	rserv/branches/rserv-libratbox/src/ucommand.c (File Modified) 
+
+
+androsyn    2010/09/25 15:04:16 UTC	(20100925_1-27078)
+  Log:
+  Pull in libratbox svn
+  
+
+  Modified:
+	rserv/branches/rserv-libratbox/  (Property Modified)
+
+
+androsyn    2010/09/25 14:58:13 UTC	(20100925_0-27075)
+  Log:
+  Make a branch for libratbox merging..
+  
+
+  Modified:
+	rserv/branches/rserv-libratbox/ (File Added) 
 
 
 moggie      2010/09/22 10:21:29 UTC	(20100922_0-27073)

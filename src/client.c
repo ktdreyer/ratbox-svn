@@ -44,20 +44,21 @@
 #include "hook.h"
 #include "s_userserv.h"
 #include "conf.h"
+#include "tools.h"
 
-static dlink_list name_table[MAX_NAME_HASH];
-static dlink_list uid_table[MAX_NAME_HASH];
-static dlink_list host_table[MAX_HOST_HASH];
+static rb_dlink_list name_table[MAX_NAME_HASH];
+static rb_dlink_list uid_table[MAX_NAME_HASH];
+static rb_dlink_list host_table[MAX_HOST_HASH];
 
-dlink_list user_list;
-dlink_list oper_list;
-dlink_list server_list;
-dlink_list exited_list;
+rb_dlink_list user_list;
+rb_dlink_list oper_list;
+rb_dlink_list server_list;
+rb_dlink_list exited_list;
 
-static BlockHeap *client_heap;
-static BlockHeap *user_heap;
-static BlockHeap *server_heap;
-static BlockHeap *host_heap;
+static rb_bh *client_heap;
+static rb_bh *user_heap;
+static rb_bh *server_heap;
+static rb_bh *host_heap;
 
 static void cleanup_host_table(void *);
 
@@ -83,12 +84,12 @@ static struct scommand_handler squit_command = { "SQUIT", c_squit, 0, DLINK_EMPT
 void
 init_client(void)
 {
-        client_heap = BlockHeapCreate("Client", sizeof(struct client), HEAP_CLIENT);
-        user_heap = BlockHeapCreate("User", sizeof(struct user), HEAP_USER);
-        server_heap = BlockHeapCreate("Server", sizeof(struct server), HEAP_SERVER);
-	host_heap = BlockHeapCreate("Hostname", sizeof(struct host_entry), HEAP_HOST);
+        client_heap = rb_bh_create(sizeof(struct client), HEAP_CLIENT, "Client");
+        user_heap = rb_bh_create(sizeof(struct user), HEAP_USER, "User");
+        server_heap = rb_bh_create(sizeof(struct server), HEAP_SERVER, "Server");
+	host_heap = rb_bh_create(sizeof(struct host_entry), HEAP_HOST, "Hostname");
 
-	eventAdd("cleanup_host_table", cleanup_host_table, NULL, 3600);
+	rb_event_add("cleanup_host_table", cleanup_host_table, NULL, 3600);
 
 	add_scommand_handler(&kill_command);
 	add_scommand_handler(&nick_command);
@@ -141,12 +142,12 @@ void
 add_client(struct client *target_p)
 {
 	unsigned int hashv = hash_name(target_p->name);
-	dlink_add(target_p, &target_p->nameptr, &name_table[hashv]);
+	rb_dlinkAdd(target_p, &target_p->nameptr, &name_table[hashv]);
 
 	if(!EmptyString(target_p->uid))
 	{
 		hashv = hash_name(target_p->uid);
-		dlink_add(target_p, &target_p->uidptr, &uid_table[hashv]);
+		rb_dlinkAdd(target_p, &target_p->uidptr, &uid_table[hashv]);
 	}
 }
 
@@ -160,12 +161,12 @@ void
 del_client(struct client *target_p)
 {
 	unsigned int hashv = hash_name(target_p->name);
-	dlink_delete(&target_p->nameptr, &name_table[hashv]);
+	rb_dlinkDelete(&target_p->nameptr, &name_table[hashv]);
 
 	if(!EmptyString(target_p->uid))
 	{
 		hashv = hash_name(target_p->uid);
-		dlink_delete(&target_p->uidptr, &uid_table[hashv]);
+		rb_dlinkDelete(&target_p->uidptr, &uid_table[hashv]);
 	}
 }
 
@@ -179,7 +180,7 @@ struct client *
 find_client(const char *name)
 {
 	struct client *target_p;
-	dlink_node *ptr;
+	rb_dlink_node *ptr;
 	unsigned int hashv;
 
 	if(IsDigit(*name))
@@ -195,7 +196,7 @@ find_client(const char *name)
 	 */
 	hashv = hash_name(name);
 
-	DLINK_FOREACH(ptr, name_table[hashv].head)
+	RB_DLINK_FOREACH(ptr, name_table[hashv].head)
 	{
 		target_p = ptr->data;
 
@@ -210,12 +211,12 @@ struct client *
 find_named_client(const char *name)
 {
 	struct client *target_p;
-	dlink_node *ptr;
+	rb_dlink_node *ptr;
 	unsigned int hashv; 
 
 	hashv = hash_name(name);
 
-	DLINK_FOREACH(ptr, name_table[hashv].head)
+	RB_DLINK_FOREACH(ptr, name_table[hashv].head)
 	{
 		target_p = ptr->data;
 
@@ -230,10 +231,10 @@ struct client *
 find_uid(const char *name)
 {
 	struct client *target_p;
-	dlink_node *ptr;
+	rb_dlink_node *ptr;
 	unsigned int hashv = hash_name(name);
 
-	DLINK_FOREACH(ptr, uid_table[hashv].head)
+	RB_DLINK_FOREACH(ptr, uid_table[hashv].head)
 	{
 		target_p = ptr->data;
 
@@ -310,20 +311,20 @@ static void
 cleanup_host_table(void *unused)
 {
 	struct host_entry *hent;
-	dlink_node *ptr, *next_ptr;
+	rb_dlink_node *ptr, *next_ptr;
 	int i;
 
 	HASH_WALK_SAFE(i, MAX_HOST_HASH, ptr, next_ptr, host_table)
 	{
 		hent = ptr->data;
 
-		if(hent->flood_expire < CURRENT_TIME &&
-		   hent->cregister_expire < CURRENT_TIME &&
-		   hent->uregister_expire < CURRENT_TIME)
+		if(hent->flood_expire < rb_current_time() &&
+		   hent->cregister_expire < rb_current_time() &&
+		   hent->uregister_expire < rb_current_time())
 		{
-			dlink_delete(&hent->node, &host_table[i]);
-			my_free(hent->name);
-			BlockHeapFree(host_heap, hent);
+			rb_dlinkDelete(&hent->node, &host_table[i]);
+			rb_free(hent->name);
+			rb_bh_free(host_heap, hent);
 		}
 	}
 	HASH_WALK_END
@@ -339,10 +340,10 @@ struct host_entry *
 find_host(const char *name)
 {
 	struct host_entry *hent;
-	dlink_node *ptr;
+	rb_dlink_node *ptr;
 	unsigned int hashv = hash_host(name);
 
-	DLINK_FOREACH(ptr, host_table[hashv].head)
+	RB_DLINK_FOREACH(ptr, host_table[hashv].head)
 	{
 		hent = ptr->data;
 
@@ -350,9 +351,9 @@ find_host(const char *name)
 			return hent;
 	}
 
-	hent = BlockHeapAlloc(host_heap);
-	hent->name = my_strdup(name);
-	dlink_add(hent, &hent->node, &host_table[hashv]);
+	hent = rb_bh_alloc(host_heap);
+	hent->name = rb_strdup(name);
+	rb_dlinkAdd(hent, &hent->node, &host_table[hashv]);
 
 	return hent;
 }
@@ -417,8 +418,8 @@ generate_uid(void)
 static void
 exit_user(struct client *target_p, int split)
 {
-	dlink_node *ptr;
-	dlink_node *next_ptr;
+	rb_dlink_node *ptr;
+	rb_dlink_node *next_ptr;
 
 	if(IsDead(target_p))
 		return;
@@ -432,22 +433,22 @@ exit_user(struct client *target_p, int split)
 
 #ifdef ENABLE_USERSERV
 	if(target_p->user->user_reg)
-		dlink_find_destroy(target_p, &target_p->user->user_reg->users);
+		rb_dlinkFindDestroy(target_p, &target_p->user->user_reg->users);
 #endif
 
 	if(target_p->user->oper)
 	{
-		dlink_find_destroy(target_p, &oper_list);
+		rb_dlinkFindDestroy(target_p, &oper_list);
 		deallocate_conf_oper(target_p->user->oper);
 	}
 
-	DLINK_FOREACH_SAFE(ptr, next_ptr, target_p->user->channels.head)
+	RB_DLINK_FOREACH_SAFE(ptr, next_ptr, target_p->user->channels.head)
 	{
 		del_chmember(ptr->data);
 	}
 
-	dlink_move_node(&target_p->listnode, &user_list, &exited_list);
-	dlink_delete(&target_p->upnode, &target_p->uplink->server->users);
+	rb_dlinkMoveNode(&target_p->listnode, &user_list, &exited_list);
+	rb_dlinkDelete(&target_p->upnode, &target_p->uplink->server->users);
 }
 
 /* exit_server()
@@ -459,8 +460,8 @@ exit_user(struct client *target_p, int split)
 static void
 exit_server(struct client *target_p, int split)
 {
-	dlink_node *ptr;
-	dlink_node *next_ptr;
+	rb_dlink_node *ptr;
+	rb_dlink_node *next_ptr;
 
 	if(IsDead(target_p))
 		return;
@@ -471,14 +472,14 @@ exit_server(struct client *target_p, int split)
 	hook_call(HOOK_SERVER_EXIT_WARNING, target_p, NULL);
 
 	/* first exit each of this servers users */
-	DLINK_FOREACH_SAFE(ptr, next_ptr, target_p->server->users.head)
+	RB_DLINK_FOREACH_SAFE(ptr, next_ptr, target_p->server->users.head)
 	{
 		hook_call(HOOK_CLIENT_EXIT_SPLIT, ptr->data, NULL);
 		exit_client(ptr->data, split);
 	}
 
         /* then exit each of their servers.. */
-	DLINK_FOREACH_SAFE(ptr, next_ptr, target_p->server->servers.head)
+	RB_DLINK_FOREACH_SAFE(ptr, next_ptr, target_p->server->servers.head)
 	{
 		exit_client(ptr->data, split);
 	}
@@ -486,11 +487,11 @@ exit_server(struct client *target_p, int split)
 	/* do this after all its leaf servers have been removed */
 	hook_call(HOOK_SERVER_EXIT, target_p, NULL);
 
-	dlink_move_node(&target_p->listnode, &server_list, &exited_list);
+	rb_dlinkMoveNode(&target_p->listnode, &server_list, &exited_list);
 
 	/* if it has an uplink, remove it from its uplinks list */
 	if(target_p->uplink != NULL)
-		dlink_delete(&target_p->upnode, &target_p->uplink->server->servers);
+		rb_dlinkDelete(&target_p->upnode, &target_p->uplink->server->servers);
 }
 
 /* exit_client()
@@ -526,15 +527,15 @@ free_client(struct client *target_p)
 {
         if(target_p->user != NULL)
 	{
-		my_free(target_p->user->ip);
-		my_free(target_p->user->mask);
-                BlockHeapFree(user_heap, target_p->user);
+		rb_free(target_p->user->ip);
+		rb_free(target_p->user->mask);
+                rb_bh_free(user_heap, target_p->user);
 	}
 
 	if(target_p->server != NULL)
-	        BlockHeapFree(server_heap, target_p->server);
+	        rb_bh_free(server_heap, target_p->server);
 
-	BlockHeapFree(client_heap, target_p);
+	rb_bh_free(client_heap, target_p);
 }
 
 /* string_to_umode()
@@ -686,17 +687,17 @@ c_nick(struct client *client_p, const char *parv[], int parc)
 			}
 		}
 
-		target_p = BlockHeapAlloc(client_heap);
-		target_p->user = BlockHeapAlloc(user_heap);
+		target_p = rb_bh_alloc(client_heap);
+		target_p->user = rb_bh_alloc(user_heap);
 
 		target_p->uplink = uplink_p;
 
-		strlcpy(target_p->name, parv[0], sizeof(target_p->name));
-		strlcpy(target_p->user->username, parv[4],
+		rb_strlcpy(target_p->name, parv[0], sizeof(target_p->name));
+		rb_strlcpy(target_p->user->username, parv[4],
 			sizeof(target_p->user->username));
-		strlcpy(target_p->user->host, parv[5], 
+		rb_strlcpy(target_p->user->host, parv[5], 
                         sizeof(target_p->user->host));
-                strlcpy(target_p->info, parv[7], sizeof(target_p->info));
+                rb_strlcpy(target_p->info, parv[7], sizeof(target_p->info));
 
 		target_p->user->servername = uplink_p->name;
 		target_p->user->tsinfo = newts;
@@ -705,11 +706,11 @@ c_nick(struct client *client_p, const char *parv[], int parc)
 		snprintf(buf, sizeof(buf), "%s!%s@%s",
 			target_p->name, target_p->user->username, 
 			target_p->user->host);
-		target_p->user->mask = my_strdup(buf);
+		target_p->user->mask = rb_strdup(buf);
 
 		add_client(target_p);
-		dlink_add(target_p, &target_p->listnode, &user_list);
-		dlink_add(target_p, &target_p->upnode, &uplink_p->server->users);
+		rb_dlinkAdd(target_p, &target_p->listnode, &user_list);
+		rb_dlinkAdd(target_p, &target_p->upnode, &uplink_p->server->users);
 
 		if(IsEOB(uplink_p))
 			hook_call(HOOK_CLIENT_CONNECT, target_p, NULL);
@@ -730,15 +731,15 @@ c_nick(struct client *client_p, const char *parv[], int parc)
 				parv[0], (unsigned int) strlen(parv[0]), NICKLEN);
 
 		del_client(client_p);
-		strlcpy(client_p->name, parv[0], sizeof(client_p->name));
+		rb_strlcpy(client_p->name, parv[0], sizeof(client_p->name));
 		add_client(client_p);
 
 		/* need to update their mask with new nick */
 		snprintf(buf, sizeof(buf), "%s!%s@%s",
 			client_p->name, client_p->user->username, 
 			client_p->user->host);
-		my_free(client_p->user->mask);
-		client_p->user->mask = my_strdup(buf);
+		rb_free(client_p->user->mask);
+		client_p->user->mask = rb_strdup(buf);
 
 		client_p->user->tsinfo = atol(parv[1]);
 
@@ -803,22 +804,22 @@ c_uid(struct client *client_p, const char *parv[], int parc)
 		}
 	}
 
-	target_p = BlockHeapAlloc(client_heap);
-	target_p->user = BlockHeapAlloc(user_heap);
+	target_p = rb_bh_alloc(client_heap);
+	target_p->user = rb_bh_alloc(user_heap);
 
 	target_p->uplink = client_p;
 
-	strlcpy(target_p->name, parv[0], sizeof(target_p->name));
-	strlcpy(target_p->user->username, parv[4],
+	rb_strlcpy(target_p->name, parv[0], sizeof(target_p->name));
+	rb_strlcpy(target_p->user->username, parv[4],
 		sizeof(target_p->user->username));
-	strlcpy(target_p->user->host, parv[5], 
+	rb_strlcpy(target_p->user->host, parv[5], 
 		sizeof(target_p->user->host));
 
 	if(parv[6][0] != '0' && parv[6][1] != '\0')
-		target_p->user->ip = my_strdup(parv[6]);
+		target_p->user->ip = rb_strdup(parv[6]);
 
-	strlcpy(target_p->uid, parv[7], sizeof(target_p->uid));
-	strlcpy(target_p->info, parv[8], sizeof(target_p->info));
+	rb_strlcpy(target_p->uid, parv[7], sizeof(target_p->uid));
+	rb_strlcpy(target_p->info, parv[8], sizeof(target_p->info));
 
 	target_p->user->servername = client_p->name;
 	target_p->user->tsinfo = newts;
@@ -827,11 +828,11 @@ c_uid(struct client *client_p, const char *parv[], int parc)
 	snprintf(buf, sizeof(buf), "%s!%s@%s",
 		target_p->name, target_p->user->username, 
 		target_p->user->host);
-	target_p->user->mask = my_strdup(buf);
+	target_p->user->mask = rb_strdup(buf);
 
 	add_client(target_p);
-	dlink_add(target_p, &target_p->listnode, &user_list);
-	dlink_add(target_p, &target_p->upnode, &client_p->server->users);
+	rb_dlinkAdd(target_p, &target_p->listnode, &user_list);
+	rb_dlinkAdd(target_p, &target_p->upnode, &client_p->server->users);
 
 	if(IsEOB(client_p))
 		hook_call(HOOK_CLIENT_CONNECT, target_p, NULL);
@@ -889,9 +890,9 @@ c_kill(struct client *client_p, const char *parv[], int parc)
 				target_p->name, client_p->name);
 
 		/* no kill in the last 20 seconds, reset. */
-		if((first_kill + 20) < CURRENT_TIME)
+		if((first_kill + 20) < rb_current_time())
 		{
-			first_kill = CURRENT_TIME;
+			first_kill = rb_current_time();
 			num_kill = 1;
 		}
                 /* 20 kills in 20 seconds.. service fight. */
@@ -941,7 +942,7 @@ c_server(struct client *client_p, const char *parv[], int parc)
 			mlog("Connection to server %s failed: "
 				"(Protocol mismatch)",
 				server_p->name);
-			(server_p->io_close)(server_p);
+			signoff_server(server_p);
 			return;
 		}
 
@@ -950,24 +951,24 @@ c_server(struct client *client_p, const char *parv[], int parc)
                         mlog("Connection to server %s failed: "
                              "(Servername mismatch)",
                              server_p->name);
-                        (server_p->io_close)(server_p);
+                        signoff_server(server_p);
                         return;
                 }
 
                 ClearConnHandshake(server_p);
-                server_p->first_time = CURRENT_TIME;
+                server_p->first_time = rb_current_time();
         }
 
-	target_p = BlockHeapAlloc(client_heap);
-	target_p->server = BlockHeapAlloc(server_heap);
+	target_p = rb_bh_alloc(client_heap);
+	target_p->server = rb_bh_alloc(server_heap);
 
-	strlcpy(target_p->name, parv[0], sizeof(target_p->name));
-	strlcpy(target_p->info, EmptyString(parv[2]) ? default_gecos : parv[2],
+	rb_strlcpy(target_p->name, parv[0], sizeof(target_p->name));
+	rb_strlcpy(target_p->info, EmptyString(parv[2]) ? default_gecos : parv[2],
 		sizeof(target_p->info));
 
 	/* local TS6 servers use SERVER and pass the SID on the PASS command */
 	if(client_p == NULL)
-		strlcpy(target_p->uid, server_p->sid, sizeof(target_p->uid));
+		rb_strlcpy(target_p->uid, server_p->sid, sizeof(target_p->uid));
 
 	target_p->server->hops = atoi(parv[1]);
 
@@ -975,7 +976,7 @@ c_server(struct client *client_p, const char *parv[], int parc)
 	if(client_p != NULL)
 	{
 		target_p->uplink = client_p;
-		dlink_add(target_p, &target_p->upnode, 
+		rb_dlinkAdd(target_p, &target_p->upnode, 
                           &client_p->server->servers);
 	}
 	/* its connected to us */
@@ -989,7 +990,7 @@ c_server(struct client *client_p, const char *parv[], int parc)
 	}
 
 	add_client(target_p);
-	dlink_add(target_p, &target_p->listnode, &server_list);
+	rb_dlinkAdd(target_p, &target_p->listnode, &server_list);
 
 	if(client_p == NULL)
 	{
@@ -1022,21 +1023,21 @@ c_sid(struct client *client_p, const char *parv[], int parc)
 			parv[0], (unsigned int) strlen(parv[0]), HOSTLEN);
 	}
 
-	target_p = BlockHeapAlloc(client_heap);
-	target_p->server = BlockHeapAlloc(server_heap);
+	target_p = rb_bh_alloc(client_heap);
+	target_p->server = rb_bh_alloc(server_heap);
 
-	strlcpy(target_p->name, parv[0], sizeof(target_p->name));
-	strlcpy(target_p->uid, parv[2], sizeof(target_p->uid));
-	strlcpy(target_p->info, EmptyString(parv[3]) ? default_gecos : parv[3],
+	rb_strlcpy(target_p->name, parv[0], sizeof(target_p->name));
+	rb_strlcpy(target_p->uid, parv[2], sizeof(target_p->uid));
+	rb_strlcpy(target_p->info, EmptyString(parv[3]) ? default_gecos : parv[3],
 		sizeof(target_p->info));
 
 	target_p->server->hops = atoi(parv[1]);
 
 	target_p->uplink = client_p;
-	dlink_add(target_p, &target_p->upnode, &client_p->server->servers);
+	rb_dlinkAdd(target_p, &target_p->upnode, &client_p->server->servers);
 
 	add_client(target_p);
-	dlink_add(target_p, &target_p->listnode, &server_list);
+	rb_dlinkAdd(target_p, &target_p->listnode, &server_list);
 
 	sendto_server(":%s PING %s %s", MYUID, target_p->name, UID(target_p));
 }
@@ -1079,11 +1080,11 @@ is_network_split(void)
 {
 	int s_count = 0;
 	struct client *target_p;
-	dlink_node *ptr;
+	rb_dlink_node *ptr;
 
 	if(config_file.min_servers > 0)
 	{
-		DLINK_FOREACH(ptr, server_list.head)
+		RB_DLINK_FOREACH(ptr, server_list.head)
 		{
 			target_p = ptr->data;
 			if(IsEOB(target_p))
@@ -1098,7 +1099,7 @@ is_network_split(void)
 	}
 
 	if((config_file.min_users > 0) &&
-			(dlink_list_length(&user_list) < config_file.min_users))
+			(rb_dlink_list_length(&user_list) < config_file.min_users))
 	{
 		mlog("Network split detected (users)");
 		return 1;

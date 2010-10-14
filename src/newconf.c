@@ -13,19 +13,20 @@
 #include "conf.h"
 #include "service.h"
 #include "io.h"
-#include "event.h"
+#include "s_chanserv.h"
+#include "s_banserv.h"
 
 #define CF_TYPE(x) ((x) & CF_MTYPE)
 
 struct TopConf *conf_cur_block;
 static char *conf_cur_block_name;
 
-static dlink_list conf_items;
+static rb_dlink_list conf_items;
 
 struct conf_server *yy_server;
 struct conf_oper *yy_oper;
 struct conf_oper *yy_tmpoper;
-static dlink_list yy_oper_list;
+static rb_dlink_list yy_oper_list;
 
 struct client *yy_service;
 
@@ -156,24 +157,24 @@ add_top_conf(const char *name, int (*sfunc) (struct TopConf *),
 {
 	struct TopConf *tc;
 
-	tc = my_malloc(sizeof(struct TopConf));
+	tc = rb_malloc(sizeof(struct TopConf));
 
-	tc->tc_name = my_strdup(name);
+	tc->tc_name = rb_strdup(name);
 	tc->tc_sfunc = sfunc;
 	tc->tc_efunc = efunc;
 	tc->tc_entries = items;
 
-	dlink_add_alloc(tc, &conf_items);
+	rb_dlinkAddAlloc(tc, &conf_items);
 	return 0;
 }
 
 static struct TopConf *
 find_top_conf(const char *name)
 {
-	dlink_node *d;
+	rb_dlink_node *d;
 	struct TopConf *tc;
 
-	DLINK_FOREACH(d, conf_items.head)
+	RB_DLINK_FOREACH(d, conf_items.head)
 	{
 		tc = d->data;
 		if(strcasecmp(tc->tc_name, name) == 0)
@@ -192,18 +193,18 @@ add_conf_extension(const char *top, const char *name, struct ConfEntry *items)
 	if((tc = find_top_conf(top)) == NULL)
 		return;
 
-	ext = my_malloc(sizeof(struct ConfExtension));
+	ext = rb_malloc(sizeof(struct ConfExtension));
 
-	ext->name = my_strdup(name);
+	ext->name = rb_strdup(name);
 	ext->items = items;
 
-	dlink_add_alloc(ext, &tc->extensions);
+	rb_dlinkAddAlloc(ext, &tc->extensions);
 }
 
 static struct ConfEntry *
 find_conf_item(const struct TopConf *top, const char *name)
 {
-	dlink_node *ptr;
+	rb_dlink_node *ptr;
 	struct ConfEntry *cf;
 	struct ConfExtension *ext;
 
@@ -218,7 +219,7 @@ find_conf_item(const struct TopConf *top, const char *name)
 		}
 	}
 
-	DLINK_FOREACH(ptr, top->tc_items.head)
+	RB_DLINK_FOREACH(ptr, top->tc_items.head)
 	{
 		cf = ptr->data;
 		if(strcasecmp(cf->cf_name, name) == 0)
@@ -228,7 +229,7 @@ find_conf_item(const struct TopConf *top, const char *name)
 	if(EmptyString(conf_cur_block_name))
 		return NULL;
 
-	DLINK_FOREACH(ptr, top->extensions.head)
+	RB_DLINK_FOREACH(ptr, top->extensions.head)
 	{
 		ext = ptr->data;
 
@@ -315,7 +316,7 @@ conf_start_block(const char *block, const char *name)
 	}
 
 	if(name)
-		conf_cur_block_name = my_strdup(name);
+		conf_cur_block_name = rb_strdup(name);
 	else
 		conf_cur_block_name = NULL;
 
@@ -332,7 +333,7 @@ conf_end_block(struct TopConf *tc)
 	if(tc->tc_efunc)
 		return tc->tc_efunc(tc);
 
-	my_free(conf_cur_block_name);
+	rb_free(conf_cur_block_name);
 	return 0;
 }
 
@@ -357,8 +358,8 @@ conf_set_generic_string(void *data, int len, void *location)
 	if(len > 0 && strlen(input) > len)
 		input[len] = '\0';
 
-	my_free(*loc);
-	*loc = my_strdup(input);
+	rb_free(*loc);
+	*loc = rb_strdup(input);
 }
 
 
@@ -401,9 +402,9 @@ conf_call_set(struct TopConf *tc, const char *item, conf_parm_t * value, int typ
 			value->v.list->type = CF_STRING;
 
 			if(cp->v.number == 1)
-				cp->v.string = my_strdup("yes");
+				cp->v.string = rb_strdup("yes");
 			else
-				cp->v.string = my_strdup("no");
+				cp->v.string = rb_strdup("no");
 		}
 
 		/* maybe it's a CF_TIME and they passed CF_INT --
@@ -466,14 +467,14 @@ add_conf_item(const char *topconf, const char *name, int type, void (*func) (voi
 	if((cf = find_conf_item(tc, name)) != NULL)
 		return -1;
 
-	cf = my_malloc(sizeof(struct ConfEntry));
+	cf = rb_malloc(sizeof(struct ConfEntry));
 
-	cf->cf_name = my_strdup(name);
+	cf->cf_name = rb_strdup(name);
 	cf->cf_type = type;
 	cf->cf_func = func;
 	cf->cf_arg = NULL;
 
-	dlink_add_alloc(cf, &tc->tc_items);
+	rb_dlinkAddAlloc(cf, &tc->tc_items);
 
 	return 0;
 }
@@ -485,7 +486,7 @@ split_user_host(const char *userhost, const char **user, const char **host)
         static char uh[USERHOSTLEN+1];
         char *p;
 
-        strlcpy(uh, userhost, sizeof(uh));
+        rb_strlcpy(uh, userhost, sizeof(uh));
 
         if((p = strchr(uh, '@')) != NULL)
         {
@@ -512,7 +513,7 @@ conf_set_serverinfo_name(void *data)
 			return;
 		}
 		
-	        config_file.name = my_strdup(data);
+	        config_file.name = rb_strdup(data);
 	}
 }
 
@@ -522,7 +523,7 @@ conf_set_serverinfo_sid(void *data)
 	if(config_file.sid == NULL)
 	{
 		if(valid_sid((const char *) data))
-	        	config_file.sid = my_strdup(data);
+	        	config_file.sid = rb_strdup(data);
 		else
 			conf_report_error("Ignoring serverinfo::sid -- invalid sid");
 	}
@@ -548,7 +549,7 @@ conf_set_email_program(void *data)
 			break;
 		}
 
-		config_file.email_program[i++] = my_strdup(args->v.string);
+		config_file.email_program[i++] = rb_strdup(args->v.string);
 
 		if(i >= MAX_EMAIL_PROGRAM_ARGS)
 		{
@@ -565,11 +566,11 @@ conf_begin_connect(struct TopConf *tc)
 {
         if(yy_server != NULL)
         {
-                my_free(yy_server);
+                rb_free(yy_server);
                 yy_server = NULL;
         }
 
-        yy_server = my_malloc(sizeof(struct conf_server));
+        yy_server = rb_malloc(sizeof(struct conf_server));
         yy_server->defport = 6667;
 	yy_server->flags = CONF_SERVER_AUTOCONN;
 
@@ -580,13 +581,13 @@ static int
 conf_end_connect(struct TopConf *tc)
 {
         if(conf_cur_block_name != NULL)
-                yy_server->name = my_strdup(conf_cur_block_name);
+                yy_server->name = rb_strdup(conf_cur_block_name);
 
         if(EmptyString(yy_server->name) || EmptyString(yy_server->host) ||
            EmptyString(yy_server->pass))
         {
                 conf_report_error("Ignoring connect block, missing fields.");
-                my_free(yy_server);
+                rb_free(yy_server);
                 yy_server = NULL;
                 return 0;
         }
@@ -594,12 +595,12 @@ conf_end_connect(struct TopConf *tc)
 	if(strlen(yy_server->name) > HOSTLEN)
 	{
 		conf_report_error("Ignoring connect block, servername length invalid.");
-		my_free(yy_server);
+		rb_free(yy_server);
 		yy_server = NULL;
 		return 0;
 	}
 
-        dlink_add_tail_alloc(yy_server, &conf_server_list);
+        rb_dlinkAddTailAlloc(yy_server, &conf_server_list);
 
         yy_server = NULL;
         return 0;
@@ -608,22 +609,22 @@ conf_end_connect(struct TopConf *tc)
 static void
 conf_set_connect_host(void *data)
 {
-        my_free(yy_server->host);
-        yy_server->host = my_strdup(data);
+        rb_free(yy_server->host);
+        yy_server->host = rb_strdup(data);
 }
 
 static void
 conf_set_connect_password(void *data)
 {
-        my_free(yy_server->pass);
-        yy_server->pass = my_strdup(data);
+        rb_free(yy_server->pass);
+        yy_server->pass = rb_strdup(data);
 }
 
 static void
 conf_set_connect_vhost(void *data)
 {
-        my_free(yy_server->vhost);
-        yy_server->vhost = my_strdup(data);
+        rb_free(yy_server->vhost);
+        yy_server->vhost = rb_strdup(data);
 }
 
 static void
@@ -646,8 +647,8 @@ conf_set_connect_autoconn(void *data)
 static int
 conf_begin_operator(struct TopConf *tc)
 {
-        dlink_node *ptr;
-        dlink_node *next_ptr;
+        rb_dlink_node *ptr;
+        rb_dlink_node *next_ptr;
 
         if(yy_oper != NULL)
         {
@@ -655,13 +656,13 @@ conf_begin_operator(struct TopConf *tc)
                 yy_oper = NULL;
         }
 
-        DLINK_FOREACH_SAFE(ptr, next_ptr, yy_oper_list.head)
+        RB_DLINK_FOREACH_SAFE(ptr, next_ptr, yy_oper_list.head)
         {
                 free_conf_oper(ptr->data);
-                dlink_destroy(ptr, &yy_oper_list);
+                rb_dlinkDestroy(ptr, &yy_oper_list);
         }
 
-        yy_oper = my_malloc(sizeof(struct conf_oper));
+        yy_oper = rb_malloc(sizeof(struct conf_oper));
         yy_oper->flags |= CONF_OPER_ENCRYPTED;
 
         return 0;
@@ -671,12 +672,12 @@ static int
 conf_end_operator(struct TopConf *tc)
 {
 	struct conf_oper *yy_cloper;
-	dlink_node *ptr, *next_ptr;
-	dlink_node *cptr, *next_cptr;
+	rb_dlink_node *ptr, *next_ptr;
+	rb_dlink_node *cptr, *next_cptr;
 	int found;
 
         if(conf_cur_block_name != NULL)
-                yy_oper->name = my_strdup(conf_cur_block_name);
+                yy_oper->name = rb_strdup(conf_cur_block_name);
 
         if(EmptyString(yy_oper->name) || EmptyString(yy_oper->pass))
 	{
@@ -690,14 +691,14 @@ conf_end_operator(struct TopConf *tc)
 		return 0;
 	}
 		
-	DLINK_FOREACH_SAFE(ptr, next_ptr, yy_oper_list.head)
+	RB_DLINK_FOREACH_SAFE(ptr, next_ptr, yy_oper_list.head)
 	{
 		yy_tmpoper = ptr->data;
 
 		found = 0;
 
 		/* see if we have a conf block marked DEAD that we can update.. */
-		DLINK_FOREACH_SAFE(cptr, next_cptr, conf_oper_list.head)
+		RB_DLINK_FOREACH_SAFE(cptr, next_cptr, conf_oper_list.head)
 		{
 			yy_cloper = cptr->data;
 
@@ -742,8 +743,8 @@ conf_end_operator(struct TopConf *tc)
 			/* user, host, server are already identical.. */
 
 			/* reset password */
-			my_free(yy_cloper->pass);
-			yy_cloper->pass = my_strdup(yy_oper->pass);
+			rb_free(yy_cloper->pass);
+			yy_cloper->pass = rb_strdup(yy_oper->pass);
 
 			/* update flags */
 			yy_cloper->flags = yy_oper->flags;
@@ -760,15 +761,15 @@ conf_end_operator(struct TopConf *tc)
 		 */
 		else
 		{
-			yy_tmpoper->name = my_strdup(yy_oper->name);
-			yy_tmpoper->pass = my_strdup(yy_oper->pass);
+			yy_tmpoper->name = rb_strdup(yy_oper->name);
+			yy_tmpoper->pass = rb_strdup(yy_oper->pass);
 			yy_tmpoper->flags = yy_oper->flags;
 			yy_tmpoper->sflags = yy_oper->sflags;
 
-			dlink_add_tail_alloc(yy_tmpoper, &conf_oper_list);
+			rb_dlinkAddTailAlloc(yy_tmpoper, &conf_oper_list);
 		}
 
-		dlink_destroy(ptr, &yy_oper_list);
+		rb_dlinkDestroy(ptr, &yy_oper_list);
 	}
 
 	free_conf_oper(yy_oper);
@@ -794,7 +795,7 @@ conf_set_oper_user(void *data)
 		yy_tmpoper = NULL;
 	}
 
-	yy_tmpoper = my_malloc(sizeof(struct conf_oper));
+	yy_tmpoper = rb_malloc(sizeof(struct conf_oper));
 
 	/* we have a servername.. */
 	if(args_server != NULL)
@@ -805,7 +806,7 @@ conf_set_oper_user(void *data)
 			return;
 		}
 
-		yy_tmpoper->server = my_strdup(args_server->v.string);
+		yy_tmpoper->server = rb_strdup(args_server->v.string);
 	}
 
 	if((args->type & CF_MTYPE) != CF_QSTRING)
@@ -815,18 +816,18 @@ conf_set_oper_user(void *data)
 	}
 
 	split_user_host(args->v.string, &username, &host);
-	yy_tmpoper->username = my_strdup(username);
-	yy_tmpoper->host = my_strdup(host);
+	yy_tmpoper->username = rb_strdup(username);
+	yy_tmpoper->host = rb_strdup(host);
 
-        dlink_add_tail_alloc(yy_tmpoper, &yy_oper_list);
+        rb_dlinkAddTailAlloc(yy_tmpoper, &yy_oper_list);
 	yy_tmpoper = NULL;
 }
 
 static void
 conf_set_oper_password(void *data)
 {
-        my_free(yy_oper->pass);
-        yy_oper->pass = my_strdup(data);
+        rb_free(yy_oper->pass);
+        yy_oper->pass = rb_strdup(data);
 }
 
 static void
@@ -944,13 +945,13 @@ conf_set_service_nick(void *data)
 	if(sent_burst)
 	{
 		del_client(yy_service);
-		strlcpy(yy_service->name, (const char *) data,
+		rb_strlcpy(yy_service->name, (const char *) data,
 			sizeof(yy_service->name));
 		add_client(yy_service);
 		SetServiceReintroduce(yy_service);
 	}
 	else
-		strlcpy(yy_service->name, (const char *) data,
+		rb_strlcpy(yy_service->name, (const char *) data,
 			sizeof(yy_service->name));
 }
 
@@ -961,7 +962,7 @@ conf_set_service_username(void *data)
 	   !strcmp(yy_service->service->username, (const char *) data))
 		return;
 
-	strlcpy(yy_service->service->username, (const char *) data,
+	rb_strlcpy(yy_service->service->username, (const char *) data,
 		sizeof(yy_service->service->username));
 
 	if(sent_burst)
@@ -975,7 +976,7 @@ conf_set_service_host(void *data)
 	   !strcmp(yy_service->service->host, (const char *) data))
 		return;
 
-	strlcpy(yy_service->service->host, (const char *) data,
+	rb_strlcpy(yy_service->service->host, (const char *) data,
 		sizeof(yy_service->service->host));
 
 	if(sent_burst)
@@ -988,7 +989,7 @@ conf_set_service_realname(void *data)
 	if(yy_service == NULL || !strcmp(yy_service->info, (const char *) data))
 		return;
 
-	strlcpy(yy_service->info, (const char *) data,
+	rb_strlcpy(yy_service->info, (const char *) data,
 		sizeof(yy_service->info));
 
 	if(sent_burst)
@@ -1049,7 +1050,7 @@ conf_set_chanserv_expireban(void *data)
 		return;
 
 	config_file.cexpireban_frequency = val;
-	eventUpdate("chanserv_expireban", val);
+	rb_event_update(chanserv_expireban_ev, val);
 }
 
 static void
@@ -1061,7 +1062,7 @@ conf_set_chanserv_enforcetopic(void *data)
 		return;
 
 	config_file.cenforcetopic_frequency = val;
-	eventUpdate("chanserv_enforcetopic", val);
+	rb_event_update(chanserv_enforcetopic_ev, val);
 }
 
 static void
@@ -1080,7 +1081,7 @@ conf_set_banserv_autosync(void *data)
 		return;
 
 	config_file.bs_autosync_frequency = val;
-	eventUpdate("banserv_autosync", val);
+	rb_event_update(banserv_autosync_ev, val);
 }
 
 static struct ConfEntry conf_serverinfo_table[] =

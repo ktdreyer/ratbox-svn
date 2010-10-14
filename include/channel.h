@@ -9,7 +9,7 @@
 
 #define MAX_CHANNEL_TABLE	16384
 
-extern dlink_list channel_list;
+extern rb_dlink_list channel_list;
 
 #define DIR_NONE -1
 #define DIR_ADD  1
@@ -31,19 +31,19 @@ struct channel
 	time_t tsinfo;
 	time_t topic_tsinfo;
 
-	dlink_list users;		/* users in this channel */
-	dlink_list users_opped;		/* subset of users who are opped */
-	dlink_list users_unopped;	/* subset of users who are unopped */
-	dlink_list services;
+	rb_dlink_list users;		/* users in this channel */
+	rb_dlink_list users_opped;		/* subset of users who are opped */
+	rb_dlink_list users_unopped;	/* subset of users who are unopped */
+	rb_dlink_list services;
 
-	dlink_list bans;		/* +b */
-	dlink_list excepts;		/* +e */
-	dlink_list invites;		/* +I */
+	rb_dlink_list bans;		/* +b */
+	rb_dlink_list excepts;		/* +e */
+	rb_dlink_list invites;		/* +I */
 
 	struct chmode mode;
 
-	dlink_node listptr;		/* node in channel_list */
-	dlink_node nameptr;		/* node in channel hash */
+	rb_dlink_node listptr;		/* node in channel_list */
+	rb_dlink_node nameptr;		/* node in channel hash */
 
 #ifdef ENABLE_CHANFIX
 	void *cfptr;			/* chanfix pointer */
@@ -52,9 +52,9 @@ struct channel
 
 struct chmember
 {
-	dlink_node chnode;		/* node in struct channel */
-	dlink_node choppednode;		/* node in struct channel for opped/unopped */
-	dlink_node usernode;		/* node in struct client */
+	rb_dlink_node chnode;		/* node in struct channel */
+	rb_dlink_node choppednode;		/* node in struct channel for opped/unopped */
+	rb_dlink_node usernode;		/* node in struct client */
 
 	struct channel *chptr;
 	struct client *client_p;
@@ -120,7 +120,7 @@ extern void rejoin_service(struct client *service_p, struct channel *chptr, int 
 int valid_ban(const char *banstr);
 
 /* DO NOT DEREFERENCE THE VOID POINTER RETURNED FROM THIS */
-void *del_ban(const char *banstr, dlink_list *list);
+void *del_ban(const char *banstr, rb_dlink_list *list);
 
 int parse_simple_mode(struct chmode *, const char **, int, int, int);
 void parse_full_mode(struct channel *, struct client *, const char **, int, int, int);

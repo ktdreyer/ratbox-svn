@@ -37,6 +37,7 @@
 #include "scommand.h"
 #include "client.h"
 #include "log.h"
+#include "tools.h"
 
 static void c_error(struct client *, const char *parv[], int parc);
 struct scommand_handler error_command = { "ERROR", c_error, FLAGS_UNKNOWN, DLINK_EMPTY };
@@ -52,5 +53,5 @@ c_error(struct client *client_p, const char *parv[], int parc)
         sendto_all("Connection to server %s error: (%s)",
                    server_p->name, parv[0]);
 
-        (server_p->io_close)(server_p);
+	signoff_server(server_p);
 }

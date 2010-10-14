@@ -40,6 +40,7 @@
 #include "conf.h"
 #include "watch.h"
 #include "s_userserv.h"
+#include "tools.h"
 
 static FILE *logfile;
 
@@ -63,14 +64,14 @@ void
 reopen_logfiles(void)
 {
 	struct client *service_p;
-	dlink_node *ptr;
+	rb_dlink_node *ptr;
 
 	if(logfile != NULL)
 		fclose(logfile);
 
 	open_logfile();
 
-	DLINK_FOREACH(ptr, service_list.head)
+	RB_DLINK_FOREACH(ptr, service_list.head)
 	{
 		service_p = ptr->data;
 
@@ -86,7 +87,7 @@ smalldate(void)
 {
 	static char buf[MAX_DATE_STRING];
 	struct tm *lt;
-	time_t ltime = CURRENT_TIME;
+	time_t ltime = rb_current_time();
 
 	lt = localtime(&ltime);
 

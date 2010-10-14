@@ -320,11 +320,11 @@ init_langs(void)
 	/* ensure the default language is always at position 0 */
 	memset(langs_available, 0, sizeof(const char *) * LANG_MAX);
 	(void) lang_get_langcode(LANG_DEFAULT);
-	langs_description[0] = my_strdup("English");
+	langs_description[0] = rb_strdup("English");
 
 	/* reset svc_notice, and load default messages */
 	memset(svc_notice, 0, sizeof(char **) * LANG_MAX);
-	svc_notice[0] = my_calloc(1, sizeof(char *) * SVC_LAST);
+	svc_notice[0] = rb_malloc(sizeof(char *) * SVC_LAST);
 
 	for(i = 0; lang_internal[i].id != SVC_LAST; i++)
 	{
@@ -385,7 +385,7 @@ lang_get_langcode(const char *name)
 		return 0;
 	}
 
-	langs_available[i] = my_strdup(name);
+	langs_available[i] = rb_strdup(name);
 	return i;
 }
 
@@ -488,7 +488,7 @@ lang_parse_transfile(FILE *fp, const char *filename, unsigned int langcode,
 			{
 				if(*langcode_str)
 				{
-					my_free(*langcode_str);
+					rb_free(*langcode_str);
 					*langcode_str = NULL;
 				}
 
@@ -499,7 +499,7 @@ lang_parse_transfile(FILE *fp, const char *filename, unsigned int langcode,
 					if((p = strrchr(data, '"')))
 						*p = '\0';
 
-					*langcode_str = my_strdup(data);
+					*langcode_str = rb_strdup(data);
 				}
 			}
 
@@ -512,7 +512,7 @@ lang_parse_transfile(FILE *fp, const char *filename, unsigned int langcode,
 			{
 				if(*langdesc_str)
 				{
-					my_free(*langdesc_str);
+					rb_free(*langdesc_str);
 					*langdesc_str = NULL;
 				}
 
@@ -523,7 +523,7 @@ lang_parse_transfile(FILE *fp, const char *filename, unsigned int langcode,
 					if((p = strrchr(data, '"')))
 						*p = '\0';
 
-					*langdesc_str = my_strdup(data);
+					*langdesc_str = rb_strdup(data);
 				}
 			}
 
@@ -580,7 +580,7 @@ lang_parse_transfile(FILE *fp, const char *filename, unsigned int langcode,
 				*p = '\0';
 
 				if(lang_fmt_check(filename, svc_notice[0][i], data) > 0)
-					svc_notice[langcode][i] = my_strdup(data);
+					svc_notice[langcode][i] = rb_strdup(data);
 
 				continue;
 			}
@@ -635,9 +635,9 @@ lang_load_transfile(FILE *fp, const char *filename)
 		return;
 	}
 
-	my_free(langs_description[langcode]);
-	langs_description[langcode] = my_strdup(langdesc_str);
-	svc_notice[langcode] = my_calloc(1, sizeof(char *) * SVC_LAST);
+	rb_free(langs_description[langcode]);
+	langs_description[langcode] = rb_strdup(langdesc_str);
+	svc_notice[langcode] = rb_malloc(sizeof(char *) * SVC_LAST);
 	lang_parse_transfile(fp, filename, langcode, NULL, NULL);
 }
 
@@ -695,10 +695,10 @@ lang_clear_trans(void)
 		for(j = 0; j < SVC_LAST; j++)
 		{
 			if(svc_notice[i][j])
-				my_free((void *) svc_notice[i][j]);
+				rb_free((void *) svc_notice[i][j]);
 		}
 
-		my_free(svc_notice[i]);
+		rb_free(svc_notice[i]);
 		svc_notice[i] = NULL;
 	}
 }

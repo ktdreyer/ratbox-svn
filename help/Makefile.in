@@ -2,7 +2,7 @@
 # $Id$
 
 MV=@MV@
-RM=@RM@
+RM=@RB_RM@
 INSTALL=@INSTALL@
 INSTALL_DATA=@INSTALL_DATA@
 prefix=@prefix@

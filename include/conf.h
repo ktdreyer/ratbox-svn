@@ -245,8 +245,8 @@ struct conf_oper
 #define ConfServerAutoconn(x)	((x)->flags & CONF_SERVER_AUTOCONN)
 
 extern struct _config_file config_file;
-extern dlink_list conf_server_list;
-extern dlink_list conf_oper_list;
+extern rb_dlink_list conf_server_list;
+extern rb_dlink_list conf_oper_list;
 extern FILE *conf_fbfile_in;
 
 extern void conf_parse(int cold);

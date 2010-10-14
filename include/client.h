@@ -11,10 +11,10 @@
 #define MAX_NAME_HASH 65536
 #define MAX_HOST_HASH 65536
 
-extern dlink_list user_list;
-extern dlink_list oper_list;
-extern dlink_list server_list;
-extern dlink_list exited_list;
+extern rb_dlink_list user_list;
+extern rb_dlink_list oper_list;
+extern rb_dlink_list server_list;
+extern rb_dlink_list exited_list;
 
 struct lconn;
 struct service_command;
@@ -33,10 +33,10 @@ struct client
 	struct service *service;
 	struct client *uplink;		/* server this is connected to */
 
-	dlink_node nameptr;		/* dlink_node in name_table */
-	dlink_node uidptr;
-	dlink_node listnode;		/* in client/server/exited_list */
-	dlink_node upnode;		/* in uplinks servers/clients list */
+	rb_dlink_node nameptr;		/* rb_dlink_node in name_table */
+	rb_dlink_node uidptr;
+	rb_dlink_node listnode;		/* in client/server/exited_list */
+	rb_dlink_node upnode;		/* in uplinks servers/clients list */
 };
 
 struct user
@@ -57,17 +57,17 @@ struct user
 	struct conf_oper *oper;
 	int watchflags;
 
-	dlink_list channels;
+	rb_dlink_list channels;
 
-	dlink_node servptr;
-	dlink_node hostptr;
-	dlink_node uhostptr;
+	rb_dlink_node servptr;
+	rb_dlink_node hostptr;
+	rb_dlink_node uhostptr;
 };
 
 struct server
 {
-	dlink_list users;
-	dlink_list servers;
+	rb_dlink_list users;
+	rb_dlink_list servers;
 
 	int hops;
 };
@@ -80,7 +80,7 @@ struct service
 	int status;
 	unsigned long flags;
 
-	dlink_list channels;		/* the channels this service is in */
+	rb_dlink_list channels;		/* the channels this service is in */
 
 	FILE *logfile;
 
@@ -100,7 +100,7 @@ struct service
         struct ucommand_handler *orig_ucommand;
 
 	/* list of merged service handlers */
-	dlink_list merged_handler_list;
+	rb_dlink_list merged_handler_list;
 
         unsigned long help_count;
         unsigned long ehelp_count;
@@ -123,7 +123,7 @@ struct host_entry
 	time_t cregister_expire;
 	int uregister;
 	time_t uregister_expire;
-	dlink_node node;
+	rb_dlink_node node;
 };
 
 struct client_oper
@@ -135,7 +135,7 @@ struct client_oper
 
 	struct conf_oper *oper;
 
-	dlink_node ptr;
+	rb_dlink_node ptr;
 
 	time_t timestamp;
 };

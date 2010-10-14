@@ -54,8 +54,12 @@
 #include "watch.h"
 #include "hook.h"
 #include "s_banserv.h"
+#include "tools.h"
 
 static void init_s_banserv(void);
+
+struct ev_entry *banserv_expire_ev;
+struct ev_entry *banserv_autosync_ev;
 
 static struct client *banserv_p;
 
@@ -120,7 +124,7 @@ static struct service_handler banserv_service = {
 	banserv_command, sizeof(banserv_command), banserv_ucommand, init_s_banserv, NULL
 };
 
-dlink_list regexp_list;
+rb_dlink_list regexp_list;
 
 static int regexp_callback(int argc, const char **argv);
 static int regexp_neg_callback(int argc, const char **argv);
@@ -143,6 +147,7 @@ preinit_s_banserv(void)
 	banserv_p = add_service(&banserv_service);
 }
 
+
 static void
 init_s_banserv(void)
 {
@@ -153,14 +158,14 @@ init_s_banserv(void)
 
 		if((service_p = merge_service(&banserv_service, "OPERSERV", 1)) != NULL)
 		{
-			dlink_delete(&banserv_p->listnode, &service_list);
+			rb_dlinkDelete(&banserv_p->listnode, &service_list);
 			banserv_p = service_p;
 		}
 	}
 
 		
-	eventAdd("banserv_expire", e_banserv_expire, NULL, 900);
-	eventAdd("banserv_autosync", e_banserv_autosync, NULL,
+	banserv_expire_ev = rb_event_add("banserv_expire", e_banserv_expire, NULL, 900);
+	banserv_autosync_ev = rb_event_add("banserv_autosync", e_banserv_autosync, NULL,
 			DEFAULT_AUTOSYNC_FREQUENCY);
 
 	hook_add(h_banserv_new_client, HOOK_CLIENT_CONNECT);
@@ -186,16 +191,16 @@ regexp_callback(int argc, const char **argv)
 	if(regexp_comp == NULL)
 		return 0;
 
-	regexp_p = my_malloc(sizeof(struct regexp_ban));
+	regexp_p = rb_malloc(sizeof(struct regexp_ban));
 	regexp_p->id = atoi(argv[0]);
-	regexp_p->regexp_str = my_strdup(argv[1]);
-	regexp_p->reason = my_strdup(argv[2]);
+	regexp_p->regexp_str = rb_strdup(argv[1]);
+	regexp_p->reason = rb_strdup(argv[2]);
 	regexp_p->hold = atol(argv[3]);
 	regexp_p->create_time = atol(argv[4]);
-	regexp_p->oper = my_strdup(argv[5]);
+	regexp_p->oper = rb_strdup(argv[5]);
 	regexp_p->regexp = regexp_comp;
 
-	dlink_add_tail(regexp_p, &regexp_p->ptr, &regexp_list);
+	rb_dlinkAddTail(regexp_p, &regexp_p->ptr, &regexp_list);
 	return 0;
 }
 
@@ -208,7 +213,7 @@ regexp_neg_callback(int argc, const char **argv)
 	const char *re_error;
 	int re_error_offset;
 	unsigned int parent_id;
-	dlink_node *ptr;
+	rb_dlink_node *ptr;
 
 	if(EmptyString(argv[1]) || EmptyString(argv[2]) || EmptyString(argv[3]))
 		return 0;
@@ -217,7 +222,7 @@ regexp_neg_callback(int argc, const char **argv)
 		return 0;
 
 	/* find its parent regexp */
-	DLINK_FOREACH(ptr, regexp_list.head)
+	RB_DLINK_FOREACH(ptr, regexp_list.head)
 	{
 		parent_p = ptr->data;
 
@@ -233,13 +238,13 @@ regexp_neg_callback(int argc, const char **argv)
 	if(regexp_comp == NULL)
 		return 0;
 
-	regexp_p = my_malloc(sizeof(struct regexp_ban));
+	regexp_p = rb_malloc(sizeof(struct regexp_ban));
 	regexp_p->id = atoi(argv[0]);
-	regexp_p->regexp_str = my_strdup(argv[2]);
-	regexp_p->oper = my_strdup(argv[3]);
+	regexp_p->regexp_str = rb_strdup(argv[2]);
+	regexp_p->oper = rb_strdup(argv[3]);
 	regexp_p->parent = parent_p;
 
-	dlink_add_tail(regexp_p, &regexp_p->ptr, &parent_p->negations);
+	rb_dlinkAddTail(regexp_p, &regexp_p->ptr, &parent_p->negations);
 	return 0;
 }
 
@@ -256,23 +261,23 @@ expire_operbans(void)
 	 * servers
 	 */
 	rsdb_exec(NULL, "DELETE FROM operbans WHERE hold != '0' AND hold <= '%lu'",
-		CURRENT_TIME);
+		rb_current_time());
 }
 
 static void
 e_banserv_expire(void *unused)
 {
 	struct regexp_ban *regexp_p;
-	dlink_node *ptr;
-	dlink_node *next_ptr;
+	rb_dlink_node *ptr;
+	rb_dlink_node *next_ptr;
 
 	expire_operbans();
 
-	DLINK_FOREACH_SAFE(ptr, next_ptr, regexp_list.head)
+	RB_DLINK_FOREACH_SAFE(ptr, next_ptr, regexp_list.head)
 	{
 		regexp_p = ptr->data;
 
-		if(regexp_p->hold && regexp_p->hold <= CURRENT_TIME)
+		if(regexp_p->hold && regexp_p->hold <= rb_current_time())
 			regexp_free(regexp_p, 0);
 	}
 }
@@ -286,19 +291,19 @@ h_banserv_new_client(void *_target_p, void *unused)
 	struct regexp_ban *neg_p;
 	struct client *target_p = _target_p;
 	int buflen;
-	dlink_node *ptr;
-	dlink_node *next_ptr;
-	dlink_node *neg_ptr;
+	rb_dlink_node *ptr;
+	rb_dlink_node *next_ptr;
+	rb_dlink_node *neg_ptr;
 
 	buflen = snprintf(buf, sizeof(buf), "%s#%s",
 			target_p->user->mask, target_p->info);
 
-	DLINK_FOREACH_SAFE(ptr, next_ptr, regexp_list.head)
+	RB_DLINK_FOREACH_SAFE(ptr, next_ptr, regexp_list.head)
 	{
 		regexp_p = ptr->data;
 
 		/* regexp has expired */
-		if(regexp_p->hold && regexp_p->hold <= CURRENT_TIME)
+		if(regexp_p->hold && regexp_p->hold <= rb_current_time())
 		{
 			regexp_free(regexp_p, 0);
 			continue;
@@ -306,7 +311,7 @@ h_banserv_new_client(void *_target_p, void *unused)
 
 		if(pcre_exec(regexp_p->regexp, NULL, buf, buflen, 0, 0, ovector, 30) >= 0)
 		{
-			DLINK_FOREACH(neg_ptr, regexp_p->negations.head)
+			RB_DLINK_FOREACH(neg_ptr, regexp_p->negations.head)
 			{
 				neg_p = neg_ptr->data;
 
@@ -334,7 +339,7 @@ split_ban(const char *mask, char **user, char **host)
 	static char buf[BUFSIZE];
 	char *p;
 
-	strlcpy(buf, mask, sizeof(buf));
+	rb_strlcpy(buf, mask, sizeof(buf));
 
 	if((p = strchr(buf, '@')) == NULL)
 		return 0;
@@ -414,7 +419,7 @@ find_ban_remove(const char *mask, char type)
 
 	if(data.row_count && (atoi(data.row[0][0]) == 0 || (data.row[0][0] && data.row[0][0][0] == 'f')))
 	{
-		strlcpy(buf, data.row[0][1], sizeof(buf));
+		rb_strlcpy(buf, data.row[0][1], sizeof(buf));
 		retval = buf;
 	}
 	else
@@ -428,8 +433,8 @@ find_ban_remove(const char *mask, char type)
 static void
 regexp_free(struct regexp_ban *regexp_p, int neg)
 {
-	dlink_node *ptr;
-	dlink_node *next_ptr;
+	rb_dlink_node *ptr;
+	rb_dlink_node *next_ptr;
 
 	if(!neg)
 	{
@@ -440,7 +445,7 @@ regexp_free(struct regexp_ban *regexp_p, int neg)
 	}
 
 	/* this will be empty for negations themselves */
-	DLINK_FOREACH_SAFE(ptr, next_ptr, regexp_p->negations.head)
+	RB_DLINK_FOREACH_SAFE(ptr, next_ptr, regexp_p->negations.head)
 	{
 		regexp_free(ptr->data, 1);
 	}
@@ -448,14 +453,14 @@ regexp_free(struct regexp_ban *regexp_p, int neg)
 	pcre_free(regexp_p->regexp);
 
 	if(neg)
-		dlink_delete(&regexp_p->ptr, &regexp_p->parent->negations);
+		rb_dlinkDelete(&regexp_p->ptr, &regexp_p->parent->negations);
 	else
-		dlink_delete(&regexp_p->ptr, &regexp_list);
+		rb_dlinkDelete(&regexp_p->ptr, &regexp_list);
 
-	my_free(regexp_p->regexp_str);
-	my_free(regexp_p->reason);
-	my_free(regexp_p->oper);
-	my_free(regexp_p);
+	rb_free(regexp_p->regexp_str);
+	rb_free(regexp_p->reason);
+	rb_free(regexp_p->oper);
+	rb_free(regexp_p);
 }
 
 static void
@@ -526,16 +531,16 @@ sync_bans(const char *target, char banletter)
 	if(banletter)
 		rsdb_exec_fetch(&data, "SELECT type, mask, reason, hold FROM operbans "
 					"WHERE hold > '%lu' AND remove='0' AND type='%c'",
-				CURRENT_TIME, banletter);
+				rb_current_time(), banletter);
 	else
 		rsdb_exec_fetch(&data, "SELECT type, mask, reason, hold FROM operbans "
 					"WHERE hold > '%lu' AND remove='0'",
-				CURRENT_TIME);
+				rb_current_time());
 
 	for(i = 0; i < data.row_count; i++)
 	{
 		push_ban(target, data.row[i][0][0], data.row[i][1], data.row[i][2],
-			(unsigned long) (atol(data.row[i][3]) - CURRENT_TIME));
+			(unsigned long) (atol(data.row[i][3]) - rb_current_time()));
 	}
 
 	rsdb_exec_fetch_end(&data);
@@ -544,11 +549,11 @@ sync_bans(const char *target, char banletter)
 	if(banletter)
 		rsdb_exec_fetch(&data, "SELECT type, mask, reason, hold FROM operbans "
 					"WHERE hold='0' AND remove='0' AND type='%c'",
-				CURRENT_TIME, banletter);
+				rb_current_time(), banletter);
 	else
 		rsdb_exec_fetch(&data, "SELECT type, mask, reason, hold FROM operbans "
 					"WHERE hold='0' AND remove='0'",
-				CURRENT_TIME);
+				rb_current_time());
 
 	for(i = 0; i < data.row_count; i++)
 	{
@@ -561,11 +566,11 @@ sync_bans(const char *target, char banletter)
 	if(banletter)
 		rsdb_exec_fetch(&data, "SELECT type, mask FROM operbans "
 					"WHERE hold > '%lu' AND remove='1' AND type='%c'",
-				CURRENT_TIME, banletter);
+				rb_current_time(), banletter);
 	else
 		rsdb_exec_fetch(&data, "SELECT type, mask FROM operbans "
 					"WHERE hold > '%lu' AND remove='1'",
-				CURRENT_TIME);
+				rb_current_time());
 
 	for(i = 0; i < data.row_count; i++)
 	{
@@ -583,9 +588,9 @@ regexp_match(pcre *regexp, int kline, const char *kline_reason)
 	struct client *target_p;
 	unsigned int matches = 0;
 	int buflen;
-	dlink_node *ptr;
+	rb_dlink_node *ptr;
 
-	DLINK_FOREACH(ptr, user_list.head)
+	RB_DLINK_FOREACH(ptr, user_list.head)
 	{
 		target_p = ptr->data;
 
@@ -678,10 +683,10 @@ o_banserv_kline(struct client *client_p, struct lconn *conn_p, const char *parv[
 	{
 		struct client *target_p;
 		unsigned int matches = 0;
-		dlink_node *ptr;
+		rb_dlink_node *ptr;
 
 
-		DLINK_FOREACH(ptr, user_list.head)
+		RB_DLINK_FOREACH(ptr, user_list.head)
 		{
 			target_p = ptr->data;
 
@@ -702,7 +707,7 @@ o_banserv_kline(struct client *client_p, struct lconn *conn_p, const char *parv[
 				"hold='%ld', oper='%Q', remove='0' WHERE "
 				"type='K' AND mask=LOWER('%Q')",
 				reason,
-				temptime ? CURRENT_TIME + temptime : 0,
+				temptime ? rb_current_time() + temptime : 0,
 				OPER_NAME(client_p, conn_p), mask);
 	else
 		rsdb_exec(NULL, "INSERT INTO operbans "
@@ -710,8 +715,8 @@ o_banserv_kline(struct client *client_p, struct lconn *conn_p, const char *parv[
 				"oper, remove, flags) "
 				"VALUES('K', LOWER('%Q'), '%Q', '%lu', '%lu', '%Q', '0', '0')",
 				mask, reason,
-				temptime ? CURRENT_TIME + temptime : 0,
-				CURRENT_TIME, OPER_NAME(client_p, conn_p));
+				temptime ? rb_current_time() + temptime : 0,
+				rb_current_time(), OPER_NAME(client_p, conn_p));
 			
 	service_snd(banserv_p, client_p, conn_p, SVC_BAN_ISSUED,
 			"KLINE", mask);
@@ -792,9 +797,9 @@ o_banserv_xline(struct client *client_p, struct lconn *conn_p, const char *parv[
 	{
 		struct client *target_p;
 		unsigned int matches = 0;
-		dlink_node *ptr;
+		rb_dlink_node *ptr;
 
-		DLINK_FOREACH(ptr, user_list.head)
+		RB_DLINK_FOREACH(ptr, user_list.head)
 		{
 			target_p = ptr->data;
 
@@ -815,7 +820,7 @@ o_banserv_xline(struct client *client_p, struct lconn *conn_p, const char *parv[
 				"hold='%ld', oper='%Q', remove='0' WHERE "
 				"type='X' AND mask=LOWER('%Q')",
 				reason,
-				temptime ? CURRENT_TIME + temptime : 0,
+				temptime ? rb_current_time() + temptime : 0,
 				OPER_NAME(client_p, conn_p), gecos);
 	else
 		rsdb_exec(NULL, "INSERT INTO operbans "
@@ -823,8 +828,8 @@ o_banserv_xline(struct client *client_p, struct lconn *conn_p, const char *parv[
 				"oper, remove, flags) "
 				"VALUES('X', LOWER('%Q'), '%Q', '%lu', '%lu', '%Q', '0', '0')",
 				gecos, reason, 
-				temptime ? CURRENT_TIME + temptime : 0,
-				CURRENT_TIME, OPER_NAME(client_p, conn_p));
+				temptime ? rb_current_time() + temptime : 0,
+				rb_current_time(), OPER_NAME(client_p, conn_p));
 
 	service_snd(banserv_p, client_p, conn_p, SVC_BAN_ISSUED,
 			"XLINE", gecos);
@@ -905,7 +910,7 @@ o_banserv_resv(struct client *client_p, struct lconn *conn_p, const char *parv[]
 				"hold='%ld', oper='%Q', remove='0' WHERE "
 				"type='R' AND mask=LOWER('%Q')",
 				reason,
-				temptime ? CURRENT_TIME + temptime : 0,
+				temptime ? rb_current_time() + temptime : 0,
 				OPER_NAME(client_p, conn_p), mask);
 	else
 		rsdb_exec(NULL, "INSERT INTO operbans "
@@ -913,8 +918,8 @@ o_banserv_resv(struct client *client_p, struct lconn *conn_p, const char *parv[]
 				"oper, remove, flags) "
 				"VALUES('R', LOWER('%Q'), '%Q', '%lu', '%lu', '%Q', '0', '0')",
 				mask, reason, 
-				temptime ? CURRENT_TIME + temptime : 0,
-				CURRENT_TIME, OPER_NAME(client_p, conn_p));
+				temptime ? rb_current_time() + temptime : 0,
+				rb_current_time(), OPER_NAME(client_p, conn_p));
 
 	service_snd(banserv_p, client_p, conn_p, SVC_BAN_ISSUED,
 			"RESV", mask);
@@ -942,7 +947,7 @@ o_banserv_addregexp(struct client *client_p, struct lconn *conn_p, const char *p
 	int para = 0;
 	int re_error_offset;
 	unsigned int matches;
-	dlink_node *ptr;
+	rb_dlink_node *ptr;
 
 	if(regexp_validity == NULL)
 	{
@@ -957,7 +962,7 @@ o_banserv_addregexp(struct client *client_p, struct lconn *conn_p, const char *p
 	if((temptime = get_temp_time(parv[para])))
 		para++;
 
-	DLINK_FOREACH(ptr, regexp_list.head)
+	RB_DLINK_FOREACH(ptr, regexp_list.head)
 	{
 		regexp_p = ptr->data;
 
@@ -1031,22 +1036,22 @@ o_banserv_addregexp(struct client *client_p, struct lconn *conn_p, const char *p
 		return 0;
 	}
 
-	regexp_p = my_malloc(sizeof(struct regexp_ban));
+	regexp_p = rb_malloc(sizeof(struct regexp_ban));
 	regexp_p->regexp = regexp_comp;
-	regexp_p->regexp_str = my_strdup(mask);
-	regexp_p->reason = my_strdup(reason);
-	regexp_p->oper = my_strdup(OPER_NAME(client_p, conn_p));
-	regexp_p->hold = temptime ? CURRENT_TIME + temptime : 0;
-	regexp_p->create_time = CURRENT_TIME;
+	regexp_p->regexp_str = rb_strdup(mask);
+	regexp_p->reason = rb_strdup(reason);
+	regexp_p->oper = rb_strdup(OPER_NAME(client_p, conn_p));
+	regexp_p->hold = temptime ? rb_current_time() + temptime : 0;
+	regexp_p->create_time = rb_current_time();
 
-	dlink_add_tail(regexp_p, &regexp_p->ptr, &regexp_list);
+	rb_dlinkAddTail(regexp_p, &regexp_p->ptr, &regexp_list);
 
 	rsdb_exec_insert(&regexp_p->id, "operbans_regexp", "id", 
 			"INSERT INTO operbans_regexp (regex, reason, hold, create_time, oper) "
 			"VALUES('%Q', '%Q', '%lu', '%lu', '%Q')",
 			mask, reason, 
-			temptime ? CURRENT_TIME + temptime : 0,
-			CURRENT_TIME, OPER_NAME(client_p, conn_p));
+			temptime ? rb_current_time() + temptime : 0,
+			rb_current_time(), OPER_NAME(client_p, conn_p));
 
 	matches = regexp_match(regexp_p->regexp, 1, regexp_p->reason);
 
@@ -1071,7 +1076,7 @@ o_banserv_addregexpneg(struct client *client_p, struct lconn *conn_p, const char
 	const char *re_error;
 	int re_error_offset;
 	unsigned int parent_id;
-	dlink_node *ptr;
+	rb_dlink_node *ptr;
 
 	if(regexp_validity == NULL)
 	{
@@ -1085,7 +1090,7 @@ o_banserv_addregexpneg(struct client *client_p, struct lconn *conn_p, const char
 
 	parent_id = atoi(parv[0]);
 
-	DLINK_FOREACH(ptr, regexp_list.head)
+	RB_DLINK_FOREACH(ptr, regexp_list.head)
 	{
 		parent_p = ptr->data;
 
@@ -1100,7 +1105,7 @@ o_banserv_addregexpneg(struct client *client_p, struct lconn *conn_p, const char
 		return 0;
 	}
 
-	DLINK_FOREACH(ptr, parent_p->negations.head)
+	RB_DLINK_FOREACH(ptr, parent_p->negations.head)
 	{
 		regexp_p = ptr->data;
 
@@ -1129,14 +1134,14 @@ o_banserv_addregexpneg(struct client *client_p, struct lconn *conn_p, const char
 		return 0;
 	}
 
-	regexp_p = my_malloc(sizeof(struct regexp_ban));
+	regexp_p = rb_malloc(sizeof(struct regexp_ban));
 	regexp_p->regexp = regexp_comp;
-	regexp_p->regexp_str = my_strdup(parv[1]);
-	regexp_p->oper = my_strdup(OPER_NAME(client_p, conn_p));
-	regexp_p->create_time = CURRENT_TIME;
+	regexp_p->regexp_str = rb_strdup(parv[1]);
+	regexp_p->oper = rb_strdup(OPER_NAME(client_p, conn_p));
+	regexp_p->create_time = rb_current_time();
 	regexp_p->parent = parent_p;
 
-	dlink_add_tail(regexp_p, &regexp_p->ptr, &parent_p->negations);
+	rb_dlinkAddTail(regexp_p, &regexp_p->ptr, &parent_p->negations);
 
 	rsdb_exec_insert(&regexp_p->id, "operbans_regexp_neg", "id", 
 			"INSERT INTO operbans_regexp_neg (parent_id, regex, oper) "
@@ -1196,7 +1201,7 @@ o_banserv_unkline(struct client *client_p, struct lconn *conn_p, const char *par
 
 	rsdb_exec(NULL, "UPDATE operbans SET remove='1', hold='%lu' "
 			"WHERE mask=LOWER('%Q') AND type='K'",
-			CURRENT_TIME + config_file.bs_unban_time, parv[0]);
+			rb_current_time() + config_file.bs_unban_time, parv[0]);
 
 	service_snd(banserv_p, client_p, conn_p, SVC_BAN_ISSUED,
 			"UNKLINE", parv[0]);
@@ -1243,7 +1248,7 @@ o_banserv_unxline(struct client *client_p, struct lconn *conn_p, const char *par
 
 	rsdb_exec(NULL, "UPDATE operbans SET remove='1', hold='%lu' "
 			"WHERE mask=LOWER('%Q') AND type='X'",
-			CURRENT_TIME + config_file.bs_unban_time, parv[0]);
+			rb_current_time() + config_file.bs_unban_time, parv[0]);
 
 	service_snd(banserv_p, client_p, conn_p, SVC_BAN_ISSUED,
 			"UNXLINE", parv[0]);
@@ -1290,7 +1295,7 @@ o_banserv_unresv(struct client *client_p, struct lconn *conn_p, const char *parv
 
 	rsdb_exec(NULL, "UPDATE operbans SET remove='1', hold='%lu' "
 			"WHERE mask=LOWER('%Q') AND type='R'",
-			CURRENT_TIME + config_file.bs_unban_time, parv[0]);
+			rb_current_time() + config_file.bs_unban_time, parv[0]);
 
 	service_snd(banserv_p, client_p, conn_p, SVC_BAN_ISSUED,
 			"UNRESV", parv[0]);
@@ -1307,9 +1312,9 @@ static int
 o_banserv_delregexp(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct regexp_ban *regexp_p;
-	dlink_node *ptr;
+	rb_dlink_node *ptr;
 
-	DLINK_FOREACH(ptr, regexp_list.head)
+	RB_DLINK_FOREACH(ptr, regexp_list.head)
 	{
 		regexp_p = ptr->data;
 
@@ -1362,11 +1367,11 @@ o_banserv_delregexpneg(struct client *client_p, struct lconn *conn_p, const char
 	struct regexp_ban *regexp_p;
 	struct regexp_ban *parent_p;
 	unsigned int regexp_id;
-	dlink_node *ptr;
+	rb_dlink_node *ptr;
 
 	regexp_id = atoi(parv[0]);
 
-	DLINK_FOREACH(ptr, regexp_list.head)
+	RB_DLINK_FOREACH(ptr, regexp_list.head)
 	{
 		parent_p = ptr->data;
 
@@ -1381,7 +1386,7 @@ o_banserv_delregexpneg(struct client *client_p, struct lconn *conn_p, const char
 		return 0;
 	}
 
-	DLINK_FOREACH(ptr, parent_p->negations.head)
+	RB_DLINK_FOREACH(ptr, parent_p->negations.head)
 	{
 		regexp_p = ptr->data;
 
@@ -1439,7 +1444,7 @@ o_banserv_sync(struct client *client_p, struct lconn *conn_p, const char *parv[]
 	if(conn_p || irccmp(client_p->user->servername, parv[0]))
 	{
 		struct client *target_p;
-		dlink_node *ptr;
+		rb_dlink_node *ptr;
 		unsigned int hit = 0;
 
 		if(client_p)
@@ -1458,7 +1463,7 @@ o_banserv_sync(struct client *client_p, struct lconn *conn_p, const char *parv[]
 		}
 
 		/* check their mask matches at least one server */
-		DLINK_FOREACH(ptr, server_list.head)
+		RB_DLINK_FOREACH(ptr, server_list.head)
 		{
 			target_p = ptr->data;
 
@@ -1512,7 +1517,7 @@ list_bans(struct client *client_p, struct lconn *conn_p,
 
 	rsdb_exec_fetch(&data, "SELECT mask, reason, operreason, hold, oper "
 				"FROM operbans WHERE type='%c' AND remove='0' AND (hold='0' OR hold > '%lu')",
-			type, (unsigned long) CURRENT_TIME);
+			type, (unsigned long) rb_current_time());
 
 	service_snd(banserv_p, client_p, conn_p, SVC_BAN_LISTSTART, mask);
 
@@ -1524,7 +1529,7 @@ list_bans(struct client *client_p, struct lconn *conn_p,
 		duration = (unsigned long) atol(data.row[i][3]);
 
 		if(duration)
-			duration -= CURRENT_TIME;
+			duration -= rb_current_time();
 
 		service_send(banserv_p, client_p, conn_p,
 				"  %-30s exp:%s oper:%s [%s%s]",
@@ -1565,25 +1570,25 @@ o_banserv_listregexps(struct client *client_p, struct lconn *conn_p, const char 
 	struct regexp_ban *regexp_p;
 	struct regexp_ban *neg_p;
 	time_t duration;
-	dlink_node *ptr;
-	dlink_node *next_ptr;
-	dlink_node *neg_ptr;
+	rb_dlink_node *ptr;
+	rb_dlink_node *next_ptr;
+	rb_dlink_node *neg_ptr;
 
 	service_snd(banserv_p, client_p, conn_p, SVC_BAN_LISTSTART, "REGEXPS");
 
-	DLINK_FOREACH_SAFE(ptr, next_ptr, regexp_list.head)
+	RB_DLINK_FOREACH_SAFE(ptr, next_ptr, regexp_list.head)
 	{
 		regexp_p = ptr->data;
 
 		if(regexp_p->hold)
 		{
-			if(regexp_p->hold <= CURRENT_TIME)
+			if(regexp_p->hold <= rb_current_time())
 			{
 				regexp_free(regexp_p, 0);
 				continue;
 			}
 
-			duration = regexp_p->hold - CURRENT_TIME;
+			duration = regexp_p->hold - rb_current_time();
 		}
 		else
 			duration = 0;
@@ -1594,7 +1599,7 @@ o_banserv_listregexps(struct client *client_p, struct lconn *conn_p, const char 
 				duration ? get_short_duration(duration) : "never",
 				regexp_p->oper, regexp_p->reason);
 
-		DLINK_FOREACH(neg_ptr, regexp_p->negations.head)
+		RB_DLINK_FOREACH(neg_ptr, regexp_p->negations.head)
 		{
 			neg_p = neg_ptr->data;
 

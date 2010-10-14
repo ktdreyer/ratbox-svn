@@ -4,6 +4,8 @@
 
 #include "setup.h"
 
+#include <ratbox_lib.h>
+
 #include <stdio.h>
 
 #ifdef HAVE_STDLIB_H
@@ -52,7 +54,6 @@ extern int errno;
 #include <assert.h>
 
 #include "config.h"
-#include "tools.h"
 
 #ifdef strdupa
 #define LOCAL_COPY(s) strdupa(s) 

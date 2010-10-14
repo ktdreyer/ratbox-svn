@@ -47,6 +47,7 @@
 #include "modebuild.h"
 #include "log.h"
 #include "watch.h"
+#include "tools.h"
 
 static void init_s_operserv(void);
 
@@ -130,7 +131,7 @@ h_operserv_sjoin_lowerts(void *v_chptr, void *unused)
 {
 	struct channel *chptr = v_chptr;
 
-	if (dlink_find(operserv_p, &chptr->services) == NULL)
+	if (rb_dlinkFind(operserv_p, &chptr->services) == NULL)
 		return 0;
 
 	/* Save the new TS for later -- jilles */
@@ -143,7 +144,7 @@ h_operserv_sjoin_lowerts(void *v_chptr, void *unused)
 static void
 otakeover(struct channel *chptr, int invite)
 {
-	dlink_node *ptr;
+	rb_dlink_node *ptr;
 
 	part_service(operserv_p, chptr->name);
 
@@ -162,13 +163,13 @@ otakeover(struct channel *chptr, int invite)
 	join_service(operserv_p, chptr->name, chptr->tsinfo, NULL, 0);
 
 	/* need to reop some services */
-	if(dlink_list_length(&chptr->services) > 1)
+	if(rb_dlink_list_length(&chptr->services) > 1)
 	{
 		struct client *target_p;
 
 		modebuild_start(operserv_p, chptr);
 
-		DLINK_FOREACH(ptr, chptr->services.head)
+		RB_DLINK_FOREACH(ptr, chptr->services.head)
 		{
 			target_p = ptr->data;
 
@@ -184,11 +185,11 @@ static void
 otakeover_clear(struct channel *chptr, int remove_opers)
 {
 	struct chmember *msptr;
-	dlink_node *ptr, *next_ptr;
+	rb_dlink_node *ptr, *next_ptr;
 
 	kickbuild_start();
 
-	DLINK_FOREACH_SAFE(ptr, next_ptr, chptr->users.head)
+	RB_DLINK_FOREACH_SAFE(ptr, next_ptr, chptr->users.head)
 	{
 		msptr = ptr->data;
 
@@ -222,7 +223,7 @@ o_oper_takeover(struct client *client_p, struct lconn *conn_p, const char *parv[
 		return 0;
 	}
 
-	if(dlink_list_length(&chptr->users) == 0)
+	if(rb_dlink_list_length(&chptr->users) == 0)
 	{
 		/* Taking over a channel without users would lead to segfaults
 		 * and is pointless anyway -- jilles */
@@ -272,7 +273,7 @@ o_oper_osjoin(struct client *client_p, struct lconn *conn_p, const char *parv[],
 	}
 
 	if((chptr = find_channel(parv[0])) &&
-	   dlink_find(operserv_p, &chptr->services))
+	   rb_dlinkFind(operserv_p, &chptr->services))
 	{
 		service_snd(operserv_p, client_p, conn_p, SVC_IRC_ALREADYONCHANNEL,
 				operserv_p->name, parv[0]);
@@ -282,7 +283,7 @@ o_oper_osjoin(struct client *client_p, struct lconn *conn_p, const char *parv[],
 	zlog(operserv_p, 1, WATCH_OPERSERV, 1, client_p, conn_p,
 		"OSJOIN %s", parv[0]);
 
-	tsinfo = chptr != NULL ? chptr->tsinfo : CURRENT_TIME;
+	tsinfo = chptr != NULL ? chptr->tsinfo : rb_current_time();
 
 	rsdb_exec(NULL, "INSERT INTO operserv (chname, tsinfo, oper) VALUES(LOWER('%Q'), '%lu', '%Q')",
 			parv[0], tsinfo, OPER_NAME(client_p, conn_p));
@@ -308,7 +309,7 @@ o_oper_ospart(struct client *client_p, struct lconn *conn_p, const char *parv[],
 		return 1;
 	}
 
-	if((chptr = find_channel(parv[0])) == NULL || dlink_find(operserv_p, &chptr->services) == NULL)
+	if((chptr = find_channel(parv[0])) == NULL || rb_dlinkFind(operserv_p, &chptr->services) == NULL)
 	{
 		service_snd(operserv_p, client_p, conn_p, SVC_IRC_NOTINCHANNEL,
 				operserv_p->name, parv[0]);
@@ -452,7 +453,7 @@ static int
 o_oper_addignore(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct service_ignore *ignore_p;
-	dlink_node *ptr;
+	rb_dlink_node *ptr;
 
 	if(!valid_ban(parv[0]))
 	{
@@ -460,7 +461,7 @@ o_oper_addignore(struct client *client_p, struct lconn *conn_p, const char *parv
 		return 0;
 	}
 
-	DLINK_FOREACH(ptr, ignore_list.head)
+	RB_DLINK_FOREACH(ptr, ignore_list.head)
 	{
 		if(match(ptr->data, parv[0]))
 		{
@@ -470,13 +471,13 @@ o_oper_addignore(struct client *client_p, struct lconn *conn_p, const char *parv
 		}
 	}
 
-	ignore_p = my_malloc(sizeof(struct service_ignore));
-	ignore_p->mask = my_strdup(parv[0]);
+	ignore_p = rb_malloc(sizeof(struct service_ignore));
+	ignore_p->mask = rb_strdup(parv[0]);
 	collapse(ignore_p->mask);
-	ignore_p->reason = my_strdup(rebuild_params(parv, parc, 1));
-	ignore_p->oper = my_strdup(OPER_NAME(client_p, conn_p));
+	ignore_p->reason = rb_strdup(rebuild_params(parv, parc, 1));
+	ignore_p->oper = rb_strdup(OPER_NAME(client_p, conn_p));
 
-	dlink_add(ignore_p, &ignore_p->ptr, &ignore_list);
+	rb_dlinkAdd(ignore_p, &ignore_p->ptr, &ignore_list);
 
 	rsdb_exec(NULL, "INSERT INTO ignore_hosts (hostname, oper, reason) VALUES('%Q', '%Q', '%Q')",
 			ignore_p->mask, ignore_p->oper, ignore_p->reason);
@@ -490,20 +491,20 @@ static int
 o_oper_delignore(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct service_ignore *ignore_p;
-	dlink_node *ptr;
+	rb_dlink_node *ptr;
 
-	DLINK_FOREACH(ptr, ignore_list.head)
+	RB_DLINK_FOREACH(ptr, ignore_list.head)
 	{
 		ignore_p = ptr->data;
 
 		if(!irccmp(ignore_p->mask, parv[0]))
 		{
-			dlink_delete(&ignore_p->ptr, &ignore_list);
+			rb_dlinkDelete(&ignore_p->ptr, &ignore_list);
 
-			my_free(ignore_p->mask);
-			my_free(ignore_p->oper);
-			my_free(ignore_p->reason);
-			my_free(ignore_p);
+			rb_free(ignore_p->mask);
+			rb_free(ignore_p->oper);
+			rb_free(ignore_p->reason);
+			rb_free(ignore_p);
 
 			rsdb_exec(NULL, "DELETE FROM ignore_hosts WHERE hostname='%Q'", parv[0]);
 
@@ -521,11 +522,11 @@ static int
 o_oper_listignores(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct service_ignore *ignore_p;
-	dlink_node *ptr;
+	rb_dlink_node *ptr;
 
 	service_snd(operserv_p, client_p, conn_p, SVC_OPER_IGNORELIST);
 
-	DLINK_FOREACH(ptr, ignore_list.head)
+	RB_DLINK_FOREACH(ptr, ignore_list.head)
 	{
 		ignore_p = ptr->data;
 
@@ -542,7 +543,7 @@ o_oper_listopers(struct client *client_p, struct lconn *conn_p, const char *parv
 {
 	struct client *target_p;
 	struct lconn *dcc_p;
-	dlink_node *ptr;
+	rb_dlink_node *ptr;
 
 	if(client_p && !is_oper(client_p) && !client_p->user->oper)
 	{
@@ -554,11 +555,11 @@ o_oper_listopers(struct client *client_p, struct lconn *conn_p, const char *parv
 		return 1;
 	}
 
-	if(dlink_list_length(&connection_list))
+	if(rb_dlink_list_length(&connection_list))
 	{
 		service_snd(operserv_p, client_p, conn_p, SVC_OPER_CONNECTIONSSTART, "DCC");
 
-		DLINK_FOREACH(ptr, connection_list.head)
+		RB_DLINK_FOREACH(ptr, connection_list.head)
 		{
 			dcc_p = ptr->data;
 
@@ -568,11 +569,11 @@ o_oper_listopers(struct client *client_p, struct lconn *conn_p, const char *parv
 		}
 	}
 
-	if(dlink_list_length(&oper_list))
+	if(rb_dlink_list_length(&oper_list))
 	{
 		service_snd(operserv_p, client_p, conn_p, SVC_OPER_CONNECTIONSSTART, "IRC");
 
-		DLINK_FOREACH(ptr, oper_list.head)
+		RB_DLINK_FOREACH(ptr, oper_list.head)
 		{
 			target_p = ptr->data;
 

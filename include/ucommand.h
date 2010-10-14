@@ -8,7 +8,7 @@ struct lconn;
 struct cachefile;
 struct client;
 
-extern dlink_list ucommand_list;
+extern rb_dlink_list ucommand_list;
 
 struct ucommand_handler
 {

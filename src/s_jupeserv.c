@@ -48,6 +48,7 @@
 #include "hook.h"
 #include "event.h"
 #include "watch.h"
+#include "tools.h"
 
 struct server_jupe
 {
@@ -56,12 +57,12 @@ struct server_jupe
 	int points;
 	int add;
 	time_t expire;
-	dlink_node node;
-	dlink_list servers;
+	rb_dlink_node node;
+	rb_dlink_list servers;
 };
 
-static dlink_list pending_jupes;
-static dlink_list active_jupes;
+static rb_dlink_list pending_jupes;
+static rb_dlink_list active_jupes;
 
 static void init_s_jupeserv(void);
 
@@ -117,14 +118,14 @@ init_s_jupeserv(void)
 
 		if((service_p = merge_service(&jupe_service, "OPERSERV", 1)) != NULL)
 		{
-			dlink_delete(&jupeserv_p->listnode, &service_list);
+			rb_dlinkDelete(&jupeserv_p->listnode, &service_list);
 			jupeserv_p = service_p;
 		}
 	}
 
 	hook_add(h_jupeserv_squit, HOOK_PROTO_SQUIT_UNKNOWN);
 	hook_add(h_jupeserv_finburst, HOOK_EOB_UPLINK);
-	eventAdd("e_jupeserv_expire", e_jupeserv_expire, NULL, 60);
+	rb_event_add("e_jupeserv_expire", e_jupeserv_expire, NULL, 60);
 
 	rsdb_exec(jupe_db_callback, "SELECT servername, reason FROM jupes");
 }
@@ -132,9 +133,9 @@ init_s_jupeserv(void)
 static struct server_jupe *
 make_jupe(const char *name)
 {
-	struct server_jupe *jupe_p = my_malloc(sizeof(struct server_jupe));
-	jupe_p->name = my_strdup(name);
-	dlink_add(jupe_p, &jupe_p->node, &pending_jupes);
+	struct server_jupe *jupe_p = rb_malloc(sizeof(struct server_jupe));
+	jupe_p->name = rb_strdup(name);
+	rb_dlinkAdd(jupe_p, &jupe_p->node, &pending_jupes);
 	return jupe_p;
 }
 
@@ -156,32 +157,32 @@ add_jupe(struct server_jupe *jupe_p)
 	if(finished_bursting)
 		sendto_server(":%s SERVER %s 1 :JUPED: %s",
 				MYUID, jupe_p->name, jupe_p->reason);
-	dlink_move_node(&jupe_p->node, &pending_jupes, &active_jupes);
+	rb_dlinkMoveNode(&jupe_p->node, &pending_jupes, &active_jupes);
 }
 
 static void
 free_jupe(struct server_jupe *jupe_p)
 {
-	dlink_node *ptr, *next_ptr;
+	rb_dlink_node *ptr, *next_ptr;
 
-	DLINK_FOREACH_SAFE(ptr, next_ptr, jupe_p->servers.head)
+	RB_DLINK_FOREACH_SAFE(ptr, next_ptr, jupe_p->servers.head)
 	{
-		my_free(ptr->data);
-		dlink_destroy(ptr, &jupe_p->servers);
+		rb_free(ptr->data);
+		rb_dlinkDestroy(ptr, &jupe_p->servers);
 	}
 
-	my_free(jupe_p->name);
-	my_free(jupe_p->reason);
-	my_free(jupe_p);
+	rb_free(jupe_p->name);
+	rb_free(jupe_p->reason);
+	rb_free(jupe_p);
 }
 
 static struct server_jupe *
-find_jupe(const char *name, dlink_list *list)
+find_jupe(const char *name, rb_dlink_list *list)
 {
 	struct server_jupe *jupe_p;
-	dlink_node *ptr;
+	rb_dlink_node *ptr;
 
-	DLINK_FOREACH(ptr, list->head)
+	RB_DLINK_FOREACH(ptr, list->head)
 	{
 		jupe_p = ptr->data;
 
@@ -196,15 +197,15 @@ static void
 e_jupeserv_expire(void *unused)
 {
 	struct server_jupe *jupe_p;
-	dlink_node *ptr, *next_ptr;
+	rb_dlink_node *ptr, *next_ptr;
 
-	DLINK_FOREACH_SAFE(ptr, next_ptr, pending_jupes.head)
+	RB_DLINK_FOREACH_SAFE(ptr, next_ptr, pending_jupes.head)
 	{
 		jupe_p = ptr->data;
 
-		if(jupe_p->expire <= CURRENT_TIME)
+		if(jupe_p->expire <= rb_current_time())
 		{
-			dlink_delete(&jupe_p->node, &pending_jupes);
+			rb_dlinkDelete(&jupe_p->node, &pending_jupes);
 			free_jupe(jupe_p);
 		}
 	}
@@ -216,7 +217,7 @@ jupe_db_callback(int argc, const char **argv)
 	struct server_jupe *jupe_p;
 
 	jupe_p = make_jupe(argv[0]);
-	jupe_p->reason = my_strdup(argv[1]);
+	jupe_p->reason = rb_strdup(argv[1]);
 
 	add_jupe(jupe_p);
 	return 0;
@@ -242,9 +243,9 @@ h_jupeserv_finburst(void *unused, void *unused2)
 {
 	struct client *target_p;
 	struct server_jupe *jupe_p;
-	dlink_node *ptr;
+	rb_dlink_node *ptr;
 
-	DLINK_FOREACH(ptr, active_jupes.head)
+	RB_DLINK_FOREACH(ptr, active_jupes.head)
 	{
 		jupe_p = ptr->data;
 
@@ -301,7 +302,7 @@ o_jupeserv_jupe(struct client *client_p, struct lconn *conn_p, const char *parv[
 	 */
 	if((jupe_p = find_jupe(parv[0], &pending_jupes)))
 	{
-		dlink_delete(&jupe_p->node, &pending_jupes);
+		rb_dlinkDelete(&jupe_p->node, &pending_jupes);
 		free_jupe(jupe_p);
 	}
 
@@ -315,9 +316,9 @@ o_jupeserv_jupe(struct client *client_p, struct lconn *conn_p, const char *parv[
 		"JUPE %s %s", jupe_p->name, reason);
 
 	if(EmptyString(reason))
-		jupe_p->reason = my_strdup("No Reason");
+		jupe_p->reason = rb_strdup("No Reason");
 	else
-		jupe_p->reason = my_strdup(reason);
+		jupe_p->reason = rb_strdup(reason);
 
 	rsdb_exec(NULL, "INSERT INTO jupes (servername, reason) VALUES('%Q', '%Q')",
 			jupe_p->name, jupe_p->reason);
@@ -348,7 +349,7 @@ o_jupeserv_unjupe(struct client *client_p, struct lconn *conn_p, const char *par
 
 	if((ajupe_p = find_jupe(parv[0], &pending_jupes)))
 	{
-		dlink_delete(&ajupe_p->node, &pending_jupes);
+		rb_dlinkDelete(&ajupe_p->node, &pending_jupes);
 		free_jupe(ajupe_p);
 	}
 
@@ -367,7 +368,7 @@ o_jupeserv_unjupe(struct client *client_p, struct lconn *conn_p, const char *par
 				MYUID, jupe_p->name, conn_p->name);
 
 	sendto_server("SQUIT %s :Unjuped", jupe_p->name);
-	dlink_delete(&jupe_p->node, &active_jupes);
+	rb_dlinkDelete(&jupe_p->node, &active_jupes);
 	free_jupe(jupe_p);
 	return 0;
 }
@@ -376,7 +377,7 @@ static int
 s_jupeserv_calljupe(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct server_jupe *jupe_p;
-	dlink_node *ptr;
+	rb_dlink_node *ptr;
 
 	if(!valid_jupe(parv[0]))
 	{
@@ -411,12 +412,12 @@ s_jupeserv_calljupe(struct client *client_p, struct lconn *conn_p, const char *p
 			reason[REASONLEN] = '\0';
 
 		if(EmptyString(reason))
-			jupe_p->reason = my_strdup("No Reason");
+			jupe_p->reason = rb_strdup("No Reason");
 		else
-			jupe_p->reason = my_strdup(reason);
+			jupe_p->reason = rb_strdup(reason);
 	}
 
-	DLINK_FOREACH(ptr, jupe_p->servers.head)
+	RB_DLINK_FOREACH(ptr, jupe_p->servers.head)
 	{
 		if(!irccmp((const char *) ptr->data, client_p->user->servername))
 		{
@@ -429,12 +430,12 @@ s_jupeserv_calljupe(struct client *client_p, struct lconn *conn_p, const char *p
 	zlog(jupeserv_p, 1, WATCH_JUPESERV, 1, client_p, conn_p,
 		"CALLJUPE %s %s", parv[0], jupe_p->reason);
 
-	jupe_p->expire = CURRENT_TIME + config_file.pending_time;
+	jupe_p->expire = rb_current_time() + config_file.pending_time;
 	if(ClientAdmin(client_p))
 		jupe_p->points += config_file.admin_score;
 	else
 		jupe_p->points += config_file.oper_score;
-	dlink_add_alloc(my_strdup(client_p->user->servername), &jupe_p->servers);
+	rb_dlinkAddAlloc(rb_strdup(client_p->user->servername), &jupe_p->servers);
 
 	if(jupe_p->points >= config_file.jupe_score)
 	{
@@ -464,7 +465,7 @@ static int
 s_jupeserv_callunjupe(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct server_jupe *ajupe_p, *jupe_p;
-	dlink_node *ptr;
+	rb_dlink_node *ptr;
 
 	if(!config_file.unjupe_score || !config_file.oper_score ||
 			!config_file.admin_score)
@@ -486,7 +487,7 @@ s_jupeserv_callunjupe(struct client *client_p, struct lconn *conn_p, const char 
 		jupe_p->points = config_file.unjupe_score;
 	}
 
-	DLINK_FOREACH(ptr, jupe_p->servers.head)
+	RB_DLINK_FOREACH(ptr, jupe_p->servers.head)
 	{
 		if(!irccmp((const char *) ptr->data, client_p->user->servername))
 		{
@@ -499,12 +500,12 @@ s_jupeserv_callunjupe(struct client *client_p, struct lconn *conn_p, const char 
 	zlog(jupeserv_p, 1, WATCH_JUPESERV, 1, client_p, conn_p,
 		"CALLUNJUPE %s", parv[0]);
 
-	jupe_p->expire = CURRENT_TIME + config_file.pending_time;
+	jupe_p->expire = rb_current_time() + config_file.pending_time;
 	if(ClientAdmin(client_p))
 		jupe_p->points -= config_file.admin_score;
 	else
 		jupe_p->points -= config_file.oper_score;
-	dlink_add_alloc(my_strdup(client_p->user->servername), &jupe_p->servers);
+	rb_dlinkAddAlloc(rb_strdup(client_p->user->servername), &jupe_p->servers);
 
 	if(jupe_p->points <= 0)
 	{
@@ -520,8 +521,8 @@ s_jupeserv_callunjupe(struct client *client_p, struct lconn *conn_p, const char 
 				jupe_p->name);
 
 		sendto_server("SQUIT %s :Unjuped", jupe_p->name);
-		dlink_delete(&jupe_p->node, &pending_jupes);
-		dlink_delete(&ajupe_p->node, &active_jupes);
+		rb_dlinkDelete(&jupe_p->node, &pending_jupes);
+		rb_dlinkDelete(&ajupe_p->node, &active_jupes);
 		free_jupe(jupe_p);
 		free_jupe(ajupe_p);
 	}
@@ -538,7 +539,7 @@ static int
 s_jupeserv_pending(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct server_jupe *jupe_p;
-	dlink_node *ptr;
+	rb_dlink_node *ptr;
 
 	if(!config_file.oper_score || !config_file.admin_score)
 	{
@@ -547,12 +548,12 @@ s_jupeserv_pending(struct client *client_p, struct lconn *conn_p, const char *pa
 		return 0;
 	}
 
-	if(dlink_list_length(&pending_jupes))
+	if(rb_dlink_list_length(&pending_jupes))
 		zlog(jupeserv_p, 3, WATCH_JUPESERV, 1, client_p, conn_p, "PENDING");
 
 	service_err(jupeserv_p, client_p, SVC_JUPE_PENDINGLIST);
 
-	DLINK_FOREACH(ptr, pending_jupes.head)
+	RB_DLINK_FOREACH(ptr, pending_jupes.head)
 	{
 		jupe_p = ptr->data;
 

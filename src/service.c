@@ -32,9 +32,6 @@
  */
 #include "stdinc.h"
 
-#ifdef HAVE_CRYPT_H
-#include <crypt.h>
-#endif
 
 #include "rsdb.h"
 #include "rserv.h"
@@ -50,10 +47,10 @@
 #include "channel.h"
 #include "s_userserv.h"
 #include "watch.h"
-#include "balloc.h"
+#include "tools.h"
 
-dlink_list service_list;
-dlink_list ignore_list;
+rb_dlink_list service_list;
+rb_dlink_list ignore_list;
 
 static int ignore_db_callback(int, const char **);
 
@@ -63,16 +60,16 @@ void
 init_services(void)
 {
 	struct client *service_p;
-	dlink_node *ptr;
-	dlink_node *next_ptr;
+	rb_dlink_node *ptr;
+	rb_dlink_node *next_ptr;
 
 	/* init functions may remove themselves from this list */
-	DLINK_FOREACH_SAFE(ptr, next_ptr, service_list.head)
+	RB_DLINK_FOREACH_SAFE(ptr, next_ptr, service_list.head)
 	{
 		service_p = ptr->data;
 
 		/* generate all our services a UID.. */
-		strlcpy(service_p->uid, generate_uid(), sizeof(service_p->uid));
+		rb_strlcpy(service_p->uid, generate_uid(), sizeof(service_p->uid));
 
 		if(service_p->service->init)
 			(service_p->service->init)();
@@ -89,12 +86,12 @@ ignore_db_callback(int argc, const char **argv)
 	if(EmptyString(argv[0]) || EmptyString(argv[1]) || EmptyString(argv[2]))
 		return 0;
 
-	ignore_p = my_malloc(sizeof(struct service_ignore));
-	ignore_p->mask = my_strdup(argv[0]);
-	ignore_p->oper = my_strdup(argv[1]);
-	ignore_p->reason = my_strdup(argv[2]);
+	ignore_p = rb_malloc(sizeof(struct service_ignore));
+	ignore_p->mask = rb_strdup(argv[0]);
+	ignore_p->oper = rb_strdup(argv[1]);
+	ignore_p->reason = rb_strdup(argv[2]);
 
-	dlink_add(ignore_p, &ignore_p->ptr, &ignore_list);
+	rb_dlinkAdd(ignore_p, &ignore_p->ptr, &ignore_list);
 	return 0;
 }
 
@@ -102,9 +99,9 @@ static int
 find_ignore(struct client *client_p)
 {
 	struct service_ignore *ignore_p;
-	dlink_node *ptr;
+	rb_dlink_node *ptr;
 
-	DLINK_FOREACH(ptr, ignore_list.head)
+	RB_DLINK_FOREACH(ptr, ignore_list.head)
 	{
 		ignore_p = ptr->data;
 
@@ -137,8 +134,8 @@ load_service_help(struct client *service_p)
         if(service_p->service->command == NULL)
 		return;
 
-	service_p->service->help = my_malloc(sizeof(struct cachefile *) * LANG_MAX);
-	service_p->service->helpadmin = my_malloc(sizeof(struct cachefile *) * LANG_MAX);
+	service_p->service->help = rb_malloc(sizeof(struct cachefile *) * LANG_MAX);
+	service_p->service->helpadmin = rb_malloc(sizeof(struct cachefile *) * LANG_MAX);
 
 	for(i = 0; langs_available[i]; i++)
 	{
@@ -146,7 +143,7 @@ load_service_help(struct client *service_p)
 			HELP_PATH, langs_available[i], lcase(service_p->service->id));
 		service_p->service->help[i] = cache_file(filename, "index", 1);
 
-		strlcat(filename, "-admin", sizeof(filename));
+		rb_strlcat(filename, "-admin", sizeof(filename));
 		service_p->service->helpadmin[i] = cache_file(filename, "index-admin", 1);
 	}
 }
@@ -160,10 +157,10 @@ append_service_help(struct client *service_p, const char *service_id)
 	unsigned int i;
 
 	if(service_p->service->help == NULL)
-		service_p->service->help = my_malloc(sizeof(struct cachefile *) * LANG_MAX);
+		service_p->service->help = rb_malloc(sizeof(struct cachefile *) * LANG_MAX);
 
 	if(service_p->service->helpadmin == NULL)
-		service_p->service->helpadmin = my_malloc(sizeof(struct cachefile *) * LANG_MAX);
+		service_p->service->helpadmin = rb_malloc(sizeof(struct cachefile *) * LANG_MAX);
 
 	for(i = 0; langs_available[i]; i++)
 	{
@@ -175,14 +172,14 @@ append_service_help(struct client *service_p, const char *service_id)
 
 		if(contents_fileptr != NULL && fileptr != NULL)
 		{
-			dlink_move_list_tail(&fileptr->contents, &contents_fileptr->contents);
+			rb_dlinkMoveListTail(&fileptr->contents, &contents_fileptr->contents);
 		}
 		else if(fileptr != NULL)
 			service_p->service->help[i] = fileptr;
 
 		free_cachefile(fileptr);
 
-		strlcat(filename, "-admin", sizeof(filename));
+		rb_strlcat(filename, "-admin", sizeof(filename));
 		fileptr = cache_file(filename, "index-admin", 1);
 
 		contents_fileptr = service_p->service->helpadmin[i];
@@ -192,8 +189,8 @@ append_service_help(struct client *service_p, const char *service_id)
 			/* add a blank line to the start of this file to
 			 * separate them
 			 */
-			dlink_add_alloc(emptyline, &fileptr->contents);
-			dlink_move_list_tail(&fileptr->contents, &contents_fileptr->contents);
+			rb_dlinkAddAlloc(emptyline, &fileptr->contents);
+			rb_dlinkMoveListTail(&fileptr->contents, &contents_fileptr->contents);
 		}
 		else if(fileptr != NULL)
 			service_p->service->helpadmin[i] = fileptr;
@@ -213,7 +210,7 @@ load_service_command_help(struct service_command *scommand, int maxlen,
 
 	for(i = 0; i < maxlen; i++)
 	{
-		scommand[i].helpfile = my_malloc(sizeof(struct cachefile *) * LANG_MAX);
+		scommand[i].helpfile = rb_malloc(sizeof(struct cachefile *) * LANG_MAX);
 
 		for(j = 0; langs_available[j]; j++)
 		{
@@ -221,7 +218,7 @@ load_service_command_help(struct service_command *scommand, int maxlen,
 				HELP_PATH, langs_available[j], lcase(service_id));
 
 			/* we cant lcase() twice in one function call */
-			strlcat(filename, lcase(scommand[i].cmd),
+			rb_strlcat(filename, lcase(scommand[i].cmd),
 				sizeof(filename));
 
 			scommand[i].helpfile[j] = cache_file(filename, scommand[i].cmd, 0);
@@ -252,11 +249,11 @@ load_service_command_help(struct service_command *scommand, int maxlen,
 					if(EmptyString(langs_description[k]))
 						continue;
 
-					lineptr = BlockHeapAlloc(cacheline_heap);
+					lineptr = rb_bh_alloc(cacheline_heap);
 					snprintf(lineptr->data, sizeof(lineptr->data),
 						"     %-6s - %s",
 						langs_available[k], langs_description[k]);
-					dlink_add_tail(lineptr, &lineptr->linenode, &(scommand[i].helpfile[j]->contents));
+					rb_dlinkAddTail(lineptr, &lineptr->linenode, &(scommand[i].helpfile[j]->contents));
 				}
 			}
 		}
@@ -265,14 +262,14 @@ load_service_command_help(struct service_command *scommand, int maxlen,
 
 	for(i = 0; ucommand && ucommand[i].cmd && ucommand[i].cmd[0] != '\0'; i++)
 	{
-		ucommand[i].helpfile = my_malloc(sizeof(struct cachefile *) * LANG_MAX);
+		ucommand[i].helpfile = rb_malloc(sizeof(struct cachefile *) * LANG_MAX);
 
 		for(j = 0; langs_available[j]; j++)
 		{
 		        /* now see if we can load a helpfile.. */
         		snprintf(filename, sizeof(filename), "%s/%s/%s/u-",
                 		 HELP_PATH, langs_available[j], lcase(service_id));
-		        strlcat(filename, lcase(ucommand->cmd), sizeof(filename));
+		        rb_strlcat(filename, lcase(ucommand->cmd), sizeof(filename));
 
 	        	ucommand[i].helpfile[j] = cache_file(filename, ucommand->cmd, 0);
 		}
@@ -298,8 +295,8 @@ clear_service_help(struct client *service_p)
 		free_cachefile(service_p->service->helpadmin[j]);
 	}
 
-	my_free(service_p->service->help);
-	my_free(service_p->service->helpadmin);
+	rb_free(service_p->service->help);
+	rb_free(service_p->service->helpadmin);
 	service_p->service->help = NULL;
 	service_p->service->helpadmin = NULL;
 
@@ -310,7 +307,7 @@ clear_service_help(struct client *service_p)
 			free_cachefile(scommand[i].helpfile[j]);
 		}
 
-		my_free(scommand[i].helpfile);
+		rb_free(scommand[i].helpfile);
 		scommand[i].helpfile = NULL;
 	}
 
@@ -323,7 +320,7 @@ clear_service_help(struct client *service_p)
 			free_cachefile(ucommand->helpfile[j]);
 		}
 
-		my_free(ucommand->helpfile);
+		rb_free(ucommand->helpfile);
 		ucommand->helpfile = NULL;
 	}
 }
@@ -333,10 +330,10 @@ rehash_help(void)
 {
 	struct service_handler *handler;
 	struct client *service_p;
-	dlink_node *ptr;
-	dlink_node *merge_ptr;
+	rb_dlink_node *ptr;
+	rb_dlink_node *merge_ptr;
 
-	DLINK_FOREACH(ptr, service_list.head)
+	RB_DLINK_FOREACH(ptr, service_list.head)
 	{
 		service_p = ptr->data;
 
@@ -363,7 +360,7 @@ rehash_help(void)
 					service_p->service->command_size / sizeof(struct service_command),
 					service_p->service->ucommand, service_p->service->id);
 
-		DLINK_FOREACH(merge_ptr, service_p->service->merged_handler_list.head)
+		RB_DLINK_FOREACH(merge_ptr, service_p->service->merged_handler_list.head)
 		{
 			handler = merge_ptr->data;
 
@@ -417,16 +414,16 @@ add_service(struct service_handler *service)
 		qsort(service->command, maxlen,
 			sizeof(struct service_command), (bqcmp) scmd_sort);
 
-	client_p = my_malloc(sizeof(struct client));
-	client_p->service = my_malloc(sizeof(struct service));
+	client_p = rb_malloc(sizeof(struct client));
+	client_p->service = rb_malloc(sizeof(struct service));
 
-	strlcpy(client_p->name, service->name, sizeof(client_p->name));
-	strlcpy(client_p->service->username, service->username,
+	rb_strlcpy(client_p->name, service->name, sizeof(client_p->name));
+	rb_strlcpy(client_p->service->username, service->username,
 		sizeof(client_p->service->username));
-	strlcpy(client_p->service->host, service->host,
+	rb_strlcpy(client_p->service->host, service->host,
 		sizeof(client_p->service->host));
-	strlcpy(client_p->info, service->info, sizeof(client_p->info));
-	strlcpy(client_p->service->id, service->id, sizeof(client_p->service->id));
+	rb_strlcpy(client_p->info, service->info, sizeof(client_p->info));
+	rb_strlcpy(client_p->service->id, service->id, sizeof(client_p->service->id));
 	client_p->service->command = service->command;
 	client_p->service->command_size = service->command_size;
         client_p->service->ucommand = service->ucommand;
@@ -437,7 +434,7 @@ add_service(struct service_handler *service)
         client_p->service->flood_max = service->flood_max;
         client_p->service->flood_grace = service->flood_grace;
 
-	dlink_add_tail(client_p, &client_p->listnode, &service_list);
+	rb_dlinkAddTail(client_p, &client_p->listnode, &service_list);
 
         if(service->ucommand != NULL)
                 add_ucommands(client_p, service->ucommand);
@@ -455,9 +452,9 @@ struct client *
 find_service_id(const char *name)
 {
 	struct client *client_p;
-	dlink_node *ptr;
+	rb_dlink_node *ptr;
 
-	DLINK_FOREACH(ptr, service_list.head)
+	RB_DLINK_FOREACH(ptr, service_list.head)
 	{
 		client_p = ptr->data;
 
@@ -482,7 +479,7 @@ merge_service(struct service_handler *handler_p, const char *service_id, int sta
 		return NULL;
 
 	if(startup)
-		dlink_add_tail_alloc(handler_p, &service_p->service->merged_handler_list);
+		rb_dlinkAddTailAlloc(handler_p, &service_p->service->merged_handler_list);
 
 	/* play nice, and merge the index/index-admin helpfiles */
 	append_service_help(service_p, handler_p->id);
@@ -492,7 +489,7 @@ merge_service(struct service_handler *handler_p, const char *service_id, int sta
 	original_command_length = service_p->service->command_size / sizeof(struct service_command);
 	merged_command_length = merged_command_size / sizeof(struct service_command);
 
-	svc_cmd = my_malloc(merged_command_size);
+	svc_cmd = rb_malloc(merged_command_size);
 	memcpy(svc_cmd, service_p->service->command, service_p->service->command_size);
 	memcpy(svc_cmd + original_command_length, handler_p->command, handler_p->command_size);
 
@@ -504,7 +501,7 @@ merge_service(struct service_handler *handler_p, const char *service_id, int sta
 	 * the new structure via memcpy(), so we don't need the old copy anymore
 	 */
 	if(service_p->service->orig_command)
-		my_free(service_p->service->command);
+		rb_free(service_p->service->command);
 
 	if(service_p->service->orig_command == NULL)
 	{
@@ -545,7 +542,7 @@ merge_service(struct service_handler *handler_p, const char *service_id, int sta
 		new_command_size = sizeof(struct ucommand_handler) * new_command_length;
 		merged_command_size = sizeof(struct ucommand_handler) * merged_command_length;
 
-		svc_ucommand = my_malloc(merged_command_size);
+		svc_ucommand = rb_malloc(merged_command_size);
 
 		if(original_command_size)
 			memcpy(svc_ucommand, service_p->service->ucommand, original_command_size);
@@ -553,7 +550,7 @@ merge_service(struct service_handler *handler_p, const char *service_id, int sta
 		memcpy(svc_ucommand + original_command_length, handler_p->ucommand, new_command_size);
 
 		if(service_p->service->orig_ucommand)
-			my_free(service_p->service->ucommand);
+			rb_free(service_p->service->ucommand);
 
 		if(service_p->service->orig_ucommand == NULL)
 			service_p->service->orig_ucommand = service_p->service->ucommand;
@@ -571,14 +568,14 @@ unmerge_service(struct client *service_p)
 		return;
 
 	/* allocated in ram */
-	my_free(service_p->service->command);
+	rb_free(service_p->service->command);
 	service_p->service->command = service_p->service->orig_command;
 	service_p->service->command_size = service_p->service->orig_command_size;
 
 	/* may not have merged any dcc commands */
 	if(service_p->service->orig_ucommand)
 	{
-		my_free(service_p->service->ucommand);
+		rb_free(service_p->service->ucommand);
 		service_p->service->ucommand = service_p->service->orig_ucommand;
 	}
 
@@ -605,9 +602,9 @@ void
 introduce_service_channels(struct client *target_p, int send_tb)
 {
 	struct channel *chptr;
-	dlink_node *ptr;
+	rb_dlink_node *ptr;
 
-	DLINK_FOREACH(ptr, target_p->service->channels.head)
+	RB_DLINK_FOREACH(ptr, target_p->service->channels.head)
 	{
 		chptr = ptr->data;
 
@@ -629,9 +626,9 @@ void
 introduce_services()
 {
 	struct client *service_p;
-	dlink_node *ptr;
+	rb_dlink_node *ptr;
 
-	DLINK_FOREACH(ptr, service_list.head)
+	RB_DLINK_FOREACH(ptr, service_list.head)
 	{
 		service_p = ptr->data;
 
@@ -646,9 +643,9 @@ void
 introduce_services_channels()
 {
 	struct client *service_p;
-	dlink_node *ptr;
+	rb_dlink_node *ptr;
 
-	DLINK_FOREACH(ptr, service_list.head)
+	RB_DLINK_FOREACH(ptr, service_list.head)
 	{
 		service_p = ptr->data;
 
@@ -680,9 +677,9 @@ void
 update_service_floodcount(void *unused)
 {
 	struct client *client_p;
-	dlink_node *ptr;
+	rb_dlink_node *ptr;
 
-	DLINK_FOREACH(ptr, service_list.head)
+	RB_DLINK_FOREACH(ptr, service_list.head)
 	{
 		client_p = ptr->data;
 
@@ -698,7 +695,7 @@ handle_service_help_index(struct client *service_p, struct client *client_p)
 {
 	struct cachefile *fileptr;
 	struct cacheline *lineptr;
-	dlink_node *ptr;
+	rb_dlink_node *ptr;
 	int i;
 
 	/* if this service has short help enabled, or there is no index 
@@ -724,8 +721,8 @@ handle_service_help_index(struct client *service_p, struct client *client_p)
 			     (client_p->user->oper->flags & cmd_table[i].operflags) == 0)))
 				continue;
 
-			strlcat(buf, cmd_table[i].cmd, sizeof(buf));
-			strlcat(buf, " ", sizeof(buf));
+			rb_strlcat(buf, cmd_table[i].cmd, sizeof(buf));
+			rb_strlcat(buf, " ", sizeof(buf));
 		}
 		SCMD_END;
 
@@ -749,7 +746,7 @@ handle_service_help_index(struct client *service_p, struct client *client_p)
 		/* dump them the index file */
 		/* this contains a short introduction and a list of commands */
 
-		DLINK_FOREACH(ptr, fileptr->contents.head)
+		RB_DLINK_FOREACH(ptr, fileptr->contents.head)
 		{
 			lineptr = ptr->data;
 			service_error(service_p, client_p, "%s",
@@ -763,7 +760,7 @@ handle_service_help_index(struct client *service_p, struct client *client_p)
 	{
 		service_err(service_p, client_p, SVC_HELP_INDEXADMIN);
 
-		DLINK_FOREACH(ptr, fileptr->contents.head)
+		RB_DLINK_FOREACH(ptr, fileptr->contents.head)
 		{
 			lineptr = ptr->data;
 			service_error(service_p, client_p, "%s",
@@ -783,7 +780,7 @@ handle_service_help(struct client *service_p, struct client *client_p, const cha
 	{
 		struct cachefile *fileptr;
 		struct cacheline *lineptr;
-		dlink_node *ptr;
+		rb_dlink_node *ptr;
 
 		if(cmd_entry->helpfile == NULL || lang_get_cachefile(cmd_entry->helpfile, client_p) == NULL ||
 		   (cmd_entry->operonly && !is_oper(client_p)))
@@ -794,7 +791,7 @@ handle_service_help(struct client *service_p, struct client *client_p, const cha
 
 		fileptr = lang_get_cachefile(cmd_entry->helpfile, client_p);
 
-		DLINK_FOREACH(ptr, fileptr->contents.head)
+		RB_DLINK_FOREACH(ptr, fileptr->contents.head)
 		{
 			lineptr = ptr->data;
 			service_error(service_p, client_p, "%s", lineptr->data);
@@ -820,7 +817,7 @@ handle_service_msg(struct client *service_p, struct client *client_p, char *text
         if((p = strchr(text, ' ')) != NULL)
 	{
                 *p++ = '\0';
-	        parc = string_to_array(p, parv);
+	        parc = rb_string_to_array(p, parv, MAXPARA);
 	}
 
 	handle_service(service_p, client_p, text, parc, (const char **) parv, 1);
@@ -848,9 +845,9 @@ handle_service(struct client *service_p, struct client *client_p,
 			 find_conf_oper(client_p->user->username, client_p->user->host, client_p->user->servername, NULL) == NULL))
 			return;
 
-		if((client_p->user->flood_time + config_file.client_flood_time) < CURRENT_TIME)
+		if((client_p->user->flood_time + config_file.client_flood_time) < rb_current_time())
 		{
-			client_p->user->flood_time = CURRENT_TIME;
+			client_p->user->flood_time = rb_current_time();
 			client_p->user->flood_count = 0;
 		}
 
@@ -938,7 +935,7 @@ handle_service(struct client *service_p, struct client *client_p,
 		}
 
 		if(ConfOperEncrypted(oper_p))
-			crpass = crypt(parv[1], oper_p->pass);
+			crpass = rb_crypt(parv[1], oper_p->pass);
 		else
 			crpass = parv[1];
 
@@ -954,7 +951,7 @@ handle_service(struct client *service_p, struct client *client_p,
 
 		client_p->user->oper = oper_p;
 		oper_p->refcount++;
-		dlink_add_alloc(client_p, &oper_list);
+		rb_dlinkAddAlloc(client_p, &oper_list);
 
 		watch_send(WATCH_AUTH, client_p, NULL, 1, "has logged in (irc)");
 
@@ -974,7 +971,7 @@ handle_service(struct client *service_p, struct client *client_p,
 
 		deallocate_conf_oper(client_p->user->oper);
 		client_p->user->oper = NULL;
-		dlink_find_destroy(client_p, &oper_list);
+		rb_dlinkFindDestroy(client_p, &oper_list);
 
 		sendto_server(":%s NOTICE %s :Oper logout successful",
 				MYUID, UID(client_p));
@@ -1013,7 +1010,7 @@ handle_service(struct client *service_p, struct client *client_p,
 			}
 			else
 			{
-				client_p->user->user_reg->last_time = CURRENT_TIME;
+				client_p->user->user_reg->last_time = rb_current_time();
 				client_p->user->user_reg->flags |= US_FLAGS_NEEDUPDATE;
 			}
 		}
@@ -1192,7 +1189,7 @@ service_stats(struct client *service_p, struct lconn *conn_p)
         {
                 snprintf(buf2, sizeof(buf2), "%s:%lu ",
                          cmd_table[i].cmd, cmd_table[i].cmd_use);
-                strlcat(buf, buf2, sizeof(buf));
+                rb_strlcat(buf, buf2, sizeof(buf));
 
                 j++;
 

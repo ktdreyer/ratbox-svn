@@ -50,11 +50,11 @@ struct service_ignore
 	char *reason;
 	char *oper;
 
-	dlink_node ptr;
+	rb_dlink_node ptr;
 };
 
-extern dlink_list service_list;
-extern dlink_list ignore_list;
+extern rb_dlink_list service_list;
+extern rb_dlink_list ignore_list;
 
 #define OPER_NAME(client_p, conn_p) ((conn_p) ? (conn_p)->name : \
 		((client_p)->user->oper ? (client_p)->user->oper->name : "-"))

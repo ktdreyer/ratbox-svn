@@ -64,7 +64,7 @@ static void init_s_chanfix(void);
 
 static struct client *chanfix_p;
 
-static dlink_list chanfix_list;
+static rb_dlink_list chanfix_list;
 
 /* netsplit warning timestamp. Used to let chanfix know when a server has
  * squit, so it can temporarily ignore opless channels.
@@ -139,7 +139,7 @@ static void add_system_note(const char *, unsigned long, const char *, ...);
 static time_t seconds_to_midnight(void);
 static struct chanfix_score * get_all_cf_scores(struct channel *, int, int);
 static struct chanfix_score * get_chmember_scores(struct chanfix_score *,
-			struct channel *, dlink_list *, short);
+			struct channel *, rb_dlink_list *, short);
 static void process_chanfix_list(int);
 
 static int add_chanfix(struct channel *, short, struct client *);
@@ -158,10 +158,10 @@ init_s_chanfix(void)
 	hook_add(h_chanfix_channel_opless, HOOK_CHANNEL_OPLESS);
 	hook_add(h_chanfix_server_squit_warn, HOOK_SERVER_EXIT_WARNING);
 
-	eventAdd("e_chanfix_score_channels", e_chanfix_score_channels, NULL, 300);
-	eventAdd("e_chanfix_autofix_channels", e_chanfix_autofix_channels, NULL, 300);
-	eventAdd("e_chanfix_manualfix_channels", e_chanfix_manualfix_channels, NULL, 300);
-	eventAddOnce("e_chanfix_collate_history", e_chanfix_collate_history, NULL,
+	rb_event_add("e_chanfix_score_channels", e_chanfix_score_channels, NULL, 300);
+	rb_event_add("e_chanfix_autofix_channels", e_chanfix_autofix_channels, NULL, 300);
+	rb_event_add("e_chanfix_manualfix_channels", e_chanfix_manualfix_channels, NULL, 300);
+	rb_event_addonce("e_chanfix_collate_history", e_chanfix_collate_history, NULL,
 				seconds_to_midnight()+5);
 }
 
@@ -169,7 +169,7 @@ init_s_chanfix(void)
 static void
 chan_takeover(struct channel *chptr)
 {
-	dlink_node *ptr;
+	rb_dlink_node *ptr;
 
 	part_service(chanfix_p, chptr->name);
 
@@ -185,11 +185,11 @@ chan_takeover(struct channel *chptr)
 	join_service(chanfix_p, chptr->name, chptr->tsinfo, NULL, 0);
 
 	/* need to reop some services */
-	if(dlink_list_length(&chptr->services) > 1)
+	if(rb_dlink_list_length(&chptr->services) > 1)
 	{
 		struct client *target_p;
 		modebuild_start(chanfix_p, chptr);
-		DLINK_FOREACH(ptr, chptr->services.head)
+		RB_DLINK_FOREACH(ptr, chptr->services.head)
 		{
 			target_p = ptr->data;
 
@@ -289,7 +289,7 @@ add_system_note(const char *chan, unsigned long chan_id, const char *format, ...
 		rsdb_exec(NULL,
 			"INSERT INTO cf_note (channel_id, timestamp, author, text) "
 			"VALUES('%lu', '%lu', '%Q', '%Q')",
-			chan_id, CURRENT_TIME, chanfix_p->name, buf);
+			chan_id, rb_current_time(), chanfix_p->name, buf);
 	}
 }
 
@@ -350,7 +350,7 @@ get_all_cf_scores(struct channel *chptr, int max_num, int min_score)
 		return NULL;
 	}
 
-	scores = my_malloc(sizeof(struct chanfix_score));
+	scores = rb_malloc(sizeof(struct chanfix_score));
 
 	if(max_num < 1)
 		max_num = data.row_count;
@@ -359,7 +359,7 @@ get_all_cf_scores(struct channel *chptr, int max_num, int min_score)
 		max_num = data.row_count;
 
 	scores->length = max_num;
-	scores->s_items = my_malloc(sizeof(struct chanfix_score_item) * max_num);
+	scores->s_items = rb_malloc(sizeof(struct chanfix_score_item) * max_num);
 
 	for(i = 0; i < max_num; i++)
 	{
@@ -377,17 +377,17 @@ get_all_cf_scores(struct channel *chptr, int max_num, int min_score)
  */
 static struct chanfix_score *
 get_chmember_scores(struct chanfix_score *scores, struct channel *chptr,
-		dlink_list *listptr, short ignore_clones)
+		rb_dlink_list *listptr, short ignore_clones)
 {
 	unsigned long userhost_id;
 	struct chmember *msptr;
 	struct chanfix_score_item *clone;
-	dlink_node *ptr, *next_ptr, *ptr2;
+	rb_dlink_node *ptr, *next_ptr, *ptr2;
 	char userhost[USERHOSTLEN+1];
 	unsigned int i, u_count, c_count;
 
 
-	if(dlink_list_length(listptr) < 1)
+	if(rb_dlink_list_length(listptr) < 1)
 		return NULL;
 
 	if(scores == NULL)
@@ -400,12 +400,12 @@ get_chmember_scores(struct chanfix_score *scores, struct channel *chptr,
 		for(i = 0; i < scores->length; i++)
 			scores->s_items[i].msptr = NULL;
 
-		if(dlink_list_length(&scores->clones) > 0)
+		if(rb_dlink_list_length(&scores->clones) > 0)
 		{
-			DLINK_FOREACH(ptr, scores->clones.head)
+			RB_DLINK_FOREACH(ptr, scores->clones.head)
 			{
 				clone = ptr->data;
-				mlog("debug: re-setting clone with userhost_id: %d",
+				mlog("debug: re-setting clone with userhost_id: %lu",
 						clone->userhost_id);
 				clone->msptr = NULL;
 			}
@@ -416,7 +416,7 @@ get_chmember_scores(struct chanfix_score *scores, struct channel *chptr,
 	u_count = 0;	/* counter for users */
 	c_count = 0;	/* counter for clones */
 
-	DLINK_FOREACH_SAFE(ptr, next_ptr, listptr->head)
+	RB_DLINK_FOREACH_SAFE(ptr, next_ptr, listptr->head)
 	{
 		msptr = ptr->data;
 
@@ -447,18 +447,18 @@ get_chmember_scores(struct chanfix_score *scores, struct channel *chptr,
 					 */
 					mlog("debug: found clone as '%s'.", userhost);
 					c_count++;
-					if(c_count > dlink_list_length(&scores->clones))
+					if(c_count > rb_dlink_list_length(&scores->clones))
 					{
 						mlog("debug: creating new clone struct.");
-						clone = my_malloc(sizeof(struct chanfix_score_item));
+						clone = rb_malloc(sizeof(struct chanfix_score_item));
 						clone->msptr = msptr;
 						clone->score = scores->s_items[i].score;
 						clone->userhost_id = userhost_id;
-						dlink_add_alloc(clone, &scores->clones);
+						rb_dlinkAddAlloc(clone, &scores->clones);
 					}
 					else
 					{
-						DLINK_FOREACH(ptr2, scores->clones.head)
+						RB_DLINK_FOREACH(ptr2, scores->clones.head)
 						{
 							clone = ptr2->data;
 							if(clone->msptr == NULL)
@@ -491,10 +491,10 @@ static void
 collect_channel_scores(struct channel *chptr, time_t timestamp, unsigned int dayts)
 {
 	struct chmember *msptr;
-	dlink_node *ptr;
+	rb_dlink_node *ptr;
 	char userhost[USERHOSTLEN+1];
 
-	DLINK_FOREACH(ptr, chptr->users_opped.head)
+	RB_DLINK_FOREACH(ptr, chptr->users_opped.head)
 	{
 		msptr = ptr->data;
 
@@ -520,9 +520,9 @@ chanfix_opless_channel(struct chanfix_channel *cf_ch)
 	unsigned int time_since_start, i, count;
 	int min_score, min_chan_s, min_user_s;
 	uint8_t all_opped = 1;
-	dlink_node *ptr;
+	rb_dlink_node *ptr;
 
-	time_since_start = CURRENT_TIME - (cf_ch->time_fix_started);
+	time_since_start = rb_current_time() - (cf_ch->time_fix_started);
 
 	/* Fetch all the scores from the DB that aren't below the absolute
 	 * useful minimum.
@@ -605,9 +605,9 @@ chanfix_opless_channel(struct chanfix_channel *cf_ch)
 		}
 	}
 
-	if(dlink_list_length(&scores->clones) > 0)
+	if(rb_dlink_list_length(&scores->clones) > 0)
 	{
-		DLINK_FOREACH(ptr, scores->clones.head)
+		RB_DLINK_FOREACH(ptr, scores->clones.head)
 		{
 			clone = ptr->data;
 			if(clone->msptr && clone->score >= min_score)
@@ -625,8 +625,8 @@ chanfix_opless_channel(struct chanfix_channel *cf_ch)
 		/* Unfortunately no one has a high enough score right now. */
 		mlog("debug: '%s' currently doesn't have users with high enough scores.",
 				cf_ch->chptr->name);
-		/*my_free(all_scores->s_items);
-		my_free(all_scores);*/
+		/*rb_free(all_scores->s_items);
+		rb_free(all_scores);*/
 		return 0;
 	}
 
@@ -645,17 +645,17 @@ chanfix_opless_channel(struct chanfix_channel *cf_ch)
 			all_opped = 0;
 			break;
 		}
-		/*my_free(all_scores->s_items);
-		my_free(all_scores);*/
+		/*rb_free(all_scores->s_items);
+		rb_free(all_scores);*/
 	}
 
 	if(all_opped &&
-		(dlink_list_length(&cf_ch->chptr->users_opped) >= scores->length))
+		(rb_dlink_list_length(&cf_ch->chptr->users_opped) >= scores->length))
 	{
 		return 1;
 	}
-	/*my_free(all_scores->s_items);
-	my_free(all_scores);*/
+	/*rb_free(all_scores->s_items);
+	rb_free(all_scores);*/
 
 	return 0;
 }
@@ -668,31 +668,31 @@ static void
 process_chanfix_list(int fix_type)
 {
 	struct chanfix_channel *cf_ch;
-	dlink_node *ptr, *next_ptr;
+	rb_dlink_node *ptr, *next_ptr;
 	short fix_status;
 
-	DLINK_FOREACH_SAFE(ptr, next_ptr, chanfix_list.head)
+	RB_DLINK_FOREACH_SAFE(ptr, next_ptr, chanfix_list.head)
 	{
 		cf_ch = ptr->data;
 
 		if(cf_ch->flags & fix_type)
 		{
 			if((fix_type == CF_STATUS_AUTOFIX) &&
-				((CURRENT_TIME - cf_ch->time_prev_attempt) < CF_AUTOFIX_INTERVAL))
+				((rb_current_time() - cf_ch->time_prev_attempt) < CF_AUTOFIX_INTERVAL))
 			{
 				continue;
 			}
 			else if((fix_type == CF_STATUS_MANUALFIX) &&
-				((CURRENT_TIME - cf_ch->time_prev_attempt) < CF_MANUALFIX_INTERVAL))
+				((rb_current_time() - cf_ch->time_prev_attempt) < CF_MANUALFIX_INTERVAL))
 			{
 				continue;
 			}
 			else
 			{
-				cf_ch->time_prev_attempt = CURRENT_TIME;
+				cf_ch->time_prev_attempt = rb_current_time();
 			}
 
-			if(dlink_list_length(&cf_ch->chptr->users) < config_file.cf_min_clients)
+			if(rb_dlink_list_length(&cf_ch->chptr->users) < config_file.cf_min_clients)
 			{
 				del_chanfix(cf_ch->chptr);
 				mlog("debug: Channel '%s' has insufficient users for a fix (%d required).",
@@ -700,7 +700,7 @@ process_chanfix_list(int fix_type)
 				continue;
 			}
 
-			if(dlink_list_length(&cf_ch->chptr->users_opped) >= CF_MIN_FIX_OPS)
+			if(rb_dlink_list_length(&cf_ch->chptr->users_opped) >= CF_MIN_FIX_OPS)
 			{
 				del_chanfix(cf_ch->chptr);
 				mlog("debug: Channel '%s' has enough ops (fix complete).",
@@ -717,7 +717,7 @@ process_chanfix_list(int fix_type)
 				continue;
 			}
 
-			if(CURRENT_TIME - cf_ch->time_fix_started > CF_MAX_FIX_TIME)
+			if(rb_current_time() - cf_ch->time_fix_started > CF_MAX_FIX_TIME)
 			{
 				del_chanfix(cf_ch->chptr);
 				mlog("debug: Cannot fix channel '%s' (fix time expired).",
@@ -767,7 +767,7 @@ build_channel_scores(struct channel *chptr, int max_num)
 	struct chanfix_score *scores;
 	unsigned long channel_id, userhost_id;
 	struct chmember *msptr;
-	dlink_node *ptr;
+	rb_dlink_node *ptr;
 	struct rsdb_table data;
 	char userhost[USERHOSTLEN+1];
 	int day_score, hist_score;
@@ -777,16 +777,16 @@ build_channel_scores(struct channel *chptr, int max_num)
 	if((channel_id = get_channel_id(chptr->name)) == 0)
 		return NULL;
 
-	if(dlink_list_length(&chptr->users) < 1)
+	if(rb_dlink_list_length(&chptr->users) < 1)
 		return NULL;
 
-	scores = my_malloc(sizeof(struct chanfix_score));
-	scores->s_items = my_malloc(sizeof(struct chanfix_score_item) *
-					dlink_list_length(&chptr->users));
+	scores = rb_malloc(sizeof(struct chanfix_score));
+	scores->s_items = rb_malloc(sizeof(struct chanfix_score_item) *
+					rb_dlink_list_length(&chptr->users));
 
 	user_count = 0;
 
-	DLINK_FOREACH(ptr, chptr->users.head)
+	RB_DLINK_FOREACH(ptr, chptr->users.head)
 	{
 		msptr = ptr->data;
 
@@ -796,7 +796,7 @@ build_channel_scores(struct channel *chptr, int max_num)
 
 		userhost_id = get_userhost_id(userhost);
 
-		mlog("debug: user id %d matches with userhost '%s'.", userhost_id, userhost);
+		mlog("debug: user id %lu matches with userhost '%s'.", userhost_id, userhost);
 
 		if(!userhost_id)
 			continue;
@@ -863,8 +863,8 @@ static void
 e_chanfix_score_channels(void *unused)
 {
 	struct channel *chptr;
-	dlink_node *ptr;
-	time_t min_ts, max_ts, timestamp = CURRENT_TIME;
+	rb_dlink_node *ptr;
+	time_t min_ts, max_ts, timestamp = rb_current_time();
 	unsigned int dayts = DAYS_SINCE_EPOCH;
 	short i = 0;
 	struct rsdb_table ts_data;
@@ -877,13 +877,13 @@ e_chanfix_score_channels(void *unused)
 
 	mlog("debug: Examining channels for opped users.");
 
-	DLINK_FOREACH(ptr, channel_list.head)
+	RB_DLINK_FOREACH(ptr, channel_list.head)
 	{
 		chptr = ptr->data;
 
-		if(dlink_list_length(&chptr->users) >= config_file.cf_min_clients)
+		if(rb_dlink_list_length(&chptr->users) >= config_file.cf_min_clients)
 		{
-			if(dlink_list_length(&chptr->users_opped) != 0)
+			if(rb_dlink_list_length(&chptr->users_opped) != 0)
 			{
 				collect_channel_scores(chptr, timestamp, dayts);
 			}
@@ -943,7 +943,7 @@ e_chanfix_score_channels(void *unused)
 	}
 
 	mlog("debug: channel op scoring time: %s",
-			get_duration(CURRENT_TIME - timestamp));
+			get_duration(rb_current_time() - timestamp));
 }
 
 /* Collate the cf_score data into cf_score_history. */
@@ -993,7 +993,7 @@ e_chanfix_collate_history(void *unused)
 		i++;
 	}
 
-	eventAddOnce("e_chanfix_collate_history", e_chanfix_collate_history, NULL,
+	rb_event_addonce("e_chanfix_collate_history", e_chanfix_collate_history, NULL,
 				seconds_to_midnight()+5);
 
 	/* Drop old history data from the cf_score_history table. */
@@ -1011,11 +1011,11 @@ e_chanfix_autofix_channels(void *unused)
 	if(!is_network_split() && config_file.cf_enable_autofix)
 	{
 		mlog("debug: Processing autofix channels.");
-		start_time = CURRENT_TIME;
+		start_time = rb_current_time();
 
 		process_chanfix_list(CF_STATUS_AUTOFIX);
 		mlog("debug: autofix processing time: %s",
-				get_duration(CURRENT_TIME - start_time));
+				get_duration(rb_current_time() - start_time));
 	}
 }
 
@@ -1026,11 +1026,11 @@ e_chanfix_manualfix_channels(void *unused)
 	if(!is_network_split() && config_file.cf_enable_chanfix)
 	{
 		mlog("debug: Processing chanfix channels.");
-		start_time = CURRENT_TIME;
+		start_time = rb_current_time();
 
 		process_chanfix_list(CF_STATUS_MANUALFIX);
 		mlog("debug: chanfix processing time: %s",
-				get_duration(CURRENT_TIME - start_time));
+				get_duration(rb_current_time() - start_time));
 	}
 }
 
@@ -1052,7 +1052,7 @@ h_chanfix_channel_opless(void *chptr_v, void *unused)
 
 	if(!chptr->cfptr)
 	{
-		if(netsplit_warn_ts > CURRENT_TIME)
+		if(netsplit_warn_ts > rb_current_time())
 		{
 			mlog("debug: Temporarily ignoring opless channel %s "
 					"(recent squit detected).", chptr->name);
@@ -1073,7 +1073,7 @@ h_chanfix_server_squit_warn(void *target_p, void *unused)
 	/* Temporarily disable opless channel detection because it looks
 	 * like a netsplit is in progress.
 	 */
-	netsplit_warn_ts = CF_OPLESS_IGNORE_TIME + CURRENT_TIME;
+	netsplit_warn_ts = CF_OPLESS_IGNORE_TIME + rb_current_time();
 
 	return 0;
 }
@@ -1124,8 +1124,8 @@ o_chanfix_score(struct client *client_p, struct lconn *conn_p, const char *parv[
 		return 0;
 	}
 
-	my_free(all_scores->s_items);
-	my_free(all_scores);
+	rb_free(all_scores->s_items);
+	rb_free(all_scores);
 	all_scores = NULL;
 
 	/* Get new list containing all DB scores */
@@ -1182,8 +1182,8 @@ o_chanfix_score(struct client *client_p, struct lconn *conn_p, const char *parv[
 		service_snd(chanfix_p, client_p, conn_p, SVC_CF_NOMATCHES);
 	}
 
-	my_free(all_scores->s_items);
-	my_free(all_scores);
+	rb_free(all_scores->s_items);
+	rb_free(all_scores);
 
 	return 0;
 }
@@ -1235,7 +1235,7 @@ o_chanfix_uscore(struct client *client_p, struct lconn *conn_p, const char *parv
 		}
 	}
 	else
-		strlcpy(userhost, parv[1], sizeof(userhost));
+		rb_strlcpy(userhost, parv[1], sizeof(userhost));
 	
 	userhost_id = get_userhost_id(userhost);
 
@@ -1337,8 +1337,8 @@ o_chanfix_userlist(struct client *client_p, struct lconn *conn_p, const char *pa
 		service_snd(chanfix_p, client_p, conn_p, SVC_CF_NOMATCHES);
 	}
 
-	my_free(scores->s_items);
-	my_free(scores);
+	rb_free(scores->s_items);
+	rb_free(scores);
 
 	return 0;
 }
@@ -1401,8 +1401,8 @@ o_chanfix_userlist2(struct client *client_p, struct lconn *conn_p, const char *p
 		service_snd(chanfix_p, client_p, conn_p, SVC_CF_NOMATCHES);
 	}
 
-	my_free(scores->s_items);
-	my_free(scores);
+	rb_free(scores->s_items);
+	rb_free(scores);
 
 	return 0;
 }
@@ -1411,7 +1411,7 @@ static int
 o_chanfix_chanfix(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct channel *chptr;
-	dlink_node *ptr, *next_ptr;
+	rb_dlink_node *ptr, *next_ptr;
 	struct chmember *msptr;
 
 	if(!valid_chname(parv[0]))
@@ -1442,7 +1442,7 @@ o_chanfix_chanfix(struct client *client_p, struct lconn *conn_p, const char *par
 	}
 
 
-	if(dlink_list_length(&chptr->users) < config_file.cf_min_clients)
+	if(rb_dlink_list_length(&chptr->users) < config_file.cf_min_clients)
 	{
 		/* Not enough users in this channel */
 		service_snd(chanfix_p, client_p, conn_p,
@@ -1451,7 +1451,7 @@ o_chanfix_chanfix(struct client *client_p, struct lconn *conn_p, const char *par
 	}
 
 	/* Check if anyone is opped, if they are we don't do anything. */
-	if(dlink_list_length(&chptr->users_opped) > 0)
+	if(rb_dlink_list_length(&chptr->users_opped) > 0)
 	{
 		service_snd(chanfix_p, client_p, conn_p,
 				SVC_CF_HASOPPEDUSERS, parv[0]);
@@ -1486,7 +1486,7 @@ static int
 o_chanfix_revert(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct channel *chptr;
-	dlink_node *ptr, *next_ptr;
+	rb_dlink_node *ptr, *next_ptr;
 	struct chmember *msptr;
 
 	if(!valid_chname(parv[0]))
@@ -1501,7 +1501,7 @@ o_chanfix_revert(struct client *client_p, struct lconn *conn_p, const char *parv
 		return 0;
 	}
 
-	if(dlink_list_length(&chptr->users) < config_file.cf_min_clients)
+	if(rb_dlink_list_length(&chptr->users) < config_file.cf_min_clients)
 	{
 		/* Not enough users in this channel */
 		service_snd(chanfix_p, client_p, conn_p, SVC_CF_NOTENOUGHUSERS, parv[0]);
@@ -1813,8 +1813,8 @@ o_chanfix_check(struct client *client_p, struct lconn *conn_p, const char *parv[
 		return 0;
 	}
 
-	ops = dlink_list_length(&chptr->users_opped);
-	users = dlink_list_length(&chptr->users);
+	ops = rb_dlink_list_length(&chptr->users_opped);
+	users = rb_dlink_list_length(&chptr->users);
 	service_snd(chanfix_p, client_p, conn_p, SVC_CF_CHECK, parv[0], ops, users);
 
 	return 0;
@@ -1873,7 +1873,7 @@ o_chanfix_addnote(struct client *client_p, struct lconn *conn_p, const char *par
 	rsdb_exec(NULL,
 			"INSERT INTO cf_note (channel_id, timestamp, author, text) "
 			"VALUES('%lu', '%lu', '%Q', '%Q')",
-			channel_id, CURRENT_TIME, client_p->user->oper->name, msg);
+			channel_id, rb_current_time(), client_p->user->oper->name, msg);
 
 	service_err(chanfix_p, client_p, SVC_CF_NOTEADDED, parv[0]);
 
@@ -2054,7 +2054,7 @@ static time_t
 seconds_to_midnight(void)
 {
 	struct tm *t_info;
-	time_t nowtime = CURRENT_TIME;
+	time_t nowtime = rb_current_time();
 	t_info = gmtime(&nowtime);
 	return 86400 - (t_info->tm_hour * 3600 + t_info->tm_min * 60 + t_info->tm_sec);
 }
@@ -2110,7 +2110,7 @@ add_chanfix(struct channel *chptr, short chanfix, struct client *client_p)
 		return 0;
 	}
 
-	cf_ptr = my_calloc(1, sizeof(struct chanfix_channel));
+	cf_ptr = rb_malloc(sizeof(struct chanfix_channel));
 	cf_ptr->chptr = chptr;
 
 	if(chanfix)
@@ -2118,7 +2118,7 @@ add_chanfix(struct channel *chptr, short chanfix, struct client *client_p)
 	else
 		cf_ptr->flags |= CF_STATUS_AUTOFIX;
 
-	cf_ptr->time_fix_started = CURRENT_TIME;
+	cf_ptr->time_fix_started = rb_current_time();
 	cf_ptr->time_prev_attempt = 0;
 
 	cf_ptr->scores = get_all_cf_scores(chptr, 0,
@@ -2130,7 +2130,7 @@ add_chanfix(struct channel *chptr, short chanfix, struct client *client_p)
 					chptr->name);
 		if(client_p)
 			service_err(chanfix_p, client_p, SVC_CF_NODATAFOR, chanfix_p->name);
-		my_free(cf_ptr);
+		rb_free(cf_ptr);
 		cf_ptr = NULL;
 		return 0;
 	}
@@ -2138,8 +2138,8 @@ add_chanfix(struct channel *chptr, short chanfix, struct client *client_p)
 	cf_ptr->highest_score = cf_ptr->scores->s_items[0].score;
 	cf_ptr->endfix_uscore = CF_MIN_USER_SCORE_END * cf_ptr->highest_score;
 
-	/*my_free(scores->s_items);
-	my_free(scores);
+	/*rb_free(scores->s_items);
+	rb_free(scores);
 	scores = NULL;*/
 
 
@@ -2150,7 +2150,7 @@ add_chanfix(struct channel *chptr, short chanfix, struct client *client_p)
 	 *    the DB.
 	 */
 
-	dlink_add(cf_ptr, &cf_ptr->node, &chanfix_list);
+	rb_dlinkAdd(cf_ptr, &cf_ptr->node, &chanfix_list);
 	chptr->cfptr = cf_ptr;
 
 	if(!chanfix)
@@ -2164,36 +2164,36 @@ del_chanfix(struct channel *chptr)
 {
 	struct chanfix_channel *cfptr;
 	struct chanfix_score_item *clone;
-	dlink_node *ptr, *next_ptr;
+	rb_dlink_node *ptr, *next_ptr;
 
 	part_service(chanfix_p, chptr->name);
 
 	cfptr = (struct chanfix_channel *) chptr->cfptr;
 
-	dlink_delete(&cfptr->node, &chanfix_list);
+	rb_dlinkDelete(&cfptr->node, &chanfix_list);
 
 	/* If chanfix detected any clones, get rid of those too. */
-	if(dlink_list_length(&cfptr->scores->clones) > 0)
+	if(rb_dlink_list_length(&cfptr->scores->clones) > 0)
 	{
-		DLINK_FOREACH_SAFE(ptr, next_ptr, cfptr->scores->clones.head)
+		RB_DLINK_FOREACH_SAFE(ptr, next_ptr, cfptr->scores->clones.head)
 		{
 			clone = ptr->data;
-			mlog("debug: freeing clone memory with userhost_id: %d",
+			mlog("debug: freeing clone memory with userhost_id: %lu",
 					clone->userhost_id);
-			dlink_destroy(ptr, &cfptr->scores->clones);
-			my_free(clone);
+			rb_dlinkDestroy(ptr, &cfptr->scores->clones);
+			rb_free(clone);
 		}
 	}
 
 	if(cfptr->scores)
 	{
 		mlog("debug: deleting scores struct for: %s", chptr->name);
-		my_free(cfptr->scores->s_items);
-		my_free(cfptr->scores);
+		rb_free(cfptr->scores->s_items);
+		rb_free(cfptr->scores);
 		cfptr->scores = NULL;
 	}
 
-	my_free(cfptr);
+	rb_free(cfptr);
 	chptr->cfptr = NULL;
 }
 

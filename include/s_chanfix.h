@@ -4,7 +4,7 @@
 
 struct channel;
 
-#define DAYS_SINCE_EPOCH	CURRENT_TIME / 86400
+#define DAYS_SINCE_EPOCH	rb_current_time() / 86400
 
 #define CF_STATUS_CLEAREDMODES		0x0000001
 #define CF_STATUS_CLEAREDBANS		0x0000002
@@ -29,7 +29,7 @@ struct chanfix_channel
 	int endfix_uscore;	/* min possible user score at end of a chanfix */
 	uint32_t flags;
 
-	dlink_node node;	/* ptr to this node in chanfix_list */
+	rb_dlink_node node;	/* ptr to this node in chanfix_list */
 };
 
 /* Structures for storing one or more chanfix_score_items containing
@@ -41,7 +41,7 @@ struct chanfix_score
 	unsigned int length;
 	unsigned int matched;
 
-	dlink_list clones;	/* List of duplicate user@hosts found. */
+	rb_dlink_list clones;	/* List of duplicate user@hosts found. */
 };
 
 struct chanfix_score_item
@@ -101,6 +101,6 @@ struct chanfix_score_item
 
 /* Time to temporarily ignore opless channels for after a server
  * squits, meaning a netsplit might be in progress (seconds). */
-#define CF_OPLESS_IGNORE_TIME	180
+#define CF_OPLESS_IGNORE_TIME  180
 
 #endif

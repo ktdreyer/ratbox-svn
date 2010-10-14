@@ -7,7 +7,6 @@
 #include <sys/types.h>
 #include <netinet/in.h>
 
-#define WE_ARE_MEMORY_C
 #include "stdinc.h"
 #include "setup.h"
 #include "config.h"
@@ -96,7 +95,7 @@ static void	free_cur_list(conf_parm_t* list)
 	{
 		case CF_STRING:
 		case CF_QSTRING:
-			my_free(list->v.string);
+			rb_free(list->v.string);
 			break;
 		case CF_LIST:
 			free_cur_list(list->v.list);
@@ -117,7 +116,7 @@ static void	add_cur_list_cpt(conf_parm_t *new)
 
 	if (cur_list == NULL)
 	{
-		cur_list = my_malloc(sizeof(conf_parm_t));
+		cur_list = rb_malloc(sizeof(conf_parm_t));
 		cur_list->v.list = new;
 	}
 	else
@@ -136,7 +135,7 @@ static void	add_cur_list(int type, char *str, int number)
 {
 	conf_parm_t *new;
 
-	new = my_malloc(sizeof(conf_parm_t));
+	new = rb_malloc(sizeof(conf_parm_t));
 	new->next = NULL;
 	new->type = type;
 
@@ -149,7 +148,7 @@ static void	add_cur_list(int type, char *str, int number)
 		break;
 	case CF_STRING:
 	case CF_QSTRING:
-		new->v.string = my_strdup(str);
+		new->v.string = rb_strdup(str);
 		break;
 	}
 
@@ -249,19 +248,19 @@ single: oneitem
 
 oneitem: qstring
             {
-		$$ = my_malloc(sizeof(conf_parm_t));
+		$$ = rb_malloc(sizeof(conf_parm_t));
 		$$->type = CF_QSTRING;
-		$$->v.string = my_strdup($1);
+		$$->v.string = rb_strdup($1);
 	    }
           | timespec
             {
-		$$ = my_malloc(sizeof(conf_parm_t));
+		$$ = rb_malloc(sizeof(conf_parm_t));
 		$$->type = CF_TIME;
 		$$->v.number = $1;
 	    }
           | number
             {
-		$$ = my_malloc(sizeof(conf_parm_t));
+		$$ = rb_malloc(sizeof(conf_parm_t));
 		$$->type = CF_INT;
 		$$->v.number = $1;
 	    }
@@ -271,7 +270,7 @@ oneitem: qstring
 		   so pass it as that, if so */
 		int val = conf_get_yesno_value($1);
 
-		$$ = my_malloc(sizeof(conf_parm_t));
+		$$ = rb_malloc(sizeof(conf_parm_t));
 
 		if (val != -1)
 		{
@@ -281,7 +280,7 @@ oneitem: qstring
 		else
 		{
 			$$->type = CF_STRING;
-			$$->v.string = my_strdup($1);
+			$$->v.string = rb_strdup($1);
 		}
             }
           ;

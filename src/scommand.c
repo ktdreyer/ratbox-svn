@@ -45,7 +45,7 @@
 #include "event.h"
 #include "s_userserv.h"
 
-static dlink_list scommand_table[MAX_SCOMMAND_HASH];
+static rb_dlink_list scommand_table[MAX_SCOMMAND_HASH];
 
 static void c_admin(struct client *, const char *parv[], int parc);
 static void c_capab(struct client *, const char *parv[], int parc);
@@ -102,10 +102,10 @@ static void
 handle_scommand_unknown(const char *command, const char *parv[], int parc)
 {
 	struct scommand_handler *handler;
-	dlink_node *ptr;
+	rb_dlink_node *ptr;
 	unsigned int hashv = hash_command(command);
 	
-	DLINK_FOREACH(ptr, scommand_table[hashv].head)
+	RB_DLINK_FOREACH(ptr, scommand_table[hashv].head)
 	{
 		handler = ptr->data;
 		if(!strcasecmp(command, handler->cmd))
@@ -123,18 +123,18 @@ handle_scommand_client(struct client *client_p, const char *command,
 {
 	struct scommand_handler *handler;
 	scommand_func hook;
-	dlink_node *ptr;
-	dlink_node *hptr;
+	rb_dlink_node *ptr;
+	rb_dlink_node *hptr;
 	unsigned int hashv = hash_command(command);
 	
-	DLINK_FOREACH(ptr, scommand_table[hashv].head)
+	RB_DLINK_FOREACH(ptr, scommand_table[hashv].head)
 	{
 		handler = ptr->data;
 		if(!strcasecmp(command, handler->cmd))
 		{
 			handler->func(client_p, parv, parc);
 
-			DLINK_FOREACH(hptr, handler->hooks.head)
+			RB_DLINK_FOREACH(hptr, handler->hooks.head)
 			{
 				hook = hptr->data;
 				(*hook)(client_p, parv, parc);
@@ -174,22 +174,22 @@ add_scommand_handler(struct scommand_handler *chandler)
 		return;
 
 	hashv = hash_command(chandler->cmd);
-	dlink_add_alloc(chandler, &scommand_table[hashv]);
+	rb_dlinkAddAlloc(chandler, &scommand_table[hashv]);
 }
 
 void
 add_scommand_hook(scommand_func hook, const char *command)
 {
 	struct scommand_handler *handler;
-	dlink_node *ptr;
+	rb_dlink_node *ptr;
 	unsigned int hashv = hash_command(command);
 
-	DLINK_FOREACH(ptr, scommand_table[hashv].head)
+	RB_DLINK_FOREACH(ptr, scommand_table[hashv].head)
 	{
 		handler = ptr->data;
 		if(!strcasecmp(command, handler->cmd))
 		{
-			dlink_add_alloc(hook, &handler->hooks);
+			rb_dlinkAddAlloc(hook, &handler->hooks);
 			return;
 		}
 	}
@@ -201,15 +201,15 @@ void
 del_scommand_hook(scommand_func hook, const char *command)
 {
 	struct scommand_handler *handler;
-	dlink_node *ptr;
+	rb_dlink_node *ptr;
 	unsigned int hashv = hash_command(command);
 
-	DLINK_FOREACH(ptr, scommand_table[hashv].head)
+	RB_DLINK_FOREACH(ptr, scommand_table[hashv].head)
 	{
 		handler = ptr->data;
 		if(!strcasecmp(command, handler->cmd))
 		{
-			dlink_find_destroy(hook, &handler->hooks);
+			rb_dlinkFindDestroy(hook, &handler->hooks);
 			return;
 		}
 	}
@@ -265,7 +265,7 @@ c_capab(struct client *client_p, const char *parv[], int parc)
 	if(client_p != NULL)
 		return;
 
-	strlcpy(buf, parv[0], sizeof(buf));
+	rb_strlcpy(buf, parv[0], sizeof(buf));
 
 	if((p = strchr(buf, ' ')))
 		*p++ = '\0';
@@ -347,7 +347,7 @@ c_pass(struct client *client_p, const char *parv[], int parc)
 		mlog("Connection to server %s failed: "
 			"(Password mismatch)",
 			server_p->name);
-		(server_p->io_close)(server_p);
+		signoff_server(server_p);
 		return;
 	}
 
@@ -356,7 +356,7 @@ c_pass(struct client *client_p, const char *parv[], int parc)
 		mlog("Connection to server %s failed: "
 			"(Protocol mismatch)",
 			server_p->name);
-		(server_p->io_close)(server_p);
+		signoff_server(server_p);
 		return;
 	}
 
@@ -364,7 +364,7 @@ c_pass(struct client *client_p, const char *parv[], int parc)
 
 	if(parc > 3 && atoi(parv[2]) >= 6 && !EmptyString(parv[3]) && valid_sid(parv[3]))
 	{
-		server_p->sid = my_strdup(parv[3]);
+		server_p->sid = rb_strdup(parv[3]);
 	}
 	/* TS6 is required, therefore server_p->sid MUST be valid */
 	else
@@ -372,7 +372,7 @@ c_pass(struct client *client_p, const char *parv[], int parc)
 		mlog("Connection to server %s failed: "
 			"(TS6 required)",
 			server_p->name);
-		(server_p->io_close)(server_p);
+		signoff_server(server_p);
 		return;
 	}
 
@@ -416,7 +416,7 @@ static void
 c_trace(struct client *client_p, const char *parv[], int parc)
 {
         struct client *service_p;
-        dlink_node *ptr;
+        rb_dlink_node *ptr;
 
 	if(parc < 1 || EmptyString(parv[0]))
 		return;
@@ -424,7 +424,7 @@ c_trace(struct client *client_p, const char *parv[], int parc)
 	if(!IsUser(client_p))
 		return;
 
-        DLINK_FOREACH(ptr, service_list.head)
+        RB_DLINK_FOREACH(ptr, service_list.head)
         {
                 service_p = ptr->data;
 
@@ -534,9 +534,9 @@ c_stats(struct client *client_p, const char *parv[], int parc)
 		case 'n': case 'N':
 		{
 			struct conf_server *conf_p;
-			dlink_node *ptr;
+			rb_dlink_node *ptr;
 
-			DLINK_FOREACH(ptr, conf_server_list.head)
+			RB_DLINK_FOREACH(ptr, conf_server_list.head)
 			{
 				conf_p = ptr->data;
 
@@ -552,9 +552,9 @@ c_stats(struct client *client_p, const char *parv[], int parc)
 		case 'h': case 'H':
 		{
 			struct conf_server *conf_p;
-			dlink_node *ptr;
+			rb_dlink_node *ptr;
 
-			DLINK_FOREACH(ptr, conf_server_list.head)
+			RB_DLINK_FOREACH(ptr, conf_server_list.head)
 			{
 				conf_p = ptr->data;
 
@@ -567,7 +567,7 @@ c_stats(struct client *client_p, const char *parv[], int parc)
 		case 'u':
 			sendto_server(":%s 242 %s :Server Up %s",
 				      MYUID, UID(client_p),
-                                      get_duration(CURRENT_TIME -
+                                      get_duration(rb_current_time() -
                                                    first_time));
 			break;
 
@@ -575,16 +575,16 @@ c_stats(struct client *client_p, const char *parv[], int parc)
 			sendto_server(":%s 249 %s V :%s (AutoConn.!*@*) Idle: "
                                       "%ld SendQ: %ld Connected %s",
 				      MYUID, UID(client_p), server_p->name, 
-				      (CURRENT_TIME - server_p->last_time), 
+				      (rb_current_time() - server_p->last_time), 
                                       get_sendq(server_p),
-                                      get_duration(CURRENT_TIME -
+                                      get_duration(rb_current_time() -
                                                    server_p->first_time));
 			break;
 
 		case 'o': case 'O':
 		{
 			struct conf_oper *conf_p;
-			dlink_node *ptr;
+			rb_dlink_node *ptr;
 
 			if(!config_file.allow_stats_o)
 				break;
@@ -595,7 +595,7 @@ c_stats(struct client *client_p, const char *parv[], int parc)
 			if(!is_oper(client_p) && !client_p->user->oper)
 				break;
 
-			DLINK_FOREACH(ptr, conf_oper_list.head)
+			RB_DLINK_FOREACH(ptr, conf_oper_list.head)
 			{
 				conf_p = ptr->data;
 
@@ -625,7 +625,7 @@ c_stats(struct client *client_p, const char *parv[], int parc)
 			if(!client_p->user->oper || !(client_p->user->oper->flags & CONF_OPER_ADMIN))
 				break;
 
-			event_show(client_p, NULL);
+			// XXX fix me event_show(client_p, NULL);
 			break;
 
 

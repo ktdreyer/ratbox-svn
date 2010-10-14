@@ -17,23 +17,21 @@ AC_PROG_LEX
 AC_PROG_RANLIB
 AC_EXEEXT
 
-AC_PATH_PROG(RM, rm)
+AC_PATH_PROG(RB_RM, rm)
 AC_PATH_PROG(CP, cp)
 AC_PATH_PROG(MV, mv)
 AC_PATH_PROG(AR, ar)
 
-AC_CHECK_FUNC(crypt,, AC_CHECK_LIB(crypt, crypt,,))
-
 AC_HEADER_STDC
-AC_CHECK_HEADERS(sys/time.h stdlib.h stdarg.h string.h strings.h unistd.h errno.h getopt.h crypt.h dirent.h)
+AC_CHECK_HEADERS(sys/time.h stdlib.h stdarg.h string.h strings.h unistd.h errno.h getopt.h dirent.h)
+
 
 AC_TYPE_SIGNAL
 AC_FUNC_STRFTIME
 AC_CHECK_FUNC(socket,, AC_CHECK_LIB(socket, socket))
 AC_CHECK_FUNC(gethostbyname,, AC_CHECK_LIB(nsl, gethostbyname))
-AC_CHECK_FUNCS(select strlcpy strlcat gethostbyname mmap getaddrinfo)
+AC_CHECK_FUNCS(getaddrinfo)
 
-AC_SEARCH_LIBS(nanosleep, rt posix4, AC_DEFINE(HAVE_NANOSLEEP, 1, [Define if you have nanosleep]))
 
 AC_ARG_WITH(logdir,
 [ --with-logdir=DIR         logfiles in DIR [localstatedir/log] ],
@@ -457,6 +455,8 @@ AC_SUBST(S_GLOBAL)
 AC_SUBST(S_BANSERV)
 AC_SUBST(S_WATCHSERV)
 AC_SUBST(S_CHANFIX)
+
+AC_CONFIG_SUBDIRS(libratbox)
 
 AC_OUTPUT(			\
 	Makefile		\

@@ -31,15 +31,15 @@
  * $Id$
  */
 #include "stdinc.h"
-
+#include "tools.h"
 #include "rserv.h"
 #include "client.h"
 #include "channel.h"
 #include "io.h"
 #include "modebuild.h"
 
-static dlink_list kickbuild_list;
-static dlink_list kickbuildr_list;
+static rb_dlink_list kickbuild_list;
+static rb_dlink_list kickbuildr_list;
 
 static char modebuf[BUFSIZE];
 static char parabuf[BUFSIZE];
@@ -126,33 +126,33 @@ struct kickbuilder
 void
 kickbuild_start(void)
 {
-	dlink_node *ptr, *next_ptr;
+	rb_dlink_node *ptr, *next_ptr;
 
-	DLINK_FOREACH_SAFE(ptr, next_ptr, kickbuild_list.head)
+	RB_DLINK_FOREACH_SAFE(ptr, next_ptr, kickbuild_list.head)
 	{
-		dlink_destroy(ptr, &kickbuild_list);
+		rb_dlinkDestroy(ptr, &kickbuild_list);
 	}
 
-	DLINK_FOREACH_SAFE(ptr, next_ptr, kickbuildr_list.head)
+	RB_DLINK_FOREACH_SAFE(ptr, next_ptr, kickbuildr_list.head)
 	{
-		dlink_destroy(ptr, &kickbuildr_list);
+		rb_dlinkDestroy(ptr, &kickbuildr_list);
 	}
 }
 
 void
 kickbuild_add(const char *nick, const char *reason)
 {
-	dlink_add_tail_alloc((void *) nick, &kickbuild_list);
-	dlink_add_tail_alloc((void *) reason, &kickbuildr_list);
+	rb_dlinkAddTailAlloc((void *) nick, &kickbuild_list);
+	rb_dlinkAddTailAlloc((void *) reason, &kickbuildr_list);
 }
 
 void
 kickbuild_finish(struct client *service_p, struct channel *chptr)
 {
-	dlink_node *ptr, *next_ptr;
-	dlink_node *rptr;
+	rb_dlink_node *ptr, *next_ptr;
+	rb_dlink_node *rptr;
 
-	DLINK_FOREACH_SAFE(ptr, next_ptr, kickbuild_list.head)
+	RB_DLINK_FOREACH_SAFE(ptr, next_ptr, kickbuild_list.head)
 	{
 		rptr = kickbuildr_list.head;
 
@@ -160,7 +160,7 @@ kickbuild_finish(struct client *service_p, struct channel *chptr)
 				SVC_UID(service_p), chptr->name,
 				(const char *) ptr->data, 
 				(const char *) rptr->data);
-		dlink_destroy(rptr, &kickbuildr_list);
-		dlink_destroy(ptr, &kickbuild_list);
+		rb_dlinkDestroy(rptr, &kickbuildr_list);
+		rb_dlinkDestroy(ptr, &kickbuild_list);
 	}
 }

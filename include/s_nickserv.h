@@ -14,8 +14,8 @@ struct nick_reg
 	time_t reg_time;
 	time_t last_time;
 	int flags;
-	dlink_node node;
-	dlink_node usernode;
+	rb_dlink_node node;
+	rb_dlink_node usernode;
 };
 
 /* flags stored in db: 0xFFFF */

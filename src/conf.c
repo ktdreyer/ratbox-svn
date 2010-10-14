@@ -41,10 +41,10 @@
 #include "log.h"
 
 struct _config_file config_file;
-dlink_list conf_server_list;
-dlink_list conf_oper_list;
+rb_dlink_list conf_server_list;
+rb_dlink_list conf_oper_list;
 
-dlink_list client_oper_list;
+rb_dlink_list client_oper_list;
 
 time_t first_time;
 
@@ -139,8 +139,8 @@ set_default_conf(void)
 	config_file.bs_max_resv_matches = 200;
 	config_file.bs_max_regexp_matches = 200;
 
-	my_free(config_file.nwarn_string);
-	config_file.nwarn_string = my_strdup("This nickname is registered, you may "
+	rb_free(config_file.nwarn_string);
+	config_file.nwarn_string = rb_strdup("This nickname is registered, you may "
 				"be disconnected if a user regains this nickname.");
 
 	config_file.oper_score = 3;
@@ -176,7 +176,7 @@ validate_conf(void)
 		die(0, "No SID specified");
 
 	if(EmptyString(config_file.gecos))
-		config_file.gecos = my_strdup("ratbox services");
+		config_file.gecos = rb_strdup("ratbox services");
 
 	if(config_file.dcc_low_port <= 1024)
 		config_file.dcc_low_port = 1025;
@@ -222,17 +222,17 @@ static void
 clear_old_conf(void)
 {
 	struct conf_oper *oper_p;
-	dlink_node *ptr;
-	dlink_node *next_ptr;
+	rb_dlink_node *ptr;
+	rb_dlink_node *next_ptr;
 	int i;
 
 	for(i = 0; config_file.email_program[i]; i++)
 	{
-		my_free(config_file.email_program[i]);
+		rb_free(config_file.email_program[i]);
 		config_file.email_program[i] = NULL;
 	}
 
-	DLINK_FOREACH_SAFE(ptr, next_ptr, conf_oper_list.head)
+	RB_DLINK_FOREACH_SAFE(ptr, next_ptr, conf_oper_list.head)
 	{
 		oper_p = ptr->data;
 
@@ -240,10 +240,10 @@ clear_old_conf(void)
 		SetConfDead(oper_p);
 	}
 
-	DLINK_FOREACH_SAFE(ptr, next_ptr, conf_server_list.head)
+	RB_DLINK_FOREACH_SAFE(ptr, next_ptr, conf_server_list.head)
 	{
 		free_conf_server(ptr->data);
-		dlink_destroy(ptr, &conf_server_list);
+		rb_dlinkDestroy(ptr, &conf_server_list);
 	}	
 }
 
@@ -255,17 +255,17 @@ static void
 clear_old_conf_final(void)
 {
 	struct conf_oper *oper_p;
-	dlink_node *ptr;
-	dlink_node *next_ptr;
+	rb_dlink_node *ptr;
+	rb_dlink_node *next_ptr;
 
-	DLINK_FOREACH_SAFE(ptr, next_ptr, conf_oper_list.head)
+	RB_DLINK_FOREACH_SAFE(ptr, next_ptr, conf_oper_list.head)
 	{
 		oper_p = ptr->data;
 
 		if(ConfDead(oper_p) && oper_p->refcount == 0)
 		{
 			free_conf_oper(oper_p);
-			dlink_destroy(ptr, &conf_oper_list);
+			rb_dlinkDestroy(ptr, &conf_oper_list);
 		}
 	}
 }
@@ -274,7 +274,7 @@ void
 conf_parse(int cold)
 {
 	struct client *target_p;
-	dlink_node *ptr;
+	rb_dlink_node *ptr;
 
         if((conf_fbfile_in = fopen(CONF_PATH, "r")) == NULL)
 	{
@@ -299,7 +299,7 @@ conf_parse(int cold)
 	/* if we havent sent our burst, the following will just break */
 	if(!testing_conf && sent_burst)
 	{
-		DLINK_FOREACH(ptr, service_list.head)
+		RB_DLINK_FOREACH(ptr, service_list.head)
 		{
 			target_p = ptr->data;
 
@@ -346,21 +346,21 @@ rehash(int sig)
 void
 free_conf_oper(struct conf_oper *conf_p)
 {
-	my_free(conf_p->name);
-	my_free(conf_p->pass);
-	my_free(conf_p->username);
-	my_free(conf_p->host);
-	my_free(conf_p->server);
-	my_free(conf_p);
+	rb_free(conf_p->name);
+	rb_free(conf_p->pass);
+	rb_free(conf_p->username);
+	rb_free(conf_p->host);
+	rb_free(conf_p->server);
+	rb_free(conf_p);
 }
 
 void
 free_conf_server(struct conf_server *conf_p)
 {
-	my_free(conf_p->name);
-	my_free(conf_p->host);
-	my_free(conf_p->pass);
-	my_free(conf_p->vhost);
+	rb_free(conf_p->name);
+	rb_free(conf_p->host);
+	rb_free(conf_p->pass);
+	rb_free(conf_p->vhost);
 }
 
 void
@@ -377,9 +377,9 @@ struct conf_server *
 find_conf_server(const char *name)
 {
         struct conf_server *server;
-        dlink_node *ptr;
+        rb_dlink_node *ptr;
 
-        DLINK_FOREACH(ptr, conf_server_list.head)
+        RB_DLINK_FOREACH(ptr, conf_server_list.head)
         {
                 server = ptr->data;
 
@@ -395,9 +395,9 @@ find_conf_oper(const char *username, const char *host, const char *server,
 		const char *oper_username)
 {
         struct conf_oper *oper_p;
-        dlink_node *ptr;
+        rb_dlink_node *ptr;
 
-        DLINK_FOREACH(ptr, conf_oper_list.head)
+        RB_DLINK_FOREACH(ptr, conf_oper_list.head)
         {
                 oper_p = ptr->data;
 
@@ -426,19 +426,19 @@ store_client_oper(struct client *client_p)
 {
 	struct client_oper *coper_p;
 
-	coper_p = my_malloc(sizeof(struct client_oper));
-	strlcpy(coper_p->uid, client_p->uid, sizeof(coper_p->uid));
-	strlcpy(coper_p->username, client_p->user->username,
+	coper_p = rb_malloc(sizeof(struct client_oper));
+	rb_strlcpy(coper_p->uid, client_p->uid, sizeof(coper_p->uid));
+	rb_strlcpy(coper_p->username, client_p->user->username,
 		sizeof(coper_p->username));
-	strlcpy(coper_p->host, client_p->user->host, sizeof(coper_p->host));
-	strlcpy(coper_p->sid, client_p->uplink->uid, sizeof(coper_p->sid));
+	rb_strlcpy(coper_p->host, client_p->user->host, sizeof(coper_p->host));
+	rb_strlcpy(coper_p->sid, client_p->uplink->uid, sizeof(coper_p->sid));
 
 	coper_p->oper = client_p->user->oper;
 	coper_p->oper->refcount++;
 
-	coper_p->timestamp = CURRENT_TIME;
+	coper_p->timestamp = rb_current_time();
 
-	dlink_add(coper_p, &coper_p->ptr, &client_oper_list);
+	rb_dlinkAdd(coper_p, &coper_p->ptr, &client_oper_list);
 }
 
 /* free_client_oper()
@@ -452,8 +452,8 @@ void
 free_client_oper(struct client_oper *coper_p)
 {
 	deallocate_conf_oper(coper_p->oper);
-	dlink_delete(&coper_p->ptr, &client_oper_list);
-	my_free(coper_p);
+	rb_dlinkDelete(&coper_p->ptr, &client_oper_list);
+	rb_free(coper_p);
 }
 
 /* clear_client_oper_sid()
@@ -467,9 +467,9 @@ void
 clear_client_oper_sid(struct client *client_p)
 {
 	struct client_oper *coper_p;
-	dlink_node *ptr, *next_ptr;
+	rb_dlink_node *ptr, *next_ptr;
 
-	DLINK_FOREACH_SAFE(ptr, next_ptr, client_oper_list.head)
+	RB_DLINK_FOREACH_SAFE(ptr, next_ptr, client_oper_list.head)
 	{
 		coper_p = ptr->data;
 
@@ -489,13 +489,13 @@ void
 expire_client_oper(void *unused)
 {
 	struct client_oper *coper_p;
-	dlink_node *ptr, *next_ptr;
+	rb_dlink_node *ptr, *next_ptr;
 
-	DLINK_FOREACH_SAFE(ptr, next_ptr, client_oper_list.head)
+	RB_DLINK_FOREACH_SAFE(ptr, next_ptr, client_oper_list.head)
 	{
 		coper_p = ptr->data;
 
-		if((coper_p->timestamp + config_file.split_oper_time) < CURRENT_TIME)
+		if((coper_p->timestamp + config_file.split_oper_time) < rb_current_time())
 			free_client_oper(coper_p);
 	}
 }
@@ -630,18 +630,18 @@ conf_service_flags(uint64_t flags)
 			if(serviceid != service_flags[i].serviceid)
 			{
 				if(serviceid)
-					strlcat(buf, " ", sizeof(buf));
+					rb_strlcat(buf, " ", sizeof(buf));
 
-				strlcat(buf, service_flags[i].sname, sizeof(buf));
-				strlcat(buf, ":", sizeof(buf));
+				rb_strlcat(buf, service_flags[i].sname, sizeof(buf));
+				rb_strlcat(buf, ":", sizeof(buf));
 
 				serviceid = service_flags[i].serviceid;
 			}
 #ifdef SERVICE_FLAGS_FULL
 			else
-				strlcat(buf, ",", sizeof(buf));
+				rb_strlcat(buf, ",", sizeof(buf));
 #endif
-			strlcat(buf, service_flags[i].name, sizeof(buf));
+			rb_strlcat(buf, service_flags[i].name, sizeof(buf));
 		}
 	}
 

@@ -53,15 +53,16 @@
 #include "email.h"
 #include "dbhook.h"
 #include "watch.h"
+#include "tools.h"
 
 #define MAX_HASH_WALK	1024
 
 static void init_s_userserv(void);
 
 static struct client *userserv_p;
-static BlockHeap *user_reg_heap;
+static rb_bh *user_reg_heap;
 
-dlink_list user_reg_table[MAX_NAME_HASH];
+rb_dlink_list user_reg_table[MAX_NAME_HASH];
 
 static int o_user_userregister(struct client *, struct lconn *, const char **, int);
 static int o_user_userdrop(struct client *, struct lconn *, const char **, int);
@@ -144,7 +145,7 @@ preinit_s_userserv(void)
 static void
 init_s_userserv(void)
 {
-	user_reg_heap = BlockHeapCreate("User Reg", sizeof(struct user_reg), HEAP_USER_REG);
+	user_reg_heap = rb_bh_create(sizeof(struct user_reg), HEAP_USER_REG, "User Reg");
 
 	rsdb_exec(user_db_callback, 
 			"SELECT username, password, email, suspender, suspend_reason, "
@@ -157,24 +158,24 @@ init_s_userserv(void)
 	hook_add(h_user_burst_login, HOOK_USERSERV_LOGIN_BURST);
 	hook_add(h_user_dbsync, HOOK_DBSYNC);
 
-	eventAdd("userserv_expire", e_user_expire, NULL, 900);
-	eventAdd("userserv_expire_reset", e_user_expire_reset, NULL, 3600);
+	rb_event_add("userserv_expire", e_user_expire, NULL, 900);
+	rb_event_add("userserv_expire_reset", e_user_expire_reset, NULL, 3600);
 }
 
 static void
 add_user_reg(struct user_reg *reg_p)
 {
 	unsigned int hashv = hash_name(reg_p->name);
-	dlink_add(reg_p, &reg_p->node, &user_reg_table[hashv]);
+	rb_dlinkAdd(reg_p, &reg_p->node, &user_reg_table[hashv]);
 }
 
 static void
 free_user_reg(struct user_reg *ureg_p)
 {
-	dlink_node *ptr, *next_ptr;
+	rb_dlink_node *ptr, *next_ptr;
 	unsigned int hashv = hash_name(ureg_p->name);
 
-	dlink_delete(&ureg_p->node, &user_reg_table[hashv]);
+	rb_dlinkDelete(&ureg_p->node, &user_reg_table[hashv]);
 
 	rsdb_exec(NULL, "DELETE FROM users_resetpass WHERE username = '%Q'",
 			ureg_p->name);
@@ -184,14 +185,14 @@ free_user_reg(struct user_reg *ureg_p)
 			ureg_p->name);
 
 #ifdef ENABLE_CHANSERV
-	DLINK_FOREACH_SAFE(ptr, next_ptr, ureg_p->channels.head)
+	RB_DLINK_FOREACH_SAFE(ptr, next_ptr, ureg_p->channels.head)
 	{
 		free_member_reg(ptr->data, 1);
 	}
 #endif
 
 #ifdef ENABLE_NICKSERV
-	DLINK_FOREACH_SAFE(ptr, next_ptr, ureg_p->nicks.head)
+	RB_DLINK_FOREACH_SAFE(ptr, next_ptr, ureg_p->nicks.head)
 	{
 		free_nick_reg(ptr->data);
 	}
@@ -200,11 +201,11 @@ free_user_reg(struct user_reg *ureg_p)
 	rsdb_exec(NULL, "DELETE FROM users WHERE username = '%Q'",
 			ureg_p->name);
 
-	my_free(ureg_p->password);
-	my_free(ureg_p->email);
-	my_free(ureg_p->suspender);
-	my_free(ureg_p->suspend_reason);
-	BlockHeapFree(user_reg_heap, ureg_p);
+	rb_free(ureg_p->password);
+	rb_free(ureg_p->email);
+	rb_free(ureg_p->suspender);
+	rb_free(ureg_p->suspend_reason);
+	rb_bh_free(user_reg_heap, ureg_p);
 }
 
 static int
@@ -225,18 +226,18 @@ user_db_callback(int argc, const char **argv)
 		return 0;
 	}
 
-	reg_p = BlockHeapAlloc(user_reg_heap);
-	strlcpy(reg_p->name, argv[0], sizeof(reg_p->name));
-	reg_p->password = my_strdup(argv[1]);
+	reg_p = rb_bh_alloc(user_reg_heap);
+	rb_strlcpy(reg_p->name, argv[0], sizeof(reg_p->name));
+	reg_p->password = rb_strdup(argv[1]);
 
 	if(!EmptyString(argv[2]))
-		reg_p->email = my_strdup(argv[2]);
+		reg_p->email = rb_strdup(argv[2]);
 
 	if(!EmptyString(argv[3]))
-		reg_p->suspender = my_strdup(argv[3]);
+		reg_p->suspender = rb_strdup(argv[3]);
 
 	if(!EmptyString(argv[4]))
-		reg_p->suspend_reason = my_strdup(argv[4]);
+		reg_p->suspend_reason = rb_strdup(argv[4]);
 
 	if(!EmptyString(argv[5]))
 		reg_p->suspend_time = atol(argv[5]);
@@ -261,9 +262,9 @@ find_user_reg(struct client *client_p, const char *username)
 {
 	struct user_reg *reg_p;
 	unsigned int hashv = hash_name(username);
-	dlink_node *ptr;
+	rb_dlink_node *ptr;
 
-	DLINK_FOREACH(ptr, user_reg_table[hashv].head)
+	RB_DLINK_FOREACH(ptr, user_reg_table[hashv].head)
 	{
 		reg_p = ptr->data;
 
@@ -321,19 +322,19 @@ static void
 logout_user_reg(struct user_reg *ureg_p)
 {
 	struct client *target_p;
-	dlink_node *ptr, *next_ptr;
+	rb_dlink_node *ptr, *next_ptr;
 
-	if(!dlink_list_length(&ureg_p->users))
+	if(!rb_dlink_list_length(&ureg_p->users))
 		return;
 
-	DLINK_FOREACH_SAFE(ptr, next_ptr, ureg_p->users.head)
+	RB_DLINK_FOREACH_SAFE(ptr, next_ptr, ureg_p->users.head)
 	{
 		target_p = ptr->data;
 
 		sendto_server(":%s ENCAP * SU %s", MYUID, UID(target_p));
 
 		target_p->user->user_reg = NULL;
-		dlink_destroy(ptr, &ureg_p->users);
+		rb_dlinkDestroy(ptr, &ureg_p->users);
 	}
 }
 
@@ -370,7 +371,7 @@ dbh_user_register(struct rsdb_hook *dbh, const char *c_data)
 
 	data = LOCAL_COPY(c_data);
 
-	argc = string_to_array(data, argv);
+	argc = rb_string_to_array(data, argv, MAXPARA);
 
 	if(EmptyString(argv[0]) || EmptyString(argv[1]))
 		return 1;
@@ -378,14 +379,14 @@ dbh_user_register(struct rsdb_hook *dbh, const char *c_data)
 	if((ureg_p = find_user_reg(NULL, argv[0])))
 		return 1;
 
-	ureg_p = BlockHeapAlloc(user_reg_heap);
-	strlcpy(ureg_p->name, argv[0], sizeof(ureg_p->name));
-	ureg_p->password = my_strdup(argv[1]);
+	ureg_p = rb_bh_alloc(user_reg_heap);
+	rb_strlcpy(ureg_p->name, argv[0], sizeof(ureg_p->name));
+	ureg_p->password = rb_strdup(argv[1]);
 
 	if(!EmptyString(argv[2]))
-		ureg_p->email = my_strdup(argv[2]);
+		ureg_p->email = rb_strdup(argv[2]);
 
-	ureg_p->reg_time = ureg_p->last_time = CURRENT_TIME;
+	ureg_p->reg_time = ureg_p->last_time = rb_current_time();
 
 	add_user_reg(ureg_p);
 
@@ -406,7 +407,7 @@ dbh_user_setpass(struct rsdb_hook *dbh, const char *c_data)
 	int argc;
 
 	data = LOCAL_COPY(c_data);
-	argc = string_to_array(data, argv);
+	argc = rb_string_to_array(data, argv, MAXPARA);
 
 	if(EmptyString(argv[0]) || EmptyString(argv[1]))
 		return 1;
@@ -414,8 +415,8 @@ dbh_user_setpass(struct rsdb_hook *dbh, const char *c_data)
 	if((ureg_p = find_user_reg(NULL, argv[0])) == NULL)
 		return 1;
 
-	my_free(ureg_p->password);
-	ureg_p->password = my_strdup(argv[1]);
+	rb_free(ureg_p->password);
+	ureg_p->password = rb_strdup(argv[1]);
 
 	rsdb_hook_schedule(NULL, NULL, "UPDATE users SET password='%Q' WHERE username='%Q'",
 			ureg_p->password, ureg_p->name);
@@ -432,7 +433,7 @@ dbh_user_setemail(struct rsdb_hook *dbh, const char *c_data)
 	int argc;
 
 	data = LOCAL_COPY(c_data);
-	argc = string_to_array(data, argv);
+	argc = rb_string_to_array(data, argv, MAXPARA);
 
 	if(EmptyString(argv[0]) || EmptyString(argv[1]))
 		return 1;
@@ -440,8 +441,8 @@ dbh_user_setemail(struct rsdb_hook *dbh, const char *c_data)
 	if((ureg_p = find_user_reg(NULL, argv[0])) == NULL)
 		return 1;
 
-	my_free(ureg_p->email);
-	ureg_p->email = my_strdup(argv[1]);
+	rb_free(ureg_p->email);
+	ureg_p->email = rb_strdup(argv[1]);
 
 	rsdb_hook_schedule(NULL, NULL, "UPDATE users SET email='%Q' WHERE username='%Q'",
 			ureg_p->email, ureg_p->name);
@@ -469,7 +470,7 @@ h_user_burst_login(void *v_client_p, void *v_username)
 
 	/* already logged in.. hmm, this shouldnt really happen */
 	if(client_p->user->user_reg)
-		dlink_find_destroy(client_p, &client_p->user->user_reg->users);
+		rb_dlinkFindDestroy(client_p, &client_p->user->user_reg->users);
 
 	/* username is suspended, ignore it and log them out */
 	if(ureg_p->flags & US_FLAGS_SUSPENDED)
@@ -479,9 +480,9 @@ h_user_burst_login(void *v_client_p, void *v_username)
 	}
 
 	client_p->user->user_reg = ureg_p;
-	dlink_add_alloc(client_p, &ureg_p->users);
+	rb_dlinkAddAlloc(client_p, &ureg_p->users);
 
-	ureg_p->last_time = CURRENT_TIME;
+	ureg_p->last_time = rb_current_time();
 	ureg_p->flags |= US_FLAGS_NEEDUPDATE;
 
 	return 0;
@@ -491,7 +492,7 @@ static int
 h_user_dbsync(void *unused, void *unusedd)
 {
 	struct user_reg *ureg_p;
-	dlink_node *ptr;
+	rb_dlink_node *ptr;
 	int i;
 
 	rsdb_transaction(RSDB_TRANS_START);
@@ -501,9 +502,9 @@ h_user_dbsync(void *unused, void *unusedd)
 		ureg_p = ptr->data;
 
 		/* if they're logged in, reset the expiry */
-		if(dlink_list_length(&ureg_p->users))
+		if(rb_dlink_list_length(&ureg_p->users))
 		{
-			ureg_p->last_time = CURRENT_TIME;
+			ureg_p->last_time = rb_current_time();
 			ureg_p->flags |= US_FLAGS_NEEDUPDATE;
 		}
 
@@ -546,7 +547,7 @@ e_user_expire(void *unused)
 {
 	static int hash_pos = 0;
 	struct user_reg *ureg_p;
-	dlink_node *ptr, *next_ptr;
+	rb_dlink_node *ptr, *next_ptr;
 	int i;
 
 	/* Start a transaction, we're going to make a lot of changes */
@@ -558,16 +559,16 @@ e_user_expire(void *unused)
 
 		/* nuke unverified accounts first */
 		if(ureg_p->flags & US_FLAGS_NEVERLOGGEDIN &&
-		   (ureg_p->reg_time + config_file.uexpire_unverified_time) <= CURRENT_TIME)
+		   (ureg_p->reg_time + config_file.uexpire_unverified_time) <= rb_current_time())
 		{
 			free_user_reg(ureg_p);
 			continue;
 		}
 				
 		/* if they're logged in, reset the expiry */
-		if(dlink_list_length(&ureg_p->users))
+		if(rb_dlink_list_length(&ureg_p->users))
 		{
-			ureg_p->last_time = CURRENT_TIME;
+			ureg_p->last_time = rb_current_time();
 			ureg_p->flags |= US_FLAGS_NEEDUPDATE;
 		}
 
@@ -586,10 +587,10 @@ e_user_expire(void *unused)
 			if(!config_file.uexpire_suspended_time)
 				continue;
 
-			if((ureg_p->last_time + config_file.uexpire_suspended_time) > CURRENT_TIME)
+			if((ureg_p->last_time + config_file.uexpire_suspended_time) > rb_current_time())
 				continue;
 		}
-		else if((ureg_p->last_time + config_file.uexpire_time + expire_bonus(CURRENT_TIME - ureg_p->reg_time)) > CURRENT_TIME)
+		else if((ureg_p->last_time + config_file.uexpire_time + expire_bonus(rb_current_time() - ureg_p->reg_time)) > rb_current_time())
 			continue;
 
 		free_user_reg(ureg_p);
@@ -603,21 +604,21 @@ static void
 e_user_expire_reset(void *unused)
 {
 	rsdb_exec(NULL, "DELETE FROM users_resetpass WHERE time <= '%lu'",
-			CURRENT_TIME - config_file.uresetpass_duration);
+			rb_current_time() - config_file.uresetpass_duration);
 	rsdb_exec(NULL, "DELETE FROM users_resetemail WHERE time <= '%lu'",
-			CURRENT_TIME - config_file.uresetemail_duration);
+			rb_current_time() - config_file.uresetemail_duration);
 }
 
 static void
 expire_user_suspend(struct user_reg *ureg_p)
 {
 	ureg_p->flags &= ~US_FLAGS_SUSPENDED;
-	my_free(ureg_p->suspender);
+	rb_free(ureg_p->suspender);
 	ureg_p->suspender = NULL;
-	my_free(ureg_p->suspend_reason);
+	rb_free(ureg_p->suspend_reason);
 	ureg_p->suspend_reason = NULL;
 	ureg_p->suspend_time = 0;
-	ureg_p->last_time = CURRENT_TIME;
+	ureg_p->last_time = rb_current_time();
 
 	rsdb_exec(NULL, "UPDATE users SET flags='%d',suspender=NULL,suspend_reason=NULL,last_time='%lu',suspend_time='0' WHERE username='%Q'",
 			ureg_p->flags, ureg_p->last_time, ureg_p->name);
@@ -652,21 +653,21 @@ o_user_userregister(struct client *client_p, struct lconn *conn_p, const char *p
 		"USERREGISTER %s %s",
 		parv[0], EmptyString(parv[2]) ? "-" : parv[2]);
 
-	reg_p = BlockHeapAlloc(user_reg_heap);
-	strlcpy(reg_p->name, parv[0], sizeof(reg_p->name));
+	reg_p = rb_bh_alloc(user_reg_heap);
+	rb_strlcpy(reg_p->name, parv[0], sizeof(reg_p->name));
 
 	password = get_crypt(parv[1], NULL);
-	reg_p->password = my_strdup(password);
+	reg_p->password = rb_strdup(password);
 
 	if(!EmptyString(parv[2]))
 	{
 		if(valid_email(parv[2]))
-			reg_p->email = my_strdup(parv[2]);
+			reg_p->email = rb_strdup(parv[2]);
 		else
 			service_snd(userserv_p, client_p, conn_p, SVC_EMAIL_INVALIDIGNORED, parv[2]);
 	}
 
-	reg_p->reg_time = reg_p->last_time = CURRENT_TIME;
+	reg_p->reg_time = reg_p->last_time = rb_current_time();
 
 	add_user_reg(reg_p);
 
@@ -751,15 +752,15 @@ o_user_usersuspend(struct client *client_p, struct lconn *conn_p, const char *pa
 	logout_user_reg(reg_p);
 
 	reg_p->flags |= US_FLAGS_SUSPENDED;
-	reg_p->last_time = CURRENT_TIME;
+	reg_p->last_time = rb_current_time();
 
 	if(suspend_time)
-		reg_p->suspend_time = CURRENT_TIME + suspend_time;
+		reg_p->suspend_time = rb_current_time() + suspend_time;
 	else
 		reg_p->suspend_time = 0;
 
-	reg_p->suspender = my_strdup(OPER_NAME(client_p, conn_p));
-	reg_p->suspend_reason = my_strndup(reason, SUSPENDREASONLEN);
+	reg_p->suspender = rb_strdup(OPER_NAME(client_p, conn_p));
+	reg_p->suspend_reason = rb_strndup(reason, SUSPENDREASONLEN);
 
 	rsdb_exec(NULL, "UPDATE users SET flags='%d', suspender='%Q', "
 			"suspend_reason='%Q',last_time='%lu', suspend_time='%lu' WHERE username='%Q'",
@@ -793,12 +794,12 @@ o_user_userunsuspend(struct client *client_p, struct lconn *conn_p, const char *
 		"USERUNSUSPEND %s", reg_p->name);
 
 	reg_p->flags &= ~US_FLAGS_SUSPENDED;
-	my_free(reg_p->suspender);
+	rb_free(reg_p->suspender);
 	reg_p->suspender = NULL;
-	my_free(reg_p->suspend_reason);
+	rb_free(reg_p->suspend_reason);
 	reg_p->suspend_reason = NULL;
 	reg_p->suspend_time = 0;
-	reg_p->last_time = CURRENT_TIME;
+	reg_p->last_time = rb_current_time();
 
 	rsdb_exec(NULL, "UPDATE users SET flags='%d',suspender=NULL,suspend_reason=NULL,last_time='%lu',suspend_time='0' WHERE username='%Q'",
 			reg_p->flags, reg_p->last_time, reg_p->name);
@@ -817,7 +818,7 @@ o_user_userlist(struct client *client_p, struct lconn *conn_p, const char *parv[
 	static char buf[BUFSIZE];
 	struct user_reg *ureg_p;
 	const char *mask = def_mask;
-	dlink_node *ptr;
+	rb_dlink_node *ptr;
 	unsigned int limit = 100;
 	int para = 0;
 	int longlist = 0, suspended = 0;
@@ -900,10 +901,10 @@ o_user_userlist(struct client *client_p, struct lconn *conn_p, const char *parv[
 					ureg_p->suspend_reason ? ureg_p->suspend_reason : NULL);
 				p = timebuf;
 			}
-			else if(!dlink_list_length(&ureg_p->users))
+			else if(!rb_dlink_list_length(&ureg_p->users))
 			{
 				snprintf(timebuf, sizeof(timebuf), "Last %s",
-					get_short_duration(CURRENT_TIME - ureg_p->last_time));
+					get_short_duration(rb_current_time() - ureg_p->last_time));
 				p = timebuf;
 			}
 
@@ -911,7 +912,7 @@ o_user_userlist(struct client *client_p, struct lconn *conn_p, const char *parv[
 				"  %s - Email %s For %s %s",
 				ureg_p->name,
 				EmptyString(ureg_p->email) ? "<>" : ureg_p->email,
-				get_short_duration(CURRENT_TIME - ureg_p->reg_time),
+				get_short_duration(rb_current_time() - ureg_p->reg_time),
 				p);
 		}
 
@@ -960,7 +961,7 @@ o_user_userinfo(struct client *client_p, struct lconn *conn_p, const char *parv[
 
 	service_snd(userserv_p, client_p, conn_p, SVC_INFO_REGDURATIONUSER,
 			ureg_p->name,
-			get_duration((time_t) (CURRENT_TIME - ureg_p->reg_time)));
+			get_duration((time_t) (rb_current_time() - ureg_p->reg_time)));
 
 	if(USER_SUSPEND_EXPIRED(ureg_p))
 		expire_user_suspend(ureg_p);
@@ -970,7 +971,7 @@ o_user_userinfo(struct client *client_p, struct lconn *conn_p, const char *parv[
 		time_t suspend_time = ureg_p->suspend_time;
 
 		if(suspend_time)
-			suspend_time -= CURRENT_TIME;
+			suspend_time -= rb_current_time();
 
 		service_snd(userserv_p, client_p, conn_p, SVC_INFO_SUSPENDED,
 				ureg_p->name, ureg_p->suspender,
@@ -1004,8 +1005,8 @@ o_user_usersetpass(struct client *client_p, struct lconn *conn_p, const char *pa
 		"USERSETPASS %s", ureg_p->name);
 
 	password = get_crypt(parv[1], NULL);
-	my_free(ureg_p->password);
-	ureg_p->password = my_strdup(password);
+	rb_free(ureg_p->password);
+	ureg_p->password = rb_strdup(password);
 
 	rsdb_exec(NULL, "UPDATE users SET password='%Q' WHERE username='%Q'", 
 			password, ureg_p->name);
@@ -1035,8 +1036,8 @@ o_user_usersetemail(struct client *client_p, struct lconn *conn_p, const char *p
 	zlog(userserv_p, 1, WATCH_USADMIN, 1, client_p, conn_p,
 		"USERSETEMAIL %s", ureg_p->name);
 
-	my_free(ureg_p->email);
-	ureg_p->email = my_strdup(parv[1]);
+	rb_free(ureg_p->email);
+	ureg_p->email = rb_strdup(parv[1]);
 
 	rsdb_exec(NULL, "UPDATE users SET email='%Q' WHERE username='%Q'", 
 			parv[1], ureg_p->name);
@@ -1172,9 +1173,9 @@ s_user_register(struct client *client_p, struct lconn *conn_p, const char *parv[
 		static time_t last_time = 0;
 		static int last_count = 0;
 
-		if((last_time + config_file.uregister_time) < CURRENT_TIME)
+		if((last_time + config_file.uregister_time) < rb_current_time())
 		{
-			last_time = CURRENT_TIME;
+			last_time = rb_current_time();
 			last_count = 1;
 		}
 		else if(last_count >= config_file.uregister_amount)
@@ -1194,7 +1195,7 @@ s_user_register(struct client *client_p, struct lconn *conn_p, const char *parv[
 
 		/* this host has gone over the limits.. */
 		if(hent->uregister >= config_file.uhregister_amount &&
-		   hent->uregister_expire > CURRENT_TIME)
+		   hent->uregister_expire > rb_current_time())
 		{
 			service_err(userserv_p, client_p, SVC_RATELIMITEDHOST,
 					userserv_p->name, "REGISTER");
@@ -1202,9 +1203,9 @@ s_user_register(struct client *client_p, struct lconn *conn_p, const char *parv[
 		}
 
 		/* its expired.. reset limits */
-		if(hent->uregister_expire <= CURRENT_TIME)
+		if(hent->uregister_expire <= rb_current_time())
 		{
-			hent->uregister_expire = CURRENT_TIME + config_file.uhregister_time;
+			hent->uregister_expire = rb_current_time() + config_file.uhregister_time;
 			hent->uregister = 0;
 		}
 
@@ -1254,14 +1255,14 @@ s_user_register(struct client *client_p, struct lconn *conn_p, const char *parv[
 
 	password = get_crypt(parv[1], NULL);
 
-	reg_p = BlockHeapAlloc(user_reg_heap);
+	reg_p = rb_bh_alloc(user_reg_heap);
 	strcpy(reg_p->name, parv[0]);
-	reg_p->password = my_strdup(password);
+	reg_p->password = rb_strdup(password);
 
 	if(!EmptyString(parv[2]))
-		reg_p->email = my_strdup(parv[2]);
+		reg_p->email = rb_strdup(parv[2]);
 
-	reg_p->reg_time = reg_p->last_time = CURRENT_TIME;
+	reg_p->reg_time = reg_p->last_time = rb_current_time();
 
 	if(config_file.uregister_verify)
 		reg_p->flags |= US_FLAGS_NEVERLOGGEDIN;
@@ -1278,7 +1279,7 @@ s_user_register(struct client *client_p, struct lconn *conn_p, const char *parv[
 
 	if(!config_file.uregister_verify)
 	{
-		dlink_add_alloc(client_p, &reg_p->users);
+		rb_dlinkAddAlloc(client_p, &reg_p->users);
 		client_p->user->user_reg = reg_p;
 
 		sendto_server(":%s ENCAP * SU %s %s", 
@@ -1354,7 +1355,7 @@ s_user_login(struct client *client_p, struct lconn *conn_p, const char *parv[], 
 {
 	struct user_reg *reg_p;
 	const char *password;
-	dlink_node *ptr;
+	rb_dlink_node *ptr;
 
 	if(client_p->user->user_reg != NULL)
 	{
@@ -1384,7 +1385,7 @@ s_user_login(struct client *client_p, struct lconn *conn_p, const char *parv[], 
 	}
 
 	if(config_file.umax_logins && 
-	   dlink_list_length(&reg_p->users) >= config_file.umax_logins)
+	   rb_dlink_list_length(&reg_p->users) >= config_file.umax_logins)
 	{
 		service_err(userserv_p, client_p, SVC_USER_LOGINMAX,
 				config_file.umax_logins);
@@ -1402,7 +1403,7 @@ s_user_login(struct client *client_p, struct lconn *conn_p, const char *parv[], 
 	zlog(userserv_p, 5, 0, 0, client_p, NULL,
 		"LOGIN %s", reg_p->name);
 
-	DLINK_FOREACH(ptr, reg_p->users.head)
+	RB_DLINK_FOREACH(ptr, reg_p->users.head)
 	{
 		service_err(userserv_p, ptr->data, SVC_USER_USERLOGGEDIN,
 				client_p->user->mask, reg_p->name);
@@ -1412,9 +1413,9 @@ s_user_login(struct client *client_p, struct lconn *conn_p, const char *parv[], 
 			MYUID, UID(client_p), reg_p->name);
 
 	client_p->user->user_reg = reg_p;
-	reg_p->last_time = CURRENT_TIME;
+	reg_p->last_time = rb_current_time();
 	reg_p->flags |= US_FLAGS_NEEDUPDATE;
-	dlink_add_alloc(client_p, &reg_p->users);
+	rb_dlinkAddAlloc(client_p, &reg_p->users);
 	service_err(userserv_p, client_p, SVC_SUCCESSFUL,
 			userserv_p->name, "LOGIN");
 
@@ -1426,7 +1427,7 @@ s_user_login(struct client *client_p, struct lconn *conn_p, const char *parv[], 
 static int
 s_user_logout(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
-	dlink_find_destroy(client_p, &client_p->user->user_reg->users);
+	rb_dlinkFindDestroy(client_p, &client_p->user->user_reg->users);
 	client_p->user->user_reg = NULL;
 	service_err(userserv_p, client_p, SVC_SUCCESSFUL,
 			userserv_p->name, "LOGOUT");
@@ -1458,7 +1459,7 @@ s_user_resetpass(struct client *client_p, struct lconn *conn_p, const char *parv
 	if((reg_p = find_user_reg(client_p, parv[0])) == NULL)
 		return 1;
 
-	if((CURRENT_TIME - reg_p->reg_time) < config_file.ureset_regtime_duration)
+	if((rb_current_time() - reg_p->reg_time) < config_file.ureset_regtime_duration)
 	{
 		service_err(userserv_p, client_p, SVC_USER_DURATIONTOOSHORT,
 				reg_p->name, userserv_p->name, "RESETPASS");
@@ -1488,7 +1489,7 @@ s_user_resetpass(struct client *client_p, struct lconn *conn_p, const char *parv
 		}
 
 		rsdb_exec_fetch(&data, "SELECT COUNT(username) FROM users_resetpass WHERE username='%Q' AND time > '%lu'",
-				reg_p->name, CURRENT_TIME - config_file.uresetpass_duration);
+				reg_p->name, rb_current_time() - config_file.uresetpass_duration);
 
 		if(data.row_count == 0)
 		{
@@ -1524,7 +1525,7 @@ s_user_resetpass(struct client *client_p, struct lconn *conn_p, const char *parv
 
 		token = get_password();
 		rsdb_exec(NULL, "INSERT INTO users_resetpass (username, token, time) VALUES('%Q', '%Q', '%lu')",
-				reg_p->name, token, CURRENT_TIME);
+				reg_p->name, token, rb_current_time());
 
 		if(!send_email(reg_p->email, "Password reset",
 				"%s!%s@%s has requested a password reset for username %s which "
@@ -1568,7 +1569,7 @@ s_user_resetpass(struct client *client_p, struct lconn *conn_p, const char *parv
 
 	/* authenticating a password reset */
 	rsdb_exec_fetch(&data, "SELECT token FROM users_resetpass WHERE username='%Q' AND time > '%lu'",
-			reg_p->name, CURRENT_TIME - config_file.uresetpass_duration);
+			reg_p->name, rb_current_time() - config_file.uresetpass_duration);
 
 	/* ok, found the entry.. */
 	if(data.row_count)
@@ -1585,8 +1586,8 @@ s_user_resetpass(struct client *client_p, struct lconn *conn_p, const char *parv
 			rsdb_exec(NULL, "UPDATE users SET password='%Q' WHERE username='%Q'",
 					password, reg_p->name);
 
-			my_free(reg_p->password);
-			reg_p->password = my_strdup(password);
+			rb_free(reg_p->password);
+			reg_p->password = rb_strdup(password);
 
 			service_err(userserv_p, client_p, SVC_USER_CHANGEDPASSWORD, reg_p->name);
 			return 1;
@@ -1619,7 +1620,7 @@ s_user_resetemail(struct client *client_p, struct lconn *conn_p, const char *par
 		return 1;
 	}
 
-	if((CURRENT_TIME - reg_p->reg_time) < config_file.ureset_regtime_duration)
+	if((rb_current_time() - reg_p->reg_time) < config_file.ureset_regtime_duration)
 	{
 		service_err(userserv_p, client_p, SVC_USER_DURATIONTOOSHORT,
 				reg_p->name, userserv_p->name, "RESETEMAIL");
@@ -1636,7 +1637,7 @@ s_user_resetemail(struct client *client_p, struct lconn *conn_p, const char *par
 	if(parc == 0)
 	{
 		rsdb_exec_fetch(&data, "SELECT COUNT(username) FROM users_resetemail WHERE username='%Q' AND time > '%lu'",
-				reg_p->name, CURRENT_TIME - config_file.uresetemail_duration);
+				reg_p->name, rb_current_time() - config_file.uresetemail_duration);
 
 		if(data.row_count == 0)
 		{
@@ -1669,7 +1670,7 @@ s_user_resetemail(struct client *client_p, struct lconn *conn_p, const char *par
 		/* insert email as blank, as we need to check for it in AUTH */
 		token = get_password();
 		rsdb_exec(NULL, "INSERT INTO users_resetemail (username, token, time) VALUES('%Q', '%Q', '%lu')",
-				reg_p->name, token, CURRENT_TIME);
+				reg_p->name, token, rb_current_time());
 
 		if(!send_email(reg_p->email, "E-Mail reset",
 				"%s!%s@%s has requested a e-mail reset for username %s which "
@@ -1714,7 +1715,7 @@ s_user_resetemail(struct client *client_p, struct lconn *conn_p, const char *par
 		}
 
 		rsdb_exec_fetch(&data, "SELECT token FROM users_resetemail WHERE username='%Q' AND time > '%lu' AND email is NULL",
-				reg_p->name, CURRENT_TIME - config_file.uresetemail_duration);
+				reg_p->name, rb_current_time() - config_file.uresetemail_duration);
 
 		/* ok, found the entry.. */
 		if(data.row_count)
@@ -1746,7 +1747,7 @@ s_user_resetemail(struct client *client_p, struct lconn *conn_p, const char *par
 				rsdb_exec(NULL, "DELETE FROM users_resetemail WHERE username='%Q'",
 						reg_p->name);
 				rsdb_exec(NULL, "INSERT INTO users_resetemail (username, token, time, email) VALUES('%Q', '%Q', '%lu', '%Q')",
-						reg_p->name, token, CURRENT_TIME, email);
+						reg_p->name, token, rb_current_time(), email);
 
 				zlog(userserv_p, 3, 0, 0, client_p, NULL,
 						"RESETEMAIL %s %s (confirm)", reg_p->name, email);
@@ -1780,7 +1781,7 @@ s_user_resetemail(struct client *client_p, struct lconn *conn_p, const char *par
 		}
 
 		rsdb_exec_fetch(&data, "SELECT token, email FROM users_resetemail WHERE username='%Q' AND time > '%lu' AND email is not NULL",
-				reg_p->name, CURRENT_TIME - config_file.uresetemail_duration);
+				reg_p->name, rb_current_time() - config_file.uresetemail_duration);
 
 		/* ok, found the entry.. */
 		if(data.row_count)
@@ -1789,8 +1790,8 @@ s_user_resetemail(struct client *client_p, struct lconn *conn_p, const char *par
 			{
 				const char *email = data.row[0][1];
 				
-				my_free(reg_p->email);
-				reg_p->email = my_strdup(email);
+				rb_free(reg_p->email);
+				reg_p->email = rb_strdup(email);
 
 				/* need to execute another query.. */
 				rsdb_exec_fetch_end(&data);
@@ -1874,8 +1875,8 @@ s_user_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 		zlog(userserv_p, 3, 0, 0, client_p, NULL, "SET PASS");
 
 		password = get_crypt(parv[2], NULL);
-		my_free(ureg_p->password);
-		ureg_p->password = my_strdup(password);
+		rb_free(ureg_p->password);
+		ureg_p->password = rb_strdup(password);
 
 		rsdb_exec(NULL, "UPDATE users SET password='%Q' "
 				"WHERE username='%Q'", password, ureg_p->name);
@@ -1914,8 +1915,8 @@ s_user_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 		zlog(userserv_p, 3, 0, 0, client_p, NULL, 
 			"SET EMAIL %s", arg);
 
-		my_free(ureg_p->email);
-		ureg_p->email = my_strdup(arg);
+		rb_free(ureg_p->email);
+		ureg_p->email = rb_strdup(arg);
 
 		rsdb_exec(NULL, "UPDATE users SET email='%Q' "
 				"WHERE username='%Q'", arg, ureg_p->name);
@@ -2038,14 +2039,14 @@ dump_user_info(struct client *client_p, struct lconn *conn_p, struct user_reg *u
 	struct nick_reg *nreg_p;
 #endif
 	struct client *target_p;
-	dlink_node *ptr;
+	rb_dlink_node *ptr;
 	char *p;
 	int buflen = 0;
 	int mlen;
 
 	p = buf;
 
-	DLINK_FOREACH(ptr, ureg_p->channels.head)
+	RB_DLINK_FOREACH(ptr, ureg_p->channels.head)
 	{
 		mreg_p = ptr->data;
 
@@ -2075,7 +2076,7 @@ dump_user_info(struct client *client_p, struct lconn *conn_p, struct user_reg *u
 	p = buf;
 	buflen = 0;
 
-	DLINK_FOREACH(ptr, ureg_p->nicks.head)
+	RB_DLINK_FOREACH(ptr, ureg_p->nicks.head)
 	{
 		nreg_p = ptr->data;
 
@@ -2102,12 +2103,12 @@ dump_user_info(struct client *client_p, struct lconn *conn_p, struct user_reg *u
 		service_snd(userserv_p, client_p, conn_p, SVC_INFO_EMAIL,
 				ureg_p->name, ureg_p->email);
 
-	if(dlink_list_length(&ureg_p->users))
+	if(rb_dlink_list_length(&ureg_p->users))
 	{
 		service_snd(userserv_p, client_p, conn_p, SVC_INFO_CURRENTLOGON,
 				ureg_p->name);
 
-		DLINK_FOREACH(ptr, ureg_p->users.head)
+		RB_DLINK_FOREACH(ptr, ureg_p->users.head)
 		{
 			target_p = ptr->data;
 
@@ -2127,7 +2128,7 @@ s_user_info(struct client *client_p, struct lconn *conn_p, const char *parv[], i
 
 	service_err(userserv_p, client_p, SVC_INFO_REGDURATIONUSER,
 			ureg_p->name,
-			get_duration((time_t) (CURRENT_TIME - ureg_p->reg_time)));
+			get_duration((time_t) (rb_current_time() - ureg_p->reg_time)));
 
 	if(USER_SUSPEND_EXPIRED(ureg_p))
 		expire_user_suspend(ureg_p);
@@ -2137,7 +2138,7 @@ s_user_info(struct client *client_p, struct lconn *conn_p, const char *parv[], i
 		time_t suspend_time = ureg_p->suspend_time;
 
 		if(suspend_time)
-			suspend_time -= CURRENT_TIME;
+			suspend_time -= rb_current_time();
 
 		if(config_file.ushow_suspend_reasons)
 			service_err(userserv_p, client_p, SVC_INFO_SUSPENDEDADMIN,
@@ -2165,7 +2166,7 @@ s_userserv_countmem(size_t *sz_user_reg_password, size_t *sz_user_reg_email,
 {
 	struct user_reg *ureg_p;
 	struct member_reg *mreg_p;
-	dlink_node *ptr, *vptr;
+	rb_dlink_node *ptr, *vptr;
 	int i;
 
 	HASH_WALK(i, MAX_NAME_HASH, ptr, user_reg_table)
@@ -2184,7 +2185,7 @@ s_userserv_countmem(size_t *sz_user_reg_password, size_t *sz_user_reg_email,
 		if(!EmptyString(ureg_p->suspend_reason))
 			*sz_user_reg_suspend += strlen(ureg_p->suspend_reason) + 1;
 
-		DLINK_FOREACH(vptr, ureg_p->channels.head)
+		RB_DLINK_FOREACH(vptr, ureg_p->channels.head)
 		{
 			mreg_p = vptr->data;
 			*sz_member_reg_lastmod += strlen(mreg_p->lastmod) + 1;

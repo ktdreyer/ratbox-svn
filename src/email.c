@@ -35,6 +35,7 @@
 #include "conf.h"
 #include "log.h"
 #include "email.h"
+#include "tools.h"
 
 static time_t email_last;
 static int email_count;
@@ -42,9 +43,9 @@ static int email_count;
 int
 can_send_email(void)
 {
-	if(email_last + config_file.email_duration < CURRENT_TIME)
+	if(email_last + config_file.email_duration < rb_current_time())
 	{
-		email_last = CURRENT_TIME;
+		email_last = rb_current_time();
 		email_count = 0;
 
 		return 1;
