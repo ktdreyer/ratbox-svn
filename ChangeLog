@@ -1,3 +1,11 @@
+androsyn    2010/11/01 03:47:44 UTC	(20101101_0-27117)
+  Log:
+  use RB_RM for RM, this fixes make clean
+
+  Modified:
+	rserv/trunk/src/Makefile.in (File Modified) 
+
+
 androsyn    2010/10/04 14:18:35 UTC	(20101004_1-27104)
   Log:
   make rserv link against libratbox properly
