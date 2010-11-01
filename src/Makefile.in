@@ -1,7 +1,7 @@
 # $Id$
 
 CC=@CC@
-RM=@RM@
+RM=@RB_RM@
 MV=@MV@
 INSTALL=@INSTALL@
 LEX=@LEX@
