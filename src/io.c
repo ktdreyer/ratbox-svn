@@ -626,7 +626,7 @@ read_server(rb_fde_t *F, void *data)
 
 	if(IsDead(conn_p))
 		return;
-	
+	ClearConnSentPing(conn_p);
 	while(1)
 	{
 		len = rb_linebuf_get(&conn_p->lb_recvq, readbuf, sizeof(readbuf), LINEBUF_COMPLETE, LINEBUF_PARSED);
