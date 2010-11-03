@@ -1,3 +1,11 @@
+androsyn    2010/11/03 20:53:54 UTC	(20101103_4-27129)
+  Log:
+  update last_time when reading from the server.  also check for IsDead after read_any here
+
+  Modified:
+	rserv/trunk/src/io.c (File Modified) 
+
+
 moggie      2010/11/03 18:58:16 UTC	(20101103_3-27127)
   Log:
   - pgsql will need tools.h too.
