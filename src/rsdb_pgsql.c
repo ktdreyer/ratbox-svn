@@ -37,6 +37,7 @@
 #include "rserv.h"
 #include "conf.h"
 #include "log.h"
+#include "tools.h"
 
 #define RSDB_MAXCOLS			30
 #define RSDB_MAX_RECONNECT_TIME		30
