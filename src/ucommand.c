@@ -357,10 +357,18 @@ u_connect(struct client *unused, struct lconn *conn_p, const char *parv[], int p
 	return 0;
 }
 
+
+static void
+events_cb(char *str, void *ptr)
+{
+	sendto_one(ptr, "%s", str);
+
+}
+
 static int
 u_events(struct client *unused, struct lconn *conn_p, const char *parv[], int parc)
 {
-//XXX        event_show(NULL, conn_p);
+	rb_dump_events(events_cb, conn_p);
 	return 0;
 }
 
