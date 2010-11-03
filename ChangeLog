@@ -1,3 +1,11 @@
+androsyn    2010/11/03 21:12:18 UTC	(20101103_6-27133)
+  Log:
+  clear the ping flag
+
+  Modified:
+	rserv/trunk/src/io.c (File Modified) 
+
+
 androsyn    2010/11/03 21:04:18 UTC	(20101103_5-27131)
   Log:
   * Centralize the last_time update stuff to read_any().
