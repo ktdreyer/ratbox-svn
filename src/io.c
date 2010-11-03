@@ -562,7 +562,7 @@ static void
 read_any(struct lconn *conn_p, int server)
 {
 	int length = 0;
-
+	unsigned long total_read = 0;
 	while(1)
 	{
 		length = rb_read(conn_p->F, readbuf, sizeof(readbuf));
@@ -602,9 +602,11 @@ read_any(struct lconn *conn_p, int server)
 			return;
 		}
 		
-		
+		total_read += length;
 		rb_linebuf_parse(&conn_p->lb_recvq, readbuf, length, 0); 
 	}
+	if(total_read > 0)
+		conn_p->last_time = rb_current_time();
 }
 
 
@@ -625,13 +627,12 @@ read_server(rb_fde_t *F, void *data)
 	if(IsDead(conn_p))
 		return;
 	
-	conn_p->last_time = rb_current_time();
-	
 	while(1)
 	{
 		len = rb_linebuf_get(&conn_p->lb_recvq, readbuf, sizeof(readbuf), LINEBUF_COMPLETE, LINEBUF_PARSED);
 		if(len <= 0 || IsDead(conn_p))
 			return;
+		
 		parse_server(readbuf, len);
 		if(IsDead(conn_p))
 			return;
@@ -650,6 +651,8 @@ read_client(rb_fde_t *F, void *data)
 	struct lconn *conn_p = data;
 	int len;
 	read_any(conn_p, 0);
+	if(IsDead(conn_p))
+		return;
 	
 	while(1)
 	{
