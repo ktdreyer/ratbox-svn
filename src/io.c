@@ -260,7 +260,7 @@ connect_to_generic(struct lconn *conn_p, const char *host, int port, const char 
 	rb_fde_t *F;
 	struct sockaddr_in localaddr, remoteaddr, *laddr = NULL;
 	
-	x = make_sockaddrs(host, port, vhost, IO_HOST, &remoteaddr, &localaddr);
+	x = make_sockaddrs(host, port, vhost, flag, &remoteaddr, &localaddr);
 	if(x <= 0)
 		return;
 	if(x > 2) 
