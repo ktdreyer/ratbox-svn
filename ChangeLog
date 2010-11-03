@@ -1,3 +1,14 @@
+androsyn    2010/11/03 17:56:20 UTC	(20101103_0-27121)
+  Log:
+  Rebuild configure, remove spaces between a few -L options and the library path.
+  
+  
+
+  Modified:
+	rserv/trunk/autoconf/configure.in (File Modified) 
+	rserv/trunk/configure (File Modified) 
+
+
 androsyn    2010/11/01 03:47:44 UTC	(20101101_0-27117)
   Log:
   use RB_RM for RM, this fixes make clean
