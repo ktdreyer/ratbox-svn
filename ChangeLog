@@ -1,3 +1,12 @@
+moggie      2010/11/03 18:58:16 UTC	(20101103_3-27127)
+  Log:
+  - pgsql will need tools.h too.
+  
+
+  Modified:
+	rserv/trunk/src/rsdb_pgsql.c (File Modified) 
+
+
 androsyn    2010/11/03 18:26:10 UTC	(20101103_2-27125)
   Log:
   add tools.h to rsdb_mysql.c
