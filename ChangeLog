@@ -1,3 +1,13 @@
+androsyn    2010/11/03 22:26:22 UTC	(20101103_9-27139)
+  Log:
+  Make .events work again.
+  
+  
+
+  Modified:
+	rserv/trunk/src/ucommand.c (File Modified) 
+
+
 androsyn    2010/11/03 21:52:34 UTC	(20101103_8-27137)
   Log:
   add SSL/TLS support and document the ssl flag
