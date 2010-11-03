@@ -1,3 +1,11 @@
+androsyn    2010/11/03 21:41:19 UTC	(20101103_7-27135)
+  Log:
+  pass flag to make_sockaddrs instead of a hard coded IO_HOST
+
+  Modified:
+	rserv/trunk/src/io.c (File Modified) 
+
+
 androsyn    2010/11/03 21:12:18 UTC	(20101103_6-27133)
   Log:
   clear the ping flag
