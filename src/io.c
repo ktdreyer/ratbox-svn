@@ -622,6 +622,10 @@ read_server(rb_fde_t *F, void *data)
 	int len;
 	read_any(conn_p, 1);
 
+	if(IsDead(conn_p))
+		return;
+	
+	conn_p->last_time = rb_current_time();
 	
 	while(1)
 	{
