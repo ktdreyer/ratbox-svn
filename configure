@@ -4949,7 +4949,7 @@ $as_echo "sqlite3" >&6; }
 
 		if test "X$ac_cv_sqlite3_path" != "X"; then
 			DB_INCLUDES="$DB_INCLUDES -I $ac_cv_sqlite3_path/include/"
-			LDFLAGS="$LDFLAGS -L $ac_cv_sqlite3_path/lib/"
+			LDFLAGS="$LDFLAGS -L$ac_cv_sqlite3_path/lib/"
 		fi
 	else
 		{ $as_echo "$as_me:${as_lineno-$LINENO}: result: internal packaged sqlite3" >&5
@@ -5076,7 +5076,7 @@ $as_echo "system" >&6; }
 
 	if test "X$ac_cv_pcre_path" != "X"; then
 		PCRE_INCLUDES="$PCRE_INCLUDES -I $ac_cv_pcre_path/include/"
-		LDFLAGS="$LDFLAGS -L $ac_cv_pcre_path/lib/"
+		LDFLAGS="$LDFLAGS -L$ac_cv_pcre_path/lib/"
 	fi
 else
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: internal packaged PCRE" >&5

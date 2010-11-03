@@ -334,7 +334,7 @@ else
 
 		if test "X$ac_cv_sqlite3_path" != "X"; then
 			DB_INCLUDES="$DB_INCLUDES -I $ac_cv_sqlite3_path/include/"
-			LDFLAGS="$LDFLAGS -L $ac_cv_sqlite3_path/lib/"
+			LDFLAGS="$LDFLAGS -L$ac_cv_sqlite3_path/lib/"
 		fi
 	else
 		AC_MSG_RESULT(internal packaged sqlite3)
@@ -396,7 +396,7 @@ if test "X$ac_cv_found_pcre_inc" = "Xyes" &&
 
 	if test "X$ac_cv_pcre_path" != "X"; then
 		PCRE_INCLUDES="$PCRE_INCLUDES -I $ac_cv_pcre_path/include/"
-		LDFLAGS="$LDFLAGS -L $ac_cv_pcre_path/lib/"
+		LDFLAGS="$LDFLAGS -L$ac_cv_pcre_path/lib/"
 	fi
 else
 	AC_MSG_RESULT([internal packaged PCRE])
