@@ -634,6 +634,23 @@ conf_set_connect_port(void *data)
 }
 
 static void
+conf_set_connect_ssl(void *data)
+{
+	int yesno = *(unsigned int *) data;
+
+	if(!rb_supports_ssl())
+	{
+		conf_report_error("Warning -- No SSL support in libratbox, ignoring ssl flag!");
+		return;
+	}
+
+	if(yesno)
+		yy_server->flags |= CONF_SERVER_SSL;
+	else
+		yy_server->flags &= ~CONF_SERVER_SSL;
+}
+
+static void
 conf_set_connect_autoconn(void *data)
 {
 	int yesno = *(unsigned int *) data;
@@ -1144,6 +1161,7 @@ static struct ConfEntry conf_connect_table[] =
 	{ "vhost",	CF_QSTRING, conf_set_connect_vhost,	0, NULL },
 	{ "port",	CF_INT,     conf_set_connect_port,	0, NULL },
 	{ "autoconn",   CF_YESNO,   conf_set_connect_autoconn,	0, NULL },
+	{ "ssl",	CF_YESNO,   conf_set_connect_ssl,	0, NULL },
 	{ "\0", 0, NULL, 0, NULL }
 };
 

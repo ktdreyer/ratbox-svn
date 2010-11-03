@@ -241,8 +241,9 @@ struct conf_oper
 #define CONF_OPER_CF_ADMIN	(CONF_OPER_CF_NOTES|CONF_OPER_CF_BLOCK|CONF_OPER_CF_CHANFIX)
 
 #define CONF_SERVER_AUTOCONN	0x0001
-
+#define CONF_SERVER_SSL		0x0002
 #define ConfServerAutoconn(x)	((x)->flags & CONF_SERVER_AUTOCONN)
+#define ConfServerSSL(x)	((x)->flags & CONF_SERVER_SSL)
 
 extern struct _config_file config_file;
 extern rb_dlink_list conf_server_list;

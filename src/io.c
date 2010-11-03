@@ -254,7 +254,7 @@ connect_callback(rb_fde_t *F, int status, void *data)
 
 
 static void
-connect_to_generic(struct lconn *conn_p, const char *host, int port, const char *vhost, int flag)
+connect_to_generic(struct lconn *conn_p, const char *host, int port, const char *vhost, int flag, int ssl)
 {
 	int x, lsize;
 	rb_fde_t *F;
@@ -276,7 +276,10 @@ connect_to_generic(struct lconn *conn_p, const char *host, int port, const char 
 	}
 
 	conn_p->F = F;
-	rb_connect_tcp(conn_p->F, (struct sockaddr *)&remoteaddr, (struct sockaddr *)laddr, lsize, connect_callback, conn_p, 30);
+	if(ssl)
+		rb_connect_tcp_ssl(conn_p->F, (struct sockaddr *)&remoteaddr, (struct sockaddr *)laddr, lsize, connect_callback, conn_p, 30);
+	else
+		rb_connect_tcp(conn_p->F, (struct sockaddr *)&remoteaddr, (struct sockaddr *)laddr, lsize, connect_callback, conn_p, 30);
 }
 
 
@@ -317,7 +320,7 @@ connect_to_server(void *target_server)
         conn_p->pass = rb_strdup(conf_p->pass);
 	SetConnConnecting(conn_p);
 	server_p = conn_p;
-	connect_to_generic(conn_p, conf_p->host, conf_p->port, conf_p->vhost, IO_HOST);
+	connect_to_generic(conn_p, conf_p->host, conf_p->port, conf_p->vhost, IO_HOST, ConfServerSSL(conf_p));
 }
 
 /* connect_to_client()
@@ -343,7 +346,7 @@ connect_to_client(struct client *client_p, struct conf_oper *oper_p,
 	SetConnConnecting(conn_p);
 	SetConnDccOut(conn_p);
 	rb_dlinkAddAlloc(conn_p, &connection_list);
-	connect_to_generic(conn_p, host, port, config_file.dcc_vhost, IO_IP);
+	connect_to_generic(conn_p, host, port, config_file.dcc_vhost, IO_IP, 0);
 
 }
 
