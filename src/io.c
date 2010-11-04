@@ -84,7 +84,7 @@ static void check_server_status(void *data)
 
 	if(server_p == NULL)
 		return;
-	
+
 	/* socket isnt dead.. */
 	if(!ConnDead(server_p))
 	{

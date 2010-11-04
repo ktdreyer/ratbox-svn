@@ -255,7 +255,8 @@ get_cf_chan_flags(const char *chan, uint32_t *flags)
 	struct rsdb_table data;
 
 	rsdb_exec_fetch(&data,
-		"SELECT flags FROM cf_channel WHERE chname=LOWER('%Q')", chan);
+			"SELECT flags FROM cf_channel "
+			"WHERE chname=LOWER('%Q')", chan);
 
 	if(data.row_count > 0)
 	{
@@ -420,7 +421,7 @@ get_chmember_scores(struct chanfix_score *scores, struct channel *chptr,
 	{
 		msptr = ptr->data;
 
-		snprintf(userhost, sizeof(userhost), "%s@%s",
+		rb_snprintf(userhost, sizeof(userhost), "%s@%s",
 				msptr->client_p->user->username,
 				msptr->client_p->user->host);
 
@@ -502,7 +503,7 @@ collect_channel_scores(struct channel *chptr, time_t timestamp, unsigned int day
 				msptr->client_p->user->username[0] == '~')
 			continue;
 
-		snprintf(userhost, sizeof(userhost), "%s@%s",
+		rb_snprintf(userhost, sizeof(userhost), "%s@%s",
 				msptr->client_p->user->username,
 				msptr->client_p->user->host);
 
@@ -790,7 +791,7 @@ build_channel_scores(struct channel *chptr, int max_num)
 	{
 		msptr = ptr->data;
 
-		snprintf(userhost, sizeof(userhost), "%s@%s",
+		rb_snprintf(userhost, sizeof(userhost), "%s@%s",
 				msptr->client_p->user->username,
 				msptr->client_p->user->host);
 
@@ -833,7 +834,7 @@ build_channel_scores(struct channel *chptr, int max_num)
 		user_count++;
 	}
 
-	scores->s_items = realloc(scores->s_items,
+	scores->s_items = rb_realloc(scores->s_items,
 			sizeof(struct chanfix_score_item) * user_count);
 
 	scores->length = user_count;
@@ -1111,7 +1112,7 @@ o_chanfix_score(struct client *client_p, struct lconn *conn_p, const char *parv[
 		buf[0] = '\0';
 		for(i = 0; i < all_scores->length; i++)
 		{
-			snprintf(t_buf, sizeof(t_buf), "%d ", all_scores->s_items[i].score);
+			rb_snprintf(t_buf, sizeof(t_buf), "%d ", all_scores->s_items[i].score);
 			strcat(buf, t_buf);
 		}
 		service_snd(chanfix_p, client_p, conn_p, SVC_CF_TOPSCORESFOR,
@@ -1145,7 +1146,7 @@ o_chanfix_score(struct client *client_p, struct lconn *conn_p, const char *parv[
 		{
 			if(scores->s_items[i].msptr)
 			{
-				snprintf(t_buf, sizeof(t_buf), "%d ", scores->s_items[i].score);
+				rb_snprintf(t_buf, sizeof(t_buf), "%d ", scores->s_items[i].score);
 				strcat(buf, t_buf);
 				count++;
 			}
@@ -1170,7 +1171,7 @@ o_chanfix_score(struct client *client_p, struct lconn *conn_p, const char *parv[
 		{
 			if(scores->s_items[i].msptr)
 			{
-				snprintf(t_buf, sizeof(t_buf), "%d ", scores->s_items[i].score);
+				rb_snprintf(t_buf, sizeof(t_buf), "%d ", scores->s_items[i].score);
 				strcat(buf, t_buf);
 				count++;
 			}
@@ -1224,7 +1225,7 @@ o_chanfix_uscore(struct client *client_p, struct lconn *conn_p, const char *parv
 
 		if(target_p)
 		{
-			snprintf(userhost, sizeof(userhost), "%s@%s",
+			rb_snprintf(userhost, sizeof(userhost), "%s@%s",
 					target_p->user->username,
 					target_p->user->host);
 		}
@@ -1323,7 +1324,8 @@ o_chanfix_userlist(struct client *client_p, struct lconn *conn_p, const char *pa
 		{
 			if(scores->s_items[i].msptr)
 			{
-				snprintf(buf, sizeof(buf), "%4d  %s!%s@%s", scores->s_items[i].score,
+				rb_snprintf(buf, sizeof(buf), "%4d  %s!%s@%s",
+					scores->s_items[i].score,
 					scores->s_items[i].msptr->client_p->name,
 					scores->s_items[i].msptr->client_p->user->username,
 					scores->s_items[i].msptr->client_p->user->host);
@@ -1387,7 +1389,8 @@ o_chanfix_userlist2(struct client *client_p, struct lconn *conn_p, const char *p
 		{
 			if(scores->s_items[i].msptr)
 			{
-				snprintf(buf, sizeof(buf), "%4d  %s!%s@%s", scores->s_items[i].score,
+				rb_snprintf(buf, sizeof(buf), "%4d  %s!%s@%s",
+					scores->s_items[i].score,
 					scores->s_items[i].msptr->client_p->name,
 					scores->s_items[i].msptr->client_p->user->username,
 					scores->s_items[i].msptr->client_p->user->host);
@@ -1458,10 +1461,10 @@ o_chanfix_chanfix(struct client *client_p, struct lconn *conn_p, const char *par
 		return 0;
 	}
 
-	/* Need to check to see if this channel has an ALERT set for it. */
 
 	/* Try to add the manual fix. If an error occurs, add_chanfix() should
 	 * inform the client since we've passed a client ptr.
+	 * A check for the ALERT or BLOCK flags is done by add_chanfix().
 	 */
 	if(!add_chanfix(chptr, 1, client_p))
 		return 0;
@@ -1981,7 +1984,6 @@ o_chanfix_set(struct client *client_p, struct lconn *conn_p, const char *parv[],
 		}
 		else
 		{
-			/* Instead of returning an error here, we should show the current value */
 			service_err(chanfix_p, client_p, SVC_NEEDMOREPARAMS, chanfix_p->name, "SET::autofix");
 		}
 	}
@@ -2023,7 +2025,7 @@ o_chanfix_set(struct client *client_p, struct lconn *conn_p, const char *parv[],
 static int
 o_chanfix_status(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
-	service_send(chanfix_p, client_p, conn_p, "Chanfix module status:");
+	service_send(chanfix_p, client_p, conn_p, "ChanFix module status:");
 
 	if(config_file.cf_enable_autofix)
 		service_send(chanfix_p, client_p, conn_p, "Automatic channel fixing enabled.");
@@ -2035,11 +2037,6 @@ o_chanfix_status(struct client *client_p, struct lconn *conn_p, const char *parv
 	else
 		service_send(chanfix_p, client_p, conn_p, "Manual channel fixing disabled.");
 
-	/*service_send(chanfix_p, client_p, conn_p,
-		"For scoring/fixing, chanfix requires that at least %d out of %d network servers be linked (~%d percent).",
-			(config_file.cf_min_server_percent * config_file.cf_network_servers) / 100 + 1,
-			config_file.cf_network_servers, config_file.cf_min_server_percent);
-	*/
 
 	if(is_network_split())
 		service_send(chanfix_p, client_p, conn_p, "Splitmode active. Channel scoring/fixing disabled.");
@@ -2172,7 +2169,7 @@ del_chanfix(struct channel *chptr)
 
 	rb_dlinkDelete(&cfptr->node, &chanfix_list);
 
-	/* If chanfix detected any clones, get rid of those too. */
+	/* If ChanFix detected any clones, get rid of those too. */
 	if(rb_dlink_list_length(&cfptr->scores->clones) > 0)
 	{
 		RB_DLINK_FOREACH_SAFE(ptr, next_ptr, cfptr->scores->clones.head)
