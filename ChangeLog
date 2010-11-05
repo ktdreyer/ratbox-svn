@@ -1,3 +1,12 @@
+moggie      2010/11/05 18:51:57 UTC	(20101105_1-27147)
+  Log:
+  - Add some #ifdefs to omit some events.
+  
+
+  Modified:
+	rserv/trunk/src/newconf.c (File Modified) 
+
+
 moggie      2010/11/05 18:31:37 UTC	(20101105_0-27145)
   Log:
   - Add an alert boolean for notes.
