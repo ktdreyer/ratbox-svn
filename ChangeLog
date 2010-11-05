@@ -1,3 +1,22 @@
+moggie      2010/11/05 18:31:37 UTC	(20101105_0-27145)
+  Log:
+  - Add an alert boolean for notes.
+  - Modify the ALERT command to require text for a note.
+  - Switch get_time() to international date format.
+  - Leave flags as a number during SQL execution instead of a string.
+  
+
+  Modified:
+	rserv/trunk/help/en/chanfix/alert (File Modified) 
+	rserv/trunk/help/en/chanfix/index-admin (File Modified) 
+	rserv/trunk/src/messages.c (File Modified) 
+	rserv/trunk/src/s_chanfix.c (File Modified) 
+	rserv/trunk/src/tools.c (File Modified) 
+	rserv/trunk/tools/base/schema-mysql.txt (File Modified) 
+	rserv/trunk/tools/base/schema-pgsql.txt (File Modified) 
+	rserv/trunk/tools/base/schema-sqlite.txt (File Modified) 
+
+
 moggie      2010/11/04 01:30:43 UTC	(20101104_0-27141)
   Log:
   - Use some more libratbox stuff.
