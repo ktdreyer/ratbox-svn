@@ -100,7 +100,7 @@ static struct service_command chanfix_command[] =
 	{ "SET",	&o_chanfix_set,		1, NULL, 1, 0L, 0, 0, CONF_OPER_CF_ADMIN },
 	{ "BLOCK",	&o_chanfix_block,	1, NULL, 1, 0L, 0, 0, CONF_OPER_CF_BLOCK },
 	{ "UNBLOCK",	&o_chanfix_unblock,	1, NULL, 1, 0L, 0, 0, CONF_OPER_CF_BLOCK },
-	{ "ALERT",	&o_chanfix_alert,	1, NULL, 1, 0L, 0, 0, CONF_OPER_CF_NOTES },
+	{ "ALERT",	&o_chanfix_alert,	2, NULL, 1, 0L, 0, 0, CONF_OPER_CF_NOTES },
 	{ "UNALERT",	&o_chanfix_unalert,	1, NULL, 1, 0L, 0, 0, CONF_OPER_CF_NOTES },
 	{ "CHECK",	&o_chanfix_check,	1, NULL, 1, 0L, 0, 0, CONF_OPER_CF_INFO },
 	{ "USERLIST",	&o_chanfix_userlist,	1, NULL, 1, 0L, 0, 0, CONF_OPER_CF_CHANFIX },
@@ -353,10 +353,7 @@ get_all_cf_scores(struct channel *chptr, int max_num, int min_score)
 
 	scores = rb_malloc(sizeof(struct chanfix_score));
 
-	if(max_num < 1)
-		max_num = data.row_count;
-
-	if(max_num > data.row_count)
+	if(max_num < 1 || max_num > data.row_count)
 		max_num = data.row_count;
 
 	scores->length = max_num;
@@ -994,14 +991,14 @@ e_chanfix_collate_history(void *unused)
 		i++;
 	}
 
-	rb_event_addonce("e_chanfix_collate_history", e_chanfix_collate_history, NULL,
-				seconds_to_midnight()+5);
+	rb_event_addonce("e_chanfix_collate_history", e_chanfix_collate_history,
+			NULL, seconds_to_midnight()+5);
 
 	/* Drop old history data from the cf_score_history table. */
 	mlog("info: Dropping old daysample history.");
 
 	rsdb_exec(NULL, "DELETE FROM cf_score_history WHERE dayts < %lu",
-				(DAYS_SINCE_EPOCH - CF_DAYSAMPLES + 1));
+			(DAYS_SINCE_EPOCH - CF_DAYSAMPLES + 1));
 }
 
 static void
@@ -1566,7 +1563,7 @@ o_chanfix_block(struct client *client_p, struct lconn *conn_p, const char *parv[
 			flags |= CF_CHAN_BLOCK;
 			service_snd(chanfix_p, client_p, conn_p, SVC_SUCCESSFULON,
 					chanfix_p->name, "BLOCKED", parv[0]);
-			rsdb_exec(NULL, "UPDATE cf_channel SET flags = '%d' WHERE chname = '%Q'",
+			rsdb_exec(NULL, "UPDATE cf_channel SET flags = %u WHERE chname = '%Q'",
 					flags, parv[0]);
 		}
 	}
@@ -1613,8 +1610,8 @@ o_chanfix_unblock(struct client *client_p, struct lconn *conn_p, const char *par
 		{
 			flags &= ~CF_CHAN_BLOCK;
 			service_snd(chanfix_p, client_p, conn_p, SVC_SUCCESSFULON,
-					chanfix_p->name, "UNBLOCKED", parv[0]);
-			rsdb_exec(NULL, "UPDATE cf_channel SET flags = '%d' WHERE chname = '%Q'",
+					chanfix_p->name, "UNBLOCK", parv[0]);
+			rsdb_exec(NULL, "UPDATE cf_channel SET flags = %u WHERE chname = '%Q'",
 					flags, parv[0]);
 		}
 	}
@@ -1634,9 +1631,8 @@ o_chanfix_alert(struct client *client_p, struct lconn *conn_p, const char *parv[
 {
 	struct rsdb_table data;
 	uint32_t flags = 0;
-
-	/*const char *msg;
-	msg = rebuild_params(parv, parc, 1);*/
+	const char *msg;
+	unsigned long channel_id;
 
 	if(!valid_chname(parv[0]))
 	{
@@ -1645,11 +1641,12 @@ o_chanfix_alert(struct client *client_p, struct lconn *conn_p, const char *parv[
 	}
 
 	rsdb_exec_fetch(&data,
-			"SELECT flags FROM cf_channel WHERE chname=LOWER('%Q')", parv[0]);
+			"SELECT id, flags FROM cf_channel WHERE chname=LOWER('%Q')", parv[0]);
 
 	if((data.row_count > 0) && (data.row[0][0] != NULL))
 	{
-		flags = atoi(data.row[0][0]);
+		channel_id = atoi(data.row[0][0]);
+		flags = atoi(data.row[0][1]);
 
 		if(flags & CF_CHAN_ALERT)
 		{
@@ -1657,11 +1654,18 @@ o_chanfix_alert(struct client *client_p, struct lconn *conn_p, const char *parv[
 		}
 		else
 		{
-			flags |= CF_CHAN_ALERT;
 			service_snd(chanfix_p, client_p, conn_p, SVC_SUCCESSFULON,
 					chanfix_p->name, "ALERT", parv[0]);
-			rsdb_exec(NULL, "UPDATE cf_channel SET flags = '%d' "
+			flags |= CF_CHAN_ALERT;
+			rsdb_exec(NULL, "UPDATE cf_channel SET flags = %u "
 					"WHERE chname = '%Q'", flags, parv[0]);
+
+			msg = rebuild_params(parv, parc, 1);
+
+			rsdb_exec(NULL, "INSERT INTO cf_note "
+					"(channel_id, timestamp, author, alert, text) "
+					"VALUES('%lu', '%lu', '%Q', '%d', '%Q')", channel_id,
+					rb_current_time(), client_p->user->oper->name, 1, msg);
 		}
 	}
 	else
@@ -1679,6 +1683,7 @@ static int
 o_chanfix_unalert(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct rsdb_table data;
+	unsigned long channel_id;
 	uint32_t flags = 0;
 
 	if(!valid_chname(parv[0]))
@@ -1688,28 +1693,31 @@ o_chanfix_unalert(struct client *client_p, struct lconn *conn_p, const char *par
 	}
 
 	rsdb_exec_fetch(&data,
-			"SELECT flags FROM cf_channel WHERE chname=LOWER('%Q')", parv[0]);
+			"SELECT id, flags FROM cf_channel WHERE chname=LOWER('%Q')", parv[0]);
 
-	if((data.row_count > 0) && (data.row[0][0] != NULL))
+	if(data.row_count > 0)
 	{
-		flags = atoi(data.row[0][0]);
+		channel_id = atoi(data.row[0][0]);
+		flags = atoi(data.row[0][1]);
 
 		if(!(flags & CF_CHAN_ALERT))
-		{
-			service_snd(chanfix_p, client_p, conn_p, SVC_CF_NOALERT, parv[0]);
-		}
+			service_snd(chanfix_p, client_p, conn_p,
+					SVC_CF_NOALERT, parv[0]);
 		else
 		{
-			flags &= ~CF_CHAN_ALERT;
 			service_snd(chanfix_p, client_p, conn_p, SVC_SUCCESSFULON,
 					chanfix_p->name, "UNALERT", parv[0]);
-			rsdb_exec(NULL, "UPDATE cf_channel SET flags = '%d' WHERE chname = '%Q'",
-					flags, parv[0]);
+			flags &= ~CF_CHAN_ALERT;
+			rsdb_exec(NULL, "UPDATE cf_channel SET flags = %d WHERE id = %lu",
+					flags, channel_id);
+			rsdb_exec(NULL, "UPDATE cf_note SET alert = False "
+					"WHERE channel_id = %lu AND alert = True", channel_id);
 		}
 	}
 	else
 	{
-		service_snd(chanfix_p, client_p, conn_p, SVC_CF_NODATAFOR, parv[0]);
+		service_snd(chanfix_p, client_p, conn_p,
+				SVC_CF_NODATAFOR, parv[0]);
 	}
 
 	rsdb_exec_fetch_end(&data);
@@ -1742,22 +1750,10 @@ o_chanfix_info(struct client *client_p, struct lconn *conn_p, const char *parv[]
 
 	service_snd(chanfix_p, client_p, conn_p, SVC_CF_INFOON, parv[0]);
 
-	if(!get_cf_chan_flags(parv[0], &flags))
-	{
-		service_snd(chanfix_p, client_p, conn_p, SVC_CF_NODATAFOR, parv[0]);
-		return 0;
-	}
-
-	if(flags & CF_CHAN_ALERT)
-		service_snd(chanfix_p, client_p, conn_p, SVC_CF_HASALERT, parv[0]);
-
-	if(flags & CF_CHAN_BLOCK)
-		service_snd(chanfix_p, client_p, conn_p, SVC_CF_ISBLOCKED, parv[0]);
-
 	if(((chptr = find_channel(parv[0])) != NULL) && (chptr->cfptr))
 	{
-		mlog("debug: inside fix status check");
 		cfptr = (struct chanfix_channel *) chptr->cfptr;
+
 		if(cfptr->flags & CF_STATUS_AUTOFIX)
 			service_snd(chanfix_p, client_p,
 					conn_p, SVC_CF_AUTOFIXED, parv[0]);
@@ -1773,7 +1769,7 @@ o_chanfix_info(struct client *client_p, struct lconn *conn_p, const char *parv[]
 	}
 
 	rsdb_exec_fetch(&data, "SELECT id, author, timestamp, text FROM cf_note "
-			"WHERE channel_id = %lu "
+			"WHERE channel_id = %lu AND alert = False "
 			"ORDER BY timestamp DESC LIMIT %d",
 			channel_id, config_file.cf_max_notes);
 
@@ -1792,6 +1788,33 @@ o_chanfix_info(struct client *client_p, struct lconn *conn_p, const char *parv[]
 		service_snd(chanfix_p, client_p, conn_p, SVC_CF_NONOTES);
 
 	rsdb_exec_fetch_end(&data);
+
+
+	get_cf_chan_flags(parv[0], &flags);
+
+	if(flags & CF_CHAN_BLOCK)
+		service_snd(chanfix_p, client_p, conn_p, SVC_CF_ISBLOCKED, parv[0]);
+
+	/* If the channel has an ALERT flag, also show the alerted note. */
+	if(flags & CF_CHAN_ALERT)
+	{
+		service_snd(chanfix_p, client_p, conn_p, SVC_CF_HASALERT, parv[0]);
+
+		rsdb_exec_fetch(&data, "SELECT id, author, timestamp, text "
+				"FROM cf_note WHERE channel_id = %lu "
+				"AND alert = True", channel_id);
+
+		if(data.row_count == 1)
+		{
+			service_err(chanfix_p, client_p, SVC_CF_SHOWNOTE,
+					atoi(data.row[0][0]), data.row[0][1],
+					get_time(atoi(data.row[0][2]), 0), data.row[0][3]);
+		}
+		else
+			service_snd(chanfix_p, client_p, conn_p, SVC_CF_NOALERT);
+
+		rsdb_exec_fetch_end(&data);
+	}
 
 	service_snd(chanfix_p, client_p, conn_p, SVC_CF_ENDOFINFO);
 
@@ -1849,28 +1872,6 @@ o_chanfix_addnote(struct client *client_p, struct lconn *conn_p, const char *par
 	}
 #endif
 
-
-	/*rsdb_exec_fetch(&data, "SELECT userhost_id, COUNT(*) AS t "
-		"FROM cf_score "
-		"WHERE channel_id = %lu AND userhost_id= %lu ",
-		channel_id, userhost_id);
-	if(data.row_count == 0 || data.row[0][0] == NULL)
-		day_score = 0;
-	else
-		day_score = atoi(data.row[0][1]);
-	rsdb_exec_fetch_end(&data);
-
-
-	rsdb_exec_fetch(&data, "SELECT userhost_id, SUM(score) AS t "
-		"  FROM cf_score_history "
-		"  WHERE channel_id = %lu AND userhost_id= %lu",
-		channel_id, userhost_id);
-	if(data.row_count == 0 || data.row[0][0] == NULL)
-		hist_score = 0;
-	else
-		hist_score = atoi(data.row[0][1]);
-	rsdb_exec_fetch_end(&data);*/
-
 	msg = rebuild_params(parv, parc, 1);
 
 	rsdb_exec(NULL,
@@ -1879,8 +1880,6 @@ o_chanfix_addnote(struct client *client_p, struct lconn *conn_p, const char *par
 			channel_id, rb_current_time(), client_p->user->oper->name, msg);
 
 	service_err(chanfix_p, client_p, SVC_CF_NOTEADDED, parv[0]);
-
-
 
 	return 0;
 }
@@ -2123,8 +2122,8 @@ add_chanfix(struct channel *chptr, short chanfix, struct client *client_p)
 
 	if(cf_ptr->scores == NULL)
 	{
-		mlog("debug: Insufficient DB scores for '%s', cannot add for chanfixing.",
-					chptr->name);
+		mlog("debug: Insufficient DB scores for '%s', cannot "
+				"add for chanfixing.", chptr->name);
 		if(client_p)
 			service_err(chanfix_p, client_p, SVC_CF_NODATAFOR, chanfix_p->name);
 		rb_free(cf_ptr);
@@ -2134,18 +2133,6 @@ add_chanfix(struct channel *chptr, short chanfix, struct client *client_p)
 
 	cf_ptr->highest_score = cf_ptr->scores->s_items[0].score;
 	cf_ptr->endfix_uscore = CF_MIN_USER_SCORE_END * cf_ptr->highest_score;
-
-	/*rb_free(scores->s_items);
-	rb_free(scores);
-	scores = NULL;*/
-
-
-	/* We should either:
-	 *	- Get the highest chanop score so we can set highest_score, or
-	 *  - Fetch all the chanops from the DB we can consider for opping and store
-	 *    them in the autofix_channel struct so we don't have to keep querying
-	 *    the DB.
-	 */
 
 	rb_dlinkAdd(cf_ptr, &cf_ptr->node, &chanfix_list);
 	chptr->cfptr = cf_ptr;

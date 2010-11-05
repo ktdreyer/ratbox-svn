@@ -231,6 +231,7 @@ CREATE TABLE cf_note (
 	channel_id INTEGER NOT NULL,
 	timestamp INTEGER UNSIGNED DEFAULT '0',
 	author VARCHAR(OPERNAMELEN),
+	alert BOOL DEFAULT FALSE,
 	text TEXT,
 	PRIMARY KEY (id),
 	FOREIGN KEY (channel_id) REFERENCES cf_channel (id) ON DELETE CASCADE

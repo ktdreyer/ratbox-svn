@@ -212,6 +212,7 @@ CREATE TABLE cf_note (
 	channel_id INTEGER NOT NULL,
 	timestamp INTEGER DEFAULT '0',
 	author TEXT,
+	alert INTEGER DEFAULT '0',
 	text TEXT,
 	FOREIGN KEY (channel_id) REFERENCES cf_channel (id)
 );

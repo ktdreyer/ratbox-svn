@@ -90,9 +90,9 @@ get_time(time_t when, int tz)
 	tmptr = localtime(&when);
 
 	if(tz)
-		strftime(timebuffer, MAX_DATE_STRING, "%d/%m/%Y %H:%M %Z", tmptr);
+		strftime(timebuffer, MAX_DATE_STRING, "%Y-%m-%d %H:%M %Z", tmptr);
 	else
-		strftime(timebuffer, MAX_DATE_STRING, "%d/%m/%Y %H:%M", tmptr);
+		strftime(timebuffer, MAX_DATE_STRING, "%Y-%m-%d %H:%M", tmptr);
 
 	return timebuffer;
 }

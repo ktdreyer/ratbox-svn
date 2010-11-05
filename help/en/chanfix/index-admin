@@ -1,5 +1,5 @@
  ADDNOTE       - Adds a note for a channel.
- ALERT         - Sets an alert flag for a channel.
+ ALERT         - Sets the alert flag and adds a note.
  BLOCK         - Excludes a channel from auto and manual fixing.
  CHANFIX       - Performs a manual fix of a channel that contains no ops.
  CHECK         - Shows the number of ops and total clients of a channel.
