@@ -1067,7 +1067,9 @@ conf_set_chanserv_expireban(void *data)
 		return;
 
 	config_file.cexpireban_frequency = val;
+#ifdef ENABLE_CHANSERV
 	rb_event_update(chanserv_expireban_ev, val);
+#endif
 }
 
 static void
@@ -1079,7 +1081,9 @@ conf_set_chanserv_enforcetopic(void *data)
 		return;
 
 	config_file.cenforcetopic_frequency = val;
+#ifdef ENABLE_CHANSERV
 	rb_event_update(chanserv_enforcetopic_ev, val);
+#endif
 }
 
 static void
@@ -1098,7 +1102,9 @@ conf_set_banserv_autosync(void *data)
 		return;
 
 	config_file.bs_autosync_frequency = val;
+#ifdef ENABLE_BANSERV
 	rb_event_update(banserv_autosync_ev, val);
+#endif
 }
 
 static struct ConfEntry conf_serverinfo_table[] =
