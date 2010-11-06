@@ -276,12 +276,14 @@ struct _lang_internal lang_internal[] =
 	{ SVC_CF_UHOSTSCORE,		"%4d  %s"	},
 	{ SVC_CF_INFOON,		"Information on %s:"	},
 	{ SVC_CF_ENDOFINFO,		"End of information"	},
-	{ SVC_CF_NOTEADDED,		"Note added for %s"	},
-	{ SVC_CF_NOTEREMOVED,		"Note ID %d removed for %s"	},
-	{ SVC_CF_NONOTES,		"No notes to display"	},
-	{ SVC_CF_SHOWNOTE,		"[%u:%s] %s  %s"	},
-	{ SVC_CF_DELNOTE,		"Note #%u deleted"	},
-	{ SVC_CF_NOTEINVALID,		"Invalid note number %s"	},
+
+	/* Channel NOTE related */
+	{ SVC_NOTE_NOTEADDED,		"Note added for %s"	},
+	{ SVC_NOTE_NOTEREMOVED,		"Note ID %d removed for %s"	},
+	{ SVC_NOTE_NONE,		"No channel notes to display"	},
+	{ SVC_NOTE_DELNOTE,		"Note #%u deleted"	},
+	{ SVC_NOTE_SHOW,		"[%u:%s] %s  %s"	},
+	{ SVC_NOTE_INVALID,		"Invalid note number %s"	},
 /* STOP_GENEXAMPLE_PARSING -- for genexample.pl in langs/ */
 
 	/* this must be last */

@@ -207,12 +207,11 @@ CREATE TABLE cf_score_history (
 	FOREIGN KEY (userhost_id) REFERENCES cf_userhost (id)
 );
 
-CREATE TABLE cf_note (
+CREATE TABLE chan_note (
 	id INTEGER PRIMARY KEY,
-	channel_id INTEGER NOT NULL,
+	chname TEXT,
 	timestamp INTEGER DEFAULT '0',
 	author TEXT,
-	alert INTEGER DEFAULT '0',
-	text TEXT,
-	FOREIGN KEY (channel_id) REFERENCES cf_channel (id)
+	flags INTEGER DEFAULT '0',
+	text TEXT
 );

@@ -40,6 +40,7 @@ struct _config_file
 
 	int min_servers;
 	int min_users;
+	int max_notes;
 
 	char *admin1;
 	char *admin2;
@@ -143,7 +144,6 @@ struct _config_file
 	int cf_num_top_scores;
 	int cf_min_clients;
 	int cf_client_needs_ident;
-	int cf_max_notes;
 };
 
 struct conf_server

@@ -77,6 +77,7 @@ set_default_conf(void)
 
 	config_file.min_servers = 0;
 	config_file.min_users = 0;
+	config_file.max_notes = 10;
 
 	config_file.split_oper_time = 600;
 
@@ -163,7 +164,6 @@ set_default_conf(void)
 	config_file.cf_num_top_scores = 10;
 	config_file.cf_min_clients = 4;
 	config_file.cf_client_needs_ident = 1;
-	config_file.cf_max_notes = 10;
 }
 
 static void
@@ -201,6 +201,10 @@ validate_conf(void)
 	if(config_file.umax_logins < 0)
 		config_file.umax_logins = 0;
 
+	if((config_file.max_notes < 0)
+			|| (config_file.max_notes > 25))
+		config_file.max_notes = 10;
+
 	/* email verification requires we're given an email address */
 	if(config_file.uregister_verify)
 		config_file.uregister_email = 1;
@@ -213,9 +217,6 @@ validate_conf(void)
 	if(config_file.cf_min_clients < 2)
 		config_file.cf_min_clients = 2;
 
-	if((config_file.cf_max_notes < 3)
-			|| (config_file.cf_max_notes > 25))
-		config_file.cf_max_notes = 10;
 }
 
 static void

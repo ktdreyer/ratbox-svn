@@ -233,13 +233,12 @@ CREATE TABLE cf_score_history (
 	FOREIGN KEY (userhost_id) REFERENCES cf_userhost (id) ON DELETE CASCADE
 );
 
-CREATE TABLE cf_note (
+CREATE TABLE chan_note (
 	id SERIAL,
-	channel_id BIGINT NOT NULL,
+	chname VARCHAR(CHANNELLEN),
 	timestamp INTEGER DEFAULT '0',
 	author VARCHAR(OPERNAMELEN),
-	alert BOOL DEFAULT FALSE,
+	flags INTEGER DEFAULT '0',
 	text TEXT,
-	PRIMARY KEY (id),
-	FOREIGN KEY (channel_id) REFERENCES cf_channel (id) ON DELETE CASCADE
+	PRIMARY KEY (id)
 );
