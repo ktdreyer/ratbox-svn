@@ -1,3 +1,29 @@
+moggie      2010/11/06 14:44:44 UTC	(20101106_0-27149)
+  Log:
+  - Move channel note handling out of chanfix for use by other services.
+  - Add notes.c and notes.h for note stuff.
+  - Update DB, translation strings and config file for chan note changes.
+  - Remove obsolete add_system_note().
+  
+
+  Modified:
+	rserv/trunk/doc/example.conf (File Modified) 
+	rserv/trunk/include/conf.h (File Modified) 
+	rserv/trunk/include/langs.h (File Modified) 
+	rserv/trunk/include/notes.h (File Added) 
+	rserv/trunk/src/  (Property Modified)
+	rserv/trunk/src/Makefile.in (File Modified) 
+	rserv/trunk/src/conf.c (File Modified) 
+	rserv/trunk/src/langs.c (File Modified) 
+	rserv/trunk/src/messages.c (File Modified) 
+	rserv/trunk/src/newconf.c (File Modified) 
+	rserv/trunk/src/notes.c (File Added) 
+	rserv/trunk/src/s_chanfix.c (File Modified) 
+	rserv/trunk/tools/base/schema-mysql.txt (File Modified) 
+	rserv/trunk/tools/base/schema-pgsql.txt (File Modified) 
+	rserv/trunk/tools/base/schema-sqlite.txt (File Modified) 
+
+
 moggie      2010/11/05 18:51:57 UTC	(20101105_1-27147)
   Log:
   - Add some #ifdefs to omit some events.
