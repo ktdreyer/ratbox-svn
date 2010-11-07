@@ -1,3 +1,19 @@
+moggie      2010/11/07 01:50:54 UTC	(20101107_0-27151)
+  Log:
+  - Check if chanfix scores are too low before the fix is added.
+  - Re-order add_chanfix() to avoid a couple of unnecessary malloc() and
+    free() calls.
+  - Add a couple of add NOTE calls to give more channel info.
+  
+
+  Modified:
+	rserv/trunk/include/langs.h (File Modified) 
+	rserv/trunk/include/s_chanfix.h (File Modified) 
+	rserv/trunk/src/langs.c (File Modified) 
+	rserv/trunk/src/messages.c (File Modified) 
+	rserv/trunk/src/s_chanfix.c (File Modified) 
+
+
 moggie      2010/11/06 14:44:44 UTC	(20101106_0-27149)
   Log:
   - Move channel note handling out of chanfix for use by other services.
