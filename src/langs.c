@@ -289,6 +289,7 @@ const char *svc_notice_string[] =
 	"SVC_CF_UHOSTSCORE",
 	"SVC_CF_INFOON",
 	"SVC_CF_ENDOFINFO",
+	"SVC_CF_LOWSCORES",
 
 	/* Channel NOTES */
 	"SVC_NOTE_NOTEADDED",

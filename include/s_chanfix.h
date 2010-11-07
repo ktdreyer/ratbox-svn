@@ -48,8 +48,8 @@ struct chanfix_score_item
 {
 	struct chmember *msptr;
 	unsigned long userhost_id;
-	int score;
-	uint8_t opped;
+	unsigned short score;
+	int8_t opped;
 };
 
 /* The minimum number of ops required for a successful chanfix. */

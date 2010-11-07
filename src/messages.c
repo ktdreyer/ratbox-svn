@@ -276,6 +276,7 @@ struct _lang_internal lang_internal[] =
 	{ SVC_CF_UHOSTSCORE,		"%4d  %s"	},
 	{ SVC_CF_INFOON,		"Information on %s:"	},
 	{ SVC_CF_ENDOFINFO,		"End of information"	},
+	{ SVC_CF_LOWSCORES,		"Cannot fix %s (scores too low)"	},
 
 	/* Channel NOTE related */
 	{ SVC_NOTE_NOTEADDED,		"Note added for %s"	},

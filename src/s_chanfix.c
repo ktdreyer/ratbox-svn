@@ -323,7 +323,7 @@ get_all_cf_scores(struct channel *chptr, int max_num, int min_score)
 			channel_id, channel_id);
 	}
 
-	if(data.row_count == 0 || data.row[0][0] == NULL)
+	if(data.row_count == 0)
 	{
 		rsdb_exec_fetch_end(&data);
 		return NULL;
@@ -552,8 +552,8 @@ chanfix_opless_channel(struct chanfix_channel *cf_ch)
 			(cf_ch->highest_score * CF_MIN_USER_SCORE_BEGIN -
 			CF_MIN_USER_SCORE_END * cf_ch->highest_score);
 	
-	/* The min score needed for ops is the HIGHER of min_chan_score
-	 * or min_user_score.
+	/* The min score we use for opping is the higher of min_chan_s
+	 * or min_user_s.
 	 */
 	min_score = (min_chan_s > min_user_s)
 				? min_chan_s
@@ -645,84 +645,80 @@ process_chanfix_list(int fix_type)
 {
 	struct chanfix_channel *cf_ch;
 	rb_dlink_node *ptr, *next_ptr;
-	short fix_status;
+	int8_t fix_status;
 
 	RB_DLINK_FOREACH_SAFE(ptr, next_ptr, chanfix_list.head)
 	{
 		cf_ch = ptr->data;
 
-		if(cf_ch->flags & fix_type)
+		if(!(cf_ch->flags & fix_type))
+			continue;
+
+
+		if((fix_type == CF_STATUS_AUTOFIX) &&
+			((rb_current_time() - cf_ch->time_prev_attempt) < CF_AUTOFIX_INTERVAL))
 		{
-			if((fix_type == CF_STATUS_AUTOFIX) &&
-				((rb_current_time() - cf_ch->time_prev_attempt) < CF_AUTOFIX_INTERVAL))
+			continue;
+		}
+		else if((fix_type == CF_STATUS_MANUALFIX) &&
+			((rb_current_time() - cf_ch->time_prev_attempt) < CF_MANUALFIX_INTERVAL))
+		{
+			continue;
+		}
+		else
+			cf_ch->time_prev_attempt = rb_current_time();
+
+
+		if(rb_dlink_list_length(&cf_ch->chptr->users) < config_file.cf_min_clients)
+		{
+			del_chanfix(cf_ch->chptr);
+			mlog("debug: Channel '%s' has insufficient users for a fix (%d required).",
+					cf_ch->chptr->name, config_file.cf_min_clients);
+			add_channote(cf_ch->chptr->name, "ChanFix", 0,
+					"Fix incomplete (insufficient users)");
+			continue;
+		}
+
+		if(rb_dlink_list_length(&cf_ch->chptr->users_opped) >= CF_MIN_FIX_OPS)
+		{
+			del_chanfix(cf_ch->chptr);
+			mlog("debug: Channel '%s' has enough ops (fix complete).",
+					cf_ch->chptr->name);
+			add_channote(cf_ch->chptr->name, "ChanFix", 0,
+					"Fix complete (enough ops)");
+			continue;
+		}
+
+
+		if(rb_current_time() - cf_ch->time_fix_started > CF_MAX_FIX_TIME)
+		{
+			del_chanfix(cf_ch->chptr);
+			mlog("debug: Cannot fix channel '%s' (fix time expired).",
+					cf_ch->chptr->name);
+			add_channote(cf_ch->chptr->name, "ChanFix", 0,
+					"Fix incomplete (time expired)");
+			continue;
+		}
+			
+		join_service(chanfix_p, cf_ch->chptr->name,
+				cf_ch->chptr->tsinfo, NULL, 0);
+
+		fix_status = chanfix_opless_channel(cf_ch);
+
+		if(fix_status != 0)
+		{
+			if(fix_status)
 			{
-				continue;
-			}
-			else if((fix_type == CF_STATUS_MANUALFIX) &&
-				((rb_current_time() - cf_ch->time_prev_attempt) < CF_MANUALFIX_INTERVAL))
-			{
-				continue;
+				mlog("debug: Opping logic thinks '%s' is fixed.",
+						cf_ch->chptr->name);
+				add_channote(cf_ch->chptr->name, chanfix_p->name, 0,
+						"Channel fix complete");
 			}
 			else
-			{
-				cf_ch->time_prev_attempt = rb_current_time();
-			}
-
-			if(rb_dlink_list_length(&cf_ch->chptr->users) < config_file.cf_min_clients)
-			{
-				del_chanfix(cf_ch->chptr);
-				mlog("debug: Channel '%s' has insufficient users for a fix (%d required).",
-						cf_ch->chptr->name, config_file.cf_min_clients);
-				continue;
-			}
-
-			if(rb_dlink_list_length(&cf_ch->chptr->users_opped) >= CF_MIN_FIX_OPS)
-			{
-				del_chanfix(cf_ch->chptr);
-				mlog("debug: Channel '%s' has enough ops (fix complete).",
+				mlog("debug: Fatal error occured trying to fix '%s'.",
 						cf_ch->chptr->name);
-				continue;
-			}
 
-			if(cf_ch->highest_score <=
-					(CF_MIN_ABS_CHAN_SCORE_END * CF_MAX_CHANFIX_SCORE))
-			{
-				del_chanfix(cf_ch->chptr);
-				mlog("debug: Cannot fix channel '%s' (highest user score is too low).",
-						cf_ch->chptr->name);
-				continue;
-			}
-
-			if(rb_current_time() - cf_ch->time_fix_started > CF_MAX_FIX_TIME)
-			{
-				del_chanfix(cf_ch->chptr);
-				mlog("debug: Cannot fix channel '%s' (fix time expired).",
-						cf_ch->chptr->name);
-				add_channote(cf_ch->chptr->name, "ChanFix", 0,
-						"AUTOFIX ended (fix time expired)");
-				continue;
-			}
-				
-			join_service(chanfix_p, cf_ch->chptr->name,
-					cf_ch->chptr->tsinfo, NULL, 0);
-
-			fix_status = chanfix_opless_channel(cf_ch);
-
-			if(fix_status != 0)
-			{
-				if(fix_status)
-				{
-					mlog("debug: Opping logic thinks '%s' is fixed.",
-							cf_ch->chptr->name);
-					add_channote(cf_ch->chptr->name, chanfix_p->name, 0,
-							"Channel fix complete");
-				}
-				else
-					mlog("debug: Fatal error occured trying to fix '%s'.",
-							cf_ch->chptr->name);
-
-				del_chanfix(cf_ch->chptr);
-			}
+			del_chanfix(cf_ch->chptr);
 		}
 	}
 
@@ -1967,6 +1963,7 @@ seconds_to_midnight(void)
 	return 86400 - (t_info->tm_hour * 3600 + t_info->tm_min * 60 + t_info->tm_sec);
 }
 
+
 /* Add a channel to be manual or auto fixed.
  * Input: channel pointer, man/auto fix bool, client struct if an error
  *        message needs to be sent to a client.
@@ -1975,6 +1972,7 @@ static int
 add_chanfix(struct channel *chptr, short chanfix, struct client *client_p)
 {
 	struct chanfix_channel *cf_ptr;
+	struct chanfix_score *scores_ptr;
 	uint32_t flags;
 
 #ifdef ENABLE_CHANSERV
@@ -2018,42 +2016,56 @@ add_chanfix(struct channel *chptr, short chanfix, struct client *client_p)
 		return 0;
 	}
 
+
+	scores_ptr = get_all_cf_scores(chptr, 0,
+			(CF_MIN_ABS_CHAN_SCORE_END * CF_MAX_CHANFIX_SCORE));
+
+	if(scores_ptr == NULL)
+	{
+		mlog("debug: Insufficient DB scores for '%s', cannot "
+				"add for chanfixing.", chptr->name);
+		if(client_p)
+			service_err(chanfix_p, client_p, SVC_CF_NODATAFOR, chanfix_p->name);
+		return 0;
+
+	} else if(scores_ptr->s_items[0].score <=
+			(CF_MIN_ABS_CHAN_SCORE_END * CF_MAX_CHANFIX_SCORE))
+	{
+		mlog("debug: Cannot fix channel '%s' (highest score is too low).",
+				chptr->name);
+		if(client_p)
+			service_err(chanfix_p, client_p, SVC_CF_LOWSCORES, chanfix_p->name);
+		rb_free(scores_ptr);
+		scores_ptr = NULL;
+		return 0;
+	}
+
 	cf_ptr = rb_malloc(sizeof(struct chanfix_channel));
 	cf_ptr->chptr = chptr;
+
+	cf_ptr->time_fix_started = rb_current_time();
+	cf_ptr->time_prev_attempt = 0;
+	cf_ptr->highest_score = scores_ptr->s_items[0].score;
+	cf_ptr->endfix_uscore = CF_MIN_USER_SCORE_END * cf_ptr->highest_score;
+
+	cf_ptr->scores = scores_ptr;
+	scores_ptr = NULL;
 
 	if(chanfix)
 		cf_ptr->flags |= CF_STATUS_MANUALFIX;
 	else
 		cf_ptr->flags |= CF_STATUS_AUTOFIX;
 
-	cf_ptr->time_fix_started = rb_current_time();
-	cf_ptr->time_prev_attempt = 0;
-
-	cf_ptr->scores = get_all_cf_scores(chptr, 0,
-			(CF_MIN_ABS_CHAN_SCORE_END * CF_MAX_CHANFIX_SCORE));
-
-	if(cf_ptr->scores == NULL)
-	{
-		mlog("debug: Insufficient DB scores for '%s', cannot "
-				"add for chanfixing.", chptr->name);
-		if(client_p)
-			service_err(chanfix_p, client_p, SVC_CF_NODATAFOR, chanfix_p->name);
-		rb_free(cf_ptr);
-		cf_ptr = NULL;
-		return 0;
-	}
-
-	cf_ptr->highest_score = cf_ptr->scores->s_items[0].score;
-	cf_ptr->endfix_uscore = CF_MIN_USER_SCORE_END * cf_ptr->highest_score;
 
 	rb_dlinkAdd(cf_ptr, &cf_ptr->node, &chanfix_list);
 	chptr->cfptr = cf_ptr;
 
 	if(!chanfix)
-		add_channote(chptr->name, chanfix_p->name, 0, "Added for AUTOFIX");
+		add_channote(chptr->name, chanfix_p->name, 0, "Added for AutoFix");
 
 	return 1;
 }
+
 
 static void 
 del_chanfix(struct channel *chptr)
