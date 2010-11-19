@@ -1,3 +1,27 @@
+moggie      2010/11/19 20:27:30 UTC	(20101119_0-27153)
+  Log:
+  - Add an OPME chanfix command.
+  - Update help info and remove unused chanfix HISTORY entry.
+  - Drop max modes to 8 so mode changes aren't as wide and 'cause 8 seems like
+    a nicer number (power of 2 and double what the IRCD uses).
+  - Take src/.depend out of SVN.
+  
+
+  Modified:
+	rserv/trunk/help/en/chanfix/history (File Deleted) 
+	rserv/trunk/help/en/chanfix/index (File Modified) 
+	rserv/trunk/help/en/chanfix/index-admin (File Modified) 
+	rserv/trunk/help/en/chanfix/opme (File Added) 
+	rserv/trunk/help/en/chanfix/revert (File Added) 
+	rserv/trunk/help/en/chanfix/score (File Modified) 
+	rserv/trunk/include/channel.h (File Modified) 
+	rserv/trunk/include/langs.h (File Modified) 
+	rserv/trunk/src/.depend (File Deleted) 
+	rserv/trunk/src/langs.c (File Modified) 
+	rserv/trunk/src/messages.c (File Modified) 
+	rserv/trunk/src/s_chanfix.c (File Modified) 
+
+
 moggie      2010/11/07 01:50:54 UTC	(20101107_0-27151)
   Log:
   - Check if chanfix scores are too low before the fix is added.
