@@ -1,4 +1,4 @@
 SCORE <#channel>
-[ADMIN] Shows the highest scores belonging to users in the channel.
+[ADMIN] Shows the highest scores belonging to users in a channel.
 Matches against opped and non-opped users.
   <#channel>: Channel to check scores of.

@@ -252,7 +252,7 @@ struct _lang_internal lang_internal[] =
 	{ SVC_MEMO_UNREAD_COUNT,	"You  have %u new memo(s)"				},
 
 	/* chanfix */
-	{ SVC_CF_NOTENOUGHUSERS,	"Channel %s doesn't have enough users for me to act on"		},
+	{ SVC_CF_NOTENOUGHUSERS,	"Channel %s does not have enough users for me to act on"		},
 	{ SVC_CF_HASOPPEDUSERS,		"Channel %s already has opped users"				},
 	{ SVC_CF_CHECK,			"Channel %s appears to contain %d opped out of %d users"	},
 	{ SVC_CF_CHANFIXINPROG,		"Channel fix in progress, please stand by."			},
@@ -261,8 +261,9 @@ struct _lang_internal lang_internal[] =
 	{ SVC_CF_TOPOPSCORES,		"Top %d scores for ops in channel '%s':"	},
 	{ SVC_CF_TOPUNOPSCORES,		"Top %d scores for non-ops in channel '%s':"	},
 	{ SVC_CF_TOPUSERSFOR,		"Top %d users for channel '%s':"	},
+	{ SVC_CF_HASSCORES,		"%s has ChanFix database scores"	},
 	{ SVC_CF_NODATAFOR,		"No data for %s in database."	},
-	{ SVC_CF_BEINGFIXED,		"Channel %s is already being fixed."	},
+	{ SVC_CF_BEINGFIXED,		"Channel %s is currently being fixed."	},
 	{ SVC_CF_AUTOFIXED,		"Channel %s is being autofixed."	},
 	{ SVC_CF_CHANFIXED,		"Channel %s is being chanfixed."	},
 	{ SVC_CF_1BEENOPPED,		"1 client should have been opped."	},

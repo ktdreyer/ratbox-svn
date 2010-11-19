@@ -5,7 +5,7 @@
 #define CHANNELLEN	200
 #define KEYLEN		24
 
-#define MAX_MODES	10
+#define MAX_MODES	8
 
 #define MAX_CHANNEL_TABLE	16384
 

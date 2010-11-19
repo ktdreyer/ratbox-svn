@@ -78,6 +78,7 @@ static int o_chanfix_userlist(struct client *, struct lconn *, const char **, in
 static int o_chanfix_userlist2(struct client *, struct lconn *, const char **, int);
 static int o_chanfix_chanfix(struct client *, struct lconn *, const char **, int);
 static int o_chanfix_revert(struct client *, struct lconn *, const char **, int);
+static int o_chanfix_opme(struct client *, struct lconn *, const char **, int);
 static int o_chanfix_check(struct client *, struct lconn *, const char **, int);
 static int o_chanfix_block(struct client *, struct lconn *, const char **, int);
 static int o_chanfix_unblock(struct client *, struct lconn *, const char **, int);
@@ -95,6 +96,7 @@ static struct service_command chanfix_command[] =
 	{ "USCORE",	&o_chanfix_uscore,	2, NULL, 1, 0L, 0, 0, CONF_OPER_CF_CHANFIX },
 	{ "CHANFIX",	&o_chanfix_chanfix,	1, NULL, 1, 0L, 0, 0, CONF_OPER_CF_CHANFIX },
 	{ "REVERT",	&o_chanfix_revert,	1, NULL, 1, 0L, 0, 0, CONF_OPER_CF_CHANFIX },
+	{ "OPME",	&o_chanfix_opme,	1, NULL, 1, 0L, 0, 0, CONF_OPER_CF_ADMIN },
 	{ "INFO",	&o_chanfix_info,	1, NULL, 1, 0L, 0, 1, 0 },
 	{ "ADDNOTE",	&o_chanfix_addnote,	2, NULL, 1, 0L, 0, 0, CONF_OPER_CF_NOTES },
 	{ "DELNOTE",	&o_chanfix_delnote,	1, NULL, 1, 0L, 0, 0, CONF_OPER_CF_NOTES },
@@ -184,7 +186,10 @@ chan_takeover(struct channel *chptr)
 
 	join_service(chanfix_p, chptr->name, chptr->tsinfo, NULL, 0);
 
-	/* need to reop some services */
+	/* Need to reop some services (don't need to update opped/unopped
+	 * lists because the remove_our_ov_modes() function only acts upon
+	 * users and not service clients).
+	 */
 	if(rb_dlink_list_length(&chptr->services) > 1)
 	{
 		struct client *target_p;
@@ -495,7 +500,7 @@ chanfix_opless_channel(struct chanfix_channel *cf_ch)
 	struct chanfix_score_item *clone;
 	unsigned int time_since_start, i, count;
 	int min_score, min_chan_s, min_user_s;
-	uint8_t all_opped = 1;
+	int8_t all_opped = 1;
 	rb_dlink_node *ptr;
 
 	time_since_start = rb_current_time() - (cf_ch->time_fix_started);
@@ -689,7 +694,6 @@ process_chanfix_list(int fix_type)
 			continue;
 		}
 
-
 		if(rb_current_time() - cf_ch->time_fix_started > CF_MAX_FIX_TIME)
 		{
 			del_chanfix(cf_ch->chptr);
@@ -712,7 +716,7 @@ process_chanfix_list(int fix_type)
 				mlog("debug: Opping logic thinks '%s' is fixed.",
 						cf_ch->chptr->name);
 				add_channote(cf_ch->chptr->name, chanfix_p->name, 0,
-						"Channel fix complete");
+						"Fix complete (op logic)");
 			}
 			else
 				mlog("debug: Fatal error occured trying to fix '%s'.",
@@ -828,7 +832,7 @@ build_channel_scores(struct channel *chptr, int max_num)
 	return scores;
 }
 
-/* General function to manage how we iterate over all the channels
+/* General event to manage how we iterate over all the channels
  * gathering score data.
  */
 static void 
@@ -838,12 +842,12 @@ e_chanfix_score_channels(void *unused)
 	rb_dlink_node *ptr;
 	time_t min_ts, max_ts, timestamp = rb_current_time();
 	unsigned int dayts = DAYS_SINCE_EPOCH;
-	short i = 0;
+	uint8_t i = 0;
 	struct rsdb_table ts_data;
 
 	if(is_network_split())
 	{
-		mlog("debug: Channel scoring skipped (network split).");
+		mlog("debug: Channel scoring suspended (network split).");
 		return;
 	}
 
@@ -924,7 +928,7 @@ e_chanfix_collate_history(void *unused)
 {
 	unsigned int min_dayts;
 	struct rsdb_table ts_data;
-	short i = 0;
+	uint8_t i = 0;
 
 	/* As a basic sanity check, don't do more than 10 of these at a time. */
 	while (i < 10)
@@ -1500,6 +1504,82 @@ o_chanfix_revert(struct client *client_p, struct lconn *conn_p, const char *parv
 			chanfix_p->name, "REVERT", parv[0], client_p->name);
 
 	add_channote(parv[0], chanfix_p->name, 0, "REVERT issued by %s",
+			client_p->user->oper->name);
+
+	return 0;
+}
+
+
+static int
+o_chanfix_opme(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
+{
+	struct channel *chptr;
+	rb_dlink_node *ptr;
+	struct chmember *member_p;
+	struct chanfix_score *scores;
+
+	if(!valid_chname(parv[0]))
+	{
+		service_snd(chanfix_p, client_p, conn_p, SVC_IRC_CHANNELINVALID, parv[0]);
+		return 0;
+	}
+
+	if((chptr = find_channel(parv[0])) == NULL)
+	{
+		service_snd(chanfix_p, client_p, conn_p, SVC_IRC_NOSUCHCHANNEL, parv[0]);
+		return 0;
+	}
+
+	/* Check if anyone is opped, if they are we don't do anything. */
+	if(rb_dlink_list_length(&chptr->users_opped) > 0)
+	{
+		service_snd(chanfix_p, client_p, conn_p,
+				SVC_CF_HASOPPEDUSERS, parv[0]);
+		return 0;
+	}
+
+#ifdef ENABLE_CHANSERV
+	if(find_channel_reg(NULL, chptr->name))
+	{
+		service_snd(chanfix_p, client_p, conn_p, SVC_CF_CHANSERVCHANNEL, parv[0]);
+		return 0;
+	}
+#endif
+
+	/* Make sure this channel isn't already being fixed. */
+	if(chptr->cfptr)
+	{
+		service_err(chanfix_p, client_p, SVC_CF_BEINGFIXED, parv[0]);
+		return 0;
+	}
+
+	if((scores = get_all_cf_scores(chptr, 0, 0)) != NULL)
+	{
+		service_snd(chanfix_p, client_p, conn_p, SVC_CF_HASSCORES, parv[0]);
+		rb_free(scores->s_items);
+		rb_free(scores);
+		scores = NULL;
+		return 0;
+	}
+
+	member_p = find_chmember(chptr, client_p);
+
+	if(member_p == NULL)
+	{
+		service_snd(chanfix_p, client_p, conn_p,
+			SVC_IRC_YOUNOTINCHANNEL, parv[0]);
+		return 0;
+	}
+
+	sendto_server(":%s MODE %s +o %s",
+			SVC_UID(chanfix_p), chptr->name,
+			UID(member_p->client_p));
+	op_chmember(member_p);
+
+	service_snd(chanfix_p, client_p, conn_p, SVC_SUCCESSFULON,
+			chanfix_p->name, "OPME", parv[0]);
+
+	add_channote(parv[0], chanfix_p->name, 0, "OPME issued by %s",
 			client_p->user->oper->name);
 
 	return 0;

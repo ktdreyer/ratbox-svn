@@ -1,0 +1,3 @@
+REVERT <#channel>
+[ADMIN] Restore a channel according to its chanfix scores.
+  <#channel>: Channel to revert

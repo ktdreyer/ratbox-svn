@@ -4,7 +4,9 @@
  CHANFIX       - Performs a manual fix of a channel that contains no ops.
  CHECK         - Shows the number of ops and total clients of a channel.
  DELNOTE       - Removes a channel note identified by its ID number.
- SCORE         - Shows the highest scores belonging to users in the channel.
+ OPME          - Gain ops in an opless & scoreless channel.
+ REVERT        - Restore a channel according to its chanfix scores.
+ SCORE         - Shows the highest scores belonging to users in a channel.
  SET           - Sets various options for chanfix.
  UNALERT       - Removes an alert flag for a channel.
  UNBLOCK       - Re-enables auto and manual fixing for a channel.
