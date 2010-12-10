@@ -1,3 +1,25 @@
+moggie      2010/12/10 19:56:43 UTC	(20101210_0-27157)
+  Log:
+  - Add support for not giving chanfix scores clients without a hostname.
+  - Add watchserv stuff for watching chanfix commands.
+  - Don't look for clones in the userlist commands.
+  
+
+  Modified:
+	rserv/trunk/doc/example.conf (File Modified) 
+	rserv/trunk/help/en/chanfix/general (File Modified) 
+	rserv/trunk/help/en/chanfix/index (File Modified) 
+	rserv/trunk/help/en/chanfix/set (File Modified) 
+	rserv/trunk/include/client.h (File Modified) 
+	rserv/trunk/include/conf.h (File Modified) 
+	rserv/trunk/include/watch.h (File Modified) 
+	rserv/trunk/src/client.c (File Modified) 
+	rserv/trunk/src/conf.c (File Modified) 
+	rserv/trunk/src/newconf.c (File Modified) 
+	rserv/trunk/src/s_chanfix.c (File Modified) 
+	rserv/trunk/src/s_watchserv.c (File Modified) 
+
+
 moggie      2010/11/19 20:27:30 UTC	(20101119_0-27153)
   Log:
   - Add an OPME chanfix command.
