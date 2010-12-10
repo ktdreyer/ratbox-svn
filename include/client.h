@@ -151,6 +151,7 @@ struct client_oper
 #define FLAGS_DEAD	0x0001
 #define FLAGS_EOB	0x0002
 #define FLAGS_RSFNC	0x0004
+#define FLAGS_NODNS	0x0008
 
 #define IsDead(x)	((x) && (x)->flags & FLAGS_DEAD)
 #define SetDead(x)	((x)->flags |= FLAGS_DEAD)

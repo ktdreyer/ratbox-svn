@@ -816,7 +816,14 @@ c_uid(struct client *client_p, const char *parv[], int parc)
 		sizeof(target_p->user->host));
 
 	if(parv[6][0] != '0' && parv[6][1] != '\0')
+	{
 		target_p->user->ip = rb_strdup(parv[6]);
+		/* Maybe good to use a case sensitive comparison here to make
+		 * the check faster. Max of 39 chars in an ascii IPv6 address.
+		 */
+		if(!strncmp(target_p->user->host, target_p->user->ip, 39))
+			target_p->flags |= FLAGS_NODNS;
+	}
 
 	rb_strlcpy(target_p->uid, parv[7], sizeof(target_p->uid));
 	rb_strlcpy(target_p->info, parv[8], sizeof(target_p->info));

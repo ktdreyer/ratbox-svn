@@ -177,8 +177,7 @@ chan_takeover(struct channel *chptr)
 
 	remove_our_simple_modes(chptr, NULL, 0);
 	remove_our_ov_modes(chptr);
-
-	remove_our_bans(chptr, NULL, 1, 1, 0);
+	remove_our_bans(chptr, NULL, 1, 0, 0);
 
 	chptr->mode.mode = MODE_TOPIC|MODE_NOEXTERNAL;
 
@@ -483,6 +482,11 @@ collect_channel_scores(struct channel *chptr, time_t timestamp, unsigned int day
 				msptr->client_p->user->username[0] == '~')
 			continue;
 
+		/* Check if the client has a hostname or just an IP */
+		if(config_file.cf_client_needs_dns &&
+				(msptr->client_p->flags & FLAGS_NODNS))
+			continue;
+
 		rb_snprintf(userhost, sizeof(userhost), "%s@%s",
 				msptr->client_p->user->username,
 				msptr->client_p->user->host);
@@ -492,6 +496,7 @@ collect_channel_scores(struct channel *chptr, time_t timestamp, unsigned int day
 						chptr->name, userhost, timestamp, dayts);
 	}
 }
+
 
 static int
 chanfix_opless_channel(struct chanfix_channel *cf_ch)
@@ -1112,6 +1117,9 @@ o_chanfix_score(struct client *client_p, struct lconn *conn_p, const char *parv[
 	service_snd(chanfix_p, client_p, conn_p, SVC_CF_TOPOPSCORES,
 			config_file.cf_num_top_scores, parv[0]);
 
+	/* arg 3 of get_chmember_scores() is 1 to tell the function to ignore clones
+	 * and therefore not allocate memory for them that we'd later need to free().
+	 */
 	scores = get_chmember_scores(all_scores, chptr, &chptr->users_opped, 1);
 	if(scores && scores->matched > 0)
 	{
@@ -1185,6 +1193,9 @@ o_chanfix_uscore(struct client *client_p, struct lconn *conn_p, const char *parv
 		service_snd(chanfix_p, client_p, conn_p, SVC_CF_NODATAFOR, parv[0]);
 		return 0;
 	}
+
+	zlog(chanfix_p, 4, WATCH_CHANFIX, 1, client_p, conn_p,
+			"USCORE %s", parv[0]);
 
 #ifdef ENABLE_CHANSERV
 	if(find_channel_reg(NULL, parv[0]))
@@ -1276,6 +1287,9 @@ o_chanfix_userlist(struct client *client_p, struct lconn *conn_p, const char *pa
 		return 0;
 	}
 
+	zlog(chanfix_p, 4, WATCH_CHANFIX, 1, client_p, conn_p,
+			"USERLIST %s", parv[0]);
+
 #ifdef ENABLE_CHANSERV
 	if(find_channel_reg(NULL, chptr->name))
 	{
@@ -1283,7 +1297,7 @@ o_chanfix_userlist(struct client *client_p, struct lconn *conn_p, const char *pa
 	}
 #endif
 
-	if((scores = get_chmember_scores(NULL, chptr, &chptr->users, 0)) == NULL)
+	if((scores = get_chmember_scores(NULL, chptr, &chptr->users, 1)) == NULL)
 	{
 		service_snd(chanfix_p, client_p, conn_p, SVC_CF_NODATAFOR, parv[0]);
 		return 0;
@@ -1454,6 +1468,9 @@ o_chanfix_chanfix(struct client *client_p, struct lconn *conn_p, const char *par
 	service_snd(chanfix_p, client_p, conn_p, SVC_ISSUEDFORBY,
 			chanfix_p->name, "CHANFIX", parv[0], client_p->name);
 
+	zlog(chanfix_p, 2, WATCH_CHANFIX, 1, client_p, conn_p,
+			"CHANFIX %s", parv[0]);
+
 	add_channote(parv[0], chanfix_p->name, 0, "CHANFIX by %s",
 			client_p->user->oper->name);
 
@@ -1503,6 +1520,9 @@ o_chanfix_revert(struct client *client_p, struct lconn *conn_p, const char *parv
 	service_snd(chanfix_p, client_p, conn_p, SVC_ISSUEDFORBY,
 			chanfix_p->name, "REVERT", parv[0], client_p->name);
 
+	zlog(chanfix_p, 2, WATCH_CHANFIX, 1, client_p, conn_p,
+			"REVERT %s", parv[0]);
+
 	add_channote(parv[0], chanfix_p->name, 0, "REVERT issued by %s",
 			client_p->user->oper->name);
 
@@ -1514,7 +1534,6 @@ static int
 o_chanfix_opme(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	struct channel *chptr;
-	rb_dlink_node *ptr;
 	struct chmember *member_p;
 	struct chanfix_score *scores;
 
@@ -1526,14 +1545,14 @@ o_chanfix_opme(struct client *client_p, struct lconn *conn_p, const char *parv[]
 
 	if((chptr = find_channel(parv[0])) == NULL)
 	{
-		service_snd(chanfix_p, client_p, conn_p, SVC_IRC_NOSUCHCHANNEL, parv[0]);
+		service_err(chanfix_p, client_p, SVC_IRC_NOSUCHCHANNEL, parv[0]);
 		return 0;
 	}
 
 	/* Check if anyone is opped, if they are we don't do anything. */
 	if(rb_dlink_list_length(&chptr->users_opped) > 0)
 	{
-		service_snd(chanfix_p, client_p, conn_p,
+		service_err(chanfix_p, client_p,
 				SVC_CF_HASOPPEDUSERS, parv[0]);
 		return 0;
 	}
@@ -1541,7 +1560,7 @@ o_chanfix_opme(struct client *client_p, struct lconn *conn_p, const char *parv[]
 #ifdef ENABLE_CHANSERV
 	if(find_channel_reg(NULL, chptr->name))
 	{
-		service_snd(chanfix_p, client_p, conn_p, SVC_CF_CHANSERVCHANNEL, parv[0]);
+		service_err(chanfix_p, client_p, SVC_CF_CHANSERVCHANNEL, parv[0]);
 		return 0;
 	}
 #endif
@@ -1555,7 +1574,7 @@ o_chanfix_opme(struct client *client_p, struct lconn *conn_p, const char *parv[]
 
 	if((scores = get_all_cf_scores(chptr, 0, 0)) != NULL)
 	{
-		service_snd(chanfix_p, client_p, conn_p, SVC_CF_HASSCORES, parv[0]);
+		service_err(chanfix_p, client_p, SVC_CF_HASSCORES, parv[0]);
 		rb_free(scores->s_items);
 		rb_free(scores);
 		scores = NULL;
@@ -1579,6 +1598,9 @@ o_chanfix_opme(struct client *client_p, struct lconn *conn_p, const char *parv[]
 	service_snd(chanfix_p, client_p, conn_p, SVC_SUCCESSFULON,
 			chanfix_p->name, "OPME", parv[0]);
 
+	zlog(chanfix_p, 1, WATCH_CHANFIX, 1, client_p, conn_p,
+			"OPME %s", parv[0]);
+
 	add_channote(parv[0], chanfix_p->name, 0, "OPME issued by %s",
 			client_p->user->oper->name);
 
@@ -1590,9 +1612,6 @@ static int
 o_chanfix_block(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
 	uint32_t flags = 0;
-
-	/*const char *msg;
-	msg = rebuild_params(parv, parc, 1);*/
 
 	if(!valid_chname(parv[0]))
 	{
@@ -1613,6 +1632,8 @@ o_chanfix_block(struct client *client_p, struct lconn *conn_p, const char *parv[
 					chanfix_p->name, "BLOCK", parv[0]);
 			rsdb_exec(NULL, "UPDATE cf_channel SET flags = %u WHERE chname = '%Q'",
 					flags, parv[0]);
+			zlog(chanfix_p, 3, WATCH_CHANFIX, 1, client_p, conn_p,
+					"BLOCK %s", parv[0]);
 		}
 	}
 	else
@@ -1623,6 +1644,8 @@ o_chanfix_block(struct client *client_p, struct lconn *conn_p, const char *parv[
 				"VALUES (LOWER('%Q'), '%d')", parv[0], flags);
 		service_snd(chanfix_p, client_p, conn_p, SVC_SUCCESSFULON,
 				chanfix_p->name, "BLOCK", parv[0]);
+		zlog(chanfix_p, 3, WATCH_CHANFIX, 1, client_p, conn_p,
+				"BLOCK %s", parv[0]);
 	}
 
 	return 0;
@@ -1659,6 +1682,8 @@ o_chanfix_unblock(struct client *client_p, struct lconn *conn_p, const char *par
 					chanfix_p->name, "UNBLOCK", parv[0]);
 			rsdb_exec(NULL, "UPDATE cf_channel SET flags = %u WHERE chname = '%Q'",
 					flags, parv[0]);
+			zlog(chanfix_p, 3, WATCH_CHANFIX, 1, client_p, conn_p,
+					"UNBLOCK %s", parv[0]);
 		}
 	}
 	else
@@ -1701,6 +1726,8 @@ o_chanfix_alert(struct client *client_p, struct lconn *conn_p, const char *parv[
 			msg = rebuild_params(parv, parc, 1);
 
 			add_channote(parv[0], client_p->user->oper->name, NOTE_CF_ALERT, msg);
+			zlog(chanfix_p, 3, WATCH_CHANFIX, 1, client_p, conn_p,
+					"ALERT %s", parv[0]);
 		}
 	}
 	else
@@ -1746,6 +1773,8 @@ o_chanfix_unalert(struct client *client_p, struct lconn *conn_p, const char *par
 
 			rsdb_exec(NULL, "UPDATE chan_note SET flags = (flags&%u)"
 					"WHERE chname = LOWER('%Q')", ~NOTE_CF_ALERT, parv[0]);
+			zlog(chanfix_p, 3, WATCH_CHANFIX, 1, client_p, conn_p,
+					"UNALERT %s", parv[0]);
 		}
 	}
 	else
@@ -1911,6 +1940,8 @@ o_chanfix_set(struct client *client_p, struct lconn *conn_p, const char *parv[],
 				config_file.min_servers = num;
 				service_err(chanfix_p, client_p, SVC_OPTIONSETTO, chanfix_p->name,
 						"SET", "min_servers", parv[1]);
+				zlog(chanfix_p, 1, WATCH_CHANFIX, 1, client_p, conn_p,
+						"SET min servers");
 			}
 			else
 			{
@@ -1934,6 +1965,8 @@ o_chanfix_set(struct client *client_p, struct lconn *conn_p, const char *parv[],
 				config_file.min_users = num;
 				service_err(chanfix_p, client_p, SVC_OPTIONSETTO, chanfix_p->name,
 						"SET", "min_users", parv[1]);
+				zlog(chanfix_p, 1, WATCH_CHANFIX, 1, client_p, conn_p,
+						"SET min users");
 			}
 			else
 			{
@@ -1956,12 +1989,16 @@ o_chanfix_set(struct client *client_p, struct lconn *conn_p, const char *parv[],
 				config_file.cf_enable_autofix = 1;
 				service_err(chanfix_p, client_p, SVC_OPTIONSETTO, chanfix_p->name,
 						"SET", "autofix", "enabled");
+				zlog(chanfix_p, 1, WATCH_CHANFIX, 1, client_p, conn_p,
+						"SET autofix on");
 			}
 			else if(!irccmp(parv[1], "off") || !irccmp(parv[0], "no"))
 			{
 				service_err(chanfix_p, client_p, SVC_OPTIONSETTO, chanfix_p->name,
 						"SET", "autofix", "disabled");
 				config_file.cf_enable_autofix = 0;
+				zlog(chanfix_p, 1, WATCH_CHANFIX, 1, client_p, conn_p,
+						"SET autofix off");
 			}
 			else
 			{
@@ -1983,12 +2020,16 @@ o_chanfix_set(struct client *client_p, struct lconn *conn_p, const char *parv[],
 				config_file.cf_enable_chanfix = 1;
 				service_err(chanfix_p, client_p, SVC_OPTIONSETTO, chanfix_p->name,
 						"SET", "chanfix", "enabled");
+				zlog(chanfix_p, 1, WATCH_CHANFIX, 1, client_p, conn_p,
+						"SET chanfix on");
 			}
 			else if(!irccmp(parv[1], "off") || !irccmp(parv[0], "no"))
 			{
 				service_err(chanfix_p, client_p, SVC_OPTIONSETTO, chanfix_p->name,
 						"SET", "chanfix", "disabled");
 				config_file.cf_enable_chanfix = 0;
+				zlog(chanfix_p, 1, WATCH_CHANFIX, 1, client_p, conn_p,
+						"SET chanfix off");
 			}
 			else
 			{

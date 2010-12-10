@@ -1,6 +1,7 @@
 SET <option> <parameter>
 [ADMIN] Sets various options for chanfix.
-  SERVERS <integer>: Total number of servers that should be linked
+  SERVERS <integer>: Min number of servers that should be linked
                      on the network.
-  AUTOFIX <on|off> : Toggle whether chanfix should perform automatic fixing.
-  CHANFIX <on|off> : Toggle whether chanfix should permit manual chanfixing.
+  USERS <integer>  : Min number of users on the network.
+  AUTOFIX <on|off> : Toggle whether ChanFix should perform auto fixing.
+  CHANFIX <on|off> : Toggle whether ChanFix should permit manual fixing.

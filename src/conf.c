@@ -164,6 +164,7 @@ set_default_conf(void)
 	config_file.cf_num_top_scores = 10;
 	config_file.cf_min_clients = 4;
 	config_file.cf_client_needs_ident = 1;
+	config_file.cf_client_needs_dns = 0;
 }
 
 static void

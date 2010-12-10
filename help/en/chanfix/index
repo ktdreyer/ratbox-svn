@@ -1,4 +1,4 @@
 This service monitors the network and attempts to
-fix oppless channels. Available commands:
+fix opless channels. Available commands:
  INFO        - Shows notes for this channel, and whether it has been blocked.
  STATUS      - Shows the current status of the chanfix module.

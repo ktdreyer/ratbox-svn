@@ -89,6 +89,9 @@ static struct
 	{ "usoper",		WATCH_USOPER		},
 	{ "usregister",		WATCH_USREGISTER	},
 #endif
+#ifdef ENABLE_CHANFIX
+	{ "chanfix",		WATCH_CHANFIX		},
+#endif
 	{ "all",		WATCH_ALL		},
 	{ NULL, 0 }
 };
