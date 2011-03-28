@@ -43,9 +43,9 @@ static int email_count;
 int
 can_send_email(void)
 {
-	if(email_last + config_file.email_duration < rb_current_time())
+	if(email_last + config_file.email_duration < rb_time())
 	{
-		email_last = rb_current_time();
+		email_last = rb_time();
 		email_count = 0;
 
 		return 1;

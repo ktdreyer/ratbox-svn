@@ -203,7 +203,7 @@ e_jupeserv_expire(void *unused)
 	{
 		jupe_p = ptr->data;
 
-		if(jupe_p->expire <= rb_current_time())
+		if(jupe_p->expire <= rb_time())
 		{
 			rb_dlinkDelete(&jupe_p->node, &pending_jupes);
 			free_jupe(jupe_p);
@@ -430,7 +430,7 @@ s_jupeserv_calljupe(struct client *client_p, struct lconn *conn_p, const char *p
 	zlog(jupeserv_p, 1, WATCH_JUPESERV, 1, client_p, conn_p,
 		"CALLJUPE %s %s", parv[0], jupe_p->reason);
 
-	jupe_p->expire = rb_current_time() + config_file.pending_time;
+	jupe_p->expire = rb_time() + config_file.pending_time;
 	if(ClientAdmin(client_p))
 		jupe_p->points += config_file.admin_score;
 	else
@@ -500,7 +500,7 @@ s_jupeserv_callunjupe(struct client *client_p, struct lconn *conn_p, const char 
 	zlog(jupeserv_p, 1, WATCH_JUPESERV, 1, client_p, conn_p,
 		"CALLUNJUPE %s", parv[0]);
 
-	jupe_p->expire = rb_current_time() + config_file.pending_time;
+	jupe_p->expire = rb_time() + config_file.pending_time;
 	if(ClientAdmin(client_p))
 		jupe_p->points -= config_file.admin_score;
 	else

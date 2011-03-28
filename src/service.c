@@ -845,9 +845,9 @@ handle_service(struct client *service_p, struct client *client_p,
 			 find_conf_oper(client_p->user->username, client_p->user->host, client_p->user->servername, NULL) == NULL))
 			return;
 
-		if((client_p->user->flood_time + config_file.client_flood_time) < rb_current_time())
+		if((client_p->user->flood_time + config_file.client_flood_time) < rb_time())
 		{
-			client_p->user->flood_time = rb_current_time();
+			client_p->user->flood_time = rb_time();
 			client_p->user->flood_count = 0;
 		}
 
@@ -1010,7 +1010,7 @@ handle_service(struct client *service_p, struct client *client_p,
 			}
 			else
 			{
-				client_p->user->user_reg->last_time = rb_current_time();
+				client_p->user->user_reg->last_time = rb_time();
 				client_p->user->user_reg->flags |= US_FLAGS_NEEDUPDATE;
 			}
 		}

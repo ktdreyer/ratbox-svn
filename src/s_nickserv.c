@@ -268,7 +268,7 @@ s_nick_register(struct client *client_p, struct lconn *conn_p, const char *parv[
 		return 1;
 	}
 	else
-		ureg_p->last_time = rb_current_time();
+		ureg_p->last_time = rb_time();
 
 	if(rb_dlink_list_length(&ureg_p->nicks) >= config_file.nmax_nicks)
 	{
@@ -296,7 +296,7 @@ s_nick_register(struct client *client_p, struct lconn *conn_p, const char *parv[
 	nreg_p = rb_bh_alloc(nick_reg_heap);
 
 	rb_strlcpy(nreg_p->name, client_p->name, sizeof(nreg_p->name));
-	nreg_p->reg_time = nreg_p->last_time = rb_current_time();
+	nreg_p->reg_time = nreg_p->last_time = rb_time();
 
 	if(config_file.nallow_set_warn)
 		nreg_p->flags |= NS_FLAGS_WARN;
@@ -424,7 +424,7 @@ s_nick_regain(struct client *client_p, struct lconn *conn_p, const char *parv[],
 	 */
 	sendto_server("ENCAP %s RSFNC %s %s %lu %lu",
 			client_p->user->servername, UID(client_p),
-			nreg_p->name, (unsigned long)(rb_current_time() - 60),
+			nreg_p->name, (unsigned long)(rb_time() - 60),
 			(unsigned long)client_p->user->tsinfo);
 
 	exit_client(target_p, 0);
@@ -522,7 +522,7 @@ s_nick_info(struct client *client_p, struct lconn *conn_p, const char *parv[], i
 
 	service_err(nickserv_p, client_p, SVC_INFO_REGDURATIONNICK,
 			nreg_p->name, nreg_p->user_reg->name,
-			get_duration((time_t) (rb_current_time() - nreg_p->reg_time)));
+			get_duration((time_t) (rb_time() - nreg_p->reg_time)));
 
 	zlog(nickserv_p, 5, 0, 0, client_p, NULL, "INFO %s", parv[0]);
 

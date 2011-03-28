@@ -446,7 +446,7 @@ u_status(struct client *unused, struct lconn *conn_p, const char *parv[], int pa
 {
         sendto_one(conn_p, "%s, version ratbox-services-%s(%s), up %s",
 			MYNAME, RSERV_VERSION, SERIALNUM,
-			get_duration(rb_current_time() - first_time));
+			get_duration(rb_time() - first_time));
 
         if(server_p != NULL)
                 sendto_one(conn_p, "Currently connected to %s", server_p->name);

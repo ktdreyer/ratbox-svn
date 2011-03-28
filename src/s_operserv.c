@@ -283,7 +283,7 @@ o_oper_osjoin(struct client *client_p, struct lconn *conn_p, const char *parv[],
 	zlog(operserv_p, 1, WATCH_OPERSERV, 1, client_p, conn_p,
 		"OSJOIN %s", parv[0]);
 
-	tsinfo = chptr != NULL ? chptr->tsinfo : rb_current_time();
+	tsinfo = chptr != NULL ? chptr->tsinfo : rb_time();
 
 	rsdb_exec(NULL, "INSERT INTO operserv (chname, tsinfo, oper) VALUES(LOWER('%Q'), '%lu', '%Q')",
 			parv[0], tsinfo, OPER_NAME(client_p, conn_p));

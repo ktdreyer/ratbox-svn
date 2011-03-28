@@ -508,7 +508,7 @@ chanfix_opless_channel(struct chanfix_channel *cf_ch)
 	int8_t all_opped = 1;
 	rb_dlink_node *ptr;
 
-	time_since_start = rb_current_time() - (cf_ch->time_fix_started);
+	time_since_start = rb_time() - (cf_ch->fix_started);
 
 	/* Fetch all the scores from the DB that aren't below the absolute
 	 * useful minimum.
@@ -666,17 +666,17 @@ process_chanfix_list(int fix_type)
 
 
 		if((fix_type == CF_STATUS_AUTOFIX) &&
-			((rb_current_time() - cf_ch->time_prev_attempt) < CF_AUTOFIX_INTERVAL))
+			((rb_time() - cf_ch->prev_attempt) < CF_AUTOFIX_FREQ))
 		{
 			continue;
 		}
 		else if((fix_type == CF_STATUS_MANUALFIX) &&
-			((rb_current_time() - cf_ch->time_prev_attempt) < CF_MANUALFIX_INTERVAL))
+			((rb_time() - cf_ch->prev_attempt) < CF_CHANFIX_FREQ))
 		{
 			continue;
 		}
 		else
-			cf_ch->time_prev_attempt = rb_current_time();
+			cf_ch->prev_attempt = rb_time();
 
 
 		if(rb_dlink_list_length(&cf_ch->chptr->users) < config_file.cf_min_clients)
@@ -699,7 +699,7 @@ process_chanfix_list(int fix_type)
 			continue;
 		}
 
-		if(rb_current_time() - cf_ch->time_fix_started > CF_MAX_FIX_TIME)
+		if(rb_time() - cf_ch->fix_started > CF_MAX_FIX_TIME)
 		{
 			del_chanfix(cf_ch->chptr);
 			mlog("debug: Cannot fix channel '%s' (fix time expired).",
@@ -845,7 +845,7 @@ e_chanfix_score_channels(void *unused)
 {
 	struct channel *chptr;
 	rb_dlink_node *ptr;
-	time_t min_ts, max_ts, timestamp = rb_current_time();
+	time_t min_ts, max_ts, timestamp = rb_time();
 	unsigned int dayts = DAYS_SINCE_EPOCH;
 	uint8_t i = 0;
 	struct rsdb_table ts_data;
@@ -924,7 +924,7 @@ e_chanfix_score_channels(void *unused)
 	}
 
 	mlog("debug: channel op scoring time: %s",
-			get_duration(rb_current_time() - timestamp));
+			get_duration(rb_time() - timestamp));
 }
 
 /* Collate the cf_score data into cf_score_history. */
@@ -992,11 +992,11 @@ e_chanfix_autofix_channels(void *unused)
 	if(!is_network_split() && config_file.cf_enable_autofix)
 	{
 		mlog("debug: Processing autofix channels.");
-		start_time = rb_current_time();
+		start_time = rb_time();
 
 		process_chanfix_list(CF_STATUS_AUTOFIX);
 		mlog("debug: autofix processing time: %s",
-				get_duration(rb_current_time() - start_time));
+				get_duration(rb_time() - start_time));
 	}
 }
 
@@ -1007,11 +1007,11 @@ e_chanfix_manualfix_channels(void *unused)
 	if(!is_network_split() && config_file.cf_enable_chanfix)
 	{
 		mlog("debug: Processing chanfix channels.");
-		start_time = rb_current_time();
+		start_time = rb_time();
 
 		process_chanfix_list(CF_STATUS_MANUALFIX);
 		mlog("debug: chanfix processing time: %s",
-				get_duration(rb_current_time() - start_time));
+				get_duration(rb_time() - start_time));
 	}
 }
 
@@ -1033,7 +1033,7 @@ h_chanfix_channel_opless(void *chptr_v, void *unused)
 
 	if(!chptr->cfptr)
 	{
-		if(netsplit_warn_ts > rb_current_time())
+		if(netsplit_warn_ts > rb_time())
 		{
 			mlog("debug: Temporarily ignoring opless channel %s "
 					"(recent squit detected).", chptr->name);
@@ -1054,7 +1054,7 @@ h_chanfix_server_squit_warn(void *target_p, void *unused)
 	/* Temporarily disable opless channel detection because it looks
 	 * like a netsplit is in progress.
 	 */
-	netsplit_warn_ts = CF_OPLESS_IGNORE_TIME + rb_current_time();
+	netsplit_warn_ts = CF_OPLESS_IGNORE_TIME + rb_time();
 
 	return 0;
 }
@@ -2079,7 +2079,7 @@ static time_t
 seconds_to_midnight(void)
 {
 	struct tm *t_info;
-	time_t nowtime = rb_current_time();
+	time_t nowtime = rb_time();
 	t_info = gmtime(&nowtime);
 	return 86400 - (t_info->tm_hour * 3600 + t_info->tm_min * 60 + t_info->tm_sec);
 }
@@ -2164,8 +2164,8 @@ add_chanfix(struct channel *chptr, short chanfix, struct client *client_p)
 	cf_ptr = rb_malloc(sizeof(struct chanfix_channel));
 	cf_ptr->chptr = chptr;
 
-	cf_ptr->time_fix_started = rb_current_time();
-	cf_ptr->time_prev_attempt = 0;
+	cf_ptr->fix_started = rb_time();
+	cf_ptr->prev_attempt = 0;
 	cf_ptr->highest_score = scores_ptr->s_items[0].score;
 	cf_ptr->endfix_uscore = CF_MIN_USER_SCORE_END * cf_ptr->highest_score;
 

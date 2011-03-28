@@ -4,7 +4,7 @@
 
 struct channel;
 
-#define DAYS_SINCE_EPOCH	rb_current_time() / 86400
+#define DAYS_SINCE_EPOCH	rb_time() / 86400
 
 #define CF_STATUS_CLEAREDMODES		0x0000001
 #define CF_STATUS_CLEAREDBANS		0x0000002
@@ -22,8 +22,8 @@ struct channel;
 struct chanfix_channel
 {
 	struct channel *chptr;
-	time_t time_fix_started;
-	time_t time_prev_attempt;
+	time_t fix_started;
+	time_t prev_attempt;
 	struct chanfix_score *scores;
 	int highest_score;	/* highest chanop score in channel */
 	int endfix_uscore;	/* min possible user score at end of a chanfix */
@@ -86,10 +86,10 @@ struct chanfix_score_item
 #define CF_MAX_FIX_TIME	3600
 
 /* The time to wait between consecutive autofixes (seconds). */
-#define CF_AUTOFIX_INTERVAL	600
+#define CF_AUTOFIX_FREQ	600
 
 /* The time to wait between consecutive chanfixes (seconds). */
-#define CF_MANUALFIX_INTERVAL	300
+#define CF_CHANFIX_FREQ	300
 
 /* Time to wait before removing channel modes during an autofix. Expressed as
  * a percentage of the CF_MAX_FIX_TIME. */

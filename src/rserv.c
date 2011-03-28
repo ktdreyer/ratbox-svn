@@ -476,7 +476,7 @@ main(int argc, char *argv[])
 	add_scommand_handler(&bmask_command);
 	add_scommand_handler(&privmsg_command);
 
-	first_time = rb_current_time();
+	first_time = rb_time();
 
 	if(testing_conf)
 		fprintf(stderr, "Conf check started\n");

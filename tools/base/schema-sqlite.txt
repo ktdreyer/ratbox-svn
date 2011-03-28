@@ -170,8 +170,8 @@ CREATE TABLE cf_temp_score (
 	timestamp INTEGER,
 	dayts INTEGER
 );
-CREATE UNIQUE INDEX cf_temp_score_chname_idx ON cf_temp_score (chname);
-CREATE UNIQUE INDEX cf_temp_score_userhost_idx ON cf_temp_score (userhost);
+CREATE INDEX cf_temp_score_chname_idx ON cf_temp_score (chname);
+CREATE INDEX cf_temp_score_userhost_idx ON cf_temp_score (userhost);
 
 CREATE TABLE cf_userhost (
 	id INTEGER PRIMARY KEY,

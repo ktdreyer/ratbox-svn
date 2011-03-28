@@ -57,7 +57,7 @@ add_channote(const char *chan, const char *author, uint32_t flags,
 			"INSERT INTO chan_note "
 			"(chname, timestamp, author, flags, text) "
 			"VALUES(LOWER('%Q'), '%lu', '%Q', '%u', '%Q')",
-			chan, rb_current_time(), author, flags, buf);
+			chan, rb_time(), author, flags, buf);
 
 	return 1;
 }

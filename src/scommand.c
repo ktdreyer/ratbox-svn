@@ -567,7 +567,7 @@ c_stats(struct client *client_p, const char *parv[], int parc)
 		case 'u':
 			sendto_server(":%s 242 %s :Server Up %s",
 				      MYUID, UID(client_p),
-                                      get_duration(rb_current_time() -
+                                      get_duration(rb_time() -
                                                    first_time));
 			break;
 
@@ -575,9 +575,9 @@ c_stats(struct client *client_p, const char *parv[], int parc)
 			sendto_server(":%s 249 %s V :%s (AutoConn.!*@*) Idle: "
                                       "%ld SendQ: %ld Connected %s",
 				      MYUID, UID(client_p), server_p->name, 
-				      (rb_current_time() - server_p->last_time), 
+				      (rb_time() - server_p->last_time), 
                                       get_sendq(server_p),
-                                      get_duration(rb_current_time() -
+                                      get_duration(rb_time() -
                                                    server_p->first_time));
 			break;
 

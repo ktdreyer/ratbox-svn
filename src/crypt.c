@@ -34,7 +34,7 @@ init_crypt_seed(void)
 	unsigned int seed;
 	if(rb_get_random(&seed, sizeof(seed)) == -1)
 	{
-		const struct timeval *tv = rb_current_time_tv();
+		const struct timeval *tv = rb_time_tv();
 		srand(tv->tv_sec ^ (tv->tv_usec | (getpid() << 20)));
 		return;
 	}

@@ -85,7 +85,7 @@ struct ban_reg
 };
 
 #define CHAN_SUSPEND_EXPIRED(x) ((x)->flags & CS_FLAGS_SUSPENDED && (x)->suspend_time && \
-				(x)->suspend_time <= rb_current_time())
+				(x)->suspend_time <= rb_time())
 
 extern struct chan_reg *find_channel_reg(struct client *, const char *);
 

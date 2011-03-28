@@ -438,7 +438,7 @@ store_client_oper(struct client *client_p)
 	coper_p->oper = client_p->user->oper;
 	coper_p->oper->refcount++;
 
-	coper_p->timestamp = rb_current_time();
+	coper_p->timestamp = rb_time();
 
 	rb_dlinkAdd(coper_p, &coper_p->ptr, &client_oper_list);
 }
@@ -497,7 +497,7 @@ expire_client_oper(void *unused)
 	{
 		coper_p = ptr->data;
 
-		if((coper_p->timestamp + config_file.split_oper_time) < rb_current_time())
+		if((coper_p->timestamp + config_file.split_oper_time) < rb_time())
 			free_client_oper(coper_p);
 	}
 }

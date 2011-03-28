@@ -88,9 +88,9 @@ stats_uplink(struct lconn *conn_p)
                 sendto_one(conn_p, "Currently connected to %s Idle: %ld "
                            "SendQ: %ld Connected: %s",
                            server_p->name,
-                           (rb_current_time() - server_p->last_time), 
+                           (rb_time() - server_p->last_time), 
                            get_sendq(server_p),
-                           get_duration(rb_current_time() - server_p->first_time));
+                           get_duration(rb_time() - server_p->first_time));
         else
                 sendto_one(conn_p, "Currently disconnected");
 }
@@ -100,7 +100,7 @@ stats_uptime(struct lconn *conn_p)
 {
         sendto_one(conn_p, "%s up %s",
                    MYNAME,
-                   get_duration(rb_current_time() - first_time));
+                   get_duration(rb_time() - first_time));
 }
 
 static struct _stats_table stats_table[] =

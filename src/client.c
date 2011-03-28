@@ -318,9 +318,9 @@ cleanup_host_table(void *unused)
 	{
 		hent = ptr->data;
 
-		if(hent->flood_expire < rb_current_time() &&
-		   hent->cregister_expire < rb_current_time() &&
-		   hent->uregister_expire < rb_current_time())
+		if(hent->flood_expire < rb_time() &&
+		   hent->cregister_expire < rb_time() &&
+		   hent->uregister_expire < rb_time())
 		{
 			rb_dlinkDelete(&hent->node, &host_table[i]);
 			rb_free(hent->name);
@@ -897,9 +897,9 @@ c_kill(struct client *client_p, const char *parv[], int parc)
 				target_p->name, client_p->name);
 
 		/* no kill in the last 20 seconds, reset. */
-		if((first_kill + 20) < rb_current_time())
+		if((first_kill + 20) < rb_time())
 		{
-			first_kill = rb_current_time();
+			first_kill = rb_time();
 			num_kill = 1;
 		}
                 /* 20 kills in 20 seconds.. service fight. */
@@ -963,7 +963,7 @@ c_server(struct client *client_p, const char *parv[], int parc)
                 }
 
                 ClearConnHandshake(server_p);
-                server_p->first_time = rb_current_time();
+                server_p->first_time = rb_time();
         }
 
 	target_p = rb_bh_alloc(client_heap);

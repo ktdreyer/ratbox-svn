@@ -393,7 +393,7 @@ join_service(struct client *service_p, const char *chname, time_t tsinfo,
 		chptr = rb_bh_alloc(channel_heap);
 
 		rb_strlcpy(chptr->name, chname, sizeof(chptr->name));
-		chptr->tsinfo = tsinfo ? tsinfo : rb_current_time();
+		chptr->tsinfo = tsinfo ? tsinfo : rb_time();
 
 		if(mode != NULL)
 		{
@@ -573,7 +573,7 @@ c_topic(struct client *client_p, const char *parv[], int parc)
 		else
 			rb_strlcpy(chptr->topicwho, client_p->name, sizeof(chptr->topicwho));
 
-		chptr->topic_tsinfo = rb_current_time();
+		chptr->topic_tsinfo = rb_time();
 	}
 
 	hook_call(HOOK_CHANNEL_TOPIC, chptr, NULL);
@@ -610,7 +610,7 @@ c_tb(struct client *client_p, const char *parv[], int parc)
 
 		rb_strlcpy(chptr->topic, parv[3], sizeof(chptr->topic));
 		rb_strlcpy(chptr->topicwho, parv[2], sizeof(chptr->topicwho));
-		chptr->topic_tsinfo = rb_current_time();
+		chptr->topic_tsinfo = rb_time();
 	}
 	/* :<server> TB <#channel> <topicts> :<topic> */
 	else
@@ -620,7 +620,7 @@ c_tb(struct client *client_p, const char *parv[], int parc)
 
 		rb_strlcpy(chptr->topic, parv[2], sizeof(chptr->topic));
 		rb_strlcpy(chptr->topicwho, client_p->name, sizeof(chptr->topicwho));
-		chptr->topic_tsinfo = rb_current_time();
+		chptr->topic_tsinfo = rb_time();
 	}
 
 	hook_call(HOOK_CHANNEL_TOPIC, chptr, NULL);

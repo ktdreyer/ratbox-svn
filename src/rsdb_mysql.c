@@ -109,11 +109,11 @@ rsdb_shutdown(void)
 static void
 rsdb_try_reconnect(void)
 {
-	time_t expire_time = rb_current_time() + RSDB_MAX_RECONNECT_TIME;
+	time_t expire_time = rb_time() + RSDB_MAX_RECONNECT_TIME;
 
 	mlog("Warning: unable to connect to database, stopping all functions until we recover");
 
-	while(rb_current_time() < expire_time)
+	while(rb_time() < expire_time)
 	{
 		if(!rsdb_connect(0))
 			return;

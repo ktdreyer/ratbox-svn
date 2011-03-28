@@ -40,7 +40,7 @@ struct user_reg
 /* Flags not stored in the DB: 0xFFFF0000 */
 #define US_FLAGS_NEEDUPDATE	0x00010000
 
-#define USER_SUSPEND_EXPIRED(x)	((x)->flags & US_FLAGS_SUSPENDED && (x)->suspend_time && (x)->suspend_time <= rb_current_time())
+#define USER_SUSPEND_EXPIRED(x)	((x)->flags & US_FLAGS_SUSPENDED && (x)->suspend_time && (x)->suspend_time <= rb_time())
 
 extern struct user_reg *find_user_reg(struct client *, const char *name);
 extern struct user_reg *find_user_reg_nick(struct client *, const char *name);

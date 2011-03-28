@@ -293,8 +293,8 @@ init_channel_reg(struct chan_reg *chreg_p, const char *name)
 	chptr = find_channel(name);
 
 	chreg_p->name = rb_strdup(name);
-	chreg_p->tsinfo = chptr != NULL ? chptr->tsinfo : rb_current_time();
-	chreg_p->reg_time = chreg_p->last_time = rb_current_time();
+	chreg_p->tsinfo = chptr != NULL ? chptr->tsinfo : rb_time();
+	chreg_p->reg_time = chreg_p->last_time = rb_time();
 	chreg_p->cmode.mode = MODE_TOPIC|MODE_NOEXTERNAL;
 
 	add_channel_reg(chreg_p);
@@ -472,7 +472,7 @@ verify_member_reg(struct client *client_p, struct channel **chptr,
 	}
 
 	/* this is called when someone issues a command.. */
-	mreg_p->channel_reg->last_time = rb_current_time();
+	mreg_p->channel_reg->last_time = rb_time();
 	mreg_p->channel_reg->flags |= CS_FLAGS_NEEDUPDATE;
 
 	return mreg_p;
@@ -731,7 +731,7 @@ enable_inhabit(struct chan_reg *chreg_p, struct channel *chptr, int autojoin)
 				SVC_UID(chanserv_p), chptr->name, chreg_p->topic);
 		rb_strlcpy(chptr->topic, chreg_p->topic, sizeof(chptr->topic));
 		rb_strlcpy(chptr->topicwho, MYNAME, sizeof(chptr->topicwho));
-		chptr->topic_tsinfo = rb_current_time();
+		chptr->topic_tsinfo = rb_time();
 	}
 }
 
@@ -865,12 +865,12 @@ e_chanserv_expirechan(void *unused)
 
 		if(chreg_p->flags & CS_FLAGS_SUSPENDED)
 		{
-			if((chreg_p->last_time + config_file.cexpire_suspended_time) > rb_current_time())
+			if((chreg_p->last_time + config_file.cexpire_suspended_time) > rb_time())
 				continue;
 		}
 		else
 		{
-			if((chreg_p->last_time + config_file.cexpire_time) > rb_current_time())
+			if((chreg_p->last_time + config_file.cexpire_time) > rb_time())
 				continue;
 
 			/* final check: make sure nobody with access is on the
@@ -878,7 +878,7 @@ e_chanserv_expirechan(void *unused)
 			 * otherwise expire. */
 			if(access_users_on_channel(chreg_p))
 			{
-				chreg_p->last_time = rb_current_time();
+				chreg_p->last_time = rb_time();
 				rsdb_exec(NULL, "UPDATE channels "
 						"SET last_time = '%lu' WHERE chname = '%Q'",
 						chreg_p->last_time, chreg_p->name);
@@ -917,7 +917,7 @@ e_chanserv_expireban(void *unused)
 		{
 			banreg_p = ptr->data;
 
-			if(!banreg_p->hold || banreg_p->hold > rb_current_time())
+			if(!banreg_p->hold || banreg_p->hold > rb_time())
 				continue;
 
 			if (!any)
@@ -987,7 +987,7 @@ e_chanserv_enforcetopic(void *unused)
 				SVC_UID(chanserv_p), chptr->name, chreg_p->topic);
 		rb_strlcpy(chptr->topic, chreg_p->topic, sizeof(chptr->topic));
 		rb_strlcpy(chptr->topicwho, MYNAME, sizeof(chptr->topicwho));
-		chptr->topic_tsinfo = rb_current_time();
+		chptr->topic_tsinfo = rb_time();
 	}
 	HASH_WALK_END
 }
@@ -996,7 +996,7 @@ static void
 e_chanserv_expire_delowner(void *unused)
 {
 	rsdb_exec(NULL, "DELETE FROM channels_dropowner WHERE time <= '%lu'",
-			rb_current_time() - config_file.cdelowner_duration);
+			rb_time() - config_file.cdelowner_duration);
 }
 
 static void
@@ -1383,7 +1383,7 @@ h_chanserv_join(void *v_chptr, void *v_members)
 			banreg_p = bptr->data;
 
 			/* ban has expired? */
-			if(banreg_p->hold && banreg_p->hold <= rb_current_time())
+			if(banreg_p->hold && banreg_p->hold <= rb_time())
 				continue;
 
 			if(!match(banreg_p->mask, member_p->client_p->user->mask))
@@ -1437,7 +1437,7 @@ h_chanserv_join(void *v_chptr, void *v_members)
 		if(mreg_p != NULL)
 		{
 			/* update last_time whenever a user with access joins */
-			mreg_p->channel_reg->last_time = rb_current_time();
+			mreg_p->channel_reg->last_time = rb_time();
 			mreg_p->channel_reg->flags |= CS_FLAGS_NEEDUPDATE;
 		}
 
@@ -1546,7 +1546,7 @@ h_chanserv_user_login(void *v_client_p, void *unused)
 			continue;
 
 		/* channel is being used */
-		mreg_p->channel_reg->last_time = rb_current_time();
+		mreg_p->channel_reg->last_time = rb_time();
 		mreg_p->channel_reg->flags |= CS_FLAGS_NEEDUPDATE;
 
 		/* autoop/voice dont work on +o users */
@@ -1635,7 +1635,7 @@ h_chanserv_topic(void *v_chptr, void *unused)
 				SVC_UID(chanserv_p), chptr->name, chreg_p->topic);
 		rb_strlcpy(chptr->topic, chreg_p->topic, sizeof(chptr->topic));
 		rb_strlcpy(chptr->topicwho, MYNAME, sizeof(chptr->topicwho));
-		chptr->topic_tsinfo = rb_current_time();
+		chptr->topic_tsinfo = rb_time();
 	}
 
 	return 0;
@@ -1650,7 +1650,7 @@ expire_chan_suspend(struct chan_reg *chreg_p)
 	rb_free(chreg_p->suspend_reason);
 	chreg_p->suspend_reason = NULL;
 	chreg_p->suspend_time = 0;
-	chreg_p->last_time = rb_current_time();
+	chreg_p->last_time = rb_time();
 
 	rsdb_exec(NULL, "UPDATE channels SET flags='%d', suspender=NULL, suspend_reason=NULL,"
 			"suspend_time='0', last_time='%lu' WHERE chname='%Q'",
@@ -1761,10 +1761,10 @@ o_chan_chansuspend(struct client *client_p, struct lconn *conn_p, const char *pa
 	reg_p->flags |= CS_FLAGS_SUSPENDED;
 	reg_p->suspender = rb_strdup(OPER_NAME(client_p, conn_p));
 	reg_p->suspend_reason = rb_strndup(reason, SUSPENDREASONLEN);
-	reg_p->last_time = rb_current_time();
+	reg_p->last_time = rb_time();
 
 	if(suspend_time)
-		reg_p->suspend_time = rb_current_time() + suspend_time;
+		reg_p->suspend_time = rb_time() + suspend_time;
 	else
 		reg_p->suspend_time = 0;
 
@@ -1804,7 +1804,7 @@ o_chan_chanunsuspend(struct client *client_p, struct lconn *conn_p, const char *
 	reg_p->suspender = NULL;
 	rb_free(reg_p->suspend_reason);
 	reg_p->suspend_reason = NULL;
-	reg_p->last_time = rb_current_time();
+	reg_p->last_time = rb_time();
 
 	rsdb_exec(NULL, "UPDATE channels SET flags='%d',suspender=NULL,suspend_reason=NULL,last_time='%lu' WHERE chname = '%Q'",
 			reg_p->flags, reg_p->last_time, reg_p->name);
@@ -1905,14 +1905,14 @@ o_chan_chanlist(struct client *client_p, struct lconn *conn_p, const char *parv[
 			else if(!access_users_on_channel(chreg_p))
 			{
 				snprintf(timebuf, sizeof(timebuf), "Last %s",
-					get_short_duration(rb_current_time() - chreg_p->last_time));
+					get_short_duration(rb_time() - chreg_p->last_time));
 				p = timebuf;
 			}
 
 			service_send(chanserv_p, client_p, conn_p,
 				"  %s - To %s For %s %s",
 				chreg_p->name, find_owner(chreg_p),
-				get_short_duration(rb_current_time() - chreg_p->reg_time),
+				get_short_duration(rb_time() - chreg_p->reg_time),
 				p);
 		}
 
@@ -1960,14 +1960,14 @@ o_chan_chaninfo(struct client *client_p, struct lconn *conn_p, const char *parv[
 
 	service_snd(chanserv_p, client_p, conn_p, SVC_INFO_REGDURATIONCHAN,
 			chreg_p->name, owner ?  owner : "?unknown?",
-			get_duration((time_t) (rb_current_time() - chreg_p->reg_time)));
+			get_duration((time_t) (rb_time() - chreg_p->reg_time)));
 
 	if(chreg_p->flags & CS_FLAGS_SUSPENDED)
 	{
 		time_t suspend_time = chreg_p->suspend_time;
 
 		if(suspend_time)
-			suspend_time -= rb_current_time();
+			suspend_time -= rb_time();
 
 		service_snd(chanserv_p, client_p, conn_p, SVC_INFO_SUSPENDED,
 				chreg_p->name, chreg_p->suspender, 
@@ -2019,7 +2019,7 @@ s_chan_register(struct client *client_p, struct lconn *conn_p, const char *parv[
 	}
 
 	if(config_file.ctime_lock > 0 &&
-		(rb_current_time() - config_file.ctime_lock) > chptr->tsinfo)
+		(rb_time() - config_file.ctime_lock) > chptr->tsinfo)
 	{
 		service_err(chanserv_p, client_p, SVC_CHAN_TIMELOCKED, parv[0]);
 		return 1;
@@ -2031,9 +2031,9 @@ s_chan_register(struct client *client_p, struct lconn *conn_p, const char *parv[
 		static time_t last_time = 0;
 		static int last_count = 0;
 
-		if((last_time + config_file.cregister_time) < rb_current_time())
+		if((last_time + config_file.cregister_time) < rb_time())
 		{
-			last_time = rb_current_time();
+			last_time = rb_time();
 			last_count = 1;
 		}
 		else if(last_count >= config_file.cregister_amount)
@@ -2053,7 +2053,7 @@ s_chan_register(struct client *client_p, struct lconn *conn_p, const char *parv[
 
 		/* this host has gone over the limits.. */
 		if(hent->cregister >= config_file.chregister_amount &&
-		   hent->cregister_expire > rb_current_time())
+		   hent->cregister_expire > rb_time())
 		{
 			service_err(chanserv_p, client_p, SVC_RATELIMITEDHOST,
 					chanserv_p->name, "REGISTER");
@@ -2061,9 +2061,9 @@ s_chan_register(struct client *client_p, struct lconn *conn_p, const char *parv[
 		}
 
 		/* its expired.. reset limits */
-		if(hent->cregister_expire <= rb_current_time())
+		if(hent->cregister_expire <= rb_time())
 		{
-			hent->cregister_expire = rb_current_time() + config_file.chregister_time;
+			hent->cregister_expire = rb_time() + config_file.chregister_time;
 			hent->cregister = 0;
 		}
 
@@ -2247,7 +2247,7 @@ s_chan_delowner(struct client *client_p, struct lconn *conn_p, const char *parv[
 		}
 
 		rsdb_exec_fetch(&data, "SELECT COUNT(chname) FROM channels_dropowner WHERE chname='%Q' AND time > '%lu'",
-				chreg_p->name, rb_current_time() - config_file.cdelowner_duration);
+				chreg_p->name, rb_time() - config_file.cdelowner_duration);
 
 		if(data.row_count == 0)
 		{
@@ -2283,7 +2283,7 @@ s_chan_delowner(struct client *client_p, struct lconn *conn_p, const char *parv[
 
 		token = get_password();
 		rsdb_exec(NULL, "INSERT INTO channels_dropowner (chname, token, time) VALUES('%Q', '%Q', '%lu')",
-				             chreg_p->name, token, rb_current_time());
+				             chreg_p->name, token, rb_time());
 
 		if(!send_email(ureg_p->email, "Channel Owner Delete",
 				"%s!%s@%s has requested an owner delete for channel %s which "
@@ -2314,7 +2314,7 @@ s_chan_delowner(struct client *client_p, struct lconn *conn_p, const char *parv[
 
 	/* authenticating a password reset */
 	rsdb_exec_fetch(&data, "SELECT token FROM channels_dropowner WHERE chname='%Q' AND time > '%lu'",
-			chreg_p->name, rb_current_time() - config_file.cdelowner_duration);
+			chreg_p->name, rb_time() - config_file.cdelowner_duration);
 
 	/* ok, found the entry.. */
 	if(data.row_count)
@@ -3066,7 +3066,7 @@ s_chan_set(struct client *client_p, struct lconn *conn_p, const char *parv[], in
 						SVC_UID(chanserv_p), chptr->name, chreg_p->topic);
 				rb_strlcpy(chptr->topic, chreg_p->topic, sizeof(chptr->topic));
 				rb_strlcpy(chptr->topicwho, MYNAME, sizeof(chptr->topicwho));
-				chptr->topic_tsinfo = rb_current_time();
+				chptr->topic_tsinfo = rb_time();
 			}
 		}
 
@@ -3441,7 +3441,7 @@ s_chan_addban(struct client *client_p, struct lconn *conn_p, const char *parv[],
 
 	banreg_p = make_ban_reg(mreg_p->channel_reg, mask, reason, 
 			mreg_p->user_reg->name, level, 
-			duration ? rb_current_time() + duration : 0);
+			duration ? rb_time() + duration : 0);
 	write_ban_db_entry(banreg_p, mreg_p->channel_reg->name);
 
 	service_err(chanserv_p, client_p, SVC_CHAN_BANSET,
@@ -3657,7 +3657,7 @@ s_chan_listbans(struct client *client_p, struct lconn *conn_p, const char *parv[
 		service_error(chanserv_p, client_p, 
 				"  %s %d (%s) [mod: %s] :%s",
 				banreg_p->mask, banreg_p->level,
-				(banreg_p->hold ? get_short_duration(banreg_p->hold - rb_current_time()): "perm"),
+				(banreg_p->hold ? get_short_duration(banreg_p->hold - rb_time()): "perm"),
 				banreg_p->username, banreg_p->reason);
 	}
 
@@ -3808,7 +3808,7 @@ s_chan_info(struct client *client_p, struct lconn *conn_p, const char *parv[], i
 
 	service_err(chanserv_p, client_p, SVC_INFO_REGDURATIONCHAN,
 			reg_p->name, owner ?  owner : "?unknown?",
-			get_duration((time_t) (rb_current_time() - reg_p->reg_time)));
+			get_duration((time_t) (rb_time() - reg_p->reg_time)));
 
 	if(CHAN_SUSPEND_EXPIRED(reg_p))
 		expire_chan_suspend(reg_p);
@@ -3818,7 +3818,7 @@ s_chan_info(struct client *client_p, struct lconn *conn_p, const char *parv[], i
 		time_t suspend_time = reg_p->suspend_time;
 
 		if(suspend_time)
-			suspend_time -= rb_current_time();
+			suspend_time -= rb_time();
 
 		if(config_file.cshow_suspend_reasons)
 			service_err(chanserv_p, client_p, SVC_INFO_SUSPENDEDADMIN,

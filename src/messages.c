@@ -254,7 +254,7 @@ struct _lang_internal lang_internal[] =
 	/* chanfix */
 	{ SVC_CF_NOTENOUGHUSERS,	"Channel %s does not have enough users for me to act on"		},
 	{ SVC_CF_HASOPPEDUSERS,		"Channel %s already has opped users"				},
-	{ SVC_CF_CHECK,			"Channel %s appears to contain %d opped out of %d users"	},
+	{ SVC_CF_CHECK,			"Channel %s appears to contain %d opped out of %d clients"	},
 	{ SVC_CF_CHANFIXINPROG,		"Channel fix in progress, please stand by."			},
 	{ SVC_CF_CHANSERVCHANNEL,	"Channel %s is registered with ChanServ"			},
 	{ SVC_CF_TOPSCORESFOR,		"Top %d scores for channel '%s':"		},

@@ -103,7 +103,7 @@ static void check_server_status(void *data)
 
 		/* connection timed out.. */
 		else if(ConnConnecting(server_p) &&
-				((server_p->first_time + 30) <= rb_current_time()))
+				((server_p->first_time + 30) <= rb_time()))
 		{
 			mlog("Connection to server %s timed out",
 				server_p->name);
@@ -115,7 +115,7 @@ static void check_server_status(void *data)
 		/* authentication timed out.. */
 		else if(ConnHandshake(server_p) &&
 				((server_p->first_time + 60) <=
-				 rb_current_time()))
+				 rb_time()))
 		{
 			mlog("Connection to server %s timed out",
 				server_p->name);
@@ -127,7 +127,7 @@ static void check_server_status(void *data)
 		/* pinged out */
 		else if(ConnSentPing(server_p) &&
 			((server_p->last_time + config_file.ping_time*2)
-			<= rb_current_time()))
+			<= rb_time()))
 		{
 			mlog("Connection to server %s lost: (Ping timeout)",
 				server_p->name);
@@ -139,7 +139,7 @@ static void check_server_status(void *data)
 		/* no data for a while.. send ping */
 		else if(!ConnSentPing(server_p) &&
 			((server_p->last_time + config_file.ping_time) 
-			<= rb_current_time()))
+			<= rb_time()))
 		{
 			sendto_server("PING :%s", MYUID);
 			SetConnSentPing(server_p);
@@ -212,7 +212,7 @@ next_autoconn(void)
         if(conf_p != NULL)
         {
                 conf_p->port = conf_p->defport;
-                conf_p->last_connect = rb_current_time();
+                conf_p->last_connect = rb_time();
         }
 
         return conf_p;
@@ -316,7 +316,7 @@ connect_to_server(void *target_server)
 
 	conn_p = rb_malloc(sizeof(struct lconn));
 	conn_p->name = rb_strdup(conf_p->name);
-	conn_p->first_time = conn_p->last_time = rb_current_time();
+	conn_p->first_time = conn_p->last_time = rb_time();
         conn_p->pass = rb_strdup(conf_p->pass);
 	SetConnConnecting(conn_p);
 	server_p = conn_p;
@@ -341,7 +341,7 @@ connect_to_client(struct client *client_p, struct conf_oper *oper_p,
 	conn_p->oper = oper_p;
 	oper_p->refcount++;
 
-	conn_p->first_time = conn_p->last_time = rb_current_time();
+	conn_p->first_time = conn_p->last_time = rb_time();
 
 	SetConnConnecting(conn_p);
 	SetConnDccOut(conn_p);
@@ -409,7 +409,7 @@ connect_from_client(struct client *client_p, struct conf_oper *oper_p,
 	oper_p->refcount++;
 
 	conn_p->F = F;
-	conn_p->first_time = conn_p->last_time = rb_current_time();
+	conn_p->first_time = conn_p->last_time = rb_time();
 
 	SetConnConnecting(conn_p);
 	SetConnDccIn(conn_p);
@@ -609,7 +609,7 @@ read_any(struct lconn *conn_p, int server)
 		rb_linebuf_parse(&conn_p->lb_recvq, readbuf, length, 0); 
 	}
 	if(total_read > 0)
-		conn_p->last_time = rb_current_time();
+		conn_p->last_time = rb_time();
 }
 
 

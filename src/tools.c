@@ -85,7 +85,7 @@ get_time(time_t when, int tz)
 	struct tm *tmptr;
 
 	if(!when)
-		when = rb_current_time();
+		when = rb_time();
 
 	tmptr = localtime(&when);
 

@@ -143,7 +143,7 @@ o_operbot_objoin(struct client *client_p, struct lconn *conn_p, const char *parv
 	zlog(operbot_p, 1, WATCH_OPERBOT, 1, client_p, conn_p,
 		"OBJOIN %s", parv[0]);
 
-	tsinfo = chptr != NULL ? chptr->tsinfo : rb_current_time();
+	tsinfo = chptr != NULL ? chptr->tsinfo : rb_time();
 
 	rsdb_exec(NULL, "INSERT INTO operbot (chname, tsinfo, oper) VALUES(LOWER('%Q'), '%lu', '%Q')",
 			parv[0], tsinfo, OPER_NAME(client_p, conn_p));
