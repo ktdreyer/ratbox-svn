@@ -1,3 +1,49 @@
+moggie      2011/03/28 21:35:43 UTC	(20110328_0-27177)
+  Log:
+  - Rename rb_current_time() as rb_time() and rb_current_time_tv()
+    as rb_time_tv(). Update everything that depends on them.
+  - Rename time_fix_started as fix_started.
+  - Rename time_prev_attempt as prev_attempt.
+  - Update missing flag from CONF_OPER_CF_ADMIN.
+  - Rename CF_AUTOFIX_INTERVAL as CF_AUTOFIX_FREQ.
+  - Rename CF_MANUALFIX_INTERVAL as CF_CHANFIX_FREQ.
+  - Fix index syntax in sqlite schema.
+  
+
+  Modified:
+	rserv/trunk/include/conf.h (File Modified) 
+	rserv/trunk/include/s_chanfix.h (File Modified) 
+	rserv/trunk/include/s_chanserv.h (File Modified) 
+	rserv/trunk/include/s_userserv.h (File Modified) 
+	rserv/trunk/src/channel.c (File Modified) 
+	rserv/trunk/src/client.c (File Modified) 
+	rserv/trunk/src/conf.c (File Modified) 
+	rserv/trunk/src/crypt.c (File Modified) 
+	rserv/trunk/src/email.c (File Modified) 
+	rserv/trunk/src/io.c (File Modified) 
+	rserv/trunk/src/log.c (File Modified) 
+	rserv/trunk/src/messages.c (File Modified) 
+	rserv/trunk/src/notes.c (File Modified) 
+	rserv/trunk/src/rsdb_mysql.c (File Modified) 
+	rserv/trunk/src/rsdb_pgsql.c (File Modified) 
+	rserv/trunk/src/rserv.c (File Modified) 
+	rserv/trunk/src/s_banserv.c (File Modified) 
+	rserv/trunk/src/s_chanfix.c (File Modified) 
+	rserv/trunk/src/s_chanserv.c (File Modified) 
+	rserv/trunk/src/s_jupeserv.c (File Modified) 
+	rserv/trunk/src/s_memoserv.c (File Modified) 
+	rserv/trunk/src/s_nickserv.c (File Modified) 
+	rserv/trunk/src/s_operbot.c (File Modified) 
+	rserv/trunk/src/s_operserv.c (File Modified) 
+	rserv/trunk/src/s_userserv.c (File Modified) 
+	rserv/trunk/src/scommand.c (File Modified) 
+	rserv/trunk/src/service.c (File Modified) 
+	rserv/trunk/src/tools.c (File Modified) 
+	rserv/trunk/src/u_stats.c (File Modified) 
+	rserv/trunk/src/ucommand.c (File Modified) 
+	rserv/trunk/tools/base/schema-sqlite.txt (File Modified) 
+
+
 moggie      2010/12/10 19:56:43 UTC	(20101210_0-27157)
   Log:
   - Add support for not giving chanfix scores clients without a hostname.
