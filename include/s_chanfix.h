@@ -8,7 +8,7 @@ struct channel;
 
 #define CF_STATUS_CLEAREDMODES		0x0000001
 #define CF_STATUS_CLEAREDBANS		0x0000002
-#define CF_STATUS_MANUALFIX		0x0000004
+#define CF_STATUS_MANFIX		0x0000004
 #define CF_STATUS_AUTOFIX		0x0000008
 
 /* Channel flags used by the DB in cf_channel table */
@@ -24,6 +24,7 @@ struct chanfix_channel
 	struct channel *chptr;
 	time_t fix_started;
 	time_t prev_attempt;
+	unsigned int cycle;	/* number of fix attempt cycles */
 	struct chanfix_score *scores;
 	int highest_score;	/* highest chanop score in channel */
 	int endfix_uscore;	/* min possible user score at end of a chanfix */
@@ -82,22 +83,28 @@ struct chanfix_score_item
  * Make sure this value is between 0 and CF_MIN_USER_SCORE_BEGIN. */
 #define CF_MIN_USER_SCORE_END	0.30f
 
-/* The maximum time to try fixing a channel (seconds). */
-#define CF_MAX_FIX_TIME	3600
+/* The time spent trying to fix a channel during each fix cycle.
+ * Used by the op logic and should not be changed (seconds). */
+#define CF_FIX_TIME	3600
 
-/* The time to wait between consecutive autofixes (seconds). */
+/* While counting the number of fix attempt cycles for an opless
+ * channel; stop inhabiting the channel after every multiple of
+ * CF_FIX_CYCLES and refresh the DB scores. */
+#define CF_FIX_CYCLES	6
+
+/* The time to wait between consecutive autofix attempts (seconds). */
 #define CF_AUTOFIX_FREQ	600
 
-/* The time to wait between consecutive chanfixes (seconds). */
+/* The time to wait between consecutive chanfix attempts (seconds). */
 #define CF_CHANFIX_FREQ	300
 
-/* Time to wait before removing channel modes during an autofix. Expressed as
- * a percentage of the CF_MAX_FIX_TIME. */
-#define CF_REMOVE_MODES_TIME	0.50f
+/* Time to wait before removing channel modes during an autofix.
+ * Expressed in seconds. */
+#define CF_REMOVE_MODES_TIME	20 * 60
 
-/* Time to wait before removing channel bans during an autofix. Expressed as
- * a percentage of the CF_MAX_FIX_TIME. */
-#define CF_REMOVE_BANS_TIME	0.60f
+/* Time to wait before removing channel bans during an autofix.
+ * Expressed in seconds. */
+#define CF_REMOVE_BANS_TIME	40 * 60
 
 /* Time to temporarily ignore opless channels for after a server
  * squits, meaning a netsplit might be in progress (seconds). */

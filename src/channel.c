@@ -756,6 +756,30 @@ remove_our_bans(struct channel *chptr, struct client *service_p,
 		modebuild_finish();
 }
 
+/* has_prevent_join_mode()
+ *   checks whether a channel has modes preventing users from joining
+ *
+ * inputs	- channel to check for prevent join modes
+ * outputs	- true or false
+ */
+bool
+has_prevent_join_mode(struct channel *chptr)
+{
+	int i;
+
+	for(i = 0; chmode_table[i].mode; i++)
+	{
+		if(chmode_table[i].prevent_join &&
+				(chptr->mode.mode & chmode_table[i].mode))
+			return true;
+	}
+
+	if(chptr->mode.key[0] || chptr->mode.limit)
+		return true;
+
+	return false;
+}
+
 /* chmode_to_string()
  *   converts a channels mode into a string
  *

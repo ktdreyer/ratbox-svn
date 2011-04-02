@@ -7,6 +7,7 @@
 #include <ratbox_lib.h>
 
 #include <stdio.h>
+#include <stdbool.h>
 
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
