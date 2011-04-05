@@ -126,7 +126,7 @@ static int h_chanfix_server_squit_warn(void *target_p, void *unused);
 static void e_chanfix_score_channels(void *unused);
 static void e_chanfix_collate_history(void *unused);
 static void e_chanfix_autofix_channels(void *unused);
-static void e_chanfix_manualfix_channels(void *unused);
+static void e_chanfix_manfix_channels(void *unused);
 
 static void takeover_channel(struct channel *);
 static unsigned long get_userhost_id(const char *);
@@ -158,9 +158,9 @@ init_s_chanfix(void)
 
 	rb_event_add("e_chanfix_score_channels", e_chanfix_score_channels, NULL, 300);
 	rb_event_add("e_chanfix_autofix_channels", e_chanfix_autofix_channels, NULL, 300);
-	rb_event_add("e_chanfix_manualfix_channels", e_chanfix_manualfix_channels, NULL, 300);
+	rb_event_add("e_chanfix_manfix_channels", e_chanfix_manfix_channels, NULL, 300);
 	rb_event_addonce("e_chanfix_collate_history", e_chanfix_collate_history, NULL,
-				seconds_to_midnight()+5);
+				seconds_to_midnight()+30);
 }
 
 /* preconditions: TS >= 2 and there is at least one user in the channel */
@@ -999,13 +999,45 @@ e_chanfix_collate_history(void *unused)
 	}
 
 	rb_event_addonce("e_chanfix_collate_history", e_chanfix_collate_history,
-			NULL, seconds_to_midnight()+5);
+			NULL, seconds_to_midnight()+30);
 
 	/* Drop old history data from the cf_score_history table. */
 	mlog("info: Dropping old daysample history.");
-
 	rsdb_exec(NULL, "DELETE FROM cf_score_history WHERE dayts < %lu",
 			(DAYS_SINCE_EPOCH - CF_DAYSAMPLES + 1));
+
+	if(DAYS_SINCE_EPOCH % 28 == 0)
+	{
+		/* Delete unused userhost_ids from the database. */
+		mlog("info: Deleting unused userhost_ids from the database.");
+		rsdb_exec(NULL, "DELETE FROM cf_userhost "
+			"WHERE cf_userhost.id NOT IN "
+			"  (SELECT userhost_id "
+			"  FROM "
+			"    (SELECT cf_score.userhost_id "
+			"    FROM cf_score "
+			"    GROUP BY cf_score.userhost_id "
+			"    UNION ALL "
+			"    SELECT cf_score_history.userhost_id "
+			"    FROM cf_score_history "
+			"    GROUP BY cf_score_history.userhost_id) AS comb_table)");
+		/* Delete unused channel_ids from the database that don't have
+		 * any flags set. */
+		mlog("info: Deleting unused channel_ids from the database.");
+		rsdb_exec(NULL, "DELETE FROM cf_channel "
+			"WHERE cf_channel.flags = 0 "
+			"AND cf_channel.id NOT IN "
+			"  (SELECT channel_id "
+			"  FROM "
+			"    (SELECT cf_score.channel_id "
+			"    FROM cf_score "
+			"    GROUP BY cf_score.channel_id "
+			"    UNION ALL "
+			"    SELECT cf_score_history.channel_id "
+			"    FROM cf_score_history "
+			"    GROUP BY cf_score_history.channel_id) AS comb_table)");
+	}
+
 }
 
 static void
@@ -1025,7 +1057,7 @@ e_chanfix_autofix_channels(void *unused)
 }
 
 static void
-e_chanfix_manualfix_channels(void *unused)
+e_chanfix_manfix_channels(void *unused)
 {
 	time_t start_time;
 	if(!is_network_split() && config_file.cf_enable_chanfix)
@@ -1076,7 +1108,7 @@ h_chanfix_channel_opless(void *chptr_v, void *unused)
 static int
 h_chanfix_server_squit_warn(void *target_p, void *unused)
 {
-	/* Temporarily disable opless channel detection because it looks
+	/* Temporarily disable opless channel detection when it looks
 	 * like a netsplit is in progress.
 	 */
 	netsplit_warn_ts = CF_OPLESS_IGNORE_TIME + rb_time();
@@ -1321,13 +1353,12 @@ o_chanfix_userlist(struct client *client_p, struct lconn *conn_p, const char *pa
 #endif
 
 	if((scores = fetch_cf_scores(chptr, 0, 0)) == NULL)
-		return 0;
-
-	if(match_chmembers(scores, chptr, &chptr->users, 1) == NULL)
 	{
 		service_snd(chanfix_p, client_p, conn_p, SVC_CF_NODATAFOR, parv[0]);
 		return 0;
 	}
+
+	match_chmembers(scores, chptr, &chptr->users, 1);
 
 	if(scores->matched > 0)
 	{
@@ -2076,22 +2107,17 @@ o_chanfix_status(struct client *client_p, struct lconn *conn_p, const char *parv
 {
 	service_send(chanfix_p, client_p, conn_p, "ChanFix module status:");
 
-	if(config_file.cf_enable_autofix)
-		service_send(chanfix_p, client_p, conn_p, "Automatic channel fixing enabled.");
-	else
-		service_send(chanfix_p, client_p, conn_p, "Automatic channel fixing disabled.");
+	service_send(chanfix_p, client_p, conn_p, "Automatic fixing: %s",
+			config_file.cf_enable_autofix ? "enabled" : "disabled");
+	service_send(chanfix_p, client_p, conn_p, "Manual fixing: %s",
+			config_file.cf_enable_chanfix ? "enabled" : "disabled");
 
-	if(config_file.cf_enable_chanfix)
-		service_send(chanfix_p, client_p, conn_p, "Manual channel fixing enabled.");
-	else
-		service_send(chanfix_p, client_p, conn_p, "Manual channel fixing disabled.");
+	service_send(chanfix_p, client_p, conn_p, "Channel fixes in progress: %d",
+			rb_dlink_list_length(&chanfix_list));
 
-
-	if(is_network_split())
-		service_send(chanfix_p, client_p, conn_p, "Splitmode active. Channel scoring/fixing disabled.");
-	else
-		service_send(chanfix_p, client_p, conn_p, "Splitmode not active.");
-		
+	service_send(chanfix_p, client_p, conn_p, "Splitmode status: %s",
+			is_network_split() ? "active (scoring/fixing disabled)" : "inactive");
+	
 	return 0;
 }
 

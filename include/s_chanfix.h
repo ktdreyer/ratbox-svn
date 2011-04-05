@@ -4,7 +4,7 @@
 
 struct channel;
 
-#define DAYS_SINCE_EPOCH	rb_time() / 86400
+#define DAYS_SINCE_EPOCH	(rb_time() / 86400)
 
 #define CF_STATUS_CLEAREDMODES		0x0000001
 #define CF_STATUS_CLEAREDBANS		0x0000002
@@ -100,11 +100,11 @@ struct chanfix_score_item
 
 /* Time to wait before removing channel modes during an autofix.
  * Expressed in seconds. */
-#define CF_REMOVE_MODES_TIME	20 * 60
+#define CF_REMOVE_MODES_TIME	(20 * 60)
 
 /* Time to wait before removing channel bans during an autofix.
  * Expressed in seconds. */
-#define CF_REMOVE_BANS_TIME	40 * 60
+#define CF_REMOVE_BANS_TIME	(40 * 60)
 
 /* Time to temporarily ignore opless channels for after a server
  * squits, meaning a netsplit might be in progress (seconds). */
