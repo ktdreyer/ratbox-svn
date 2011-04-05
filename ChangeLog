@@ -1,3 +1,15 @@
+moggie      2011/04/05 12:10:15 UTC	(20110405_0-27187)
+  Log:
+  - Ensure the USERLIST command displays SVC_CF_NODATAFOR.
+  - Add SQL queries to delete unused userhost and channel IDs from the
+    database at 28 day intervals.
+  
+
+  Modified:
+	rserv/trunk/include/s_chanfix.h (File Modified) 
+	rserv/trunk/src/s_chanfix.c (File Modified) 
+
+
 moggie      2011/04/02 12:16:29 UTC	(20110402_0-27185)
   Log:
   - Add has_prevent_join_mode() to know when a channel has cmodes set that can
