@@ -3009,6 +3009,82 @@ ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
+
+
+
+  if test "X$CC" != "X"; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether ${CC} accepts -fstack-protector" >&5
+$as_echo_n "checking whether ${CC} accepts -fstack-protector... " >&6; }
+if ${ssp_cv_cc+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ssp_old_cflags="$CFLAGS"
+       CFLAGS="$CFLAGS -fstack-protector"
+       cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  ssp_cv_cc=yes
+else
+  ssp_cv_cc=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+       CFLAGS="$ssp_old_cflags"
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ssp_cv_cc" >&5
+$as_echo "$ssp_cv_cc" >&6; }
+    if test $ssp_cv_cc = yes; then
+      CFLAGS="$CFLAGS -fstack-protector"
+
+$as_echo "#define ENABLE_SSP_CC 1" >>confdefs.h
+
+    fi
+  fi
+
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether libssp exists" >&5
+$as_echo_n "checking whether libssp exists... " >&6; }
+if ${ssp_cv_lib+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ssp_old_libs="$LIBS"
+     LIBS="$LIBS -lssp"
+     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ssp_cv_lib=yes
+else
+  ssp_cv_lib=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+     LIBS="$ssp_old_libs"
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ssp_cv_lib" >&5
+$as_echo "$ssp_cv_lib" >&6; }
+  if test $ssp_cv_lib = yes; then
+    LIBS="$LIBS -lssp"
+  fi
+
 ac_aux_dir=
 for ac_dir in "$srcdir" "$srcdir/.." "$srcdir/../.."; do
   if test -f "$ac_dir/install-sh"; then
@@ -3173,7 +3249,6 @@ fi
   test -n "$YACC" && break
 done
 test -n "$YACC" || YACC="yacc"
-
 
 for ac_prog in flex lex
 do
@@ -3424,6 +3499,7 @@ esac
 else
   RANLIB="$ac_cv_prog_RANLIB"
 fi
+
 
 
 

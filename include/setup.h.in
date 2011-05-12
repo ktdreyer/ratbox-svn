@@ -30,6 +30,9 @@
 /* Oper Service */
 #undef ENABLE_OPERSERV
 
+/* Define if SSP C support is enabled. */
+#undef ENABLE_SSP_CC
+
 /* User Service */
 #undef ENABLE_USERSERV
 
