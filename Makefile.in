@@ -27,10 +27,10 @@ includedir=@includedir@
 all: build
 
 autoconf:
-	autoconf autoconf/configure.in >configure
-	autoheader -l autoconf autoconf/configure.in > include/setup.h.in
+	autoconf 
+	autoheader
 
-build:
+build: 
 	@for i in $(SUBDIRS); do \
 		echo "build -> $$i"; \
 		cd $$i; \
