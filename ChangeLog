@@ -1,3 +1,12 @@
+androsyn    2011/05/12 15:27:33 UTC	(20110512_1-27197)
+  Log:
+  remove dependency checking for now..it seems a little hosed
+
+  Modified:
+	rserv/trunk/Makefile.in (File Modified) 
+	rserv/trunk/src/Makefile.in (File Modified) 
+
+
 androsyn    2011/05/12 15:21:33 UTC	(20110512_0-27195)
   Log:
   Move the autoconf stuff up to the parent directory like normal.
