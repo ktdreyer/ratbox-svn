@@ -1,4 +1,4 @@
-/* include/setup.h.in.  Generated from autoconf/configure.in by autoheader.  */
+/* include/setup.h.in.  Generated from configure.in by autoheader.  */
 
 /* List Service */
 #undef ENABLE_ALIS
