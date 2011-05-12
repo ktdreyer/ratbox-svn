@@ -144,6 +144,15 @@ static void check_server_status(void *data)
 			sendto_server("PING :%s", MYUID);
 			SetConnSentPing(server_p);
 		}
+		
+	} else {
+		/* connection is dead, uplinks still here. byebye */
+		if(server_p->client_p != NULL && !IsDead(server_p->client_p)) 
+			exit_client(server_p->client_p, 0);
+		rb_free(server_p->name);
+		rb_free(server_p->sid);
+		rb_free(server_p);
+		server_p = NULL;
 	}
 }
 
