@@ -1,3 +1,19 @@
+androsyn    2011/05/12 15:21:33 UTC	(20110512_0-27195)
+  Log:
+  Move the autoconf stuff up to the parent directory like normal.
+  
+  
+
+  Modified:
+	rserv/trunk/autoconf/ (File Deleted) 
+	rserv/trunk/config.guess (File Added) 
+	rserv/trunk/config.sub (File Added) 
+	rserv/trunk/configure (File Modified) 
+	rserv/trunk/configure.in (File Added) 
+	rserv/trunk/include/setup.h.in (File Modified) 
+	rserv/trunk/install-sh (File Added) 
+
+
 moggie      2011/04/05 12:10:15 UTC	(20110405_0-27187)
   Log:
   - Ensure the USERLIST command displays SVC_CF_NODATAFOR.
