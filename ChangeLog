@@ -1,3 +1,15 @@
+androsyn    2011/05/12 15:33:59 UTC	(20110512_2-27199)
+  Log:
+  Add -fstack-protector macros and enable them in autoconf
+  
+
+  Modified:
+	rserv/trunk/aclocal.m4 (File Modified) 
+	rserv/trunk/configure (File Modified) 
+	rserv/trunk/configure.in (File Modified) 
+	rserv/trunk/include/setup.h.in (File Modified) 
+
+
 androsyn    2011/05/12 15:27:33 UTC	(20110512_1-27197)
   Log:
   remove dependency checking for now..it seems a little hosed
