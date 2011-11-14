@@ -185,15 +185,13 @@ CREATE TABLE memos (
 );
 
 CREATE TABLE cf_temp_score (
-	id SERRIAL,
+	id SERIAL,
 	chname VARCHAR(CHANNELLEN),
 	userhost VARCHAR(CONVERT_USER_HOST),
 	timestamp INTEGER,
 	dayts INTEGER,
 	PRIMARY KEY(id)
 );
-CREATE INDEX cf_temp_score_chname_idx ON cf_channel (chname);
-CREATE INDEX cf_temp_score_userhost_idx ON cf_userhost (userhost);
 
 CREATE TABLE cf_userhost (
 	id SERIAL,
@@ -205,7 +203,7 @@ CREATE INDEX cf_userhost_userhost_idx ON cf_userhost (userhost);
 CREATE TABLE cf_channel (
 	id SERIAL,
 	chname VARCHAR(CHANNELLEN),
-	flags INTEGER UNSIGNED DEFAULT '0',
+	flags INTEGER DEFAULT '0',
 	PRIMARY KEY(id)
 );
 CREATE INDEX cf_channel_chname_idx ON cf_channel (chname);

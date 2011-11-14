@@ -135,8 +135,8 @@ h_operserv_sjoin_lowerts(void *v_chptr, void *unused)
 		return 0;
 
 	/* Save the new TS for later -- jilles */
-	rsdb_exec(NULL, "UPDATE operserv SET tsinfo = '%lu' WHERE chname = LOWER('%Q')",
-			chptr->tsinfo, chptr->name);
+	rsdb_exec(NULL, "UPDATE operserv SET tsinfo = '%lu' WHERE chname = '%Q'",
+			chptr->tsinfo, lcase(chptr->name));
 	return 0;
 }
 
@@ -285,8 +285,8 @@ o_oper_osjoin(struct client *client_p, struct lconn *conn_p, const char *parv[],
 
 	tsinfo = chptr != NULL ? chptr->tsinfo : rb_time();
 
-	rsdb_exec(NULL, "INSERT INTO operserv (chname, tsinfo, oper) VALUES(LOWER('%Q'), '%lu', '%Q')",
-			parv[0], tsinfo, OPER_NAME(client_p, conn_p));
+	rsdb_exec(NULL, "INSERT INTO operserv (chname, tsinfo, oper) VALUES('%Q', '%lu', '%Q')",
+			lcase(parv[0]), tsinfo, OPER_NAME(client_p, conn_p));
 
 	join_service(operserv_p, parv[0], tsinfo, NULL, 0);
 
@@ -320,8 +320,8 @@ o_oper_ospart(struct client *client_p, struct lconn *conn_p, const char *parv[],
 	 * is the 'maintain' priv, but through channels joined through
 	 * TAKEOVER, its the 'takeover' priv.
 	 */
-	rsdb_exec_fetch(&data, "SELECT COUNT(chname) FROM operserv WHERE chname=LOWER('%Q')",
-			chptr->name);
+	rsdb_exec_fetch(&data, "SELECT COUNT(chname) FROM operserv WHERE chname='%Q'",
+			lcase(chptr->name));
 
 	if(data.row_count == 0)
 	{
@@ -360,7 +360,7 @@ o_oper_ospart(struct client *client_p, struct lconn *conn_p, const char *parv[],
 		"OSPART %s", parv[0]);
 
 	if(osjoin)
-		rsdb_exec(NULL, "DELETE FROM operserv WHERE chname=LOWER('%Q')", parv[0]);
+		rsdb_exec(NULL, "DELETE FROM operserv WHERE chname='%Q'", lcase(parv[0]));
 
 	service_snd(operserv_p, client_p, conn_p, SVC_SUCCESSFULON,
 			operserv_p->name, "OSPART", parv[0]);

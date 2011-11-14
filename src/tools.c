@@ -87,7 +87,7 @@ get_time(time_t when, int tz)
 	if(!when)
 		when = rb_time();
 
-	tmptr = localtime(&when);
+	tmptr = gmtime(&when);
 
 	if(tz)
 		strftime(timebuffer, MAX_DATE_STRING, "%Y-%m-%d %H:%M %Z", tmptr);
@@ -141,39 +141,39 @@ get_temp_time(const char *duration)
 const char *
 lcase(const char *text)
 {
-        static char buf[BUFSIZE+1];
-        int i = 0;
+	static char buf[BUFSIZE+1];
+	int i = 0;
 
-        buf[0] = '\0';
+	buf[0] = '\0';
 
-        while(text[i] != '\0' && i < BUFSIZE-1)
-        {
-                buf[i] = tolower(text[i]);
-                i++;
-        }
+	while(text[i] != '\0' && i < BUFSIZE-1)
+	{
+		buf[i] = ToLower(text[i]);
+		i++;
+	}
 
-        buf[i] = '\0';
+	buf[i] = '\0';
 
-        return buf;
+	return buf;
 }
 
 const char *
 ucase(const char *text)
 {
-        static char buf[BUFSIZE+1];
-        int i = 0;
+	static char buf[BUFSIZE+1];
+	int i = 0;
 
-        buf[0] = '\0';
+	buf[0] = '\0';
 
-        while(text[i] != '\0' && i < BUFSIZE-1)
-        {
-                buf[i] = toupper(text[i]);
-                i++;
-        }
+	while(text[i] != '\0' && i < BUFSIZE-1)
+	{
+		buf[i] = ToUpper(text[i]);
+		i++;
+	}
 
-        buf[i] = '\0';
+	buf[i] = '\0';
 
-        return buf;
+	return buf;
 }
 
 /*

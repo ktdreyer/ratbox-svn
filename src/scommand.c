@@ -56,6 +56,7 @@ static void c_pong(struct client *, const char *parv[], int parc);
 static void c_stats(struct client *, const char *parv[], int parc);
 static void c_trace(struct client *, const char *parv[], int parc);
 static void c_version(struct client *, const char *parv[], int parc);
+static void c_time(struct client *, const char *parv[], int parc);
 static void c_whois(struct client *, const char *parv[], int parc);
 
 static struct scommand_handler admin_command = { "ADMIN", c_admin, 0, DLINK_EMPTY };
@@ -67,6 +68,7 @@ static struct scommand_handler pong_command = { "PONG", c_pong, 0, DLINK_EMPTY }
 static struct scommand_handler stats_command = { "STATS", c_stats, 0, DLINK_EMPTY };
 static struct scommand_handler trace_command = { "TRACE", c_trace, 0, DLINK_EMPTY };
 static struct scommand_handler version_command = { "VERSION", c_version, 0, DLINK_EMPTY };
+static struct scommand_handler time_command = { "TIME", c_time, 0, DLINK_EMPTY };
 static struct scommand_handler whois_command = { "WHOIS", c_whois, 0, DLINK_EMPTY };
 
 void
@@ -81,6 +83,7 @@ init_scommand(void)
 	add_scommand_handler(&stats_command);
 	add_scommand_handler(&trace_command);
 	add_scommand_handler(&version_command);
+	add_scommand_handler(&time_command);
 	add_scommand_handler(&whois_command);
 }
 
@@ -455,6 +458,18 @@ c_version(struct client *client_p, const char *parv[], int parc)
 		sendto_server(":%s 351 %s ratbox-services-%s(%s). %s A TS",
 			      MYUID, UID(client_p), RSERV_VERSION,
                               SERIALNUM, MYNAME);
+}
+
+static void
+c_time(struct client *client_p, const char *parv[], int parc)
+{
+	if(parc < 1 || EmptyString(parv[0]))
+		return;
+
+	char buf[80];
+	if(IsUser(client_p))
+		sendto_server(":%s 391 %s %s", MYUID, UID(client_p),
+				rb_date(rb_time(), buf, sizeof(buf)));
 }
 
 static void

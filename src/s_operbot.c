@@ -115,8 +115,8 @@ h_operbot_sjoin_lowerts(void *v_chptr, void *unused)
 		return 0;
 
 	/* Save the new TS for later -- jilles */
-	rsdb_exec(NULL, "UPDATE operbot SET tsinfo = '%lu' WHERE chname = LOWER('%Q')",
-			chptr->tsinfo, chptr->name);
+	rsdb_exec(NULL, "UPDATE operbot SET tsinfo = '%lu' WHERE chname = '%Q'",
+			chptr->tsinfo, lcase(chptr->name));
 	return 0;
 }
 
@@ -145,8 +145,8 @@ o_operbot_objoin(struct client *client_p, struct lconn *conn_p, const char *parv
 
 	tsinfo = chptr != NULL ? chptr->tsinfo : rb_time();
 
-	rsdb_exec(NULL, "INSERT INTO operbot (chname, tsinfo, oper) VALUES(LOWER('%Q'), '%lu', '%Q')",
-			parv[0], tsinfo, OPER_NAME(client_p, conn_p));
+	rsdb_exec(NULL, "INSERT INTO operbot (chname, tsinfo, oper) VALUES('%Q', '%lu', '%Q')",
+			lcase(parv[0]), tsinfo, OPER_NAME(client_p, conn_p));
 
 	join_service(operbot_p, parv[0], tsinfo, NULL, 0);
 
@@ -163,8 +163,8 @@ o_operbot_obpart(struct client *client_p, struct lconn *conn_p, const char *parv
 		zlog(operbot_p, 1, WATCH_OPERBOT, 1, client_p, conn_p,
 			"OBPART %s", parv[0]);
 
-		rsdb_exec(NULL, "DELETE FROM operbot WHERE chname = LOWER('%Q')",
-				parv[0]);
+		rsdb_exec(NULL, "DELETE FROM operbot WHERE chname = '%Q'",
+				lcase(parv[0]));
 		service_snd(operbot_p, client_p, conn_p, SVC_SUCCESSFULON,
 				operbot_p->name, "OBPART", parv[0]);
 	}

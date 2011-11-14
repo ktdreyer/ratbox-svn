@@ -207,8 +207,8 @@ get_userhost_id(const char *userhost)
 	unsigned long userhost_id;
 	struct rsdb_table data;
 
-	rsdb_exec_fetch(&data, "SELECT id FROM cf_userhost WHERE userhost=LOWER('%Q')",
-						userhost);
+	rsdb_exec_fetch(&data, "SELECT id FROM cf_userhost WHERE userhost='%Q'",
+						lcase(userhost));
 
 	if((data.row_count > 0) && (data.row[0][0] != NULL))
 	{
@@ -231,8 +231,8 @@ get_channel_id(const char *channel)
 	unsigned long channel_id;
 	struct rsdb_table data;
 
-	rsdb_exec_fetch(&data, "SELECT id FROM cf_channel WHERE chname=LOWER('%Q')",
-						channel);
+	rsdb_exec_fetch(&data, "SELECT id FROM cf_channel WHERE chname='%Q'",
+						lcase(channel));
 
 	if((data.row_count > 0) && (data.row[0][0] != NULL))
 	{
@@ -256,7 +256,7 @@ get_cf_chan_flags(const char *chan, uint32_t *flags)
 
 	rsdb_exec_fetch(&data,
 			"SELECT flags FROM cf_channel "
-			"WHERE chname=LOWER('%Q')", chan);
+			"WHERE chname='%Q'", lcase(chan));
 
 	if(data.row_count > 0)
 	{
@@ -291,7 +291,7 @@ fetch_cf_scores(struct channel *chptr, int max_num, int min_score)
 
 	if(min_score > 0)
 	{
-		rsdb_exec_fetch(&data, "SELECT userhost_id, SUM(t) AS total "
+		rsdb_exec_fetch(&data, "SELECT userhost_id, SUM(t) "
 			"FROM "
 			"  (SELECT cf_score.userhost_id, count(*) AS t "
 			"  FROM cf_score WHERE channel_id = %lu "
@@ -301,13 +301,13 @@ fetch_cf_scores(struct channel *chptr, int max_num, int min_score)
 			"  FROM cf_score_history WHERE channel_id = %lu "
 			"  GROUP BY cf_score_history.userhost_id) AS total_table "
 			"GROUP BY total_table.userhost_id "
-			"HAVING total > %d "
-			"ORDER BY total DESC",
+			"HAVING SUM(t) > %d "
+			"ORDER BY SUM(t) DESC",
 			channel_id, channel_id, min_score);
 	}
 	else
 	{
-		rsdb_exec_fetch(&data, "SELECT userhost_id, SUM(t) AS total "
+		rsdb_exec_fetch(&data, "SELECT userhost_id, SUM(t) "
 			"FROM "
 			"  (SELECT cf_score.userhost_id, count(*) AS t "
 			"  FROM cf_score WHERE channel_id = %lu "
@@ -317,7 +317,7 @@ fetch_cf_scores(struct channel *chptr, int max_num, int min_score)
 			"  FROM cf_score_history WHERE channel_id = %lu "
 			"  GROUP BY cf_score_history.userhost_id) AS total_table "
 			"GROUP BY total_table.userhost_id "
-			"ORDER BY total DESC",
+			"ORDER BY SUM(t) DESC",
 			channel_id, channel_id);
 	}
 
@@ -591,18 +591,17 @@ process_chanfix_list(int fix_type)
 
 		if(rb_dlink_list_length(&cf_ch->chptr->users_opped) >= CF_MIN_FIX_OPS)
 		{
-			del_chanfix(cf_ch->chptr);
 			mlog("debug: Channel '%s' has enough ops (fix complete).",
 					cf_ch->chptr->name);
 			add_channote(cf_ch->chptr->name, "ChanFix", 0,
 					"Fix complete (enough ops)");
+			del_chanfix(cf_ch->chptr);
 			continue;
 		}
 
-		/* Is there any point trying to fix a channel indefinitely?
+		/* Should we bother trying to fix a channel indefinitely?
 		 * Since we store the DB scores while we're fixing. After N fix
-		 * window cycles, perhaps we should abort the fix to get updated
-		 * score values?
+		 * window cycles, restart the fix to get updated score values.
 		 */
 		if(rb_time() - cf_ch->fix_started > CF_FIX_TIME)
 		{
@@ -612,36 +611,34 @@ process_chanfix_list(int fix_type)
 			{
 				if(rb_dlink_list_length(&cf_ch->chptr->users) < config_file.cf_min_clients)
 				{
-					del_chanfix(cf_ch->chptr);
 					mlog("debug: Fix incomplete for %s (not enough users after max cycles).",
 							cf_ch->chptr->name);
 					add_channote(cf_ch->chptr->name, "ChanFix", 0, "Fix incomplete after "
 							"%d cycles (not enough users)", cf_ch->cycle);
+					del_chanfix(cf_ch->chptr);
 				}
 				else if(rb_dlink_list_length(&cf_ch->chptr->users_opped) > 0)
 				{
-					del_chanfix(cf_ch->chptr);
 					mlog("debug: Fix complete for %s (time expired, some ops given).",
 							cf_ch->chptr->name);
 					add_channote(cf_ch->chptr->name, "ChanFix", 0,
 							"Fix complete (time expired, some ops given)");
+					del_chanfix(cf_ch->chptr);
 				}
 				else
 				{
+					mlog("debug: Reached fix cycles multiple for %s, restarting with refreshed scores.",
+							cf_ch->chptr->name);
 					part_service(chanfix_p, cf_ch->chptr->name);
 					cf_ch->fix_started = rb_time();
 					cf_ch->cycle++;
 					free_cf_scores(cf_ch->scores);
 					cf_ch->scores = NULL;
-					mlog("debug: Reached fix cycles multiple for %s, restarting with refreshed scores.",
-							cf_ch->chptr->name);
 				}
 			}
 			else
 			{
-				/* Fix window expired, but no ops were given; reset
-				 * and try again.
-				 */
+				/* Fix window expired, reset and try again. */
 				mlog("debug: Fix time expired for %s, restarting.",
 						cf_ch->chptr->name);
 				cf_ch->fix_started = rb_time();
@@ -657,11 +654,11 @@ process_chanfix_list(int fix_type)
 					(CF_MIN_ABS_CHAN_SCORE_END * CF_MAX_CHANFIX_SCORE));
 			if(cf_ch->scores == NULL)
 			{
-				del_chanfix(cf_ch->chptr);
 				mlog("debug: Fix incomplete for '%s' (insufficient DB scores).",
 						cf_ch->chptr->name);
 				add_channote(cf_ch->chptr->name, "ChanFix", 0,
 						"Fix incomplete (insufficient DB scores)");
+				del_chanfix(cf_ch->chptr);
 				continue;
 			}
 		}
@@ -703,6 +700,10 @@ process_chanfix_list(int fix_type)
 		/* Check there are scores and some users have been matched. If no users
 		 * were matched, don't bother trying to fix since there's no one we can give ops to.
 		 */
+		/* TODO: When all ops have been opped during a fix (but not by chanfix).
+		 * Chanfix doesn't know that the fix is complete (everyone has ops)
+		 * because it doesn't get past this check (no unopped users to match).
+		 */
 		if(scores == NULL || scores->matched == 0)
 		{
 			mlog("debug: No matched users for %s.", cf_ch->chptr->name);
@@ -714,11 +715,11 @@ process_chanfix_list(int fix_type)
 
 		if(fix_opless_channel(cf_ch))
 		{
-			del_chanfix(cf_ch->chptr);
 			mlog("debug: Opping logic thinks %s is fixed.",
 					cf_ch->chptr->name);
 			add_channote(cf_ch->chptr->name, chanfix_p->name, 0,
 					"Fix complete (op logic)");
+			del_chanfix(cf_ch->chptr);
 
 		}
 	}
@@ -774,9 +775,9 @@ build_channel_scores(struct channel *chptr, int max_num)
 		if(!userhost_id)
 			continue;
 
-		rsdb_exec_fetch(&data, "SELECT userhost_id, COUNT(*) AS t "
+		rsdb_exec_fetch(&data, "SELECT COUNT(*) "
 			"FROM cf_score "
-			"WHERE channel_id = %lu AND userhost_id= %lu ",
+			"WHERE channel_id = %lu AND userhost_id = %lu",
 			channel_id, userhost_id);
 		if(data.row_count == 0 || data.row[0][0] == NULL)
 			day_score = 0;
@@ -785,9 +786,9 @@ build_channel_scores(struct channel *chptr, int max_num)
 		rsdb_exec_fetch_end(&data);
 
 
-		rsdb_exec_fetch(&data, "SELECT userhost_id, SUM(score) AS t "
-			"  FROM cf_score_history "
-			"  WHERE channel_id = %lu AND userhost_id= %lu",
+		rsdb_exec_fetch(&data, "SELECT SUM(score) "
+			"FROM cf_score_history "
+			"WHERE channel_id = %lu AND userhost_id = %lu",
 			channel_id, userhost_id);
 		if(data.row_count == 0 || data.row[0][0] == NULL)
 			hist_score = 0;
@@ -817,7 +818,7 @@ build_channel_scores(struct channel *chptr, int max_num)
 
 	if(max_num > 0)
 	{
-		scores->s_items = realloc(scores->s_items,
+		scores->s_items = rb_realloc(scores->s_items,
 				sizeof(struct chanfix_score_item) * max_num);
 		if(user_count > max_num)
 		{
@@ -856,8 +857,8 @@ collect_channel_scores(struct channel *chptr, time_t timestamp, unsigned int day
 				msptr->client_p->user->host);
 
 		rsdb_exec(NULL, "INSERT INTO cf_temp_score (chname, userhost, timestamp, dayts) "
-						"VALUES(LOWER('%Q'), LOWER('%Q'), '%lu', '%lu')",
-						chptr->name, userhost, timestamp, dayts);
+						"VALUES('%Q', '%Q', '%lu', '%lu')",
+						lcase(chptr->name), lcase(userhost), timestamp, dayts);
 	}
 }
 
@@ -890,6 +891,7 @@ e_chanfix_score_channels(void *unused)
 		{
 			if(rb_dlink_list_length(&chptr->users_opped) > 0)
 			{
+				/*mlog("debug: Collecting scores for channel '%s'.", chptr->name);*/
 				collect_channel_scores(chptr, timestamp, dayts);
 			}
 			else if((!chptr->cfptr) && (add_chanfix(chptr, CF_STATUS_AUTOFIX, NULL)))
@@ -971,14 +973,18 @@ e_chanfix_collate_history(void *unused)
 			return;
 		}
 
-		if(ts_data.row[0][0] != NULL)
+		if(!EmptyString(ts_data.row[0][0]))
 			min_dayts = atoi(ts_data.row[0][0]);
 		else
 			min_dayts = DAYS_SINCE_EPOCH;
 
 		rsdb_exec_fetch_end(&ts_data);
 
-		if(min_dayts == DAYS_SINCE_EPOCH)
+		mlog("debug: Value of dayts: %d", min_dayts);
+		/* In pgsql, 'SELECT MIN(dayts) FROM cf_score' on an empty table
+		 * returns one empty row, resulting in min_dayts equalling 0
+		 * (likely due to atoi() processing an empty string?) */
+		if(min_dayts == DAYS_SINCE_EPOCH || min_dayts == 0)
 		{
 			mlog("info: History successfully collated.");
 			break;
@@ -989,7 +995,7 @@ e_chanfix_collate_history(void *unused)
 		rsdb_exec(NULL, "INSERT INTO cf_score_history (channel_id, userhost_id, dayts, score) "
 				"SELECT channel_id, userhost_id, dayts, count(*) "
 				"FROM cf_score where dayts = %u "
-				"GROUP BY channel_id, userhost_id",
+				"GROUP BY channel_id, userhost_id, dayts",
 				min_dayts);
 
 		/* Delete these day's entries when we're done. */
@@ -1287,25 +1293,24 @@ o_chanfix_uscore(struct client *client_p, struct lconn *conn_p, const char *parv
 		return 0;
 	}
 
-	rsdb_exec_fetch(&data, "SELECT userhost_id, COUNT(*) AS t "
-		"FROM cf_score "
-		"WHERE channel_id = %lu AND userhost_id= %lu ",
+	rsdb_exec_fetch(&data, "SELECT COUNT(*) FROM cf_score "
+		"WHERE channel_id = %lu AND userhost_id = %lu",
 		channel_id, userhost_id);
 	if(data.row_count == 0 || data.row[0][0] == NULL)
 		day_score = 0;
 	else
-		day_score = atoi(data.row[0][1]);
+		day_score = atoi(data.row[0][0]);
 	rsdb_exec_fetch_end(&data);
 
 
-	rsdb_exec_fetch(&data, "SELECT userhost_id, SUM(score) AS t "
+	rsdb_exec_fetch(&data, "SELECT SUM(score) "
 		"  FROM cf_score_history "
-		"  WHERE channel_id = %lu AND userhost_id= %lu",
+		"  WHERE channel_id = %lu AND userhost_id = %lu",
 		channel_id, userhost_id);
 	if(data.row_count == 0 || data.row[0][0] == NULL)
 		hist_score = 0;
 	else
-		hist_score = atoi(data.row[0][1]);
+		hist_score = atoi(data.row[0][0]);
 	rsdb_exec_fetch_end(&data);
 
 
@@ -1692,7 +1697,7 @@ o_chanfix_block(struct client *client_p, struct lconn *conn_p, const char *parv[
 		service_snd(chanfix_p, client_p, conn_p, SVC_CF_NODATAFOR, parv[0]);
 		flags |= CF_CHAN_BLOCK;
 		rsdb_exec(NULL, "INSERT INTO cf_channel (chname, flags) "
-				"VALUES (LOWER('%Q'), '%d')", parv[0], flags);
+				"VALUES ('%Q', '%u')", lcase(parv[0]), flags);
 		service_snd(chanfix_p, client_p, conn_p, SVC_SUCCESSFULON,
 				chanfix_p->name, "BLOCK", parv[0]);
 		zlog(chanfix_p, 3, WATCH_CHANFIX, 1, client_p, conn_p,
@@ -1716,7 +1721,7 @@ o_chanfix_unblock(struct client *client_p, struct lconn *conn_p, const char *par
 	}
 
 	rsdb_exec_fetch(&data,
-			"SELECT flags FROM cf_channel WHERE chname=LOWER('%Q')", parv[0]);
+			"SELECT flags FROM cf_channel WHERE chname='%Q'", lcase(parv[0]));
 
 	if((data.row_count > 0) && (data.row[0][0] != NULL))
 	{
@@ -1804,7 +1809,7 @@ o_chanfix_unalert(struct client *client_p, struct lconn *conn_p, const char *par
 	}
 
 	rsdb_exec_fetch(&data,
-			"SELECT id, flags FROM cf_channel WHERE chname=LOWER('%Q')", parv[0]);
+			"SELECT id, flags FROM cf_channel WHERE chname='%Q'", lcase(parv[0]));
 
 	if(data.row_count > 0)
 	{
@@ -1823,7 +1828,7 @@ o_chanfix_unalert(struct client *client_p, struct lconn *conn_p, const char *par
 					flags, channel_id);
 
 			rsdb_exec(NULL, "UPDATE chan_note SET flags = (flags&%u)"
-					"WHERE chname = LOWER('%Q')", ~NOTE_CF_ALERT, parv[0]);
+					"WHERE chname = '%Q'", ~NOTE_CF_ALERT, lcase(parv[0]));
 			zlog(chanfix_p, 3, WATCH_CHANFIX, 1, client_p, conn_p,
 					"UNALERT %s", parv[0]);
 		}
@@ -1880,7 +1885,7 @@ o_chanfix_info(struct client *client_p, struct lconn *conn_p, const char *parv[]
 		else
 			service_snd(chanfix_p, client_p,
 					conn_p, SVC_CF_CHANFIXED, parv[0]);
-		service_send(chanfix_p, client_p, conn_p, "Fix cycle %d",
+		service_send(chanfix_p, client_p, conn_p, "Fix cycle: %d",
 				cfptr->cycle);
 	}
 
@@ -2003,8 +2008,8 @@ o_chanfix_set(struct client *client_p, struct lconn *conn_p, const char *parv[],
 		}
 		else
 		{
-			/* Instead of returning an error here, we could show the current value */
-			service_err(chanfix_p, client_p, SVC_NEEDMOREPARAMS, chanfix_p->name, "SET::min_servers");
+			service_err(chanfix_p, client_p, SVC_NEEDMOREPARAMS,
+					chanfix_p->name, "SET::min_servers");
 		}
 	}
 	else if(!irccmp(parv[0], "min_users"))
@@ -2060,7 +2065,8 @@ o_chanfix_set(struct client *client_p, struct lconn *conn_p, const char *parv[],
 		}
 		else
 		{
-			service_err(chanfix_p, client_p, SVC_NEEDMOREPARAMS, chanfix_p->name, "SET::autofix");
+			service_err(chanfix_p, client_p, SVC_NEEDMOREPARAMS,
+					chanfix_p->name, "SET::autofix");
 		}
 	}
 	else if(!irccmp(parv[0], "chanfix"))
@@ -2091,12 +2097,14 @@ o_chanfix_set(struct client *client_p, struct lconn *conn_p, const char *parv[],
 		}
 		else
 		{
-			service_err(chanfix_p, client_p, SVC_NEEDMOREPARAMS, chanfix_p->name, "SET::chanfix");
+			service_err(chanfix_p, client_p, SVC_NEEDMOREPARAMS,
+					chanfix_p->name, "SET::chanfix");
 		}
 	}
 	else
 	{
-		service_err(chanfix_p, client_p, SVC_OPTIONINVALID, chanfix_p->name, "SET");
+		service_err(chanfix_p, client_p, SVC_OPTIONINVALID,
+				chanfix_p->name, "SET");
 	}
 		
 	return 0;
@@ -2105,14 +2113,14 @@ o_chanfix_set(struct client *client_p, struct lconn *conn_p, const char *parv[],
 static int
 o_chanfix_status(struct client *client_p, struct lconn *conn_p, const char *parv[], int parc)
 {
-	service_send(chanfix_p, client_p, conn_p, "ChanFix module status:");
+	service_send(chanfix_p, client_p, conn_p, "-- ChanFix Status --");
 
 	service_send(chanfix_p, client_p, conn_p, "Automatic fixing: %s",
 			config_file.cf_enable_autofix ? "enabled" : "disabled");
 	service_send(chanfix_p, client_p, conn_p, "Manual fixing: %s",
 			config_file.cf_enable_chanfix ? "enabled" : "disabled");
 
-	service_send(chanfix_p, client_p, conn_p, "Channel fixes in progress: %d",
+	service_send(chanfix_p, client_p, conn_p, "Fixes in progress: %d",
 			rb_dlink_list_length(&chanfix_list));
 
 	service_send(chanfix_p, client_p, conn_p, "Splitmode status: %s",
@@ -2232,25 +2240,42 @@ add_chanfix(struct channel *chptr, uint32_t type, struct client *client_p)
 	return true;
 }
 
-
+/* Calling this function when ChanFix is the last remaining client in a channel
+ * can cause the channel to be destroyed. Thus, adding chan_notes etc should
+ * always done first.
+ */
 static void 
 del_chanfix(struct channel *chptr)
 {
 	struct chanfix_channel *cfptr;
-	struct chanfix_score_item *clone;
-	rb_dlink_node *ptr, *next_ptr;
 
-	part_service(chanfix_p, chptr->name);
+	mlog("debug: del_chanfix() on %s.", chptr->name);
 
 	cfptr = (struct chanfix_channel *) chptr->cfptr;
 
-	rb_dlinkDelete(&cfptr->node, &chanfix_list);
+	/* check for a NULL ptr here, in case part_service() causes the channel
+	 * to be destroyed.
+	 */
+	if(!cfptr)
+	{
+		mlog("debug: warning: chanfix_channel has already been deleted.");
+		/*zlog(operserv_p, 1, WATCH_OPERSERV, 1, client_p, conn_p,
+			"OMODE %s %s", chptr->name, rebuild_params(parv, parc, 1));*/
+		sendto_server(":%s WALLOPS :[WARNING] A chanfix_channel struct has "
+				"already been deleted.", MYUID);
+		return;
+	}
 
+	rb_dlinkDelete(&cfptr->node, &chanfix_list);
 	free_cf_scores(cfptr->scores);
 	cfptr->scores = NULL;
-
 	rb_free(cfptr);
 	chptr->cfptr = NULL;
+
+	/* part_service() last to help avoid things breaking if the channel is
+	 * destroyed as ChanFix leaves.
+	 */ 
+	part_service(chanfix_p, chptr->name);
 }
 
 static void 

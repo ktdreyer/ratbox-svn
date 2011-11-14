@@ -56,8 +56,8 @@ add_channote(const char *chan, const char *author, uint32_t flags,
 	rsdb_exec(NULL,
 			"INSERT INTO chan_note "
 			"(chname, timestamp, author, flags, text) "
-			"VALUES(LOWER('%Q'), '%lu', '%Q', '%u', '%Q')",
-			chan, rb_time(), author, flags, buf);
+			"VALUES('%Q', '%lu', '%Q', '%u', '%Q')",
+			lcase(chan), rb_time(), author, flags, buf);
 
 	return 1;
 }
@@ -89,7 +89,7 @@ list_channotes(struct client *service_p, struct client *client_p,
 	{
 		rsdb_exec_fetch(&data, "SELECT id, author, timestamp, text FROM chan_note "
 			"WHERE chname = '%Q' "
-			"AND !(flags & %u) AND !(flags & %u) "
+			"AND NOT (flags & %u) > 0 AND NOT (flags & %u) > 0 "
 			"ORDER BY timestamp DESC LIMIT %d",
 			chan, NOTE_CF_ALERT, NOTE_CF_BLOCK, config_file.max_notes);
 	}
@@ -97,7 +97,7 @@ list_channotes(struct client *service_p, struct client *client_p,
 	{
 		rsdb_exec_fetch(&data, "SELECT id, author, timestamp, text FROM chan_note "
 			"WHERE chname = '%Q' "
-			"AND !(flags & %u) AND !(flags & %u) "
+			"AND NOT (flags & %u) > 0 AND NOT (flags & %u) > 0 "
 			"ORDER BY timestamp DESC LIMIT %d OFFSET %d",
 			chan, NOTE_CF_ALERT, NOTE_CF_BLOCK, (end-start), start);
 	}
@@ -127,7 +127,7 @@ show_alert_note(struct client *service_p, struct client *client_p, const char *c
 
 	rsdb_exec_fetch(&data, "SELECT id, author, timestamp, text "
 			"FROM chan_note WHERE chname = '%Q' "
-			"AND (flags & %u)", chan, NOTE_CF_ALERT);
+			"AND (flags & %u) > 0", chan, NOTE_CF_ALERT);
 
 	if(data.row_count == 1)
 	{
@@ -148,7 +148,7 @@ show_block_note(struct client *service_p, struct client *client_p, const char *c
 
 	rsdb_exec_fetch(&data, "SELECT id, author, timestamp, text "
 			"FROM chan_note WHERE chname = '%Q' "
-			"AND (flags & %u)", chan, NOTE_CF_BLOCK);
+			"AND (flags & %u) > 0", chan, NOTE_CF_BLOCK);
 
 	if(data.row_count == 1)
 	{
