@@ -1,3 +1,26 @@
+moggie      2011/11/14 14:48:32 UTC	(20111114_0-27327)
+  Log:
+  - Replace SQL's LOWER() for rserv's an IRC style lcase(), LOWER() may cause problems.
+  - Fix some bitmask SQL syntax.
+  - Use gmtime() instead of localtime().
+  - Fix the PgSQL schema.
+  - In del_chanfix(), check cfptr in case part_service() causes the channel to be destroyed.
+  - Improve reliability of history collation.
+  - Fix some SQL queries to conform with stricter syntax.
+  - Respond to a server TIME command.
+  
+
+  Modified:
+	rserv/trunk/src/notes.c (File Modified) 
+	rserv/trunk/src/s_banserv.c (File Modified) 
+	rserv/trunk/src/s_chanfix.c (File Modified) 
+	rserv/trunk/src/s_operbot.c (File Modified) 
+	rserv/trunk/src/s_operserv.c (File Modified) 
+	rserv/trunk/src/scommand.c (File Modified) 
+	rserv/trunk/src/tools.c (File Modified) 
+	rserv/trunk/tools/base/schema-pgsql.txt (File Modified) 
+
+
 androsyn    2011/05/12 17:54:29 UTC	(20110512_3-27201)
   Log:
   free server_p and friends if the server disconnects, allowing auto reconnect to work
