@@ -1,3 +1,12 @@
+moggie      2011/12/20 23:46:02 UTC	(20111220_0-27337)
+  Log:
+  Avoid using lcase() twice during one function call.
+  
+
+  Modified:
+	rserv/trunk/src/s_chanfix.c (File Modified) 
+
+
 moggie      2011/11/14 14:48:32 UTC	(20111114_0-27327)
   Log:
   - Replace SQL's LOWER() for rserv's an IRC style lcase(), LOWER() may cause problems.
