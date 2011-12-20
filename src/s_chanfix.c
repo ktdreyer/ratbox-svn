@@ -838,6 +838,7 @@ collect_channel_scores(struct channel *chptr, time_t timestamp, unsigned int day
 	struct chmember *msptr;
 	rb_dlink_node *ptr;
 	char userhost[USERHOSTLEN+1];
+	int i;
 
 	RB_DLINK_FOREACH(ptr, chptr->users_opped.head)
 	{
@@ -856,9 +857,17 @@ collect_channel_scores(struct channel *chptr, time_t timestamp, unsigned int day
 				msptr->client_p->user->username,
 				msptr->client_p->user->host);
 
+		/* We can't use lcase() twice in the same function call.
+		 * Ensure userhost is in lowercase format.
+		 */
+		for(i = 0; (userhost[i] != '\0') && (i < USERHOSTLEN); i++)
+		{
+			userhost[i] = ToLower(userhost[i]);
+		}
+
 		rsdb_exec(NULL, "INSERT INTO cf_temp_score (chname, userhost, timestamp, dayts) "
 						"VALUES('%Q', '%Q', '%lu', '%lu')",
-						lcase(chptr->name), lcase(userhost), timestamp, dayts);
+						lcase(chptr->name), userhost, timestamp, dayts);
 	}
 }
 
