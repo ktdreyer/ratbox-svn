@@ -7,7 +7,7 @@ print OUTPUT "# example.lang\n";
 print OUTPUT "#   Contains a base translation file to rework into other languages\n";
 print OUTPUT "#\n";
 print OUTPUT "# Copyright (C) 2007-2008 Lee Hardy <leeh\@leeh.co.uk>\n";
-print OUTPUT "# Copyright (C) 2007-2008 ircd-ratbox development team\n";
+print OUTPUT "# Copyright (C) 2007-2012 ircd-ratbox development team\n";
 print OUTPUT "\n";
 print OUTPUT "# The 'code' of the language\n";
 print OUTPUT "set LANG_CODE\t\t\"en\"\n";

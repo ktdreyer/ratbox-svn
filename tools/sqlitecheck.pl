@@ -9,7 +9,7 @@
 # for use with the old database.
 #
 # Copyright (C) 2006 Lee Hardy <lee -at- leeh.co.uk>
-# Copyright (C) 2006 ircd-ratbox development team
+# Copyright (C) 2006-2012 ircd-ratbox development team
 #
 # $Id$
 

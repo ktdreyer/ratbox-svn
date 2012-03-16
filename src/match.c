@@ -2,7 +2,7 @@
  *   Contains functions for comparing strings.
  *
  * Copyright (C) 2003-2005 Lee Hardy <leeh@leeh.co.uk>
- * Copyright (C) 2003-2005 ircd-ratbox development team
+ * Copyright (C) 2003-2012 ircd-ratbox development team
  *
  * $Id$
  */

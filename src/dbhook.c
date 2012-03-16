@@ -2,7 +2,7 @@
  *   Contains code for hooking into database tables.
  *
  * Copyright (C) 2006-2007 Lee Hardy <leeh@leeh.co.uk>
- * Copyright (C) 2006-2007 ircd-ratbox development team
+ * Copyright (C) 2006-2012 ircd-ratbox development team
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are

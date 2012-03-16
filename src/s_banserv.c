@@ -2,7 +2,7 @@
  *   Contains the code for the ban (kline etc) service
  *
  * Copyright (C) 2005-2008 Lee Hardy <lee -at- leeh.co.uk>
- * Copyright (C) 2005-2008 ircd-ratbox development team
+ * Copyright (C) 2005-2012 ircd-ratbox development team
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are

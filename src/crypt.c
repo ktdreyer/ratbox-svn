@@ -2,7 +2,7 @@
  *   Contains functions for encrypting a password.
  *
  * Copyright (C) 2004-2007 Lee Hardy
- * Copyright (C) 2004-2007 ircd-ratbox development team
+ * Copyright (C) 2004-2012 ircd-ratbox development team
  *
  * $Id$
  */

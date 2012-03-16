@@ -2,7 +2,7 @@
  *   Contains functions to allow services to build a mode buffer.
  *
  * Copyright (C) 2004-2007 Lee Hardy <lee -at- leeh.co.uk>
- * Copyright (C) 2004-2007 ircd-ratbox development team
+ * Copyright (C) 2004-2012 ircd-ratbox development team
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
