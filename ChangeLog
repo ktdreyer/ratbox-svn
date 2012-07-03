@@ -1,3 +1,16 @@
+jilles      2012/07/03 23:47:50 UTC	(20120703_0-27401)
+  Log:
+  tools: Remove ircd-shortcut.pl from the rserv tree.
+  
+  The version from the ircd tree should be used.
+  
+
+  Modified:
+	rserv/trunk/INSTALL (File Modified) 
+	rserv/trunk/Makefile.in (File Modified) 
+	rserv/trunk/tools/ircd-shortcut.pl (File Deleted) 
+
+
 dubkat      2012/03/16 21:08:18 UTC	(20120316_0-27379)
   Log:
   House Cleaning - update our copyrights
