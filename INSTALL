@@ -100,8 +100,9 @@ doc/database_mod.txt for more information.
 
 11. Run sbin/ratbox-services
 
-12. Investigate PREFIX/bin/ircd-shortcut.pl if you wish to install command
-    shortcuts for your services in your ircd, eg /chanserv etc.
+12. Investigate contrib/ircd-shortcut.pl in the ircd source tree if you
+    wish to install command shortcuts for your services in your ircd,
+    eg /chanserv etc.
 
 
 
