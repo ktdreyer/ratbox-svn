@@ -1,3 +1,12 @@
+androsyn    2012/07/06 23:13:20 UTC	(20120706_0-27403)
+  Log:
+  Test commit...
+  
+
+  Modified:
+	rserv/trunk/INSTALL (File Modified) 
+
+
 jilles      2012/07/03 23:47:50 UTC	(20120703_0-27401)
   Log:
   tools: Remove ircd-shortcut.pl from the rserv tree.
