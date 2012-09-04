@@ -1,3 +1,11 @@
+androsyn    2012/09/04 21:43:56 UTC	(20120904_0-27405)
+  Log:
+  suppress Wempty-body warning with clang, this empty body is quite intended
+
+  Modified:
+	ircd-ratbox/trunk/src/match.c (File Modified) 
+
+
 androsyn    2012/07/06 23:13:20 UTC	(20120706_0-27403)
   Log:
   Test commit...
