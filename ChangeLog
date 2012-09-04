@@ -1,3 +1,11 @@
+androsyn    2012/09/04 21:53:34 UTC	(20120904_1-27407)
+  Log:
+  fix some format type warnings flagged by clang
+
+  Modified:
+	ircd-ratbox/trunk/include/messages.h (File Modified) 
+
+
 androsyn    2012/09/04 21:43:56 UTC	(20120904_0-27405)
   Log:
   suppress Wempty-body warning with clang, this empty body is quite intended
